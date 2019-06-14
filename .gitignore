@@ -1,0 +1,9 @@
+venv/*
+node_modules/*
+*/node_modules/
+.idea
+*./idea
+.idea/*
+__pycache__/*
+*/__pycache__/
+.DS_Store

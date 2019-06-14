@@ -1,0 +1,195 @@
+import json
+import os
+import time
+import numpy as np
+import pandas as pd
+
+from numpy import array
+import talib as ta
+from flask import make_response
+
+from back.ZhongShuProcess import ZhongShuProcess
+from back.BiProcess import BiProcess
+from back.DuanProcess import DuanProcess
+from back.KlineProcess import KlineProcess
+from back.Tools import Tools
+
+
+# 币安的数据结构
+# [
+#     [
+#         1499040000000,      # Open time
+#         "0.01634790",       # Open
+#         "0.80000000",       # High
+#         "0.01575800",       # Low
+#         "0.01577100",       # Close
+#         "148976.11427815",  # Volume
+#         1499644799999,      # Close time
+#         "2434.19055334",    # Quote asset volume
+#         308,                # Number of trades
+#         "1756.87402397",    # Taker buy base asset volume
+#         "28.46694368",      # Taker buy quote asset volume
+#         "17928899.62484339" # Ignore.
+#     ]
+# ]
+
+
+class Calc:
+    def calcData(self):
+        klineList = []
+
+        # def processKline():
+        #     count = len(highList)
+        #     for i in range(count):
+        #         add(highList[i], lowList[i], timeList[i])
+
+        # 读入数据
+        # flask 读入文件需要这样写
+        base_dir = os.path.dirname(__file__)
+        data_str = open(os.path.join(base_dir, './klineData_bak.json')).read()
+
+        # data_str = open('./klineData.json').read()
+
+        openPriceList = []
+        highList = []
+        lowList = []
+        closePriceList = []
+        timeList = []
+        volumeList = []
+
+        jsonObj = json.loads(data_str)
+        # print(jsonObj)
+
+        for i in range(len(jsonObj)):
+            item = jsonObj[i]
+            localTime = time.localtime(item[0] / 1000)
+            strTime = time.strftime("%m-%d %H:%M", localTime)
+            highList.append(round(float(item[2]), 2))
+            lowList.append(round(float(item[3]), 2))
+
+            openPriceList.append(round(float(item[1]), 2))
+            closePriceList.append(round(float(item[4]), 2))
+            timeList.append(strTime)
+            volumeList.append(round(float(item[5])))
+
+        print(highList)
+        print(lowList)
+        print(timeList)
+
+        # k线处理
+        klineProcess = KlineProcess()
+        count = len(highList)
+        for i in range(count):
+            klineProcess.add(highList[i], lowList[i], timeList[i])
+
+        # print('处理后的k线:', klineProcess.klineList, "原始k线:", len(klineProcess.klineRawList));
+        # 处理后的k线
+        # for i in range(len(klineProcess.klineList)):
+        #     prn_obj(klineProcess.klineList[i])
+        # 笔处理
+        biProcess = BiProcess()
+        biProcess.handle(klineProcess.klineList)
+        # 笔结果
+        biResult = [0 for i in range(len(timeList))]
+        for i in range(len(biProcess.biList)):
+            item = biProcess.biList[i]
+            biResult[item.klineList[-1].middle] = item.direction
+
+        print("笔结果:", len(biProcess.biList), biResult)
+
+        # 段处理
+        duanProcess = DuanProcess()
+        duanResult = duanProcess.handle(biResult, highList, lowList)
+
+        print("段结果:", len(biResult), len(duanResult))
+
+        # 中枢处理
+        zhongShu = ZhongShuProcess()
+        zhongShuHigh = zhongShu.initHigh(biResult, highList, lowList)
+        zhongShuLow = zhongShu.initLow(biResult, highList, lowList)
+        zhongShuStartEnd = zhongShu.initStartEnd(biResult, highList, lowList)
+
+        print('笔中枢高:', len(zhongShuHigh), zhongShuHigh)
+        print('笔中枢低:', len(zhongShuLow), zhongShuLow)
+        print('笔中枢开始结束:', len(zhongShuStartEnd), zhongShuStartEnd)
+
+        # 拼接json数据
+        resJson = {}
+        # 时间
+        resJson['date'] = timeList
+        resJson['open'] = openPriceList
+        resJson['high'] = highList
+        resJson['low'] = lowList
+        resJson['close'] = closePriceList
+
+        resJson['bidata'] = getBiData(biProcess, timeList)
+        resJson['duandata'] = getDuanData(biProcess, duanProcess, timeList)
+        resJson['diff'] = getMacd(closePriceList)[0].tolist()
+        resJson['dea'] = getMacd(closePriceList)[1].tolist()
+        resJson['macd'] = getMacd(closePriceList)[2].tolist()
+        resJson['volume'] = volumeList
+        resJsonStr = json.dumps(resJson)
+        print(resJsonStr)
+        return resJson
+
+
+def getBiData(biProcess, timeList):
+    resBiData = {}
+
+    biData = []
+    biDate = []
+    for i in range(0, len(biProcess.biList) + 1, 1):
+        # bi = biProcess.biList[i]
+
+        #  第一笔和最后一笔特殊处理
+        if i == 0:
+            bi = biProcess.biList[i]
+            if bi.direction == 1:
+                biData.append(bi.low)
+            else:
+                biData.append(bi.high)
+            biDate.append(timeList[0])
+        else:
+            bi = biProcess.biList[i - 1]
+            if bi.direction == 1:
+                biData.append(bi.high)
+            else:
+                biData.append(bi.low)
+            biDate.append(timeList[bi.klineList[-1].middle])
+        print(bi.start, bi.end, bi.klineList[-1].middle, bi.low, bi.high, bi.direction)
+    resBiData['data'] = biData
+    resBiData['date'] = biDate
+    return resBiData
+
+
+def getDuanData(biProcess, duanProcess, timeList):
+    resDuanData = {}
+
+    duanData = []
+    duanDate = []
+    for i in range(len(timeList)):
+        if duanProcess.result[i] == 0:
+            continue
+        if duanProcess.result[i] == 1:
+            for j in range(0, len(biProcess.biList), 1):
+                bi = biProcess.biList[j]
+                if i == bi.klineList[-1].middle:
+                    duanData.append(bi.high)
+                    break
+        elif duanProcess.result[i] == -1:
+            for j in range(0, len(biProcess.biList), 1):
+                bi = biProcess.biList[j]
+                if i == bi.klineList[-1].middle:
+                    duanData.append(bi.low)
+                    break
+        duanDate.append(timeList[i])
+    resDuanData['data'] = duanData
+    resDuanData['date'] = duanDate
+    return resDuanData
+
+
+def getMacd(closePriceList):
+    close = array(closePriceList)
+    macd = ta.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
+    result = np.nan_to_num(macd)
+    return result
