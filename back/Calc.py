@@ -7,7 +7,9 @@ import pandas as pd
 from numpy import array
 import talib as ta
 from flask import make_response
+import copy
 
+from back import KlineData
 from back.ZhongShuProcess import ZhongShuProcess
 from back.BiProcess import BiProcess
 from back.DuanProcess import DuanProcess
@@ -33,7 +35,6 @@ from back.Tools import Tools
 #     ]
 # ]
 
-
 class Calc:
     def calcData(self):
         klineList = []
@@ -43,12 +44,15 @@ class Calc:
         #     for i in range(count):
         #         add(highList[i], lowList[i], timeList[i])
 
-        # 读入数据
-        # flask 读入文件需要这样写
-        base_dir = os.path.dirname(__file__)
-        data_str = open(os.path.join(base_dir, './klineData_bak.json')).read()
+        # 读入本都数据
+        # flask 读入本地文件需要这样写
+        # base_dir = os.path.dirname(__file__)
+        # data_str = open(os.path.join(base_dir, './klineData.json')).read()
 
-        # data_str = open('./klineData.json').read()
+        # 获取接口数据
+        klineData = KlineData.getKlineData()
+        print("从接口到的数据", klineData)
+        data_str = klineData
 
         openPriceList = []
         highList = []
@@ -57,7 +61,7 @@ class Calc:
         timeList = []
         volumeList = []
 
-        jsonObj = json.loads(data_str)
+        jsonObj = data_str['data']
         # print(jsonObj)
 
         for i in range(len(jsonObj)):
@@ -113,6 +117,9 @@ class Calc:
         print('笔中枢低:', len(zhongShuLow), zhongShuLow)
         print('笔中枢开始结束:', len(zhongShuStartEnd), zhongShuStartEnd)
 
+        zsdata, zsflag = getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList)
+        print("中枢数据:", zsdata, zsflag)
+
         # 拼接json数据
         resJson = {}
         # 时间
@@ -128,6 +135,8 @@ class Calc:
         resJson['dea'] = getMacd(closePriceList)[1].tolist()
         resJson['macd'] = getMacd(closePriceList)[2].tolist()
         resJson['volume'] = volumeList
+        resJson['zsdata'] = zsdata
+        resJson['zsflag'] = zsflag
         resJsonStr = json.dumps(resJson)
         print(resJsonStr)
         return resJson
@@ -186,6 +195,36 @@ def getDuanData(biProcess, duanProcess, timeList):
     resDuanData['data'] = duanData
     resDuanData['date'] = duanDate
     return resDuanData
+
+
+def getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList):
+    zsdata = []
+    zsStart = []
+    zsEnd = []
+    zsflag = []
+    for i in range(len(zhongShuStartEnd)):
+        item = zhongShuStartEnd[i]
+        if item == 0:
+            continue
+        if item == 1:
+            print("中枢起点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
+            zsStart = [timeList[i], zhongShuLow[i]]
+        elif item == 2:
+            print("中枢终点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
+            zsEnd = [timeList[i], zhongShuHigh[i]]
+        if len(zsStart) and len(zsEnd):
+            zsItem = [copy.copy(zsStart), copy.copy(zsEnd)]
+            print("中枢拼接:", zsItem)
+            zsdata.append(copy.copy(zsItem))
+            if zsStart[1] > zsEnd[1]:
+                zsflag.append(-1)
+            else:
+                zsflag.append(1)
+            zsStart.clear()
+            zsEnd.clear()
+            zsItem.clear()
+
+    return zsdata, zsflag
 
 
 def getMacd(closePriceList):

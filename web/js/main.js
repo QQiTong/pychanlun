@@ -31,7 +31,7 @@ var downBorderColor = '#14d0cd';
 
 let timer;
 
-function refresh() {
+function refresh(update) {
     clearInterval(timer);
 
     // $("#echarsZoomStart").val(myChart.getOption().dataZoom[0].start);
@@ -40,11 +40,11 @@ function refresh() {
         // data: {'code': $("#code").val(), 'kxType': $("#kxType").val()},
         type: 'get',
         success: function (data) {
-            var result = draw(data);
-            if ($("#code").val().length > 0 && $("#code").val() != result.code) {
-                console.log('refresh....');
-                refresh()
-            }
+            var result = draw(data, update);
+            // if ($("#code").val().length > 0 && $("#code").val() != result.code) {
+            //     console.log('refresh....');
+            //     refresh()
+            // }
 
         }
     });
@@ -88,6 +88,10 @@ if (fromIndex) {
 //
 // draw(stockJsonData);
 refresh()
+
+setInterval(() => {
+    refresh('update')
+}, 1000)
 if (fromIndex) {
     fromIndex = !fromIndex;  //刷新后，就设置为false，首页进入的不读取是否收藏过状态
     // refresh();
@@ -165,7 +169,7 @@ function preNext(type) {
     }
 }
 
-function draw(stockJsonData) {
+function draw(stockJsonData, update) {
     // const jsonObj = JSON.parse(stockJsonData);
     const resultData = splitData(stockJsonData);
     // var dataTitle = resultData.info.name + ' ' + resultData.info.code + ' ' + resultData.info.kxTypeTip;
@@ -204,578 +208,569 @@ function draw(stockJsonData) {
     //
     var zoomStart = parseInt($("#echarsZoomStart").val(), 10);
     dataTitle = "BTC";
-    infoValue3 = '5分钟';
-    option = {
-        backgroundColor: bgColor,
-        title: {
-            text: dataTitle,
-            subtext: infoValue3,
-            left: '2%',
-            textStyle: {
-                color: 'white'
-            }
-        },
-        tooltip: { //提示框
-            trigger: 'axis', //触发类型：axis坐标轴触发,item
-            axisPointer: { //坐标轴指示器配置项
-                type: 'cross' //指示器类型，十字准星
-            },
-        },
-        toolbox: {
-            orient: 'horizontal',
-            itemSize: 16,
-            itemGap: 8,
-            top: 16,
-            right: '1.4%',
-            feature: {
-                // myLevel1: {
-                //     show: true,
-                //     title: '1分K线级别(会员)',
-                //     icon: 'image://img/icon_36_1.png',
-                //     onclick: function () {
-                //         $("#kxType").val('1');
-                //         refresh();
-                //     }
-                // },
-                // myLevel5: {
-                //     show: true,
-                //     title: '5分K线级别',
-                //     icon: 'image://img/icon_36_5.png',
-                //     onclick: function () {
-                //         $("#kxType").val('5');
-                //         refresh();
-                //     }
-                // },
-                // myLevel15: {
-                //     show: true,
-                //     title: '15分K线级别(会员)',
-                //     icon: 'image://img/icon_147_15.png',
-                //     onclick: function () {
-                //         $("#kxType").val('15');
-                //         refresh();
-                //     }
-                // },
-                // myLevel30: {
-                //     show: true,
-                //     title: '30分K线级别',
-                //     icon: 'image://img/icon_36_30.png',
-                //     onclick: function () {
-                //         $("#kxType").val('30');
-                //         refresh();
-                //     }
-                // },
-                // myLevel60: {
-                //     show: true,
-                //     title: '60分K线级别(会员)',
-                //     icon: 'image://img/icon_147_60.png',
-                //     onclick: function () {
-                //         $("#kxType").val('60');
-                //         refresh();
-                //     }
-                // },
-                // myLevelDay: {
-                //     show: true,
-                //     title: '日K线级别',
-                //     icon: 'image://img/icon_36_d.png',
-                //     background: '#555',
-                //     onclick: function () {
-                //         $("#kxType").val('d');
-                //         refresh();
-                //     }
-                // },
-                // myLevelWeek: {
-                //     show: true,
-                //     title: '周K线级别(会员)',
-                //     icon: 'image://img/icon_36_w.png',
-                //     background: '#555',
-                //     onclick: function () {
-                //         $("#kxType").val('w');
-                //         refresh();
-                //     }
-                // },
+    infoValue3 = '1分钟';
+    if (update) {
+        console.log('更新了',update);
+        option = myChart.getOption();
+        option.series[0].data = resultData.values;
+        option.series[0].markArea.data = resultData.zsvalues;
+        option.series[1].data = resultData.biValues;
+        option.series[2].data = resultData.duanValues;
+        option.series[3].data = calculateMA(resultData, 5);
+        option.series[4].data = calculateMA(resultData, 10);
+        option.series[5].data = resultData.macd;
+        option.series[6].data = resultData.diff;
+        option.series[7].data = resultData.dea;
+        option.series[8].data = resultData.volume;
+        option.xAxis[0].data = resultData.time
+        option.xAxis[1].data = resultData.time
+        option.xAxis[2].data = resultData.time
 
-                // myPrevious: {
-                //     title: '上一个',
-                //     icon: 'image://img/icon_previous.svg',
-                //     onclick: function () {
-                //
-                //         const value = preNext('pre');
-                //         $("#code").val(value.code);
-                //         $("#kxType").val(value.kxType);
-                //         refresh();
-                //     }
-                // },
-                // myNext: {
-                //     title: '下一个',
-                //     icon: 'image://img/icon_next.svg',
-                //     onclick: function () {
-                //         const value = preNext('next');
-                //         $("#code").val(value.code);
-                //         $("#kxType").val(value.kxType);
-                //         refresh();
-                //     }
-                // },
-                // myCollect: {
-                //     title: '收藏',
-                //     icon: collectIcon,
-                //     onclick: function () {
-                //         var curCode = $("#code").val();
-                //         refreshCollectedStatus(curCode, false);
-                //     }
-                // },
-                // myAutoRefresh: {
-                //     type: 'jpeg',//png
-                //     //name: resultData.info
-                //     background: '#555',
-                //
-                //     icon: 'image://img/icon_refresh.svg',
-                //     title: '刷新',
-                //     onclick: function () {
-                //         refresh();
-                //     }
-                // },
-                // saveAsImage: {
-                //     type: 'jpeg',//png
-                //     name: dataTitle + '自动画线',
-                //     backgroundColor: '#fff',
-                //     title: '保存图片',
-                //     show: false
-                // },
-            },
-        },
-        color: ['yellow', 'green', 'yellow', 'white', '#999999'],
-        legend: {
-            data: ['笔', '段', 'MA5', 'MA10', '布林中轨'],
-            selected: {
-                '笔': true,
-                '段': true,
-                'MA5': false,
-                'MA10': false,
-                '布林中轨': false
-            },
-            top: 55,
-            textStyle: {
-                color: 'white'
-            }
-        },
-        grid: [{//直角坐标系
-            left: '3.2%',
-            right: '3.35%',
-            height: '57%',
-            top: 85,
-        }, {
-            top: '69%',
-            height: '15%',
-            left: '3.2%',
-            right: '3.35%',
-        }, {
-            top: '86%',
-            height: '5%',
-            left: '3.2%',
-            right: '3.35%',
-        }
-        ],
-        xAxis: [
-            {
-                type: 'category',
-                data: resultData.time,
-                scale: true,
-                boundaryGap: false,
-                axisLine: {onZero: false},
-                splitLine: {show: false},
-                splitNumber: 20,
-                min: 'dataMin',
-                max: 'dataMax',
-                axisLine: {lineStyle: {color: '#8392A5'}}
-            },
-            {
-                type: 'category',
-                gridIndex: 1,
-                data: resultData.time,
-                axisTick: {
-                    show: false
-                },
-                axisLabel: {
-                    show: true
-                },
-                axisLine: {lineStyle: {color: '#8392A5'}}
-
-
-            },
-            {
-                type: 'category',
-                gridIndex: 2,
-                data: resultData.time,
-                axisTick: {
-                    show: false
-                },
-                axisLabel: {
-                    show: false
-                },
-                axisLine: {lineStyle: {color: '#8392A5'}}
-
-
-            }
-        ],
-        yAxis: [
-            {
-                scale: true,
-                splitArea: {
-                    show: false
-                },
-                splitLine: {
-                    lineStyle: {
-                        opacity: 0.3,
-                        type: 'dashed',
-                    }
-                },
-                axisLine: {lineStyle: {color: '#8392A5'}},
-            },
-            {
-                gridIndex: 1,
-                splitNumber: 4,
-                axisLine: {
-                    onZero: false
-                },
-                axisTick: {
-                    show: false
-                },
-                splitLine: {
-                    show: false
-                },
-                axisLabel: {
-                    show: true
-                },
-                axisLine: {lineStyle: {color: '#8392A5'}},
-            },
-            {
-                gridIndex: 2,
-                splitNumber: 3,
-                axisLine: {
-                    onZero: false
-                },
-                axisTick: {
-                    show: false
-                },
-                splitLine: {
-                    show: false
-                },
-                axisLabel: {
-                    show: false
-                },
-                axisLine: {lineStyle: {color: '#8392A5'}},
-            }
-        ],
-        dataZoom: [
-
-            {
-                type: 'inside',
-                xAxisIndex: [0, 0],
-                start: zoomStart,
-                end: 100,
-                minSpan: 10,
-            },
-            {
-                type: 'inside',
-                xAxisIndex: [0, 1],
-                start: zoomStart,
-                end: 100,
-                minSpan: 10,
-            },
-            {
-                xAxisIndex: [0, 2],
-                type: 'slider',
-                start: zoomStart,
-                end: 100,
-                top: '92%',
-                minSpan: 10,
+    } else {
+        option = {
+            backgroundColor: bgColor,
+            title: {
+                text: dataTitle,
+                subtext: infoValue3,
+                left: '2%',
                 textStyle: {
-                    color: '#8392A5'
+                    color: 'white'
+                }
+            },
+            tooltip: { //提示框
+                trigger: 'axis', //触发类型：axis坐标轴触发,item
+                axisPointer: { //坐标轴指示器配置项
+                    type: 'cross' //指示器类型，十字准星
                 },
-                dataBackground: {
-                    areaStyle: {
+            },
+            toolbox: {
+                orient: 'horizontal',
+                itemSize: 16,
+                itemGap: 8,
+                top: 16,
+                right: '1.4%',
+                feature: {
+                    // myLevel1: {
+                    //     show: true,
+                    //     title: '1分K线级别(会员)',
+                    //     icon: 'image://img/icon_36_1.png',
+                    //     onclick: function () {
+                    //         $("#kxType").val('1');
+                    //         refresh();
+                    //     }
+                    // },
+                    // myLevel5: {
+                    //     show: true,
+                    //     title: '5分K线级别',
+                    //     icon: 'image://img/icon_36_5.png',
+                    //     onclick: function () {
+                    //         $("#kxType").val('5');
+                    //         refresh();
+                    //     }
+                    // },
+                    // myLevel15: {
+                    //     show: true,
+                    //     title: '15分K线级别(会员)',
+                    //     icon: 'image://img/icon_147_15.png',
+                    //     onclick: function () {
+                    //         $("#kxType").val('15');
+                    //         refresh();
+                    //     }
+                    // },
+                    // myLevel30: {
+                    //     show: true,
+                    //     title: '30分K线级别',
+                    //     icon: 'image://img/icon_36_30.png',
+                    //     onclick: function () {
+                    //         $("#kxType").val('30');
+                    //         refresh();
+                    //     }
+                    // },
+                    // myLevel60: {
+                    //     show: true,
+                    //     title: '60分K线级别(会员)',
+                    //     icon: 'image://img/icon_147_60.png',
+                    //     onclick: function () {
+                    //         $("#kxType").val('60');
+                    //         refresh();
+                    //     }
+                    // },
+                    // myLevelDay: {
+                    //     show: true,
+                    //     title: '日K线级别',
+                    //     icon: 'image://img/icon_36_d.png',
+                    //     background: '#555',
+                    //     onclick: function () {
+                    //         $("#kxType").val('d');
+                    //         refresh();
+                    //     }
+                    // },
+                    // myLevelWeek: {
+                    //     show: true,
+                    //     title: '周K线级别(会员)',
+                    //     icon: 'image://img/icon_36_w.png',
+                    //     background: '#555',
+                    //     onclick: function () {
+                    //         $("#kxType").val('w');
+                    //         refresh();
+                    //     }
+                    // },
+
+                    // myPrevious: {
+                    //     title: '上一个',
+                    //     icon: 'image://img/icon_previous.svg',
+                    //     onclick: function () {
+                    //
+                    //         const value = preNext('pre');
+                    //         $("#code").val(value.code);
+                    //         $("#kxType").val(value.kxType);
+                    //         refresh();
+                    //     }
+                    // },
+                    // myNext: {
+                    //     title: '下一个',
+                    //     icon: 'image://img/icon_next.svg',
+                    //     onclick: function () {
+                    //         const value = preNext('next');
+                    //         $("#code").val(value.code);
+                    //         $("#kxType").val(value.kxType);
+                    //         refresh();
+                    //     }
+                    // },
+                    // myCollect: {
+                    //     title: '收藏',
+                    //     icon: collectIcon,
+                    //     onclick: function () {
+                    //         var curCode = $("#code").val();
+                    //         refreshCollectedStatus(curCode, false);
+                    //     }
+                    // },
+                    // myAutoRefresh: {
+                    //     type: 'jpeg',//png
+                    //     //name: resultData.info
+                    //     background: '#555',
+                    //
+                    //     icon: 'image://img/icon_refresh.svg',
+                    //     title: '刷新',
+                    //     onclick: function () {
+                    //         refresh();
+                    //     }
+                    // },
+                    // saveAsImage: {
+                    //     type: 'jpeg',//png
+                    //     name: dataTitle + '自动画线',
+                    //     backgroundColor: '#fff',
+                    //     title: '保存图片',
+                    //     show: false
+                    // },
+                },
+            },
+            color: ['yellow', 'green', 'yellow', 'white', '#999999'],
+            legend: {
+                data: ['笔', '段', 'MA5', 'MA10', '布林中轨'],
+                selected: {
+                    '笔': true,
+                    '段': true,
+                    'MA5': false,
+                    'MA10': false,
+                    '布林中轨': false
+                },
+                top: 55,
+                textStyle: {
+                    color: 'white'
+                }
+            },
+            grid: [{//直角坐标系
+                left: '3.2%',
+                right: '3.35%',
+                height: '57%',
+                top: 85,
+            }, {
+                top: '69%',
+                height: '15%',
+                left: '3.2%',
+                right: '3.35%',
+            }, {
+                top: '86%',
+                height: '5%',
+                left: '3.2%',
+                right: '3.35%',
+            }
+            ],
+            xAxis: [
+                {
+                    type: 'category',
+                    data: resultData.time,
+                    scale: true,
+                    boundaryGap: false,
+                    axisLine: {onZero: false},
+                    splitLine: {show: false},
+                    splitNumber: 20,
+                    min: 'dataMin',
+                    max: 'dataMax',
+                    axisLine: {lineStyle: {color: '#8392A5'}}
+                },
+                {
+                    type: 'category',
+                    gridIndex: 1,
+                    data: resultData.time,
+                    axisTick: {
+                        show: false
+                    },
+                    axisLabel: {
+                        show: true
+                    },
+                    axisLine: {lineStyle: {color: '#8392A5'}}
+
+
+                },
+                {
+                    type: 'category',
+                    gridIndex: 2,
+                    data: resultData.time,
+                    axisTick: {
+                        show: false
+                    },
+                    axisLabel: {
+                        show: false
+                    },
+                    axisLine: {lineStyle: {color: '#8392A5'}}
+
+
+                }
+            ],
+            yAxis: [
+                {
+                    scale: true,
+                    splitArea: {
+                        show: false
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            opacity: 0.3,
+                            type: 'dashed',
+                        }
+                    },
+                    axisLine: {lineStyle: {color: '#8392A5'}},
+                },
+                {
+                    gridIndex: 1,
+                    splitNumber: 4,
+                    axisLine: {
+                        onZero: false
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLabel: {
+                        show: true
+                    },
+                    axisLine: {lineStyle: {color: '#8392A5'}},
+                },
+                {
+                    gridIndex: 2,
+                    splitNumber: 3,
+                    axisLine: {
+                        onZero: false
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisLabel: {
+                        show: false
+                    },
+                    axisLine: {lineStyle: {color: '#8392A5'}},
+                }
+            ],
+            dataZoom: [
+
+                {
+                    type: 'inside',
+                    xAxisIndex: [0, 0],
+                    start: zoomStart,
+                    end: 100,
+                    minSpan: 10,
+                },
+                {
+                    type: 'inside',
+                    xAxisIndex: [0, 1],
+                    start: zoomStart,
+                    end: 100,
+                    minSpan: 10,
+                },
+                {
+                    xAxisIndex: [0, 2],
+                    type: 'slider',
+                    start: zoomStart,
+                    end: 100,
+                    top: '92%',
+                    minSpan: 10,
+                    textStyle: {
                         color: '#8392A5'
                     },
-                    lineStyle: {
-                        opacity: 0.8,
-                        color: '#8392A5'
+                    dataBackground: {
+                        areaStyle: {
+                            color: '#8392A5'
+                        },
+                        lineStyle: {
+                            opacity: 0.8,
+                            color: '#8392A5'
+                        }
+                    },
+                    handleStyle: {
+                        color: '#fff',
+                        shadowBlur: 3,
+                        shadowColor: 'rgba(0, 0, 0, 0.6)',
+                        shadowOffsetX: 2,
+                        shadowOffsetY: 2
                     }
-                },
-                handleStyle: {
-                    color: '#fff',
-                    shadowBlur: 3,
-                    shadowColor: 'rgba(0, 0, 0, 0.6)',
-                    shadowOffsetX: 2,
-                    shadowOffsetY: 2
-                }
 
-            }
-        ],
-        series: [
-            {
-                name: 'K线图',
-                type: 'candlestick',
-                data: resultData.values,
-                animation: false,
-                itemStyle: {
-                    normal: {
-                        color: upColor,
-                        color0: downColor,
-                        borderColor: upBorderColor,
-                        borderColor0: downBorderColor
-                    }
+                }
+            ],
+            series: [
+                {
+                    name: 'K线图',
+                    type: 'candlestick',
+                    data: resultData.values,
+                    animation: false,
+                    itemStyle: {
+                        normal: {
+                            color: upColor,
+                            color0: downColor,
+                            borderColor: upBorderColor,
+                            borderColor0: downBorderColor
+                        }
+                    },
+                    // markPoint: {
+                    //     data: resultData.mmdValues,
+                    //     animation: false
+                    // },
+                    markArea: {
+                        silent: true,
+                        data: resultData.zsvalues,
+                    },
                 },
-                // markPoint: {
-                //     data: resultData.mmdValues,
+                {
+                    name: '笔',
+                    type: 'line',
+                    z: 3,
+                    data: resultData.biValues,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'dashed',
+                            width: 1,
+                            color: 'yellow'
+                        },
+                    },
+                    symbol: 'none',
+                    animation: false
+                },
+                {
+                    name: '段',
+                    type: 'line',
+                    z: 4,
+                    data: resultData.duanValues,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'solid',
+                            width: 2,
+                            color: 'green'
+                        },
+                    },
+                    symbol: 'none',
+                    animation: false
+                },
+                // {
+                //     name: 'markline',
+                //     type: 'line',
+                //     data: resultData.markLineData,
+                //     smooth: true,
+                //     lineStyle: {
+                //         normal: {
+                //             opacity: 0.25,
+                //             type: 'dashed',
+                //             width: 0.8,
+                //             color: 'blue'
+                //         },
+                //     },
+                //     symbol: 'none',
                 //     animation: false
                 // },
-                // markArea: {
-                //     silent: true,
-                //     data: resultData.zsvalues,
+                {
+                    name: 'MA5',
+                    type: 'line',
+                    data: calculateMA(resultData, 5),
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.9,
+                            type: 'solid',
+                            width: 1,
+                            color: "white"
+                        },
+                    },
+                    symbol: 'none',
+                    animation: false
+                },
+                {
+                    name: 'MA10',
+                    type: 'line',
+                    data: calculateMA(resultData, 10),
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.9,
+                            type: 'solid',
+                            width: 1,
+                            color: "yellow"
+                        },
+                    },
+                    symbol: 'none',
+                    animation: false
+                },
+                {
+                    name: 'MACD',
+                    type: 'bar',
+                    xAxisIndex: 1,
+                    yAxisIndex: 1,
+                    data: resultData.macd,
+                    barWidth: 1,
+                    itemStyle: {
+                        normal: {
+                            color: function (params) {
+                                var colorList;
+                                if (params.data >= 0) {
+                                    colorList = 'red';
+                                } else {
+                                    colorList = '#14d0cd';
+                                }
+                                return colorList;
+                            },
+                        }
+                    }
+                },
+                {
+                    name: 'DIFF',
+                    type: 'line',
+                    xAxisIndex: 1,
+                    yAxisIndex: 1,
+                    data: resultData.diff,
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'solid',
+                            width: 1,
+                            color: 'white'
+                        },
+                    },
+                    symbol: 'none',
+                    animation: false,
+                    markPoint: {
+                        data: resultData.bcMACDValues
+                    },
+                },
+                {
+                    name: 'DEA',
+                    type: 'line',
+                    xAxisIndex: 1,
+                    yAxisIndex: 1,
+                    data: resultData.dea,
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'solid',
+                            width: 1,
+                            color: 'yellow'
+                        },
+                    },
+                    symbol: 'none',
+                    animation: false
+                },
+                {
+                    name: 'Volume',
+                    type: 'bar',
+                    xAxisIndex: 2,
+                    yAxisIndex: 2,
+                    data: resultData.volume,
+                    itemStyle: {
+                        normal: {
+                            color: function (params) {
+                                var colorList;
+                                if (resultData.values[params.dataIndex][1] > resultData.values[params.dataIndex][0]) {
+                                    colorList = '#ef232a';
+                                } else {
+                                    colorList = downColor;
+                                }
+                                return colorList;
+                            },
+                        }
+                    }
+                },
+                // {
+                //     name: '布林上轨',
+                //     type: 'line',
+                //     data: resultData.boll_up,
+                //     smooth: true,
+                //     lineStyle: {
+                //         normal: {
+                //             opacity: 0.6,
+                //             type: 'dotted',
+                //             width: 1,
+                //             color: '#444'
+                //         },
+                //     },
+                //     symbol: 'none',
+                //     animation: false
                 // },
-            },
-            {
-                name: '笔',
-                type: 'line',
-                z: 3,
-                data: resultData.biValues,
-                lineStyle: {
-                    normal: {
-                        opacity: 1,
-                        type: 'dashed',
-                        width: 1,
-                        color: 'yellow'
-                    },
-                },
-                symbol: 'none',
-                animation: false
-            },
-            {
-                name: '段',
-                type: 'line',
-                z: 4,
-                data: resultData.duanValues,
-                lineStyle: {
-                    normal: {
-                        opacity: 1,
-                        type: 'solid',
-                        width: 2,
-                        color: 'green'
-                    },
-                },
-                symbol: 'none',
-                animation: false
-            },
-            // {
-            //     name: 'markline',
-            //     type: 'line',
-            //     data: resultData.markLineData,
-            //     smooth: true,
-            //     lineStyle: {
-            //         normal: {
-            //             opacity: 0.25,
-            //             type: 'dashed',
-            //             width: 0.8,
-            //             color: 'blue'
-            //         },
-            //     },
-            //     symbol: 'none',
-            //     animation: false
-            // },
-            {
-                name: 'MA5',
-                type: 'line',
-                data: calculateMA(resultData, 5),
-                smooth: true,
-                lineStyle: {
-                    normal: {
-                        opacity: 0.9,
-                        type: 'solid',
-                        width: 1,
-                        color: "white"
-                    },
-                },
-                symbol: 'none',
-                animation: false
-            },
-            {
-                name: 'MA10',
-                type: 'line',
-                data: calculateMA(resultData, 10),
-                smooth: true,
-                lineStyle: {
-                    normal: {
-                        opacity: 0.9,
-                        type: 'solid',
-                        width: 1,
-                        color: "yellow"
-                    },
-                },
-                symbol: 'none',
-                animation: false
-            },
-            /*{
-                name: 'MA20',
-                type: 'line',
-                data: calculateMA(20),
-                smooth: true,
-                lineStyle: {
-                    normal: {
-                        opacity: 0.5,
-                        type: 'dotted',
-                        width: 1
-                    },
-                },
-                symbol: 'none',
-                animation: false
-            },
-            {
-                name: 'MA30',
-                type: 'line',
-                data: calculateMA(30),
-                smooth: true,
-                lineStyle: {
-                    normal: {
-                        opacity: 0.5,
-                        type: 'dotted',
-                        width: 1
-                    },
-                },
-                symbol: 'none',
-                animation: false
-            },*/
-            {
-                name: 'MACD',
-                type: 'bar',
-                xAxisIndex: 1,
-                yAxisIndex: 1,
-                data: resultData.macd,
-                barWidth: 1,
-                itemStyle: {
-                    normal: {
-                        color: function (params) {
-                            var colorList;
-                            if (params.data >= 0) {
-                                colorList = 'red';
-                            } else {
-                                colorList = '#14d0cd';
-                            }
-                            return colorList;
-                        },
-                    }
-                }
-            },
-            {
-                name: 'DIFF',
-                type: 'line',
-                xAxisIndex: 1,
-                yAxisIndex: 1,
-                data: resultData.diff,
-                smooth: true,
-                lineStyle: {
-                    normal: {
-                        opacity: 1,
-                        type: 'solid',
-                        width: 1,
-                        color: 'white'
-                    },
-                },
-                symbol: 'none',
-                animation: false,
-                markPoint: {
-                    data: resultData.bcMACDValues
-                },
-            },
-            {
-                name: 'DEA',
-                type: 'line',
-                xAxisIndex: 1,
-                yAxisIndex: 1,
-                data: resultData.dea,
-                smooth: true,
-                lineStyle: {
-                    normal: {
-                        opacity: 1,
-                        type: 'solid',
-                        width: 1,
-                        color: 'yellow'
-                    },
-                },
-                symbol: 'none',
-                animation: false
-            },
-            {
-                name: 'Volume',
-                type: 'bar',
-                xAxisIndex: 2,
-                yAxisIndex: 2,
-                data: resultData.volume,
-                itemStyle: {
-                    normal: {
-                        color: function (params) {
-                            var colorList;
-                            if (resultData.values[params.dataIndex][1] > resultData.values[params.dataIndex][0]) {
-                                colorList = '#ef232a';
-                            } else {
-                                colorList = downColor;
-                            }
-                            return colorList;
-                        },
-                    }
-                }
-            },
-            // {
-            //     name: '布林上轨',
-            //     type: 'line',
-            //     data: resultData.boll_up,
-            //     smooth: true,
-            //     lineStyle: {
-            //         normal: {
-            //             opacity: 0.6,
-            //             type: 'dotted',
-            //             width: 1,
-            //             color: '#444'
-            //         },
-            //     },
-            //     symbol: 'none',
-            //     animation: false
-            // },
-            // {
-            //     name: '布林中轨',
-            //     type: 'line',
-            //     data: resultData.boll_middle,
-            //     smooth: true,
-            //     lineStyle: {
-            //         normal: {
-            //             opacity: 0.5,
-            //             type: 'dotted',
-            //             width: 1,
-            //             color: "#888888"
-            //         },
-            //     },
-            //     symbol: 'none',
-            //     animation: false
-            // },
-            // {
-            //     name: '布林下轨',
-            //     type: 'line',
-            //     data: resultData.boll_bottom,
-            //     smooth: true,
-            //     lineStyle: {
-            //         normal: {
-            //             opacity: 0.6,
-            //             type: 'dotted',
-            //             width: 1,
-            //             color: '#444'
-            //         },
-            //     },
-            //     symbol: 'none',
-            //     animation: false
-            // },
-        ],
-        graphic: [],
-    };
+                // {
+                //     name: '布林中轨',
+                //     type: 'line',
+                //     data: resultData.boll_middle,
+                //     smooth: true,
+                //     lineStyle: {
+                //         normal: {
+                //             opacity: 0.5,
+                //             type: 'dotted',
+                //             width: 1,
+                //             color: "#888888"
+                //         },
+                //     },
+                //     symbol: 'none',
+                //     animation: false
+                // },
+                // {
+                //     name: '布林下轨',
+                //     type: 'line',
+                //     data: resultData.boll_bottom,
+                //     smooth: true,
+                //     lineStyle: {
+                //         normal: {
+                //             opacity: 0.6,
+                //             type: 'dotted',
+                //             width: 1,
+                //             color: '#444'
+                //         },
+                //     },
+                //     symbol: 'none',
+                //     animation: false
+                // },
+            ],
+            graphic: [],
+        };
+    }
     myChart.setOption(option);
+
+
     // refreshCollectedStatus(resultData.info.code, true);
 
     myChart.on('click', function (params) {
@@ -807,8 +802,8 @@ function splitData(jsonObj) {
     console.log('bidata', bidata);
     console.log('duandata', duandata);
 
-    // const zsdata = jsonObj.zsdata;
-    // const zsflag = jsonObj.zsflag;
+    const zsdata = jsonObj.zsdata;
+    const zsflag = jsonObj.zsflag;
     //
     const macddata = jsonObj.macd;
     const diffdata = jsonObj.diff;
@@ -838,54 +833,54 @@ function splitData(jsonObj) {
         duanValues.push([duandata.date[i], duandata.data[i]])
     }
 
-    // var zsvalues = [];
-    // for (var i = 0; i < zsdata.length; i++) {
-    //     var value;
-    //     if (zsflag[i] > 0) {
-    //         value = [
-    //             {
-    //                 coord: zsdata[i][0],
-    //                 itemStyle: {
-    //                     color: 'red',
-    //                     borderWidth: '1',
-    //                     borderColor: 'blue',
-    //                     opacity: 0.7,
-    //                 }
-    //             },
-    //             {
-    //                 coord: zsdata[i][1],
-    //                 itemStyle: {
-    //                     color: 'red',
-    //                     borderWidth: '1',
-    //                     borderColor: 'blue',
-    //                     opacity: 0.7,
-    //                 }
-    //             }
-    //         ];
-    //     } else {
-    //         value = [
-    //             {
-    //                 coord: zsdata[i][0],
-    //                 itemStyle: {
-    //                     color: 'green',
-    //                     borderWidth: '1',
-    //                     borderColor: 'blue',
-    //                     opacity: 0.5,
-    //                 }
-    //             },
-    //             {
-    //                 coord: zsdata[i][1],
-    //                 itemStyle: {
-    //                     color: 'green',
-    //                     borderWidth: '1',
-    //                     borderColor: 'blue',
-    //                     opacity: 0.5,
-    //                 }
-    //             }
-    //         ];
-    //     }
-    //     zsvalues.push(value);
-    // }
+    var zsvalues = [];
+    for (var i = 0; i < zsdata.length; i++) {
+        var value;
+        if (zsflag[i] > 0) {
+            value = [
+                {
+                    coord: zsdata[i][0],
+                    itemStyle: {
+                        color: bgColor,
+                        borderWidth: '2',
+                        borderColor: 'red',
+                        opacity: 1,
+                    }
+                },
+                {
+                    coord: zsdata[i][1],
+                    itemStyle: {
+                        color: 'red',
+                        borderWidth: '1',
+                        borderColor: 'red',
+                        opacity: 0.2,
+                    }
+                }
+            ];
+        } else {
+            value = [
+                {
+                    coord: zsdata[i][0],
+                    itemStyle: {
+                        color: downColor,
+                        borderWidth: '1',
+                        borderColor: downColor,
+                        opacity: 0.2,
+                    }
+                },
+                {
+                    coord: zsdata[i][1],
+                    itemStyle: {
+                        color: downColor,
+                        borderWidth: '1',
+                        borderColor: downColor,
+                        opacity: 0.2,
+                    }
+                }
+            ];
+        }
+        zsvalues.push(value);
+    }
     // 买卖点
     // var mmdValues = [];
     // for (var i = 0; i < jsonObj.buyData.date.length; i++) {
@@ -1064,8 +1059,8 @@ function splitData(jsonObj) {
         volume: volumeData,
         biValues: biValues,
         duanValues: duanValues,
-        // zsvalues: zsvalues,
-        // zsflag: zsflag,
+        zsvalues: zsvalues,
+        zsflag: zsflag,
         macd: macddata,
         diff: diffdata,
         dea: deadata,

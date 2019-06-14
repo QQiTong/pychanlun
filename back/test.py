@@ -1,2 +1,3 @@
-biResult = []
-biResult[3] = 2
+biResult = [[1,2]]
+
+print(len(biResult) == True)
