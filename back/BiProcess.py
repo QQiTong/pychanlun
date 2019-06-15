@@ -66,6 +66,7 @@ class BiProcess(ToString):
         count = len(klineList)
         for i in range(count):
             item = klineList[i]
+            item.i = i
             if len(self.biList) == 0:
                 # create first bi ,suppose first bi is up
                 bi = Bi()
@@ -87,18 +88,28 @@ class BiProcess(ToString):
                         lastBi.end = item.end
                         # previous not become bi
                         if len(tempklineList) > 0:
+                            adjust = False
                             for j in range(len(tempklineList)):
-                                # if tempklineList[j].low < lastBi.low:
-                                #     if len(self.biList) > 1:
-                                #         # merge last bi into last last bi
-                                #         lastLastBi = self.biList[-2]
-                                #         for x in range(len(lastBi.klineList)):
-                                #             lastLastBi.klineList.append(lastBi.klineList[x])
-                                #         lastBi = lastLastBi
-                                #         lastBi.low = tempklineList[j].low
+                                if tempklineList[j].low < lastBi.low:
+                                     if len(self.biList) > 1:
+                                        # merge last bi into last last bi
+                                        lastLastBi = self.biList[-2]
+                                        for x in range(len(lastBi.klineList)):
+                                            lastLastBi.klineList.append(lastBi.klineList[x])
+                                        lastBi = lastLastBi
+                                        del self.biList[-1]
+                                        lastBi.klineList.append(tempklineList[j])
+                                        lastBi.low = tempklineList[j].low
+                                        lastBi.end = lastBi.klineList[-1].end
+                                        i = lastBi.klineList[-1].i
+                                        adjust = True
+                                        break
                                 lastBi.klineList.append(tempklineList[j])
+                            if not adjust:
+                                lastBi.klineList.append(item)
                             tempklineList.clear()
-                        lastBi.klineList.append(item)
+                        else:
+                            lastBi.klineList.append(item)
                     else:
                         tempklineList.append(item)
                         # whether has new down bi
@@ -120,18 +131,28 @@ class BiProcess(ToString):
                         lastBi.low = item.low
                         lastBi.end = item.end
                         if len(tempklineList) > 0:
+                            adjust = False
                             for l in range(len(tempklineList)):
-                                # if tempklineList[l].high > lastBi.high:
-                                #     if len(self.biList) > 1:
-                                #         # merge last bi into last last bi
-                                #         lastLastBi = self.biList[-2]
-                                #         for x in range(len(lastBi.klineList)):
-                                #             lastLastBi.klineList.append(lastBi.klineList[x])
-                                #         lastBi = lastLastBi
-                                #         lastBi.high = tempklineList[j].high
+                                if tempklineList[l].high > lastBi.high:
+                                     if len(self.biList) > 1:
+                                        # merge last bi into last last bi
+                                        lastLastBi = self.biList[-2]
+                                        for x in range(len(lastBi.klineList)):
+                                            lastLastBi.klineList.append(lastBi.klineList[x])
+                                        lastBi = lastLastBi
+                                        del self.biList[-1]
+                                        lastBi.klineList.append(tempklineList[l])
+                                        lastBi.high = tempklineList[l].high
+                                        lastBi.end = lastBi.klineList[-1].end
+                                        i = lastBi.klineList[-1].i
+                                        adjust = True
+                                        break
                                 lastBi.klineList.append(tempklineList[l])
+                            if not adjust:
+                                lastBi.klineList.append(item)
                             tempklineList.clear()
-                        lastBi.klineList.append(item)
+                        else:
+                            lastBi.klineList.append(item)
                     else:
                         tempklineList.append(item)
                         if self.ifChengbi(tempklineList, 1):
