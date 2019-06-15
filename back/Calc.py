@@ -36,7 +36,22 @@ from back.Tools import Tools
 # ]
 
 class Calc:
-    def calcData(self):
+    def __init__(self):
+        #
+        self.levelMap = {
+            '1min': '5min',
+            '3min': '15min',
+            '15min': '1hour',
+            '1hour': '1day',
+            '1day': '1week',
+
+            '5min': '30min',
+            '30min': '4hour',
+            '4hour': '1week',
+            '1week': '1week'
+        }
+
+    def calcData(self, kxType):
         klineList = []
 
         # def processKline():
@@ -48,11 +63,14 @@ class Calc:
         # flask 读入本地文件需要这样写
         # base_dir = os.path.dirname(__file__)
         # data_str = open(os.path.join(base_dir, './klineData.json')).read()
+        # jsonObj = json.loads(data_str)
 
         # 获取接口数据
-        klineData = KlineData.getKlineData()
-        print("从接口到的数据", klineData)
-        data_str = klineData
+        klineData = KlineData.getKlineData(kxType)
+        klineDataBigLevel = KlineData.getKlineData(self.levelMap[kxType])
+        # print("从接口到的数据", klineData)
+        jsonObj = klineData['data']
+        jsonObjBigLevel = klineDataBigLevel['data']
 
         openPriceList = []
         highList = []
@@ -61,8 +79,16 @@ class Calc:
         timeList = []
         volumeList = []
 
-        jsonObj = data_str['data']
-        # print(jsonObj)
+        # 获取大级别macd
+        closeListBigLevel = []
+        timeListBigLevel = []
+
+        for i in range(len(jsonObjBigLevel)):
+            item = jsonObjBigLevel[i]
+            closeListBigLevel.append(round(float(item[4]), 2))
+            localTime = time.localtime(item[0] / 1000)
+            strTime = time.strftime("%m-%d %H:%M", localTime)
+            timeListBigLevel.append(strTime)
 
         for i in range(len(jsonObj)):
             item = jsonObj[i]
@@ -137,6 +163,13 @@ class Calc:
         resJson['volume'] = volumeList
         resJson['zsdata'] = zsdata
         resJson['zsflag'] = zsflag
+
+        # 获取大级别macd
+        resJson['diffBigLevel'] = getMacd(closeListBigLevel)[0].tolist()
+        resJson['deaBigLevel'] = getMacd(closeListBigLevel)[1].tolist()
+        resJson['macdBigLevel'] = getMacd(closeListBigLevel)[2].tolist()
+        resJson['dateBigLevel'] = timeListBigLevel
+
         resJsonStr = json.dumps(resJson)
         print(resJsonStr)
         return resJson

@@ -15,7 +15,9 @@ def hello():
 @app.route('/api/stock_data')
 def data():
     calc = Calc()
-    result = calc.calcData()
+    kxType = request.args.get("kxType") or "1min"
+
+    result = calc.calcData(kxType)
 
     return Response(json.dumps(result), mimetype='application/json')
 

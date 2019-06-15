@@ -4,8 +4,8 @@ import json
 url = "http://api.zb.cn/data/v1/kline?market=btc_usdt"
 
 
-def getKlineData():
-    para = {"type": "1min"}
+def getKlineData(period):
+    para = {"type": period}
     header = {}
     r = requests.get(url, params=para, headers=header, )
     # verify=True适用于服务端的ssl证书验证，verify=False为关闭ssl验证

@@ -10,12 +10,12 @@ class KlineRaw:
 # K线处理
 # class Kline:
 #     high = None  # kline high
-#     low = None  # kline low
-#     direction = None  # kline direction
-#     start = None  # start kline position
-#     end = None  # end kline position
-#     middle = None
-#     time = None
+# #     low = None  # kline low
+# #     direction = None  # kline direction
+# #     start = None  # start kline position
+# #     end = None  # end kline position
+# #     middle = None
+# #     time = None
 #     endTime = None
 
 
