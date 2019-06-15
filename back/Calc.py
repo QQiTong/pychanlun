@@ -51,7 +51,7 @@ class Calc:
 
         # 获取接口数据
         klineData = KlineData.getKlineData()
-        print("从接口到的数据", klineData)
+        # print("从接口到的数据", klineData)
         data_str = klineData
 
         openPriceList = []
@@ -61,6 +61,7 @@ class Calc:
         timeList = []
         volumeList = []
 
+        # jsonObj = json.loads(data_str)
         jsonObj = data_str['data']
         # print(jsonObj)
 
@@ -76,9 +77,9 @@ class Calc:
             timeList.append(strTime)
             volumeList.append(round(float(item[5])))
 
-        print(highList)
-        print(lowList)
-        print(timeList)
+        # print(highList)
+        # print(lowList)
+        # print(timeList)
 
         # k线处理
         klineProcess = KlineProcess()
@@ -99,13 +100,13 @@ class Calc:
             item = biProcess.biList[i]
             biResult[item.klineList[-1].middle] = item.direction
 
-        print("笔结果:", len(biProcess.biList), biResult)
+        # print("笔结果:", len(biProcess.biList), biResult)
 
         # 段处理
         duanProcess = DuanProcess()
         duanResult = duanProcess.handle(biResult, highList, lowList)
 
-        print("段结果:", len(biResult), len(duanResult))
+        # print("段结果:", len(biResult), len(duanResult))
 
         # 中枢处理
         zhongShu = ZhongShuProcess()
@@ -113,12 +114,12 @@ class Calc:
         zhongShuLow = zhongShu.initLow(biResult, highList, lowList)
         zhongShuStartEnd = zhongShu.initStartEnd(biResult, highList, lowList)
 
-        print('笔中枢高:', len(zhongShuHigh), zhongShuHigh)
-        print('笔中枢低:', len(zhongShuLow), zhongShuLow)
-        print('笔中枢开始结束:', len(zhongShuStartEnd), zhongShuStartEnd)
+        # print('笔中枢高:', len(zhongShuHigh), zhongShuHigh)
+        # print('笔中枢低:', len(zhongShuLow), zhongShuLow)
+        # print('笔中枢开始结束:', len(zhongShuStartEnd), zhongShuStartEnd)
 
         zsdata, zsflag = getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList)
-        print("中枢数据:", zsdata, zsflag)
+        # print("中枢数据:", zsdata, zsflag)
 
         # 拼接json数据
         resJson = {}
@@ -138,7 +139,7 @@ class Calc:
         resJson['zsdata'] = zsdata
         resJson['zsflag'] = zsflag
         resJsonStr = json.dumps(resJson)
-        print(resJsonStr)
+        # print(resJsonStr)
         return resJson
 
 
