@@ -53,7 +53,7 @@ class BiProcess(ToString):
                 if i >= len(tempKxianList):
                     return False
                 # find previous highest price
-                highestPrice = tempKxianList[i].low
+                highestPrice = tempKxianList[i].high
                 # if there is higher than highest price , then become bi
                 for j in range(i + 1, len(tempKxianList), 1):
                     if tempKxianList[j].high > highestPrice:
