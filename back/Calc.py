@@ -9,13 +9,12 @@ import talib as ta
 from flask import make_response
 import copy
 
-from back import KlineData
+from back.KlineDataTool import KlineDataTool
 from back.ZhongShuProcess import ZhongShuProcess
 from back.BiProcess import BiProcess
 from back.DuanProcess import DuanProcess
 from back.KlineProcess import KlineProcess
 from back.Tools import Tools
-
 
 # 币安的数据结构
 # [
@@ -34,6 +33,20 @@ from back.Tools import Tools
 #         "17928899.62484339" # Ignore.
 #     ]
 # ]
+'''
+火币数据结构
+{
+    amount: 133.9523230990729,
+    close: 8858.25,
+    count: 168,
+    high: 8860.01,
+    id: 1560609600,
+    low: 8842.35,
+    open: 8859.96,
+    vol: 11862
+}
+'''
+
 
 class Calc:
     def __init__(self):
@@ -41,8 +54,8 @@ class Calc:
         self.levelMap = {
             '1min': '5min',
             '3min': '15min',
-            '15min': '1hour',
-            '1hour': '1day',
+            '15min': '60min',
+            '60min': '1day',
             '1day': '1week',
 
             '5min': '30min',
@@ -66,11 +79,12 @@ class Calc:
         # jsonObj = json.loads(data_str)
 
         # 获取接口数据
-        klineData = KlineData.getKlineData(kxType)
-        klineDataBigLevel = KlineData.getKlineData(self.levelMap[kxType])
+        klineDataTool = KlineDataTool()
+        klineData = klineDataTool.getKlineData(kxType)
+        klineDataBigLevel = klineDataTool.getKlineData(self.levelMap[kxType])
         # print("从接口到的数据", klineData)
-        jsonObj = klineData['data']
-        jsonObjBigLevel = klineDataBigLevel['data']
+        jsonObj = klineData
+        jsonObjBigLevel = klineDataBigLevel
 
         openPriceList = []
         highList = []
@@ -85,22 +99,22 @@ class Calc:
 
         for i in range(len(jsonObjBigLevel)):
             item = jsonObjBigLevel[i]
-            closeListBigLevel.append(round(float(item[4]), 2))
-            localTime = time.localtime(item[0] / 1000)
+            closeListBigLevel.append(round(float(item['close']), 2))
+            localTime = time.localtime(item['id'])
             strTime = time.strftime("%m-%d %H:%M", localTime)
             timeListBigLevel.append(strTime)
 
         for i in range(len(jsonObj)):
             item = jsonObj[i]
-            localTime = time.localtime(item[0] / 1000)
+            localTime = time.localtime(item['id'])
             strTime = time.strftime("%m-%d %H:%M", localTime)
-            highList.append(round(float(item[2]), 2))
-            lowList.append(round(float(item[3]), 2))
+            highList.append(round(float(item['high']), 2))
+            lowList.append(round(float(item['low']), 2))
 
-            openPriceList.append(round(float(item[1]), 2))
-            closePriceList.append(round(float(item[4]), 2))
+            openPriceList.append(round(float(item['open']), 2))
+            closePriceList.append(round(float(item['close']), 2))
             timeList.append(strTime)
-            volumeList.append(round(float(item[5])))
+            volumeList.append(round(float(item['amount']), 2))
 
         print(highList)
         print(lowList)
@@ -125,13 +139,13 @@ class Calc:
             item = biProcess.biList[i]
             biResult[item.klineList[-1].middle] = item.direction
 
-        print("笔结果:", len(biProcess.biList), biResult)
+        # print("笔结果:", len(biProcess.biList), biResult)
 
         # 段处理
         duanProcess = DuanProcess()
         duanResult = duanProcess.handle(biResult, highList, lowList)
 
-        print("段结果:", len(biResult), len(duanResult))
+        # print("段结果:", len(biResult), len(duanResult))
 
         # 中枢处理
         zhongShu = ZhongShuProcess()
@@ -139,12 +153,12 @@ class Calc:
         zhongShuLow = zhongShu.initLow(biResult, highList, lowList)
         zhongShuStartEnd = zhongShu.initStartEnd(biResult, highList, lowList)
 
-        print('笔中枢高:', len(zhongShuHigh), zhongShuHigh)
-        print('笔中枢低:', len(zhongShuLow), zhongShuLow)
-        print('笔中枢开始结束:', len(zhongShuStartEnd), zhongShuStartEnd)
+        # print('笔中枢高:', len(zhongShuHigh), zhongShuHigh)
+        # print('笔中枢低:', len(zhongShuLow), zhongShuLow)
+        # print('笔中枢开始结束:', len(zhongShuStartEnd), zhongShuStartEnd)
 
         zsdata, zsflag = getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList)
-        print("中枢数据:", zsdata, zsflag)
+        # print("中枢数据:", zsdata, zsflag)
 
         # 拼接json数据
         resJson = {}
@@ -171,7 +185,7 @@ class Calc:
         resJson['dateBigLevel'] = timeListBigLevel
 
         resJsonStr = json.dumps(resJson)
-        print(resJsonStr)
+        # print(resJsonStr)
         return resJson
 
 
@@ -198,7 +212,7 @@ def getBiData(biProcess, timeList):
             else:
                 biData.append(bi.low)
             biDate.append(timeList[bi.klineList[-1].middle])
-        print(bi.start, bi.end, bi.klineList[-1].middle, bi.low, bi.high, bi.direction)
+        # print(bi.start, bi.end, bi.klineList[-1].middle, bi.low, bi.high, bi.direction)
     resBiData['data'] = biData
     resBiData['date'] = biDate
     return resBiData

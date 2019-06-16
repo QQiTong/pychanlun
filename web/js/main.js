@@ -1,21 +1,3 @@
-//添加收藏
-function addCollect(code, name) {
-    $.ajax({
-        url: '/collect/add-collect/',
-        type: 'get',
-        data: {'code': code, 'name': name},
-        success: function (data) {
-            if (data['resultCode'] == '0') {
-                alert('未登录');
-            } else if (data['resultCode'] == '1') {
-                alert('收藏成功');
-            } else if (data['resultCode'] == '2') {
-                alert('已存在');
-            }
-        }
-    });
-}
-
 $("#nav_drawing").addClass('nav_btn_clicked');
 $("#echarsZoomStart").val(55);
 
@@ -33,7 +15,7 @@ let timer;
 // 请求标志
 let requestFlag = true;
 function refresh(update) {
-
+    // $(".loading-style-4").show();
     let that = this;
     that.requestFlag = false;
 
@@ -47,6 +29,8 @@ function refresh(update) {
         type: 'get',
         success: function (data) {
             that.requestFlag = true;
+            // $(".loading-style-4").hide();
+
             var result = draw(data, update);
             // if ($("#code").val().length > 0 && $("#code").val() != result.code) {
             //     console.log('refresh....');
@@ -55,6 +39,8 @@ function refresh(update) {
         },
         error:function (error) {
             that.requestFlag = true;
+            // $(".loading-style-4").hide();
+
         }
     });
 }
@@ -98,13 +84,13 @@ if (fromIndex) {
 // draw(stockJsonData);
 refresh('refresh');
 
-setInterval(() => {
-    if(this.requestFlag){
-        refresh('update')
-    }else{
-        console.log('wait...')
-    }
-}, 5000);
+// setInterval(() => {
+//     if(this.requestFlag){
+//         refresh('update')
+//     }else{
+//         // console.log('wait...')
+//     }
+// }, 5000);
 if (fromIndex) {
     fromIndex = !fromIndex;  //刷新后，就设置为false，首页进入的不读取是否收藏过状态
     // refresh();
@@ -137,14 +123,6 @@ function refreshCollectedStatus(code, justRefresh) {
     //         myChart.setOption(option);
     //     }
     // });
-}
-
-function cancelCollect(code) {
-    $.ajax({
-        url: '/collect/cancel-collect/',
-        type: 'get',
-        data: {'code': code},
-    });
 }
 
 function preNext(type) {
@@ -223,7 +201,7 @@ function draw(stockJsonData, update) {
     dataTitle = "BTC";
     infoValue3 = $("#kxType").val();
     if (update==='update') {
-        console.log('更新了', update);
+        // console.log('更新了', update);
         option = myChart.getOption();
         option.series[0].data = resultData.values;
         option.series[0].markArea.data = resultData.zsvalues;
@@ -322,7 +300,7 @@ function draw(stockJsonData, update) {
                         title: '60分钟',
                         icon: 'image://img/icon_1h.png',
                         onclick: function () {
-                            $("#kxType").val('1hour');
+                            $("#kxType").val('60min');
                             refresh();
                         }
                     },
@@ -921,7 +899,7 @@ function draw(stockJsonData, update) {
     // refreshCollectedStatus(resultData.info.code, true);
 
     myChart.on('click', function (params) {
-        console.log(params.value);
+        // console.log(params.value);
         if (params.value.indexOf("会员") >= 0) {
             window.location.href = "/vip/";
         } else if (params.value.indexOf("2中枢1买") >= 0) {
@@ -946,8 +924,8 @@ function splitData(jsonObj) {
     const bidata = jsonObj.bidata;
     const duandata = jsonObj.duandata;
 
-    console.log('bidata', bidata);
-    console.log('duandata', duandata);
+    // console.log('bidata', bidata);
+    // console.log('duandata', duandata);
 
     const zsdata = jsonObj.zsdata;
     const zsflag = jsonObj.zsflag;
