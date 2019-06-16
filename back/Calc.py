@@ -8,6 +8,7 @@ from numpy import array
 import talib as ta
 from flask import make_response
 import copy
+import pydash
 
 from back.KlineDataTool import KlineDataTool
 from back.ZhongShuProcess import ZhongShuProcess
@@ -15,6 +16,7 @@ from back.BiProcess import BiProcess
 from back.DuanProcess import DuanProcess
 from back.KlineProcess import KlineProcess
 from back.Tools import Tools
+from back.beichi import calcBeichi
 
 # 币安的数据结构
 # [
@@ -116,9 +118,12 @@ class Calc:
             timeList.append(strTime)
             volumeList.append(round(float(item['amount']), 2))
 
-        print(highList)
-        print(lowList)
-        print(timeList)
+        # K线所在笔的方向
+        directionList = [0 for i in range(len(timeList))]
+
+        # print(highList)
+        # print(lowList)
+        # print(timeList)
 
         # k线处理
         klineProcess = KlineProcess()
@@ -138,6 +143,9 @@ class Calc:
         for i in range(len(biProcess.biList)):
             item = biProcess.biList[i]
             biResult[item.klineList[-1].middle] = item.direction
+            for j in range(item.start + 1, item.end + 1):
+                directionList[j] = item.direction
+
 
         # print("笔结果:", len(biProcess.biList), biResult)
 
@@ -183,6 +191,14 @@ class Calc:
         resJson['deaBigLevel'] = getMacd(closeListBigLevel)[1].tolist()
         resJson['macdBigLevel'] = getMacd(closeListBigLevel)[2].tolist()
         resJson['dateBigLevel'] = timeListBigLevel
+
+        # 本级别MACD背驰
+        diffList = resJson['diff']
+        deaList = resJson['dea']
+        macdList = resJson['macd']
+        beichiData = calcBeichi(timeList, highList, lowList, directionList, diffList, deaList, macdList)
+        resJson['buyMACDBCData'] = beichiData['buyMACDBCData']
+        resJson['sellMACDBCData'] = beichiData['sellMACDBCData']
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)
@@ -254,14 +270,14 @@ def getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList):
         if item == 0:
             continue
         if item == 1:
-            print("中枢起点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
+            # print("中枢起点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
             zsStart = [timeList[i], zhongShuLow[i]]
         elif item == 2:
-            print("中枢终点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
+            # print("中枢终点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
             zsEnd = [timeList[i], zhongShuHigh[i]]
         if len(zsStart) and len(zsEnd):
             zsItem = [copy.copy(zsStart), copy.copy(zsEnd)]
-            print("中枢拼接:", zsItem)
+            # print("中枢拼接:", zsItem)
             zsdata.append(copy.copy(zsItem))
             if zsStart[1] > zsEnd[1]:
                 zsflag.append(-1)

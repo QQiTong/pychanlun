@@ -799,9 +799,9 @@ function draw(stockJsonData, update) {
                     },
                     symbol: 'none',
                     animation: false,
-                    // markPoint: {
-                    //     data: resultData.bcMACDValues
-                    // },
+                    markPoint: {
+                        // data: resultData.bcMACDValues
+                    },
                 },
                 {
                     name: 'DEA',
@@ -1130,38 +1130,38 @@ function splitData(jsonObj) {
     //     mmdValues.push(value);
     // }
     //
-    // var bcMACDValues = [];
-    // for (var i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
-    //     var value = {
-    //         coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
-    //         value: jsonObj.buyMACDBCData.value[i],
-    //         symbolRotate: 0,
-    //         symbol: 'pin',
-    //         itemStyle: {
-    //             normal: {color: 'green'}
-    //         }
-    //     };
-    //     bcMACDValues.push(value);
-    // }
-    // for (var i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
-    //     var value = {
-    //         coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
-    //         value: jsonObj.sellMACDBCData.value[i],
-    //         symbolRotate: -180,
-    //         symbol: 'pin',
-    //         itemStyle: {
-    //             normal: {color: 'red'}
-    //         },
-    //         label: {
-    //             position: 'inside',
-    //             offset: [0, 10],
-    //             textBorderColor: 'red',
-    //             textBorderWidth: 2,
-    //             color: 'white',
-    //         },
-    //     };
-    //     bcMACDValues.push(value);
-    // }
+    var bcMACDValues = [];
+    for (var i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
+        var value = {
+            coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
+            value: jsonObj.buyMACDBCData.value[i],
+            symbolRotate: -180,
+            symbol: 'pin',
+            itemStyle: {
+                normal: { color: 'red' }
+            }
+        };
+        bcMACDValues.push(value);
+    }
+    for (var i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
+        var value = {
+            coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
+            value: jsonObj.sellMACDBCData.value[i],
+            symbolRotate: 0,
+            symbol: 'pin',
+            itemStyle: {
+                normal: { color: 'green' }
+            },
+            label: {
+                position: 'inside',
+                offset: [0, 10],
+                textBorderColor: 'red',
+                textBorderWidth: 2,
+                color: 'white',
+            },
+        };
+        bcMACDValues.push(value);
+    }
     // 布林带
     // const fixLength = 5;
     // for (var i = 0; i < macddata.length; i++) {
@@ -1207,7 +1207,7 @@ function splitData(jsonObj) {
         // basicInfo: basicInfo,
         // concept: concept,
         // mmdValues: mmdValues,
-        // bcMACDValues: bcMACDValues,
+        bcMACDValues: bcMACDValues,
         // markLineData: markLineData,
     };
 }
