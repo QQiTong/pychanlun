@@ -76,7 +76,7 @@ class KlineProcess:
                 kline.middle = kline.start
                 # the new kline
                 self.klineList.append(kline)
-            elif high < lastkline.high and low > lastkline.low:
+            elif high <= lastkline.high and low >= lastkline.low:
                 # pre include
                 if lastkline.direction == 1:
                     lastkline.low = low
