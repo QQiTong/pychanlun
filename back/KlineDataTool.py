@@ -37,7 +37,7 @@ class KlineDataTool:
         if r.status_code == 200:
 
             json_r = r.json()
-            print("接口请求结果:", json_r)
+            # print("接口请求结果:", json_r)
             splitItem = json_r['ch'].split('.')
             if splitItem[1] != "BTC_CQ" or splitItem[3] != period:
                 # 求的参数和返回的参数不一致
@@ -46,7 +46,7 @@ class KlineDataTool:
                 # 3min需要合成
                 composeKline = ComposeKline()
                 kline3min = composeKline.compose(json_r['data'], 3)
-                print("合成的3分钟数据:", kline3min)
+                # print("合成的3分钟数据:", kline3min)
                 return kline3min
             return json_r['data']
         else:

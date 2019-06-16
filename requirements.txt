@@ -2,3 +2,4 @@ ta-lib
 flask
 pandas
 requests
+pydash
