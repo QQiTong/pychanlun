@@ -50,21 +50,44 @@ from back.Tools import Tools
 
 class Calc:
     def __init__(self):
-        #
+        # 火币dm接口参数 本级别和大级别映射
         self.levelMap = {
             '1min': '5min',
             '3min': '15min',
             '15min': '60min',
             '60min': '1day',
             '1day': '1week',
-
             '5min': '30min',
             '30min': '4hour',
             '4hour': '1week',
             '1week': '1week'
         }
+        # 聚宽期货接口参数 本级别和大级别映射
+        self.futureLevelMap = {
+            '1m': '5m',
+            '3m': '15m',
+            '15m': '60m',
+            '60m': '1d',
+            '1d': '1w',
+            '5m': '30m',
+            '30m': '1m',  # 需要合成 4hour
+            '4hour': '1w',  # 需要合成 4hour
+            '1w': '1w'
+        }
+        #     period参数转换
+        self.periodMap = {
+            '1min': '1m',
+            '3min': '1m',  # 需要合成
+            '15min': '15m',
+            '60min': '60m',
+            '1day': '1d',
+            '5min': '5m',
+            '30min': '30m',
+            '4hour': '4hour',  # 需要合成
+            '1week': '1w'
+        }
 
-    def calcData(self, kxType):
+    def calcData(self, kxType, symbol):
         klineList = []
 
         # def processKline():
@@ -77,11 +100,18 @@ class Calc:
         # base_dir = os.path.dirname(__file__)
         # data_str = open(os.path.join(base_dir, './klineData.json')).read()
         # jsonObj = json.loads(data_str)
-
         # 获取接口数据
         klineDataTool = KlineDataTool()
-        klineData = klineDataTool.getKlineData(kxType)
-        klineDataBigLevel = klineDataTool.getKlineData(self.levelMap[kxType])
+        # if symbol == 'BTC_CQ':
+        klineData = klineDataTool.getKlineData(kxType, 500)
+        klineDataBigLevel = klineDataTool.getKlineData(self.levelMap[kxType], 100)
+        # else:
+        #     # 期货
+        #     currentPeriod = self.periodMap[kxType]
+        #     klineData = klineDataTool.getFutureData(symbol, self.periodMap[kxType], 500)
+        #       if currentPeriod == '30m':
+        #       bigLevelPeriod = self.futureLevelMap[self.periodMap[kxType]]
+        #     klineDataBigLevel = klineDataTool.getFutureData(symbol, self.futureLevelMap[self.periodMap[kxType]], 100)
         # print("从接口到的数据", klineData)
         jsonObj = klineData
         jsonObjBigLevel = klineDataBigLevel

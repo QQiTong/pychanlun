@@ -3,6 +3,12 @@ $("#echarsZoomStart").val(55);
 
 var myChart = echarts.init(document.getElementById('main'));
 
+setTimeout(function (){
+    window.onresize = function () {
+        console.log('resize')
+        myChart.resize();
+    }
+},200);
 var bgColor = '#202529';
 var upColor = 'red';
 var upBorderColor = 'red';
@@ -84,13 +90,13 @@ if (fromIndex) {
 // draw(stockJsonData);
 refresh('refresh');
 
-// setInterval(() => {
-//     if(this.requestFlag){
-//         refresh('update')
-//     }else{
-//         // console.log('wait...')
-//     }
-// }, 5000);
+setInterval(() => {
+    if(this.requestFlag){
+        refresh('update')
+    }else{
+        // console.log('wait...')
+    }
+}, 5000);
 if (fromIndex) {
     fromIndex = !fromIndex;  //刷新后，就设置为false，首页进入的不读取是否收藏过状态
     // refresh();
@@ -160,6 +166,33 @@ function preNext(type) {
     }
 }
 
+function switchSymbol(symbol) {
+    let that = this;
+    that.requestFlag = false;
+
+    console.log("切换币种:",symbol)
+    $.ajax({
+        url: '/api/stock_data',
+        data: {'symbol':symbol,'kxType': $("#kxType").val()},
+        type: 'get',
+        success: function (data) {
+            that.requestFlag = true;
+            // $(".loading-style-4").hide();
+
+            var result = draw(data, 'refresh');
+            // if ($("#code").val().length > 0 && $("#code").val() != result.code) {
+            //     console.log('refresh....');
+            //     refresh()
+            // }
+        },
+        error:function (error) {
+            that.requestFlag = true;
+            // $(".loading-style-4").hide();
+
+        }
+    });
+
+}
 function draw(stockJsonData, update) {
     // const jsonObj = JSON.parse(stockJsonData);
     const resultData = splitData(stockJsonData);
@@ -831,6 +864,10 @@ function draw(stockJsonData, update) {
                         normal: {
                             color: function (params) {
                                 var colorList;
+                                // fix
+                                if(!resultData.values[params.dataIndex]){
+                                   return 'red'
+                                }
                                 if (resultData.values[params.dataIndex][1] > resultData.values[params.dataIndex][0]) {
                                     colorList = 'red';
                                 } else {
