@@ -1135,10 +1135,10 @@ function splitData(jsonObj) {
         var value = {
             coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
             value: jsonObj.buyMACDBCData.value[i],
-            symbolRotate: -180,
+            symbolRotate: 0,
             symbol: 'pin',
             itemStyle: {
-                normal: { color: 'red' }
+                normal: { color: 'green' }
             }
         };
         bcMACDValues.push(value);
@@ -1147,10 +1147,10 @@ function splitData(jsonObj) {
         var value = {
             coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
             value: jsonObj.sellMACDBCData.value[i],
-            symbolRotate: 0,
+            symbolRotate: -180,
             symbol: 'pin',
             itemStyle: {
-                normal: { color: 'green' }
+                normal: { color: 'red' }
             },
             label: {
                 position: 'inside',
