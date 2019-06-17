@@ -84,13 +84,13 @@ if (fromIndex) {
 // draw(stockJsonData);
 refresh('refresh');
 
-// setInterval(() => {
-//     if(this.requestFlag){
-//         refresh('update')
-//     }else{
-//         // console.log('wait...')
-//     }
-// }, 5000);
+setInterval(() => {
+    if(this.requestFlag){
+        refresh('update')
+    }else{
+        // console.log('wait...')
+    }
+}, 10000);
 if (fromIndex) {
     fromIndex = !fromIndex;  //刷新后，就设置为false，首页进入的不读取是否收藏过状态
     // refresh();
@@ -163,6 +163,8 @@ function preNext(type) {
 function switchSymbol(symbol) {
     let that = this;
     that.requestFlag = false;
+    //每次切换都重置成三分钟
+    $("#kxType").val('3min')
 
     console.log("切换币种:",symbol)
     $.ajax({
