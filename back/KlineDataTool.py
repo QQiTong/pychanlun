@@ -65,7 +65,7 @@ class KlineDataTool:
 
         df = get_bars(symbol, size, unit=period, fields=['date', 'open', 'high', 'low', 'close', 'volume'],
                       include_now=True, end_dt=datetime.now())
-        print(df)
+        # print(df)
         nparray = np.array(df)
         npKlineList = nparray.tolist()
         klineList = []
@@ -77,10 +77,10 @@ class KlineDataTool:
             item['open'] = npKlineList[i][1]
             item['high'] = npKlineList[i][2]
             item['low'] = npKlineList[i][3]
-            item['show'] = npKlineList[i][4]
+            item['close'] = npKlineList[i][4]
             item['amount'] = npKlineList[i][5]
             klineList.append(item)
-            print("item->", item)
+            # print("item->", item)
         print("期货k线结果:", klineList)
         composeKline = ComposeKline()
         if target == 3 :

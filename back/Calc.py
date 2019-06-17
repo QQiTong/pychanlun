@@ -104,16 +104,18 @@ class Calc:
         # jsonObj = json.loads(data_str)
         # 获取接口数据
         klineDataTool = KlineDataTool()
-        # if symbol == 'BTC_CQ':
-        klineData = klineDataTool.getKlineData(kxType, 500)
-        klineDataBigLevel = klineDataTool.getKlineData(self.levelMap[kxType], 100)
-        # else:
-        #     # 期货
-        #     currentPeriod = self.periodMap[kxType]
-        #     klineData = klineDataTool.getFutureData(symbol, self.periodMap[kxType], 500)
-        #       if currentPeriod == '30m':
-        #       bigLevelPeriod = self.futureLevelMap[self.periodMap[kxType]]
-        #     klineDataBigLevel = klineDataTool.getFutureData(symbol, self.futureLevelMap[self.periodMap[kxType]], 100)
+        if symbol == 'BTC_CQ':
+            klineData = klineDataTool.getKlineData(kxType, 500)
+            klineDataBigLevel = klineDataTool.getKlineData(self.levelMap[kxType], 100)
+        else:
+            # 期货
+            currentPeriod = self.periodMap[kxType]
+            klineData = klineDataTool.getFutureData(symbol, currentPeriod, 500)
+            if currentPeriod == '30m':
+                bigLevelPeriod = '4hour'
+            else:
+                bigLevelPeriod = self.futureLevelMap[self.periodMap[kxType]]
+            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 100)
         # print("从接口到的数据", klineData)
         jsonObj = klineData
         jsonObjBigLevel = klineDataBigLevel
@@ -175,7 +177,6 @@ class Calc:
             biResult[item.klineList[-1].middle] = item.direction
             for j in range(item.start + 1, item.end + 1):
                 directionList[j] = item.direction
-
 
         # print("笔结果:", len(biProcess.biList), biResult)
 
