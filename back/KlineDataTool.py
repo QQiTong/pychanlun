@@ -30,7 +30,11 @@ class KlineDataTool:
             target = 3
         para = {"period": period, "size": size, "symbol": "BTC_CQ"}
         header = {}
+        startTime = datetime.now()
+
         r = requests.get(hbdmUrl, params=para, headers=header, )
+        endTime = datetime.now() - startTime
+        print("耗时:", endTime)
         # verify=True适用于服务端的ssl证书验证，verify=False为关闭ssl验证
         # print('get请求获取的响应结果json类型', r.text)
         # print("get请求获取响应头", r.headers['Content-Type'])
@@ -54,39 +58,33 @@ class KlineDataTool:
 
     def getFutureData(self, symbol, period, size):
         # 聚宽数据源
+        startTime = datetime.now()
         print("可调用条数:", get_query_count())
-        target = 0
-        if period == '4hour':
-           period = '1m'
-           target = 4  # 合成240分钟
-        if period == '3m':
-           period = '1m'
-           target = 3  # 合成3分钟
-
-        df = get_bars(symbol, size, unit=period, fields=['date', 'open', 'high', 'low', 'close', 'volume'],
-                      include_now=True, end_dt=datetime.now())
-        # print(df)
+        # df = get_bars(symbol, size, unit=period, fields=['date', 'open', 'high', 'low', 'close', 'volume'],
+        #               include_now=True, end_dt=datetime.now())
+        df = get_price(symbol, frequency=period, end_date=datetime.now(), count=size,
+        fields = ['open', 'high', 'low', 'close', 'volume'])
+        # df = get_price('RB1910.XSGE', frequency='240m', end_date=datetime.now(), count=200,
+        #                fields=['open', 'high', 'low', 'close', 'volume'])
         nparray = np.array(df)
         npKlineList = nparray.tolist()
+        # npIndexList = pd.to_numeric(df.index) // 1000000000
         klineList = []
 
         for i in range(len(npKlineList)):
-            timeStamp = int(time.mktime(npKlineList[i][0].timetuple()))
+            # timeStamp = int(time.mktime(npKlineList[i][0].timetuple()))
+            timeStamp = int(time.mktime(df.index[i].timetuple()))
             item = {}
             item['id'] = timeStamp
-            item['open'] = npKlineList[i][1]
-            item['high'] = npKlineList[i][2]
-            item['low'] = npKlineList[i][3]
-            item['close'] = npKlineList[i][4]
-            item['amount'] = npKlineList[i][5]
+            item['open'] = 0 if pd.isna(npKlineList[i][0]) else npKlineList[i][0]
+            item['high'] = 0 if pd.isna(npKlineList[i][1]) else npKlineList[i][1]
+            item['low'] = 0 if pd.isna(npKlineList[i][2]) else npKlineList[i][2]
+            item['close'] = 0 if pd.isna(npKlineList[i][3]) else npKlineList[i][3]
+            item['amount'] = 0 if pd.isna(npKlineList[i][4]) else npKlineList[i][4]
             klineList.append(item)
             # print("item->", item)
-        print("期货k线结果:", klineList)
-        composeKline = ComposeKline()
-        if target == 3 :
-            kline3min = composeKline.compose(klineList, 3)
-            return kline3min
-        if target == 4 :
-            kline240min = composeKline.compose(klineList, 240)
-            return kline240min
+        # print("期货k线结果:", klineList)
+        # endTime = datetime.now() - startTime
+        # print("函数时间", endTime)
+
         return klineList

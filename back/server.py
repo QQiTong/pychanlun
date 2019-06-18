@@ -24,7 +24,7 @@ def data():
 
 if __name__ == '__main__':
     print("启动服务------------------")
-    # auth('13088887055', 'chanlun123456')
-    app.run(debug=True)
+    auth('13088887055', 'chanlun123456')
+    app.run()
     # 服务启动的时候 登录聚宽
 

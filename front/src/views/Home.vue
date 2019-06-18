@@ -2,41 +2,54 @@
     <!--    <div class="main" id="main">-->
     <!--    </div>-->
     <div class="main">
-<!--        <div class="switchContainer">-->
-<!--            <div class="furtureTab">-->
-<!--                <H4>期货</H4>-->
-<!--                &lt;!&ndash;            上期所&ndash;&gt;-->
-<!--                <a onclick="switchSymbol('RB9999.XSGE')" class="bold">螺纹RB</a>-->
-<!--                <a onclick="switchSymbol('HC9999.XSGE')">热卷HC</a>-->
-<!--                <a onclick="switchSymbol('RU9999.XSGE')">橡胶RU</a>-->
-<!--                <a onclick="switchSymbol('NI9999.XSGE')">沪镍NI</a>-->
-<!--                <a onclick="switchSymbol('FU9999.XSGE')">燃油FU</a>-->
-<!--                <a onclick="switchSymbol('ZN9999.XSGE')">沪锌ZN</a>-->
-<!--                <a onclick="switchSymbol('SP9999.XSGE')">纸浆</a>-->
-<!--                &lt;!&ndash;            郑商所&ndash;&gt;-->
-<!--                <a onclick="switchSymbol('MA9999.XZCE')" class="bold">甲醇MA</a>-->
-<!--                <a onclick="switchSymbol('SR9999.XZCE')">白糖SR</a>-->
-<!--                <a onclick="switchSymbol('AP9999.XZCE')">苹果AP</a>-->
-<!--                &lt;!&ndash;            大商所&ndash;&gt;-->
-<!--                <a onclick="switchSymbol('J9999.XDCE')" class="bold">焦炭J</a>-->
-<!--                <a onclick="switchSymbol('JM9999.XDCE')">焦煤JM</a>-->
-<!--                <a onclick="switchSymbol('PP9999.XDCE')">聚丙烯PP</a>-->
-<!--            </div>-->
-<!--            <div class="coinTab">-->
-<!--                <H4>数字货币</H4>-->
-<!--                <a onclick="switchSymbol('BTC_CQ')" class="bold">BTC</a>-->
-<!--            </div>-->
-<!--        </div>-->
-        <div class="echarts">
-            <v-chart :options="option" autoresize></v-chart>
+        <!--合约切换区域        -->
+        <div class="left">
+            <div class="switchContainer">
+                <div class="furtureTab">
+                    <div class="symbol-title">期货</div>
+                    <!--            上期所-->
+                    <div class="symbol-list">
+                        <a @click="switchSymbol('RB1910.XSGE')" class="bold symbol-item">螺纹RB</a>
+                        <a @click="switchSymbol('HC9999.XSGE')" class="symbol-item">热卷HC</a>
+                        <a @click="switchSymbol('RU9999.XSGE')" class="symbol-item">橡胶RU</a>
+                        <a @click="switchSymbol('NI9999.XSGE')" class="symbol-item">沪镍NI</a>
+                        <a @click="switchSymbol('FU9999.XSGE')" class="symbol-item">燃油FU</a>
+                        <a @click="switchSymbol('ZN9999.XSGE')" class="symbol-item">沪锌ZN</a>
+                        <a @click="switchSymbol('SP9999.XSGE')" class="symbol-item">纸浆SP</a>
+                        <!--            郑商所-->
+                        <a @click="switchSymbol('MA9999.XZCE')" class="bold symbol-item">甲醇MA</a>
+                        <a @click="switchSymbol('SR9999.XZCE')" class="symbol-item">白糖SR</a>
+                        <a @click="switchSymbol('AP9999.XZCE')" class="symbol-item">苹果AP</a>
+                        <!--            大商所-->
+                        <a @click="switchSymbol('J9999.XDCE')" class="bold symbol-item">焦炭J</a>
+                        <a @click="switchSymbol('JM9999.XDCE')" class="symbol-item">焦煤JM</a>
+                        <a @click="switchSymbol('PP9999.XDCE')" class="symbol-item">聚丙烯PP</a>
+                    </div>
+
+                </div>
+                <div class="coinTab">
+                    <div class="symbol-title">数字货币</div>
+                    <div class="symbol-list">
+                        <a @click="switchSymbol('BTC_CQ')" class="bold symbol-item">BTC</a>
+                    </div>
+
+                </div>
+            </div>
         </div>
-        <div class="loading-anim" v-show="showAnim">
-            <div class="loader-inner"></div>
-            <div class="loader-inner"></div>
-            <div class="loader-inner"></div>
-            <div class="loader-inner"></div>
-            <div class="loader-inner"></div>
+        <!--图表显示区域        -->
+        <div class="right">
+            <div class="echarts">
+                <v-chart :options="option" autoresize></v-chart>
+            </div>
+            <div class="loading-anim" v-show="showAnim">
+                <div class="loader-inner"></div>
+                <div class="loader-inner"></div>
+                <div class="loader-inner"></div>
+                <div class="loader-inner"></div>
+                <div class="loader-inner"></div>
+            </div>
         </div>
+
     </div>
 </template>
 
@@ -66,6 +79,7 @@
         },
         data() {
             return {
+                //控制动画和防重复请求
                 showAnim: true,
                 // myChart: null,
                 option: {},
@@ -77,8 +91,10 @@
                     downBorderColor: '#14d0cd'
                 },
                 //品种
-                symbol: "BTC_CQ",
-                period: "1min",
+                // symbol: "BTC_CQ",
+                // period: "1min",
+                symbol: "RB1910.XSGE",
+                period: "1day",
                 //1 重新渲染 2 更新,
                 refreshOrUpdate: 1,
                 dataTitle: "主标题",
@@ -98,11 +114,20 @@
                 resultData: {},
                 // 缩放比例
                 zoomStart: 55,
+                timer: null
             }
         },
         mounted() {
-            console.log("图片", this.periodIcons[0]);
-            this.getStockData()
+            this.getStockData();
+            // this.timer = setInterval(() => {
+            //     this.refreshOrUpdate = 2;
+            //     if (!this.showAnim) {
+            //         console.log("发出请求---")
+            //         this.getStockData()
+            //     } else {
+            //         console.log("拦截重复请求---")
+            //     }
+            // }, 10 * 1000)
         },
         beforeDestroy() {
             // if (!this.myChart) {
@@ -113,19 +138,23 @@
             // this.myChart = null;
         },
         methods: {
+            switchSymbol(symbol) {
+                this.symbol = symbol;
+                this.getStockData()
+            },
             getStockData() {
                 this.showAnim = true;
                 // 恢复缩放比例
-                if (JSON.stringify(this.option) !== "{}") {
-                    this.zoomStart = this.option.dataZoom[0].start;
-                }
+                // if (JSON.stringify(this.option) !== "{}") {
+                //     this.zoomStart = this.option.dataZoom[0].start;
+                // }
                 let requestData = {
                     symbol: this.symbol,
                     period: this.period
                 };
                 userApi.stockData(requestData).then(res => {
                     this.showAnim = false;
-                    console.log("结果:", res);
+                    // console.log("结果:", res);
 
                     this.dataTitle = this.symbol;
                     this.dataSubTitle = this.period;
@@ -139,35 +168,34 @@
             //
             draw(stockJsonData) {
                 let resultData = this.splitData(stockJsonData);
-                console.log("当前类型", this.refreshOrUpdate);
+                // console.log("当前类型", this.refreshOrUpdate);
                 if (this.refreshOrUpdate === 2) {
-                    // //    更新charts
-                    // option = this.myChart.getOption();
-                    // option.series[0].data = resultData.values;
-                    // option.series[0].markArea.data = resultData.zsvalues;
-                    // option.series[1].data = resultData.biValues;
-                    // option.series[2].data = resultData.duanValues;
-                    // option.series[3].data = this.calculateMA(resultData, 5);
-                    // option.series[4].data = this.calculateMA(resultData, 10);
-                    // option.series[5].data = resultData.macd;
-                    // option.series[6].data = resultData.diff;
-                    // option.series[7].data = resultData.dea;
-                    //
-                    // option.series[8].data = resultData.macdBigLevel;
-                    // option.series[9].data = resultData.diffBigLevel;
-                    // option.series[10].data = resultData.deaBigLevel;
-                    //
-                    // option.series[11].data = resultData.volume;
-                    //
-                    //
-                    // option.xAxis[0].data = resultData.time;
-                    // option.xAxis[1].data = resultData.time;
-                    // option.xAxis[2].data = resultData.timeBigLevel;
-                    // option.xAxis[3].data = resultData.time;
+                    //    更新charts
+                    console.log("更新");
+                    this.option.series[0].data = resultData.values;
+                    this.option.series[0].markArea.data = resultData.zsvalues;
+                    this.option.series[1].data = resultData.biValues;
+                    this.option.series[2].data = resultData.duanValues;
+                    this.option.series[3].data = this.calculateMA(resultData, 5);
+                    this.option.series[4].data = this.calculateMA(resultData, 10);
+                    this.option.series[5].data = resultData.macd;
+                    this.option.series[6].data = resultData.diff;
+                    this.option.series[7].data = resultData.dea;
+
+                    this.option.series[8].data = resultData.macdBigLevel;
+                    this.option.series[9].data = resultData.diffBigLevel;
+                    this.option.series[10].data = resultData.deaBigLevel;
+
+                    this.option.series[11].data = resultData.volume;
+
+
+                    this.option.xAxis[0].data = resultData.time;
+                    this.option.xAxis[1].data = resultData.time;
+                    this.option.xAxis[2].data = resultData.timeBigLevel;
+                    this.option.xAxis[3].data = resultData.time;
                 } else {
                     console.log("重载");
                     //    重载echarts
-                    let downColor = this.echartsConfig.downColor;
                     this.option = {
                         backgroundColor: this.echartsConfig.bgColor,
                         title: {

@@ -9,6 +9,7 @@ import talib as ta
 from flask import make_response
 import copy
 import pydash
+from datetime import datetime
 
 from back.KlineDataTool import KlineDataTool
 from back.ZhongShuProcess import ZhongShuProcess
@@ -70,23 +71,23 @@ class Calc:
             '3m': '15m',
             '15m': '60m',
             '60m': '1d',
-            '1d': '1w',
+            '1d': '7d',
             '5m': '30m',
-            '30m': '1m',  # 需要合成 4hour
-            '4hour': '1w',  # 需要合成 4hour
-            '1w': '1w'
+            '30m': '240m',
+            '240m': '5d',
+            '5d': '5d'
         }
         #     period参数转换
         self.periodMap = {
             '1min': '1m',
-            '3min': '1m',  # 需要合成
+            '3min': '3m',
             '15min': '15m',
             '60min': '60m',
             '1day': '1d',
             '5min': '5m',
             '30min': '30m',
-            '4hour': '4hour',  # 需要合成
-            '1week': '1w'
+            '4hour': '240m',
+            '1week': '5d'
         }
 
     def calcData(self, kxType, symbol):
@@ -110,12 +111,9 @@ class Calc:
         else:
             # 期货
             currentPeriod = self.periodMap[kxType]
-            klineData = klineDataTool.getFutureData(symbol, currentPeriod, 500)
-            if currentPeriod == '30m':
-                bigLevelPeriod = '4hour'
-            else:
-                bigLevelPeriod = self.futureLevelMap[self.periodMap[kxType]]
-            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 100)
+            klineData = klineDataTool.getFutureData(symbol, currentPeriod, 200)
+            bigLevelPeriod = self.futureLevelMap[currentPeriod]
+            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 40)
         # print("从接口到的数据", klineData)
         jsonObj = klineData
         jsonObjBigLevel = klineDataBigLevel
