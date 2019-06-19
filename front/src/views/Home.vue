@@ -30,7 +30,7 @@
                 <div class="coinTab">
                     <div class="symbol-title">数字货币</div>
                     <div class="symbol-list">
-                        <a @click="switchSymbol('BTC_CQ')" class="bold symbol-item">BTC</a>
+                        <a @click="switchSymbol('XBTUSD')" class="bold symbol-item">BTC</a>
                     </div>
 
                 </div>
