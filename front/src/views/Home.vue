@@ -140,6 +140,7 @@
         methods: {
             switchSymbol(symbol) {
                 this.symbol = symbol;
+                this.refreshOrUpdate = 1
                 this.getStockData()
             },
             getStockData() {
