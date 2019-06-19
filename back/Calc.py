@@ -54,6 +54,19 @@ from back.beichi import calcBeichi
 class Calc:
     def __init__(self):
         # 火币dm接口参数 本级别和大级别映射
+        # 火币深度不够,无法容纳大资金
+        # self.levelMap = {
+        #     '1min': '5min',
+        #     '3min': '15min',
+        #     '15min': '60min',
+        #     '60min': '1day',
+        #     '1day': '1week',
+        #     '5min': '30min',
+        #     '30min': '4hour',
+        #     '4hour': '1week',
+        #     '1week': '1week'
+        # }
+        # bitmex 小级别大级别映射
         self.levelMap = {
             '1min': '5min',
             '3min': '15min',
@@ -65,6 +78,19 @@ class Calc:
             '4hour': '1week',
             '1week': '1week'
         }
+        #  bitmex 参数转换
+        self.bitmexPeriodMap = {
+            '1min': '1m',
+            '3min': '3m',
+            '15min': '15m',
+            '60min': '1h',
+            '1day': '1d',
+            '5min': '5m',
+            '30min': '30m',
+            '4hour': '240m',
+            '1week': '7d'
+        }
+
         # 聚宽期货接口参数 本级别和大级别映射
         self.futureLevelMap = {
             '1m': '5m',
@@ -90,7 +116,7 @@ class Calc:
             '1week': '5d'
         }
 
-    def calcData(self, kxType, symbol):
+    def calcData(self, period, symbol):
         klineList = []
 
         # def processKline():
@@ -105,12 +131,12 @@ class Calc:
         # jsonObj = json.loads(data_str)
         # 获取接口数据
         klineDataTool = KlineDataTool()
-        if symbol == 'BTC_CQ':
-            klineData = klineDataTool.getKlineData(kxType, 500)
-            klineDataBigLevel = klineDataTool.getKlineData(self.levelMap[kxType], 100)
+        if symbol == 'XBTUSD':
+            klineData = klineDataTool.getKlineData(self.bitmexPeriodMap[period], 500)
+            klineDataBigLevel = klineDataTool.getKlineData(self.bitmexPeriodMap[self.levelMap[period]], 100)
         else:
             # 期货
-            currentPeriod = self.periodMap[kxType]
+            currentPeriod = self.periodMap[period]
             klineData = klineDataTool.getFutureData(symbol, currentPeriod, 200)
             bigLevelPeriod = self.futureLevelMap[currentPeriod]
             klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 40)
@@ -132,13 +158,13 @@ class Calc:
         for i in range(len(jsonObjBigLevel)):
             item = jsonObjBigLevel[i]
             closeListBigLevel.append(round(float(item['close']), 2))
-            localTime = time.localtime(item['id'])
+            localTime = time.localtime(item['time'])
             strTime = time.strftime("%m-%d %H:%M", localTime)
             timeListBigLevel.append(strTime)
 
         for i in range(len(jsonObj)):
             item = jsonObj[i]
-            localTime = time.localtime(item['id'])
+            localTime = time.localtime(item['time'])
             strTime = time.strftime("%m-%d %H:%M", localTime)
             highList.append(round(float(item['high']), 2))
             lowList.append(round(float(item['low']), 2))
@@ -146,7 +172,7 @@ class Calc:
             openPriceList.append(round(float(item['open']), 2))
             closePriceList.append(round(float(item['close']), 2))
             timeList.append(strTime)
-            volumeList.append(round(float(item['amount']), 2))
+            volumeList.append(round(float(item['volume']), 2))
 
         # K线所在笔的方向
         directionList = [0 for i in range(len(timeList))]

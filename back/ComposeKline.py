@@ -13,7 +13,7 @@ class ComposeKline:
     def timeFilter(self, records, since, to=1000000000000000):
         bars = []
         for i in records:
-            if i['id'] >= since and i['id'] <= to:
+            if i['time'] >= since and i['time'] <= to:
                 bars.append(i)
 
         return bars
@@ -25,8 +25,8 @@ class ComposeKline:
             return []
 
         period_ms = period * 60  # 以秒记的K线周期
-        end_in = records[len(records) - 1]['id']  # K线的结束时间
-        start_at = records[0]['id']  # K线的开始时间
+        end_in = records[len(records) - 1]['time']  # K线的结束时间
+        start_at = records[0]['time']  # K线的开始时间
 
         # 获得可以用于计算目标K线的开始时间
         r_offest = start_at % period_ms
@@ -45,7 +45,7 @@ class ComposeKline:
             except IndexError:
                 continue
             # 初始化新的Bar
-            Time = bars[0]['id']
+            Time = bars[0]['time']
             Open = bars[0]['open']
             High = bars[0]['high']
             Low = bars[0]['low']
@@ -55,16 +55,16 @@ class ComposeKline:
                 High = max(High, item['high'])
                 Low = min(Low, item['low'])
                 Close = item['close']
-                Amount += item['amount']
+                Amount += item['volume']
 
             # 将Bar添加添加到新的K线中
             n_records.append(dict({
-                'id': Time,
+                'time': Time,
                 'open': Open,
                 'high': High,
                 'low': Low,
                 'close': Close,
-                'amount': Amount
+                'volume': Amount
             }))
 
         return n_records
@@ -75,12 +75,12 @@ class ComposeKline:
         for i in range(len(src)):
             item = src[i]
             newItem = {}
-            newItem['amount'] = round(float(item['amount']), 2)
+            newItem['volume'] = round(float(item['volume']), 2)
             newItem['open'] = round(float(item['open']), 2)
             newItem['high'] = round(float(item['high']), 2)
             newItem['low'] = round(float(item['low']), 2)
             newItem['close'] = round(float(item['close']), 2)
-            newItem['id'] = item['id']
+            newItem['time'] = item['time']
             klineList.append(newItem)
 
         result = self.calcRecords(klineList, target)

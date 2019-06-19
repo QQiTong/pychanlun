@@ -91,8 +91,10 @@
                     downBorderColor: '#14d0cd'
                 },
                 //品种
-                symbol: "BTC_CQ",
+                symbol: "XBTUSD",
                 period: "1min",
+                // symbol: "BTC_CQ",
+                // period: "1min",
                 // symbol: "RB1910.XSGE",
                 // period: "1day",
                 //1 重新渲染 2 更新,
@@ -119,15 +121,15 @@
         },
         mounted() {
             this.getStockData();
-            this.timer = setInterval(() => {
-                this.refreshOrUpdate = 2;
-                if (!this.showAnim) {
-                    console.log("发出请求---")
-                    this.getStockData()
-                } else {
-                    console.log("拦截重复请求---")
-                }
-            }, 10 * 1000)
+            // this.timer = setInterval(() => {
+            //     this.refreshOrUpdate = 2;
+            //     if (!this.showAnim) {
+            //         console.log("发出请求---")
+            //         this.getStockData()
+            //     } else {
+            //         console.log("拦截重复请求---")
+            //     }
+            // }, 10 * 1000)
         },
         beforeDestroy() {
             // if (!this.myChart) {

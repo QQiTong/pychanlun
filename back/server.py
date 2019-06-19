@@ -16,9 +16,9 @@ def hello():
 @app.route('/api/stock_data')
 def data():
     calc = Calc()
-    kxType = request.args.get("kxType") or "1min"
-    symbol = request.args.get("symbol") or "BTC_CQ"
-    result = calc.calcData(kxType, symbol)
+    period = request.args.get("period") or "1min"
+    symbol = request.args.get("symbol") or "XBTUSD"
+    result = calc.calcData(period, symbol)
     return Response(json.dumps(result), mimetype='application/json')
 
 
