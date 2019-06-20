@@ -12,4 +12,12 @@ export const userApi = {
             data: data
         })
     },
+    saveStockData(data) {
+        let url = `/api/save_stock_data?period=${data.period}&symbol=${data.symbol}`;
+        return axios({
+            url: url,
+            method: 'get',
+            data: data
+        })
+    },
 }

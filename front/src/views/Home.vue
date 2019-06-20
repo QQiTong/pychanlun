@@ -34,6 +34,7 @@
                     </div>
 
                 </div>
+                <div class="save-kline" @click="saveKline">保存K线</div>
             </div>
         </div>
         <!--图表显示区域        -->
@@ -129,7 +130,7 @@
             //     } else {
             //         console.log("拦截重复请求---")
             //     }
-            // }, 10 * 1000)
+            // }, 20 * 1000)
         },
         beforeDestroy() {
             // if (!this.myChart) {
@@ -140,6 +141,24 @@
             // this.myChart = null;
         },
         methods: {
+            saveKline(){
+                let requestData = {
+                    symbol: this.symbol,
+                    period: this.period
+                };
+                userApi.saveStockData(requestData).then(res => {
+                    this.showAnim = false;
+                    // console.log("结果:", res);
+
+                    this.dataTitle = this.symbol;
+                    this.dataSubTitle = this.period;
+                    //todo 判断请求和返回的symbol 是否一致
+                    this.draw(res)
+                }).catch(() => {
+                    this.showAnim = false;
+
+                });
+            },
             switchSymbol(symbol) {
                 this.symbol = symbol;
                 this.refreshOrUpdate = 1
@@ -149,6 +168,7 @@
                 this.showAnim = true;
                 // 恢复缩放比例
                 // if (JSON.stringify(this.option) !== "{}") {
+                //     console.log("恢复zoom")
                 //     this.zoomStart = this.option.dataZoom[0].start;
                 // }
                 let requestData = {
@@ -847,35 +867,6 @@
                     };
 
                 }
-                // this.option = {
-                //     xAxis: {
-                //         type: 'category',
-                //         data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                //     },
-                //     yAxis: {
-                //         type: 'value'
-                //     },
-                //     series: [{
-                //         data: [820, 932, 901, 934, 1290, 1330, 1320],
-                //         type: 'line',
-                //         smooth: true
-                //     }]
-                // }
-                // todo 加载普通图标不会卡死
-                // this.myChart.setOption({
-                //     title: {text: 'ECharts 入门示例'},
-                //     tooltip: {},
-                //     xAxis: {
-                //         data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
-                //     },
-                //     yAxis: {},
-                //     series: [{
-                //         name: '销量',
-                //         type: 'bar',
-                //         data: [5, 20, 36, 10, 10, 20]
-                //     }]
-                // });
-                // this.myChart.setOption(option);
             },
             splitData(jsonObj) {
                 const stockDate = jsonObj.date;
