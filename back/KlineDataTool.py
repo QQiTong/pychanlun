@@ -21,123 +21,101 @@ bitmexUrl = "https://www.bitmex.com/api/v1/trade/bucketed"
 # sinaUrl = "http://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesMiniKLineXm?symbol=CODE"
 
 class KlineDataTool:
-    # 废弃
-    # def getKlineData(self, period, size):
-    #     # 3min 和 1week 的火币dm没有提供,需要合成
-    #
-    #     target = 0
-    #     if period == '3min':
-    #         period = '1min'
-    #         target = 3
-    #     para = {"period": period, "size": size, "symbol": "BTC_CQ"}
-    #     header = {}
-    #     startTime = datetime.now()
-    #
-    #     r = requests.get(hbdmUrl, params=para, headers=header, )
-    #     endTime = datetime.now() - startTime
-    #     print("耗时:", endTime)
-    #     # verify=True适用于服务端的ssl证书验证，verify=False为关闭ssl验证
-    #     # print('get请求获取的响应结果json类型', r.text)
-    #     # print("get请求获取响应头", r.headers['Content-Type'])
-    #     if r.status_code == 200:
-    #
-    #         json_r = r.json()
-    #         # print("接口请求结果:", json_r)
-    #         splitItem = json_r['ch'].split('.')
-    #         if splitItem[1] != "BTC_CQ" or splitItem[3] != period:
-    #             # 求的参数和返回的参数不一致
-    #             return
-    #         if target == 3:
-    #             # 3min需要合成
-    #             composeKline = ComposeKline()
-    #             kline3min = composeKline.compose(json_r['data'], 3)
-    #             # print("合成的3分钟数据:", kline3min)
-    #             return kline3min
-    #         return json_r['data']
-    #     else:
-    #         print("接口请求出错!")
 
-    def getKlineData(self, period, size):
-        # 3m,15m,30m,240m 用pandas合成
-
+    def getBtcData(self, period, isBigLevel):
+        url = "https://www.bitmex.com/api/udf/history"
+        dtime = datetime.now()
+        toDate = int(time.mktime(dtime.timetuple()))
         target = 0
-        if period == '3min' or period == '3m':
-            period = '1m'
+        fromDate = 0
+        # 最大是10080 ,但是数量大了前端会卡顿
+        if period == "1m":
+            period = '1'
+            fromDate = toDate - 24 * 60 * 60
+        elif period == "3m":
+            period = '1'
             target = 3
-            size = 750
-        #     因为最大只能请求750条数据导致 k线导致合成出来的数据太少
-        #  todo 15,30,240,分钟数据量太小
-        elif period == '15min' or period == '15m':
-            period = '1m'
+            fromDate = toDate - 24 * 60 * 60 * 3
+        elif period == "5m":
+            period = '5'
+
+            fromDate = toDate - (1000 * 5 * 60) / 5 if isBigLevel else toDate - 1000 * 5 * 60
+        elif period == "15m":
+            period = '1'
             target = 15
-            size = 750
-        elif period == '30min' or period == '30m':
-            period = '1m'
+            fromDate = toDate - (10080 * 60) / 5 if isBigLevel else toDate - 2000 * 5 * 60
+
+        elif period == "30m":
+            period = '1'
             target = 30
-            size = 750
-        elif period == '240min' or period == '240m':
-            period = '1m'
+            fromDate = toDate - (10080 * 60) / 5 if isBigLevel else toDate - 2000 * 5 * 60
+        elif period == "60m":
+            period = '60'
+            fromDate = toDate - (1000 * 60 * 60) / 5 if isBigLevel else toDate - 10 * 1000 * 5 * 60
+        elif period == "240m":
+            period = '1'
             target = 240
-            size = 750
+            fromDate = toDate - (10080 * 60) / 5 if isBigLevel else toDate - 1000 * 5 * 60
+        elif period == '1d':
+            period = 'D'
+            fromDate = toDate - (1440 * 24 * 60 * 60) / 5 if isBigLevel else toDate - 1000 * 60 * 60 * 24
         elif period == '7d':
-            period = '1d'
+            period = 'D'
             target = 7
-            size = 750
-        para = {
-            "binSize": period,  # 时间周期，可选参数包括1m,5m,1h,1d
-            'partial': 'true',  # 是否返回未完成的K线
-            "symbol": "XBTUSD",  # 合约类型，如永续合约:XBTUSD
-            "count": size,  # 返回K线的条数
-            'reverse': 'true',  # 是否显示最近的数据，即按时间降序排列
-            'endTime': datetime.now()  # 结束时间，格式：2018-07-23T00:00:00.000Z
-            # 'startTime':startTime #开始时间，格式：2018-06-23T00:00:00.000Z
+            fromDate = toDate - (1440 * 24 * 60 * 60) / 5 if isBigLevel else toDate - 1000 * 5 * 60 * 24
+
+        payload = {
+            'resolution': period,
+            'symbol': 'XBTUSD',  # 合约类型，如永续合约:XBTUSD
+            'from': fromDate,
+            'to': toDate
         }
-        header = {}
+        header = {"accept": "*/*", "accept-encoding": "gzip, deflate, br",
+                  "accept-language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+                  "origin": "https://static.bitmex.com",
+                  "referer": "https://static.bitmex.com/",
+                  }
         startTime = datetime.now()
-        r = requests.get(bitmexUrl, params=para, headers=header, )
+        r = requests.get(url, params=payload, headers=header, )
         endTime = datetime.now() - startTime
-        print("bitmex耗时:", endTime)
-        # verify=True适用于服务端的ssl证书验证，verify=False为关闭ssl验证
-        # print('get请求获取的响应结果json类型', r.text)
-        # print("get请求获取响应头", r.headers['Content-Type'])
-        if r.status_code == 200:
-            klines = r.json()
-            print("bitmex耗时返回的结果:", klines)
-
-            return self.procesKlineData(klines, target)
-        else:
-            print("接口请求出错!")
-
-    #  合成k线 type 合成几分钟的
-    def procesKlineData(self, klines, target):
-        klines.reverse()
-        timeList = []
+        print("bitmex接口花费时间:", endTime, datetime.now(), r)
+        klines = json.loads(r.text)
+        print(len(klines['o']))
         newKlineList = []
-        for kline in klines:
-            timeStr = kline['timestamp'].split('.')[0]
-            timeStr = timeStr.replace("T", " ")
-            timeArray = time.strptime(timeStr, "%Y-%m-%d %H:%M:%S")
-            timeStamp = int(time.mktime(timeArray)) + 8 * 3600
-            #  pandas 需要字符串格式的时间
-            dateArray = datetime.utcfromtimestamp(timeStamp)
-            otherStyleTime = dateArray.strftime("%Y-%m-%d %H:%M:%S")
-            timeList.append(otherStyleTime)
-            newItem = {
-                "open": kline['open'],
-                "high": kline['high'],
-                "low": kline['low'],
-                "close": kline['close'],
-                "time": timeStamp,
-                "volume": kline['volume']
-            }
-            newKlineList.append(newItem)
-        df = pd.DataFrame(klines, index=timeList, columns=['open', 'high', 'low', 'close', 'volume'])
-        print(df, timeList)
+        originKlineList = []
 
+        for i in range(len(klines['o'])):
+            newKline = {}
+            originKline = {}
+            originKline['open'] = newKline['open'] = klines['o'][i]
+            originKline['high'] = newKline['high'] = klines['h'][i]
+            originKline['low'] = newKline['low'] = klines['l'][i]
+            originKline['close'] = newKline['close'] = klines['c'][i]
+            originKline['volume'] = newKline['volume'] = klines['v'][i]
+            originKline['time'] = klines['t'][i]
+
+            dateArray = datetime.utcfromtimestamp(klines['t'][i] + 8 * 3600)
+            otherStyleTime = dateArray.strftime("%Y-%m-%d %H:%M:%S")
+            newKline['time'] = otherStyleTime
+            newKlineList.append(newKline)
+            originKlineList.append(originKline)
+
+        # print("结果:", newKlineList)
+        # print("结果:", originKlineList)
         if target == 0:
-            return newKlineList
+            return originKlineList
         else:
-            # 合成k线
+            # k线聚合处理
+            df = pd.DataFrame(newKlineList, columns=['time', 'open', 'high', 'low', 'close', 'volume'])
+            df['time'] = pd.to_datetime(df['time'])
+            timeList = np.array(df['time']).tolist()
+            df.set_index("time", inplace=True)
+            # print(timeList, df)
+
+            if target == 7:
+                targetStr = str(target) + 'D'
+            else:
+                targetStr = str(target) + 'T'
             ohlc_dict = {
                 'open': 'first',
                 'high': 'max',
@@ -145,34 +123,31 @@ class KlineDataTool:
                 'close': 'last',
                 'volume': 'sum'
             }
-            if target == 7:
-                targetStr = str(target) + 'D'
-            else:
-                targetStr = str(target) + 'T'
-            df.index = pd.DatetimeIndex(df.index)
-            resultDf = df.resample(targetStr, how=ohlc_dict, closed='left', label='left')
-            # 转换成list
-            resultKline = self.getKLineResult(resultDf)
-            print(resultDf, resultKline)
-            return resultKline
+            # df.index = pd.DatetimeIndex(df.index)
 
-    def getKLineResult(self, resultDf):
-        nparray = np.array(resultDf)
-        npKlineList = nparray.tolist()
-        klineList = []
+            # 聚合k线
+            resultDf = df.resample(targetStr, closed='left', label='left') \
+                .agg(ohlc_dict).dropna(how='any')
+            # print(resultDf)
+            # 把索引转成列
+            resultDf.reset_index('time', inplace=True)
+            # 将列字符串的时间转成时间戳
+            nparray = np.array(resultDf)
+            npKlineList = nparray.tolist()
+            processedKlineList = []
 
-        for i in range(len(npKlineList)):
-            # timeStamp = int(time.mktime(npKlineList[i][0].timetuple()))
-            timeStamp = int(time.mktime(resultDf.index[i].timetuple()))
-            item = {}
-            item['time'] = timeStamp
-            item['open'] = 0 if pd.isna(npKlineList[i][0]) else npKlineList[i][0]
-            item['high'] = 0 if pd.isna(npKlineList[i][1]) else npKlineList[i][1]
-            item['low'] = 0 if pd.isna(npKlineList[i][2]) else npKlineList[i][2]
-            item['close'] = 0 if pd.isna(npKlineList[i][3]) else npKlineList[i][3]
-            item['volume'] = 0 if pd.isna(npKlineList[i][4]) else npKlineList[i][4]
-            klineList.append(item)
-        return klineList
+            for i in range(len(npKlineList)):
+                timeStamp = int(time.mktime(npKlineList[i][0].timetuple()))
+                item = {}
+                item['time'] = timeStamp
+                item['open'] = 0 if pd.isna(npKlineList[i][1]) else npKlineList[i][1]
+                item['high'] = 0 if pd.isna(npKlineList[i][2]) else npKlineList[i][2]
+                item['low'] = 0 if pd.isna(npKlineList[i][3]) else npKlineList[i][3]
+                item['close'] = 0 if pd.isna(npKlineList[i][4]) else npKlineList[i][4]
+                item['volume'] = 0 if pd.isna(npKlineList[i][5]) else npKlineList[i][5]
+                processedKlineList.append(item)
+            # print("处理结果:", processedKlineList)
+            return processedKlineList
 
     def getFutureData(self, symbol, period, size):
         # 聚宽数据源

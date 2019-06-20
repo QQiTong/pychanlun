@@ -84,7 +84,7 @@ class Calc:
             '1min': '1m',
             '3min': '3m',
             '15min': '15m',
-            '60min': '1h',
+            '60min': '60m',
             '1day': '1d',
             '5min': '5m',
             '30min': '30m',
@@ -117,7 +117,7 @@ class Calc:
             '1week': '5d'
         }
 
-    def calcData(self, period, symbol, save = False):
+    def calcData(self, period, symbol, save=False):
         klineList = []
 
         # def processKline():
@@ -133,8 +133,8 @@ class Calc:
         # 获取接口数据
         klineDataTool = KlineDataTool()
         if symbol == 'XBTUSD':
-            klineData = klineDataTool.getKlineData(self.bitmexPeriodMap[period], 500)
-            klineDataBigLevel = klineDataTool.getKlineData(self.bitmexPeriodMap[self.levelMap[period]], 100)
+            klineData = klineDataTool.getBtcData(self.bitmexPeriodMap[period], False)
+            klineDataBigLevel = klineDataTool.getBtcData(self.bitmexPeriodMap[self.levelMap[period]], True)
         else:
             # 期货
             currentPeriod = self.periodMap[period]

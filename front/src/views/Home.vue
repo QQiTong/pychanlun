@@ -40,7 +40,7 @@
         <!--图表显示区域        -->
         <div class="right">
             <div class="echarts">
-                <v-chart :options="option" autoresize></v-chart>
+                <v-chart :options="option" autoresize ref="myCharts"></v-chart>
             </div>
             <div class="loading-anim" v-show="showAnim">
                 <div class="loader-inner"></div>
@@ -111,13 +111,15 @@
                     require('../assets/img/icon_1h.png'),
                     require('../assets/img/icon_4h.png'),
                     require('../assets/img/icon_1d.png'),
-                    require('../assets/img/icon_1w.png')
+                    require('../assets/img/icon_1w.png'),
+                    require('../assets/img/icon_refresh.svg')
                 ],
                 //    处理好的echarts数据
                 resultData: {},
                 // 缩放比例
                 zoomStart: 55,
-                timer: null
+                timer: null,
+                savedZoomStart: 0
             }
         },
         mounted() {
@@ -130,7 +132,13 @@
             //     } else {
             //         console.log("拦截重复请求---")
             //     }
-            // }, 20 * 1000)
+            // }, 10 * 1000)
+            console.log("----", this.$refs.myCharts)
+            // this.$refs.myCharts.on('datazoom', function (obj) {
+            //     //do some thing
+            //     //这里通过obj获取信息，设定option之后,重新载入图表
+            //     console.log("zoom事件:", obj)
+            // });
         },
         beforeDestroy() {
             // if (!this.myChart) {
@@ -141,7 +149,11 @@
             // this.myChart = null;
         },
         methods: {
-            saveKline(){
+            // handleDataZoom(param) {
+            //     console.log("item", param)
+            //     this.zoomStart = param.batch[0].start
+            // },
+            saveKline() {
                 let requestData = {
                     symbol: this.symbol,
                     period: this.period
@@ -166,10 +178,12 @@
             },
             getStockData() {
                 this.showAnim = true;
+
+
                 // 恢复缩放比例
                 // if (JSON.stringify(this.option) !== "{}") {
-                //     console.log("恢复zoom")
-                //     this.zoomStart = this.option.dataZoom[0].start;
+                //     console.log("恢复zoom", this.savedZoomStart, this.zoomStart)
+                //     this.zoomStart = this.savedZoomStart
                 // }
                 let requestData = {
                     symbol: this.symbol,
@@ -194,7 +208,7 @@
                 // console.log("当前类型", this.refreshOrUpdate);
                 if (this.refreshOrUpdate === 2) {
                     //    更新charts
-                    console.log("更新");
+                    // console.log("更新");
                     this.option.series[0].data = resultData.values;
                     this.option.series[0].markArea.data = resultData.zsvalues;
                     this.option.series[1].data = resultData.biValues;
@@ -336,17 +350,17 @@
                                         this.getStockData();
                                     }
                                 },
-                                // myAutoRefresh: {
-                                //     type: 'jpeg',//png
-                                //     //name: resultData.info
-                                //     background: '#555',
-                                //
-                                //     icon: 'image://img/icon_refresh.svg',
-                                //     title: '刷新',
-                                //     onclick: function () {
-                                //         refresh();
-                                //     }
-                                // },
+                                myAutoRefresh: {
+                                    type: 'jpeg',//png
+                                    //name: resultData.info
+                                    background: '#555',
+                                    icon: 'image://' + this.periodIcons[9],
+                                    title: '刷新',
+                                    onclick: () => {
+                                        this.refreshOrUpdate = 2;
+                                        this.getStockData()
+                                    }
+                                },
                                 // saveAsImage: {
                                 //     type: 'jpeg',//png
                                 //     name: dataTitle + '自动画线',
@@ -1145,12 +1159,6 @@
         }
     }
 </script>
-<style>
-    .echarts {
-        width: 100%;
-        height: 100%;
-    }
-</style>
 <style lang="stylus">
     @import "../style/main.styl";
 </style>

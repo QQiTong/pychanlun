@@ -26,11 +26,12 @@ function refresh(update) {
     that.requestFlag = false;
 
     clearInterval(timer);
-
-    // $("#echarsZoomStart").val(myChart.getOption().dataZoom[0].start);
+    if(myChart.getOption()){
+        $("#echarsZoomStart").val(myChart.getOption().dataZoom[0].start);
+    }
     $.ajax({
         url: '/api/stock_data',
-        data: {'symbol': that.symbol,'kxType': $("#kxType").val()},
+        data: {'symbol': that.symbol,'period': $("#kxType").val()},
         type: 'get',
         success: function (data) {
             that.requestFlag = true;
@@ -67,7 +68,7 @@ document.onkeydown = function (event) {
         refresh();
     }
 };
-var symbol = 'BTC_CQ';
+var symbol = 'XBTUSD';
 var r_from = 'index';
 var fromIndex = r_from.length > 0;
 if (fromIndex) {
@@ -169,7 +170,7 @@ function switchSymbol(symbol) {
     console.log("切换币种:",symbol)
     $.ajax({
         url: '/api/stock_data',
-        data: {'symbol':symbol,'kxType': $("#kxType").val()},
+        data: {'symbol':symbol,'period': $("#kxType").val()},
         type: 'get',
         success: function (data) {
             that.requestFlag = true;
@@ -392,17 +393,17 @@ function draw(stockJsonData, update) {
                     //         refreshCollectedStatus(curCode, false);
                     //     }
                     // },
-                    // myAutoRefresh: {
-                    //     type: 'jpeg',//png
-                    //     //name: resultData.info
-                    //     background: '#555',
-                    //
-                    //     icon: 'image://img/icon_refresh.svg',
-                    //     title: '刷新',
-                    //     onclick: function () {
-                    //         refresh();
-                    //     }
-                    // },
+                    myAutoRefresh: {
+                        type: 'jpeg',//png
+                        //name: resultData.info
+                        background: '#555',
+
+                        icon: 'image://img/icon_refresh.svg',
+                        title: '刷新',
+                        onclick: function () {
+                            refresh();
+                        }
+                    },
                     // saveAsImage: {
                     //     type: 'jpeg',//png
                     //     name: dataTitle + '自动画线',
