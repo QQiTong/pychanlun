@@ -21,6 +21,13 @@ def data():
     result = calc.calcData(period, symbol)
     return Response(json.dumps(result), mimetype='application/json')
 
+@app.route('/api/save_stock_data')
+def save_stock_date():
+    calc = Calc()
+    period = request.args.get("period") or "1min"
+    symbol = request.args.get("symbol") or "XBTUSD"
+    result = calc.calcData(period, symbol, True)
+    return Response(json.dumps(result), mimetype='application/json')
 
 if __name__ == '__main__':
     print("启动服务------------------")

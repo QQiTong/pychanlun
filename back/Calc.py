@@ -3,6 +3,7 @@ import os
 import time
 import numpy as np
 import pandas as pd
+import codecs
 
 from numpy import array
 import talib as ta
@@ -116,7 +117,7 @@ class Calc:
             '1week': '5d'
         }
 
-    def calcData(self, period, symbol):
+    def calcData(self, period, symbol, save = False):
         klineList = []
 
         # def processKline():
@@ -141,6 +142,11 @@ class Calc:
             bigLevelPeriod = self.futureLevelMap[currentPeriod]
             klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 40)
         # print("从接口到的数据", klineData)
+        # 存数据快照，调试时候用
+        if save:
+            with codecs.open('klineData.json', 'w', encoding='utf-8') as f:
+                json_str = json.dumps(klineData, ensure_ascii=False, indent=4)
+                f.write(json_str)
         jsonObj = klineData
         jsonObjBigLevel = klineDataBigLevel
 
