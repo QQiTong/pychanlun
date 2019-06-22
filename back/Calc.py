@@ -257,7 +257,17 @@ class Calc:
         diffList = resJson['diff']
         deaList = resJson['dea']
         macdList = resJson['macd']
-        beichiData = calcBeichi(timeList, highList, lowList, directionList, diffList, deaList, macdList)
+        beichiPayload = {
+            'timeList': timeList,
+            'highList': highList,
+            'lowList': lowList,
+            'directionList': directionList,
+            'diffList': diffList,
+            'deaList': deaList,
+            'macdList': macdList,
+            'biList': biProcess.biList
+        }
+        beichiData = calcBeichi(beichiPayload)
         resJson['buyMACDBCData'] = beichiData['buyMACDBCData']
         resJson['sellMACDBCData'] = beichiData['sellMACDBCData']
 
