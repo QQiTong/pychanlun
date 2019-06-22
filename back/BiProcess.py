@@ -22,46 +22,44 @@ class BiProcess(ToString):
 
     def mergeBi(self):
         count = len(self.biList)
-        if (count >= 3 and self.biList[-2].biType == "Dummy"):
-            print(self.biList[-2].biType)
+        if (count >= 4 and self.biList[-2].biType == "Dummy"):
             dummyBi = self.biList[-2]
             if dummyBi.direction == 1:
                 dummyBiLow = dummyBi.low
+                iMerge = -1
                 i = count - 4
-                while i >= 0:
-                    if self.biList[i].low <= dummyBiLow:
-                        break
-                    i = i - 2
-                # 从i笔开始合并
-                bi = self.biList[i]
-                for j in range(i + 1, count - 1):
-                    bi2 = self.biList[j]
-                    for x in range(len(bi2.klineList)):
-                        bi.klineList.append(bi2.klineList[x])
-                    if bi2.high > bi.high:
-                        bi.high = bi2.high
-                    bi.end = bi2.end
-                for d in range(count - 2, i, -1):
-                    print('删除笔', d)
-                    del self.biList[d]
+                if self.biList[i].low <= dummyBiLow:
+                    iMerge = i
+                # 从iMerge笔开始合并
+                if iMerge > -1:
+                    bi = self.biList[i]
+                    for j in range(i + 1, count - 1):
+                        bi2 = self.biList[j]
+                        for x in range(len(bi2.klineList)):
+                            bi.klineList.append(bi2.klineList[x])
+                        if bi2.high > bi.high:
+                            bi.high = bi2.high
+                        bi.end = bi2.end
+                    for d in range(count - 2, i, -1):
+                        del self.biList[d]
             elif dummyBi.direction == -1:
                 dummyBiHigh = dummyBi.high
+                iMerge = -1
                 i = count - 4
-                while i >= 0:
-                    if self.biList[i].high >= dummyBiHigh:
-                        break
-                    i = i - 2
-                # 从i笔开始合并
-                bi = self.biList[i]
-                for j in range(i + 1, count - 1):
-                    bi2 = self.biList[j]
-                    for x in range(len(bi2.klineList)):
-                        bi.klineList.append(bi2.klineList[x])
-                    if bi2.low > bi.low:
-                        bi.low = bi2.low
-                    bi.end = bi2.end
-                for d in range(count - 2, i, -1):
-                    del self.biList[d]
+                if self.biList[i].high >= dummyBiHigh:
+                    iMerge = i
+                # 从iMerge笔开始合并
+                if iMerge > -1:
+                    bi = self.biList[i]
+                    for j in range(i + 1, count - 1):
+                        bi2 = self.biList[j]
+                        for x in range(len(bi2.klineList)):
+                            bi.klineList.append(bi2.klineList[x])
+                        if bi2.low > bi.low:
+                            bi.low = bi2.low
+                        bi.end = bi2.end
+                    for d in range(count - 2, i, -1):
+                        del self.biList[d]
 
 
     # 为了能调整笔的高低点，有时候我们需要把不满足条件的情况也零时算一笔
@@ -152,7 +150,6 @@ class BiProcess(ToString):
                     else:
                         tempklineList.append(item)
                         # whether has new down bi
-                        print(self.isChengbi(tempklineList, -1))
                         biResult, biType = self.isChengbi(tempklineList, -1)
                         if biResult:
                             bi = Bi()
@@ -166,7 +163,7 @@ class BiProcess(ToString):
                                 bi.klineList.append(tempklineList[k])
                             tempklineList.clear()
                             self.biList.append(bi)
-                            self.mergeBi()
+                            # self.mergeBi()
                 elif lastBi.direction == -1:
                     # previous bi is down bi
                     # down bi continue
@@ -192,7 +189,7 @@ class BiProcess(ToString):
                                 bi.klineList.append(tempklineList[m])
                             tempklineList.clear()
                             self.biList.append(bi)
-                            self.mergeBi()
+                            # self.mergeBi()
         lastBi = self.biList[-1]
         # todo 循环结束了tempKxianList还有值?
         if len(tempklineList) >= 4:
