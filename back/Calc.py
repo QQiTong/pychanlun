@@ -138,9 +138,9 @@ class Calc:
         else:
             # 期货
             currentPeriod = self.periodMap[period]
-            klineData = klineDataTool.getFutureData(symbol, currentPeriod, 200)
+            klineData = klineDataTool.getFutureData(symbol, currentPeriod, 1000)
             bigLevelPeriod = self.futureLevelMap[currentPeriod]
-            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 40)
+            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 200)
         # print("从接口到的数据", klineData)
         # 存数据快照，调试时候用
         if save:
