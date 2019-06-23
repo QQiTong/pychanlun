@@ -138,8 +138,8 @@ class BiProcess(ToString):
                 # previous bi is up
                 if lastBi.direction == 1:
                     # up bi continue
-                    if item.high >= lastBi.high:
-                        lastBi.high = item.high
+                    if item.maxHigh >= lastBi.high:
+                        lastBi.high = item.maxHigh
                         lastBi.end = item.end
                         # previous not become bi
                         if len(tempklineList) > 0:
@@ -167,8 +167,8 @@ class BiProcess(ToString):
                 elif lastBi.direction == -1:
                     # previous bi is down bi
                     # down bi continue
-                    if item.low <= lastBi.low:
-                        lastBi.low = item.low
+                    if item.maxLow <= lastBi.low:
+                        lastBi.low = item.maxLow
                         lastBi.end = item.end
                         if len(tempklineList) > 0:
                             for l in range(len(tempklineList)):

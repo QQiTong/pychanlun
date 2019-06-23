@@ -40,7 +40,9 @@ class KlineProcess:
         if len(self.klineList) == 0:
             kline = Kline()
             kline.high = high
+            kline.maxHigh = high
             kline.low = low
+            kline.maxLow = low
             kline.time = time
             kline.endTime = time
 
@@ -52,9 +54,12 @@ class KlineProcess:
         else:
             lastkline = self.klineList[-1]
             if high > lastkline.high and low > lastkline.low:
+                # 向上
                 kline = Kline()
                 kline.high = high
+                kline.maxHigh = high
                 kline.low = low
+                kline.maxLow = low
                 kline.time = time
                 kline.endTime = time
 
@@ -65,9 +70,12 @@ class KlineProcess:
                 # the new kline
                 self.klineList.append(kline)
             elif high < lastkline.high and low < lastkline.low:
+                # 向下
                 kline = Kline()
                 kline.high = high
+                kline.maxHigh = high
                 kline.low = low
+                kline.maxLow = low
                 kline.time = time
                 kline.endTime = time
                 kline.direction = -1
@@ -77,23 +85,24 @@ class KlineProcess:
                 # the new kline
                 self.klineList.append(kline)
             elif high <= lastkline.high and low >= lastkline.low:
-                # pre include
+                # 前包含
                 if lastkline.direction == 1:
                     lastkline.low = low
                 else:
                     lastkline.high = high
-
                 # lastkline.middle = lastkline.end
                 lastkline.end = lastkline.end + 1
                 lastkline.endTime = time
 
             else:
-                # after include
+                # 后包含
                 if lastkline.direction == 1:
                     lastkline.high = high
                 else:
                     lastkline.low = low
                 lastkline.end = lastkline.end + 1
                 lastkline.endTime = time
+                if high > lastkline.maxHigh: lastkline.maxHigh = high
+                if low < lastkline.maxLow: lastkline.maxLow = low
                 # todo 这个middle值作用:  因为经过包含处理后笔的端点不是最低点了,因此要
                 lastkline.middle = lastkline.end

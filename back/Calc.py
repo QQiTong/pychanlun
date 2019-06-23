@@ -125,11 +125,7 @@ class Calc:
         #     for i in range(count):
         #         add(highList[i], lowList[i], timeList[i])
 
-        # 读入本都数据
-        # flask 读入本地文件需要这样写
-        # base_dir = os.path.dirname(__file__)
-        # data_str = open(os.path.join(base_dir, './klineData.json')).read()
-        # jsonObj = json.loads(data_str)
+
         # 获取接口数据
         klineDataTool = KlineDataTool()
         if symbol == 'XBTUSD':
@@ -140,13 +136,25 @@ class Calc:
             currentPeriod = self.periodMap[period]
             klineData = klineDataTool.getFutureData(symbol, currentPeriod, 1000)
             bigLevelPeriod = self.futureLevelMap[currentPeriod]
-            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 200)
+            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 40)
         # print("从接口到的数据", klineData)
         # 存数据快照，调试时候用
         if save:
             with codecs.open('klineData.json', 'w', encoding='utf-8') as f:
                 json_str = json.dumps(klineData, ensure_ascii=False, indent=4)
                 f.write(json_str)
+            with codecs.open('klineDataBigLevel.json', 'w', encoding='utf-8') as f:
+                json_str = json.dumps(klineDataBigLevel, ensure_ascii=False, indent=4)
+                f.write(json_str)
+
+        # 读入本都数据
+        # flask 读入本地文件需要这样写
+        # base_dir = os.path.dirname(__file__)
+        # data_str = open(os.path.join(base_dir, 'klineData.json')).read()
+        # klineData = json.loads(data_str)
+        # data_str = open(os.path.join(base_dir, 'klineDataBigLevel.json')).read()
+        # klineDataBigLevel = json.loads(data_str)
+
         jsonObj = klineData
         jsonObjBigLevel = klineDataBigLevel
 
