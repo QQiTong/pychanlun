@@ -39,7 +39,7 @@ class KlineDataTool:
         elif period == "5m":
             period = '5'
 
-            fromDate = toDate - (1000 * 5 * 60) / 5 if isBigLevel else toDate - 1000 * 5 * 60
+            fromDate = toDate - (1000 * 5 * 60) / 4 if isBigLevel else toDate - 1000 * 5 * 60
         elif period == "15m":
             period = '1'
             target = 15
