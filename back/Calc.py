@@ -18,7 +18,7 @@ from back.BiProcess import BiProcess
 from back.DuanProcess import DuanProcess
 from back.KlineProcess import KlineProcess
 from back.Tools import Tools
-from back.beichi import calcBeichi
+import back.divergence as divergence
 
 # 币安的数据结构
 # [
@@ -261,21 +261,16 @@ class Calc:
         resJson['macdBigLevel'] = getMacd(closeListBigLevel)[2].tolist()
         resJson['dateBigLevel'] = timeListBigLevel
 
-        # 本级别MACD背驰
         diffList = resJson['diff']
         deaList = resJson['dea']
         macdList = resJson['macd']
-        beichiPayload = {
-            'timeList': timeList,
-            'highList': highList,
-            'lowList': lowList,
-            'directionList': directionList,
-            'diffList': diffList,
-            'deaList': deaList,
-            'macdList': macdList,
-            'biList': biProcess.biList
-        }
-        beichiData = calcBeichi(beichiPayload)
+
+        # 开发测试中的背驰计算
+        time_array = np.array(timeList)
+        macd_array = np.array(macdList)
+        diff_array = np.array(diffList)
+        dea_array = np.array(deaList)
+        beichiData = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, duanResult)
         resJson['buyMACDBCData'] = beichiData['buyMACDBCData']
         resJson['sellMACDBCData'] = beichiData['sellMACDBCData']
 
