@@ -5,6 +5,6 @@ node_modules/*
 *./idea
 .idea/*
 __pycache__/*
-*/__pycache__/
+__pycache__
 .DS_Store
 web/package-lock.json
