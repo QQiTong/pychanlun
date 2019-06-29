@@ -93,7 +93,6 @@
                 },
                 //品种
                 symbol: "XBTUSD",
-                // symbol: "RB1910.XSGE",
                 period: "1min",
                 // symbol: "BTC_CQ",
                 // period: "1min",
