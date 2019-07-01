@@ -140,20 +140,22 @@ class Calc:
         # print("从接口到的数据", klineData)
         # 存数据快照，调试时候用
         if save:
-            with codecs.open('klineData.json', 'w', encoding='utf-8') as f:
+            base_dir = os.path.dirname(__file__)
+            with codecs.open(os.path.join(base_dir, 'klineData.json'), 'w', encoding='utf-8') as f:
                 json_str = json.dumps(klineData, ensure_ascii=False, indent=4)
                 f.write(json_str)
-            with codecs.open('klineDataBigLevel.json', 'w', encoding='utf-8') as f:
+            with codecs.open(os.path.join(base_dir, 'klineDataBigLevel.json'), 'w', encoding='utf-8') as f:
                 json_str = json.dumps(klineDataBigLevel, ensure_ascii=False, indent=4)
                 f.write(json_str)
 
         # 读入本都数据
         # flask 读入本地文件需要这样写
         # base_dir = os.path.dirname(__file__)
-        # data_str = open(os.path.join(base_dir, 'klineData.json')).read()
-        # klineData = json.loads(data_str)
-        # data_str = open(os.path.join(base_dir, 'klineDataBigLevel.json')).read()
-        # klineDataBigLevel = json.loads(data_str)
+        # print(base_dir)
+        # with codecs.open(os.path.join(base_dir, 'klineData.json'), encoding='utf-8') as f:
+        #     klineData = json.load(f)
+        # with codecs.open(os.path.join(base_dir, 'klineDataBigLevel.json'), encoding='utf-8') as f:
+        #     klineDataBigLevel = json.load(f)
 
         jsonObj = klineData
         jsonObjBigLevel = klineDataBigLevel
