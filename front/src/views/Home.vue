@@ -40,7 +40,7 @@
         <!--图表显示区域        -->
         <div class="right">
             <div class="echarts">
-                <v-chart :options="option" autoresize ref="myCharts"></v-chart>
+                <v-chart autoresize ref="myCharts" :manual-update="true"></v-chart>
             </div>
             <div class="loading-anim" v-show="showAnim">
                 <div class="loader-inner"></div>
@@ -57,7 +57,7 @@
 <script>
     // @ is an alias to /src
     import {userApi} from '../api/UserApi'
-    import {mapGetters, mapMutations} from 'vuex'
+    // import {mapGetters, mapMutations} from 'vuex'
     // let moment = require('moment')
 
     import ECharts from 'vue-echarts'
@@ -78,9 +78,9 @@
         components: {
             'v-chart': ECharts
         },
-        data() {
+        data () {
             return {
-                //控制动画和防重复请求
+                // 控制动画和防重复请求
                 showAnim: true,
                 // myChart: null,
                 option: {},
@@ -91,17 +91,17 @@
                     downColor: '#14d0cd',
                     downBorderColor: '#14d0cd'
                 },
-                //品种
-                symbol: "XBTUSD",
-                period: "1min",
+                // 品种
+                symbol: 'XBTUSD',
+                period: '1min',
                 // symbol: "BTC_CQ",
                 // period: "1min",
                 // symbol: "RB1910.XSGE",
                 // period: "1day",
-                //1 重新渲染 2 更新,
+                // 1 重新渲染 2 更新,
                 refreshOrUpdate: 1,
-                dataTitle: "主标题",
-                dataSubTitle: "副标题",
+                dataTitle: '主标题',
+                dataSubTitle: '副标题',
                 periodIcons: [
                     require('../assets/img/icon_1min.png'),
                     require('../assets/img/icon_3min.png'),
@@ -122,25 +122,30 @@
                 savedZoomStart: 0
             }
         },
-        mounted() {
-            this.getStockData();
-            // this.timer = setInterval(() => {
-            //     this.refreshOrUpdate = 2;
-            //     if (!this.showAnim) {
-            //         console.log("发出请求---")
-            //         this.getStockData()
-            //     } else {
-            //         console.log("拦截重复请求---")
-            //     }
-            // }, 10 * 1000)
-            console.log("----", this.$refs.myCharts)
+        mounted () {
+            this.getStockData()
+            this.timer = setInterval(() => {
+                this.refreshOrUpdate = 2
+                if (!this.showAnim) {
+                    console.log('发出请求---')
+                    this.getStockData()
+                } else {
+                    console.log('拦截重复请求---')
+                }
+            }, 10 * 1000)
+
+            this.$nextTick(() => {
+                console.log('----1', this.$refs.myCharts)
+                console.log('----2', this.$refs.myCharts.options)
+            })
+            // this.$refs.myCharts.options = this.option
             // this.$refs.myCharts.on('datazoom', function (obj) {
             //     //do some thing
             //     //这里通过obj获取信息，设定option之后,重新载入图表
             //     console.log("zoom事件:", obj)
             // });
         },
-        beforeDestroy() {
+        beforeDestroy () {
             // if (!this.myChart) {
             //     return;
             // }
@@ -153,32 +158,30 @@
             //     console.log("item", param)
             //     this.zoomStart = param.batch[0].start
             // },
-            saveKline() {
+            saveKline () {
                 let requestData = {
                     symbol: this.symbol,
                     period: this.period
-                };
+                }
                 userApi.saveStockData(requestData).then(res => {
-                    this.showAnim = false;
+                    this.showAnim = false
                     // console.log("结果:", res);
 
-                    this.dataTitle = this.symbol;
-                    this.dataSubTitle = this.period;
-                    //todo 判断请求和返回的symbol 是否一致
+                    this.dataTitle = this.symbol
+                    this.dataSubTitle = this.period
+                    // todo 判断请求和返回的symbol 是否一致
                     this.draw(res)
                 }).catch(() => {
-                    this.showAnim = false;
-
-                });
+                    this.showAnim = false
+                })
             },
-            switchSymbol(symbol) {
-                this.symbol = symbol;
+            switchSymbol (symbol) {
+                this.symbol = symbol
                 this.refreshOrUpdate = 1
                 this.getStockData()
             },
-            getStockData() {
-                this.showAnim = true;
-
+            getStockData () {
+                this.showAnim = true
 
                 // 恢复缩放比例
                 // if (JSON.stringify(this.option) !== "{}") {
@@ -188,52 +191,55 @@
                 let requestData = {
                     symbol: this.symbol,
                     period: this.period
-                };
+                }
                 userApi.stockData(requestData).then(res => {
-                    this.showAnim = false;
+                    this.showAnim = false
                     // console.log("结果:", res);
 
-                    this.dataTitle = this.symbol;
-                    this.dataSubTitle = this.period;
-                    //todo 判断请求和返回的symbol 是否一致
+                    this.dataTitle = this.symbol
+                    this.dataSubTitle = this.period
+                    // todo 判断请求和返回的symbol 是否一致
                     this.draw(res)
                 }).catch(() => {
-                    this.showAnim = false;
-
-                });
+                    this.showAnim = false
+                })
             },
             //
-            draw(stockJsonData) {
-                let resultData = this.splitData(stockJsonData);
+            draw (stockJsonData) {
+                let resultData = this.splitData(stockJsonData)
                 // console.log("当前类型", this.refreshOrUpdate);
                 if (this.refreshOrUpdate === 2) {
                     //    更新charts
                     // console.log("更新");
-                    this.option.series[0].data = resultData.values;
-                    this.option.series[0].markArea.data = resultData.zsvalues;
-                    this.option.series[1].data = resultData.biValues;
-                    this.option.series[2].data = resultData.duanValues;
-                    this.option.series[3].data = this.calculateMA(resultData, 5);
-                    this.option.series[4].data = this.calculateMA(resultData, 10);
-                    this.option.series[5].data = resultData.macd;
-                    this.option.series[6].data = resultData.diff;
-                    this.option.series[7].data = resultData.dea;
+                    let options = this.$refs.myCharts.computedOptions
+                    console.log('更新', this.$refs.myCharts, options)
 
-                    this.option.series[8].data = resultData.macdBigLevel;
-                    this.option.series[9].data = resultData.diffBigLevel;
-                    this.option.series[10].data = resultData.deaBigLevel;
+                    options.series[0].data = resultData.values
+                    options.series[0].markArea.data = resultData.zsvalues
+                    options.series[1].data = resultData.biValues
+                    options.series[2].data = resultData.duanValues
+                    options.series[3].data = this.calculateMA(resultData, 5)
+                    options.series[4].data = this.calculateMA(resultData, 10)
+                    options.series[5].data = resultData.macd
+                    options.series[6].data = resultData.diff
+                    options.series[7].data = resultData.dea
 
-                    this.option.series[11].data = resultData.volume;
+                    options.series[8].data = resultData.macdBigLevel
+                    options.series[9].data = resultData.diffBigLevel
+                    options.series[10].data = resultData.deaBigLevel
 
+                    options.series[11].data = resultData.volume
 
-                    this.option.xAxis[0].data = resultData.time;
-                    this.option.xAxis[1].data = resultData.time;
-                    this.option.xAxis[2].data = resultData.timeBigLevel;
-                    this.option.xAxis[3].data = resultData.time;
+                    options.xAxis[0].data = resultData.time
+                    options.xAxis[1].data = resultData.time
+                    options.xAxis[2].data = resultData.timeBigLevel
+                    options.xAxis[3].data = resultData.time
+                    this.$refs.myCharts.mergeOptions(options, false)
                 } else {
-                    console.log("重载");
+                    console.log('重载')
                     //    重载echarts
-                    this.option = {
+                    let option = {
+                        animation: false,
                         backgroundColor: this.echartsConfig.bgColor,
                         title: {
                             text: this.dataTitle,
@@ -243,10 +249,10 @@
                                 color: 'white'
                             }
                         },
-                        tooltip: { //提示框
-                            trigger: 'axis', //触发类型：axis坐标轴触发,item
-                            axisPointer: { //坐标轴指示器配置项
-                                type: 'cross' //指示器类型，十字准星
+                        tooltip: { // 提示框
+                            trigger: 'axis', // 触发类型：axis坐标轴触发,item
+                            axisPointer: { // 坐标轴指示器配置项
+                                type: 'cross' // 指示器类型，十字准星
                             },
                         },
                         toolbox: {
@@ -261,10 +267,10 @@
                                     title: '1分钟',
                                     icon: 'image://' + this.periodIcons[0],
                                     onclick: () => {
-                                        this.period = '1min';
-                                        this.refreshOrUpdate = 1;
+                                        this.period = '1min'
+                                        this.refreshOrUpdate = 1
                                         // console.log("this",this,params);
-                                        this.getStockData();
+                                        this.getStockData()
                                     }
                                 },
                                 myLevel3: {
@@ -272,9 +278,9 @@
                                     title: '3分钟',
                                     icon: 'image://' + this.periodIcons[1],
                                     onclick: () => {
-                                        this.period = '3min';
-                                        this.refreshOrUpdate = 1;
-                                        this.getStockData();
+                                        this.period = '3min'
+                                        this.refreshOrUpdate = 1
+                                        this.getStockData()
                                     }
                                 },
                                 myLevel5: {
@@ -282,10 +288,9 @@
                                     title: '5分钟',
                                     icon: 'image://' + this.periodIcons[2],
                                     onclick: () => {
-                                        this.period = '5min';
-                                        this.refreshOrUpdate = 1;
-                                        this.getStockData();
-
+                                        this.period = '5min'
+                                        this.refreshOrUpdate = 1
+                                        this.getStockData()
                                     }
                                 },
                                 myLevel15: {
@@ -293,9 +298,9 @@
                                     title: '15分钟',
                                     icon: 'image://' + this.periodIcons[3],
                                     onclick: () => {
-                                        this.period = '15min';
-                                        this.refreshOrUpdate = 1;
-                                        this.getStockData();
+                                        this.period = '15min'
+                                        this.refreshOrUpdate = 1
+                                        this.getStockData()
                                     }
                                 },
                                 myLevel30: {
@@ -303,9 +308,9 @@
                                     title: '30分钟',
                                     icon: 'image://' + this.periodIcons[4],
                                     onclick: () => {
-                                        this.period = '30min';
-                                        this.refreshOrUpdate = 1;
-                                        this.getStockData();
+                                        this.period = '30min'
+                                        this.refreshOrUpdate = 1
+                                        this.getStockData()
                                     }
                                 },
                                 myLevel60: {
@@ -313,9 +318,9 @@
                                     title: '60分钟',
                                     icon: 'image://' + this.periodIcons[5],
                                     onclick: () => {
-                                        this.period = '60min';
-                                        this.refreshOrUpdate = 1;
-                                        this.getStockData();
+                                        this.period = '60min'
+                                        this.refreshOrUpdate = 1
+                                        this.getStockData()
                                     }
                                 },
                                 myLevel240: {
@@ -323,9 +328,9 @@
                                     title: '240分钟',
                                     icon: 'image://' + this.periodIcons[6],
                                     onclick: () => {
-                                        this.period = '4hour';
-                                        this.refreshOrUpdate = 1;
-                                        this.getStockData();
+                                        this.period = '4hour'
+                                        this.refreshOrUpdate = 1
+                                        this.getStockData()
                                     }
                                 },
                                 myLevelDay: {
@@ -334,9 +339,9 @@
                                     icon: 'image://' + this.periodIcons[7],
                                     background: '#555',
                                     onclick: () => {
-                                        this.period = '1day';
-                                        this.refreshOrUpdate = 1;
-                                        this.getStockData();
+                                        this.period = '1day'
+                                        this.refreshOrUpdate = 1
+                                        this.getStockData()
                                     }
                                 },
                                 myLevelWeek: {
@@ -345,19 +350,19 @@
                                     icon: 'image://' + this.periodIcons[8],
                                     background: '#555',
                                     onclick: () => {
-                                        this.period = '1week';
-                                        this.refreshOrUpdate = 1;
-                                        this.getStockData();
+                                        this.period = '1week'
+                                        this.refreshOrUpdate = 1
+                                        this.getStockData()
                                     }
                                 },
                                 myAutoRefresh: {
-                                    type: 'jpeg',//png
-                                    //name: resultData.info
+                                    type: 'jpeg', // png
+                                    // name: resultData.info
                                     background: '#555',
                                     icon: 'image://' + this.periodIcons[9],
                                     title: '刷新',
                                     onclick: () => {
-                                        this.refreshOrUpdate = 2;
+                                        this.refreshOrUpdate = 2
                                         this.getStockData()
                                     }
                                 },
@@ -386,7 +391,7 @@
                             }
                         },
                         grid: [
-                            {//直角坐标系
+                            {// 直角坐标系
                                 left: '3.2%',
                                 right: '3.35%',
                                 height: '57%',
@@ -417,12 +422,11 @@
                                 data: resultData.time,
                                 scale: true,
                                 boundaryGap: false,
-                                axisLine: {onZero: false},
                                 splitLine: {show: false},
                                 splitNumber: 20,
                                 min: 'dataMin',
                                 max: 'dataMax',
-                                axisLine: {lineStyle: {color: '#8392A5'}}
+                                axisLine: {onZero: false, lineStyle: {color: '#8392A5'}}
                             },
                             {
                                 type: 'category',
@@ -435,7 +439,6 @@
                                     show: true
                                 },
                                 axisLine: {lineStyle: {color: '#8392A5'}}
-
 
                             },
                             {
@@ -477,12 +480,13 @@
                                 },
                                 axisLine: {lineStyle: {color: '#8392A5'}},
                             },
-                            //本级别macd
+                            // 本级别macd
                             {
                                 gridIndex: 1,
                                 splitNumber: 2,
                                 axisLine: {
-                                    onZero: false
+                                    onZero: false,
+                                    lineStyle: {color: '#8392A5'}
                                 },
                                 axisTick: {
                                     show: false
@@ -493,14 +497,14 @@
                                 axisLabel: {
                                     show: true
                                 },
-                                axisLine: {lineStyle: {color: '#8392A5'}},
                             },
-                            //大级别macd
+                            // 大级别macd
                             {
                                 gridIndex: 2,
                                 splitNumber: 2,
                                 axisLine: {
-                                    onZero: false
+                                    onZero: false,
+                                    lineStyle: {color: '#8392A5'}
                                 },
                                 axisTick: {
                                     show: false
@@ -511,14 +515,14 @@
                                 axisLabel: {
                                     show: true
                                 },
-                                axisLine: {lineStyle: {color: '#8392A5'}},
                             },
                             // 成交量
                             {
                                 gridIndex: 3,
                                 splitNumber: 1,
                                 axisLine: {
-                                    onZero: false
+                                    onZero: false,
+                                    lineStyle: {color: '#8392A5'}
                                 },
                                 axisTick: {
                                     show: false
@@ -529,7 +533,6 @@
                                 axisLabel: {
                                     show: false
                                 },
-                                axisLine: {lineStyle: {color: '#8392A5'}},
                             },
                         ],
                         dataZoom: [
@@ -665,7 +668,7 @@
                                         opacity: 0.9,
                                         type: 'solid',
                                         width: 1,
-                                        color: "white"
+                                        color: 'white'
                                     },
                                 },
                                 symbol: 'none',
@@ -681,7 +684,7 @@
                                         opacity: 0.9,
                                         type: 'solid',
                                         width: 1,
-                                        color: "yellow"
+                                        color: 'yellow'
                                     },
                                 },
                                 symbol: 'none',
@@ -697,13 +700,13 @@
                                 itemStyle: {
                                     normal: {
                                         color: function (params) {
-                                            let colorList;
+                                            let colorList
                                             if (params.data >= 0) {
-                                                colorList = 'red';
+                                                colorList = 'red'
                                             } else {
-                                                colorList = '#14d0cd';
+                                                colorList = '#14d0cd'
                                             }
-                                            return colorList;
+                                            return colorList
                                         },
                                     }
                                 }
@@ -747,7 +750,7 @@
                                 symbol: 'none',
                                 animation: false
                             },
-                            //大级别MACD
+                            // 大级别MACD
                             {
                                 name: 'MACD',
                                 type: 'bar',
@@ -758,13 +761,13 @@
                                 itemStyle: {
                                     normal: {
                                         color: function (params) {
-                                            let colorList;
+                                            let colorList
                                             if (params.data >= 0) {
-                                                colorList = 'red';
+                                                colorList = 'red'
                                             } else {
-                                                colorList = '#14d0cd';
+                                                colorList = '#14d0cd'
                                             }
-                                            return colorList;
+                                            return colorList
                                         },
                                     }
                                 }
@@ -817,13 +820,13 @@
                                 itemStyle: {
                                     normal: {
                                         color: (params) => {
-                                            let colorList;
+                                            let colorList
                                             if (resultData.values[params.dataIndex][1] > resultData.values[params.dataIndex][0]) {
-                                                colorList = 'red';
+                                                colorList = 'red'
                                             } else {
-                                                colorList = this.echartsConfig.downColor;
+                                                colorList = this.echartsConfig.downColor
                                             }
-                                            return colorList;
+                                            return colorList
                                         },
                                     }
                                 }
@@ -878,46 +881,46 @@
                             // },
                         ],
                         graphic: [],
-                    };
-
+                    }
+                    this.$refs.myCharts.mergeOptions(option)
                 }
             },
-            splitData(jsonObj) {
-                const stockDate = jsonObj.date;
-                const stockHigh = jsonObj.high;
-                const stockLow = jsonObj.low;
-                const stockOpen = jsonObj.open;
-                const stockClose = jsonObj.close;
-                const volumeData = jsonObj.volume;
-                const bidata = jsonObj.bidata;
-                const duandata = jsonObj.duandata;
-                const zsdata = jsonObj.zsdata;
-                const zsflag = jsonObj.zsflag;
+            splitData (jsonObj) {
+                const stockDate = jsonObj.date
+                const stockHigh = jsonObj.high
+                const stockLow = jsonObj.low
+                const stockOpen = jsonObj.open
+                const stockClose = jsonObj.close
+                const volumeData = jsonObj.volume
+                const bidata = jsonObj.bidata
+                const duandata = jsonObj.duandata
+                const zsdata = jsonObj.zsdata
+                const zsflag = jsonObj.zsflag
                 //
-                const macddata = jsonObj.macd;
-                const diffdata = jsonObj.diff;
-                const deadata = jsonObj.dea;
+                const macddata = jsonObj.macd
+                const diffdata = jsonObj.diff
+                const deadata = jsonObj.dea
 
-                const macdBigLevel = jsonObj.macdBigLevel;
-                const diffBigLevel = jsonObj.diffBigLevel;
-                const deaBigLevel = jsonObj.deaBigLevel;
+                const macdBigLevel = jsonObj.macdBigLevel
+                const diffBigLevel = jsonObj.diffBigLevel
+                const deaBigLevel = jsonObj.deaBigLevel
 
-                const dateBigLevel = jsonObj.dateBigLevel;
-                let values = [];
+                const dateBigLevel = jsonObj.dateBigLevel
+                let values = []
                 for (let i = 0; i < stockDate.length; i++) {
-                    values.push([stockOpen[i], stockClose[i], stockLow[i], stockHigh[i]]);
+                    values.push([stockOpen[i], stockClose[i], stockLow[i], stockHigh[i]])
                 }
-                let biValues = [];
+                let biValues = []
                 for (let i = 0; i < bidata.date.length; i++) {
                     biValues.push([bidata.date[i], bidata.data[i]])
                 }
-                let duanValues = [];
+                let duanValues = []
                 for (let i = 0; i < duandata.date.length; i++) {
                     duanValues.push([duandata.date[i], duandata.data[i]])
                 }
-                let zsvalues = [];
+                let zsvalues = []
                 for (let i = 0; i < zsdata.length; i++) {
-                    let value;
+                    let value
                     if (zsflag[i] > 0) {
                         value = [
                             {
@@ -938,30 +941,30 @@
                                     opacity: 0.2,
                                 }
                             }
-                        ];
+                        ]
                     } else {
                         value = [
                             {
                                 coord: zsdata[i][0],
                                 itemStyle: {
-                                    color: downColor,
+                                    color: this.echartsConfig.downColor,
                                     borderWidth: '1',
-                                    borderColor: downColor,
+                                    borderColor: this.echartsConfig.downColor,
                                     opacity: 0.2,
                                 }
                             },
                             {
                                 coord: zsdata[i][1],
                                 itemStyle: {
-                                    color: downColor,
+                                    color: this.echartsConfig.downColor,
                                     borderWidth: '1',
-                                    borderColor: downColor,
+                                    borderColor: this.echartsConfig.downColor,
                                     opacity: 0.2,
                                 }
                             }
-                        ];
+                        ]
                     }
-                    zsvalues.push(value);
+                    zsvalues.push(value)
                 }
 
                 // 买卖点
@@ -1000,7 +1003,7 @@
                 //     };
                 //     mmdValues.push(value);
                 // }
-                //let value = {
+                // let value = {
                 //    name: 'lowest value',
                 //    type: 'min',
                 //    valueDim: 'lowest',
@@ -1019,9 +1022,9 @@
                 //        //textBorderWidth: 1,
                 //        color: 'blue',
                 //    },
-                //};
-                //mmdValues.push(value);
-                //let value = {
+                // };
+                // mmdValues.push(value);
+                // let value = {
                 //    name: 'highest value',
                 //    type: 'max',
                 //    valueDim: 'highest',
@@ -1040,8 +1043,8 @@
                 //        //textBorderWidth: 1,
                 //        color: 'blue',
                 //    },
-                //};
-                //mmdValues.push(value);
+                // };
+                // mmdValues.push(value);
 
                 // for (let i = 0; i < jsonObj.buyBCData.date.length; i++) {
                 //     let value = {
@@ -1082,7 +1085,7 @@
                 //     mmdValues.push(value);
                 // }
                 //
-                let bcMACDValues = [];
+                let bcMACDValues = []
                 for (let i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
                     let value = {
                         coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
@@ -1092,8 +1095,8 @@
                         itemStyle: {
                             normal: {color: 'green'}
                         }
-                    };
-                    bcMACDValues.push(value);
+                    }
+                    bcMACDValues.push(value)
                 }
                 for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
                     let value = {
@@ -1111,8 +1114,8 @@
                             textBorderWidth: 2,
                             color: 'white',
                         },
-                    };
-                    bcMACDValues.push(value);
+                    }
+                    bcMACDValues.push(value)
                 }
                 return {
                     time: stockDate,
@@ -1139,22 +1142,22 @@
                     // mmdValues: mmdValues,
                     bcMACDValues: bcMACDValues,
                     // markLineData: markLineData,
-                };
+                }
             },
-            calculateMA(resultData, dayCount) {
-                let result = [];
+            calculateMA (resultData, dayCount) {
+                let result = []
                 for (let i = 0, len = resultData.values.length; i < len; i++) {
                     if (i < dayCount) {
-                        result.push('-');
-                        continue;
+                        result.push('-')
+                        continue
                     }
-                    let sum = 0;
+                    let sum = 0
                     for (let j = 0; j < dayCount; j++) {
-                        sum += resultData.values[i - j][1];
+                        sum += resultData.values[i - j][1]
                     }
-                    result.push((sum / dayCount).toFixed(5));
+                    result.push((sum / dayCount).toFixed(5))
                 }
-                return result;
+                return result
             }
         }
     }
