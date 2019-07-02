@@ -175,13 +175,13 @@ class Calc:
             item = jsonObjBigLevel[i]
             closeListBigLevel.append(round(float(item['close']), 2))
             localTime = time.localtime(item['time'])
-            strTime = time.strftime("%m-%d %H:%M", localTime)
+            strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
             timeListBigLevel.append(strTime)
 
         for i in range(len(jsonObj)):
             item = jsonObj[i]
             localTime = time.localtime(item['time'])
-            strTime = time.strftime("%m-%d %H:%M", localTime)
+            strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
             highList.append(round(float(item['high']), 2))
             lowList.append(round(float(item['low']), 2))
 

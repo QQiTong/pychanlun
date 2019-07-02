@@ -7,7 +7,9 @@ import talib as ta
 import time
 
 from back.Mail import Mail
-
+'''
+金叉死叉监控
+'''
 
 def getMacd(closeList):
     close = array(closeList)

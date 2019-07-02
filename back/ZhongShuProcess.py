@@ -200,7 +200,7 @@ class ZhongShuProcess:
                     nHighCount = 0
                     # 向上中枢被向下终结
                     if zhongShuOne.nDirection == 1 and zhongShuOne.nTerminate == -1:
-                        print("向上中枢被向下终结")
+                        # print("向上中枢被向下终结")
                         bValid = False
                         for x in range(zhongShuOne.nStart, zhongShuOne.nEnd + 1, 1):
                             if biResult[x] == 1:
@@ -227,7 +227,7 @@ class ZhongShuProcess:
                             print("同级别分解最后中枢无效")
                         i = nHignIndex - 1
                     else:
-                        print("向下中枢被向下终结")
+                        # print("向下中枢被向下终结")
                         i = zhongShuOne.nEnd - 1
                     if bValid:
                         # 进行标记
@@ -262,19 +262,19 @@ class ZhongShuProcess:
                                         fLowValue = lowList[x]
                                         nLowIndex = x
                                         nHighIndex = nHighIndexTemp
-                                print('低点数量', nLowCount)
+                                # print('低点数量', nLowCount)
                             elif biResult[x] == 1:
                                 nHighIndexTemp = x
                         if bValid:
-                            print("同级别分解保留最后中枢")
-                            print("中枢结束点移到", highList[nHighIndex])
+                            # print("同级别分解保留最后中枢")
+                            # print("中枢结束点移到", highList[nHighIndex])
                             # 中枢结束点移到最高点的前一个低点
                             zhongShuOne.nEnd = nHighIndex;
                         else:
                             print("同级别分解最后中枢无效")
                         i = nLowIndex - 1;
                     else:
-                        print("向上中枢被向上终结")
+                        # print("向上中枢被向上终结")
                         i = zhongShuOne.nEnd - 1
                     if bValid:
                         # 进行标记

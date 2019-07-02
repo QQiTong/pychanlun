@@ -34,12 +34,12 @@ def calc(time_s, macd_s, diff_s, dea_s, bi_list, duan_s):
     }
     for i in range(len(divergence_down)):
         if divergence_down[i]:
-            data['sellMACDBCData']['date'].append(time_s[i])
-            data['sellMACDBCData']['data'].append(diff_s[i])
-            data['sellMACDBCData']['value'].append('线底背')
-    for i in range(len(divergence_up)):
-        if divergence_up[i]:
             data['buyMACDBCData']['date'].append(time_s[i])
             data['buyMACDBCData']['data'].append(diff_s[i])
-            data['buyMACDBCData']['value'].append('线顶背')
+            data['buyMACDBCData']['value'].append('线底背')
+    for i in range(len(divergence_up)):
+        if divergence_up[i]:
+            data['sellMACDBCData']['date'].append(time_s[i])
+            data['sellMACDBCData']['data'].append(diff_s[i])
+            data['sellMACDBCData']['value'].append('线顶背')
     return data

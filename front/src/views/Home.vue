@@ -20,6 +20,7 @@
                         <a @click="switchSymbol('MA9999.XZCE')" class="bold symbol-item">甲醇MA</a>
                         <a @click="switchSymbol('SR9999.XZCE')" class="symbol-item">白糖SR</a>
                         <a @click="switchSymbol('AP9999.XZCE')" class="symbol-item">苹果AP</a>
+                        <a @click="switchSymbol('CF9999.XZCE')" class="symbol-item">棉花CF</a>
                         <!--            大商所-->
                         <a @click="switchSymbol('J9999.XDCE')" class="bold symbol-item">焦炭J</a>
                         <a @click="switchSymbol('JM9999.XDCE')" class="symbol-item">焦煤JM</a>
@@ -1090,18 +1091,6 @@
                     let value = {
                         coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
                         value: jsonObj.buyMACDBCData.value[i],
-                        symbolRotate: 0,
-                        symbol: 'pin',
-                        itemStyle: {
-                            normal: {color: 'green'}
-                        }
-                    }
-                    bcMACDValues.push(value)
-                }
-                for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
-                    let value = {
-                        coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
-                        value: jsonObj.sellMACDBCData.value[i],
                         symbolRotate: -180,
                         symbol: 'pin',
                         itemStyle: {
@@ -1114,6 +1103,18 @@
                             textBorderWidth: 2,
                             color: 'white',
                         },
+                    }
+                    bcMACDValues.push(value)
+                }
+                for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
+                    let value = {
+                        coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
+                        value: jsonObj.sellMACDBCData.value[i],
+                        symbolRotate: 0,
+                        symbol: 'pin',
+                        itemStyle: {
+                            normal: {color: 'green'}
+                        }
                     }
                     bcMACDValues.push(value)
                 }

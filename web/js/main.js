@@ -3,12 +3,12 @@ $("#echarsZoomStart").val(55);
 
 var myChart = echarts.init(document.getElementById('main'));
 
-setTimeout(function (){
+setTimeout(function () {
     window.onresize = function () {
         console.log('resize')
         myChart.resize();
     }
-},200);
+}, 200);
 var bgColor = '#202529';
 var upColor = 'red';
 var upBorderColor = 'red';
@@ -20,18 +20,19 @@ var downBorderColor = '#14d0cd';
 let timer;
 // 请求标志
 let requestFlag = true;
+
 function refresh(update) {
     // $(".loading-style-4").show();
     let that = this;
     that.requestFlag = false;
 
     clearInterval(timer);
-    if(myChart.getOption()){
+    if (myChart.getOption()) {
         $("#echarsZoomStart").val(myChart.getOption().dataZoom[0].start);
     }
     $.ajax({
         url: '/api/stock_data',
-        data: {'symbol': that.symbol,'period': $("#kxType").val()},
+        data: {'symbol': that.symbol, 'period': $("#kxType").val()},
         type: 'get',
         success: function (data) {
             that.requestFlag = true;
@@ -42,7 +43,7 @@ function refresh(update) {
             //     refresh()
             // }
         },
-        error:function (error) {
+        error: function (error) {
             that.requestFlag = true;
             // $(".loading-style-4").hide();
 
@@ -86,9 +87,9 @@ if (fromIndex) {
 refresh('refresh');
 
 setInterval(() => {
-    if(this.requestFlag){
+    if (this.requestFlag) {
         refresh('update')
-    }else{
+    } else {
         // console.log('wait...')
     }
 }, 10000);
@@ -167,10 +168,10 @@ function switchSymbol(symbol) {
     //每次切换都重置成三分钟
     $("#kxType").val('3min')
 
-    console.log("切换币种:",symbol)
+    console.log("切换币种:", symbol)
     $.ajax({
         url: '/api/stock_data',
-        data: {'symbol':symbol,'period': $("#kxType").val()},
+        data: {'symbol': symbol, 'period': $("#kxType").val()},
         type: 'get',
         success: function (data) {
             that.requestFlag = true;
@@ -182,7 +183,7 @@ function switchSymbol(symbol) {
             //     refresh()
             // }
         },
-        error:function (error) {
+        error: function (error) {
             that.requestFlag = true;
             // $(".loading-style-4").hide();
 
@@ -190,6 +191,7 @@ function switchSymbol(symbol) {
     });
 
 }
+
 function draw(stockJsonData, update) {
     // const jsonObj = JSON.parse(stockJsonData);
     const resultData = splitData(stockJsonData);
@@ -230,7 +232,7 @@ function draw(stockJsonData, update) {
     var zoomStart = parseInt($("#echarsZoomStart").val(), 10);
     dataTitle = this.symbol;
     infoValue3 = $("#kxType").val();
-    if (update==='update') {
+    if (update === 'update') {
         // console.log('更新了', update);
         option = myChart.getOption();
         option.series[0].data = resultData.values;
@@ -257,6 +259,7 @@ function draw(stockJsonData, update) {
 
     } else {
         option = {
+            animation: false,
             backgroundColor: bgColor,
             title: {
                 text: dataTitle,
@@ -862,8 +865,8 @@ function draw(stockJsonData, update) {
                             color: function (params) {
                                 var colorList;
                                 // fix
-                                if(!resultData.values[params.dataIndex]){
-                                   return 'red'
+                                if (!resultData.values[params.dataIndex]) {
+                                    return 'red'
                                 }
                                 if (resultData.values[params.dataIndex][1] > resultData.values[params.dataIndex][0]) {
                                     colorList = 'red';
@@ -1169,22 +1172,10 @@ function splitData(jsonObj) {
         var value = {
             coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
             value: jsonObj.buyMACDBCData.value[i],
-            symbolRotate: 0,
-            symbol: 'pin',
-            itemStyle: {
-                normal: { color: 'green' }
-            }
-        };
-        bcMACDValues.push(value);
-    }
-    for (var i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
-        var value = {
-            coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
-            value: jsonObj.sellMACDBCData.value[i],
             symbolRotate: -180,
             symbol: 'pin',
             itemStyle: {
-                normal: { color: 'red' }
+                normal: {color: 'red'}
             },
             label: {
                 position: 'inside',
@@ -1193,6 +1184,18 @@ function splitData(jsonObj) {
                 textBorderWidth: 2,
                 color: 'white',
             },
+        };
+        bcMACDValues.push(value);
+    }
+    for (var i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
+        var value = {
+            coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
+            value: jsonObj.sellMACDBCData.value[i],
+            symbolRotate: 0,
+            symbol: 'pin',
+            itemStyle: {
+                normal: {color: 'green'}
+            }
         };
         bcMACDValues.push(value);
     }
