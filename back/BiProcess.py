@@ -173,6 +173,7 @@ class BiProcess(ToString):
                         if len(tempklineList) > 0:
                             for l in range(len(tempklineList)):
                                 lastBi.klineList.append(tempklineList[l])
+                            tempklineList.clear()
                         lastBi.klineList.append(item)
                     else:
                         tempklineList.append(item)
