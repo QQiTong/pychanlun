@@ -224,6 +224,10 @@ class Calc:
         duanProcess = DuanProcess()
         duanResult = duanProcess.handle(biResult, highList, lowList)
 
+        # 高一级别段处理
+        higherDuanProcess = DuanProcess()
+        higherDuanResult = higherDuanProcess.handle(duanResult, highList, lowList)
+
         # print("段结果:", len(biResult), len(duanResult))
 
         # 中枢处理
@@ -267,14 +271,29 @@ class Calc:
         deaList = resJson['dea']
         macdList = resJson['macd']
 
-        # 开发测试中的背驰计算
+        # 背驰计算
         time_array = np.array(timeList)
         macd_array = np.array(macdList)
         diff_array = np.array(diffList)
         dea_array = np.array(deaList)
         beichiData = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, duanResult)
-        resJson['buyMACDBCData'] = beichiData['buyMACDBCData']
-        resJson['sellMACDBCData'] = beichiData['sellMACDBCData']
+        beichiData2 = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, higherDuanResult)
+        buyMACDBCData = beichiData['buyMACDBCData']
+        sellMACDBCData = beichiData['sellMACDBCData']
+        buyMACDBCData2 = beichiData2['buyMACDBCData']
+        sellMACDBCData2 = beichiData2['sellMACDBCData']
+        for x in range(len(buyMACDBCData2['date'])):
+            if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
+                buyMACDBCData['date'].append(buyMACDBCData2['date'][x])
+                buyMACDBCData['data'].append(buyMACDBCData2['data'][x])
+                buyMACDBCData['value'].append(buyMACDBCData2['value'][x])
+        for x in range(len(sellMACDBCData2['date'])):
+            if pydash.find_index(sellMACDBCData['date'], lambda t: t == sellMACDBCData2['date'][x]) == -1:
+                sellMACDBCData['date'].append(sellMACDBCData2['date'][x])
+                sellMACDBCData['data'].append(sellMACDBCData2['data'][x])
+                sellMACDBCData['value'].append(sellMACDBCData2['value'][x])
+        resJson['buyMACDBCData'] = buyMACDBCData
+        resJson['sellMACDBCData'] = sellMACDBCData
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)
