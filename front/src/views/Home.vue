@@ -135,10 +135,10 @@
                 }
             }, 10 * 1000)
 
-            this.$nextTick(() => {
-                console.log('----1', this.$refs.myCharts)
-                console.log('----2', this.$refs.myCharts.options)
-            })
+            // this.$nextTick(() => {
+            //     console.log('----1', this.$refs.myCharts)
+            //     console.log('----2', this.$refs.myCharts.options)
+            // })
             // this.$refs.myCharts.options = this.option
             // this.$refs.myCharts.on('datazoom', function (obj) {
             //     //do some thing

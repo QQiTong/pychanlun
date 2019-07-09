@@ -6,7 +6,7 @@ import pandas as pd
 from numpy import array
 import talib as ta
 import time
-
+import threading
 from back.Mail import Mail
 
 '''
@@ -31,9 +31,9 @@ mail = Mail()
 
 # 监控期货
 # timeScope 监控距离现在多少分钟的
-def monitorFutures(timeScope):
+def monitorFutures():
     auth('13088887055', 'chanlun123456')
-
+    timeScope = 2
     lastTimeMap = {}
     for i in range(len(symbolList)):
         symbol = symbolList[i]
@@ -55,7 +55,7 @@ def monitorFutures(timeScope):
 
                 lastTime = lastTimeMap[symbol][period]
                 diffTime = currentTime - lastTime
-                print("diffTime:", diffTime, symbol, period)
+                print("当前:", symbol, period)
 
                 period = '5min'
                 symbol = 'RB1910.XSGE'
@@ -88,7 +88,9 @@ def monitorFutures(timeScope):
 
 # 监控BTC
 # timeScope 监控距离现在多少分钟的
-def monitorBTC(timeScope):
+def monitorBTC():
+    timeScope = 2
+
     symbol = 'XBTUSD'
     lastTimeMap = {}
     lastTimeMap[symbol] = {}
@@ -107,13 +109,14 @@ def monitorBTC(timeScope):
 
             lastTime = lastTimeMap[symbol][period]
             diffTime = currentTime - lastTime
+            print("当前:", symbol, period)
 
             if len(result['buyMACDBCData']['date']) > 0:
                 lastBuyDate = result['buyMACDBCData']['date'][-1]
                 dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
                 lastBuyValue = result['buyMACDBCData']['value'][-1]
 
-                if lastTime != dateStamp and currentTime - dateStamp <= 60*timeScope:
+                if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                     lastTimeMap[symbol][period] = dateStamp
                     msg = "当前:", symbol, period, lastBuyDate, lastBuyValue
                     print(msg)
@@ -126,7 +129,7 @@ def monitorBTC(timeScope):
                 lastSellValue = result['sellMACDBCData']['value'][-1]
                 dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
 
-                if lastTime != dateStamp and currentTime - dateStamp <= 60*timeScope:
+                if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                     lastTimeMap[symbol][period] = dateStamp
                     msg = "当前:", symbol, period, lastSellDate, lastSellValue
                     print(msg)
@@ -137,5 +140,7 @@ def monitorBTC(timeScope):
         time.sleep(10)
 
 
-monitorBTC(240)
-# monitorFutures(60)
+threading.Thread(target=monitorBTC).start()
+# threading.Thread(target=monitorFutures).start()
+# monitorBTC(2)
+# monitorFutures(2)
