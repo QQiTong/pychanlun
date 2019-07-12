@@ -6,7 +6,7 @@ import json
 from .funcat.time_series import (fit_series, NumericSeries)
 from .funcat.func import CrossOver
 
-def calc(time_s, macd_s, diff_s, dea_s, bi_list, duan_s):
+def calc(time_s, macd_s, diff_s, dea_s, bi_list, duan_s,bigLevel=False):
     time_s, macd_s, diff_s, dea_s, duan_s = fit_series(time_s, macd_s, diff_s, dea_s, duan_s)
     divergence_down = np.zeros(len(time_s))
     divergence_up = np.zeros(len(time_s))
@@ -36,10 +36,16 @@ def calc(time_s, macd_s, diff_s, dea_s, bi_list, duan_s):
         if divergence_down[i]:
             data['buyMACDBCData']['date'].append(time_s[i])
             data['buyMACDBCData']['data'].append(diff_s[i])
-            data['buyMACDBCData']['value'].append('线底背')
+            if bigLevel:
+                data['buyMACDBCData']['value'].append('高级别线底背')
+            else:
+                data['buyMACDBCData']['value'].append('线底背')
     for i in range(len(divergence_up)):
         if divergence_up[i]:
             data['sellMACDBCData']['date'].append(time_s[i])
             data['sellMACDBCData']['data'].append(diff_s[i])
-            data['sellMACDBCData']['value'].append('线顶背')
+            if bigLevel:
+                data['sellMACDBCData']['value'].append('高级别线顶背')
+            else:
+                data['sellMACDBCData']['value'].append('线顶背')
     return data

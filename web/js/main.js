@@ -250,6 +250,7 @@ function draw(stockJsonData, update) {
         option.series[10].data = resultData.deaBigLevel;
 
         option.series[11].data = resultData.volume;
+        option.series[12].data = resultData.higherDuanValues;
 
 
         option.xAxis[0].data = resultData.time;
@@ -926,6 +927,22 @@ function draw(stockJsonData, update) {
                 //     symbol: 'none',
                 //     animation: false
                 // },
+                {
+                    name: '高级别段',
+                    type: 'line',
+                    z: 5,
+                    data: resultData.higherDuanValues,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'solid',
+                            width: 2,
+                            color: 'blue'
+                        },
+                    },
+                    symbol: 'none',
+                    animation: false
+                },
             ],
             graphic: [],
         };
@@ -960,6 +977,7 @@ function splitData(jsonObj) {
 
     const bidata = jsonObj.bidata;
     const duandata = jsonObj.duandata;
+    const higherDuanData = jsonObj.higherDuanData;
 
     // console.log('bidata', bidata);
     // console.log('duandata', duandata);
@@ -1000,6 +1018,12 @@ function splitData(jsonObj) {
     for (var i = 0; i < duandata.date.length; i++) {
         duanValues.push([duandata.date[i], duandata.data[i]])
     }
+    var higherDuanValues = [];
+    for (var i = 0; i < higherDuanData.date.length; i++) {
+        higherDuanValues.push([higherDuanData.date[i], higherDuanData.data[i]])
+    }
+
+
 
     var zsvalues = [];
     for (var i = 0; i < zsdata.length; i++) {
@@ -1199,6 +1223,39 @@ function splitData(jsonObj) {
         };
         bcMACDValues.push(value);
     }
+    // 大级别macd背驰点标注 buyHigherMACDBCData
+    for (var i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
+        var value = {
+            coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.data[i]],
+            value: jsonObj.buyHigherMACDBCData.value[i],
+            symbolRotate: 90,
+            symbol: 'pin',
+            itemStyle: {
+                normal: {color: 'red'}
+            },
+            label: {
+                position: 'inside',
+                offset: [0, 10],
+                textBorderColor: 'red',
+                textBorderWidth: 2,
+                color: 'white',
+            },
+        };
+        bcMACDValues.push(value);
+    }
+    for (var i = 0; i < jsonObj.sellHigherMACDBCData.date.length; i++) {
+        var value = {
+            coord: [jsonObj.sellHigherMACDBCData.date[i], jsonObj.sellHigherMACDBCData.data[i]],
+            value: jsonObj.sellHigherMACDBCData.value[i],
+            symbolRotate: 90,
+            symbol: 'pin',
+            itemStyle: {
+                normal: {color: 'green'}
+            }
+        };
+        bcMACDValues.push(value);
+    }
+
     // 布林带
     // const fixLength = 5;
     // for (var i = 0; i < macddata.length; i++) {
@@ -1227,6 +1284,7 @@ function splitData(jsonObj) {
         volume: volumeData,
         biValues: biValues,
         duanValues: duanValues,
+        higherDuanValues: higherDuanValues,
         zsvalues: zsvalues,
         zsflag: zsflag,
         macd: macddata,

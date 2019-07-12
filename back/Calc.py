@@ -254,6 +254,9 @@ class Calc:
 
         resJson['bidata'] = getBiData(biProcess, timeList)
         resJson['duandata'] = getDuanData(biProcess, duanProcess, timeList)
+
+        resJson['higherDuanData'] = getDuanData(biProcess,higherDuanProcess,timeList)
+
         resJson['diff'] = getMacd(closePriceList)[0].tolist()
         resJson['dea'] = getMacd(closePriceList)[1].tolist()
         resJson['macd'] = getMacd(closePriceList)[2].tolist()
@@ -277,23 +280,39 @@ class Calc:
         diff_array = np.array(diffList)
         dea_array = np.array(deaList)
         beichiData = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, duanResult)
-        beichiData2 = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, higherDuanResult)
+        beichiData2 = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, higherDuanResult,True)
         buyMACDBCData = beichiData['buyMACDBCData']
         sellMACDBCData = beichiData['sellMACDBCData']
         buyMACDBCData2 = beichiData2['buyMACDBCData']
         sellMACDBCData2 = beichiData2['sellMACDBCData']
+
+
+        buyHigherMACDBCData = {}
+        buyHigherMACDBCData['date'] = []
+        buyHigherMACDBCData['data'] = []
+        buyHigherMACDBCData['value'] = []
+
+        sellHigherMACDBCData = {}
+        sellHigherMACDBCData['date'] = []
+        sellHigherMACDBCData['data'] = []
+        sellHigherMACDBCData['value'] = []
+
         for x in range(len(buyMACDBCData2['date'])):
             if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
-                buyMACDBCData['date'].append(buyMACDBCData2['date'][x])
-                buyMACDBCData['data'].append(buyMACDBCData2['data'][x])
-                buyMACDBCData['value'].append(buyMACDBCData2['value'][x])
+                buyHigherMACDBCData['date'].append(buyMACDBCData2['date'][x])
+                buyHigherMACDBCData['data'].append(buyMACDBCData2['data'][x])
+                buyHigherMACDBCData['value'].append(buyMACDBCData2['value'][x])
         for x in range(len(sellMACDBCData2['date'])):
             if pydash.find_index(sellMACDBCData['date'], lambda t: t == sellMACDBCData2['date'][x]) == -1:
-                sellMACDBCData['date'].append(sellMACDBCData2['date'][x])
-                sellMACDBCData['data'].append(sellMACDBCData2['data'][x])
-                sellMACDBCData['value'].append(sellMACDBCData2['value'][x])
+                sellHigherMACDBCData['date'].append(sellMACDBCData2['date'][x])
+                sellHigherMACDBCData['data'].append(sellMACDBCData2['data'][x])
+                sellHigherMACDBCData['value'].append(sellMACDBCData2['value'][x])
         resJson['buyMACDBCData'] = buyMACDBCData
         resJson['sellMACDBCData'] = sellMACDBCData
+
+        resJson['buyHigherMACDBCData'] = buyHigherMACDBCData
+        resJson['sellHigherMACDBCData'] = sellHigherMACDBCData
+
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)

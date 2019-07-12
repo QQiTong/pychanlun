@@ -35,7 +35,7 @@ class KlineDataTool:
         elif period == "3m":
             period = '1'
             target = 3
-            fromDate = toDate - 24 * 60 * 60 * 3
+            fromDate = toDate - 24 * 60 * 60 * 4
         elif period == "5m":
             period = '5'
 
