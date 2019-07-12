@@ -11,22 +11,22 @@ from vnpy.app.cta_strategy import (
 
 
 class MacdStrategy(CtaTemplate):
-    author = "parker"
+    """"""
+
+    author = "用Python的交易员"
 
     fast_window = 12
     slow_window = 26
-    mid_window = 9
+    signal_window = 9
 
     fast_ma0 = 0.0
     fast_ma1 = 0.0
 
     slow_ma0 = 0.0
     slow_ma1 = 0.0
+    change = 0.02
 
-    mid_0 = 0.0
-    mid_1 = 0.0
-
-    parameters = ["fast_window", "slow_window"]
+    parameters = ["fast_window", "slow_window","change"]
     variables = ["fast_ma0", "fast_ma1", "slow_ma0", "slow_ma1"]
 
     def __init__(self, cta_engine, strategy_name, vt_symbol, setting):
@@ -35,8 +35,8 @@ class MacdStrategy(CtaTemplate):
             cta_engine, strategy_name, vt_symbol, setting
         )
 
-        self.bg = BarGenerator(self.on_bar)
-        self.am = ArrayManager()
+        self.bg = BarGenerator(self.on_bar, 15, self.on_15min_bar)
+        self.am = ArrayManager(500)
 
     def on_init(self):
         """
@@ -50,7 +50,6 @@ class MacdStrategy(CtaTemplate):
         Callback when strategy is started.
         """
         self.write_log("策略启动")
-        self.put_event()
 
     def on_stop(self):
         """
@@ -58,56 +57,59 @@ class MacdStrategy(CtaTemplate):
         """
         self.write_log("策略停止")
 
-        self.put_event()
-
     def on_tick(self, tick: TickData):
         """
         Callback of new tick data update.
         """
         self.bg.update_tick(tick)
 
-    def on_15min_bar(self, bar: BarData):
-        print("15min", bar)
-
     def on_bar(self, bar: BarData):
         """
         Callback of new bar data update.
         """
-        print("macd查看----->", bar)
+        self.bg.update_bar(bar)
+
+    def on_15min_bar(self, bar: BarData):
+        """"""
+        self.cancel_all()
+
         am = self.am
         am.update_bar(bar)
         if not am.inited:
             return
+        dif, dea, macd = am.macd(self.fast_window, self.slow_window,self.signal_window,array=True)
+        self.fast_ma0 = dif[-1]
+        self.fast_ma1 = dif[-2]
 
-        macd, signal, hist = am.macd(self.fast_window, self.slow_window, self.mid_window, array=True)
-        self.fast_ma0 = macd[-1]
-        self.fast_ma1 = macd[-2]
-        buyCondition = (am.close_array[-1] - am.open_array[-1]) / am.open_array[-1] >=0.02
-        sellCondition = (am.close_array[-1] - am.open_array[-1]) / am.open_array[-1] <=0.02
-        self.slow_ma0 = signal[-1]
-        self.slow_ma1 = signal[-2]
+        self.slow_ma0 = dea[-1]
+        self.slow_ma1 = dea[-2]
 
-        self.mid_0 = hist[-1]
-        self.mid_1 = hist[-2]
+        cross_over = self.fast_ma0 > self.slow_ma0 and self.fast_ma1 < self.slow_ma1
+        cross_below = self.fast_ma0 < self.slow_ma0 and self.fast_ma1 > self.slow_ma1
 
-        # cross_over = self.fast_ma0 > self.slow_ma0 and self.fast_ma1 < self.slow_ma1
-        # cross_below = self.fast_ma0 < self.slow_ma0 and self.fast_ma1 > self.slow_ma1
-        cross_over = self.mid_0 > 0 > self.mid_1 and buyCondition
-        cross_below = self.mid_0 < 0 < self.mid_1 and sellCondition
+        # 涨跌幅
+        buy_condition = (bar.close_price - bar.open_price) / bar.open_price >= self.change
+        sell_condition = (bar.close_price - bar.open_price) / bar.open_price <= -self.change
+        # print("am长度:",len(am.close))
+        # and buy_condition and sell_condition
         if cross_over:
-            if self.pos == 0:
+            if self.pos == 0 :
+                print("开多:", bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
                 self.buy(bar.close_price, 1)
             elif self.pos < 0:
+                print("平空:", bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
                 self.cover(bar.close_price, 1)
-                self.buy(bar.close_price, 1)
+                # self.buy(bar.close_price, 1)
 
         elif cross_below:
-            if self.pos == 0:
+            if self.pos == 0 :
+                print("开空:",bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
+
                 self.short(bar.close_price, 1)
             elif self.pos > 0:
+                print("平多:", bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
                 self.sell(bar.close_price, 1)
-                self.short(bar.close_price, 1)
-
+                # self.short(bar.close_price, 1)
         self.put_event()
 
     def on_order(self, order: OrderData):

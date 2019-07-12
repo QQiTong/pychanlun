@@ -57,7 +57,6 @@ class BacktesterManager(QtWidgets.QWidget):
         self.class_combo = QtWidgets.QComboBox()
         self.class_combo.addItems(self.class_names)
 
-        # self.symbol_line = QtWidgets.QLineEdit("BTC190927.HUOBI")
         self.symbol_line = QtWidgets.QLineEdit("XBTUSD.BITMEX")
 
         self.interval_combo = QtWidgets.QComboBox()
@@ -78,7 +77,7 @@ class BacktesterManager(QtWidgets.QWidget):
             QtCore.QDate.currentDate()
         )
 
-        self.rate_line = QtWidgets.QLineEdit("0.00075")
+        self.rate_line = QtWidgets.QLineEdit("0.0075")
         self.slippage_line = QtWidgets.QLineEdit("0.2")
         self.size_line = QtWidgets.QLineEdit("1")
         self.pricetick_line = QtWidgets.QLineEdit("0.2")

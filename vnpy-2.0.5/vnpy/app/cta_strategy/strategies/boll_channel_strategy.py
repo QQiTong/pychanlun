@@ -93,26 +93,24 @@ class BollChannelStrategy(CtaTemplate):
         if self.pos == 0:
             self.intra_trade_high = bar.high_price
             self.intra_trade_low = bar.low_price
-
             if self.cci_value > 0:
+                print("开多", bar.datetime, bar.close_price)
                 self.buy(self.boll_up, self.fixed_size, True)
             elif self.cci_value < 0:
+                print("开空", bar.datetime, bar.close_price)
                 self.short(self.boll_down, self.fixed_size, True)
-
         elif self.pos > 0:
             self.intra_trade_high = max(self.intra_trade_high, bar.high_price)
             self.intra_trade_low = bar.low_price
-
             self.long_stop = self.intra_trade_high - self.atr_value * self.sl_multiplier
+            print("平多", bar.datetime, bar.close_price)
             self.sell(self.long_stop, abs(self.pos), True)
-
         elif self.pos < 0:
             self.intra_trade_high = bar.high_price
             self.intra_trade_low = min(self.intra_trade_low, bar.low_price)
-
+            print("平空", bar.datetime, bar.close_price)
             self.short_stop = self.intra_trade_low + self.atr_value * self.sl_multiplier
             self.cover(self.short_stop, abs(self.pos), True)
-
         self.put_event()
 
     def on_order(self, order: OrderData):

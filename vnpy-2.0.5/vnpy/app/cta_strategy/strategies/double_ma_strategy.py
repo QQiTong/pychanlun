@@ -39,7 +39,7 @@ class DoubleMaStrategy(CtaTemplate):
         Callback when strategy is inited.
         """
         self.write_log("策略初始化")
-        self.load_bar(10)
+        self.load_bar(1)
 
     def on_start(self):
         """
@@ -62,12 +62,11 @@ class DoubleMaStrategy(CtaTemplate):
         """
         self.bg.update_tick(tick)
 
-
-
     def on_bar(self, bar: BarData):
         """
         Callback of new bar data update.
         """
+        print("haha333333")
         am = self.am
         am.update_bar(bar)
         if not am.inited:
@@ -86,21 +85,15 @@ class DoubleMaStrategy(CtaTemplate):
 
         if cross_over:
             if self.pos == 0:
-                print("开多----->", bar)
-
                 self.buy(bar.close_price, 1)
             elif self.pos < 0:
-                print("平空开多----->", bar)
-
                 self.cover(bar.close_price, 1)
                 self.buy(bar.close_price, 1)
 
         elif cross_below:
             if self.pos == 0:
-                print("开空----->", bar)
                 self.short(bar.close_price, 1)
             elif self.pos > 0:
-                print("平多开空----->", bar)
                 self.sell(bar.close_price, 1)
                 self.short(bar.close_price, 1)
 

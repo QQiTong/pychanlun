@@ -8,6 +8,7 @@ from copy import copy
 from datetime import datetime, timedelta
 from threading import Lock
 from urllib.parse import urlencode
+
 from requests import ConnectionError
 
 from vnpy.api.rest import Request, RestClient
@@ -336,9 +337,8 @@ class BitmexRestApi(RestClient):
                 for d in data:
                     dt = datetime.strptime(
                         d["timestamp"], "%Y-%m-%dT%H:%M:%S.%fZ")
-                    # dt = dt + timedelta(hours=+7)
-
-
+                    # 修复时差问题
+                    dt = dt + timedelta(hours=+8,minutes=-1)
                     bar = BarData(
                         symbol=req.symbol,
                         exchange=req.exchange,
