@@ -57,8 +57,8 @@ def monitorFutures():
                 diffTime = currentTime - lastTime
                 print("当前:", symbol, period)
 
-                period = '5min'
-                symbol = 'RB1910.XSGE'
+                # period = '5min'
+                # symbol = 'RB1910.XSGE'
                 result = calc.calcData(period, symbol)
                 if len(result['buyMACDBCData']['date']) > 0:
                     lastBuyDate = result['buyMACDBCData']['date'][-1]
@@ -79,6 +79,31 @@ def monitorFutures():
 
                     if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                         msg = "当前:", symbol, period, lastSellDate, lastSellValue
+                        print(msg)
+                        mailResult = mail.send(str(msg))
+                        if not mailResult:
+                            print("发送失败")
+                # 监控高级别
+                if len(result['buyHigherMACDBCData']['date']) > 0:
+                    lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
+                    lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
+
+                    dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+
+                    if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                        msg = "高级别背驰-当前:", symbol, period, lastBuyDate, lastBuyValue
+                        print(msg)
+                        mailResult = mail.send(str(msg))
+                        if not mailResult:
+                            print("发送失败")
+
+                if len(result['sellHigherMACDBCData']['date']) > 0:
+                    lastSellDate = result['sellHigherMACDBCData']['date'][-1]
+                    lastSellValue = result['sellHigherMACDBCData']['value'][-1]
+                    dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+
+                    if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                        msg = "高级别背驰-当前:", symbol, period, lastSellDate, lastSellValue
                         print(msg)
                         mailResult = mail.send(str(msg))
                         if not mailResult:
@@ -136,11 +161,36 @@ def monitorBTC():
                     mailResult = mail.send(str(msg))
                     if not mailResult:
                         print("发送失败")
+            # 监控高级别
+            if len(result['buyHigherMACDBCData']['date']) > 0:
+                lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
+                dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+                lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
+
+                if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                    lastTimeMap[symbol][period] = dateStamp
+                    msg = "高级别背驰-当前:", symbol, period, lastBuyDate, lastBuyValue
+                    print(msg)
+                    mailResult = mail.send(str(msg))
+                    if not mailResult:
+                        print("发送失败")
+            if len(result['sellHigherMACDBCData']['date']) > 0:
+                lastSellDate = result['sellHigherMACDBCData']['date'][-1]
+                lastSellValue = result['sellHigherMACDBCData']['value'][-1]
+                dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+
+                if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                    lastTimeMap[symbol][period] = dateStamp
+                    msg = "高级别背驰-当前:", symbol, period, lastSellDate, lastSellValue
+                    print(msg)
+                    mailResult = mail.send(str(msg))
+                    if not mailResult:
+                        print("发送失败")
             time.sleep(5)
         time.sleep(10)
 
 
 threading.Thread(target=monitorBTC).start()
-# threading.Thread(target=monitorFutures).start()
+threading.Thread(target=monitorFutures).start()
 # monitorBTC(2)
 # monitorFutures(2)
