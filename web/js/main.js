@@ -276,6 +276,9 @@ function draw(stockJsonData, update) {
                     type: 'cross' //指示器类型，十字准星
                 },
             },
+            axisPointer: {
+                link: {xAxisIndex: 'all'},
+            },
             toolbox: {
                 orient: 'horizontal',
                 itemSize: 16,
@@ -417,13 +420,13 @@ function draw(stockJsonData, update) {
                     // },
                 },
             },
-            color: [ 'yellow','green','blue', 'white', 'white'],
+            color: ['yellow', 'green', 'blue', 'white', 'white'],
             legend: {
-                data: ['笔', '段','高级别段', 'MA5', 'MA10'],
+                data: ['笔', '段', '高级别段', 'MA5', 'MA10'],
                 selected: {
                     '笔': true,
                     '段': true,
-                    '高级别段':true,
+                    '高级别段': true,
                     'MA5': false,
                     'MA10': false,
                     // '布林中轨': false
@@ -465,12 +468,23 @@ function draw(stockJsonData, update) {
                     data: resultData.time,
                     scale: true,
                     boundaryGap: false,
-                    axisLine: {onZero: false},
                     splitLine: {show: false},
                     splitNumber: 20,
                     min: 'dataMin',
                     max: 'dataMax',
-                    axisLine: {lineStyle: {color: '#8392A5'}}
+                    axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
+                    // axisPointer: {
+                    //     label: {
+                    //         formatter: function (params) {
+                    //             var seriesValue = (params.seriesData[0] || {}).value;
+                    //             return params.value
+                    //                 + (seriesValue != null
+                    //                         ? '\n' + echarts.format.addCommas(seriesValue)
+                    //                         : ''
+                    //                 );
+                    //         }
+                    //     }
+                    // }
                 },
                 {
                     type: 'category',
@@ -529,9 +543,6 @@ function draw(stockJsonData, update) {
                 {
                     gridIndex: 1,
                     splitNumber: 2,
-                    axisLine: {
-                        onZero: false
-                    },
                     axisTick: {
                         show: false
                     },
@@ -541,7 +552,7 @@ function draw(stockJsonData, update) {
                     axisLabel: {
                         show: true
                     },
-                    axisLine: {lineStyle: {color: '#8392A5'}},
+                    axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
                 },
                 //大级别macd
                 {
@@ -1025,7 +1036,6 @@ function splitData(jsonObj) {
     }
 
 
-
     var zsvalues = [];
     for (var i = 0; i < zsdata.length; i++) {
         var value;
@@ -1224,12 +1234,12 @@ function splitData(jsonObj) {
         };
         bcMACDValues.push(value);
     }
-    // 大级别macd背驰点标注 buyHigherMACDBCData
+    // 高级别macd背驰点标注 buyHigherMACDBCData
     for (var i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
         var value = {
             coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.data[i]],
             value: jsonObj.buyHigherMACDBCData.value[i],
-            symbolRotate: -90,
+            symbolRotate: 90,
             symbol: 'pin',
             itemStyle: {
                 normal: {color: 'Purple'}
@@ -1248,7 +1258,7 @@ function splitData(jsonObj) {
         var value = {
             coord: [jsonObj.sellHigherMACDBCData.date[i], jsonObj.sellHigherMACDBCData.data[i]],
             value: jsonObj.sellHigherMACDBCData.value[i],
-            symbolRotate: -90,
+            symbolRotate: 90,
             symbol: 'pin',
             label: {
                 position: 'inside',
