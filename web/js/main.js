@@ -1044,18 +1044,18 @@ function splitData(jsonObj) {
                 {
                     coord: zsdata[i][0],
                     itemStyle: {
-                        color: bgColor,
+                        color: upColor,
                         borderWidth: '2',
                         borderColor: 'red',
-                        opacity: 1,
+                        opacity: 0.2,
                     }
                 },
                 {
                     coord: zsdata[i][1],
                     itemStyle: {
-                        color: 'red',
+                        color: upColor,
                         borderWidth: '1',
-                        borderColor: 'red',
+                        borderColor: upColor,
                         opacity: 0.2,
                     }
                 }
