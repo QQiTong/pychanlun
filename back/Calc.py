@@ -234,16 +234,16 @@ class Calc:
         entanglementList = entanglement.calcEntanglements(timeList, duanResult, biResult, highList, lowList)
 
         # 中枢处理
-        zhongShu = ZhongShuProcess()
-        zhongShuHigh = zhongShu.initHigh(biResult, highList, lowList)
-        zhongShuLow = zhongShu.initLow(biResult, highList, lowList)
-        zhongShuStartEnd = zhongShu.initStartEnd(biResult, highList, lowList)
+        # zhongShu = ZhongShuProcess()
+        # zhongShuHigh = zhongShu.initHigh(biResult, highList, lowList)
+        # zhongShuLow = zhongShu.initLow(biResult, highList, lowList)
+        # zhongShuStartEnd = zhongShu.initStartEnd(biResult, highList, lowList)
 
         # print('笔中枢高:', len(zhongShuHigh), zhongShuHigh)
         # print('笔中枢低:', len(zhongShuLow), zhongShuLow)
         # print('笔中枢开始结束:', len(zhongShuStartEnd), zhongShuStartEnd)
 
-        zsdata, zsflag = getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList)
+        zsdata, zsflag = getZhongShuData(entanglementList)
         # print("中枢数据:", zsdata, zsflag)
 
         # 拼接json数据
@@ -376,35 +376,47 @@ def getDuanData(biProcess, duanProcess, timeList):
     resDuanData['date'] = duanDate
     return resDuanData
 
-
-def getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList):
+def getZhongShuData(entanglementList):
     zsdata = []
-    zsStart = []
-    zsEnd = []
     zsflag = []
-    for i in range(len(zhongShuStartEnd)):
-        item = zhongShuStartEnd[i]
-        if item == 0:
-            continue
-        if item == 1:
-            # print("中枢起点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
-            zsStart = [timeList[i], zhongShuLow[i]]
-        elif item == 2:
-            # print("中枢终点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
-            zsEnd = [timeList[i], zhongShuHigh[i]]
-        if len(zsStart) and len(zsEnd):
-            zsItem = [copy.copy(zsStart), copy.copy(zsEnd)]
-            # print("中枢拼接:", zsItem)
-            zsdata.append(copy.copy(zsItem))
-            if zsStart[1] > zsEnd[1]:
-                zsflag.append(-1)
-            else:
-                zsflag.append(1)
-            zsStart.clear()
-            zsEnd.clear()
-            zsItem.clear()
-
+    for i in range(len(entanglementList)):
+        e = entanglementList[i]
+        if e.direction == -1:
+            zsflag.append(-1)
+            zsdata.append([e.startTime, e.top, e.endTime, e.bottom])
+        else:
+            zsflag.append(1)
+            zsdata.append([e.startTime, e.bottom, e.endTime, e.top])
     return zsdata, zsflag
+
+# def getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList):
+#     zsdata = []
+#     zsStart = []
+#     zsEnd = []
+#     zsflag = []
+#     for i in range(len(zhongShuStartEnd)):
+#         item = zhongShuStartEnd[i]
+#         if item == 0:
+#             continue
+#         if item == 1:
+#             # print("中枢起点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
+#             zsStart = [timeList[i], zhongShuLow[i]]
+#         elif item == 2:
+#             # print("中枢终点:", i, zhongShuHigh[i], zhongShuLow[i], zhongShuStartEnd[i])
+#             zsEnd = [timeList[i], zhongShuHigh[i]]
+#         if len(zsStart) and len(zsEnd):
+#             zsItem = [copy.copy(zsStart), copy.copy(zsEnd)]
+#             # print("中枢拼接:", zsItem)
+#             zsdata.append(copy.copy(zsItem))
+#             if zsStart[1] > zsEnd[1]:
+#                 zsflag.append(-1)
+#             else:
+#                 zsflag.append(1)
+#             zsStart.clear()
+#             zsEnd.clear()
+#             zsItem.clear()
+
+#     return zsdata, zsflag
 
 
 def getMacd(closePriceList):
