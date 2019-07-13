@@ -383,10 +383,10 @@ def getZhongShuData(entanglementList):
         e = entanglementList[i]
         if e.direction == -1:
             zsflag.append(-1)
-            zsdata.append([e.startTime, e.top, e.endTime, e.bottom])
+            zsdata.append([[e.startTime, e.top], [e.endTime, e.bottom]])
         else:
             zsflag.append(1)
-            zsdata.append([e.startTime, e.bottom, e.endTime, e.top])
+            zsdata.append([[e.startTime, e.bottom], [e.endTime, e.top]])
     return zsdata, zsflag
 
 # def getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList):
