@@ -19,6 +19,7 @@ from back.DuanProcess import DuanProcess
 from back.KlineProcess import KlineProcess
 from back.Tools import Tools
 import back.divergence as divergence
+import back.entanglement as entanglement
 
 # 币安的数据结构
 # [
@@ -229,6 +230,8 @@ class Calc:
         higherDuanResult = higherDuanProcess.handle(duanResult, highList, lowList)
 
         # print("段结果:", len(biResult), len(duanResult))
+
+        entanglementList = entanglement.calcEntanglements(timeList, duanResult, biResult, highList, lowList)
 
         # 中枢处理
         zhongShu = ZhongShuProcess()
