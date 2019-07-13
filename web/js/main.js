@@ -417,15 +417,16 @@ function draw(stockJsonData, update) {
                     // },
                 },
             },
-            color: ['yellow', 'green', 'yellow', 'white', '#999999'],
+            color: [ 'yellow','green','blue', 'white', 'white'],
             legend: {
-                data: ['笔', '段', 'MA5', 'MA10', '布林中轨'],
+                data: ['笔', '段','高级别段', 'MA5', 'MA10'],
                 selected: {
                     '笔': true,
                     '段': true,
+                    '高级别段':true,
                     'MA5': false,
                     'MA10': false,
-                    '布林中轨': false
+                    // '布林中轨': false
                 },
                 top: 10,
                 textStyle: {
@@ -657,7 +658,7 @@ function draw(stockJsonData, update) {
                 {
                     name: '笔',
                     type: 'line',
-                    z: 3,
+                    z: 1,
                     data: resultData.biValues,
                     lineStyle: {
                         normal: {
@@ -673,7 +674,7 @@ function draw(stockJsonData, update) {
                 {
                     name: '段',
                     type: 'line',
-                    z: 4,
+                    z: 1,
                     data: resultData.duanValues,
                     lineStyle: {
                         normal: {
@@ -930,7 +931,7 @@ function draw(stockJsonData, update) {
                 {
                     name: '高级别段',
                     type: 'line',
-                    z: 5,
+                    z: 1,
                     data: resultData.higherDuanValues,
                     lineStyle: {
                         normal: {
@@ -1228,16 +1229,16 @@ function splitData(jsonObj) {
         var value = {
             coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.data[i]],
             value: jsonObj.buyHigherMACDBCData.value[i],
-            symbolRotate: 90,
+            symbolRotate: -90,
             symbol: 'pin',
             itemStyle: {
-                normal: {color: 'red'}
+                normal: {color: 'Purple'}
             },
             label: {
                 position: 'inside',
-                offset: [0, 10],
-                textBorderColor: 'red',
-                textBorderWidth: 2,
+                offset: [10, 5],
+                textBorderColor: 'Purple',
+                textBorderWidth: 1,
                 color: 'white',
             },
         };
@@ -1247,10 +1248,17 @@ function splitData(jsonObj) {
         var value = {
             coord: [jsonObj.sellHigherMACDBCData.date[i], jsonObj.sellHigherMACDBCData.data[i]],
             value: jsonObj.sellHigherMACDBCData.value[i],
-            symbolRotate: 90,
+            symbolRotate: -90,
             symbol: 'pin',
+            label: {
+                position: 'inside',
+                offset: [10, 5],
+                textBorderColor: 'blue',
+                textBorderWidth: 1,
+                color: 'white',
+            },
             itemStyle: {
-                normal: {color: 'green'}
+                normal: {color: 'blue'}
             }
         };
         bcMACDValues.push(value);

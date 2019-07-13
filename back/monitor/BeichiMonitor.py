@@ -24,8 +24,9 @@ symbolList2 = ['MA1909.XZCE', 'SR1909.XZCE', 'FG1909.XZCE']
 symbolList3 = ['NI1907.XSGE', 'ZN1907.XSGE']
 
 periodList = ['1min', '3min', '5min', '15min', '30min', '60min']
+periodList2 = ['3min', '5min', '15min', '30min', '60min']
 
-symbolList = symbolList1
+symbolList = symbolList2
 mail = Mail()
 
 
@@ -38,17 +39,17 @@ def monitorFutures():
     for i in range(len(symbolList)):
         symbol = symbolList[i]
         lastTimeMap[symbol] = {}
-        for j in range(len(periodList)):
-            period = periodList[j]
+        for j in range(len(periodList2)):
+            period = periodList2[j]
             lastTimeMap[symbol][period] = 0
 
     print(lastTimeMap)
 
     while True:
         for i in range(len(symbolList)):
-            for j in range(len(periodList)):
+            for j in range(len(periodList2)):
                 symbol = symbolList[i]
-                period = periodList[j]
+                period = periodList2[j]
                 calc = Calc()
                 # 当前时间戳 秒为单位
                 currentTime = int(time.time())
@@ -128,6 +129,7 @@ def monitorBTC():
         for j in range(len(periodList)):
             period = periodList[j]
             calc = Calc()
+            period = '3min'
             result = calc.calcData(period, symbol)
             # 当前时间戳 秒为单位
             currentTime = int(time.time())
@@ -191,6 +193,6 @@ def monitorBTC():
 
 
 threading.Thread(target=monitorBTC).start()
-threading.Thread(target=monitorFutures).start()
+# threading.Thread(target=monitorFutures).start()
 # monitorBTC(2)
 # monitorFutures(2)

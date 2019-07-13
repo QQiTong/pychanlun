@@ -297,21 +297,21 @@ class Calc:
         sellHigherMACDBCData['data'] = []
         sellHigherMACDBCData['value'] = []
 
-        for x in range(len(buyMACDBCData2['date'])):
-            if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
-                buyHigherMACDBCData['date'].append(buyMACDBCData2['date'][x])
-                buyHigherMACDBCData['data'].append(buyMACDBCData2['data'][x])
-                buyHigherMACDBCData['value'].append(buyMACDBCData2['value'][x])
-        for x in range(len(sellMACDBCData2['date'])):
-            if pydash.find_index(sellMACDBCData['date'], lambda t: t == sellMACDBCData2['date'][x]) == -1:
-                sellHigherMACDBCData['date'].append(sellMACDBCData2['date'][x])
-                sellHigherMACDBCData['data'].append(sellMACDBCData2['data'][x])
-                sellHigherMACDBCData['value'].append(sellMACDBCData2['value'][x])
+        # for x in range(len(buyMACDBCData2['date'])):
+        #     if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
+        #         buyHigherMACDBCData['date'].append(buyMACDBCData2['date'][x])
+        #         buyHigherMACDBCData['data'].append(buyMACDBCData2['data'][x])
+        #         buyHigherMACDBCData['value'].append(buyMACDBCData2['value'][x])
+        # for x in range(len(sellMACDBCData2['date'])):
+        #     if pydash.find_index(sellMACDBCData['date'], lambda t: t == sellMACDBCData2['date'][x]) == -1:
+        #         sellHigherMACDBCData['date'].append(sellMACDBCData2['date'][x])
+        #         sellHigherMACDBCData['data'].append(sellMACDBCData2['data'][x])
+        #         sellHigherMACDBCData['value'].append(sellMACDBCData2['value'][x])
         resJson['buyMACDBCData'] = buyMACDBCData
         resJson['sellMACDBCData'] = sellMACDBCData
 
-        resJson['buyHigherMACDBCData'] = buyHigherMACDBCData
-        resJson['sellHigherMACDBCData'] = sellHigherMACDBCData
+        resJson['buyHigherMACDBCData'] = buyMACDBCData2
+        resJson['sellHigherMACDBCData'] = sellMACDBCData2
 
 
         resJsonStr = json.dumps(resJson)
