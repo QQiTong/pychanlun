@@ -5,6 +5,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import time
+import pydash
 
 # url = "http://api.zb.cn/data/v1/kline?market=btc_usdt"
 # 火币合约接口 全局代理后200ms内 , 不代理1s左右
@@ -38,31 +39,30 @@ class KlineDataTool:
             fromDate = toDate - 24 * 60 * 60 * 4
         elif period == "5m":
             period = '5'
-
-            fromDate = toDate - (1000 * 5 * 60) / 4 if isBigLevel else toDate - 1000 * 5 * 60
+            fromDate = toDate - 1000 * 5 * 60
         elif period == "15m":
             period = '1'
             target = 15
-            fromDate = toDate - (10080 * 60) / 5 if isBigLevel else toDate - 2000 * 5 * 60
+            fromDate = toDate - 2000 * 5 * 60
 
         elif period == "30m":
             period = '1'
             target = 30
-            fromDate = toDate - (10080 * 60) / 5 if isBigLevel else toDate - 2000 * 5 * 60
+            fromDate = toDate - 2000 * 5 * 60
         elif period == "60m":
             period = '60'
-            fromDate = toDate - (1000 * 60 * 60) / 5 if isBigLevel else toDate - 10 * 1000 * 5 * 60
+            fromDate = toDate - 10 * 1000 * 5 * 60
         elif period == "240m":
             period = '1'
             target = 240
-            fromDate = toDate - (10080 * 60) / 5 if isBigLevel else toDate - 1000 * 5 * 60
+            fromDate = toDate - 1000 * 5 * 60
         elif period == '1d':
             period = 'D'
-            fromDate = toDate - (1440 * 24 * 60 * 60) / 5 if isBigLevel else toDate - 1000 * 60 * 60 * 24
+            fromDate = toDate - 1000 * 60 * 60 * 24
         elif period == '7d':
             period = 'D'
             target = 7
-            fromDate = toDate - (1440 * 24 * 60 * 60) / 5 if isBigLevel else toDate - 1000 * 5 * 60 * 24
+            fromDate = toDate - 1000 * 5 * 60 * 24
 
         payload = {
             'resolution': period,

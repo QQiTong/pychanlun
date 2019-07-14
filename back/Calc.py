@@ -126,12 +126,12 @@ class Calc:
         #     for i in range(count):
         #         add(highList[i], lowList[i], timeList[i])
 
-
         # 获取接口数据
         klineDataTool = KlineDataTool()
         if symbol == 'XBTUSD':
             klineData = klineDataTool.getBtcData(self.bitmexPeriodMap[period], False)
             klineDataBigLevel = klineDataTool.getBtcData(self.bitmexPeriodMap[self.levelMap[period]], True)
+            klineDataBigLevel = pydash.filter_(klineDataBigLevel, lambda klineItem: klineItem['time']>= klineData[0]['time'])
         else:
             # 期货
             currentPeriod = self.periodMap[period]
@@ -258,7 +258,7 @@ class Calc:
         resJson['bidata'] = getBiData(biProcess, timeList)
         resJson['duandata'] = getDuanData(biProcess, duanProcess, timeList)
 
-        resJson['higherDuanData'] = getDuanData(biProcess,higherDuanProcess,timeList)
+        resJson['higherDuanData'] = getDuanData(biProcess, higherDuanProcess, timeList)
 
         resJson['diff'] = getMacd(closePriceList)[0].tolist()
         resJson['dea'] = getMacd(closePriceList)[1].tolist()
@@ -283,12 +283,12 @@ class Calc:
         diff_array = np.array(diffList)
         dea_array = np.array(deaList)
         beichiData = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, duanResult)
-        beichiData2 = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, higherDuanResult,True)
+        beichiData2 = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, higherDuanResult,
+                                      True)
         buyMACDBCData = beichiData['buyMACDBCData']
         sellMACDBCData = beichiData['sellMACDBCData']
         buyMACDBCData2 = beichiData2['buyMACDBCData']
         sellMACDBCData2 = beichiData2['sellMACDBCData']
-
 
         buyHigherMACDBCData = {}
         buyHigherMACDBCData['date'] = []
@@ -315,7 +315,6 @@ class Calc:
 
         resJson['buyHigherMACDBCData'] = buyMACDBCData2
         resJson['sellHigherMACDBCData'] = sellMACDBCData2
-
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)
@@ -376,6 +375,7 @@ def getDuanData(biProcess, duanProcess, timeList):
     resDuanData['date'] = duanDate
     return resDuanData
 
+
 def getZhongShuData(entanglementList):
     zsdata = []
     zsflag = []
@@ -388,6 +388,7 @@ def getZhongShuData(entanglementList):
             zsflag.append(1)
             zsdata.append([[e.startTime, e.bottom], [e.endTime, e.top]])
     return zsdata, zsflag
+
 
 # def getZhongShuData(zhongShuHigh, zhongShuLow, zhongShuStartEnd, timeList):
 #     zsdata = []
