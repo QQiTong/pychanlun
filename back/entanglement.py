@@ -42,10 +42,10 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                         e_down_list[-1].top = high_data[x]
                         if len(e_down_list) > 1:
                             # 看是否有重叠区间
-                            if e_down_list[-1].top >= e_down_list[-2].bottom:
+                            if e_down_list[-1].top >= e_down_list[-2].bottom and e_down_list[-1].bottom <= e_down_list[-2].top:
                                 # 有重叠区间
-                                if e_down_list[-1].top < e_down_list[-2].top:
-                                    e_down_list[-2].top = e_down_list[-1].top
+                                e_down_list[-2].top = min(e_down_list[-1].top, e_down_list[-2].top)
+                                e_down_list[-2].bottom = max(e_down_list[-1].bottom, e_down_list[-2].bottom)
                                 e_down_list[-2].end = e_down_list[-1].end
                                 e_down_list[-2].endTime = time_data[e_down_list[-2].end]
                                 e_down_list[-2].formal = True
@@ -76,10 +76,10 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                         e_up_list[-1].bottom = low_data[x]
                         if len(e_up_list) > 1:
                             # 看是否有重叠区间
-                            if e_up_list[-1].bottom <= e_up_list[-2].top:
+                            if e_up_list[-1].bottom <= e_up_list[-2].top and e_up_list[-1].top >= e_up_list[-2].bottom:
                                 # 有重叠区间
-                                if e_up_list[-1].bottom > e_up_list[-2].bottom:
-                                    e_up_list[-2].bottom = e_up_list[-1].bottom
+                                e_up_list[-2].top = min(e_up_list[-1].top, e_up_list[-2].top)
+                                e_up_list[-2].bottom = max(e_up_list[-1].bottom, e_up_list[-2].bottom)
                                 e_up_list[-2].end = e_up_list[-1].end
                                 e_up_list[-2].endTime = time_data[e_up_list[-2].end]
                                 e_up_list[-2].formal = True
