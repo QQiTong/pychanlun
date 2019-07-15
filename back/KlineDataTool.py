@@ -1,11 +1,15 @@
 import requests
 import json
-from jqdatasdk import *
+# from jqdatasdk import *
 from datetime import datetime
 import numpy as np
 import pandas as pd
 import time
 import pydash
+
+import rqdatac as rq
+from rqdatac import *
+
 
 # url = "http://api.zb.cn/data/v1/kline?market=btc_usdt"
 # 火币合约接口 全局代理后200ms内 , 不代理1s左右
@@ -152,11 +156,14 @@ class KlineDataTool:
     def getFutureData(self, symbol, period, size):
         # 聚宽数据源
         startTime = datetime.now()
-        print("可调用条数:", get_query_count())
+        # print("可调用条数:", get_query_count())
         # df = get_bars(symbol, size, unit=period, fields=['date', 'open', 'high', 'low', 'close', 'volume'],
         #               include_now=True, end_dt=datetime.now())
-        df = get_price(symbol, frequency=period, end_date=datetime.now(), count=size,
-                       fields=['open', 'high', 'low', 'close', 'volume'])
+        # df = get_price(symbol, frequency=period, end_date=datetime.now(), count=size,
+        #                fields=['open', 'high', 'low', 'close', 'volume'])
+        df = rq.get_price(symbol, frequency=period,
+                            fields=['open', 'high', 'low', 'close', 'volume'], end_date=datetime.now())
+
         # df = get_price('RB1910.XSGE', frequency='240m', end_date=datetime.now(), count=200,
         #                fields=['open', 'high', 'low', 'close', 'volume'])
         nparray = np.array(df)
