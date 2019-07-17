@@ -1,5 +1,6 @@
 import requests
 import json
+import numpy as np
 from .backend import DataBackend
 
 from ..utils import lru_cache, get_str_date_from_int, get_int_date
@@ -23,5 +24,13 @@ class BitmexDataBackend(DataBackend):
             "referer": "https://static.bitmex.com/",
             }
         r = requests.get(self.endpoint, params=payload, headers=header)
-        klines = json.loads(r.text)
-        return klines
+        prices = json.loads(r.text)
+        t = prices.get('t', [])
+        o = prices.get('o', [])
+        c = prices.get('c', [])
+        h = prices.get('h', [])
+        l = prices.get('l', [])
+        v = prices.get('v', [])
+        rec = np.zeros((len(t),), dtype=[('time', 'int32'), ('open', 'float32'), ('close', 'float32'), ('high', 'float32'), ('low', 'float32'), ('volume', 'float32')])
+        rec[:] = list(zip(t, o, c, h, l, v))
+        return rec

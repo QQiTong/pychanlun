@@ -10,4 +10,3 @@ def doMonitor1():
     startTime = endTime - 24 * 60 * 60 * 4
     dataBackend = BitmexDataBackend()
     prices = dataBackend.get_price('XBTUSD', startTime, endTime, '1')
-    print(prices)
