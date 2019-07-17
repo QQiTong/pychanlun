@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from numpy import array
 import talib as ta
-import rqdatac as rq
-from rqdatac import *
+# import rqdatac as rq
+# from rqdatac import *
 import time
 import threading
 from back.Mail import Mail
@@ -16,19 +16,19 @@ from back.Mail import Mail
 '''
 
 klineDataTool = KlineDataTool()
-# symbolList1 = ['RB1910.XSGE', 'HC1910.XSGE', 'RU1909.XSGE', 'NI1907.XSGE', 'FU1909.XSGE', 'ZN1908.XSGE',
-#                'SP1909.XSGE', 'MA1909.XZCE', 'SR1909.XZCE', 'AP1910.XZCE', 'CF1909.XZCE', 'J1909.XDCE', 'JM1909.XDCE',
-#                'PP1909.XDCE']
+symbolList1 = ['RB9999.XSGE', 'HC9999.XSGE', 'RU9999.XSGE', 'NI9999.XSGE', 'FU9999.XSGE', 'ZN9999.XSGE',
+               'SP9999.XSGE', 'MA9999.XZCE', 'SR9999.XZCE', 'AP9999.XZCE', 'CF9999.XZCE', 'J9999.XDCE', 'JM9999.XDCE',
+               'PP9999.XDCE']
 # 米筐数据
-symbolList1 = ['RB88', 'HC88', 'RU88', 'NI88', 'FU88', 'ZN88',
-               'SP88', 'MA88', 'SR88', 'AP88', 'CF88', 'J88', 'JM88',
-               'PP88']
+# symbolList1 = ['RB88', 'HC88', 'RU88', 'NI88', 'FU88', 'ZN88',
+#                'SP88', 'MA88', 'SR88', 'AP88', 'CF88', 'J88', 'JM88',
+#                'PP88']
 
 
 # 23:30结束的  甲醇 白糖 玻璃
-symbolList2 = ['MA88', 'SR88', 'FG88']
+symbolList2 = ['MA9999', 'SR9999', 'FG9999']
 # 1:00 结束的锌 镍
-symbolList3 = ['NI88', 'ZN88']
+symbolList3 = ['NI9999', 'ZN9999']
 
 periodList = ['1min', '3min', '5min', '15min', '30min', '60min']
 periodList2 = ['3min', '5min', '15min', '30min', '60min']
@@ -40,10 +40,10 @@ mail = Mail()
 # 监控期货
 # timeScope 监控距离现在多少分钟的
 def monitorFutures():
-    # auth('13088887055', 'chanlun123456')
-    init('license',
-         'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
-         ('rqdatad-pro.ricequant.com', 16011))
+    auth('13088887055', 'chanlun123456')
+    # init('license',
+    #      'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
+    #      ('rqdatad-pro.ricequant.com', 16011))
     timeScope = 2
     lastTimeMap = {}
     for i in range(len(symbolList)):

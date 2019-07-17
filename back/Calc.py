@@ -137,7 +137,8 @@ class Calc:
             currentPeriod = self.periodMap[period]
             klineData = klineDataTool.getFutureData(symbol, currentPeriod, 1000)
             bigLevelPeriod = self.futureLevelMap[currentPeriod]
-            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 40)
+            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 1000)
+            klineDataBigLevel = pydash.filter_(klineDataBigLevel, lambda klineItem: klineItem['time']>= klineData[0]['time'])
         # print("从接口到的数据", klineData)
         # 存数据快照，调试时候用
         if save:

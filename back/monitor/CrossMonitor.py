@@ -43,11 +43,11 @@ def cross(arr1, arr2):  # 参数个数为2个，从参数名可以看出，这�
 auth('13088887055', 'chanlun123456')
 
 klineDataTool = KlineDataTool()
-symbolList1 = ['RB1910.XSGE', 'HC1910.XSGE', 'RU1909.XSGE', 'NI1907.XSGE', 'FU1909.XSGE', 'ZN1908.XSGE',
-               'SP1909.XSGE', 'MA1909.XZCE', 'SR1909.XZCE', 'AP1910.XZCE', 'J1909.XDCE', 'JM1909.XDCE', 'PP1909.XDCE']
+symbolList1 = ['RB1910.XSGE', 'HC1910.XSGE', 'RU9999.XSGE', 'NI1907.XSGE', 'FU9999.XSGE', 'ZN1908.XSGE',
+               'SP9999.XSGE', 'MA9999.XZCE', 'SR9999.XZCE', 'AP1910.XZCE', 'J9999.XDCE', 'JM9999.XDCE', 'PP9999.XDCE']
 
 # 23:30结束的  甲醇 白糖 玻璃
-symbolList2 = ['MA1909.XZCE', 'SR1909.XZCE', 'FG1909.XZCE']
+symbolList2 = ['MA9999.XZCE', 'SR9999.XZCE', 'FG9999.XZCE']
 # 1:00 结束的锌 镍
 symbolList3 = ['NI1907.XSGE', 'ZN1907.XSGE']
 
