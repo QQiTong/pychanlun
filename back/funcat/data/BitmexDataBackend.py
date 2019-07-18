@@ -31,6 +31,5 @@ class BitmexDataBackend(DataBackend):
         h = prices.get('h', [])
         l = prices.get('l', [])
         v = prices.get('v', [])
-        rec = np.zeros((len(t),), dtype=[('time', 'int32'), ('open', 'float32'), ('close', 'float32'), ('high', 'float32'), ('low', 'float32'), ('volume', 'float32')])
-        rec[:] = list(zip(t, o, c, h, l, v))
+        rec = np.rec.array(list(zip(t, o, c, h, l, v)), dtype=([('time', 'int32'), ('open', 'float32'), ('close', 'float32'), ('high', 'float32'), ('low', 'float32'), ('volume', 'float32')]))
         return rec
