@@ -1,6 +1,6 @@
 from back.ToString import ToString
 from back.Tools import Tools
-
+import numpy as np
 
 class Bi(ToString):
     direction = None  # direction
@@ -222,3 +222,10 @@ class BiProcess(ToString):
                         bi.klineList.append(tempklineList[i])
                     tempklineList.clear()
                     self.biList.append(bi)
+
+    def biResult(self, count):
+        r = np.zeros(count, dtype=np.int)
+        for i in range(len(self.biList)):
+            bi = self.biList[i]
+            r[bi.klineList[-1].middle] = bi.direction
+        return r
