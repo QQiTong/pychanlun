@@ -8,6 +8,9 @@ from ..BiProcess import BiProcess
 from ..DuanProcess import DuanProcess
 
 def doMonitor1():
+    """
+    策略3 XBTUSD 3m 15m 监控
+    """
     print("监控 STRATEGY 3 %s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     dtime = datetime.now()
     endTime = int(time.mktime(dtime.timetuple()))
