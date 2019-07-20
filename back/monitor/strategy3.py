@@ -48,6 +48,9 @@ def doMonitor1():
     biProcess3m.handle(klineProcess3m.klineList)
     biResult3m = biProcess3m.biResult(count3m)
 
+    duanProcess3m = DuanProcess()
+    duanResult3m = duanProcess3m.handle(biResult3m, high3m, low3m)
+
     #15m笔和段
     high15m = df15m.high.values
     low15m = df15m.low.values
@@ -60,3 +63,6 @@ def doMonitor1():
     biProcess15m = BiProcess()
     biProcess15m.handle(klineProcess15m.klineList)
     biResult15m = biProcess15m.biResult(count15m)
+
+    duanProcess15m = DuanProcess()
+    duanResult15m = duanProcess15m.handle(biResult15m, high15m, low15m)
