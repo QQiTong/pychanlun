@@ -9,6 +9,10 @@ from ..KlineProcess import KlineProcess
 from ..BiProcess import BiProcess
 from ..DuanProcess import DuanProcess
 from .. import entanglement as entanglement
+from .. import divergence as divergence
+from back.Mail import Mail
+
+mail = Mail()
 
 def doMonitor1():
     """
@@ -81,6 +85,31 @@ def doMonitor1():
     dea15m = np.nan_to_num(dea15m)
     macd15m = np.nan_to_num(macd15m)
 
-    # 计算背驰
+    # 计算中枢
     entanglementList3m = entanglement.calcEntanglements(time3m, duanResult3m, biResult3m, high3m, low3m)
     entanglementList15m = entanglement.calcEntanglements(time15m, duanResult15m, biResult15m, high15m, low15m)
+
+    # 计算背驰3m
+    diver = divergence.calc(time3m, macd3m, diff3m, dea3m, biProcess3m.biList, duanResult3m)
+    if diver['buyMACDBCData']['date'] is not None and len(diver['buyMACDBCData']['date']) > 0:
+        last = diver['buyMACDBCData']['date'][-1]
+        lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
+        nowTs = dtime.timestamp()
+        if nowTs-lastTs < 600:
+            # 顶背驰
+            msg = '顶背驰', 'XBTUSD', '3m'
+            print(msg)
+            mailResult = mail.send(str(msg))
+            if not mailResult:
+                print("发送失败")
+    if diver['sellMACDBCData']['date'] is not None and len(diver['sellMACDBCData']['date']):
+        last = diver['sellMACDBCData']['date'][-1]
+        lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
+        nowTs = dtime.timestamp()
+        if nowTs-lastTs < 600:
+            # 底背驰
+            msg = '底背驰', 'XBTUSD', '3m'
+            print(msg)
+            mailResult = mail.send(str(msg))
+            if not mailResult:
+                print("发送失败")
