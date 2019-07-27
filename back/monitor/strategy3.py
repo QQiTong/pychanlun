@@ -10,7 +10,8 @@ from ..BiProcess import BiProcess
 from ..DuanProcess import DuanProcess
 from .. import entanglement as entanglement
 from .. import divergence as divergence
-from back.Mail import Mail
+from ..Mail import Mail
+from .. import Duan
 
 mail = Mail()
 
@@ -96,20 +97,24 @@ def doMonitor1():
         lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
         nowTs = dtime.timestamp()
         if nowTs-lastTs < 600:
-            # 顶背驰
-            msg = '顶背驰', 'XBTUSD', '3m'
-            print(msg)
-            mailResult = mail.send(str(msg))
-            if not mailResult:
-                print("发送失败")
+            # 顶背驰了
+            # 看大级别有没有破位
+            if Duan.notHigher(duanResult3m, high3m):
+                msg = '顶背驰', 'XBTUSD', '3m'
+                print(msg)
+                mailResult = mail.send(str(msg))
+                if not mailResult:
+                    print("发送失败")
     if diver['sellMACDBCData']['date'] is not None and len(diver['sellMACDBCData']['date']):
         last = diver['sellMACDBCData']['date'][-1]
         lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
         nowTs = dtime.timestamp()
         if nowTs-lastTs < 600:
             # 底背驰
-            msg = '底背驰', 'XBTUSD', '3m'
-            print(msg)
-            mailResult = mail.send(str(msg))
-            if not mailResult:
-                print("发送失败")
+            # 看大级别有没有破位
+            if Duan.notLower(duanResult3m, low3m):
+                msg = '底背驰', 'XBTUSD', '3m'
+                print(msg)
+                mailResult = mail.send(str(msg))
+                if not mailResult:
+                    print("发送失败")
