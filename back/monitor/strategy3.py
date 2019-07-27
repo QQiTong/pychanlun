@@ -100,7 +100,12 @@ def doMonitor1():
             # 顶背驰了
             # 看大级别有没有破位
             if Duan.notHigher(duanResult3m, high3m):
-                msg = '顶背驰', 'XBTUSD', '3m'
+                macdPos = ""
+                if macd15m[-1] >= 0:
+                    macdPos = "大级别MACD零轴上"
+                else:
+                    macdPos = "大级别MACD零轴下"
+                msg = '顶背驰', 'XBTUSD', '3m', macdPos
                 print(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
@@ -113,7 +118,12 @@ def doMonitor1():
             # 底背驰
             # 看大级别有没有破位
             if Duan.notLower(duanResult3m, low3m):
-                msg = '底背驰', 'XBTUSD', '3m'
+                macdPos = ""
+                if macd15m[-1] >= 0:
+                    macdPos = "大级别MACD零轴上"
+                else:
+                    macdPos = "大级别MACD零轴下"
+                msg = '底背驰', 'XBTUSD', '3m', macdPos
                 print(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
