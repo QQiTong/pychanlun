@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # 启动监控任务
     scheduler = BackgroundScheduler()
-    scheduler.add_job(strategy3.doMonitor1, 'cron', minute='0/3', hour="*")
+    scheduler.add_job(strategy3.doMonitor2, 'cron', minute='0/3', hour="*")
     scheduler.start()
 
     app.run()
