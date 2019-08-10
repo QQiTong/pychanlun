@@ -3,3 +3,4 @@ pandas
 requests
 pydash
 apscheduler
+jqdatasdk
