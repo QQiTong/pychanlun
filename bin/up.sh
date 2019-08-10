@@ -5,7 +5,7 @@ name="pychanlun"
 docker rm -f $name
 docker rmi -f $name
 
-docker build -t $name -f ../Dockerfile
+docker build -t $name -f ../Dockerfile .
 docker run --restart=always -d \
     --name $name \
     --expose 5000 \
