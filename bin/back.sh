@@ -9,5 +9,5 @@ docker build -f Dockerfile.back -t $name .
 docker run --restart=always -d \
     --name $name \
     --network pychanlun-net
-    --expose 5000 \
+    -p 5000:5000 \
     $name
