@@ -1,6 +1,6 @@
 #!/bin/bash
 
-name="pychanlun"
+name="pychanlun-server"
 
 docker rm -f $name
 docker rmi -f $name
