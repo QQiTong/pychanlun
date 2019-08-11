@@ -1,4 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+export DEBIAN_FRONTEND=noninteractive
+apt-get install -y tzdata
+dpkg-reconfigure --frontend noninteractive tzdata
 
 python -m pip install --upgrade pip setuptools wheel
 
