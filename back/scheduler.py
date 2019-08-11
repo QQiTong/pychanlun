@@ -1,4 +1,6 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
+import logging
+
 from back.monitor import strategy3
 
 if __name__ == '__main__':

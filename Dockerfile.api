@@ -6,8 +6,8 @@ COPY . .
 RUN chmod a+x ./prepare.sh && ./prepare.sh
 RUN pip install -r requirements.txt
 
-ENV PYTHONUNBUFFERED 0
+ENV PYTHONUNBUFFERED 1
 
 EXPOSE 5000
 
-CMD ["python", "-m", "back.server"]
+ENTRYPOINT ["python", "-m", "back.server"]
