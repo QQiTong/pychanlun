@@ -4,3 +4,4 @@ requests
 pydash
 apscheduler
 jqdatasdk
+Flask-APScheduler
