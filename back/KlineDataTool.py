@@ -1,14 +1,14 @@
 import requests
 import json
 from jqdatasdk import *
-from datetime import datetime
+from datetime import datetime,timedelta
 import numpy as np
 import pandas as pd
 import time
 import pydash
 
-# import rqdatac as rq
-# from rqdatac import *
+import rqdatac as rq
+from rqdatac import *
 
 
 # url = "http://api.zb.cn/data/v1/kline?market=btc_usdt"
@@ -159,10 +159,24 @@ class KlineDataTool:
         # print("可调用条数:", get_query_count())
         # df = get_bars(symbol, size, unit=period, fields=['date', 'open', 'high', 'low', 'close', 'volume'],
         #               include_now=True, end_dt=datetime.now())
-        df = get_price(symbol, frequency=period, end_date=datetime.now(), count=size,
-                       fields=['open', 'high', 'low', 'close', 'volume'])
-        # df = rq.get_price(symbol, frequency=period,
-        #                     fields=['open', 'high', 'low', 'close', 'volume'], end_date=datetime.now())
+        # df = get_price(symbol, frequency=period, end_date=datetime.now(), count=size,
+        #                fields=['open', 'high', 'low', 'close', 'volume'])
+        end = datetime.now() + timedelta(1)
+        timeDeltaMap = {
+            '1m': -7,
+            '3m': -31,
+            '5m': -31,
+            '15m': -31*3,
+            '30m':-31*4,
+            '60m': -31*8,
+            '240m':-31*8,
+            '1d': -31*10,
+            '5d':-31*30
+        }
+        start_date = datetime.now() + timedelta(timeDeltaMap[period])
+
+        df = rq.get_price(symbol, frequency=period,
+                            fields=['open', 'high', 'low', 'close', 'volume'],start_date=start_date, end_date=end)
 
         # df = get_price('RB1910.XSGE', frequency='240m', end_date=datetime.now(), count=200,
         #                fields=['open', 'high', 'low', 'close', 'volume'])

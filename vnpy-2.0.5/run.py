@@ -9,7 +9,7 @@ from vnpy.gateway.bitmex import BitmexGateway
 # from vnpy.gateway.futu import FutuGateway
 # from vnpy.gateway.ib import IbGateway
 from vnpy.gateway.ctp import CtpGateway
-# from vnpy.gateway.ctptest import CtptestGateway
+from vnpy.gateway.ctptest import CtptestGateway
 # from vnpy.gateway.femas import FemasGateway
 # from vnpy.gateway.tiger import TigerGateway
 # from vnpy.gateway.oes import OesGateway
@@ -28,7 +28,7 @@ from vnpy.app.cta_strategy import CtaStrategyApp
 # from vnpy.app.csv_loader import CsvLoaderApp
 # from vnpy.app.algo_trading import AlgoTradingApp
 from vnpy.app.cta_backtester import CtaBacktesterApp
-# from vnpy.app.data_recorder import DataRecorderApp
+from vnpy.app.data_recorder import DataRecorderApp
 # from vnpy.app.risk_manager import RiskManagerApp
 from vnpy.app.script_trader import ScriptTraderApp
 from vnpy.app.rpc_service import RpcServiceApp
@@ -44,7 +44,7 @@ def main():
 
     # main_engine.add_gateway(BinanceGateway)
     main_engine.add_gateway(CtpGateway)
-    # main_engine.add_gateway(CtptestGateway)
+    main_engine.add_gateway(CtptestGateway)
     # main_engine.add_gateway(FemasGateway)
     # main_engine.add_gateway(IbGateway)
     # main_engine.add_gateway(FutuGateway)
@@ -66,7 +66,7 @@ def main():
     main_engine.add_app(CtaBacktesterApp)
     # main_engine.add_app(CsvLoaderApp)
     # main_engine.add_app(AlgoTradingApp)
-    # main_engine.add_app(DataRecorderApp)
+    main_engine.add_app(DataRecorderApp)
     # main_engine.add_app(RiskManagerApp)
     main_engine.add_app(ScriptTraderApp)
     main_engine.add_app(RpcServiceApp)

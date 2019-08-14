@@ -24,7 +24,7 @@ class MacdStrategy(CtaTemplate):
 
     slow_ma0 = 0.0
     slow_ma1 = 0.0
-    change = 0.02
+    change = 0.0002
 
     parameters = ["fast_window", "slow_window","change"]
     variables = ["fast_ma0", "fast_ma1", "slow_ma0", "slow_ma1"]
@@ -36,7 +36,7 @@ class MacdStrategy(CtaTemplate):
         )
 
         self.bg = BarGenerator(self.on_bar, 15, self.on_15min_bar)
-        self.am = ArrayManager(500)
+        self.am = ArrayManager()
 
     def on_init(self):
         """
@@ -93,22 +93,22 @@ class MacdStrategy(CtaTemplate):
         # print("am长度:",len(am.close))
         # and buy_condition and sell_condition
         if cross_over:
-            if self.pos == 0 :
+            if self.pos == 0 and buy_condition :
                 print("开多:", bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
-                self.buy(bar.close_price, 1)
+                self.buy(bar.close_price, 10,True)
             elif self.pos < 0:
                 print("平空:", bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
-                self.cover(bar.close_price, 1)
+                self.cover(bar.close_price, 10,True)
                 # self.buy(bar.close_price, 1)
 
         elif cross_below:
-            if self.pos == 0 :
+            if self.pos == 0 and sell_condition:
                 print("开空:",bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
 
-                self.short(bar.close_price, 1)
+                self.short(bar.close_price, 10,True)
             elif self.pos > 0:
                 print("平多:", bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
-                self.sell(bar.close_price, 1)
+                self.sell(bar.close_price, 10,True)
                 # self.short(bar.close_price, 1)
         self.put_event()
 

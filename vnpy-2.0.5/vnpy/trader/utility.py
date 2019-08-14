@@ -281,6 +281,8 @@ class ArrayManager(object):
         self.low_array = np.zeros(size)
         self.close_array = np.zeros(size)
         self.volume_array = np.zeros(size)
+        # added
+        self.time_array = ['' for i in range(size)]
 
     def update_bar(self, bar):
         """
@@ -295,12 +297,15 @@ class ArrayManager(object):
         self.low_array[:-1] = self.low_array[1:]
         self.close_array[:-1] = self.close_array[1:]
         self.volume_array[:-1] = self.volume_array[1:]
-
+        # added
+        self.time_array[:-1] = self.time_array[1:]
         self.open_array[-1] = bar.open_price
         self.high_array[-1] = bar.high_price
         self.low_array[-1] = bar.low_price
         self.close_array[-1] = bar.close_price
         self.volume_array[-1] = bar.volume
+        self.time_array[-1] = bar.datetime.strftime("%Y-%m-%d %H:%M")
+        # added
 
     @property
     def open(self):
@@ -336,6 +341,13 @@ class ArrayManager(object):
         Get trading volume time series.
         """
         return self.volume_array
+    #added
+    @property
+    def time(self):
+        """
+        Get trading time time series.
+        """
+        return self.time_array
 
     def sma(self, n, array=False):
         """

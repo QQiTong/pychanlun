@@ -77,10 +77,10 @@ class BacktesterManager(QtWidgets.QWidget):
             QtCore.QDate.currentDate()
         )
 
-        self.rate_line = QtWidgets.QLineEdit("0.0075")
+        self.rate_line = QtWidgets.QLineEdit("0.0001")
         self.slippage_line = QtWidgets.QLineEdit("0.2")
-        self.size_line = QtWidgets.QLineEdit("1")
-        self.pricetick_line = QtWidgets.QLineEdit("0.2")
+        self.size_line = QtWidgets.QLineEdit("10")
+        self.pricetick_line = QtWidgets.QLineEdit("1")
         self.capital_line = QtWidgets.QLineEdit("1000")
 
         backtesting_button = QtWidgets.QPushButton("开始回测")
