@@ -9,22 +9,22 @@
                     <div class="symbol-title">期货</div>
                     <!--            上期所-->
                     <div class="symbol-list">
-                        <a @click="switchSymbol('RB1910.XSGE')" class="bold symbol-item">螺纹RB</a>
-                        <a @click="switchSymbol('HC9999.XSGE')" class="symbol-item">热卷HC</a>
-                        <a @click="switchSymbol('RU9999.XSGE')" class="symbol-item">橡胶RU</a>
-                        <a @click="switchSymbol('NI9999.XSGE')" class="symbol-item">沪镍NI</a>
-                        <a @click="switchSymbol('FU9999.XSGE')" class="symbol-item">燃油FU</a>
-                        <a @click="switchSymbol('ZN9999.XSGE')" class="symbol-item">沪锌ZN</a>
-                        <a @click="switchSymbol('SP9999.XSGE')" class="symbol-item">纸浆SP</a>
+                        <a @click="switchSymbol('RB1910')" class="bold symbol-item">螺纹RB</a>
+                        <a @click="switchSymbol('HC1910')" class="symbol-item">热卷HC</a>
+                        <a @click="switchSymbol('RU2001')" class="symbol-item">橡胶RU</a>
+                        <a @click="switchSymbol('NI1910')" class="symbol-item">沪镍NI</a>
+                        <a @click="switchSymbol('FU2001')" class="symbol-item">燃油FU</a>
+                        <a @click="switchSymbol('ZN1910')" class="symbol-item">沪锌ZN</a>
+                        <a @click="switchSymbol('SP2001')" class="symbol-item">纸浆SP</a>
                         <!--            郑商所-->
-                        <a @click="switchSymbol('MA9999.XZCE')" class="bold symbol-item">甲醇MA</a>
-                        <a @click="switchSymbol('SR9999.XZCE')" class="symbol-item">白糖SR</a>
-                        <a @click="switchSymbol('AP9999.XZCE')" class="symbol-item">苹果AP</a>
-                        <a @click="switchSymbol('CF9999.XZCE')" class="symbol-item">棉花CF</a>
+                        <a @click="switchSymbol('MA1909')" class="bold symbol-item">甲醇MA</a>
+                        <a @click="switchSymbol('SR2001')" class="symbol-item">白糖SR</a>
+                        <a @click="switchSymbol('AP1910')" class="symbol-item">苹果AP</a>
+                        <a @click="switchSymbol('CF2001')" class="symbol-item">棉花CF</a>
                         <!--            大商所-->
-                        <a @click="switchSymbol('J9999.XDCE')" class="bold symbol-item">焦炭J</a>
-                        <a @click="switchSymbol('JM9999.XDCE')" class="symbol-item">焦煤JM</a>
-                        <a @click="switchSymbol('PP9999.XDCE')" class="symbol-item">聚丙烯PP</a>
+                        <a @click="switchSymbol('J2001')" class="bold symbol-item">焦炭J</a>
+                        <a @click="switchSymbol('JM1909')" class="symbol-item">焦煤JM</a>
+                        <a @click="switchSymbol('PP2001')" class="symbol-item">聚丙烯PP</a>
                     </div>
 
                 </div>
@@ -43,7 +43,7 @@
             <div class="echarts">
                 <v-chart autoresize ref="myCharts" :manual-update="true"></v-chart>
             </div>
-            <div class="loading-anim" v-show="showAnim">
+            <div class="loading-anim" v-show="firstFlag">
                 <div class="loader-inner"></div>
                 <div class="loader-inner"></div>
                 <div class="loader-inner"></div>
@@ -82,7 +82,9 @@
         data () {
             return {
                 // 控制动画和防重复请求
-                showAnim: true,
+                requestFlag: true,
+                // 是否第一次请求
+                firstFlag: true,
                 // myChart: null,
                 option: {},
                 echartsConfig: {
@@ -94,7 +96,7 @@
                 },
                 // 品种
                 symbol: 'XBTUSD',
-                period: '1min',
+                period: '3min',
                 // symbol: "BTC_CQ",
                 // period: "1min",
                 // symbol: "RB1910.XSGE",
@@ -127,7 +129,7 @@
             this.getStockData()
             this.timer = setInterval(() => {
                 this.refreshOrUpdate = 2
-                if (!this.showAnim) {
+                if (!this.requestFlag) {
                     console.log('发出请求---')
                     this.getStockData()
                 } else {
@@ -165,7 +167,7 @@
                     period: this.period
                 }
                 userApi.saveStockData(requestData).then(res => {
-                    this.showAnim = false
+                    this.requestFlag = false
                     // console.log("结果:", res);
 
                     this.dataTitle = this.symbol
@@ -173,7 +175,7 @@
                     // todo 判断请求和返回的symbol 是否一致
                     this.draw(res)
                 }).catch(() => {
-                    this.showAnim = false
+                    this.requestFlag = false
                 })
             },
             switchSymbol (symbol) {
@@ -182,7 +184,7 @@
                 this.getStockData()
             },
             getStockData () {
-                this.showAnim = true
+                this.requestFlag = true
 
                 // 恢复缩放比例
                 // if (JSON.stringify(this.option) !== "{}") {
@@ -194,7 +196,8 @@
                     period: this.period
                 }
                 userApi.stockData(requestData).then(res => {
-                    this.showAnim = false
+                    this.firstFlag = false
+                    this.requestFlag = false
                     // console.log("结果:", res);
 
                     this.dataTitle = this.symbol
@@ -202,7 +205,7 @@
                     // todo 判断请求和返回的symbol 是否一致
                     this.draw(res)
                 }).catch(() => {
-                    this.showAnim = false
+                    this.requestFlag = false
                 })
             },
             //
@@ -255,6 +258,9 @@
                             axisPointer: { // 坐标轴指示器配置项
                                 type: 'cross' // 指示器类型，十字准星
                             },
+                        },
+                        axisPointer: {
+                            link: {xAxisIndex: 'all'},
                         },
                         toolbox: {
                             orient: 'horizontal',
@@ -376,15 +382,16 @@
                                 // },
                             },
                         },
-                        color: ['yellow', 'green', 'yellow', 'white', '#999999'],
+                        color: ['yellow', 'green', 'blue', 'white', 'white'],
+
                         legend: {
-                            data: ['笔', '段', 'MA5', 'MA10', '布林中轨'],
+                            data: ['笔', '段', '高级别段', 'MA5', 'MA10'],
                             selected: {
                                 '笔': true,
                                 '段': true,
+                                '高级别段': true,
                                 'MA5': false,
                                 'MA10': false,
-                                '布林中轨': false
                             },
                             top: 10,
                             textStyle: {
@@ -427,7 +434,7 @@
                                 splitNumber: 20,
                                 min: 'dataMin',
                                 max: 'dataMax',
-                                axisLine: {onZero: false, lineStyle: {color: '#8392A5'}}
+                                axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
                             },
                             {
                                 type: 'category',
@@ -485,10 +492,7 @@
                             {
                                 gridIndex: 1,
                                 splitNumber: 2,
-                                axisLine: {
-                                    onZero: false,
-                                    lineStyle: {color: '#8392A5'}
-                                },
+                                axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
                                 axisTick: {
                                     show: false
                                 },
@@ -614,7 +618,7 @@
                             {
                                 name: '笔',
                                 type: 'line',
-                                z: 3,
+                                z: 1,
                                 data: resultData.biValues,
                                 lineStyle: {
                                     normal: {
@@ -630,7 +634,7 @@
                             {
                                 name: '段',
                                 type: 'line',
-                                z: 4,
+                                z: 1,
                                 data: resultData.duanValues,
                                 lineStyle: {
                                     normal: {
@@ -880,6 +884,22 @@
                             //     symbol: 'none',
                             //     animation: false
                             // },
+                            {
+                                name: '高级别段',
+                                type: 'line',
+                                z: 1,
+                                data: resultData.higherDuanValues,
+                                lineStyle: {
+                                    normal: {
+                                        opacity: 1,
+                                        type: 'solid',
+                                        width: 2,
+                                        color: 'blue'
+                                    },
+                                },
+                                symbol: 'none',
+                                animation: false
+                            },
                         ],
                         graphic: [],
                     }
@@ -895,6 +915,9 @@
                 const volumeData = jsonObj.volume
                 const bidata = jsonObj.bidata
                 const duandata = jsonObj.duandata
+
+                const higherDuanData = jsonObj.higherDuanData
+
                 const zsdata = jsonObj.zsdata
                 const zsflag = jsonObj.zsflag
                 //
@@ -919,6 +942,10 @@
                 for (let i = 0; i < duandata.date.length; i++) {
                     duanValues.push([duandata.date[i], duandata.data[i]])
                 }
+                var higherDuanValues = []
+                for (var i = 0; i < higherDuanData.date.length; i++) {
+                    higherDuanValues.push([higherDuanData.date[i], higherDuanData.data[i]])
+                }
                 let zsvalues = []
                 for (let i = 0; i < zsdata.length; i++) {
                     let value
@@ -927,18 +954,19 @@
                             {
                                 coord: zsdata[i][0],
                                 itemStyle: {
-                                    color: this.echartsConfig.bgColor,
+                                    color: this.echartsConfig.upColor,
                                     borderWidth: '2',
                                     borderColor: 'red',
-                                    opacity: 1,
+                                    opacity: 0.2,
                                 }
                             },
                             {
                                 coord: zsdata[i][1],
                                 itemStyle: {
-                                    color: 'red',
+                                    color: this.echartsConfig.upColor,
+
                                     borderWidth: '1',
-                                    borderColor: 'red',
+                                    borderColor: this.echartsConfig.upColor,
                                     opacity: 0.2,
                                 }
                             }
@@ -1118,6 +1146,45 @@
                     }
                     bcMACDValues.push(value)
                 }
+                // 高级别macd背驰点标注 buyHigherMACDBCData
+                for (var i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
+                    var value = {
+                        coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.data[i]],
+                        value: jsonObj.buyHigherMACDBCData.value[i],
+                        symbolRotate: 90,
+                        symbol: 'pin',
+                        itemStyle: {
+                            normal: {color: 'Purple'}
+                        },
+                        label: {
+                            position: 'inside',
+                            offset: [10, 5],
+                            textBorderColor: 'Purple',
+                            textBorderWidth: 1,
+                            color: 'white',
+                        },
+                    }
+                    bcMACDValues.push(value)
+                }
+                for (let i = 0; i < jsonObj.sellHigherMACDBCData.date.length; i++) {
+                    let value = {
+                        coord: [jsonObj.sellHigherMACDBCData.date[i], jsonObj.sellHigherMACDBCData.data[i]],
+                        value: jsonObj.sellHigherMACDBCData.value[i],
+                        symbolRotate: 90,
+                        symbol: 'pin',
+                        label: {
+                            position: 'inside',
+                            offset: [10, 5],
+                            textBorderColor: 'blue',
+                            textBorderWidth: 1,
+                            color: 'white',
+                        },
+                        itemStyle: {
+                            normal: {color: 'blue'}
+                        }
+                    }
+                    bcMACDValues.push(value)
+                }
                 return {
                     time: stockDate,
                     values: values,
@@ -1133,6 +1200,8 @@
                     diffBigLevel: diffBigLevel,
                     deaBigLevel: deaBigLevel,
                     timeBigLevel: dateBigLevel,
+                    higherDuanValues: higherDuanValues,
+
                     // boll_up: boll_up,
                     // boll_middle: boll_middle,
                     // boll_bottom: boll_bottom,
