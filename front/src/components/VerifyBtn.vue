@@ -92,17 +92,17 @@
     },
     methods: {
       async verifyBtnClick () {
-        let that = this,
-          condition = await this.condition(),
-          mailReg = /^([a-zA-Z0-9]+[_|\-|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\-|\.]?)*[a-zA-Z0-9]+(\.[a-zA-Z]{2,3})+$/,
-          //mobileReg = /^((13|14|15|17|18)[0-9]{1}\d{8})$/;
+        let that = this
+          let condition = await this.condition()
+          let mailReg = /^([a-zA-Z0-9]+[_|\-|\\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\-|\\.]?)*[a-zA-Z0-9]+(\.[a-zA-Z]{2,3})+$/
+          // mobileReg = /^((13|14|15|17|18)[0-9]{1}\d{8})$/;
           // 手机号只要不包含空格就ok，因为还有国外手机号
-          mobileReg = /\s/
-        if (!this.type || (this.type != 'phone' && this.type != 'email')) {
+          let mobileReg = /\s/
+        if (!this.type || (this.type !== 'phone' && this.type !== 'email')) {
           console.error('没有传递type，或type的值不是email或phone')
           return
         }
-        if (this.type == 'phone' && !this.countryCode) {
+        if (this.type === 'phone' && !this.countryCode) {
           console.error('没有传递countryCode')
           return
         }
@@ -205,6 +205,7 @@
         if (this.stoped) {
           return this.onStopedText
         }
+        return ''
       }
     },
     mounted () {

@@ -1147,8 +1147,8 @@
                     bcMACDValues.push(value)
                 }
                 // 高级别macd背驰点标注 buyHigherMACDBCData
-                for (var i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
-                    var value = {
+                for (let i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
+                    let value = {
                         coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.data[i]],
                         value: jsonObj.buyHigherMACDBCData.value[i],
                         symbolRotate: 90,

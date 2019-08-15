@@ -1,6 +1,6 @@
 import axios from 'axios'
 // 请求base url
-axios.defaults.baseURL = process.env.VUE_APP_BASE_API;
+axios.defaults.baseURL = process.env.VUE_APP_BASE_API
 // 请求拦截
 axios.interceptors.request.use(
     config => {
@@ -9,7 +9,7 @@ axios.interceptors.request.use(
     error => {
         Promise.reject(error)
     }
-);
+)
 // 响应拦截
 axios.interceptors.response.use((res) => {
     // 对响应数据做些事
@@ -19,5 +19,5 @@ axios.interceptors.response.use((res) => {
     return res.data
 }, (error) => {
     return Promise.reject(error)
-});
+})
 export default axios

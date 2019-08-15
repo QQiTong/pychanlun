@@ -5,11 +5,10 @@
 
 <script>
   // @ is an alias to /src
-  import { mapGetters, mapMutations } from 'vuex'
+  import {mapGetters} from 'vuex'
   // let moment = require('moment')
   export default {
     name: 'down',
-    components: { qrCodeCom },
     computed: {
       ...mapGetters(['lang'])
     },

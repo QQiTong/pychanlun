@@ -61,7 +61,7 @@ export default {
       let lang = that.lang.replace('-', '_')
       // TIP 后台需要控制是否开启极验，因此需要判断 enable===true && success===1 才显示极限
       that.sign = data.sign
-      if (typeof data.enable == 'undefined') {
+      if (typeof data.enable === 'undefined') {
         that.showGeetest = true
       }
       if (data.enable === true && data.success === 1) {
@@ -92,7 +92,7 @@ export default {
         }
         that.captchaObj = captchaObj
         that.captchaSuccess = {}
-        if (product == 'popup') {
+        if (product === 'popup') {
           captchaObj.appendTo(geetestBox || '#geetest_box')
         }
         // 当用户操作后并且通过验证后的回调
