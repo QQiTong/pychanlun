@@ -36,7 +36,7 @@ symbolList3 = ['NI1910', 'ZN1910']
 periodList = ['1min', '3min', '5min', '15min', '30min', '60min']
 periodList2 = ['3min', '5min', '15min', '30min', '60min']
 
-symbolList = symbolList2
+symbolList = symbolList1
 mail = Mail()
 
 
