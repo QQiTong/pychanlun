@@ -5,7 +5,8 @@ COPY . .
 RUN cd front && npm install && npm run build
 
 FROM nginx:alpine
-COPY --from=build ./front/web/ /usr/share/nginx/html/front/
+
+COPY --from=build /opt/app/front/web/ /usr/share/nginx/html/front/
 
 COPY ./web/ /usr/share/nginx/html/
 COPY ./web/nginx.conf /etc/nginx/conf.d/default.conf
