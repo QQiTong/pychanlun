@@ -5,4 +5,3 @@ pydash
 apscheduler
 jqdatasdk
 Flask-APScheduler
-rqdatac

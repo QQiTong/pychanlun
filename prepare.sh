@@ -18,3 +18,4 @@ popd
 
 python -m pip install numpy
 python -m pip install TA-Lib
+pip install --extra-index-url https://rquser:ricequant99@py.ricequant.com/simple/ rqdatac
