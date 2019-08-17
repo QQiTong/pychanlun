@@ -10,4 +10,5 @@ docker run --restart=always -d \
     --name $name \
     --network pychanlun-net \
     -p 8080:80 \
+    -p 80:80 \
     $name
