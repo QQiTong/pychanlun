@@ -2,7 +2,7 @@ FROM node:lts-alpine as build
 
 WORKDIR /opt/app
 COPY . .
-RUN cd front && npm run build
+RUN cd front && npm install && npm run build
 
 FROM nginx:alpine
 COPY --from=build ./front/web/ /usr/share/nginx/html/front/
