@@ -163,14 +163,39 @@
 }
 
 .switchContainer {
+    margin: 0 20px;
     display: flex;
     justify-content: space-between;
+
     a {
         cursor: pointer;
-        &:hover{
-            color:red!important;
+
+        &:hover {
+            color: red !important;
         }
     }
+}
+
+.echarts-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .echarts-item {
+        width: 1260px;
+        height: 650px;
+        border: 1px solid #fff;
+    }
+}
+
+.echarts {
+    //width: 1260px;
+    height: 650px;
+    //text-align: center;
+    //line-height: 500px;
+    //font-weight: bold;
+    //color: #688a80;
 }
 
 .bold {

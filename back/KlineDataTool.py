@@ -82,8 +82,8 @@ class KlineDataTool:
         startTime = datetime.now()
         r = requests.get(url, params=payload, headers=header, )
         endTime = datetime.now() - startTime
-        print("bitmex接口花费时间:", endTime, datetime.now(), r)
         klines = json.loads(r.text)
+        print("bitmex接口花费时间:", endTime, datetime.now(), r,klines)
         print(len(klines['o']))
         newKlineList = []
         originKlineList = []

@@ -264,6 +264,9 @@ class Calc:
         resJson['diff'] = getMacd(closePriceList)[0].tolist()
         resJson['dea'] = getMacd(closePriceList)[1].tolist()
         resJson['macd'] = getMacd(closePriceList)[2].tolist()
+        resJson['boll_up']=getBoll(closePriceList)[0].tolist()
+        resJson['boll_middle']=getBoll(closePriceList)[1].tolist()
+        resJson['boll_bottom']=getBoll(closePriceList)[2].tolist()
         resJson['volume'] = volumeList
         resJson['zsdata'] = zsdata
         resJson['zsflag'] = zsflag
@@ -425,4 +428,10 @@ def getMacd(closePriceList):
     close = array(closePriceList)
     macd = ta.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
     result = np.nan_to_num(macd)
+    return result
+
+def getBoll(closePriceList):
+    close = array(closePriceList)
+    boll = ta.BBANDS(close, 20,2)
+    result = np.nan_to_num(boll)
     return result

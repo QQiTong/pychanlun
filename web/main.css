@@ -147,6 +147,7 @@
   animation-delay: 1.04s;
 }
 .switchContainer {
+  margin: 0 20px;
   display: flex;
   justify-content: space-between;
 }
@@ -154,7 +155,21 @@
   cursor: pointer;
 }
 .switchContainer a:hover {
-  color: red!important;
+  color: red !important;
+}
+.echarts-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.echarts-list .echarts-item {
+  width: 1260px;
+  height: 650px;
+  border: 1px solid #fff;
+}
+.echarts {
+  height: 650px;
 }
 .bold {
   font-weight: bold;

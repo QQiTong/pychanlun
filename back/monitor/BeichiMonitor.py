@@ -24,12 +24,12 @@ klineDataTool = KlineDataTool()
 #                'SP88', 'MA88', 'SR88', 'AP88', 'CF88', 'J88', 'JM88',
 #                'PP88']
 # 米筐数据 主力具体合约 这个是实时数据
-symbolList1 = ['RB1910', 'HC1910', 'RU2001', 'NI1910', 'FU2001', 'ZN1910',
+symbolList1 = ['RB1910', 'HC2001', 'RU2001', 'NI1910', 'FU2001', 'ZN1910',
                'SP2001', 'MA1909', 'SR2001', 'AP1910', 'CF2001', 'J2001', 'JM1909',
-               'PP2001']
+               'PP2001','TA2001','I2001','M2001','Y2001','EG2001']
 
-# 23:30结束的  甲醇 白糖 玻璃
-symbolList2 = ['MA1909', 'SP2001', 'FG2001']
+# 23:30结束的  甲醇 白糖 玻璃 棉花
+symbolList2 = ['MA1909', 'SR2001', 'FG2001','CF2001']
 # 1:00 结束的锌 镍
 symbolList3 = ['NI1910', 'ZN1910']
 
@@ -71,11 +71,12 @@ def monitorFutures():
 
                 lastTime = lastTimeMap[symbol][period]
                 diffTime = currentTime - lastTime
-                print("当前:", symbol, period)
+                print("current:", symbol, period)
 
                 # period = '5min'
                 # symbol = 'RB1910'
                 result = calc.calcData(period, symbol)
+                closePrice = result['close'][-1]
                 if len(result['buyMACDBCData']['date']) > 0:
                     lastBuyDate = result['buyMACDBCData']['date'][-1]
                     lastBuyValue = result['buyMACDBCData']['value'][-1]
@@ -83,7 +84,7 @@ def monitorFutures():
                     dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
 
                     if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                        msg = "当前:", symbol, period, lastBuyDate, lastBuyValue
+                        msg = "current:", symbol, period, lastBuyDate, lastBuyValue,closePrice
                         print(msg)
                         mailResult = mail.send(str(msg))
                         if not mailResult:
@@ -94,7 +95,7 @@ def monitorFutures():
                     dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
 
                     if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                        msg = "当前:", symbol, period, lastSellDate, lastSellValue
+                        msg = "current:", symbol, period, lastSellDate, lastSellValue,closePrice
                         print(msg)
                         mailResult = mail.send(str(msg))
                         if not mailResult:
@@ -107,7 +108,7 @@ def monitorFutures():
                     dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
 
                     if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                        msg = "高级别背驰-当前:", symbol, period, lastBuyDate, lastBuyValue
+                        msg = "current:", symbol, period, lastBuyDate, lastBuyValue,closePrice
                         print(msg)
                         mailResult = mail.send(str(msg))
                         if not mailResult:
@@ -119,7 +120,7 @@ def monitorFutures():
                     dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
 
                     if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                        msg = "高级别背驰-当前:", symbol, period, lastSellDate, lastSellValue
+                        msg = "current:", symbol, period, lastSellDate, lastSellValue,closePrice
                         print(msg)
                         mailResult = mail.send(str(msg))
                         if not mailResult:
@@ -151,7 +152,8 @@ def monitorBTC():
 
             lastTime = lastTimeMap[symbol][period]
             diffTime = currentTime - lastTime
-            print("当前:", symbol, period)
+            closePrice = result['close'][-1]
+            print("current:", symbol, period)
 
             if len(result['buyMACDBCData']['date']) > 0:
                 lastBuyDate = result['buyMACDBCData']['date'][-1]
@@ -160,7 +162,7 @@ def monitorBTC():
 
                 if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                     lastTimeMap[symbol][period] = dateStamp
-                    msg = "当前:", symbol, period, lastBuyDate, lastBuyValue
+                    msg = "current:", symbol, period, lastBuyDate, lastBuyValue,closePrice
                     print(msg)
                     mailResult = mail.send(str(msg))
                     if not mailResult:
@@ -173,7 +175,7 @@ def monitorBTC():
 
                 if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                     lastTimeMap[symbol][period] = dateStamp
-                    msg = "当前:", symbol, period, lastSellDate, lastSellValue
+                    msg = "current:", symbol, period, lastSellDate, lastSellValue,closePrice
                     print(msg)
                     mailResult = mail.send(str(msg))
                     if not mailResult:
@@ -186,7 +188,7 @@ def monitorBTC():
 
                 if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                     lastTimeMap[symbol][period] = dateStamp
-                    msg = "高级别背驰-当前:", symbol, period, lastBuyDate, lastBuyValue
+                    msg = "current:", symbol, period, lastBuyDate, lastBuyValue,closePrice
                     print(msg)
                     mailResult = mail.send(str(msg))
                     if not mailResult:
@@ -198,7 +200,7 @@ def monitorBTC():
 
                 if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                     lastTimeMap[symbol][period] = dateStamp
-                    msg = "高级别背驰-当前:", symbol, period, lastSellDate, lastSellValue
+                    msg = "current:", symbol, period, lastSellDate, lastSellValue,closePrice
                     print(msg)
                     mailResult = mail.send(str(msg))
                     if not mailResult:
@@ -207,7 +209,7 @@ def monitorBTC():
         time.sleep(10)
 
 
-# threading.Thread(target=monitorBTC).start()
+threading.Thread(target=monitorBTC).start()
 threading.Thread(target=monitorFutures).start()
 # monitorBTC(2)
 # monitorFutures(2)
