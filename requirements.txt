@@ -8,3 +8,5 @@ flask-apscheduler
 pymongo
 mongoengine
 flask-mongoengine
+gunicorn
+gevent

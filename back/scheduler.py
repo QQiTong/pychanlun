@@ -7,7 +7,7 @@ from .config import config
 
 from back.monitor import strategy3
 
-if __name__ == '__main__':
+def app():
     app = Flask(__name__)
     app.config.from_object(config[os.getenv('PYCHANLUN_CONFIG_ENV', default='default')])
     scheduler = APScheduler()
@@ -20,3 +20,6 @@ if __name__ == '__main__':
     app.apscheduler.add_job(func=strategy3.doMonitor2, id='strategy3.doMonitor2', trigger='cron', minute='*/15', hour="*")
 
     app.run(host = '0.0.0.0')
+
+if __name__ == '__main__':
+    app()
