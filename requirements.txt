@@ -2,6 +2,9 @@ flask
 pandas==0.24.2
 requests
 pydash
-apscheduler
 jqdatasdk
-Flask-APScheduler
+apscheduler
+flask-apscheduler
+pymongo
+mongoengine
+flask-mongoengine
