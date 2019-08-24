@@ -8,10 +8,24 @@ class Config:
     pass
 
 class DevelopmentConfig(Config):
+    MONGODB_SETTINGS = {
+        'host': '47.75.57.245',
+        'port': 27017,
+        'db': 'pychanlun',
+        'username': 'pychanlun',
+        'password': 'chanlun123456'
+    }
     pass
 
 
 class ProductionConfig(Config):
+    MONGODB_SETTINGS = {
+        'host': 'mongo-server',
+        'port': 27017,
+        'db': 'pychanlun',
+        'username': 'pychanlun',
+        'password': 'chanlun123456'
+    }
     pass
 
 config = {
