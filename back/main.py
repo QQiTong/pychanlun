@@ -244,7 +244,7 @@ class Main:
                 item['close'] = 0 if pd.isna(npKlineList[i][4]) else npKlineList[i][4]
                 item['volume'] = 0 if pd.isna(npKlineList[i][5]) else npKlineList[i][5]
                 processedKlineList.append(item)
-            print("处理结果:", processedKlineList)
+            # print("处理结果:", processedKlineList)
             return processedKlineList
 
 

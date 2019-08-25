@@ -224,7 +224,7 @@ def doMonitor2():
                     macdPos = "大级别MACD零轴上"
                 else:
                     macdPos = "大级别MACD零轴下"
-                msg = '顶背驰', 'XBTUSD', '15m', macdPos
+                msg = 'XB', 'XBTUSD', '15m', macdPos
                 logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
@@ -242,7 +242,7 @@ def doMonitor2():
                     macdPos = "大级别MACD零轴上"
                 else:
                     macdPos = "大级别MACD零轴下"
-                msg = '底背驰', 'XBTUSD', '3m', macdPos
+                msg = 'XT', 'XBTUSD', '3m', macdPos
                 logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
