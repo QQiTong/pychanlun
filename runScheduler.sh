@@ -1,0 +1,1 @@
+gunicorn --config schedule.conf.py --access-logfile - --error-logfile - back.scheduler:app

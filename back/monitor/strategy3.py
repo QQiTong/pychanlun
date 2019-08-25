@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 import time
 import pandas as pd
@@ -19,7 +20,8 @@ def doMonitor1():
     """
     策略3 XBTUSD 3m 15m 监控
     """
-    print("监控 STRATEGY 3 %s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    logger = logging.getLogger()
+    logger.info("策略3 XBTUSD 3m 15m 监控 %s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     dtime = datetime.now()
     endTime = int(time.mktime(dtime.timetuple()))
     startTime = endTime - 24 * 60 * 60 * 5
@@ -105,11 +107,11 @@ def doMonitor1():
                     macdPos = "大级别MACD零轴上"
                 else:
                     macdPos = "大级别MACD零轴下"
-                msg = 'XB', 'XBTUSD', '3m', macdPos
-                print(msg)
+                msg = '顶背驰', 'XBTUSD', '3m', macdPos
+                logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
-                    print("发送失败")
+                    logger.info("发送失败")
     if diver['sellMACDBCData']['date'] is not None and len(diver['sellMACDBCData']['date']):
         last = diver['sellMACDBCData']['date'][-1]
         lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
@@ -123,18 +125,19 @@ def doMonitor1():
                     macdPos = "大级别MACD零轴上"
                 else:
                     macdPos = "大级别MACD零轴下"
-                msg = 'XT', 'XBTUSD', '3m', macdPos
-                print(msg)
+                msg = '底背驰', 'XBTUSD', '3m', macdPos
+                logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
-                    print("发送失败")
+                    logger.info("发送失败")
 
 
 def doMonitor2():
     """
     策略3 XBTUSD 15m 60m 监控
     """
-    print("监控 STRATEGY 3 %s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    logger = logging.getLogger()
+    logger.info("策略3 XBTUSD 15m 60m 监控 %s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     dtime = datetime.now()
     endTime = int(time.mktime(dtime.timetuple()))
     startTime = endTime - 24 * 60 * 60 * 5
@@ -222,10 +225,10 @@ def doMonitor2():
                 else:
                     macdPos = "大级别MACD零轴下"
                 msg = '顶背驰', 'XBTUSD', '15m', macdPos
-                print(msg)
+                logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
-                    print("发送失败")
+                    logger.info("发送失败")
     if diver['sellMACDBCData']['date'] is not None and len(diver['sellMACDBCData']['date']):
         last = diver['sellMACDBCData']['date'][-1]
         lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
@@ -240,7 +243,7 @@ def doMonitor2():
                 else:
                     macdPos = "大级别MACD零轴下"
                 msg = '底背驰', 'XBTUSD', '3m', macdPos
-                print(msg)
+                logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
-                    print("发送失败")
+                    logger.info("发送失败")
