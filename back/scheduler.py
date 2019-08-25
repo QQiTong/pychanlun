@@ -7,10 +7,10 @@ from .config import config
 
 from back.monitor import strategy3
 
-app = Flask(__name__)
-
 def app():
+    app = Flask(__name__)
     app.config.from_object(config[os.getenv('PYCHANLUN_CONFIG_ENV', default='default')])
+
     scheduler = APScheduler()
     scheduler.init_app(app)
     scheduler.start()
