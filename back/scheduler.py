@@ -11,6 +11,14 @@ def app():
     app = Flask(__name__)
     app.config.from_object(config[os.getenv('PYCHANLUN_CONFIG_ENV', default='default')])
 
+    if __name__ != '__main__':
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.DEBUG)
+        logger = logging.getLogger(__name__)
+        logger.addHandler(handler)
+        logger.handlers.extend(logging.getLogger("gunicorn.error").handlers)
+
     scheduler = APScheduler()
     scheduler.init_app(app)
     scheduler.start()
@@ -19,14 +27,6 @@ def app():
     app.apscheduler.add_job(func=strategy3.doMonitor2, id='strategy3.doMonitor2', trigger='cron', minute='*/15', hour="*")
 
     app.run(host = '0.0.0.0')
-
-if __name__ != '__main__':
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.DEBUG)
-    logger = logging.getLogger(__name__)
-    logger.addHandler(handler)
-    logger.handlers.extend(logging.getLogger("gunicorn.error").handlers)
 
 if __name__ == '__main__':
     app()
