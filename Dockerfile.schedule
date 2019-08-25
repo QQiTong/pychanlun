@@ -13,4 +13,4 @@ ENV RQDATAC2_CONF=rqdata://license:R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl0
 
 ENTRYPOINT ["python", "-m", "back.scheduler"]
 
-# ENTRYPOINT ["gunicorn", "--config", "gunicorn.conf.py", "--access-logfile", "-", "--error-logfile", "-", "back.scheduler:app"]
+# ENTRYPOINT ["gunicorn", "--config", "schedule.conf.py", "--access-logfile", "-", "--error-logfile", "-", "back.scheduler:app"]

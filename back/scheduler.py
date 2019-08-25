@@ -20,5 +20,13 @@ def app():
 
     app.run(host = '0.0.0.0')
 
+if __name__ != '__main__':
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    logger.addHandler(handler)
+    logger.handlers.extend(logging.getLogger("gunicorn.error").handlers)
+
 if __name__ == '__main__':
     app()
