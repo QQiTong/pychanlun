@@ -21,7 +21,7 @@ def doMonitor1():
     策略3 XBTUSD 3m 15m 监控
     """
     logger = logging.getLogger()
-    logger.info("策略3 XBTUSD 3m 15m 监控 %s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    logger.info("策略3 XBTUSD 3m 15m 监控")
     dtime = datetime.now()
     endTime = int(time.mktime(dtime.timetuple()))
     startTime = endTime - 24 * 60 * 60 * 5
@@ -137,7 +137,7 @@ def doMonitor2():
     策略3 XBTUSD 15m 60m 监控
     """
     logger = logging.getLogger()
-    logger.info("策略3 XBTUSD 15m 60m 监控 %s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    logger.info("策略3 XBTUSD 15m 60m 监控")
     dtime = datetime.now()
     endTime = int(time.mktime(dtime.timetuple()))
     startTime = endTime - 24 * 60 * 60 * 5
