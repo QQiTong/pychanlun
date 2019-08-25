@@ -174,4 +174,7 @@
 .bold {
   font-weight: bold;
 }
+.light {
+  color: gray !important;
+}
 /*# sourceMappingURL=main.css.map */

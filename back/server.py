@@ -17,7 +17,7 @@ def hello():
 def data():
     calc = Calc()
     period = request.args.get("period") or "1min"
-    symbol = request.args.get("symbol") or "XBTUSD"
+    symbol = request.args.get("symbol") or "BTC_CQ"
     result = calc.calcData(period, symbol)
     return Response(json.dumps(result), mimetype='application/json')
 
@@ -25,7 +25,7 @@ def data():
 def save_stock_date():
     calc = Calc()
     period = request.args.get("period") or "1min"
-    symbol = request.args.get("symbol") or "XBTUSD"
+    symbol = request.args.get("symbol") or "BTC_CQ"
     result = calc.calcData(period, symbol, True)
     return Response(json.dumps(result), mimetype='application/json')
 

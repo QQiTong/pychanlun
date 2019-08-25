@@ -13,7 +13,8 @@
     <div class="switchContainer">
         <div class="furtureTab">
             <!--            上期所-->
-            <a onclick="switchSymbol('RB1910')" class="bold">螺纹</a>
+            <span class="bold">上期所</span>
+            <a onclick="switchSymbol('RB1910')">螺纹</a>
             <a onclick="switchSymbol('HC2001')">热卷</a>
             <a onclick="switchSymbol('RU2001')">橡胶</a>
             <a onclick="switchSymbol('NI1910')">沪镍</a>
@@ -22,26 +23,53 @@
             <a onclick="switchSymbol('SP2001')">纸浆</a>
             <a onclick="switchSymbol('AU1912')">黄金</a>
             <a onclick="switchSymbol('AG1912')">白银</a>
+            <a onclick="switchSymbol('BU1912')">沥青</a>
+            <a onclick="switchSymbol('CU1910')">沪铜</a>
+            <a onclick="switchSymbol('AL1910')">沪铝</a>
+
             <!--            郑商所-->
-            <a onclick="switchSymbol('MA1909')" class="bold">甲醇</a>
+            <span class="bold">郑商所</span>
+            <a onclick="switchSymbol('MA1909')" >甲醇</a>
             <a onclick="switchSymbol('TA2001')">PTA</a>
+            <a onclick="switchSymbol('RM2001')">菜粕</a>
             <a onclick="switchSymbol('SR2001')">白糖</a>
-            <a onclick="switchSymbol('FG2001')">玻璃</a>
+            <a onclick="switchSymbol('OI2001')">郑油</a>
+            <a onclick="switchSymbol('FG2001')" class="light">玻璃</a>
+            <a onclick="switchSymbol('ZC1911')">郑煤</a>
             <a onclick="switchSymbol('AP1910')">苹果</a>
             <a onclick="switchSymbol('CF2001')">棉花</a>
+            <a onclick="switchSymbol('CJ1912')">红枣</a>
             <!--            大商所-->
-            <a onclick="switchSymbol('M2001')" class="bold">豆粕</a>
-            <a onclick="switchSymbol('Y2001')">豆油</a>
+            <span class="bold">大商所</span>
+            <a onclick="switchSymbol('M2001')">豆粕</a>
+            <a onclick="switchSymbol('Y2001')" class="light">豆油</a>
             <a onclick="switchSymbol('I2001')">铁矿</a>
             <a onclick="switchSymbol('EG2001')">乙二醇</a>
             <a onclick="switchSymbol('J2001')">焦炭</a>
             <a onclick="switchSymbol('JM1909')">焦煤</a>
             <a onclick="switchSymbol('PP2001')">PP</a>
+            <a onclick="switchSymbol('P2001')">棕榈</a>
+            <a onclick="switchSymbol('L2001')" class="light">塑料</a>
+            <a onclick="switchSymbol('C2001')">玉米</a>
+            <a onclick="switchSymbol('V2001')" class="light">PVC</a>
+            <a onclick="switchSymbol('A2001')" class="light">豆一</a>
+            <a onclick="switchSymbol('B1910')">豆二</a>
+            <a onclick="switchSymbol('CS2001')" class="light">淀粉</a>
+            <a onclick="switchSymbol('JD2001')">鸡蛋</a>
 
         </div>
-        <!--<div class="coinTab">
-            <a onclick="switchSymbol('XBTUSD')" class="bold">BTC</a>
-        </div>-->
+        <div class="coinTab">
+            <span class="bold">数字货币-火币</span>
+            <a onclick="switchSymbol('BTC_CQ')" >BTC</a>
+            <a onclick="switchSymbol('ETH_CQ')" >ETH</a>
+            <!--<a onclick="switchSymbol('XRP_CQ')" >XRP</a>小数位数太小 导致图形错乱-->
+            <a onclick="switchSymbol('BCH_CQ')" >BCH</a>
+            <a onclick="switchSymbol('LTC_CQ')" >LTC</a>
+            <!--<a onclick="switchSymbol('EOS_CQ')" >EOS</a> 小数位数太小 导致图形错乱-->
+            <a onclick="switchSymbol('BSV_CQ')" >BSV</a>
+            <!--<a onclick="switchSymbol('TRX_CQ')" >TRX</a> 小数位数太小 导致图形错乱-->
+
+        </div>
     </div>
 </div>
 <div class="echarts-list">
@@ -71,7 +99,7 @@
             </div>
         </div>
        <div class="echarts-item">
-            <div id="mainD" class="echarts">
+            <div id="main60" class="echarts">
             </div>
         </div>
 

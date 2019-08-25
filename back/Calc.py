@@ -57,6 +57,33 @@ class Calc:
     def __init__(self):
         # 火币dm接口参数 本级别和大级别映射
         # 火币深度不够,无法容纳大资金
+        self.levelMap = {
+            '1min': '5min',
+            '3min': '15min',
+            '15min': '60min',
+            '60min': '4hour',
+            '1day': '1day',
+            '5min': '30min',
+            '30min': '4hour',
+            '4hour': '4hour',
+            # '1week': '1week'
+        }
+
+        self.huobiPeriodMap = {
+            '1min': '1min',
+            # 火币没有提供3min的数据 需要合成
+            '3min': '3min',
+            '5min': '5min',
+            '15min': '15min',
+            '60min': '60min',
+
+            '30min': '30min',
+            '4hour': '4hour',
+            '1day': '1day'
+            # '1week': '1week'
+        }
+
+        # bitmex 小级别大级别映射
         # self.levelMap = {
         #     '1min': '5min',
         #     '3min': '15min',
@@ -68,30 +95,18 @@ class Calc:
         #     '4hour': '1week',
         #     '1week': '1week'
         # }
-        # bitmex 小级别大级别映射
-        self.levelMap = {
-            '1min': '5min',
-            '3min': '15min',
-            '15min': '60min',
-            '60min': '1day',
-            '1day': '1week',
-            '5min': '30min',
-            '30min': '4hour',
-            '4hour': '1week',
-            '1week': '1week'
-        }
         #  bitmex 参数转换
-        self.bitmexPeriodMap = {
-            '1min': '1m',
-            '3min': '3m',
-            '15min': '15m',
-            '60min': '60m',
-            '1day': '1d',
-            '5min': '5m',
-            '30min': '30m',
-            '4hour': '240m',
-            '1week': '7d'
-        }
+        # self.bitmexPeriodMap = {
+        #     '1min': '1m',
+        #     '3min': '3m',
+        #     '15min': '15m',
+        #     '60min': '60m',
+        #     '1day': '1d',
+        #     '5min': '5m',
+        #     '30min': '30m',
+        #     '4hour': '240m',
+        #     '1week': '7d'
+        # }
 
         # 聚宽期货接口参数 本级别和大级别映射
         self.futureLevelMap = {
@@ -128,17 +143,19 @@ class Calc:
 
         # 获取接口数据
         klineDataTool = KlineDataTool()
-        if symbol == 'XBTUSD':
-            klineData = klineDataTool.getBtcData(self.bitmexPeriodMap[period], False)
-            klineDataBigLevel = klineDataTool.getBtcData(self.bitmexPeriodMap[self.levelMap[period]], True)
-            klineDataBigLevel = pydash.filter_(klineDataBigLevel, lambda klineItem: klineItem['time']>= klineData[0]['time'])
+        if '_CQ' in symbol:
+            klineData = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[period])
+            klineDataBigLevel = klineDataTool.getDigitCoinData(symbol,self.huobiPeriodMap[self.levelMap[period]])
+            klineDataBigLevel = pydash.filter_(klineDataBigLevel,
+                                               lambda klineItem: klineItem['time'] >= klineData[0]['time'])
         else:
             # 期货
             currentPeriod = self.periodMap[period]
             klineData = klineDataTool.getFutureData(symbol, currentPeriod, 1000)
             bigLevelPeriod = self.futureLevelMap[currentPeriod]
             klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 1000)
-            klineDataBigLevel = pydash.filter_(klineDataBigLevel, lambda klineItem: klineItem['time']>= klineData[0]['time'])
+            klineDataBigLevel = pydash.filter_(klineDataBigLevel,
+                                               lambda klineItem: klineItem['time'] >= klineData[0]['time'])
         # print("从接口到的数据", klineData)
         # 存数据快照，调试时候用
         if save:
@@ -264,9 +281,9 @@ class Calc:
         resJson['diff'] = getMacd(closePriceList)[0].tolist()
         resJson['dea'] = getMacd(closePriceList)[1].tolist()
         resJson['macd'] = getMacd(closePriceList)[2].tolist()
-        resJson['boll_up']=getBoll(closePriceList)[0].tolist()
-        resJson['boll_middle']=getBoll(closePriceList)[1].tolist()
-        resJson['boll_bottom']=getBoll(closePriceList)[2].tolist()
+        resJson['boll_up'] = getBoll(closePriceList)[0].tolist()
+        resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
+        resJson['boll_bottom'] = getBoll(closePriceList)[2].tolist()
         resJson['volume'] = volumeList
         resJson['zsdata'] = zsdata
         resJson['zsflag'] = zsflag
@@ -430,8 +447,9 @@ def getMacd(closePriceList):
     result = np.nan_to_num(macd)
     return result
 
+
 def getBoll(closePriceList):
     close = array(closePriceList)
-    boll = ta.BBANDS(close, 20,2)
+    boll = ta.BBANDS(close, 20, 2)
     result = np.nan_to_num(boll)
     return result

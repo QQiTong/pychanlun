@@ -1,11 +1,13 @@
-import numpy as np
-import pydash
-from datetime import datetime
+import requests
+import json
 
-time_array = ['11' for i in range(3)]
+hbdmUrl = "https://api.hbdm.com/market/history/kline"
 
-time_array[-1]=str(datetime.now())
-# print(len(time_array))
-for i in range(len(time_array)):
-    print(time_array[i])
+payload1 = {
+    'symbol': 'BTC_CQ',  # 合约类型， 火币季度合约
+    'period': '1min',
+    'size': 2000
+}
 
+r = requests.get(hbdmUrl, params=payload1)
+print(json.loads(r.text)['ch'])
