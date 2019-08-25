@@ -15,8 +15,6 @@ def app():
     scheduler.init_app(app)
     scheduler.start()
 
-    logging.basicConfig(stream=sys.stdout,level = logging.INFO)
-
     app.apscheduler.add_job(func=strategy3.doMonitor1, id='strategy3.doMonitor1', trigger='cron', minute='*/3', hour="*")
     app.apscheduler.add_job(func=strategy3.doMonitor2, id='strategy3.doMonitor2', trigger='cron', minute='*/15', hour="*")
 
