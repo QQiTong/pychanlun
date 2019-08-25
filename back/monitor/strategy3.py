@@ -16,7 +16,7 @@ from .. import Duan
 
 mail = Mail()
 
-logger = logging.getLogger('strategy3')
+logger = logging.getLogger()
 
 def doMonitor1():
     """
