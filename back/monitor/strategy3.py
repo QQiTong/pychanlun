@@ -16,12 +16,11 @@ from .. import Duan
 
 mail = Mail()
 
-logger = logging.getLogger()
-
 def doMonitor1():
     """
     策略3 XBTUSD 3m 15m 监控
     """
+    logger = logging.getLogger()
     logger.info("策略3 XBTUSD 3m 15m 监控 %s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     dtime = datetime.now()
     endTime = int(time.mktime(dtime.timetuple()))
@@ -137,6 +136,7 @@ def doMonitor2():
     """
     策略3 XBTUSD 15m 60m 监控
     """
+    logger = logging.getLogger()
     logger.info("策略3 XBTUSD 15m 60m 监控 %s" % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     dtime = datetime.now()
     endTime = int(time.mktime(dtime.timetuple()))

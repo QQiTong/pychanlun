@@ -5,7 +5,7 @@ import sys
 from back.monitor import strategy3
 
 def app():
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')
     scheduler = BlockingScheduler({
         'apscheduler.timezone': 'Asia/shanghai'
     })
