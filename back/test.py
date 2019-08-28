@@ -1,13 +1,28 @@
 import requests
 import json
+import time
+import pydash
+from datetime import datetime
+# hbdmUrl = "https://api.hbdm.com/market/history/kline"
+#
+# payload1 = {
+#     'symbol': 'BTC_CQ',  # 合约类型， 火币季度合约
+#     'period': '1min',
+#     'size': 2000
+# }
+#
+# r = requests.get(hbdmUrl, params=payload1)
+# print(json.loads(r.text)['ch'])
 
-hbdmUrl = "https://api.hbdm.com/market/history/kline"
+# currentTime = int(time.time())
+# print(currentTime)
+#
+# dateStamp = int(time.mktime(time.strptime("2019-08-25 12:55", "%Y-%m-%d %H:%M")))
+# print(dateStamp)
+# a = [1,2,3,4,3]
+#
+# result = pydash.find_index(a,lambda i:i ==3)
+# print(result)
 
-payload1 = {
-    'symbol': 'BTC_CQ',  # 合约类型， 火币季度合约
-    'period': '1min',
-    'size': 2000
-}
-
-r = requests.get(hbdmUrl, params=payload1)
-print(json.loads(r.text)['ch'])
+result = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+print(result)

@@ -49,11 +49,23 @@ timer = setInterval(() => {
 // draw(stockJsonData);
 
 function switchSymbol(symbol, update) {
+    this.symbol = symbol
+    if (timer) {
+        clearTimeout(timer)
+        timer = setInterval(() => {
+            if (this.requestFlag) {
+                switchSymbol(symbol, 'update')
+            } else {
+                // console.log('wait...')
+            }
+        }, 10000);
+    }
+
+
     if (update == undefined) {
         console.log("undefine")
         update = 'refresh'
     }
-    this.symbol = symbol
     console.log("切换币种:", symbol)
 
     for (var i = 0; i < 6; i++) {
@@ -111,7 +123,7 @@ function draw(stockJsonData, update, kxType) {
     var zoomStart = 55
     const resultData = splitData(stockJsonData);
 
-    dataTitle = this.symbol + " 最新价:" + stockJsonData.close[stockJsonData.close.length-1];
+    dataTitle = this.symbol + " 最新价:" + stockJsonData.close[stockJsonData.close.length - 1];
 
     var currentChart = myChart1
     if (kxType === '1min') {
@@ -216,65 +228,65 @@ function draw(stockJsonData, update, kxType) {
                     //         refresh();
                     //     }
                     // },
-                //     myLevel60: {
-                //         show: true,
-                //         title: '60分钟',
-                //         icon: 'image://img/icon_1h.png',
-                //         onclick: function () {
-                //             that.kxType = '60min'
-                //             option.title.subtext = '60min'
-                //             refresh();
-                //         }
-                //     },
-                //     myLevel240: {
-                //         show: true,
-                //         title: '240分钟',
-                //         icon: 'image://img/icon_4h.png',
-                //         onclick: function () {
-                //             that.kxType = '4hour'
-                //             option.title.subtext = '4hour'
-                //             refresh();
-                //         }
-                //     },
-                //     myLevelDay: {
-                //         show: true,
-                //         title: '日',
-                //         icon: 'image://img/icon_1d.png',
-                //         background: '#555',
-                //         onclick: function () {
-                //             that.kxType = '1day'
-                //             option.title.subtext = '1day'
-                //             refresh();
-                //         }
-                //     },
-                //     myLevelWeek: {
-                //         show: true,
-                //         title: '周',
-                //         icon: 'image://img/icon_1w.png',
-                //         background: '#555',
-                //         onclick: function () {
-                //             that.kxType = '1week'
-                //             option.title.subtext = '1week'
-                //             refresh();
-                //         }
-                //     },
-                //
-                //     myAutoRefresh: {
-                //         type: 'jpeg',//png
-                //         //name: resultData.info
-                //         background: '#555',
-                //
-                //         icon: 'image://img/icon_refresh.svg',
-                //         title: '刷新',
-                //         onclick: function () {
-                //             refresh();
-                //         }
-                //     },
+                    //     myLevel60: {
+                    //         show: true,
+                    //         title: '60分钟',
+                    //         icon: 'image://img/icon_1h.png',
+                    //         onclick: function () {
+                    //             that.kxType = '60min'
+                    //             option.title.subtext = '60min'
+                    //             refresh();
+                    //         }
+                    //     },
+                    //     myLevel240: {
+                    //         show: true,
+                    //         title: '240分钟',
+                    //         icon: 'image://img/icon_4h.png',
+                    //         onclick: function () {
+                    //             that.kxType = '4hour'
+                    //             option.title.subtext = '4hour'
+                    //             refresh();
+                    //         }
+                    //     },
+                    //     myLevelDay: {
+                    //         show: true,
+                    //         title: '日',
+                    //         icon: 'image://img/icon_1d.png',
+                    //         background: '#555',
+                    //         onclick: function () {
+                    //             that.kxType = '1day'
+                    //             option.title.subtext = '1day'
+                    //             refresh();
+                    //         }
+                    //     },
+                    //     myLevelWeek: {
+                    //         show: true,
+                    //         title: '周',
+                    //         icon: 'image://img/icon_1w.png',
+                    //         background: '#555',
+                    //         onclick: function () {
+                    //             that.kxType = '1week'
+                    //             option.title.subtext = '1week'
+                    //             refresh();
+                    //         }
+                    //     },
+                    //
+                    //     myAutoRefresh: {
+                    //         type: 'jpeg',//png
+                    //         //name: resultData.info
+                    //         background: '#555',
+                    //
+                    //         icon: 'image://img/icon_refresh.svg',
+                    //         title: '刷新',
+                    //         onclick: function () {
+                    //             refresh();
+                    //         }
+                    //     },
                 },
             },
-            color: ['yellow', 'green', 'blue', 'white', 'white', 'white', 'white', 'white'],
+            color: ['yellow', 'green', 'blue', 'white', 'white', 'white', 'white', 'white','white'],
             legend: {
-                data: ['笔', '段', '高级别段', 'MA5', 'MA10', '布林上轨', '布林中轨', '布林下轨'],
+                data: ['笔', '段', '高级别段', 'MA5', 'MA10', '布林上轨', '布林中轨', '布林下轨','AMA'],
 
                 selected: {
                     '笔': true,
@@ -285,6 +297,7 @@ function draw(stockJsonData, update, kxType) {
                     '布林上轨': false,
                     '布林中轨': false,
                     '布林下轨': false,
+                    'AMA':true
                 },
                 top: 10,
                 textStyle: {
@@ -868,13 +881,13 @@ function refreshOption(chart, resultData, kxType) {
     // option.title.subtext = "kljkldfsf"
     // option.title.text = symbol + " 最新价:" + lastPrice
     option.title = {
-                text: symbol + " 最新价:" + lastPrice,
-                subtext: kxType,
-                left: '2%',
-                textStyle: {
-                    color: 'white'
-                }
-            }
+        text: symbol + " 最新价:" + lastPrice,
+        subtext: kxType,
+        left: '2%',
+        textStyle: {
+            color: 'white'
+        }
+    }
     return option
 }
 

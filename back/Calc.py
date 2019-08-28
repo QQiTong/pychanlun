@@ -12,6 +12,7 @@ import copy
 import pydash
 from datetime import datetime
 
+from back import Duan
 from back.KlineDataTool import KlineDataTool
 from back.ZhongShuProcess import ZhongShuProcess
 from back.BiProcess import BiProcess
@@ -321,6 +322,9 @@ class Calc:
         sellHigherMACDBCData['data'] = []
         sellHigherMACDBCData['value'] = []
 
+        # strategy3计算
+        resJson['notLower'] = calcNotLower(duanResult,lowList)
+        resJson['notHigher'] = calcNotHigher(duanResult,highList)
         # for x in range(len(buyMACDBCData2['date'])):
         #     if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
         #         buyHigherMACDBCData['date'].append(buyMACDBCData2['date'][x])
@@ -453,3 +457,27 @@ def getBoll(closePriceList):
     boll = ta.BBANDS(close, 20, 2)
     result = np.nan_to_num(boll)
     return result
+
+
+def calcNotLower(duanResult,lowList):
+    if Duan.notLower(duanResult, lowList):
+        macdPos = ""
+        # if macd15m[-1] >= 0:
+        #     macdPos = "大级别MACD零轴上"
+        # else:
+        #     macdPos = "大级别MACD零轴下"
+        # msg = 'XB-3', symbol, period
+        return True
+    else:
+        return False
+def calcNotHigher(duanResult,highList):
+    if Duan.notHigher(duanResult, highList):
+        macdPos = ""
+        # if macd15m[-1] >= 0:
+        #     macdPos = "大级别MACD零轴上"
+        # else:
+        #     macdPos = "大级别MACD零轴下"
+        # msg = 'XB-3', symbol, period
+        return True
+    else:
+        return False

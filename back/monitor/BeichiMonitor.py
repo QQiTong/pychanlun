@@ -6,6 +6,7 @@ import pandas as pd
 from numpy import array
 import talib as ta
 import rqdatac as rq
+from datetime import datetime
 from rqdatac import *
 import time
 import threading
@@ -20,20 +21,23 @@ klineDataTool = KlineDataTool()
 #                'SP88', 'MA88', 'SR88', 'AP88', 'CF88', 'J88', 'JM88',
 #                'PP88']
 # 米筐数据 主力具体合约 这个是实时数据
-symbolListFuture = ['RB1910', 'HC2001', 'RU2001', 'NI1910', 'FU2001', 'ZN1910', 'SP2001', 'AU1912', 'AG1912', 'BU1912',
-                    'CU1910', 'AL1910',
-                    'MA1909', 'TA2001', 'RM2001', 'SR2001', 'OI2001', 'FG2001', 'ZC1911', 'AP1910', 'CF2001', 'CJ1912',
-                    'M2001', 'Y2001', 'I2001', 'EG2001', 'J2001', 'JM1909', 'PP2001', 'P2001', 'L2001', 'C2001',
-                    'V2001', 'A2001', 'B1910']
+symbolListFuture = ['RB2001', 'HC2001', 'RU2001', 'NI1910', 'FU2001', 'ZN1910', 'SP2001',  'BU1912',
+                    # 'CU1910', 'AL1910','AU1912', 'AG1912',
+                    'MA1909', 'TA2001',  'SR2001', 'OI2001',  'AP1910', 'CF2001',
+                    'M2001', 'I2001', 'EG2001', 'J2001', 'JM1909', 'PP2001',
+                    # 'RM2001','FG2001', 'ZC1911','CJ1912','Y2001', 'P2001','L2001', 'C2001','V2001', 'A2001', 'B1910'
+                    ]
 
-symbolListDigitCoin = ['BTC_CQ', 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ']
+symbolListDigitCoin = ['BTC_CQ'
+                       # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
+                       ]
 
 periodList1 = ['1min', '3min', '5min', '15min', '30min', '60min']
 periodList2 = ['3min', '5min', '15min', '30min', '60min']
 
-periodList = periodList2
 
 mail = Mail()
+
 
 
 # 监控期货
@@ -51,8 +55,10 @@ def monitorFuturesAndDigitCoin(type):
              ('rqdatad-pro.ricequant.com', 16011))
 
         symbolList = symbolListFuture
+        periodList = periodList2
     else:
         symbolList = symbolListDigitCoin
+        periodList = periodList1
 
     for i in range(len(symbolList)):
         symbol = symbolList[i]
@@ -61,154 +67,102 @@ def monitorFuturesAndDigitCoin(type):
             period = periodList[j]
             lastTimeMap[symbol][period] = 0
     print(lastTimeMap)
+    startTime = int(time.time())
+    try:
+        while True:
+            for i in range(len(symbolList)):
+                for j in range(len(periodList)):
+                    symbol = symbolList[i]
+                    period = periodList[j]
 
-    while True:
-        for i in range(len(symbolList)):
-            for j in range(len(periodList)):
-                symbol = symbolList[i]
-                period = periodList[j]
-                calc = Calc()
-                # 当前时间戳 秒为单位
-                currentTime = int(time.time())
+                    calc = Calc()
+                    # 当前时间戳 秒为单位
+                    currentTime = int(time.time())
 
-                lastTime = lastTimeMap[symbol][period]
-                diffTime = currentTime - lastTime
-                print("current:", symbol, period)
-
-                # period = '5min'
-                # symbol = 'RB1910'
-                result = calc.calcData(period, symbol)
-                closePrice = result['close'][-1]
-                if len(result['buyMACDBCData']['date']) > 0:
-                    lastBuyDate = result['buyMACDBCData']['date'][-1]
-                    lastBuyValue = result['buyMACDBCData']['value'][-1]
-
-                    dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-
-                    if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                        msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice
-                        print(msg)
-                        mailResult = mail.send(str(msg))
-                        if not mailResult:
-                            print("发送失败")
-                if len(result['sellMACDBCData']['date']) > 0:
-                    lastSellDate = result['sellMACDBCData']['date'][-1]
-                    lastSellValue = result['sellMACDBCData']['value'][-1]
-                    dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-
-                    if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                        msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice
-                        print(msg)
-                        mailResult = mail.send(str(msg))
-                        if not mailResult:
-                            print("发送失败")
-                # 监控高级别
-                if len(result['buyHigherMACDBCData']['date']) > 0:
-                    lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
-                    lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
-
-                    dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-
-                    if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                        msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice
-                        print(msg)
-                        mailResult = mail.send(str(msg))
-                        if not mailResult:
-                            print("发送失败")
-
-                if len(result['sellHigherMACDBCData']['date']) > 0:
-                    lastSellDate = result['sellHigherMACDBCData']['date'][-1]
-                    lastSellValue = result['sellHigherMACDBCData']['value'][-1]
-                    dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-
-                    if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                        msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice
-                        print(msg)
-                        mailResult = mail.send(str(msg))
-                        if not mailResult:
-                            print("发送失败")
-                time.sleep(5)
+                    lastTime = lastTimeMap[symbol][period]
+                    diffTime = currentTime - lastTime
+                    print("current:", symbol, period)
 
 
-# 监控BTC
-# timeScope 监控距离现在多少分钟的
-# def monitorDigitCoin():
-#     timeScope = 2
-#
-#     symbol = 'XBTUSD'
-#     lastTimeMap = {}
-#     lastTimeMap[symbol] = {}
-#     for j in range(len(periodList2)):
-#         period = periodList2[j]
-#         lastTimeMap[symbol][period] = 0
-#     print(lastTimeMap)
-#
-#     while True:
-#         for j in range(len(periodList2)):
-#             period = periodList2[j]
-#             calc = Calc()
-#             # period = '3min'
-#             result = calc.calcData(period, symbol)
-#             # 当前时间戳 秒为单位
-#             currentTime = int(time.time())
-#
-#             lastTime = lastTimeMap[symbol][period]
-#             diffTime = currentTime - lastTime
-#             closePrice = result['close'][-1]
-#             print("current:", symbol, period)
-#
-#             if len(result['buyMACDBCData']['date']) > 0:
-#                 lastBuyDate = result['buyMACDBCData']['date'][-1]
-#                 dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-#                 lastBuyValue = result['buyMACDBCData']['value'][-1]
-#
-#                 if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-#                     lastTimeMap[symbol][period] = dateStamp
-#                     msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice
-#                     print(msg)
-#                     mailResult = mail.send(str(msg))
-#                     if not mailResult:
-#                         print("发送失败")
-#
-#             if len(result['sellMACDBCData']['date']) > 0:
-#                 lastSellDate = result['sellMACDBCData']['date'][-1]
-#                 lastSellValue = result['sellMACDBCData']['value'][-1]
-#                 dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-#
-#                 if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-#                     lastTimeMap[symbol][period] = dateStamp
-#                     msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice
-#                     print(msg)
-#                     mailResult = mail.send(str(msg))
-#                     if not mailResult:
-#                         print("发送失败")
-#             # 监控高级别
-#             if len(result['buyHigherMACDBCData']['date']) > 0:
-#                 lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
-#                 dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-#                 lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
-#
-#                 if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-#                     lastTimeMap[symbol][period] = dateStamp
-#                     msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice
-#                     print(msg)
-#                     mailResult = mail.send(str(msg))
-#                     if not mailResult:
-#                         print("发送失败")
-#             if len(result['sellHigherMACDBCData']['date']) > 0:
-#                 lastSellDate = result['sellHigherMACDBCData']['date'][-1]
-#                 lastSellValue = result['sellHigherMACDBCData']['value'][-1]
-#                 dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-#
-#                 if lastTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-#                     lastTimeMap[symbol][period] = dateStamp
-#                     msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice
-#                     print(msg)
-#                     mailResult = mail.send(str(msg))
-#                     if not mailResult:
-#                         print("发送失败")
-#             time.sleep(5)
-#         time.sleep(10)
+                    result = calc.calcData(period, symbol)
+                    closePrice = result['close'][-1]
+                    if len(result['buyMACDBCData']['date']) > 0:
+                        lastBuyDate = result['buyMACDBCData']['date'][-1]
+                        lastBuyValue = result['buyMACDBCData']['value'][-1]
+                        notLower = result['notLower']
+                        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+                        # print("current judge:", symbol, period, lastBuyDate, notLower)
+                        if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
+                            lastTimeMap[symbol][period] = dateStamp
+                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice ,notLower ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            print(msg)
+                            mailResult = mail.send(str(msg))
+                            if not mailResult:
+                                print("发送失败")
+                            else:
+                                print("发送成功")
+                    if len(result['sellMACDBCData']['date']) > 0:
+                        notHigher = result['notHigher']
+                        lastSellDate = result['sellMACDBCData']['date'][-1]
+                        lastSellValue = result['sellMACDBCData']['value'][-1]
+
+                        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+                        # print("current judge:", symbol, period, lastSellDate, notHigher)
+                        if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
+                            lastTimeMap[symbol][period] = dateStamp
+                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice,notHigher ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            print(msg)
+                            mailResult = mail.send(str(msg))
+                            if not mailResult:
+                                print("发送失败")
+                            else:
+                                print("发送成功")
+
+                    # 监控高级别
+                    if len(result['buyHigherMACDBCData']['date']) > 0:
+                        lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
+                        lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
+
+                        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+                        notLower = result['notLower']
+                        # print("current judge:", symbol, period, lastBuyDate, notLower)
+                        if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
+                            lastTimeMap[symbol][period] = dateStamp
+                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice,notLower ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            print(msg)
+                            mailResult = mail.send(str(msg))
+                            if not mailResult:
+                                print("发送失败")
+                            else:
+                                print("发送成功")
+
+                    if len(result['sellHigherMACDBCData']['date']) > 0:
+                        lastSellDate = result['sellHigherMACDBCData']['date'][-1]
+                        lastSellValue = result['sellHigherMACDBCData']['value'][-1]
+                        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+                        notHigher = result['notHigher']
+                        # print("current judge:", symbol, period, lastSellDate, notHigher)
+                        if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
+                            lastTimeMap[symbol][period] = dateStamp
+                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice,notHigher ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            print(msg)
+                            mailResult = mail.send(str(msg))
+                            if not mailResult:
+                                print("发送失败")
+                            else:
+                                print("发送成功")
+                    if type== "1":
+                        time.sleep(0)
+                    else:
+                        time.sleep(5)
+    except :
+        if type == "1":
+            print("期货出异常了")
+
+            threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+        else:
+            print("火币出异常了")
+            threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
 
 threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
