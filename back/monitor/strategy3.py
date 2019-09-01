@@ -162,9 +162,17 @@ def doMonitor2():
     dataBackend = BitmexDataBackend()
     prices = dataBackend.get_price('XBTUSD', startTime, endTime, '5')
 
+    symbol = 'XBTUSD'
+    period = '15m,60m'
+    rawData = {}
+    signal = False
+    remark = ""
+
     df5m = pd.DataFrame.from_records(prices)
     df5m['time'] = pd.to_datetime(df5m.time.values, unit='s', utc=True).tz_convert('Asia/Shanghai')
     df5m.set_index("time", inplace=True)
+    rawData['5m'] = df5m.reset_index().to_dict(orient = "records")
+
     ohlc_dict = {
         'open': 'first',
         'high': 'max',
@@ -174,16 +182,17 @@ def doMonitor2():
     }
     # 聚合15m数据
     df15m = df5m.resample('15T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    df15m.reset_index('time', inplace=True)
+    rawData['15m'] = df15m.reset_index().to_dict(orient = "records")
+
     # 聚合60m数据
     df60m = df5m.resample('60T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    df60m.reset_index('time', inplace=True)
+    rawData['60m'] = df60m.reset_index().to_dict(orient = "records")
 
     #15m笔和段
     high15m = df15m.high.values
     low15m = df15m.low.values
     close15m = df15m.close.values
-    time15m = df15m.time.values
+    time15m = df15m.index.values
     count15m = len(time15m)
     klineProcess15m = KlineProcess()
     for i in range(count15m):
@@ -205,7 +214,7 @@ def doMonitor2():
     high60m = df60m.high.values
     low60m = df60m.low.values
     close60m = df60m.close.values
-    time60m = df60m.time.values
+    time60m = df60m.index.values
     count60m = len(time60m)
     klineProcess60m = KlineProcess()
     for i in range(count60m):
@@ -243,6 +252,8 @@ def doMonitor2():
                 else:
                     macdPos = "大级别MACD零轴下"
                 msg = 'XB', 'XBTUSD', '15m', macdPos
+                signal = True
+                remark = msg
                 logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
@@ -261,7 +272,11 @@ def doMonitor2():
                 else:
                     macdPos = "大级别MACD零轴下"
                 msg = 'XT', 'XBTUSD', '3m', macdPos
+                signal = True
+                remark = msg
                 logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
                     logger.info("发送失败")
+    mLog = Strategy3Log(symbol = symbol, period = period, raw_data = rawData, signal = signal, remark = remark)
+    mLog.save()

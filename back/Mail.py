@@ -16,7 +16,7 @@ class Mail:
             msg = MIMEText(content, 'plain', 'utf-8')
             msg['From'] = formataddr(["reminder", my_sender])  # 括号里的对应发件人邮箱昵称、发件人邮箱账号
             # msg['To'] = my_user  # 括号里的对应收件人邮箱昵称、收件人邮箱账号
-            msg['Subject'] = "Future remind"  # 邮件的主题，也可以说是标题
+            msg['Subject'] = "PyChanlun Future Remind"  # 邮件的主题，也可以说是标题
             server = smtplib.SMTP_SSL("smtpdm.aliyun.com", 465)  # 发件人邮箱中的SMTP服务器，端口是25
             server.login(my_sender, my_pass)  # 括号中对应的是发件人邮箱账号、邮箱密码
             for i in range(len(my_user)):
