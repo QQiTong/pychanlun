@@ -13,6 +13,7 @@ from .. import entanglement as entanglement
 from .. import divergence as divergence
 from ..Mail import Mail
 from .. import Duan
+from ..model.Strategy3Log import Strategy3Log
 
 mail = Mail()
 
@@ -28,9 +29,17 @@ def doMonitor1():
     dataBackend = BitmexDataBackend()
     prices = dataBackend.get_price('XBTUSD', startTime, endTime, '1')
 
+    symbol = 'XBTUSD'
+    period = '3m,15m'
+    rawData = {}
+    signal = False
+    remark = ""
+
     df1m = pd.DataFrame.from_records(prices)
     df1m['time'] = pd.to_datetime(df1m.time.values, unit='s', utc=True).tz_convert('Asia/Shanghai')
     df1m.set_index("time", inplace=True)
+    rawData['1m'] = df1m.reset_index().to_dict(orient = "records")
+
     ohlc_dict = {
         'open': 'first',
         'high': 'max',
@@ -38,18 +47,20 @@ def doMonitor1():
         'close': 'last',
         'volume': 'sum'
     }
+
     # 聚合3m数据
     df3m = df1m.resample('3T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    df3m.reset_index('time', inplace=True)
+    rawData['3m'] = df3m.reset_index().to_dict(orient = "records")
+
     # 聚合15m数据
     df15m = df1m.resample('15T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    df15m.reset_index('time', inplace=True)
+    rawData['15m'] = df15m.reset_index().to_dict(orient = "records")
 
     #3m笔和段
     high3m = df3m.high.values
     low3m = df3m.low.values
     close3m = df3m.close.values
-    time3m = df3m.time.values
+    time3m = df3m.index.values
     count3m = len(time3m)
     klineProcess3m = KlineProcess()
     for i in range(count3m):
@@ -71,7 +82,7 @@ def doMonitor1():
     high15m = df15m.high.values
     low15m = df15m.low.values
     close15m = df15m.close.values
-    time15m = df15m.time.values
+    time15m = df15m.index.values
     count15m = len(time15m)
     klineProcess15m = KlineProcess()
     for i in range(count15m):
@@ -108,6 +119,8 @@ def doMonitor1():
                 else:
                     macdPos = "大级别MACD零轴下"
                 msg = '顶背驰', 'XBTUSD', '3m', macdPos
+                signal = True
+                remark = msg
                 logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
@@ -126,10 +139,15 @@ def doMonitor1():
                 else:
                     macdPos = "大级别MACD零轴下"
                 msg = '底背驰', 'XBTUSD', '3m', macdPos
+                signal = True
+                remark = msg
                 logger.info(msg)
                 mailResult = mail.send(str(msg))
                 if not mailResult:
                     logger.info("发送失败")
+
+    mLog = Strategy3Log(symbol = symbol, period = period, raw_data = rawData, signal = signal, remark = remark)
+    mLog.save()
 
 
 def doMonitor2():
