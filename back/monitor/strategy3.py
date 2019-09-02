@@ -118,7 +118,7 @@ def doMonitor1():
                     macdPos = "大级别MACD零轴上"
                 else:
                     macdPos = "大级别MACD零轴下"
-                msg = '顶背驰', 'XBTUSD', '3m', macdPos
+                msg = 'XB', 'XBTUSD', '3m', macdPos
                 signal = True
                 remark = msg
                 logger.info(msg)
@@ -138,7 +138,7 @@ def doMonitor1():
                     macdPos = "大级别MACD零轴上"
                 else:
                     macdPos = "大级别MACD零轴下"
-                msg = '底背驰', 'XBTUSD', '3m', macdPos
+                msg = 'XT', 'XBTUSD', '3m', macdPos
                 signal = True
                 remark = msg
                 logger.info(msg)
