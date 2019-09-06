@@ -9,7 +9,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     MONGODB_SETTINGS = {
-        'host': '47.75.57.245',
+        'host': '120.77.209.6',
         'port': 27017,
         'db': 'pychanlun',
         'username': 'pychanlun',
