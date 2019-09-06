@@ -4,7 +4,7 @@ import time
 import pandas as pd
 import talib as ta
 import numpy as np
-from ..funcat.data.BitmexDataBackend import BitmexDataBackend
+from ..funcat.data.HuobiDataBackend import HuobiDataBackend
 from ..funcat.utils import get_int_date
 from ..KlineProcess import KlineProcess
 from ..BiProcess import BiProcess
@@ -19,17 +19,17 @@ mail = Mail()
 
 def doMonitor1():
     """
-    策略3 XBTUSD 3m 15m 监控
+    策略3 BTC_CQ 3m 15m 监控
     """
     logger = logging.getLogger()
-    logger.info("策略3 XBTUSD 3m 15m 监控")
+    logger.info("策略3 BTC_CQ 3m 15m 监控")
     dtime = datetime.now()
     endTime = int(time.mktime(dtime.timetuple()))
     startTime = endTime - 24 * 60 * 60 * 5
-    dataBackend = BitmexDataBackend()
-    prices = dataBackend.get_price('XBTUSD', startTime, endTime, '1')
+    dataBackend = HuobiDataBackend()
+    prices = dataBackend.get_price('BTC_CQ', startTime, endTime, '1min')
 
-    symbol = 'XBTUSD'
+    symbol = 'BTC_CQ'
     period = '3m,15m'
     rawData = {}
     signal = False
@@ -152,17 +152,17 @@ def doMonitor1():
 
 def doMonitor2():
     """
-    策略3 XBTUSD 15m 60m 监控
+    策略3 BTC_CQ 15m 60m 监控
     """
     logger = logging.getLogger()
-    logger.info("策略3 XBTUSD 15m 60m 监控")
+    logger.info("策略3 BTC_CQ 15m 60m 监控")
     dtime = datetime.now()
     endTime = int(time.mktime(dtime.timetuple()))
     startTime = endTime - 24 * 60 * 60 * 5
-    dataBackend = BitmexDataBackend()
-    prices = dataBackend.get_price('XBTUSD', startTime, endTime, '5')
+    dataBackend = HuobiDataBackend()
+    prices = dataBackend.get_price('BTC_CQ', startTime, endTime, '5min')
 
-    symbol = 'XBTUSD'
+    symbol = 'BTC_CQ'
     period = '15m,60m'
     rawData = {}
     signal = False
