@@ -6,6 +6,8 @@ COPY . .
 RUN chmod a+x ./prepare.sh && ./prepare.sh
 RUN pip install -r requirements.txt
 
+WORKDIR /opt/app
+
 ENV PYTHONUNBUFFERED 1
 ENV PYCHANLUN_CONFIG_ENV production
 
