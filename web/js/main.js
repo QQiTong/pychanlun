@@ -26,7 +26,7 @@ var bigMacdUpLastValue = Number.MIN_SAFE_INTEGER
 var bigMacdDownLastValue = Number.MAX_SAFE_INTEGER
 
 var amaLastValue = Number.MIN_SAFE_INTEGER
-
+var amaFlag = false
 
 // 自适应宽高
 setTimeout(function () {
@@ -287,9 +287,9 @@ function draw(stockJsonData, update, kxType) {
                     //     },
                 },
             },
-            color: ['yellow', 'green', 'blue', 'white', 'white', 'white', 'white', 'white','white'],
+            color: ['yellow', 'green', 'blue', 'white', 'white', 'white', 'white', 'white', '#FF00FF'],
             legend: {
-                data: ['笔', '段', '高级别段', 'MA5', 'MA10', '布林上轨', '布林中轨', '布林下轨','ama'],
+                data: ['笔', '段', '高级别段', 'MA5', 'MA10', '布林上轨', '布林中轨', '布林下轨', 'ama'],
 
                 selected: {
                     '笔': true,
@@ -300,7 +300,7 @@ function draw(stockJsonData, update, kxType) {
                     '布林上轨': false,
                     '布林中轨': false,
                     '布林下轨': false,
-                    'ama':true
+                    'ama': true
                 },
                 top: 10,
                 textStyle: {
@@ -847,12 +847,22 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                // 16
                 {
-                    name:'ama',
+                    name: 'ama',
                     data: resultData.ama,
                     type: 'line',
-                    symbol:'circle',
-                    symbolSize: 20,
+                    markPoint: {
+                        data: resultData.amaPoints
+                    },
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'solid',
+                            width: 1,
+                            color: '#FF00FF'
+                        },
+                    },
                 }
             ],
             graphic: [],
@@ -880,6 +890,7 @@ function refreshOption(chart, resultData, kxType) {
 
     option.series[11].data = resultData.volume;
     option.series[12].data = resultData.higherDuanValues;
+    option.series[16].data = resultData.ama;
 
 
     option.xAxis[0].data = resultData.time;
@@ -939,19 +950,70 @@ function splitData(jsonObj) {
 
 
     var amaValues = [];
+    var amaPoints = [];
     for (var i = 0; i < stockDate.length; i++) {
-        var obj = new Object();
-        var temp = ama[i]==0?'-':ama[i];
-        obj['value'] = temp;
-        var color ="";
-        if(temp > amaLastValue){
-            color = "#f00"
-        }else{
-            color = "#00f"
+        // var obj = new Object();
+        var temp = ama[i] == 0 ? '-' : ama[i];
+        // obj['value'] = temp;
+        var color = "";
+        var amaValue = ''
+        if (temp > amaLastValue) {
+            if (amaFlag !=true) {
+                color = "#f00"
+                amaValue = "B"
+                amaFlag = true
+                var point = {
+                    coord: [stockDate[i], ama[i]],
+                    value: amaValue,
+                    symbolRotate: 0,
+                    symbol: 'triangle',
+                    symbolSize:10,
+                    itemStyle: {
+                        normal: {color: 'red'}
+                    },
+                    label: {
+                        position: 'inside',
+                        offset: [0, 30],
+                        textBorderColor: 'red',
+                        textBorderWidth: 2,
+                        color: 'white',
+                    },
+                }
+                amaPoints.push(point)
+            }
+
+        } else {
+            if (amaFlag != false) {
+                amaFlag = false
+                color = "#00f"
+                amaValue = "T"
+                var point = {
+                    coord: [stockDate[i], ama[i]],
+                    value: amaValue,
+                    symbolRotate: -180,
+                    symbol: 'triangle',
+                    symbolSize:10,
+                    itemStyle: {
+                        normal: {color: 'green'}
+                    },
+                    label: {
+                        position: 'inside',
+                        offset: [0, 30],
+                        textBorderColor: 'green',
+                        textBorderWidth: 2,
+                        color: 'white',
+                    },
+                }
+                amaPoints.push(point)
+            }
+
         }
         amaLastValue = temp
-        obj['itemStyle']= {'color':color}
-        amaValues.push(obj)
+        // obj['itemStyle']= {'color':color}
+        // amaValues.push(obj)
+
+
+        amaValues.push(temp)
     }
 
     var categoryData = [];
@@ -1256,6 +1318,7 @@ function splitData(jsonObj) {
         bcMACDValues: bcMACDValues,
         close: stockClose,
         ama: amaValues,
+        amaPoints: amaPoints
         // markLineData: markLineData,
     };
 }
