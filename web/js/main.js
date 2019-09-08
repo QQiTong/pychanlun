@@ -25,6 +25,9 @@ var macdDownLastValue = Number.MAX_SAFE_INTEGER
 var bigMacdUpLastValue = Number.MIN_SAFE_INTEGER
 var bigMacdDownLastValue = Number.MAX_SAFE_INTEGER
 
+var amaLastValue = Number.MIN_SAFE_INTEGER
+
+
 // 自适应宽高
 setTimeout(function () {
     window.onresize = function () {
@@ -286,7 +289,7 @@ function draw(stockJsonData, update, kxType) {
             },
             color: ['yellow', 'green', 'blue', 'white', 'white', 'white', 'white', 'white','white'],
             legend: {
-                data: ['笔', '段', '高级别段', 'MA5', 'MA10', '布林上轨', '布林中轨', '布林下轨','AMA'],
+                data: ['笔', '段', '高级别段', 'MA5', 'MA10', '布林上轨', '布林中轨', '布林下轨','ama'],
 
                 selected: {
                     '笔': true,
@@ -297,7 +300,7 @@ function draw(stockJsonData, update, kxType) {
                     '布林上轨': false,
                     '布林中轨': false,
                     '布林下轨': false,
-                    'AMA':true
+                    'ama':true
                 },
                 top: 10,
                 textStyle: {
@@ -844,6 +847,13 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                {
+                    name:'ama',
+                    data: resultData.ama,
+                    type: 'line',
+                    symbol:'circle',
+                    symbolSize: 20,
+                }
             ],
             graphic: [],
         };
@@ -921,10 +931,28 @@ function splitData(jsonObj) {
     const boll_up = jsonObj.boll_up;
     const boll_middle = jsonObj.boll_middle;
     const boll_bottom = jsonObj.boll_bottom;
+    const ama = jsonObj.ama;
     // const info = jsonObj.info;
     // const isTradeTime = jsonObj.isTradeTime;
     // const basicInfo = jsonObj.basicInfo;
     // const concept = jsonObj.concept;
+
+
+    var amaValues = [];
+    for (var i = 0; i < stockDate.length; i++) {
+        var obj = new Object();
+        var temp = ama[i]==0?'-':ama[i];
+        obj['value'] = temp;
+        var color ="";
+        if(temp > amaLastValue){
+            color = "#f00"
+        }else{
+            color = "#00f"
+        }
+        amaLastValue = temp
+        obj['itemStyle']= {'color':color}
+        amaValues.push(obj)
+    }
 
     var categoryData = [];
     var values = [];
@@ -1227,6 +1255,7 @@ function splitData(jsonObj) {
         // mmdValues: mmdValues,
         bcMACDValues: bcMACDValues,
         close: stockClose,
+        ama: amaValues,
         // markLineData: markLineData,
     };
 }

@@ -285,6 +285,7 @@ class Calc:
         resJson['boll_up'] = getBoll(closePriceList)[0].tolist()
         resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
         resJson['boll_bottom'] = getBoll(closePriceList)[2].tolist()
+        resJson['ama'] = getAma(closePriceList).tolist()
         resJson['volume'] = volumeList
         resJson['zsdata'] = zsdata
         resJson['zsflag'] = zsflag
@@ -456,6 +457,12 @@ def getBoll(closePriceList):
     close = array(closePriceList)
     boll = ta.BBANDS(close, 20, 2)
     result = np.nan_to_num(boll)
+    return result
+
+def getAma(closePriceList):
+    close = array(closePriceList)
+    ama = ta.KAMA(close)
+    result = np.nan_to_num(ama)
     return result
 
 

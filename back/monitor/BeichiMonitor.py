@@ -45,6 +45,7 @@ mail = Mail()
 def monitorFuturesAndDigitCoin(type):
     timeScope = 2
     lastTimeMap = {}
+    lastTimeAmaMap = {}
     symbolList = []
     if type == "1":
         # auth('13088887055', 'chanlun123456')
@@ -63,10 +64,14 @@ def monitorFuturesAndDigitCoin(type):
     for i in range(len(symbolList)):
         symbol = symbolList[i]
         lastTimeMap[symbol] = {}
+        lastTimeAmaMap[symbol] = {}
+
         for j in range(len(periodList)):
             period = periodList[j]
             lastTimeMap[symbol][period] = 0
+            lastTimeAmaMap[symbol][period] = 0
     print(lastTimeMap)
+    print(lastTimeAmaMap)
     startTime = int(time.time())
     try:
         while True:
@@ -80,12 +85,39 @@ def monitorFuturesAndDigitCoin(type):
                     currentTime = int(time.time())
 
                     lastTime = lastTimeMap[symbol][period]
+                    lastAmaTime = lastTimeAmaMap[symbol][period]
+
+
                     diffTime = currentTime - lastTime
                     print("current:", symbol, period)
 
 
                     result = calc.calcData(period, symbol)
                     closePrice = result['close'][-1]
+                    # ama
+                    ama = result['ama']
+                    if(ama[-3]<ama[-2] and ama[-1] <ama[-2] and period =='60min'):
+                        if lastAmaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                            lastTimeMap[symbol][period] = dateStamp
+                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "down", time.strftime(
+                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                            print(msg)
+                            mailResult = mail.send(str(msg))
+                            if not mailResult:
+                                print("发送失败")
+                            else:
+                                print("发送成功")
+                    if (ama[-3] > ama[-2] and ama[-1] > ama[-2] and period =='60min'):
+                        if lastAmaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "up", time.strftime(
+                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                            print(msg)
+                            mailResult = mail.send(str(msg))
+                            if not mailResult:
+                                print("发送失败")
+                            else:
+                                print("发送成功")
+
                     if len(result['buyMACDBCData']['date']) > 0:
                         lastBuyDate = result['buyMACDBCData']['date'][-1]
                         lastBuyValue = result['buyMACDBCData']['value'][-1]
