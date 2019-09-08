@@ -45,7 +45,8 @@ def getData1(symbol):
 
 
 def saveData(code, df, period):
-    print('保存行情数据', code, period)
+    logger = logging.getLogger()
+    logger.info("保存行情数据 %s %s" % (code, period))
     for time, row in df.iterrows():
         bar = Bar(time = time, open = row['open'], close = row['close'], high = row['high'], low = row['low'], volume = row['volume'])
         bar.switch_collection('%s_%s' % (code.lower(), period))
@@ -58,4 +59,4 @@ def getMarketData1():
     source = rx.from_(Symbol.objects()).pipe(
         ops.subscribe_on(pool_scheduler),
         ops.do_action(lambda symbol: getData1(symbol))
-    ).subscribe(lambda value: print('%s获取数据完成' % value.code))
+    ).subscribe(lambda symbol: logger.info("获取行情数据完成 %s" % symbol.code))
