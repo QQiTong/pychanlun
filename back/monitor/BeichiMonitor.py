@@ -197,5 +197,5 @@ def monitorFuturesAndDigitCoin(type):
             threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
 
-threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
 threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
