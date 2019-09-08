@@ -10,3 +10,4 @@ flask-mongoengine
 gunicorn
 gevent
 json-logging-py
+rx

@@ -19,7 +19,7 @@ class HuobiDataBackend(DataBackend):
         payload = {
             'period': period,
             'symbol': code,  # 合约类型，如永续合约:XBTUSD
-            'size': 2000
+            'size': end - start
         }
         r = requests.get(self.endpoint, params=payload)
         retJson = json.loads(r.text)

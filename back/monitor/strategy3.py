@@ -27,7 +27,7 @@ def doMonitor1():
     endTime = int(time.mktime(dtime.timetuple()))
     startTime = endTime - 24 * 60 * 60 * 5
     dataBackend = HuobiDataBackend()
-    prices = dataBackend.get_price('BTC_CQ', startTime, endTime, '1min')
+    prices = dataBackend.get_price('BTC_CQ', 0, 2000, '1min')
 
     symbol = 'BTC_CQ'
     period = '3m,15m'
@@ -160,7 +160,7 @@ def doMonitor2():
     endTime = int(time.mktime(dtime.timetuple()))
     startTime = endTime - 24 * 60 * 60 * 5
     dataBackend = HuobiDataBackend()
-    prices = dataBackend.get_price('BTC_CQ', startTime, endTime, '5min')
+    prices = dataBackend.get_price('BTC_CQ', 0, 2000, '5min')
 
     symbol = 'BTC_CQ'
     period = '15m,60m'
