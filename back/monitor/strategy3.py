@@ -110,9 +110,9 @@ def doMonitor1():
         lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
         nowTs = dtime.timestamp()
         if nowTs-lastTs < 600:
-            # 顶背驰了
+            # 低背驰了
             # 看大级别有没有破位
-            if Duan.notHigher(duanResult3m, high3m):
+            if Duan.notLower(duanResult3m, high3m):
                 macdPos = ""
                 if macd15m[-1] >= 0:
                     macdPos = "大级别MACD零轴上"
@@ -130,9 +130,9 @@ def doMonitor1():
         lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
         nowTs = dtime.timestamp()
         if nowTs-lastTs < 600:
-            # 底背驰
+            # 顶背驰
             # 看大级别有没有破位
-            if Duan.notLower(duanResult3m, low3m):
+            if Duan.notHigher(duanResult3m, low3m):
                 macdPos = ""
                 if macd15m[-1] >= 0:
                     macdPos = "大级别MACD零轴上"
@@ -243,9 +243,9 @@ def doMonitor2():
         lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
         nowTs = dtime.timestamp()
         if nowTs-lastTs < 600:
-            # 顶背驰了
+            # 低背驰了
             # 看大级别有没有破位
-            if Duan.notHigher(duanResult15m, high15m):
+            if Duan.notLower(duanResult15m, high15m):
                 macdPos = ""
                 if macd60m[-1] >= 0:
                     macdPos = "大级别MACD零轴上"
@@ -263,9 +263,9 @@ def doMonitor2():
         lastTs = (last - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
         nowTs = dtime.timestamp()
         if nowTs-lastTs < 600:
-            # 底背驰
+            # 顶背驰
             # 看大级别有没有破位
-            if Duan.notLower(duanResult15m, low15m):
+            if Duan.notHigher(duanResult15m, low15m):
                 macdPos = ""
                 if macd60m[-1] >= 0:
                     macdPos = "大级别MACD零轴上"
