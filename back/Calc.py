@@ -63,10 +63,10 @@ class Calc:
             '3min': '15min',
             '15min': '60min',
             '60min': '4hour',
-            '1day': '1day',
+            '1day': '1week',
             '5min': '30min',
             '30min': '4hour',
-            '4hour': '4hour',
+            '4hour': '1week',
             # '1week': '1week'
         }
 
@@ -80,8 +80,8 @@ class Calc:
 
             '30min': '30min',
             '4hour': '4hour',
-            '1day': '1day'
-            # '1week': '1week'
+            '1day': '1day',
+            '1week': '1week'
         }
 
         # bitmex 小级别大级别映射
@@ -115,11 +115,11 @@ class Calc:
             '3m': '15m',
             '15m': '60m',
             '60m': '1d',
-            '1d': '5d',
+            '1d': '3d',
             '5m': '30m',
             '30m': '240m',
-            '240m': '5d',
-            '5d': '5d'
+            '240m': '3d',
+            '3d': '3d',  # 周线数量只有33根画不出macd 只好取3d了
         }
         #     period参数转换
         self.periodMap = {
@@ -131,7 +131,7 @@ class Calc:
             '5min': '5m',
             '30min': '30m',
             '4hour': '240m',
-            '1week': '5d'
+            '1week': '3d'
         }
 
     def calcData(self, period, symbol, save=False):
@@ -146,7 +146,7 @@ class Calc:
         klineDataTool = KlineDataTool()
         if '_CQ' in symbol:
             klineData = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[period])
-            klineDataBigLevel = klineDataTool.getDigitCoinData(symbol,self.huobiPeriodMap[self.levelMap[period]])
+            klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[self.levelMap[period]])
             klineDataBigLevel = pydash.filter_(klineDataBigLevel,
                                                lambda klineItem: klineItem['time'] >= klineData[0]['time'])
         else:
@@ -324,8 +324,8 @@ class Calc:
         sellHigherMACDBCData['value'] = []
 
         # strategy3计算
-        resJson['notLower'] = calcNotLower(duanResult,lowList)
-        resJson['notHigher'] = calcNotHigher(duanResult,highList)
+        resJson['notLower'] = calcNotLower(duanResult, lowList)
+        resJson['notHigher'] = calcNotHigher(duanResult, highList)
         # for x in range(len(buyMACDBCData2['date'])):
         #     if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
         #         buyHigherMACDBCData['date'].append(buyMACDBCData2['date'][x])
@@ -459,6 +459,7 @@ def getBoll(closePriceList):
     result = np.nan_to_num(boll)
     return result
 
+
 def getAma(closePriceList):
     close = array(closePriceList)
     ama = ta.KAMA(close)
@@ -466,7 +467,7 @@ def getAma(closePriceList):
     return result
 
 
-def calcNotLower(duanResult,lowList):
+def calcNotLower(duanResult, lowList):
     if Duan.notLower(duanResult, lowList):
         macdPos = ""
         # if macd15m[-1] >= 0:
@@ -477,7 +478,9 @@ def calcNotLower(duanResult,lowList):
         return True
     else:
         return False
-def calcNotHigher(duanResult,highList):
+
+
+def calcNotHigher(duanResult, highList):
     if Duan.notHigher(duanResult, highList):
         macdPos = ""
         # if macd15m[-1] >= 0:

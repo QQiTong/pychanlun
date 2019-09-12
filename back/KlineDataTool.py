@@ -194,6 +194,8 @@ class KlineDataTool:
         # print("结果:", newKlineList)
         # print("结果:", originKlineList)
         if target == 0:
+            # if period=='1week':
+            #     print(len(originKlineList))
             return originKlineList
         else:
             # k线聚合处理
@@ -255,7 +257,7 @@ class KlineDataTool:
             '60m': -31*8,
             '240m':-31*8,
             '1d': -31*10,
-            '5d':-31*30
+            '3d':-31*30
         }
         start_date = datetime.now() + timedelta(timeDeltaMap[period])
 
@@ -264,6 +266,11 @@ class KlineDataTool:
 
         # df = get_price('RB1910.XSGE', frequency='240m', end_date=datetime.now(), count=200,
         #                fields=['open', 'high', 'low', 'close', 'volume'])
+        # todo 米匡240m 数据有问题,比通达信和文化财经多一个时间,需要手动去除,但是手动去除也不准,需要等米匡修复
+        if period == '240m':
+            cols = [x for i, x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
+            df = df.drop(cols)
+
         nparray = np.array(df)
         npKlineList = nparray.tolist()
         # npIndexList = pd.to_numeric(df.index) // 1000000000
@@ -284,5 +291,7 @@ class KlineDataTool:
         # print("期货k线结果:", klineList)
         # endTime = datetime.now() - startTime
         # print("函数时间", endTime)
-
+        if period=='3d':
+            print("-------------------")
+            print(len(klineList))
         return klineList

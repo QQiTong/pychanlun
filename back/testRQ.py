@@ -23,12 +23,15 @@ period = '3m'
 #     '60m':-31,
 #     '1d':-180
 # }
-# start_date = datetime.now() + timedelta(timeDeltaMap[period])
-
 end = datetime.now() + timedelta(1)
-test = rq.get_price('RB1910',frequency='5d',fields=['open', 'high', 'low', 'close', 'volume'],start_date='2017-07-03',end_date=end)
-# test = rq.futures.history_bars('RB88', bar_count=300, frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'], skip_suspended=True, include_now=False)('RB88.XSGE',frequency='1m',fields=['open', 'high', 'low', 'close', 'volume'],end_date=datetime.now(),bar_count=300)
+df = rq.get_price('RB2001',frequency='240m',fields=['open', 'high', 'low', 'close', 'volume'],start_date='2019-08-28',end_date=end)
+print(df)
 
 
-# test = rq.futures.get_dominant('rb', end_date=datetime.now())
-print(test)
+cols=[x for i,x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
+#利用enumerate对row0进行遍历，将含有数字3的列放入cols中
+print(cols)
+# print(str(df.index[0]))
+#
+df2 = df.drop(cols)
+print(df2)
