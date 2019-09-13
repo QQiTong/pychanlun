@@ -44,7 +44,7 @@ def getData1(symbol):
         saveData(symbol.code, df1h, "1h")
         # 4h数据
         df4h = df1m.resample('4H', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-        saveData(symbol.code, df1h, "4h")
+        saveData(symbol.code, df4h, "4h")
 
 
 def getData2(symbol):
@@ -58,7 +58,10 @@ def getData2(symbol):
         df1d.set_index("time", inplace=True)
         saveData(symbol.code, df1d, "1d")
         # 1w数据
-        df1w = df1d.resample('1W', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+        prices = dataBackend.get_price(symbol.code, 0, 500, '1week')
+        df1w = pd.DataFrame.from_records(prices)
+        df1w['time'] = pd.to_datetime(df1w.time.values, unit='s', utc=True).tz_convert('Asia/Shanghai')
+        df1w.set_index("time", inplace=True)
         saveData(symbol.code, df1w, "1w")
 
 
@@ -73,7 +76,7 @@ def saveData(code, df, period):
 # 取1m数据，聚合3m、5m、15m、30m和1h的数据
 def getMarketData1():
     logger = logging.getLogger()
-    logger.info("取市场行情 3m、5m、15m、30m和1h")
+    logger.info("取市场行情 3m、5m、15m、30m、1h和4h")
     source = rx.from_(Symbol.objects()).pipe(
         ops.subscribe_on(pool_scheduler),
         ops.do_action(lambda symbol: getData1(symbol))
@@ -82,7 +85,7 @@ def getMarketData1():
 # 取1h, 4h, 1d, 1w的数据
 def getMarketData2():
     logger = logging.getLogger()
-    logger.info("取市场行情 1h、4h、1d和1w")
+    logger.info("取市场行情 1d和1w")
     source = rx.from_(Symbol.objects()).pipe(
         ops.subscribe_on(pool_scheduler),
         ops.do_action(lambda symbol: getData2(symbol))
