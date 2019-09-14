@@ -26,6 +26,7 @@ aio_scheduler = AsyncIOScheduler(loop=loop)
 
 ohlc_dict = { 'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum' }
 
+
 def getData1(symbol):
     logger = logging.getLogger()
     logger.info(symbol.code)
@@ -77,6 +78,7 @@ def getData2(symbol):
         df1w = df1d.resample('W', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
         saveData(symbol.code, df1w, "1w")
 
+
 def saveData(code, df, period):
     logger = logging.getLogger()
     logger.info("保存行情数据 %s %s" % (code, period))
@@ -86,11 +88,14 @@ def saveData(code, df, period):
         bar.save()
 
 
+
 # 取1m数据，聚合3m、5m、15m、30m和1h的数据
 def getMarketData1():
     logger = logging.getLogger()
     logger.info("取市场行情 3m、5m、15m、30m、1h和4h")
-    source = rx.from_(Symbol.objects()).subscribe(
+    source = rx.from_(Symbol.objects()).pipe(
+        ops.catch(lambda e: logger.info("Error Occurred: {0}".format(e)))
+    ).subscribe(
         on_next = lambda symbol: getData1(symbol),
         on_error = lambda e: logger.info("Error Occurred: {0}".format(e)),
         on_completed = lambda: logger.info("Done!"),
@@ -101,7 +106,9 @@ def getMarketData1():
 def getMarketData2():
     logger = logging.getLogger()
     logger.info("取市场行情 1d和1w")
-    source = rx.from_(Symbol.objects()).subscribe(
+    source = rx.from_(Symbol.objects()).pipe(
+        ops.catch(lambda e: logger.info("Error Occurred: {0}".format(e)))
+    ).subscribe(
         on_next = lambda symbol: getData2(symbol),
         on_error = lambda e: logger.info("Error Occurred: {0}".format(e)),
         on_completed = lambda: logger.info("Done!"),
