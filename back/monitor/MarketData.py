@@ -5,8 +5,12 @@ from threading import current_thread
 import pandas as pd
 from datetime import datetime, timedelta
 
+import asyncio
+
 import rx
 from rx.scheduler import ThreadPoolScheduler
+from rx.scheduler.eventloop import AsyncIOScheduler
+
 from rx import operators as ops
 
 from ..model.Symbol import Symbol
@@ -16,6 +20,9 @@ from ..funcat.data.RicequantDataBackend import RicequantDataBackend
 
 optimal_thread_count = multiprocessing.cpu_count() * 5
 pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
+
+loop = asyncio.get_event_loop()
+aio_scheduler = AsyncIOScheduler(loop=loop)
 
 ohlc_dict = { 'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum' }
 
@@ -94,6 +101,11 @@ def getMarketData2():
     logger = logging.getLogger()
     logger.info("取市场行情 1d和1w")
     source = rx.from_(Symbol.objects()).pipe(
-        ops.subscribe_on(pool_scheduler),
+        ops.subscribe_on(aio_scheduler),
+        ops.observe_on(aio_scheduler),
         ops.do_action(lambda symbol: getData2(symbol))
-    ).subscribe(lambda symbol: logger.info("获取行情数据完成 %s" % symbol.code))
+    ).subscribe(
+        on_next = lambda symbol: logger.info("获取行情数据完成 %s" % symbol.code),
+        on_error = lambda e: logger.info("Error Occurred: {0}".format(e)),
+        on_completed = lambda: logger.info("Done!"),
+    )
