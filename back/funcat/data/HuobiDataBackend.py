@@ -19,10 +19,11 @@ class HuobiDataBackend(DataBackend):
     def get_price(self, code, start, end, period):
         payload = {
             'period': period,
-            'symbol': code,  # 合约类型，如永续合约:XBTUSD
+            'symbol': code,
             'size': end - start
         }
         r = requests.get(self.endpoint, params=payload)
+        print(r.text)
         retJson = json.loads(r.text)
         data = retJson['data']
         recdata = []
