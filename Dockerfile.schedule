@@ -3,6 +3,9 @@ FROM python:3.7.4
 WORKDIR /opt/app
 COPY . .
 
+ENV PIP_TRUSTED_HOST mirrors.aliyun.com
+ENV PIP_INDEX_URL http://mirrors.aliyun.com/pypi/simple
+
 RUN chmod a+x ./prepare.sh && ./prepare.sh
 RUN pip install -r requirements.txt
 
