@@ -90,22 +90,19 @@ def saveData(code, df, period):
 def getMarketData1():
     logger = logging.getLogger()
     logger.info("取市场行情 3m、5m、15m、30m、1h和4h")
-    source = rx.from_(Symbol.objects()).pipe(
-        ops.subscribe_on(pool_scheduler),
-        ops.do_action(lambda symbol: getData1(symbol))
-    ).subscribe(lambda symbol: logger.info("获取行情数据完成 %s" % symbol.code))
+    source = rx.from_(Symbol.objects()).subscribe(
+        on_next = lambda symbol: getData1(symbol),
+        on_error = lambda e: logger.info("Error Occurred: {0}".format(e)),
+        on_completed = lambda: logger.info("Done!"),
+    )
 
 
 # 取1h, 4h, 1d, 1w的数据
 def getMarketData2():
     logger = logging.getLogger()
     logger.info("取市场行情 1d和1w")
-    source = rx.from_(Symbol.objects()).pipe(
-        ops.subscribe_on(aio_scheduler),
-        ops.observe_on(aio_scheduler),
-        ops.do_action(lambda symbol: getData2(symbol))
-    ).subscribe(
-        on_next = lambda symbol: logger.info("获取行情数据完成 %s" % symbol.code),
+    source = rx.from_(Symbol.objects()).subscribe(
+        on_next = lambda symbol: getData2(symbol),
         on_error = lambda e: logger.info("Error Occurred: {0}".format(e)),
         on_completed = lambda: logger.info("Done!"),
     )

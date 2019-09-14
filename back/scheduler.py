@@ -12,7 +12,7 @@ from back.monitor import strategy3
 
 def app():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO,
-                        format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')
+                        format='%(asctime)s %(threadName)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')
 
     cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
     mongodbSettings = cfg.MONGODB_SETTINGS
