@@ -14,7 +14,7 @@ from ..model.Bar import Bar
 from ..funcat.data.HuobiDataBackend import HuobiDataBackend
 from ..funcat.data.RicequantDataBackend import RicequantDataBackend
 
-optimal_thread_count = multiprocessing.cpu_count()
+optimal_thread_count = multiprocessing.cpu_count() * 5
 pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
 
 ohlc_dict = { 'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum' }
@@ -54,15 +54,14 @@ def getData1(symbol):
 
 
 def getData2(symbol):
-    backend = symbol.backend
-    if backend == 'HUOBI':
+    if symbol.backend == 'HUOBI':
         dataBackend = HuobiDataBackend()
         # 1d数据
         df1d = dataBackend.get_price(symbol.code, 0, 500, '1day')
         saveData(symbol.code, df1d, "1d")
         df1w = df1d.resample('W', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
         saveData(symbol.code, df1w, "1w")
-    if backend == 'RICEQUANT':
+    if symbol.backend == 'RICEQUANT':
         dataBackend = RicequantDataBackend()
         start = datetime.now() + timedelta(-3)
         end = datetime.now() + timedelta(1)
