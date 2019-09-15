@@ -188,24 +188,27 @@ def doExecute(symbol, period1, period2):
         mailResult = mail.send(msg)
         saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg)
 
+
 def saveLog(symbol, period, raw_data, signal, remark):
     mLog = Strategy3Log(symbol = symbol, period = period, raw_data = raw_data, signal = True, remark = remark)
     mLog.save()
 
+
 def doCaculate(symbol):
     logger = logging.getLogger()
-    try:
-        doExecute(symbol, '3m', '15m')
-    except BaseException as e:
-        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
-    try:
-        doExecute(symbol, '15m', '1h')
-    except BaseException as e:
-        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
-    try:
-        doExecute(symbol, '1h', '1d')
-    except BaseException as e:
-        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
+    pairs = [
+        { 'current': '3m', 'higher': '15m' },
+        { 'current': '5m', 'higher': '30m' },
+        { 'current': '15m', 'higher': '1h' },
+        { 'current': '30m', 'higher': '4h' },
+        { 'current': '1h', 'higher': '1d' }
+    ]
+    for i in range(len(pairs)):
+        try:
+            doExecute(symbol, pairs[i]['current'], pairs[i]['higher'])
+        except BaseException as e:
+            logger.info("Error Occurred: {0}".format(traceback.format_exc()))
+
 
 def doMonitor():
     """
