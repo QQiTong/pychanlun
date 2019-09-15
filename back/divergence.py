@@ -44,7 +44,9 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
                 if info['duan_type'] == -1:
                     # 前面是向下段，才是背驰点
                     # 要向下段后的第一次金叉
-                    if len(pydash.filter_(gold_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
+                    if info['duan_end'] == i:
+                        divergence_down[i] = 1
+                    elif len(pydash.filter_(gold_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
                         divergence_down[i] = 1
     for i in range(len(dead_cross.series)):
         if dead_cross.series[i]:
@@ -53,7 +55,9 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
                 if info['duan_type'] == 1:
                     # 前面是向上段，才是背驰点
                     # 要向上段后的第一次死叉
-                    if len(pydash.filter_(dead_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
+                    if info['duan_end'] == i:
+                        divergence_up[i] = 1
+                    elif len(pydash.filter_(dead_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
                         divergence_up[i] = 1
     return divergence_down, divergence_up
 
@@ -64,7 +68,7 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
         'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'duan_price': [], 'beichi_price': []},
     }
     for i in range(len(divergence_down)):
-        if divergence_down[i]:
+        if divergence_down[i] == 1:
             data['buyMACDBCData']['date'].append(time_series[i])
             data['buyMACDBCData']['data'].append(diff_series[i])
             if bigLevel:
@@ -78,7 +82,7 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
                data['buyMACDBCData']['duan_price'].append(0)
             data['buyMACDBCData']['beichi_price'].append(open_series[i])
     for i in range(len(divergence_up)):
-        if divergence_up[i]:
+        if divergence_up[i] == 1:
             data['sellMACDBCData']['date'].append(time_series[i])
             data['sellMACDBCData']['data'].append(diff_series[i])
             if bigLevel:
