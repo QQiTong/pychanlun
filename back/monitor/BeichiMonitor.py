@@ -166,49 +166,37 @@ def monitorFuturesAndDigitCoin(type):
 
                     # 监控高级别
                     if len(result['buyHigherMACDBCData']['date']) > 0:
-                        # 附近有金叉的时候才通知，最近5个Bar里有金叉
-                        diff = result['diffBigLevel']
-                        dea = result['deaBigLevel']
-                        goldCross = CROSS(diff, dea)
-                        isCross = pydash.find_index(goldCross.series[-5:-1], lambda x: x == True) > -1
-                        if isCross:
-                            lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
-                            lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
+                        lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
+                        lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
 
-                            dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-                            notLower = result['notLower']
-                            # print("current judge:", symbol, period, lastBuyDate, notLower)
-                            if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
-                                lastTimeMap[symbol][period] = dateStamp
-                                msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice,notLower ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-                                print(msg)
-                                mailResult = mail.send(str(msg))
-                                if not mailResult:
-                                    print("发送失败")
-                                else:
-                                    print("发送成功")
+                        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+                        notLower = result['notLower']
+                        # print("current judge:", symbol, period, lastBuyDate, notLower)
+                        if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
+                            lastTimeMap[symbol][period] = dateStamp
+                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice,notLower ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            print(msg)
+                            mailResult = mail.send(str(msg))
+                            if not mailResult:
+                                print("发送失败")
+                            else:
+                                print("发送成功")
 
                     if len(result['sellHigherMACDBCData']['date']) > 0:
-                        # 附近有金叉的时候才通知，最近5个Bar里有金叉
-                        diff = result['diffBigLevel']
-                        dea = result['deaBigLevel']
-                        deadCross = CROSS(dea, diff)
-                        isCross = pydash.find_index(deadCross.series[-5:-1], lambda x: x == True) > -1
-                        if isCross:
-                            lastSellDate = result['sellHigherMACDBCData']['date'][-1]
-                            lastSellValue = result['sellHigherMACDBCData']['value'][-1]
-                            dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-                            notHigher = result['notHigher']
-                            # print("current judge:", symbol, period, lastSellDate, notHigher)
-                            if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
-                                lastTimeMap[symbol][period] = dateStamp
-                                msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice,notHigher ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-                                print(msg)
-                                mailResult = mail.send(str(msg))
-                                if not mailResult:
-                                    print("发送失败")
-                                else:
-                                    print("发送成功")
+                        lastSellDate = result['sellHigherMACDBCData']['date'][-1]
+                        lastSellValue = result['sellHigherMACDBCData']['value'][-1]
+                        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+                        notHigher = result['notHigher']
+                        # print("current judge:", symbol, period, lastSellDate, notHigher)
+                        if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
+                            lastTimeMap[symbol][period] = dateStamp
+                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice,notHigher ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            print(msg)
+                            mailResult = mail.send(str(msg))
+                            if not mailResult:
+                                print("发送失败")
+                            else:
+                                print("发送成功")
                     if type== "1":
                         time.sleep(0)
                     else:

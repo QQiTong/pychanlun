@@ -3,8 +3,11 @@
 import pydash
 import numpy as np
 import json
+
 from .funcat.time_series import (fit_series, NumericSeries)
-from .funcat.func import CrossOver
+from .funcat.api import *
+from . import Duan
+
 
 '''
      High 高级别 H
@@ -26,57 +29,67 @@ signalMap = {
 }
 
 
-def calc(time_s, macd_s, diff_s, dea_s, bi_list, duan_s):
-    time_s, macd_s, diff_s, dea_s, duan_s = fit_series(time_s, macd_s, diff_s, dea_s, duan_s)
-    divergence_down = np.zeros(len(time_s)) # 底背驰信号
-    divergence_up = np.zeros(len(time_s)) # 顶背驰信号
-    for i in range(len(duan_s)):
-        if duan_s[i] == -1:
-            duan_start = pydash.find_last_index(duan_s[:i], lambda d: d == 1)
-            duan_end = i
-            down_bi_list = pydash.filter_(bi_list,
-                                        lambda bi: bi.direction == -1 and bi.klineList[-1].start <= duan_end and
-                                                    bi.klineList[0].end >= duan_start)
-            if len(down_bi_list) > 1:
-                min_diffs = pydash.map_(down_bi_list, lambda bi: np.amin(diff_s[bi.start:bi.end + 1]))
-                if len(min_diffs) > 1 and min_diffs[-1] > np.amin(min_diffs[:-1]):
+def calc(time_series, high_series, low_series, close_series, macd_series, diff_series, dea_series, bi_list, duan_series):
+    time_series, macd_series, diff_series, dea_series, duan_series = fit_series(time_series, macd_series, diff_series, dea_series, duan_series)
+    # 底背驰信号
+    divergence_down = np.zeros(len(time_series))
+    # 顶背驰信号
+    divergence_up = np.zeros(len(time_series))
+    gold_cross = CROSS(diff_series, dea_series)
+    dead_cross = CROSS(dea_series, diff_series)
+    for i in range(len(gold_cross.series)):
+        if gold_cross.series[i]:
+            info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
+            if info is not None:
+                if info['duan_type'] == -1:
+                    # 前面是向下段，金叉才是背驰点
                     divergence_down[i] = 1
-        if duan_s[i] == 1:
-            duan_start = pydash.find_last_index(duan_s[:i], lambda d: d == -1)
-            duan_end = i
-            up_bi_list = pydash.filter_(bi_list, lambda bi: bi.direction == 1 and bi.klineList[-1].start <= duan_end and
-                                                            bi.klineList[0].end >= duan_start)
-            if len(up_bi_list) > 1:
-                max_diffs = pydash.map_(up_bi_list, lambda bi: np.amax(diff_s[bi.start:bi.end + 1]))
-                if len(max_diffs) > 1 and max_diffs[-1] < np.amax(max_diffs[:-1]):
+    for i in range(len(dead_cross.series)):
+        if dead_cross.series[i]:
+            info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
+            if info is not None:
+                if info['duan_type'] == 1:
+                    # 前面是向上段，死叉才是背驰点
                     divergence_up[i] = 1
     return divergence_down, divergence_up
 
 
-def note(divergence_down, divergence_up, time_s, diff_s, bigLevel = False):
+def note(divergence_down, divergence_up, duan_series, time_series, high_series, low_series, close_series, diff_series, bigLevel = False):
     data = {
-        'buyMACDBCData': {'date': [], 'data': [], 'value': []},
-        'sellMACDBCData': {'date': [], 'data': [], 'value': []},
+        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'duan_price': [], 'current_price': []},
+        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'duan_price': [], 'current_price': []},
     }
     for i in range(len(divergence_down)):
         if divergence_down[i]:
-            data['buyMACDBCData']['date'].append(time_s[i])
-            data['buyMACDBCData']['data'].append(diff_s[i])
+            data['buyMACDBCData']['date'].append(time_series[i])
+            data['buyMACDBCData']['data'].append(diff_series[i])
             if bigLevel:
                 data['buyMACDBCData']['value'].append(signalMap['高级别线底背'])
             else:
                 data['buyMACDBCData']['value'].append(signalMap['线底背'])
+            bottom_index = pydash.find_last_index(duan_series[:i], lambda x: x == -1)
+            if bottom_index > -1:
+                data['buyMACDBCData']['duan_price'].append(low_series[bottom_index])
+            else:
+               data['buyMACDBCData']['duan_price'].append(0)
+            data['buyMACDBCData']['current_price'].append(close_series[i])
     for i in range(len(divergence_up)):
         if divergence_up[i]:
-            data['sellMACDBCData']['date'].append(time_s[i])
-            data['sellMACDBCData']['data'].append(diff_s[i])
+            data['sellMACDBCData']['date'].append(time_series[i])
+            data['sellMACDBCData']['data'].append(diff_series[i])
             if bigLevel:
                 data['sellMACDBCData']['value'].append(signalMap['高级别线顶背'])
             else:
                 data['sellMACDBCData']['value'].append(signalMap['线顶背'])
+            top_index = pydash.find_last_index(duan_series[:i], lambda x: x == 1)
+            if top_index > -1:
+                data['buyMACDBCData']['duan_price'].append(high_series[top_index])
+            else:
+               data['buyMACDBCData']['duan_price'].append(0)
+            data['buyMACDBCData']['current_price'].append(close_series[i])
     return data
 
 
-def calcAndNote(time_s, macd_s, diff_s, dea_s, bi_list, duan_s, bigLevel = False):
-    divergence_down, divergence_up = calc(time_s, macd_s, diff_s, dea_s, bi_list, duan_s)
-    return note(divergence_down, divergence_up, time_s, diff_s, bigLevel)
+def calcAndNote(time_series, high_series, low_series, close_series, macd_series, diff_series, dea_series, bi_list, duan_series, bigLevel = False):
+    divergence_down, divergence_up = calc(time_series, high_series, low_series, close_series, macd_series, diff_series, dea_series, bi_list, duan_series)
+    return note(divergence_down, divergence_up, duan_series, time_series, high_series, low_series, close_series, diff_series, bigLevel)
