@@ -317,22 +317,22 @@ function draw(stockJsonData, update, kxType) {
             },
             grid: [
                 {//直角坐标系
-                    left: '3.2%',
-                    right: '3.35%',
+                    left: '0%',
+                    right: '10%',
                     height: '57%',
                     top: 50,
                 },
                 {
                     top: '65%',
                     height: '20%',
-                    left: '3.2%',
-                    right: '3.35%',
+                    left: '0%',
+                    right: '10%',
                 },
                 {
                     top: '80%',
                     height: '15%',
-                    left: '3.2%',
-                    right: '3.35%',
+                    left: '0%',
+                    right: '10%',
                 },
                 // {
                 //     top: '90%',
@@ -549,6 +549,8 @@ function draw(stockJsonData, update, kxType) {
                     markLine: {
                         silent: true,
                         data: resultData.markLineData,
+                        symbol: 'circle',
+                        symbolSize:1,
                     }
                 },
                 //index 1
@@ -1070,9 +1072,8 @@ function splitData(jsonObj) {
         symbolSize:1,
         label: {
             normal: {
-                color: downColor,
-                formatter: '开仓:\n'+stockClose[stockDate.length - 1] +'\n 0.5%',
-            },
+                color: 'white',
+                formatter: '开:'+stockClose[stockDate.length - 1].toFixed(2) +' (0.5%)',            },
         },
     }
     //止损位 todo 临时写的值
@@ -1086,11 +1087,12 @@ function splitData(jsonObj) {
                 color: downColor
             },
         },
-        symbol: 'arrow',
+        symbol: 'circle',
+        symbolSize:1,
         label: {
             normal: {
                 color: downColor,
-                formatter: '目标:\n'+stockClose[stockDate.length - 1] * 1.005 +'\n 0.5%',
+                formatter: '盈:'+(stockClose[stockDate.length - 1] * 1.005).toFixed(2) +' (0.5%)',
             },
         },
     }
@@ -1108,10 +1110,11 @@ function splitData(jsonObj) {
         label: {
             normal: {
                 color: upColor,
-                 formatter: '止损:\n'+stockClose[stockDate.length - 1] * 0.995+'\n -0.5%',
+                 formatter: '止:'+(stockClose[stockDate.length - 1] * 0.995).toFixed(2)+' (-0.5%)',
             }
         },
-        symbol: 'pin'
+        symbol: 'circle',
+        symbolSize:1,
     }
     markLineData.push(markLineCurrent)
     markLineData.push(markLineStop)
