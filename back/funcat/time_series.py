@@ -259,4 +259,6 @@ class MarketDataSeries(NumericSeries):
 
 
 class BoolSeries(NumericSeries):
-    pass
+    def __getitem__(self, index):
+        assert isinstance(index, bool) and index >= 0
+        return self.__class__(series=self.series[:len(self.series) - index], **self.extra_create_kwargs)

@@ -306,9 +306,8 @@ class Calc:
         macd_array = np.array(macdList)
         diff_array = np.array(diffList)
         dea_array = np.array(deaList)
-        beichiData = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, duanResult)
-        beichiData2 = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, higherDuanResult,
-                                      True)
+        beichiData = divergence.calcAndNote(time_array, macd_array, diff_array, dea_array, biProcess.biList, duanResult)
+        beichiData2 = divergence.calcAndNote(time_array, macd_array, diff_array, dea_array, biProcess.biList, higherDuanResult, True)
         buyMACDBCData = beichiData['buyMACDBCData']
         sellMACDBCData = beichiData['sellMACDBCData']
         buyMACDBCData2 = beichiData2['buyMACDBCData']

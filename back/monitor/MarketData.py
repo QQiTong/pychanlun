@@ -101,7 +101,7 @@ def saveData(code, df, period):
 def getMarketData1():
     logger = logging.getLogger()
     logger.info("取市场行情 3m、5m、15m、30m、1h和4h")
-    source = rx.from_(Symbol.objects()).subscribe(
+    rx.from_(Symbol.objects()).subscribe(
         on_next = lambda symbol: getData1(symbol),
         on_error = lambda e: logger.info("Error Occurred: {0}".format(e)),
         on_completed = lambda: logger.info("Done!"),
@@ -112,7 +112,7 @@ def getMarketData1():
 def getMarketData2():
     logger = logging.getLogger()
     logger.info("取市场行情 1d和1w")
-    source = rx.from_(Symbol.objects()).subscribe(
+    rx.from_(Symbol.objects()).subscribe(
         on_next = lambda symbol: getData2(symbol),
         on_error = lambda e: logger.info("Error Occurred: {0}".format(e)),
         on_completed = lambda: logger.info("Done!"),
