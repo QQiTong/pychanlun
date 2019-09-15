@@ -307,7 +307,8 @@ function draw(stockJsonData, update, kxType) {
                     'MA10': false,
                     '布林上轨': false,
                     '布林中轨': false,
-                    '布林下轨': false
+                    '布林下轨': false,
+                    // 'markline': true
                 },
                 top: 10,
                 textStyle: {
@@ -321,7 +322,7 @@ function draw(stockJsonData, update, kxType) {
                     height: '57%',
                     top: 50,
                 },
-                       {
+                {
                     top: '65%',
                     height: '20%',
                     left: '3.2%',
@@ -388,7 +389,7 @@ function draw(stockJsonData, update, kxType) {
                     axisLabel: {
                         show: false
                     },
-                    axisLine: {lineStyle: {color: '#8392A5'}}
+                    // axisLine: {lineStyle: {color: '#8392A5'}}
                 },
                 // {
                 //     type: 'category',
@@ -413,9 +414,10 @@ function draw(stockJsonData, update, kxType) {
                         lineStyle: {
                             opacity: 0.3,
                             type: 'dashed',
+                            color: bgColor
                         }
                     },
-                    axisLine: {lineStyle: {color: '#8392A5'}},
+                    axisLine: {lineStyle: {color: bgColor}},
                 },
                 //本级别macd
                 {
@@ -522,6 +524,7 @@ function draw(stockJsonData, update, kxType) {
                 }
             ],
             series: [
+                //index 0
                 {
                     name: 'K线图',
                     type: 'candlestick',
@@ -543,7 +546,12 @@ function draw(stockJsonData, update, kxType) {
                         silent: true,
                         data: resultData.zsvalues,
                     },
+                    markLine: {
+                        silent: true,
+                        data: resultData.markLineData,
+                    }
                 },
+                //index 1
                 {
                     name: '笔',
                     type: 'line',
@@ -560,6 +568,7 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                //index 2
                 {
                     name: '段',
                     type: 'line',
@@ -573,28 +582,13 @@ function draw(stockJsonData, update, kxType) {
                             color: 'green'
                         },
                     },
-                     markPoint: {
+                    markPoint: {
                         data: resultData.duanPriceValues
                     },
                     symbol: 'none',
                     animation: false
                 },
-                // {
-                //     name: 'markline',
-                //     type: 'line',
-                //     data: resultData.markLineData,
-                //     smooth: true,
-                //     lineStyle: {
-                //         normal: {
-                //             opacity: 0.25,
-                //             type: 'dashed',
-                //             width: 0.8,
-                //             color: 'blue'
-                //         },
-                //     },
-                //     symbol: 'none',
-                //     animation: false
-                // },
+                //index 3
                 {
                     name: 'MA5',
                     type: 'line',
@@ -611,6 +605,7 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                //index 4
                 {
                     name: 'MA10',
                     type: 'line',
@@ -627,6 +622,7 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                //index 5
                 {
                     name: 'MACD',
                     type: 'bar',
@@ -658,6 +654,8 @@ function draw(stockJsonData, update, kxType) {
                         }
                     }
                 },
+                //index 6
+
                 {
                     name: 'DIFF',
                     type: 'line',
@@ -679,6 +677,8 @@ function draw(stockJsonData, update, kxType) {
                         data: resultData.bcMACDValues
                     },
                 },
+                //index 7
+
                 {
                     name: 'DEA',
                     type: 'line',
@@ -700,6 +700,7 @@ function draw(stockJsonData, update, kxType) {
                         data: resultData.macdAreaValues
                     },
                 },
+                //index 8
                 //大级别MACD
                 {
                     name: 'BigMACD',
@@ -754,6 +755,7 @@ function draw(stockJsonData, update, kxType) {
                         // data: resultData.bcMACDValues
                     },
                 },
+                //index 9
                 {
                     name: 'DEA',
                     type: 'line',
@@ -772,6 +774,7 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                //index 10
                 // {
                 //     name: 'Volume',
                 //     type: 'bar',
@@ -796,6 +799,7 @@ function draw(stockJsonData, update, kxType) {
                 //         }
                 //     }
                 // },
+                //index 11
                 {
                     name: '高级别段',
                     type: 'line',
@@ -812,6 +816,7 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                //index 12
                 {
                     name: '布林上轨',
                     type: 'line',
@@ -828,6 +833,7 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                //index 13
                 {
                     name: '布林中轨',
                     type: 'line',
@@ -844,6 +850,7 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                //index 14
                 {
                     name: '布林下轨',
                     type: 'line',
@@ -860,6 +867,36 @@ function draw(stockJsonData, update, kxType) {
                     symbol: 'none',
                     animation: false
                 },
+                //index 15
+                // {
+                //     name: 'markline',
+                //     type: 'line',
+                //     data: resultData.markLineData,
+                //     label:{
+                //         normal:{
+                //             show:true,
+                //             position:'end',
+                //             formatter:'止损前高'
+                //         }
+                //     },
+                //     smooth: true,
+                //     lineStyle: {
+                //         normal: {
+                //             opacity: 1,
+                //             type: 'dash',
+                //             width: 0.8,
+                //             color: 'yellow'
+                //         },
+                //     },
+                //     itemStyle: {
+                //         normal: {
+                //             width: 0,
+                //             color: 'yellow'
+                //         }
+                //     },
+                //     symbol: 'circle',
+                //     animation: false
+                // },
                 // 16
                 // {
                 //     name: 'ama',
@@ -895,6 +932,7 @@ function refreshOption(chart, resultData, kxType) {
     var option = chart.getOption();
     option.series[0].data = resultData.values;
     option.series[0].markArea.data = resultData.zsvalues;
+    option.series[0].markLine.data = resultData.markLineData;
     option.series[1].data = resultData.biValues;
     option.series[2].data = resultData.duanValues;
     option.series[2].markPoint.data = resultData.duanPriceValues;
@@ -903,7 +941,9 @@ function refreshOption(chart, resultData, kxType) {
     option.series[4].data = calculateMA(resultData, 10);
     option.series[5].data = resultData.macd;
     option.series[6].data = resultData.diff;
+    option.series[6].markPoint.data = resultData.bcMACDValues;
     option.series[7].data = resultData.dea;
+    option.series[7].markPoint.data = resultData.macdAreaValues;
 
     option.series[8].data = resultData.macdBigLevel;
     option.series[9].data = resultData.diffBigLevel;
@@ -911,7 +951,7 @@ function refreshOption(chart, resultData, kxType) {
 
     // option.series[11].data = resultData.volume;
     option.series[11].data = resultData.higherDuanValues;
-    // option.series[16].data = resultData.ama;
+    // option.series[15].data = resultData.markLineData;
 
 
     option.xAxis[0].data = resultData.time;
@@ -1011,11 +1051,72 @@ function splitData(jsonObj) {
 
     var categoryData = [];
     var values = [];
-    // var markLineData = [];
+    var markLineData = [];
     for (var i = 0; i < stockDate.length; i++) {
         values.push([stockOpen[i], stockClose[i], stockLow[i], stockHigh[i]]);
-        // markLineData.push([stockDate[i], stockClose[stockDate.length - 1]])
     }
+    // 保本位 todo 临时写的值
+    var markLineCurrent = {
+        yAxis: stockClose[stockDate.length - 1],
+        lineStyle: {
+            normal: {
+                opacity: 1,
+                type: 'dashed',
+                width: 1,
+                color: 'white'
+            },
+        },
+        symbol: 'circle',
+        symbolSize:1,
+        label: {
+            normal: {
+                color: downColor,
+                formatter: '开仓:\n'+stockClose[stockDate.length - 1] +'\n 0.5%',
+            },
+        },
+    }
+    //止损位 todo 临时写的值
+    var markLineTarget = {
+        yAxis: stockClose[stockDate.length - 1] * 1.005,
+        lineStyle: {
+            normal: {
+                opacity: 1,
+                type: 'dashed',
+                width: 1,
+                color: downColor
+            },
+        },
+        symbol: 'arrow',
+        label: {
+            normal: {
+                color: downColor,
+                formatter: '目标:\n'+stockClose[stockDate.length - 1] * 1.005 +'\n 0.5%',
+            },
+        },
+    }
+    // 目标价位 止盈位 todo 临时写的值
+    var markLineStop = {
+        yAxis: stockClose[stockDate.length - 1] * 0.995,
+        lineStyle: {
+            normal: {
+                opacity: 1,
+                type: 'dashed',
+                width: 1,
+                color: upColor
+            },
+        },
+        label: {
+            normal: {
+                color: upColor,
+                 formatter: '止损:\n'+stockClose[stockDate.length - 1] * 0.995+'\n -0.5%',
+            }
+        },
+        symbol: 'pin'
+    }
+    markLineData.push(markLineCurrent)
+    markLineData.push(markLineStop)
+    markLineData.push(markLineTarget)
+    console.log("markline", markLineData)
 
     var biValues = [];
     for (var i = 0; i < bidata.date.length; i++) {
@@ -1025,10 +1126,10 @@ function splitData(jsonObj) {
     for (var i = 0; i < duandata.date.length; i++) {
         duanValues.push([duandata.date[i], duandata.data[i]])
     }
-     var duanPriceValues = [];
+    var duanPriceValues = [];
     for (var i = 0; i < duandata.date.length; i++) {
         var value = {}
-        if (i >0 && duandata.data[i ] > duandata.data[i-1]) {
+        if (i > 0 && duandata.data[i] > duandata.data[i - 1]) {
             value = {
                 coord: [duandata.date[i], duandata.data[i]],
                 value: duandata.data[i],
@@ -1403,7 +1504,7 @@ function splitData(jsonObj) {
         macdAreaValues: macdAreaValues,
         // ama: amaValues,
 
-        // markLineData: markLineData,
+        markLineData: markLineData,
     };
 }
 
