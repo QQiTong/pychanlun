@@ -75,7 +75,7 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
                 data['buyMACDBCData']['value'].append(signalMap['高级别线底背'])
             else:
                 data['buyMACDBCData']['value'].append(signalMap['线底背'])
-            bottom_index = pydash.find_last_index(duan_series[:i], lambda x: x == -1)
+            bottom_index = pydash.find_last_index(duan_series[:i+1], lambda x: x == -1)
             if bottom_index > -1:
                 data['buyMACDBCData']['stop_lose_price'].append(low_series[bottom_index])
             else:
@@ -89,7 +89,7 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
                 data['sellMACDBCData']['value'].append(signalMap['高级别线顶背'])
             else:
                 data['sellMACDBCData']['value'].append(signalMap['线顶背'])
-            top_index = pydash.find_last_index(duan_series[:i], lambda x: x == 1)
+            top_index = pydash.find_last_index(duan_series[:i+1], lambda x: x == 1)
             if top_index > -1:
                 data['sellMACDBCData']['stop_lose_price'].append(high_series[top_index])
             else:
