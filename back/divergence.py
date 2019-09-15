@@ -60,8 +60,8 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
 
 def note(divergence_down, divergence_up, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel = False):
     data = {
-        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'duan_price': [], 'current_price': []},
-        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'duan_price': [], 'current_price': []},
+        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'duan_price': [], 'beichi_price': []},
+        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'duan_price': [], 'beichi_price': []},
     }
     for i in range(len(divergence_down)):
         if divergence_down[i]:
@@ -76,7 +76,7 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
                 data['buyMACDBCData']['duan_price'].append(low_series[bottom_index])
             else:
                data['buyMACDBCData']['duan_price'].append(0)
-            data['buyMACDBCData']['current_price'].append(open_series[i])
+            data['buyMACDBCData']['beichi_price'].append(open_series[i])
     for i in range(len(divergence_up)):
         if divergence_up[i]:
             data['sellMACDBCData']['date'].append(time_series[i])
@@ -90,7 +90,7 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
                 data['sellMACDBCData']['duan_price'].append(high_series[top_index])
             else:
                data['sellMACDBCData']['duan_price'].append(0)
-            data['sellMACDBCData']['current_price'].append(open_series[i])
+            data['sellMACDBCData']['beichi_price'].append(open_series[i])
     return data
 
 

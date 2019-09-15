@@ -3,6 +3,95 @@ let timer;
 let requestFlag = true;
 var kxType = "3min"
 var symbol = 'BTC_CQ';
+//杠杆倍数和买入价格
+//todo 临时写的
+var futuresLevel = {
+    'BTC_CQ': {
+        price: 1,
+        level: 20
+    },
+    'RB2001': {
+        price: 3200,
+        level: 10
+    },
+    'HC2001': {
+        price: 3200,
+        level: 10
+    },
+    'RU2001': {
+        price: 3200,
+        level: 10
+    },
+    'NI1911': {
+        price: 3200,
+        level: 10
+    },
+    'FU2001': {
+        price: 3200,
+        level: 10
+    },
+    'ZN1911': {
+        price: 3200,
+        level: 10
+    },
+    'SP2001': {
+        price: 3200,
+        level: 10
+    },
+    'BU1912': {
+        price: 3200,
+        level: 10
+    },
+    'MA2001': {
+        price: 3200,
+        level: 10
+    },
+    'TA2001': {
+        price: 3200,
+        level: 10
+    },
+    'SR2001': {
+        price: 3200,
+        level: 10
+    },
+    'OI2001': {
+        price: 3200,
+        level: 10
+    },
+    'AP1910': {
+        price: 3200,
+        level: 10
+    },
+    'M2001': {
+        price: 3200,
+        level: 10
+    },
+    'I2001': {
+        price: 3200,
+        level: 10
+    },
+    'EG2001': {
+        price: 3200,
+        level: 10
+    },
+    'J2001': {
+        price: 3200,
+        level: 10
+    },
+    'JM2001': {
+        price: 3200,
+        level: 10
+    },
+    'PP2001': {
+        price: 3200,
+        level: 10
+    },
+    'L2001': {
+        price: 3200,
+        level: 10
+    }
+}
+
 var myChart1 = echarts.init(document.getElementById('main1'));
 var myChart3 = echarts.init(document.getElementById('main3'));
 var myChart5 = echarts.init(document.getElementById('main5'));
@@ -131,7 +220,7 @@ function sendRequest(symbol, kxType, update) {
 function draw(stockJsonData, update, kxType) {
     var that = this;
     var zoomStart = 55
-    const resultData = splitData(stockJsonData);
+    const resultData = splitData(stockJsonData, kxType);
 
     dataTitle = this.symbol + " 最新价:" + stockJsonData.close[stockJsonData.close.length - 1];
 
@@ -155,7 +244,7 @@ function draw(stockJsonData, update, kxType) {
     }
     var option;
     if (update === 'update') {
-        console.log('更新了', update);
+        // console.log('更新了', update);
         option = this.refreshOption(currentChart, resultData, kxType)
 
     } else {
@@ -550,7 +639,7 @@ function draw(stockJsonData, update, kxType) {
                         silent: true,
                         data: resultData.markLineData,
                         symbol: 'circle',
-                        symbolSize:1,
+                        symbolSize: 1,
                     }
                 },
                 //index 1
@@ -977,7 +1066,7 @@ function refreshOption(chart, resultData, kxType) {
 
 // var colorStops = []
 
-function splitData(jsonObj) {
+function splitData(jsonObj, kxType) {
     const stockDate = jsonObj.date;
     const stockHigh = jsonObj.high;
     const stockLow = jsonObj.low;
@@ -1053,73 +1142,9 @@ function splitData(jsonObj) {
 
     var categoryData = [];
     var values = [];
-    var markLineData = [];
     for (var i = 0; i < stockDate.length; i++) {
         values.push([stockOpen[i], stockClose[i], stockLow[i], stockHigh[i]]);
     }
-    // 保本位 todo 临时写的值
-    var markLineCurrent = {
-        yAxis: stockClose[stockDate.length - 1],
-        lineStyle: {
-            normal: {
-                opacity: 1,
-                type: 'dashed',
-                width: 1,
-                color: 'white'
-            },
-        },
-        symbol: 'circle',
-        symbolSize:1,
-        label: {
-            normal: {
-                color: 'white',
-                formatter: '开:'+stockClose[stockDate.length - 1].toFixed(2) +' (0.5%)',            },
-        },
-    }
-    //止损位 todo 临时写的值
-    var markLineTarget = {
-        yAxis: stockClose[stockDate.length - 1] * 1.005,
-        lineStyle: {
-            normal: {
-                opacity: 1,
-                type: 'dashed',
-                width: 1,
-                color: downColor
-            },
-        },
-        symbol: 'circle',
-        symbolSize:1,
-        label: {
-            normal: {
-                color: downColor,
-                formatter: '盈:'+(stockClose[stockDate.length - 1] * 1.005).toFixed(2) +' (0.5%)',
-            },
-        },
-    }
-    // 目标价位 止盈位 todo 临时写的值
-    var markLineStop = {
-        yAxis: stockClose[stockDate.length - 1] * 0.995,
-        lineStyle: {
-            normal: {
-                opacity: 1,
-                type: 'dashed',
-                width: 1,
-                color: upColor
-            },
-        },
-        label: {
-            normal: {
-                color: upColor,
-                 formatter: '止:'+(stockClose[stockDate.length - 1] * 0.995).toFixed(2)+' (-0.5%)',
-            }
-        },
-        symbol: 'circle',
-        symbolSize:1,
-    }
-    markLineData.push(markLineCurrent)
-    markLineData.push(markLineStop)
-    markLineData.push(markLineTarget)
-    console.log("markline", markLineData)
 
     var biValues = [];
     for (var i = 0; i < bidata.date.length; i++) {
@@ -1422,6 +1447,128 @@ function splitData(jsonObj) {
         };
         bcMACDValues.push(value);
     }
+    var markLineData = [];
+    var lastBeichiType = getLastBeichiData(jsonObj.buyMACDBCData, jsonObj.sellMACDBCData)
+    var lastBeichi = null;
+    console.log("最后的背驰:", kxType, lastBeichiType)
+    if (lastBeichiType !== 0) {
+        if (lastBeichiType === -1) {
+            lastBeichi = jsonObj.buyMACDBCData
+        } else {
+            lastBeichi = jsonObj.sellMACDBCData
+        }
+        // 当前价格
+        var currentPrice = stockClose[stockClose.length-1]
+        // 背驰时的价格
+        var beichiPrice = lastBeichi['beichi_price'][lastBeichi['beichi_price'].length - 1]
+        // 止损价格
+        var duanPrice = lastBeichi['duan_price'][lastBeichi['duan_price'].length - 1]
+        // 止盈价格
+        var targetPrice = 0
+        var diffPrice = Math.abs(beichiPrice - duanPrice)
+        var currentPercent = ""
+        if (lastBeichiType === -1) {
+            targetPrice = beichiPrice + diffPrice
+            currentPercent = ((currentPrice - beichiPrice) / beichiPrice * 100 * futuresLevel[symbol].level).toFixed(2)
+        } else {
+            targetPrice = beichiPrice - diffPrice
+            currentPercent = ((beichiPrice -currentPrice) / beichiPrice * 100 * futuresLevel[symbol].level).toFixed(2)
+        }
+        var targetPercent = (Math.abs(beichiPrice - duanPrice) / beichiPrice * 100 * futuresLevel[symbol].level).toFixed(2)
+
+
+        console.log(beichiPrice, duanPrice, diffPrice, targetPrice)
+        // 当前最新价
+        var markLineCurrent = {
+            yAxis: currentPrice,
+            lineStyle: {
+                normal: {
+                    opacity: 1,
+                    type: 'dash',
+                    width: 1,
+                    color: 'yellow'
+                },
+            },
+            symbol: 'circle',
+            symbolSize: 1,
+            label: {
+                normal: {
+                    color: 'yellow',
+                    formatter: '新:' + currentPrice.toFixed(2) + " (" + currentPercent+"%)",
+                },
+            },
+        }
+        // 保本位
+        var markLineBeichi= {
+            yAxis: beichiPrice,
+            lineStyle: {
+                normal: {
+                    opacity: 1,
+                    type: 'dashed',
+                    width: 1,
+                    color: 'white'
+                },
+            },
+            symbol: 'circle',
+            symbolSize: 1,
+            label: {
+                normal: {
+                    color: 'white',
+                    formatter: '开:' + beichiPrice.toFixed(2) + " (" + futuresLevel[symbol].level + '倍)',
+                },
+            },
+        }
+
+        //止损位
+        var markLineTarget = {
+            yAxis: duanPrice,
+            lineStyle: {
+                normal: {
+                    opacity: 1,
+                    type: 'dashed',
+                    width: 1,
+                    color: upColor
+                },
+            },
+            symbol: 'circle',
+            symbolSize: 1,
+            label: {
+                normal: {
+                    color: upColor,
+                    formatter: '止:' + duanPrice.toFixed(2) + ' (-' + targetPercent + '%)',
+                },
+            },
+        }
+        // 目标价位
+        var markLineStop = {
+            yAxis: targetPrice,
+            lineStyle: {
+                normal: {
+                    opacity: 1,
+                    type: 'dashed',
+                    width: 1,
+                    color: downColor
+                },
+            },
+            label: {
+                normal: {
+                    color: downColor,
+                    formatter: '盈:' + targetPrice.toFixed(2) + ' (' + targetPercent + '%)',
+                }
+            },
+            symbol: 'circle',
+            symbolSize: 1,
+        }
+        markLineData.push(markLineCurrent)
+        markLineData.push(markLineBeichi)
+        markLineData.push(markLineStop)
+        markLineData.push(markLineTarget)
+    }
+
+
+    console.log("markline", markLineData)
+
+
     // 高级别macd背驰点标注 buyHigherMACDBCData
     for (var i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
         var value = {
@@ -1509,6 +1656,46 @@ function splitData(jsonObj) {
 
         markLineData: markLineData,
     };
+}
+
+/**
+ *
+ * @param buyMACDBCData
+ * @param sellMACDBCData
+ * @returns number 0:没有背驰  -1 底背弛 1顶背驰
+ */
+function getLastBeichiData(buyMACDBCData, sellMACDBCData) {
+    var buyTimeStamp = 0
+    var sellTimeStamp = 0
+    if (buyMACDBCData.date.length > 0) {
+        var buyTimeStr = buyMACDBCData.date[buyMACDBCData.date.length - 1]
+        buyTimeStamp = timeStrToStamp(buyTimeStr)
+    }
+    if (sellMACDBCData.date.length > 0) {
+        var sellTimeStr = sellMACDBCData.date[sellMACDBCData.date.length - 1]
+        sellTimeStamp = timeStrToStamp(sellTimeStr)
+    }
+    if (buyTimeStamp === 0 && sellTimeStamp === 0) {
+        return 0
+    } else if (buyTimeStamp !== 0 && sellTimeStamp === 0) {
+        return -1
+    } else if (buyTimeStamp === 0 && sellTimeStamp !== 0) {
+        return 1
+    } else {
+        if (buyTimeStamp > sellTimeStamp) {
+            return -1
+        } else {
+            return 1
+        }
+    }
+
+}
+
+function timeStrToStamp(timeStr) {
+    date = timeStr.substring(0, 19);
+    date = timeStr.replace(/-/g, '/'); //必须把日期'-'转为'/'
+    var timestamp = new Date(date).getTime();
+    return timestamp
 }
 
 function calculateMA(resultData, dayCount) {
