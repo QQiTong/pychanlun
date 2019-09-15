@@ -125,7 +125,7 @@ def CrossOver(s1, s2):
     cond2 = series1 <= series2  # s1[1].series <= s2[1].series
     cond1, cond2 = fit_series(cond1, cond2)
     s = cond1 & cond2
-    return BoolSeries(s)
+    return BoolSeries(np.insert(s, 0, False))
 
 
 def Ref(s1, n):
