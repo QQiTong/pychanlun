@@ -12,7 +12,7 @@ import time
 import threading
 from back.Mail import Mail
 import pydash
-from ..funcat.api import *
+from back.funcat.api import *
 
 '''
 背驰监控
