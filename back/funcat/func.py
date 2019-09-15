@@ -117,8 +117,13 @@ def CrossOver(s1, s2):
     :returns: bool序列
     :rtype: BoolSeries
     """
+
     s1, s2 = ensure_timeseries(s1), ensure_timeseries(s2)
+    print(s1.series)
+    print(s2.series)
     series1, series2 = fit_series(s1.series, s2.series)
+    print(series1)
+    print(series2)
     cond1 = series1 > series2
     series1, series2 = fit_series(s1[1].series, s2[1].series)
     cond2 = series1 <= series2  # s1[1].series <= s2[1].series

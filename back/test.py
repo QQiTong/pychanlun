@@ -3,6 +3,7 @@ import json
 import time
 import pydash
 from datetime import datetime
+from back.funcat.api import *
 # hbdmUrl = "https://api.hbdm.com/market/history/kline"
 #
 # payload1 = {
@@ -26,4 +27,7 @@ from datetime import datetime
 
 # result = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 # print(result)
-print(abs(-1))
+a = [0,1,2,3,4,5,6]
+b = [9,8,7,6,5,4,3]
+r = CROSS(a, b)
+print(r.series)

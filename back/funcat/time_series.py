@@ -195,12 +195,12 @@ class NumericSeries(TimeSeries):
 
 
 class DuplicateNumericSeries(NumericSeries):
-    # FIXME size should come from other series
-    def __init__(self, series, size=640000):
+    def __init__(self, series):
+        size = len(series)
         try:
-            val = series[-1]
-        except:
             val = series
+        except:
+            val = series[-1]
         super(DuplicateNumericSeries, self).__init__(
             np.full(size, val, dtype=np.float64))
 
