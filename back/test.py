@@ -24,5 +24,6 @@ from datetime import datetime
 # result = pydash.find_index(a,lambda i:i ==3)
 # print(result)
 
-result = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-print(result)
+# result = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+# print(result)
+print(abs(-1))

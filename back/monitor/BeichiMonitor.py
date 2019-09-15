@@ -32,8 +32,8 @@ symbolListDigitCoin = ['BTC_CQ'
                        # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
                        ]
 #
-periodList1 = ['1min', '3min', '5min', '15min', '30min', '60min']
-periodList2 = ['3min', '5min', '15min', '30min', '60min']
+periodList1 = ['1min', '3min', '5min', '15min', '30min', '60min','4hour']
+periodList2 = ['3min', '5min', '15min', '30min', '60min','4hour']
 
 
 mail = Mail()

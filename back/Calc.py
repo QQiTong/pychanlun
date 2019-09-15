@@ -62,7 +62,7 @@ class Calc:
             '1min': '5min',
             '3min': '15min',
             '15min': '60min',
-            '60min': '4hour',
+            '60min': '1day',
             '1day': '1week',
             '5min': '30min',
             '30min': '4hour',
@@ -282,6 +282,7 @@ class Calc:
         resJson['diff'] = getMacd(closePriceList)[0].tolist()
         resJson['dea'] = getMacd(closePriceList)[1].tolist()
         resJson['macd'] = getMacd(closePriceList)[2].tolist()
+        resJson['macdAreaData'] = calcArea(resJson['diff'], resJson['macd'], timeList)
         resJson['boll_up'] = getBoll(closePriceList)[0].tolist()
         resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
         resJson['boll_bottom'] = getBoll(closePriceList)[2].tolist()
@@ -491,3 +492,43 @@ def calcNotHigher(duanResult, highList):
         return True
     else:
         return False
+
+
+#     计算macd面积
+def calcArea(diff, macd, timeList):
+    # 1 : 0轴上方 -1 零轴下方
+    currentFlag = 1
+    upSum = 0
+    downSum = 0
+
+    macdAreaList = {
+        # 保存面积的值
+        'date': [],
+        # 保存dif
+        'data': [],
+        # 保存时间
+        'value': []
+    }
+
+    for i in range(len(macd)):
+        # 如果少于33根 的值
+        if i < 33:
+            continue
+        # 0轴上方
+        if macd[i] > 0:
+            if currentFlag == -1:
+                macdAreaList['value'].append(downSum)
+                macdAreaList['data'].append(round(diff[i],2))
+                macdAreaList['date'].append(timeList[i])
+                downSum = 0
+                currentFlag = 1
+            upSum = round(upSum + macd[i]*100)
+        else:
+            if currentFlag == 1:
+                macdAreaList['value'].append(upSum)
+                macdAreaList['data'].append(round(diff[i],2))
+                macdAreaList['date'].append(timeList[i])
+                upSum = 0
+                currentFlag = -1
+            downSum = round(downSum + macd[i]*100)
+    return macdAreaList
