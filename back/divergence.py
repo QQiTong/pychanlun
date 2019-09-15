@@ -64,8 +64,8 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
 
 def note(divergence_down, divergence_up, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel = False):
     data = {
-        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'duan_price': [], 'beichi_price': []},
-        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'duan_price': [], 'beichi_price': []},
+        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': []},
+        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': []},
     }
     for i in range(len(divergence_down)):
         if divergence_down[i] == 1:
@@ -77,9 +77,9 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
                 data['buyMACDBCData']['value'].append(signalMap['线底背'])
             bottom_index = pydash.find_last_index(duan_series[:i], lambda x: x == -1)
             if bottom_index > -1:
-                data['buyMACDBCData']['duan_price'].append(low_series[bottom_index])
+                data['buyMACDBCData']['stop_lose_price'].append(low_series[bottom_index])
             else:
-               data['buyMACDBCData']['duan_price'].append(0)
+               data['buyMACDBCData']['stop_lose_price'].append(0)
             data['buyMACDBCData']['beichi_price'].append(open_series[i])
     for i in range(len(divergence_up)):
         if divergence_up[i] == 1:
@@ -91,9 +91,9 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
                 data['sellMACDBCData']['value'].append(signalMap['线顶背'])
             top_index = pydash.find_last_index(duan_series[:i], lambda x: x == 1)
             if top_index > -1:
-                data['sellMACDBCData']['duan_price'].append(high_series[top_index])
+                data['sellMACDBCData']['stop_lose_price'].append(high_series[top_index])
             else:
-               data['sellMACDBCData']['duan_price'].append(0)
+               data['sellMACDBCData']['stop_lose_price'].append(0)
             data['sellMACDBCData']['beichi_price'].append(open_series[i])
     return data
 

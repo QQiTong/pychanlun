@@ -1462,7 +1462,7 @@ function splitData(jsonObj, kxType) {
         // 背驰时的价格
         var beichiPrice = lastBeichi['beichi_price'][lastBeichi['beichi_price'].length - 1]
         // 止损价格
-        var duanPrice = lastBeichi['duan_price'][lastBeichi['duan_price'].length - 1]
+        var duanPrice = lastBeichi['stop_lose_price'][lastBeichi['stop_lose_price'].length - 1]
         // 止盈价格
         var targetPrice = 0
         var diffPrice = Math.abs(beichiPrice - duanPrice)
