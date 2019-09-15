@@ -37,5 +37,13 @@ def inspect(duan_series, high_series, low_series, close_series, diff_series, dea
     duan_high = high_series[i2]
     duan_type = 1 if i2 > i1 else -1
     inspect_price = close_series[inspect_index]
-    rtn = { 'duan_high': duan_high, 'duan_low': duan_low, 'duan_type': duan_type, 'inspect_index': inspect_index, 'inspect_price': inspect_price }
+    rtn = {
+        'duan_start': i1 if i1 < i2 else i2,
+        'duan_end': i2 if i2 > i1 else i1,
+        'duan_high': duan_high,
+        'duan_low': duan_low,
+        'duan_type': duan_type,
+        'inspect_index': inspect_index,
+        'inspect_price': inspect_price
+    }
     return rtn

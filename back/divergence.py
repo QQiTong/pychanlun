@@ -42,15 +42,19 @@ def calc(time_series, high_series, low_series, close_series, macd_series, diff_s
             info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
             if info is not None:
                 if info['duan_type'] == -1:
-                    # 前面是向下段，金叉才是背驰点
-                    divergence_down[i] = 1
+                    # 前面是向下段，才是背驰点
+                    # 要向下段后的第一次金叉
+                    if len(pydash.filter_(gold_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
+                        divergence_down[i] = 1
     for i in range(len(dead_cross.series)):
         if dead_cross.series[i]:
             info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
             if info is not None:
                 if info['duan_type'] == 1:
-                    # 前面是向上段，死叉才是背驰点
-                    divergence_up[i] = 1
+                    # 前面是向上段，才是背驰点
+                    # 要向上段后的第一次死叉
+                    if len(pydash.filter_(dead_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
+                        divergence_up[i] = 1
     return divergence_down, divergence_up
 
 
