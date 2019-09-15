@@ -87,10 +87,10 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
                 data['sellMACDBCData']['value'].append(signalMap['线顶背'])
             top_index = pydash.find_last_index(duan_series[:i], lambda x: x == 1)
             if top_index > -1:
-                data['buyMACDBCData']['duan_price'].append(high_series[top_index])
+                data['sellMACDBCData']['duan_price'].append(high_series[top_index])
             else:
-               data['buyMACDBCData']['duan_price'].append(0)
-            data['buyMACDBCData']['current_price'].append(close_series[i])
+               data['sellMACDBCData']['duan_price'].append(0)
+            data['sellMACDBCData']['current_price'].append(close_series[i])
     return data
 
 
