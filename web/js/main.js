@@ -1462,10 +1462,10 @@ function splitData(jsonObj, kxType) {
         // 背驰时的价格
         var beichiPrice = lastBeichi['beichi_price'][lastBeichi['beichi_price'].length - 1]
         // 止损价格
-        var duanPrice = lastBeichi['stop_lose_price'][lastBeichi['stop_lose_price'].length - 1]
+        var stopLosePrice = lastBeichi['stop_lose_price'][lastBeichi['stop_lose_price'].length - 1]
         // 止盈价格
         var targetPrice = 0
-        var diffPrice = Math.abs(beichiPrice - duanPrice)
+        var diffPrice = Math.abs(beichiPrice - stopLosePrice)
         var currentPercent = ""
         if (lastBeichiType === -1) {
             targetPrice = beichiPrice + diffPrice
@@ -1474,10 +1474,10 @@ function splitData(jsonObj, kxType) {
             targetPrice = beichiPrice - diffPrice
             currentPercent = ((beichiPrice -currentPrice) / beichiPrice * 100 * futuresLevel[symbol].level).toFixed(2)
         }
-        var targetPercent = (Math.abs(beichiPrice - duanPrice) / beichiPrice * 100 * futuresLevel[symbol].level).toFixed(2)
+        var targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * futuresLevel[symbol].level).toFixed(2)
 
 
-        console.log(beichiPrice, duanPrice, diffPrice, targetPrice)
+        console.log(beichiPrice, stopLosePrice, diffPrice, targetPrice)
         // 当前最新价
         var markLineCurrent = {
             yAxis: currentPrice,
@@ -1521,7 +1521,7 @@ function splitData(jsonObj, kxType) {
 
         //止损位
         var markLineTarget = {
-            yAxis: duanPrice,
+            yAxis: stopLosePrice,
             lineStyle: {
                 normal: {
                     opacity: 1,
@@ -1535,7 +1535,7 @@ function splitData(jsonObj, kxType) {
             label: {
                 normal: {
                     color: upColor,
-                    formatter: '止:' + duanPrice.toFixed(2) + ' (-' + targetPercent + '%)',
+                    formatter: '止:' + stopLosePrice.toFixed(2) + ' (-' + targetPercent + '%)',
                 },
             },
         }
