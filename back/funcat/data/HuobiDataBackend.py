@@ -1,5 +1,6 @@
 import requests
 import json
+import pandas as pd
 import numpy as np
 from .backend import DataBackend
 
@@ -18,14 +19,18 @@ class HuobiDataBackend(DataBackend):
     def get_price(self, code, start, end, period):
         payload = {
             'period': period,
-            'symbol': code,  # 合约类型，如永续合约:XBTUSD
+            'symbol': code,
             'size': end - start
         }
         r = requests.get(self.endpoint, params=payload)
+        print(r.text)
         retJson = json.loads(r.text)
         data = retJson['data']
         recdata = []
         for item in data:
             recdata.append((item['id'], item['open'], item['close'], item['high'], item['low'], item['vol']))
         rec = np.rec.array(recdata, dtype=[('time', 'int32'), ('open', 'float32'), ('close', 'float32'), ('high', 'float32'), ('low', 'float32'), ('volume', 'float32')])
-        return rec
+        df = pd.DataFrame.from_records(rec)
+        df['time'] = pd.to_datetime(df.time.values, unit='s', utc=True).tz_convert('Asia/Shanghai')
+        df.set_index("time", inplace=True)
+        return df
