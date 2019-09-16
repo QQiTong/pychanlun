@@ -4,6 +4,7 @@ let requestFlag = true;
 
 var symbol = getParams('symbol')||'BTC_CQ'
 console.log("symbol",symbol)
+document.title = symbol
 var kxType = "3min"
 
 //杠杆倍数和买入价格
