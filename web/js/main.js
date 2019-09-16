@@ -81,6 +81,11 @@ var futuresLevel = {
         multiply:10
 
     },
+    'CF2001': {
+        price: 1706,
+        level: 16.67,
+        multiply:10
+    },
     'M2001': {
         price: 1706,
         level: 16.67,
