@@ -42,23 +42,35 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
             info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
             if info is not None:
                 if info['duan_type'] == -1:
-                    # 前面是向下段，才是背驰点
-                    # 要向下段后的第一次金叉
-                    if info['duan_end'] == i:
-                        divergence_down[i] = 1
-                    elif len(pydash.filter_(gold_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
-                        divergence_down[i] = 1
+                    duan_start = info['duan_start']
+                    duan_end = info['duan_end']
+                    down_bi_list = pydash.filter_(bi_list, lambda bi: bi.direction == -1 and bi.klineList[-1].start <= duan_end and bi.klineList[0].end >= duan_start)
+                    if len(down_bi_list) > 1:
+                        min_diffs = pydash.map_(down_bi_list, lambda bi: np.amin(diff_series[bi.start:bi.end + 1]))
+                        if len(min_diffs) > 1 and min_diffs[-1] > np.amin(min_diffs[:-1]):
+                            # 前面是向下段，才是背驰点
+                            # 要向下段后的第一次金叉
+                            if info['duan_end'] == i:
+                                divergence_down[i] = 1
+                            elif len(pydash.filter_(gold_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
+                                divergence_down[i] = 1
     for i in range(len(dead_cross.series)):
         if dead_cross.series[i]:
             info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
             if info is not None:
                 if info['duan_type'] == 1:
-                    # 前面是向上段，才是背驰点
-                    # 要向上段后的第一次死叉
-                    if info['duan_end'] == i:
-                        divergence_up[i] = 1
-                    elif len(pydash.filter_(dead_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
-                        divergence_up[i] = 1
+                    duan_start = info['duan_start']
+                    duan_end = info['duan_end']
+                    up_bi_list = pydash.filter_(bi_list, lambda bi: bi.direction == 1 and bi.klineList[-1].start <= duan_end and bi.klineList[0].end >= duan_start)
+                    if len(up_bi_list) > 1:
+                        max_diffs = pydash.map_(up_bi_list, lambda bi: np.amax(diff_series[bi.start:bi.end + 1]))
+                        if len(max_diffs) > 1 and max_diffs[-1] < np.amax(max_diffs[:-1]):
+                            # 前面是向上段，才是背驰点
+                            # 要向上段后的第一次死叉
+                            if info['duan_end'] == i:
+                                divergence_up[i] = 1
+                            elif len(pydash.filter_(dead_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
+                                divergence_up[i] = 1
     return divergence_down, divergence_up
 
 
