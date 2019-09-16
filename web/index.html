@@ -5,7 +5,7 @@
     <title>心如止水</title>
     <link rel="shortcut icon" href="img/favicon.ico"/>
     <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="home.css">
 </head>
 <body>
 <div>
@@ -29,7 +29,7 @@
 
             <!--            郑商所-->
             <span class="bold">郑商所</span>
-            <a onclick="jumpToKline('MA2001')" >甲醇</a>
+            <a onclick="jumpToKline('MA2001')">甲醇</a>
             <a onclick="jumpToKline('TA2001')">PTA</a>
             <!--<a onclick="jumpToKline('RM2001')">菜粕</a>极端行情-->
             <a onclick="jumpToKline('SR2001')">白糖</a>
@@ -61,10 +61,10 @@
         </div>
         <div class="coinTab">
             <span class="bold">数字货币-火币</span>
-            <a onclick="jumpToKline('BTC_CQ')" >BTC</a>
-            <a onclick="jumpToKline('ETH_CQ')" >ETH</a>
+            <a onclick="jumpToKline('BTC_CQ')">BTC</a>
+            <a onclick="jumpToKline('ETH_CQ')">ETH</a>
             <!--<a onclick="jumpToKline('XRP_CQ')" >XRP</a>小数位数太小 导致图形错乱-->
-           <!-- <a onclick="jumpToKline('BCH_CQ')" >BCH</a>-->
+            <!-- <a onclick="jumpToKline('BCH_CQ')" >BCH</a>-->
             <!--<a onclick="jumpToKline('LTC_CQ')" >LTC</a>-->
             <!--<a onclick="jumpToKline('EOS_CQ')" >EOS</a> 小数位数太小 导致图形错乱-->
             <!--<a onclick="jumpToKline('BSV_CQ')" >BSV</a>-->
@@ -72,15 +72,89 @@
 
         </div>
     </div>
+    <div class="current-market">
+        <table class="table">
+            <thead>
+            <tr>
+                <td>品种</td>
+                <td>1m</td>
+                <td>3m</td>
+                <td>5m</td>
+                <td>15m</td>
+                <td>30m</td>
+                <td>1h</td>
+                <td>4h</td>
+                <td>1d</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>RB2001</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+            </tr>
+            <tr>
+                <td>HC2001</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+            </tr>
+            <tr>
+                <td>NI2001</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+            </tr>
+            <tr>
+                <td>ZN2001</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+            </tr>
+            <tr>
+                <td>FU2001</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+                <td>--</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script type="text/javascript">
     function jumpToKline(symbol) {
-        window.open("./kline.html?symbol="+symbol)
+        window.open("./kline.html?symbol=" + symbol)
     }
-    
+
 </script>
 </body>
 </html>
