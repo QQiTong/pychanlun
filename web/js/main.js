@@ -1,94 +1,126 @@
 let timer;
 // 请求标志
 let requestFlag = true;
+
+var symbol = getParams('symbol')||'BTC_CQ'
+console.log("symbol",symbol)
+document.title = symbol
 var kxType = "3min"
-var symbol = 'BTC_CQ';
+
 //杠杆倍数和买入价格
 //todo 临时写的
 var futuresLevel = {
     'BTC_CQ': {
         price: 1,
-        level: 20
+        level: 20,
+        multiply:1
     },
     'RB2001': {
-        price: 3200,
-        level: 10
+        price: 3185,
+        level: 11.11,
+        multiply:10
     },
     'HC2001': {
-        price: 3200,
-        level: 10
+        price: 3194,
+        level: 11.11,
+        multiply:10
     },
     'RU2001': {
-        price: 3200,
-        level: 10
+        price: 12100,
+        level: 10,
+        multiply:10
     },
     'NI1911': {
-        price: 3200,
-        level: 10
+        price: 15393,
+        level: 9.09,
+        multiply:1
     },
     'FU2001': {
-        price: 3200,
-        level: 10
+        price: 2593,
+        level: 9.09,
+        multiply:10
     },
     'ZN1911': {
-        price: 3200,
-        level: 10
+        price: 7706,
+        level: 12.5,
+        multiply:5
     },
     'SP2001': {
-        price: 3200,
-        level: 10
+        price: 3802,
+        level: 12.5,
+        multiply:10
     },
     'BU1912': {
-        price: 3200,
-        level: 10
+        price: 3236,
+        level: 10,
+        multiply:10
     },
     'MA2001': {
-        price: 3200,
-        level: 10
+        price: 1876,
+        level: 12.5,
+        multiply:10
     },
     'TA2001': {
-        price: 3200,
-        level: 10
+        price: 1846,
+        level: 14.29,
+        multiply:5
     },
     'SR2001': {
-        price: 3200,
-        level: 10
+        price: 3314,
+        level: 16.67,
+        multiply:10
     },
     'OI2001': {
-        price: 3200,
-        level: 10
+        price: 4403,
+        level: 16.67,
+        multiply:10
     },
     'AP1910': {
-        price: 3200,
-        level: 10
+        price: 9162,
+        level: 9.09,
+        multiply:10
+
+    },
+    'CF2001': {
+        price: 1706,
+        level: 16.67,
+        multiply:10
     },
     'M2001': {
-        price: 3200,
-        level: 10
+        price: 1706,
+        level: 16.67,
+        multiply:10
     },
     'I2001': {
-        price: 3200,
-        level: 10
+        price: 7425,
+        level: 9.09,
+        multiply:100
     },
     'EG2001': {
-        price: 3200,
-        level: 10
+        price: 3495,
+        level: 14.29,
+        multiply:10
     },
+    // todo
     'J2001': {
         price: 3200,
-        level: 10
+        level: 11.11,
+        multiply:5
     },
     'JM2001': {
-        price: 3200,
-        level: 10
+        price: 7287,
+        level: 11.11,
+        multiply:60
     },
     'PP2001': {
-        price: 3200,
-        level: 10
+        price: 2501,
+        level: 16.67,
+        multiply:5
     },
     'L2001': {
-        price: 3200,
-        level: 10
+        price: 3395,
+        level: 11.11,
+        multiply:5
     }
 }
 
@@ -1719,4 +1751,26 @@ function sleep(delay) {
     while ((new Date()).getTime() - start < delay) {
         continue;
     }
+}
+function getParams (name) {
+        let res = ''
+        let categoryStr = window.location.href.split('?')[1] || ''
+        if (categoryStr.length > 1) {
+          let arr = categoryStr.split('&')
+          for (let i = 0, len = arr.length; i < len; i++) {
+            let pair = arr[i]
+            let key = pair.split('=')[0]
+            let value = pair.split('=')[1]
+
+            if (key === name) {
+              res = value
+              console.log('coinName', res)
+              break
+            }
+          }
+        }
+        return res
+      }
+function goHome() {
+    window.location.replace("./index.html")
 }

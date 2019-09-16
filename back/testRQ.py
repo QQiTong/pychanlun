@@ -28,10 +28,10 @@ df = rq.get_price('RB2001',frequency='240m',fields=['open', 'high', 'low', 'clos
 print(df)
 
 
-cols=[x for i,x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
-#利用enumerate对row0进行遍历，将含有数字3的列放入cols中
-print(cols)
-# print(str(df.index[0]))
-#
-df2 = df.drop(cols)
-print(df2)
+# cols=[x for i,x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
+# #利用enumerate对row0进行遍历，将含有数字3的列放入cols中
+# print(cols)
+# # print(str(df.index[0]))
+# #
+# df2 = df.drop(cols)
+# print(df2)
