@@ -2,10 +2,41 @@ var app = new Vue({
     el: '#app',
     data: {
         futureSymbolList: [],
-        digitCoinsSymbolList: ['BTC_CQ', 'ETH_CQ'],
         timer:null,
         symbol:"",
-        requestFlag:true
+        requestFlag:true,
+        digitCoinsSymbolList:[{
+            contract_multiplier: 1,
+            de_listed_date: "forever",
+            exchange: "HUOBI",
+            listed_date: "forever",
+            margin_rate: 0.05,
+            market_tplus: 0,
+            maturity_date: "forever",
+            order_book_id: "BTC_CQ",
+            round_lot: 1,
+            symbol: "比特币",
+            trading_hours: "7*24",
+            type: "Future",
+            underlying_order_book_id: "null",
+            underlying_symbol: "BTC_CQ",
+        },
+        {
+            contract_multiplier: 1,
+            de_listed_date: "forever",
+            exchange: "HUOBI",
+            listed_date: "forever",
+            margin_rate: 0.05,
+            market_tplus: 0,
+            maturity_date: "forever",
+            order_book_id: "ETH_CQ",
+            round_lot: 1,
+            symbol: "以太坊",
+            trading_hours: "7*24",
+            type: "Future",
+            underlying_order_book_id: "null",
+            underlying_symbol: "ETH_CQ",
+        }]
     },
     mounted() {
         this.getDominantSymbol()
@@ -198,7 +229,7 @@ var futuresLevel = {
     },
     // todo
     'J2001': {
-        price: 3200,
+        price: 17852,
         level: 11.11,
         multiply: 5
     },

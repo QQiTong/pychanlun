@@ -4,6 +4,7 @@ from jqdatasdk import *
 import rqdatac as rq
 from rqdatac import *
 from back.Calc import Calc
+import numpy as np
 
 app = Flask(__name__)
 
@@ -26,12 +27,14 @@ def dominant():
                   'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
                   'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
                   ]
-    dominantSymbolList = []
+    dominantSymbolInfoList = []
     for i in range(len(symbolList)):
         df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
-        dominantSymbolList.append(df[-1])
-    print("当前主力合约:",dominantSymbolList)
-    return Response(json.dumps(dominantSymbolList), mimetype='application/json')
+        dominantSymbol = df[-1]
+        dominantSymbolInfo = rq.instruments(dominantSymbol)
+        dominantSymbolInfoList.append(dominantSymbolInfo.__dict__)
+    print("当前主力合约:",dominantSymbolInfoList)
+    return Response(json.dumps(dominantSymbolInfoList), mimetype='application/json')
 
 @app.route('/api/save_stock_data')
 def save_stock_date():

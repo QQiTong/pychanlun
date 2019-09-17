@@ -1,5 +1,8 @@
 import rqdatac as rq
 from rqdatac import *
+import numpy as np
+
+import json
 from datetime import datetime,timedelta
 # rq.init('license','R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=','rqdatad-pro.ricequant.com', 16011)
 
@@ -37,14 +40,19 @@ symbolList = ['RB','HC','RU','NI','FU','ZN','SP','BU',
               'MA','TA','SR','OI','AP','CF',
               'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
              ]
-dominantSymbolList = []
+
+dominantSymbolInfoList = []
 for i in range(len(symbolList)):
     df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None,rule=0)
-    dominantSymbolList.append(df[-1])
-print(dominantSymbolList)
-
+    dominantSymbol = df[-1]
+    dominantSymbolInfo = rq.instruments(dominantSymbol)
+    dominantSymbolInfoList.append(dominantSymbolInfo.__dict__)
+print(json.dumps(dominantSymbolInfoList))
+# for i in range(len(dominantSymbolInfoList)):
+#     print(dominantSymbolInfoList[i])
+# print(json.dumps(dominantSymbolInfoList))
 # cols=[x for i,x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
-# #利用enumerate对row0进行遍历，将含有数字3的列放入cols中
+#利用enumerate对row0进行遍历，将含有数字3的列放入cols中
 # print(cols)
 # # print(str(df.index[0]))
 # #

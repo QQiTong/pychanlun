@@ -13,10 +13,10 @@
         缠非缠 禅非禅,枯木龙吟照大千
     </div>
     <div class="search-container">
-        <span>搜索:</span><input type="text" v-model="keyword">
+        <span>搜索:</span><input type="text" v-model="keyword" placeholder="品种代码">
     </div>
     <div class="current-market">
-        <table class="table  table-striped table-bordered table-condensed table-hover">
+        <table class="table table-striped table-bordered table-condensed table-hover">
             <thead>
             <tr>
                 <td>品种</td>
@@ -31,22 +31,30 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="symbol in futureSymbolList" class="warning" v-if="symbol.indexOf(keyword)!=-1">
-                <td><a @click="jumpToKline(symbol)">{{symbol}}</a></td>
+            <tr v-for="symbolInfo in futureSymbolList" class="warning" v-if="symbolInfo.order_book_id.indexOf(keyword)!=-1">
+                <td>
+                    <a @click="jumpToKline(symbolInfo.order_book_id)">
+                        {{ formatSymbol(symbolInfo) }}
+                    </a>
+                </td>
                 <td>2019-09-10 21:18 XB <br/>
-                    2019-09-16 14:51 XT</td>
+                    2019-09-16 14:51 XT
+                </td>
                 <td>2019-09-10 21:27 XB <br/>
-                2019-09-16 14:54 XT</td>
+                    2019-09-16 14:54 XT
+                </td>
                 <td>2019-09-10 21:25 XB <br/>
                     2019-09-05 14:15 XT
                 </td>
                 <td> -- <br/>
-                    2019-07-17 21:15 XT</td>
+                    2019-07-17 21:15 XT
+                </td>
                 <td>2019-06-06 15:00 XB<br/>
                     -- XT
                 </td>
                 <td>2019-08-28 15:00 XB <br/>
-                    -- XT</td>
+                    -- XT
+                </td>
                 <td>2019-08-30 15:00 XB<br/>
                     --
                 </td>
