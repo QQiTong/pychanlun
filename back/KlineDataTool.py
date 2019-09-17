@@ -267,9 +267,10 @@ class KlineDataTool:
         # df = get_price('RB1910.XSGE', frequency='240m', end_date=datetime.now(), count=200,
         #                fields=['open', 'high', 'low', 'close', 'volume'])
         # todo 米匡240m 数据有问题,比通达信和文化财经多一个时间,需要手动去除,但是手动去除也不准,需要等米匡修复
-        if period == '240m':
-            cols = [x for i, x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
-            df = df.drop(cols)
+        # todo 米匡回复: 240m 是按照交易时间切分的, 一天固定3根k线,而文华财经和通达信是一天固定2根,后面自己处理吧
+        # if period == '240m':
+        #     cols = [x for i, x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
+        #     df = df.drop(cols)
 
         nparray = np.array(df)
         npKlineList = nparray.tolist()
@@ -291,7 +292,6 @@ class KlineDataTool:
         # print("期货k线结果:", klineList)
         # endTime = datetime.now() - startTime
         # print("函数时间", endTime)
-        if period=='3d':
-            print("-------------------")
-            print(len(klineList))
+        # if period=='3d':
+            # print(len(klineList))
         return klineList

@@ -23,10 +23,25 @@ period = '3m'
 #     '60m':-31,
 #     '1d':-180
 # }
-end = datetime.now() + timedelta(1)
-df = rq.get_price('RB2001',frequency='240m',fields=['open', 'high', 'low', 'close', 'volume'],start_date='2019-08-28',end_date=end)
-print(df)
-
+# end = datetime.now() + timedelta(1)
+# df = rq.get_price('RB2001',frequency='240m',fields=['open', 'high', 'low', 'close', 'volume'],start_date='2019-08-28',end_date=end)
+# print(df)
+# 品种列表
+symbolListFuture = ['RB2001', 'HC2001', 'RU2001', 'NI1911', 'FU2001', 'ZN1911', 'SP2001',  'BU1912',
+                    # 'CU1910', 'AL1910','AU1912', 'AG1912',
+                    'MA2001', 'TA2001',  'SR2001', 'OI2001',  'AP1910', 'CF2001',
+                    'M2001', 'I2001', 'EG2001', 'J2001', 'JM2001', 'PP2001','L2001'
+                    # 'RM2001','FG2001', 'ZC1911','CJ1912','Y2001', 'P2001','L2001', 'C2001','V2001', 'A2001', 'B1910'
+                    ]
+symbolList = ['RB','HC','RU','NI','FU','ZN','SP','BU',
+              'MA','TA','SR','OI','AP','CF',
+              'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
+             ]
+dominantSymbolList = []
+for i in range(len(symbolList)):
+    df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None,rule=0)
+    dominantSymbolList.append(df[-1])
+print(dominantSymbolList)
 
 # cols=[x for i,x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
 # #利用enumerate对row0进行遍历，将含有数字3的列放入cols中

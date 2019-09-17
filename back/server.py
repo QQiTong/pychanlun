@@ -20,6 +20,18 @@ def data():
     symbol = request.args.get("symbol") or "BTC_CQ"
     result = calc.calcData(period, symbol)
     return Response(json.dumps(result), mimetype='application/json')
+@app.route('/api/dominant')
+def dominant():
+    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU',
+                  'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
+                  'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
+                  ]
+    dominantSymbolList = []
+    for i in range(len(symbolList)):
+        df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
+        dominantSymbolList.append(df[-1])
+    print("当前主力合约:",dominantSymbolList)
+    return Response(json.dumps(dominantSymbolList), mimetype='application/json')
 
 @app.route('/api/save_stock_data')
 def save_stock_date():
