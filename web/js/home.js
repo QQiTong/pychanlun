@@ -58,7 +58,7 @@ var app = new Vue({
                    console.log("获取主力合约:",data)
                     that.futureSymbolList = data;
                     that.futureSymbolList.push(...that.digitCoinsSymbolList)
-
+                    window.localStorage.setItem("symbolList",JSON.stringify(that.futureSymbolList))
                 },
                 error: function (error) {
                    console.log("获取主力合约失败:",error)

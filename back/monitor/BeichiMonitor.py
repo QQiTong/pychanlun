@@ -23,10 +23,10 @@ klineDataTool = KlineDataTool()
 #                'SP88', 'MA88', 'SR88', 'AP88', 'CF88', 'J88', 'JM88',
 #                'PP88']
 # 米筐数据 主力具体合约 这个是实时数据
-symbolListFuture = ['RB2001', 'HC2001', 'RU2001', 'NI1911', 'FU2001', 'ZN1911', 'SP2001',  'BU1912',
+symbolListFuture = ['RB2001', 'HC2001', 'RU2001', 'NI1911', 'FU2001', 'ZN1911', 'SP2001', 'BU1912',
                     # 'CU1910', 'AL1910','AU1912', 'AG1912',
-                    'MA2001', 'TA2001',  'SR2001', 'OI2001',  'AP1910', 'CF2001',
-                    'M2001', 'I2001', 'EG2001', 'J2001', 'JM2001', 'PP2001','L2001'
+                    'MA2001', 'TA2001', 'SR2001', 'OI2001', 'AP2001', 'CF2001',
+                    'M2001', 'I2001', 'EG2001', 'J2001', 'JM2001', 'PP2001', 'L2001'
                     # 'RM2001','FG2001', 'ZC1911','CJ1912','Y2001', 'P2001','L2001', 'C2001','V2001', 'A2001', 'B1910'
                     ]
 
@@ -34,13 +34,23 @@ symbolListDigitCoin = ['BTC_CQ'
                        # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
                        ]
 #
-periodList1 = ['1min', '3min', '5min', '15min', '30min', '60min','4hour']
-periodList2 = ['3min', '5min', '15min', '30min', '60min','4hour']
-
+periodList1 = ['1min', '3min', '5min', '15min', '30min', '60min', '4hour']
+periodList2 = ['3min', '5min', '15min', '30min', '60min', '4hour']
 
 mail = Mail()
 
 
+def getDominantSymbol():
+    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU',
+                  'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
+                  'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
+                  ]
+    dominantSymbolList = []
+    for i in range(len(symbolList)):
+        df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
+        dominantSymbol = df[-1]
+        dominantSymbolList.append(dominantSymbol)
+    return dominantSymbolList
 
 # 监控期货
 # timeScope 监控距离现在多少分钟的
@@ -57,8 +67,8 @@ def monitorFuturesAndDigitCoin(type):
              'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
              ('rqdatad-pro.ricequant.com', 16011))
 
-        symbolList = symbolListFuture
-        periodList = periodList2
+        symbolList = getDominantSymbol()
+        periodList = periodList1
     else:
         symbolList = symbolListDigitCoin
         periodList = periodList1
@@ -89,16 +99,14 @@ def monitorFuturesAndDigitCoin(type):
                     lastTime = lastTimeMap[symbol][period]
                     lastAmaTime = lastTimeAmaMap[symbol][period]
 
-
                     diffTime = currentTime - lastTime
                     print("current:", symbol, period)
-
 
                     result = calc.calcData(period, symbol)
                     closePrice = result['close'][-1]
                     # ama
                     ama = result['ama']
-                    if(ama[-3]<ama[-2] and ama[-1] <ama[-2] and period =='60min'):
+                    if (ama[-3] < ama[-2] and ama[-1] < ama[-2] and period == '60min'):
                         if lastAmaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                             lastTimeMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "down", time.strftime(
@@ -109,7 +117,7 @@ def monitorFuturesAndDigitCoin(type):
                                 print("发送失败")
                             else:
                                 print("发送成功")
-                    if (ama[-3] > ama[-2] and ama[-1] > ama[-2] and period =='60min'):
+                    if (ama[-3] > ama[-2] and ama[-1] > ama[-2] and period == '60min'):
                         if lastAmaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                             msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "up", time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -128,7 +136,8 @@ def monitorFuturesAndDigitCoin(type):
                         # print("current judge:", symbol, period, lastBuyDate, notLower)
                         if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
                             lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice ,notLower ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, notLower, time.strftime(
+                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
                             if not mailResult:
@@ -144,7 +153,8 @@ def monitorFuturesAndDigitCoin(type):
                         # print("current judge:", symbol, period, lastSellDate, notHigher)
                         if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
                             lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice,notHigher ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, notHigher, time.strftime(
+                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
                             if not mailResult:
@@ -162,7 +172,8 @@ def monitorFuturesAndDigitCoin(type):
                         # print("current judge:", symbol, period, lastBuyDate, notLower)
                         if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
                             lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice,notLower ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, notLower, time.strftime(
+                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
                             if not mailResult:
@@ -178,18 +189,19 @@ def monitorFuturesAndDigitCoin(type):
                         # print("current judge:", symbol, period, lastSellDate, notHigher)
                         if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
                             lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice,notHigher ,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, notHigher, time.strftime(
+                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
                             if not mailResult:
                                 print("发送失败")
                             else:
                                 print("发送成功")
-                    if type== "1":
+                    if type == "1":
                         time.sleep(0)
                     else:
                         time.sleep(5)
-    except :
+    except:
         if type == "1":
             print("期货出异常了")
 
