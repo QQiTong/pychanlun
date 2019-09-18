@@ -13,6 +13,11 @@ import threading
 from back.Mail import Mail
 import pydash
 from back.funcat.api import *
+from back.config import config
+from mongoengine import *
+import os
+
+from back.monitor.BeichiLog import BeichiLog
 
 '''
 背驰监控
@@ -23,12 +28,7 @@ klineDataTool = KlineDataTool()
 #                'SP88', 'MA88', 'SR88', 'AP88', 'CF88', 'J88', 'JM88',
 #                'PP88']
 # 米筐数据 主力具体合约 这个是实时数据
-symbolListFuture = ['RB2001', 'HC2001', 'RU2001', 'NI1911', 'FU2001', 'ZN1911', 'SP2001', 'BU1912',
-                    # 'CU1910', 'AL1910','AU1912', 'AG1912',
-                    'MA2001', 'TA2001', 'SR2001', 'OI2001', 'AP2001', 'CF2001',
-                    'M2001', 'I2001', 'EG2001', 'J2001', 'JM2001', 'PP2001', 'L2001'
-                    # 'RM2001','FG2001', 'ZC1911','CJ1912','Y2001', 'P2001','L2001', 'C2001','V2001', 'A2001', 'B1910'
-                    ]
+
 
 symbolListDigitCoin = ['BTC_CQ'
                        # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
@@ -68,7 +68,7 @@ def monitorFuturesAndDigitCoin(type):
              ('rqdatad-pro.ricequant.com', 16011))
 
         symbolList = getDominantSymbol()
-        periodList = periodList1
+        periodList = periodList2
     else:
         symbolList = symbolListDigitCoin
         periodList = periodList1
@@ -85,6 +85,12 @@ def monitorFuturesAndDigitCoin(type):
     print(lastTimeMap)
     print(lastTimeAmaMap)
     startTime = int(time.time())
+    # 连接数据库
+    cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
+    mongodbSettings = cfg.MONGODB_SETTINGS
+    connect('pychanlun', host=mongodbSettings['host'], port=mongodbSettings['port'],
+            username=mongodbSettings['username'], password=mongodbSettings['password'],
+            authentication_source='admin')
     try:
         while True:
             for i in range(len(symbolList)):
@@ -105,28 +111,28 @@ def monitorFuturesAndDigitCoin(type):
                     result = calc.calcData(period, symbol)
                     closePrice = result['close'][-1]
                     # ama
-                    ama = result['ama']
-                    if (ama[-3] < ama[-2] and ama[-1] < ama[-2] and period == '60min'):
-                        if lastAmaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                            lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "down", time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            print(msg)
-                            mailResult = mail.send(str(msg))
-                            if not mailResult:
-                                print("发送失败")
-                            else:
-                                print("发送成功")
-                    if (ama[-3] > ama[-2] and ama[-1] > ama[-2] and period == '60min'):
-                        if lastAmaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "up", time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            print(msg)
-                            mailResult = mail.send(str(msg))
-                            if not mailResult:
-                                print("发送失败")
-                            else:
-                                print("发送成功")
+                    # ama = result['ama']
+                    # if (ama[-3] < ama[-2] and ama[-1] < ama[-2] and period == '60min'):
+                    #     if lastAmaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                    #         lastTimeMap[symbol][period] = dateStamp
+                    #         msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "down", time.strftime(
+                    #             '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                    #         print(msg)
+                    #         mailResult = mail.send(str(msg))
+                    #         if not mailResult:
+                    #             print("发送失败")
+                    #         else:
+                    #             print("发送成功")
+                    # if (ama[-3] > ama[-2] and ama[-1] > ama[-2] and period == '60min'):
+                    #     if lastAmaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                    #         msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "up", time.strftime(
+                    #             '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                    #         print(msg)
+                    #         mailResult = mail.send(str(msg))
+                    #         if not mailResult:
+                    #             print("发送失败")
+                    #         else:
+                    #             print("发送成功")
 
                     if len(result['buyMACDBCData']['date']) > 0:
                         lastBuyDate = result['buyMACDBCData']['date'][-1]
@@ -140,6 +146,8 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
+                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,remark=lastBuyValue)
+                            mLog.save()
                             if not mailResult:
                                 print("发送失败")
                             else:
@@ -157,6 +165,9 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
+                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                                             remark=lastBuyValue)
+                            mLog.save()
                             if not mailResult:
                                 print("发送失败")
                             else:
@@ -176,6 +187,9 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
+                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                                             remark=lastBuyValue)
+                            mLog.save()
                             if not mailResult:
                                 print("发送失败")
                             else:
@@ -193,6 +207,9 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
+                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                                             remark=lastBuyValue)
+                            mLog.save()
                             if not mailResult:
                                 print("发送失败")
                             else:
@@ -200,16 +217,16 @@ def monitorFuturesAndDigitCoin(type):
                     if type == "1":
                         time.sleep(0)
                     else:
-                        time.sleep(5)
-    except:
+                        time.sleep(30)
+    except Exception:
         if type == "1":
-            print("期货出异常了")
+            print("期货出异常了",Exception)
 
             threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
         else:
-            print("火币出异常了")
+            print("火币出异常了",Exception)
             threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
 
-threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
 threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

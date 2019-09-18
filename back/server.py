@@ -1,10 +1,12 @@
 from flask import Flask, request, Response
 import json
 from jqdatasdk import *
-import rqdatac as rq
 from rqdatac import *
 from back.Calc import Calc
+from back.monitor.BeichiList import BeichiList
 import numpy as np
+
+import rqdatac as rq
 
 app = Flask(__name__)
 
@@ -21,6 +23,7 @@ def data():
     symbol = request.args.get("symbol") or "BTC_CQ"
     result = calc.calcData(period, symbol)
     return Response(json.dumps(result), mimetype='application/json')
+# 获取主力合约
 @app.route('/api/dominant')
 def dominant():
     symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU',
@@ -35,6 +38,13 @@ def dominant():
         dominantSymbolInfoList.append(dominantSymbolInfo.__dict__)
     print("当前主力合约:",dominantSymbolInfoList)
     return Response(json.dumps(dominantSymbolInfoList), mimetype='application/json')
+
+# 获取所有背驰列表
+@app.route('/api/get_beichi_list')
+def get_beichi_list():
+    beichiList = BeichiList()
+    beichiListResult = beichiList.getBeichiList()
+    return Response(json.dumps(beichiListResult), mimetype='application/json')
 
 @app.route('/api/save_stock_data')
 def save_stock_date():
