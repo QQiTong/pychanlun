@@ -8,7 +8,19 @@ class Config:
     SCHEDULER_TIMEZONE = 'Asia/shanghai'
     pass
 
+
 class DevelopmentConfig(Config):
+    MONGODB_SETTINGS = {
+        'host': '120.77.209.6',
+        'port': 27017,
+        'db': 'pychanlun',
+        'username': 'pychanlun',
+        'password': 'chanlun123456'
+    }
+    pass
+
+
+class ProductionConfig(Config):
     MONGODB_SETTINGS = {
         'host': 'localhost',
         'port': 27017,
@@ -18,16 +30,6 @@ class DevelopmentConfig(Config):
     }
     pass
 
-
-class ProductionConfig(Config):
-    MONGODB_SETTINGS = {
-        'host': '120.77.209.6',
-        'port': 27017,
-        'db': 'pychanlun',
-        'username': 'pychanlun',
-        'password': 'chanlun123456'
-    }
-    pass
 
 config = {
     'default': DevelopmentConfig,

@@ -10,7 +10,7 @@ var app = new Vue({
             de_listed_date: "forever",
             exchange: "HUOBI",
             listed_date: "forever",
-            margin_rate: 0.05,
+            margin_rate: 0.045,
             market_tplus: 0,
             maturity_date: "forever",
             order_book_id: "BTC_CQ",
@@ -26,7 +26,7 @@ var app = new Vue({
             de_listed_date: "forever",
             exchange: "HUOBI",
             listed_date: "forever",
-            margin_rate: 0.05,
+            margin_rate: 0.045,
             market_tplus: 0,
             maturity_date: "forever",
             order_book_id: "ETH_CQ",
@@ -54,6 +54,10 @@ var app = new Vue({
                     that.futureSymbolList.push(...that.digitCoinsSymbolList)
                     window.localStorage.setItem("symbolList",JSON.stringify(that.futureSymbolList))
                     that.getBeichiList()
+                    setInterval(()=>{
+                        that.getBeichiList()
+                    },10000)
+
                 },
                 error: function (error) {
                    console.log("获取主力合约失败:",error)

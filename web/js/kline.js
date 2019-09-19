@@ -11,7 +11,7 @@ var app = new Vue({
             de_listed_date: "forever",
             exchange: "HUOBI",
             listed_date: "forever",
-            margin_rate: 0.05,
+            margin_rate: 0.045,
             market_tplus: 0,
             maturity_date: "forever",
             order_book_id: "BTC_CQ",
@@ -27,7 +27,7 @@ var app = new Vue({
                 de_listed_date: "forever",
                 exchange: "HUOBI",
                 listed_date: "forever",
-                margin_rate: 0.05,
+                margin_rate: 0.045,
                 market_tplus: 0,
                 maturity_date: "forever",
                 order_book_id: "ETH_CQ",
@@ -202,7 +202,7 @@ var app = new Vue({
 
             dataTitle = that.symbol + "  " + kxType
             let marginLevel = (1 / (that.futureSymbolMap[that.symbol].margin_rate * 1.13)).toFixed(2)
-            subText = "杠杆倍数:" + marginLevel
+            subText = "杠杆倍数: " + marginLevel +" 交割时间: "+ that.futureSymbolMap[that.symbol].maturity_date+" 交易时间: "+that.futureSymbolMap[that.symbol].trading_hours
             var currentChart = myChart1
             if (kxType === '1min') {
                 currentChart = myChart1

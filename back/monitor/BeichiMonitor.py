@@ -165,8 +165,8 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
-                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                                             remark=lastBuyValue)
+                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+                                             remark=lastSellValue)
                             mLog.save()
                             if not mailResult:
                                 print("发送失败")
@@ -207,8 +207,8 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
-                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                                             remark=lastBuyValue)
+                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+                                             remark=lastSellValue)
                             mLog.save()
                             if not mailResult:
                                 print("发送失败")
@@ -217,16 +217,17 @@ def monitorFuturesAndDigitCoin(type):
                     if type == "1":
                         time.sleep(0)
                     else:
-                        time.sleep(30)
+                        time.sleep(5)
     except Exception:
         if type == "1":
             print("期货出异常了",Exception)
 
             threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
         else:
+            time.sleep(5)
             print("火币出异常了",Exception)
             threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
 
-# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
-threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
+threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+# threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
