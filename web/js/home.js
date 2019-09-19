@@ -5,6 +5,7 @@ var app = new Vue({
         futureSymbolList:[],
         periodList:['3min','5min','15min','30min','60min','4hour','1day'],
         beichiList:{},
+        firstRequestDominant:true,
         digitCoinsSymbolList:[{
             contract_multiplier: 1,
             de_listed_date: "forever",
@@ -39,8 +40,11 @@ var app = new Vue({
         }]
     },
     mounted() {
-        this.getDominantSymbol()
-        // this.getBeichiList()
+        // this.getDominantSymbol()
+        this.getBeichiList()
+        setInterval(() => {
+            this.getBeichiList()
+        }, 10000)
     },
     methods: {
         getDominantSymbol() {
@@ -53,15 +57,11 @@ var app = new Vue({
                     that.futureSymbolList = data;
                     that.futureSymbolList.push(...that.digitCoinsSymbolList)
                     window.localStorage.setItem("symbolList",JSON.stringify(that.futureSymbolList))
-                    that.getBeichiList()
-                    setInterval(()=>{
-                        that.getBeichiList()
-                    },10000)
-
+                    that.firstRequestDominant = false
                 },
                 error: function (error) {
                    console.log("获取主力合约失败:",error)
-
+                    that.firstRequestDominant = false
                 }
             });
         },
@@ -73,7 +73,9 @@ var app = new Vue({
                 success: function (data) {
                    console.log("获取背驰列表:",data)
                     that.beichiList = data
-                    // that.getDominantSymbol()
+                    if(that.firstRequestDominant){
+                        that.getDominantSymbol()
+                    }
                 },
                 error: function (error) {
                    console.log("获取背驰列表失败:",error)

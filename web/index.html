@@ -36,7 +36,8 @@
                         {{ symbolInfo.symbol}} ({{symbolInfo.underlying_symbol }})
                     </a>
                 </td>
-                <td v-for="periodItem in periodList">
+                <td v-for="periodItem in periodList" :class="{ 'danger':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XB')!=-1 ,
+                 'success':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XT') !=-1}">
                     {{ beichiList[symbolInfo.order_book_id][periodItem]}}
                 </td>
 
