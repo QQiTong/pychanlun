@@ -20,6 +20,7 @@
             <thead>
             <tr>
                 <td class="remark-item">品种</td>
+                <td class="change-item">涨跌</td>
                 <td class="remark-item">3min</td>
                 <td class="remark-item">5min</td>
                 <td class="remark-item">15min</td>
@@ -36,10 +37,11 @@
                         {{ symbolInfo.symbol}} ({{symbolInfo.underlying_symbol }})
                     </a>
                 </td>
+                <td :class="{ 'danger':changeList[symbolInfo.order_book_id]>=0,'success':changeList[symbolInfo.order_book_id]<=0}">{{ (changeList[symbolInfo.order_book_id] *100).toFixed(2)}}%</td>
                 <td v-for="periodItem in periodList" :class="{ 'danger':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XB')!=-1 ,
                  'success':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XT') !=-1}">
                     <span v-for="item in beichiList[symbolInfo.order_book_id][periodItem]">
-                        {{ item}}
+                        {{item}}
                     </span>
                 </td>
 

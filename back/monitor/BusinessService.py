@@ -4,11 +4,12 @@ import os
 import json
 from back.monitor.BeichiLog import BeichiLog
 from back.config import config
+from datetime import datetime, timedelta
 
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
-class BeichiList:
+class BusinessService:
     def __init__(self):
         print('beichi List init')
 
@@ -50,3 +51,21 @@ class BeichiList:
             symbolListMap[beichiItem.symbol][beichiItem.period] = msg
         print("背驰列表", symbolListMap)
         return symbolListMap
+
+    # 获取涨跌幅数据
+    def getChangeList(self):
+        dominantSymbolList = self.getDominantSymbol()
+        symbolChangeMap = {}
+        end = datetime.now() + timedelta(1)
+        start = datetime.now() + timedelta(-1)
+        for i in range(len(dominantSymbolList)):
+            item = dominantSymbolList[i]
+            df = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+                              start_date=start, end_date=end)
+            preday = df.iloc[0, 3]
+            today = df.iloc[1, 3]
+            change = round((today - preday) / today, 3)
+            symbolChangeMap[item] = change
+        print("涨跌幅信息",symbolChangeMap)
+
+        return symbolChangeMap

@@ -271,6 +271,20 @@ class KlineDataTool:
         # if period == '240m':
         #     cols = [x for i, x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
         #     df = df.drop(cols)
+        if period == '240m':
+            ohlc_dict = {
+                'open': 'first',
+                'high': 'max',
+                'low': 'min',
+                'close': 'last',
+                'volume': 'sum'
+            }
+            # df.index = pd.DatetimeIndex(df.index)
+
+            # 聚合k线
+            df = df.resample('4H', closed='left', label='left') \
+                .agg(ohlc_dict).dropna(how='any')
+
 
         nparray = np.array(df)
         npKlineList = nparray.tolist()

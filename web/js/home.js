@@ -5,6 +5,7 @@ var app = new Vue({
         futureSymbolList:[],
         periodList:['3min','5min','15min','30min','60min','4hour','1day'],
         beichiList:{},
+        changeList:{},//涨跌幅
         firstRequestDominant:true,
         digitCoinsSymbolList:[{
             contract_multiplier: 1,
@@ -42,9 +43,12 @@ var app = new Vue({
     mounted() {
         // this.getDominantSymbol()
         this.getBeichiList()
+        this.getChangeiList()
         setInterval(() => {
             this.getBeichiList()
+            this.getChangeiList()
         }, 10000)
+
     },
     methods: {
         getDominantSymbol() {
@@ -80,6 +84,20 @@ var app = new Vue({
                 error: function (error) {
                    console.log("获取背驰列表失败:",error)
 
+                }
+            });
+        },
+        getChangeiList() {
+            let that = this
+            $.ajax({
+                url: '/api/get_change_list',
+                type: 'get',
+                success: function (data) {
+                    that.changeList = data
+                   console.log("获取涨跌幅列表:",data)
+                },
+                error: function (error) {
+                   console.log("获取涨跌幅失败:",error)
                 }
             });
         },

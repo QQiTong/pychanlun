@@ -3,7 +3,7 @@ import json
 from jqdatasdk import *
 from rqdatac import *
 from back.Calc import Calc
-from back.monitor.BeichiList import BeichiList
+from back.monitor.BusinessService import BusinessService
 import numpy as np
 
 import rqdatac as rq
@@ -41,9 +41,16 @@ def dominant():
 # 获取所有背驰列表
 @app.route('/api/get_beichi_list')
 def get_beichi_list():
-    beichiList = BeichiList()
-    beichiListResult = beichiList.getBeichiList()
+    businessService = BusinessService()
+    beichiListResult = businessService.getBeichiList()
     return Response(json.dumps(beichiListResult), mimetype='application/json')
+
+# 获取涨跌幅信息
+@app.route('/api/get_change_list')
+def get_change_list():
+    businessService = BusinessService()
+    changeListResult = businessService.getChangeList()
+    return Response(json.dumps(changeListResult), mimetype='application/json')
 
 @app.route('/api/save_stock_data')
 def save_stock_date():
