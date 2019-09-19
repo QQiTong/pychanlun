@@ -41,13 +41,16 @@ symbolList = ['RB','HC','RU','NI','FU','ZN','SP','BU',
               'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
              ]
 
-dominantSymbolInfoList = []
-for i in range(len(symbolList)):
-    df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None,rule=0)
-    dominantSymbol = df[-1]
-    dominantSymbolInfo = rq.instruments(dominantSymbol)
-    dominantSymbolInfoList.append(dominantSymbolInfo.__dict__)
-print(json.dumps(dominantSymbolInfoList))
+# dominantSymbolInfoList = []
+# for i in range(len(symbolList)):
+#     df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None,rule=0)
+#     dominantSymbol = df[-1]
+#     dominantSymbolInfo = rq.instruments(dominantSymbol)
+#     dominantSymbolInfoList.append(dominantSymbolInfo.__dict__)
+# print(json.dumps(dominantSymbolInfoList))
+
+df = rq.instruments('JM2001')
+print(df)
 # for i in range(len(dominantSymbolInfoList)):
 #     print(dominantSymbolInfoList[i])
 # print(json.dumps(dominantSymbolInfoList))

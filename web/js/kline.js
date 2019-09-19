@@ -6,6 +6,8 @@ var app = new Vue({
         timer: null,
         symbol: "",
         requestFlag: true,
+        marginLevelCompany:1.125,// 不同期货公司提高的点数不一样
+        marginPrice:0,//每手需要的保证金
         digitCoinsSymbolList: [{
             contract_multiplier: 1,
             de_listed_date: "forever",
@@ -201,8 +203,8 @@ var app = new Vue({
             const resultData = this.splitData(stockJsonData, kxType);
 
             dataTitle = that.symbol + "  " + kxType
-            let marginLevel = (1 / (that.futureSymbolMap[that.symbol].margin_rate * 1.13)).toFixed(2)
-            subText = "杠杆倍数: " + marginLevel +" 交割时间: "+ that.futureSymbolMap[that.symbol].maturity_date+" 交易时间: "+that.futureSymbolMap[that.symbol].trading_hours
+            let marginLevel = (1 / (that.futureSymbolMap[that.symbol].margin_rate * this.marginLevelCompany)).toFixed(2)
+            subText = "杠杆倍数: " + marginLevel +" 每手保证金: "+this.marginPrice+" 交易时间: "+that.futureSymbolMap[that.symbol].trading_hours+" 交割时间: "+ that.futureSymbolMap[that.symbol].maturity_date
             var currentChart = myChart1
             if (kxType === '1min') {
                 currentChart = myChart1
@@ -1380,8 +1382,13 @@ var app = new Vue({
             var markLineData = [];
             var lastBeichiType = getLastBeichiData(jsonObj.buyMACDBCData, jsonObj.sellMACDBCData)
             var lastBeichi = null;
-            let marginLevel = Number((1 / (this.futureSymbolMap[this.symbol].margin_rate * 1.13)).toFixed(2))
-
+            let marginLevel = Number((1 / (this.futureSymbolMap[this.symbol].margin_rate * this.marginLevelCompany)).toFixed(2))
+            // 当前价格
+            var currentPrice = stockClose[stockClose.length - 1]
+            // 合约乘数
+            let contractMultiplier = this.futureSymbolMap[this.symbol].contract_multiplier;
+            // 1手需要的保证金
+            this.marginPrice = (contractMultiplier*currentPrice / marginLevel).toFixed(0)
             // console.log("最后的背驰:", kxType, lastBeichiType)
             if (lastBeichiType !== 0) {
                 if (lastBeichiType === -1) {
@@ -1389,8 +1396,7 @@ var app = new Vue({
                 } else {
                     lastBeichi = jsonObj.sellMACDBCData
                 }
-                // 当前价格
-                var currentPrice = stockClose[stockClose.length - 1]
+
                 // 背驰时的价格
                 var beichiPrice = lastBeichi['beichi_price'][lastBeichi['beichi_price'].length - 1]
                 // 止损价格
