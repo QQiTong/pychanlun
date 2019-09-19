@@ -26,10 +26,9 @@ def data():
 # 获取主力合约
 @app.route('/api/dominant')
 def dominant():
-    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU','AU','AG',
-                  'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
-                  'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
-                  ]
+    with open("../futureSymbol.json", 'r') as load_f:
+        symbolList = json.load(load_f)
+        print(symbolList)
     dominantSymbolInfoList = []
     for i in range(len(symbolList)):
         df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)

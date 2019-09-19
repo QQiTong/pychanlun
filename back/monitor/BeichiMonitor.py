@@ -16,7 +16,7 @@ from back.funcat.api import *
 from back.config import config
 from mongoengine import *
 import os
-
+import json
 from back.monitor.BeichiLog import BeichiLog
 
 '''
@@ -41,10 +41,9 @@ mail = Mail()
 
 
 def getDominantSymbol():
-    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU','AU','AG',
-                  'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
-                  'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
-                  ]
+    with open("../../futureSymbol.json", 'r') as load_f:
+        symbolList = json.load(load_f)
+        print(symbolList)
     dominantSymbolList = []
     for i in range(len(symbolList)):
         df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)

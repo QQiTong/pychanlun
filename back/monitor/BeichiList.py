@@ -13,10 +13,10 @@ class BeichiList:
         print('beichi List init')
 
     def getDominantSymbol(self):
-        symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU','AU','AG',
-                      'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
-                      'M', 'I', 'EG', 'J', 'JM', 'PP', 'L','AU','AG'
-                      ]
+
+        with open("../futureSymbol.json", 'r') as load_f:
+            symbolList = json.load(load_f)
+            print(symbolList)
         dominantSymbolList = []
         for i in range(len(symbolList)):
             df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
@@ -46,7 +46,7 @@ class BeichiList:
 
         for beichiItem in BeichiLog.objects:
             # todo 以后增加了沪金后 取整需要去掉
-            msg = beichiItem.remark,str(round(beichiItem.price,2)),str(beichiItem.date_created)
+            msg = beichiItem.remark, str(round(beichiItem.price, 2)), str(beichiItem.date_created)
             symbolListMap[beichiItem.symbol][beichiItem.period] = msg
         print("背驰列表", symbolListMap)
         return symbolListMap

@@ -17,12 +17,11 @@ import rqdatac as rq
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
-
 def getDominantSymbol():
-    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU','AU','AG',
-                  'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
-                  'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
-                  ]
+    with open("../futureSymbol.json", 'r') as load_f:
+        symbolList = json.load(load_f)
+        print(symbolList)
+
     dominantSymbolList = []
     for i in range(len(symbolList)):
         df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
@@ -32,17 +31,20 @@ def getDominantSymbol():
 
 
 def app():
-    init('license',
-         'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
-         ('rqdatad-pro.ricequant.com', 16011))
-    cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
-    mongodbSettings = cfg.MONGODB_SETTINGS
-    connect('pychanlun', host=mongodbSettings['host'], port=mongodbSettings['port'],
-            username=mongodbSettings['username'], password=mongodbSettings['password'], authentication_source='admin')
+    with open("../futureSymbol.json", 'r') as load_f:
+        load_dict = json.load(load_f)
+        print(load_dict)
+    # init('license',
+    #      'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
+    #      ('rqdatad-pro.ricequant.com', 16011))
+    # cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
+    # mongodbSettings = cfg.MONGODB_SETTINGS
+    # connect('pychanlun', host=mongodbSettings['host'], port=mongodbSettings['port'],
+    #         username=mongodbSettings['username'], password=mongodbSettings['password'], authentication_source='admin')
     # mLog = BeichiLog(symbol="BTC_CQ", period="30min", price=18000, signal=True,remark='XB')
     # mLog = BeichiLog(symbol="RU2001", period="4hour", price=16001, signal=True,remark='XT')
-    mLog = BeichiLog(symbol="RU2001", period="4hour", price=16000, signal=True,remark='XT')
-    mLog.save()
+    # mLog = BeichiLog(symbol="RU2001", period="4hour", price=16000, signal=True,remark='XT')
+    # mLog.save()
 
     # for beichiItem in BeichiLog.objects:
     #     print(beichiItem.date_created)
