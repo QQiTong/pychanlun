@@ -40,8 +40,12 @@ def app():
     connect('pychanlun', host=mongodbSettings['host'], port=mongodbSettings['port'],
             username=mongodbSettings['username'], password=mongodbSettings['password'], authentication_source='admin')
     # mLog = BeichiLog(symbol="BTC_CQ", period="30min", price=18000, signal=True,remark='XB')
-    mLog = BeichiLog(symbol="RU2001", period="60min", price=16000, signal=True,remark='XT')
+    # mLog = BeichiLog(symbol="RU2001", period="4hour", price=16001, signal=True,remark='XT')
+    mLog = BeichiLog(symbol="RU2001", period="4hour", price=16000, signal=True,remark='XT')
     mLog.save()
+
+    # for beichiItem in BeichiLog.objects:
+    #     print(beichiItem.date_created)
     # 获取主力合约
     # symbolList = getDominantSymbol()
     # symbolListMap = {}

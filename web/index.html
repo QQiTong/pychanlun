@@ -19,14 +19,14 @@
         <table class="table table-striped table-bordered table-condensed table-hover">
             <thead>
             <tr>
-                <td>品种</td>
-                <td>3min</td>
-                <td>5min</td>
-                <td>15min</td>
-                <td>30min</td>
-                <td>60min</td>
-                <td>4hour</td>
-                <td>1day</td>
+                <td class="remark-item">品种</td>
+                <td class="remark-item">3min</td>
+                <td class="remark-item">5min</td>
+                <td class="remark-item">15min</td>
+                <td class="remark-item">30min</td>
+                <td class="remark-item">60min</td>
+                <td class="remark-item">4hour</td>
+                <td class="remark-item">1day</td>
             </tr>
             </thead>
             <tbody>
@@ -38,7 +38,9 @@
                 </td>
                 <td v-for="periodItem in periodList" :class="{ 'danger':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XB')!=-1 ,
                  'success':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XT') !=-1}">
-                    {{ beichiList[symbolInfo.order_book_id][periodItem]}}
+                    <span v-for="item in beichiList[symbolInfo.order_book_id][periodItem]">
+                        {{ item}}
+                    </span>
                 </td>
 
             </tr>

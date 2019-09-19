@@ -45,6 +45,8 @@ class BeichiList:
                 symbolListMap[symbol][period] = ""
 
         for beichiItem in BeichiLog.objects:
-            symbolListMap[beichiItem.symbol][beichiItem.period] = beichiItem.remark," ",beichiItem.signal, " ", str(beichiItem.price)," "+str(beichiItem.date_created)
+            # todo 以后增加了沪金后 取整需要去掉
+            msg = beichiItem.remark,str(round(beichiItem.price)),str(beichiItem.date_created)
+            symbolListMap[beichiItem.symbol][beichiItem.period] = msg
         print("背驰列表", symbolListMap)
         return symbolListMap
