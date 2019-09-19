@@ -26,7 +26,7 @@ def data():
 # 获取主力合约
 @app.route('/api/dominant')
 def dominant():
-    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU',
+    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU','AU','AG',
                   'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
                   'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
                   ]

@@ -41,7 +41,7 @@ mail = Mail()
 
 
 def getDominantSymbol():
-    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU',
+    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU','AU','AG',
                   'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
                   'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
                   ]

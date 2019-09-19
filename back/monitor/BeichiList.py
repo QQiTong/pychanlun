@@ -13,9 +13,9 @@ class BeichiList:
         print('beichi List init')
 
     def getDominantSymbol(self):
-        symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU',
+        symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU','AU','AG',
                       'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
-                      'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
+                      'M', 'I', 'EG', 'J', 'JM', 'PP', 'L','AU','AG'
                       ]
         dominantSymbolList = []
         for i in range(len(symbolList)):
@@ -46,7 +46,7 @@ class BeichiList:
 
         for beichiItem in BeichiLog.objects:
             # todo 以后增加了沪金后 取整需要去掉
-            msg = beichiItem.remark,str(round(beichiItem.price)),str(beichiItem.date_created)
+            msg = beichiItem.remark,str(round(beichiItem.price,2)),str(beichiItem.date_created)
             symbolListMap[beichiItem.symbol][beichiItem.period] = msg
         print("背驰列表", symbolListMap)
         return symbolListMap

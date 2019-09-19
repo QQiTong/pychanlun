@@ -19,7 +19,7 @@ periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
 def getDominantSymbol():
-    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU',
+    symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU','AU','AG',
                   'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
                   'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
                   ]
