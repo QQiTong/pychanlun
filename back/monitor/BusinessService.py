@@ -60,11 +60,13 @@ class BusinessService:
         start = datetime.now() + timedelta(-1)
         for i in range(len(dominantSymbolList)):
             item = dominantSymbolList[i]
-            df = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-                              start_date=start, end_date=end)
-            preday = df.iloc[0, 3]
-            today = df.iloc[1, 3]
-            change = round((today - preday) / today, 3)
+            df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+                                start_date=start, end_date=end)
+            df1m = rq.get_price(item, frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
+                                start_date=start, end_date=end)
+            preday = df1d.iloc[len(df1d) - 1, 3]
+            today = df1m.iloc[len(df1m) - 1, 3]
+            change = (today - preday) / preday
             symbolChangeMap[item] = change
         print("涨跌幅信息",symbolChangeMap)
 
