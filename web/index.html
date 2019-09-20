@@ -13,7 +13,7 @@
         缠非缠 禅非禅,枯木龙吟照大千   贪嗔痴疑慢 走势终完美
     </div>
     <div class="search-container">
-        <span>搜索:</span><input type="text" v-model="keyword" placeholder="品种代码">
+        <span>搜索:</span><input type="text" v-model="value2Computed" placeholder="品种代码">
     </div>
     <div class="current-market">
         <table class="table table-striped table-bordered table-condensed table-hover">
@@ -31,7 +31,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="symbolInfo in futureSymbolList" v-if="symbolInfo.order_book_id.indexOf(keyword)!=-1">
+            <tr v-for="symbolInfo in futureSymbolList" v-if="symbolInfo.order_book_id.indexOf(value2Computed)!=-1">
                 <td>
                     <a @click="jumpToKline(symbolInfo.order_book_id)">
                         {{ symbolInfo.symbol}} ({{symbolInfo.underlying_symbol }})

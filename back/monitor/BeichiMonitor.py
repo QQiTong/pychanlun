@@ -105,7 +105,7 @@ def monitorFuturesAndDigitCoin(type):
                     lastAmaTime = lastTimeAmaMap[symbol][period]
 
                     diffTime = currentTime - lastTime
-                    print("current:", symbol, period)
+                    print("current:", symbol, period,datetime.now())
 
                     result = calc.calcData(period, symbol)
                     closePrice = result['close'][-1]
@@ -223,10 +223,9 @@ def monitorFuturesAndDigitCoin(type):
 
             threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
         else:
-            time.sleep(5)
             print("火币出异常了",Exception)
             threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
 
-threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
-# threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
+# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

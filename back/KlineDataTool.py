@@ -1,7 +1,7 @@
 import requests
 import json
 from jqdatasdk import *
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 import time
@@ -10,12 +10,11 @@ import pydash
 import rqdatac as rq
 from rqdatac import *
 
-
 # url = "http://api.zb.cn/data/v1/kline?market=btc_usdt"
 # 火币合约接口 全局代理后200ms内 , 不代理1s左右
 from back.ComposeKline import ComposeKline
 
-hbdmUrl = "https://api.hbdm.com/market/history/kline"
+hbdmUrl = "http://api.hbdm.com/market/history/kline"
 '''
 period 1min, 5min, 15min, 30min, 60min,4hour,1day, 1mon
 symbol BTC_CW 当周合约 BTC_NW 次周合约 BTC_CQ 季度合约
@@ -151,8 +150,7 @@ class KlineDataTool:
     #         # print("处理结果:", processedKlineList)
     #         return processedKlineList
 
-
-    def getDigitCoinData(self,symbol, period):
+    def getDigitCoinData(self, symbol, period):
         url = hbdmUrl
         target = 0
         #  火币没有提供3min的k线, 只能用1min进行合成
@@ -162,12 +160,12 @@ class KlineDataTool:
         payload = {
             'symbol': symbol,  # 合约类型， 火币季度合约
             'period': period,
-            'size':2000
+            'size': 2000
         }
 
         startTime = datetime.now()
-        r = requests.get(url, params=payload )
-
+        proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
+        r = requests.get(url, params=payload, proxies=proxies, verify=False)
         endTime = datetime.now() - startTime
         klines = json.loads(r.text)['data']
         # print("火币接口花费时间:", endTime, datetime.now(), r)
@@ -252,17 +250,17 @@ class KlineDataTool:
             '1m': -7,
             '3m': -31,
             '5m': -31,
-            '15m': -31*3,
-            '30m':-31*4,
-            '60m': -31*8,
-            '240m':-31*8,
-            '1d': -31*10,
-            '3d':-31*30
+            '15m': -31 * 3,
+            '30m': -31 * 4,
+            '60m': -31 * 8,
+            '240m': -31 * 8,
+            '1d': -31 * 10,
+            '3d': -31 * 30
         }
         start_date = datetime.now() + timedelta(timeDeltaMap[period])
 
         df = rq.get_price(symbol, frequency=period,
-                            fields=['open', 'high', 'low', 'close', 'volume'],start_date=start_date, end_date=end)
+                          fields=['open', 'high', 'low', 'close', 'volume'], start_date=start_date, end_date=end)
 
         # df = get_price('RB1910.XSGE', frequency='240m', end_date=datetime.now(), count=200,
         #                fields=['open', 'high', 'low', 'close', 'volume'])
@@ -271,20 +269,19 @@ class KlineDataTool:
         # if period == '240m':
         #     cols = [x for i, x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
         #     df = df.drop(cols)
-        if period == '240m':
-            ohlc_dict = {
-                'open': 'first',
-                'high': 'max',
-                'low': 'min',
-                'close': 'last',
-                'volume': 'sum'
-            }
-            # df.index = pd.DatetimeIndex(df.index)
-
-            # 聚合k线
-            df = df.resample('4H', closed='left', label='left') \
-                .agg(ohlc_dict).dropna(how='any')
-
+        # if period == '240m':
+        #     ohlc_dict = {
+        #         'open': 'first',
+        #         'high': 'max',
+        #         'low': 'min',
+        #         'close': 'last',
+        #         'volume': 'sum'
+        #     }
+        #     # df.index = pd.DatetimeIndex(df.index)
+        #
+        #     # 聚合k线
+        #     df = df.resample('4H', closed='left', label='left') \
+        #         .agg(ohlc_dict).dropna(how='any')
 
         nparray = np.array(df)
         npKlineList = nparray.tolist()
@@ -307,5 +304,5 @@ class KlineDataTool:
         # endTime = datetime.now() - startTime
         # print("函数时间", endTime)
         # if period=='3d':
-            # print(len(klineList))
+        # print(len(klineList))
         return klineList
