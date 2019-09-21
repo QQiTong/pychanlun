@@ -122,6 +122,7 @@ def doExecute(symbol, period1, period2):
             period1Diff,
             period1Dea,
             period1BiProcess.biList,
+            period1BiResult,
             period1DuanResult
         )
         # 本周期是否有底背驰
@@ -139,6 +140,7 @@ def doExecute(symbol, period1, period2):
             period2Diff,
             period2Dea,
             period2BiProcess.biList,
+            period2BiResult,
             period2DuanResult
         )
         isDiver = pydash.find_index(divergence_up[-5:-1], lambda x: x == 1) > -1

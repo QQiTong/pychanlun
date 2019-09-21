@@ -29,8 +29,8 @@ signalMap = {
 }
 
 
-def calc(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_list, duan_series):
-    time_series, macd_series, diff_series, dea_series, duan_series = fit_series(time_series, macd_series, diff_series, dea_series, duan_series)
+def calc(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_list, bi_series, duan_series):
+    time_series, macd_series, diff_series, dea_series, bi_series, duan_series = fit_series(time_series, macd_series, diff_series, dea_series, bi_series, duan_series)
     # 底背驰信号
     divergence_down = np.zeros(len(time_series))
     # 顶背驰信号
@@ -73,8 +73,7 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
                                 divergence_up[i] = 1
     return divergence_down, divergence_up
 
-
-def note(divergence_down, divergence_up, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel = False):
+def note(divergence_down, divergence_up, bi_series, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel = False):
     data = {
         'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': []},
         'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': []},
@@ -93,6 +92,13 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
             else:
                data['buyMACDBCData']['stop_lose_price'].append(0)
             data['buyMACDBCData']['beichi_price'].append(open_series[i])
+
+            # 底背驰，往后找第一次成笔的位置
+            bi_index = pydash.find_index(bi_series[i:], lambda x: x == 1)
+            if bi_index > -1:
+                data['buyMACDBCData']['stop_win_price'].append(high_series[bi_index])
+            else:
+                data['buyMACDBCData']['stop_win_price'].append(0)
     for i in range(len(divergence_up)):
         if divergence_up[i] == 1:
             data['sellMACDBCData']['date'].append(time_series[i])
@@ -107,9 +113,16 @@ def note(divergence_down, divergence_up, duan_series, time_series, high_series, 
             else:
                data['sellMACDBCData']['stop_lose_price'].append(0)
             data['sellMACDBCData']['beichi_price'].append(open_series[i])
+
+            # 顶背驰，往后找第一次成笔的位置
+            bi_index = pydash.find_index(bi_series[i:], lambda x: x == -1)
+            if bi_index > -1:
+                data['buyMACDBCData']['stop_win_price'].append(low_series[bi_index])
+            else:
+                data['buyMACDBCData']['stop_win_price'].append(0)
     return data
 
 
-def calcAndNote(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_list, duan_series, bigLevel = False):
-    divergence_down, divergence_up = calc(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_list, duan_series)
-    return note(divergence_down, divergence_up, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel)
+def calcAndNote(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_list, bi_series, duan_series, bigLevel = False):
+    divergence_down, divergence_up = calc(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_list, bi_series, duan_series)
+    return note(divergence_down, divergence_up, bi_series, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel)
