@@ -75,8 +75,8 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
 
 def note(divergence_down, divergence_up, bi_series, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel = False):
     data = {
-        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': []},
-        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': []},
+        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': [], 'stop_win_price': []},
+        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': [], 'stop_win_price': []},
     }
     for i in range(len(divergence_down)):
         if divergence_down[i] == 1:
