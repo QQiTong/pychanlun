@@ -15,7 +15,7 @@ class BusinessService:
 
     def getDominantSymbol(self):
 
-        with open("../futureSymbol.json", 'r') as load_f:
+        with open(os.path.join(os.path.dirname(__file__), '../../futureSymbol.json'), 'r') as load_f:
             symbolList = json.load(load_f)
             print(symbolList)
         dominantSymbolList = []
@@ -26,12 +26,6 @@ class BusinessService:
         return dominantSymbolList
 
     def getBeichiList(self):
-
-        cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
-        mongodbSettings = cfg.MONGODB_SETTINGS
-        connect('pychanlun', host=mongodbSettings['host'], port=mongodbSettings['port'],
-                username=mongodbSettings['username'], password=mongodbSettings['password'],
-                authentication_source='admin')
         symbolList = self.getDominantSymbol()
         #  把btc eth 加进去
         symbolList.append("BTC_CQ")

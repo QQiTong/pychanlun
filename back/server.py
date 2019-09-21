@@ -1,10 +1,13 @@
 from flask import Flask, request, Response
 import json
+import os
 from jqdatasdk import *
 from rqdatac import *
 from back.Calc import Calc
 from back.monitor.BusinessService import BusinessService
 import numpy as np
+from mongoengine import connect
+from .config import config
 
 import rqdatac as rq
 
@@ -26,7 +29,7 @@ def data():
 # 获取主力合约
 @app.route('/api/dominant')
 def dominant():
-    with open("../futureSymbol.json", 'r') as load_f:
+    with open(os.path.join(os.path.dirname(__file__), "../futureSymbol.json"), 'r') as load_f:
         symbolList = json.load(load_f)
         print(symbolList)
     dominantSymbolInfoList = []
@@ -62,6 +65,12 @@ def save_stock_date():
 
 if __name__ == '__main__':
     print("启动服务------------------")
+
+    cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
+    mongodbSettings = cfg.MONGODB_SETTINGS
+    connect('pychanlun', host=mongodbSettings.get('host', '127.0.0.1'), port=mongodbSettings.get('port', 27017),
+            username=mongodbSettings.get('username', ''), password=mongodbSettings.get('password', ''), authentication_source='admin')
+
     # auth('13088887055', 'chanlun123456')
     # 聚宽数据源 到期 改成米筐
     init('license',

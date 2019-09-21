@@ -41,7 +41,7 @@ mail = Mail()
 
 
 def getDominantSymbol():
-    with open("../../futureSymbol.json", 'r') as load_f:
+    with open(os.path.join(os.path.dirname(__file__), "../../futureSymbol.json"), 'r') as load_f:
         symbolList = json.load(load_f)
         print(symbolList)
     dominantSymbolList = []
