@@ -96,7 +96,7 @@ def note(divergence_down, divergence_up, bi_series, duan_series, time_series, hi
             # 底背驰，往后找第一次成笔的位置
             bi_index = pydash.find_index(bi_series[i:], lambda x: x == 1)
             if bi_index > -1:
-                data['buyMACDBCData']['stop_win_price'].append(high_series[bi_index])
+                data['buyMACDBCData']['stop_win_price'].append(high_series[i + bi_index])
             else:
                 data['buyMACDBCData']['stop_win_price'].append(0)
     for i in range(len(divergence_up)):
@@ -117,7 +117,7 @@ def note(divergence_down, divergence_up, bi_series, duan_series, time_series, hi
             # 顶背驰，往后找第一次成笔的位置
             bi_index = pydash.find_index(bi_series[i:], lambda x: x == -1)
             if bi_index > -1:
-                data['buyMACDBCData']['stop_win_price'].append(low_series[bi_index])
+                data['buyMACDBCData']['stop_win_price'].append(low_series[i + bi_index])
             else:
                 data['buyMACDBCData']['stop_win_price'].append(0)
     return data
