@@ -7,7 +7,7 @@ from back.Calc import Calc
 from back.monitor.BusinessService import BusinessService
 import numpy as np
 from mongoengine import connect
-from .config import config
+from back.config import config
 
 import rqdatac as rq
 
