@@ -8,3 +8,4 @@ class Bar(Document):
     high = DecimalField()
     low = DecimalField()
     volume = DecimalField()
+    date_created = DateTimeField(required=True, default = datetime.datetime.utcnow)

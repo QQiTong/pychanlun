@@ -91,9 +91,12 @@ def saveData(code, df, period):
     logger = logging.getLogger()
     logger.info("保存行情数据 %s %s" % (code, period))
     for time, row in df.iterrows():
-        bar = Bar(time = time, open = row['open'], close = row['close'], high = row['high'], low = row['low'], volume = row['volume'])
-        bar.switch_collection('%s_%s' % (code.lower(), period))
-        bar.save()
+        try:
+            bar = Bar(time = time, open = row['open'], close = row['close'], high = row['high'], low = row['low'], volume = row['volume'])
+            bar.switch_collection('%s_%s' % (code.lower(), period))
+            bar.save()
+        except BaseException as e:
+            logger.info("Error Occurred: {0}".format(traceback.format_exc()))
 
 
 

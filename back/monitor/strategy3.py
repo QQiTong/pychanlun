@@ -43,7 +43,8 @@ def doExecute(symbol, period1, period2):
         bars1 = Bar1.objects.order_by('-_id').limit(1000)
     with switch_collection(Bar, '%s_%s' % (symbol.code.lower(), period2)) as Bar2:
         bars2 = Bar2.objects.order_by('-_id').limit(1000)
-    if len(bars1) < 13 or len(bars2) < 13: return
+    if len(bars1) < 13 or len(bars2) < 13:
+        return
     period1Time = []
     period1High = []
     period1Low = []
@@ -63,11 +64,11 @@ def doExecute(symbol, period1, period2):
     period2Close = []
     len2 = len(bars2)
     for i in range(len2 - 1, -1, -1):
-        period2Time.append(int(time.mktime(bars1[i].id.timetuple())))
-        period2High.append(bars1[i].high)
-        period2Low.append(bars1[i].low)
-        period2Open.append(bars1[i].open)
-        period2Close.append(bars1[i].close)
+        period2Time.append(int(time.mktime(bars2[i].id.timetuple())))
+        period2High.append(bars2[i].high)
+        period2Low.append(bars2[i].low)
+        period2Open.append(bars2[i].open)
+        period2Close.append(bars2[i].close)
     # 计算MACD
     period1Diff, period1Dea, period1Macd = ta.MACD(np.array([float(x) for x in period1Close]), fastperiod=12, slowperiod=26, signalperiod=9)
     period1Diff = np.nan_to_num(period1Diff)
@@ -155,8 +156,7 @@ def doExecute(symbol, period1, period2):
         # 底背驰信号
         msg = json.dumps(msg, ensure_ascii=False, indent=4)
         mailResult = mail.send(msg)
-        mLog = Strategy3Log(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg)
-        mLog.save()
+        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg)
 
     # 计算死叉
     period1DeadCross = CROSS(period1Dea, period1Diff)
