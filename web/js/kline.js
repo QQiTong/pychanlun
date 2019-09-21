@@ -6,9 +6,9 @@ var app = new Vue({
         timer: null,
         symbol: "",
         requestFlag: true,
-        marginLevelCompany:1.125,// 不同期货公司提高的点数不一样
-        marginPrice:0,//每手需要的保证金
-        contractMultiplier:1,
+        marginLevelCompany: 1.125,// 不同期货公司提高的点数不一样
+        marginPrice: 0,//每手需要的保证金
+        contractMultiplier: 1,
         digitCoinsSymbolList: [{
             contract_multiplier: 1,
             de_listed_date: "forever",
@@ -205,7 +205,7 @@ var app = new Vue({
 
             dataTitle = that.symbol + "  " + kxType
             let marginLevel = (1 / (that.futureSymbolMap[that.symbol].margin_rate * this.marginLevelCompany)).toFixed(2)
-            subText = "杠杆倍数: " + marginLevel +" 每手保证金: "+this.marginPrice+" 合约乘数: "+this.contractMultiplier +" 交易时间: "+that.futureSymbolMap[that.symbol].trading_hours+" 交割时间: "+ that.futureSymbolMap[that.symbol].maturity_date
+            subText = "杠杆倍数: " + marginLevel + " 每手保证金: " + this.marginPrice + " 合约乘数: " + this.contractMultiplier + " 交易时间: " + that.futureSymbolMap[that.symbol].trading_hours + " 交割时间: " + that.futureSymbolMap[that.symbol].maturity_date
             var currentChart = myChart1
             if (kxType === '1min') {
                 currentChart = myChart1
@@ -1389,7 +1389,7 @@ var app = new Vue({
             // 合约乘数
             this.contractMultiplier = this.futureSymbolMap[this.symbol].contract_multiplier;
             // 1手需要的保证金
-            this.marginPrice = (this.contractMultiplier*currentPrice / marginLevel).toFixed(0)
+            this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
             // console.log("最后的背驰:", kxType, lastBeichiType)
             if (lastBeichiType !== 0) {
                 if (lastBeichiType === -1) {
@@ -1402,16 +1402,27 @@ var app = new Vue({
                 var beichiPrice = lastBeichi['beichi_price'][lastBeichi['beichi_price'].length - 1]
                 // 止损价格
                 var stopLosePrice = lastBeichi['stop_lose_price'][lastBeichi['stop_lose_price'].length - 1]
+                // 第一次成笔的止盈价格
+                var stopWinPrice = lastBeichi['stop_win_price'][lastBeichi['stop_win_price'].length - 1]
+                //第一次成笔的止盈百分比
+                var stopWinPercent = 0
                 // 止盈价格
                 var targetPrice = 0
                 var diffPrice = Math.abs(beichiPrice - stopLosePrice)
+                // 当前收益百分比
                 var currentPercent = ""
                 if (lastBeichiType === -1) {
                     targetPrice = beichiPrice + diffPrice
                     currentPercent = ((currentPrice - beichiPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                    if (stopWinPrice !== 0) {
+                        stopWinPercent = ((stopWinPrice - beichiPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                    }
                 } else {
                     targetPrice = beichiPrice - diffPrice
                     currentPercent = ((beichiPrice - currentPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                    if (stopWinPrice !== 0) {
+                        stopWinPercent = ((currentPrice-stopWinPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                    }
                 }
                 var targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * marginLevel).toFixed(2)
 
@@ -1459,7 +1470,7 @@ var app = new Vue({
                 }
 
                 //止损位
-                var markLineTarget = {
+                var markLineStop = {
                     yAxis: stopLosePrice,
                     lineStyle: {
                         normal: {
@@ -1479,7 +1490,7 @@ var app = new Vue({
                     },
                 }
                 // 目标价位
-                var markLineStop = {
+                var markLineTarget = {
                     yAxis: targetPrice,
                     lineStyle: {
                         normal: {
@@ -1498,10 +1509,34 @@ var app = new Vue({
                     symbol: 'circle',
                     symbolSize: 1,
                 }
+                // 第一次成笔的目标价位
+                var markLineStopWin = {
+                    yAxis: stopWinPrice,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'dashed',
+                            width: 1,
+                            color: 'green'
+                        },
+                    },
+                    label: {
+                        normal: {
+                            color: 'green',
+                            formatter: '笔盈:' + stopWinPrice.toFixed(2) + ' (' + stopWinPercent + '%)',
+                        }
+                    },
+                    symbol: 'circle',
+                    symbolSize: 1,
+                }
                 markLineData.push(markLineCurrent)
                 markLineData.push(markLineBeichi)
-                markLineData.push(markLineStop)
                 markLineData.push(markLineTarget)
+                markLineData.push(markLineStop)
+                if (stopWinPrice !== 0) {
+                    markLineData.push(markLineStopWin)
+                }
+
             }
 
 

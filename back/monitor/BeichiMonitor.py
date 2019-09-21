@@ -41,7 +41,7 @@ mail = Mail()
 
 
 def getDominantSymbol():
-    with open(os.path.join(os.path.dirname(__file__), "../../futureSymbol.json"), 'r') as load_f:
+    with open(os.path.join(os.path.dirname('__file__'), "../../futureSymbol.json"), 'r') as load_f:
         symbolList = json.load(load_f)
         print(symbolList)
     dominantSymbolList = []
@@ -136,6 +136,8 @@ def monitorFuturesAndDigitCoin(type):
                     if len(result['buyMACDBCData']['date']) > 0:
                         lastBuyDate = result['buyMACDBCData']['date'][-1]
                         lastBuyValue = result['buyMACDBCData']['value'][-1]
+                        firstBi = result['buyMACDBCData']['stop_win_price'][-1]
+
                         notLower = result['notLower']
                         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
                         # print("current judge:", symbol, period, lastBuyDate, notLower)
@@ -143,14 +145,11 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            print(msg)
-                            mailResult = mail.send(str(msg))
+
+                            sendEmail(msg)
                             mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,remark=lastBuyValue)
                             mLog.save()
-                            if not mailResult:
-                                print("发送失败")
-                            else:
-                                print("发送成功")
+
                     if len(result['sellMACDBCData']['date']) > 0:
                         notHigher = result['notHigher']
                         lastSellDate = result['sellMACDBCData']['date'][-1]
@@ -162,15 +161,10 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            print(msg)
-                            mailResult = mail.send(str(msg))
                             mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
                                              remark=lastSellValue)
                             mLog.save()
-                            if not mailResult:
-                                print("发送失败")
-                            else:
-                                print("发送成功")
+                            sendEmail(msg)
 
                     # 监控高级别
                     if len(result['buyHigherMACDBCData']['date']) > 0:
@@ -184,15 +178,10 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            print(msg)
-                            mailResult = mail.send(str(msg))
                             mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
                                              remark=lastBuyValue)
                             mLog.save()
-                            if not mailResult:
-                                print("发送失败")
-                            else:
-                                print("发送成功")
+                            sendEmail(msg)
 
                     if len(result['sellHigherMACDBCData']['date']) > 0:
                         lastSellDate = result['sellHigherMACDBCData']['date'][-1]
@@ -204,15 +193,10 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            print(msg)
-                            mailResult = mail.send(str(msg))
                             mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
                                              remark=lastSellValue)
                             mLog.save()
-                            if not mailResult:
-                                print("发送失败")
-                            else:
-                                print("发送成功")
+                            sendEmail(msg)
                     if type == "1":
                         time.sleep(0)
                     else:
@@ -226,6 +210,12 @@ def monitorFuturesAndDigitCoin(type):
             print("火币出异常了",Exception)
             threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
-
+def sendEmail(msg):
+    print(msg)
+    mailResult = mail.send(str(msg))
+    if not mailResult:
+        print("发送失败")
+    else:
+        print("发送成功")
 threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
 threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
