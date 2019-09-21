@@ -23,7 +23,6 @@ class HuobiDataBackend(DataBackend):
             'size': end - start
         }
         r = requests.get(self.endpoint, params=payload)
-        print(r.text)
         retJson = json.loads(r.text)
         data = retJson['data']
         recdata = []

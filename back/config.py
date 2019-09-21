@@ -11,11 +11,9 @@ class Config:
 
 class DevelopmentConfig(Config):
     MONGODB_SETTINGS = {
-        'host': '120.77.209.6',
+        'host': '127.0.0.1',
         'port': 27017,
         'db': 'pychanlun',
-        'username': 'pychanlun',
-        'password': 'chanlun123456'
     }
     pass
 

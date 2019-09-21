@@ -43,6 +43,7 @@ def doExecute(symbol, period1, period2):
         bars1 = Bar1.objects.order_by('-_id').limit(1000)
     with switch_collection(Bar, '%s_%s' % (symbol.code.lower(), period2)) as Bar2:
         bars2 = Bar2.objects.order_by('-_id').limit(1000)
+    if len(bars1) < 13 or len(bars2) < 13: return
     period1Time = []
     period1High = []
     period1Low = []
@@ -111,13 +112,35 @@ def doExecute(symbol, period1, period2):
         notLower = Duan.notLower(period1DuanResult, period1Low)
         if not notLower:
             return
-        divergence_down, divergence_up = divergence.calc(period1Time, period1Macd, period1Diff, period1Dea, period1BiProcess.biList, period1DuanResult)
+        divergence_down, divergence_up = divergence.calc(
+            period1Time,
+            period1High,
+            period1Low,
+            period1Open,
+            period1Close,
+            period1Macd,
+            period1Diff,
+            period1Dea,
+            period1BiProcess.biList,
+            period1DuanResult
+        )
         # 本周期是否有底背驰
         isDiver = pydash.find_index(divergence_down[-5:-1], lambda x: x == 1) > -1
         if not isDiver:
             return
         # 高周期是否顶背驰
-        divergence_down, divergence_up = divergence.calc(period2Time, period2Macd, period2Diff, period2Dea, period2BiProcess.biList, period2DuanResult)
+        divergence_down, divergence_up = divergence.calc(
+            period2Time,
+            period2High,
+            period2Low,
+            period2Open,
+            period2Close,
+            period2Macd,
+            period2Diff,
+            period2Dea,
+            period2BiProcess.biList,
+            period2DuanResult
+        )
         isDiver = pydash.find_index(divergence_up[-5:-1], lambda x: x == 1) > -1
         if isDiver:
             return
