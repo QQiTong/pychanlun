@@ -2,6 +2,7 @@ from mongoengine import *
 import datetime
 
 class Bar(Document):
+    meta = {'strict': False}
     time = DateTimeField(required=True, primary_key=True)
     open = DecimalField()
     close = DecimalField()
