@@ -141,7 +141,7 @@ def monitorFuturesAndDigitCoin(type):
                         # print("current judge:", symbol, period, lastBuyDate, notLower)
                         if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
                             lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, notLower, time.strftime(
+                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
@@ -160,7 +160,7 @@ def monitorFuturesAndDigitCoin(type):
                         # print("current judge:", symbol, period, lastSellDate, notHigher)
                         if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
                             lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, notHigher, time.strftime(
+                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
@@ -182,7 +182,7 @@ def monitorFuturesAndDigitCoin(type):
                         # print("current judge:", symbol, period, lastBuyDate, notLower)
                         if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
                             lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, notLower, time.strftime(
+                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
@@ -202,7 +202,7 @@ def monitorFuturesAndDigitCoin(type):
                         # print("current judge:", symbol, period, lastSellDate, notHigher)
                         if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
                             lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, notHigher, time.strftime(
+                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                             print(msg)
                             mailResult = mail.send(str(msg))
@@ -227,5 +227,5 @@ def monitorFuturesAndDigitCoin(type):
             threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
 
-# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
 threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

@@ -8,6 +8,7 @@ var app = new Vue({
         requestFlag: true,
         marginLevelCompany:1.125,// 不同期货公司提高的点数不一样
         marginPrice:0,//每手需要的保证金
+        contractMultiplier:1,
         digitCoinsSymbolList: [{
             contract_multiplier: 1,
             de_listed_date: "forever",
@@ -204,7 +205,7 @@ var app = new Vue({
 
             dataTitle = that.symbol + "  " + kxType
             let marginLevel = (1 / (that.futureSymbolMap[that.symbol].margin_rate * this.marginLevelCompany)).toFixed(2)
-            subText = "杠杆倍数: " + marginLevel +" 每手保证金: "+this.marginPrice+" 交易时间: "+that.futureSymbolMap[that.symbol].trading_hours+" 交割时间: "+ that.futureSymbolMap[that.symbol].maturity_date
+            subText = "杠杆倍数: " + marginLevel +" 每手保证金: "+this.marginPrice+" 合约乘数: "+this.contractMultiplier +" 交易时间: "+that.futureSymbolMap[that.symbol].trading_hours+" 交割时间: "+ that.futureSymbolMap[that.symbol].maturity_date
             var currentChart = myChart1
             if (kxType === '1min') {
                 currentChart = myChart1
@@ -1386,9 +1387,9 @@ var app = new Vue({
             // 当前价格
             var currentPrice = stockClose[stockClose.length - 1]
             // 合约乘数
-            let contractMultiplier = this.futureSymbolMap[this.symbol].contract_multiplier;
+            this.contractMultiplier = this.futureSymbolMap[this.symbol].contract_multiplier;
             // 1手需要的保证金
-            this.marginPrice = (contractMultiplier*currentPrice / marginLevel).toFixed(0)
+            this.marginPrice = (this.contractMultiplier*currentPrice / marginLevel).toFixed(0)
             // console.log("最后的背驰:", kxType, lastBeichiType)
             if (lastBeichiType !== 0) {
                 if (lastBeichiType === -1) {
