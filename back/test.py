@@ -20,9 +20,7 @@ periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
 def getDominantSymbol():
-    with open(os.path.join(os.path.pathname(__file__), "../futureSymbol.json"), 'r') as load_f:
-        symbolList = json.load(load_f)
-        print(symbolList)
+    symbolList = config['symbolList']
 
     dominantSymbolList = []
     for i in range(len(symbolList)):

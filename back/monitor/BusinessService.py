@@ -14,9 +14,7 @@ class BusinessService:
 
     def getDominantSymbol(self):
 
-        with open(os.path.join(os.path.dirname(__file__), '../../futureSymbol.json'), 'r') as load_f:
-            symbolList = json.load(load_f)
-            print(symbolList)
+        symbolList = config['symbolList']
         dominantSymbolList = []
         for i in range(len(symbolList)):
             df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
