@@ -251,6 +251,8 @@ class Calc:
         # print("段结果:", len(biResult), len(duanResult))
 
         entanglementList = entanglement.calcEntanglements(timeList, duanResult, biResult, highList, lowList)
+        # 段中枢
+        entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanResult, duanResult, highList, lowList)
 
         # 中枢处理
         # zhongShu = ZhongShuProcess()
@@ -263,6 +265,7 @@ class Calc:
         # print('笔中枢开始结束:', len(zhongShuStartEnd), zhongShuStartEnd)
 
         zsdata, zsflag = getZhongShuData(entanglementList)
+        duan_zsdata, duan_zsflag = getZhongShuData(entanglementHigherList)
         # print("中枢数据:", zsdata, zsflag)
 
         # 拼接json数据
@@ -290,6 +293,8 @@ class Calc:
         resJson['volume'] = volumeList
         resJson['zsdata'] = zsdata
         resJson['zsflag'] = zsflag
+        resJson['duan_zsdata'] = duan_zsdata
+        resJson['duan_zsflag'] = duan_zsflag
 
         # 获取大级别macd
         resJson['diffBigLevel'] = getMacd(closeListBigLevel)[0].tolist()

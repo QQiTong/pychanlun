@@ -1016,6 +1016,9 @@ var app = new Vue({
 
             const zsdata = jsonObj.zsdata;
             const zsflag = jsonObj.zsflag;
+
+            const duan_zsdata = jsonObj.duan_zsdata;
+            const duan_zsflag = jsonObj.duan_zsflag;
             //
             const macddata = jsonObj.macd;
             const diffdata = jsonObj.diff;
@@ -1176,6 +1179,54 @@ var app = new Vue({
                             coord: zsdata[i][1],
                             itemStyle: {
                                 color: downColor,
+                                borderWidth: '1',
+                                borderColor: downColor,
+                                opacity: 0.2,
+                            }
+                        }
+                    ];
+                }
+                zsvalues.push(value);
+            }
+
+            for (var i = 0; i < duan_zsdata.length; i++) {
+                var value;
+                if (duan_zsflag[i] > 0) {
+                    value = [
+                        {
+                            coord: duan_zsdata[i][0],
+                            itemStyle: {
+                                color: 'purple',
+                                borderWidth: '2',
+                                borderColor: 'purple',
+                                opacity: 0.2,
+                            }
+                        },
+                        {
+                            coord: duan_zsdata[i][1],
+                            itemStyle: {
+                                color: 'purple',
+                                borderWidth: '1',
+                                borderColor: 'purple',
+                                opacity: 0.2,
+                            }
+                        }
+                    ];
+                } else {
+                    value = [
+                        {
+                            coord: duan_zsdata[i][0],
+                            itemStyle: {
+                                color: 'blue',
+                                borderWidth: '1',
+                                borderColor: downColor,
+                                opacity: 0.2,
+                            }
+                        },
+                        {
+                            coord: duan_zsdata[i][1],
+                            itemStyle: {
+                                color: 'blue',
                                 borderWidth: '1',
                                 borderColor: downColor,
                                 opacity: 0.2,
