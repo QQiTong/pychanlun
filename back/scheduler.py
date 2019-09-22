@@ -27,10 +27,10 @@ def app():
     scheduler = BlockingScheduler({
         'apscheduler.timezone': 'Asia/shanghai'
     })
-    # scheduler.add_job(MarketData.getMarketData1, 'cron', minute='*/1', hour='*')
-    # scheduler.add_job(MarketData.getMarketData2, 'cron', minute='*/5', hour='*')
-    # scheduler.add_job(strategy3.doMonitor, 'cron', minute='*/1', hour="*")
-    scheduler.add_job(CleanData.doClean, 'cron', minute='*/1', hour='*')
+    scheduler.add_job(MarketData.getMarketData1, 'cron', minute='*/1', hour='*')
+    scheduler.add_job(MarketData.getMarketData2, 'cron', minute='*/5', hour='*')
+    scheduler.add_job(strategy3.doMonitor, 'cron', minute='*/1', hour="*")
+    scheduler.add_job(CleanData.doClean, 'cron', minute='*', hour='*/1')
     scheduler.start()
 
 
