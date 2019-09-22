@@ -2,6 +2,8 @@ import logging
 from apscheduler.schedulers.blocking import BlockingScheduler
 import sys
 import os
+import atexit
+
 from rqdatac import *
 from mongoengine import connect
 from .config import config
@@ -27,10 +29,13 @@ def app():
     scheduler = BlockingScheduler({
         'apscheduler.timezone': 'Asia/shanghai'
     })
+    atexit.register(lambda: scheduler.shutdown(wait=False))
+
     scheduler.add_job(MarketData.getMarketData1, 'cron', minute='*/1', hour='*')
     scheduler.add_job(MarketData.getMarketData2, 'cron', minute='*/5', hour='*')
     scheduler.add_job(strategy3.doMonitor, 'cron', minute='*/1', hour="*")
-    scheduler.add_job(CleanData.doClean, 'cron', minute='*', hour='*/1')
+    scheduler.add_job(CleanData.doClean, 'interval', hours = 1)
+
     scheduler.start()
 
 

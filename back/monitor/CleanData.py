@@ -15,7 +15,7 @@ def doClean():
     t = datetime.now() - timedelta(days = 30)
     for i in range(1, 5):
         collection_name = 'stragegy%s_log' % i
-        logger.info(collection_name)
+        logger.info('%s clean' % collection_name)
         if collection_name in collection_names:
             DBPyChanlun[collection_name].delete_many({
                 'date_created': { '$lte': t }
