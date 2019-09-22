@@ -33,5 +33,30 @@ class ProductionConfig(Config):
 
 config = {
     'default': DevelopmentConfig,
-    'production': ProductionConfig
+    'production': ProductionConfig,
+    'symbolList': [
+        "RB",
+        "HC",
+        "RU",
+        "NI",
+        "FU",
+        "ZN",
+        "SP",
+        "BU",
+        "AU",
+        "AG",
+        "MA",
+        "TA",
+        "SR",
+        "OI",
+        "AP",
+        "CF",
+        "M",
+        "I",
+        "EG",
+        "J",
+        "JM",
+        "PP",
+        "L"
+    ]
 }

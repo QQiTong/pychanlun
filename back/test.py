@@ -11,7 +11,7 @@ import sys
 from rqdatac import *
 import os
 
-from back.monitor.BeichiLog import BeichiLog
+
 from back.config import config
 import rqdatac as rq
 import requests
@@ -47,6 +47,8 @@ def testDb():
     # mLog = BeichiLog(symbol="RU2001", period="4hour", price=16001, signal=True,remark='XT')
     # mLog = BeichiLog(symbol="RU2001", period="4hour", price=16000, signal=True,remark='XT')
     # mLog.save()
+    symbolList = config['symbolList']
+    print(symbolList)
     return False
 
 def testChange():
@@ -85,7 +87,8 @@ def testHuobi():
     print(json.loads(r.text)['data'])
 
 def app():
-    testHuobi()
+    # testHuobi()
+    testDb()
 
 if __name__ == '__main__':
     app()
