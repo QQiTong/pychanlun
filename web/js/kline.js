@@ -1314,7 +1314,7 @@ var app = new Vue({
                         symbol: 'circle',
                         symbolSize: '5',
                         itemStyle: {
-                            normal: {color: upColor}
+                            normal: {color: downColor}
                         },
                         label: {
                             position: 'inside',
@@ -1332,7 +1332,7 @@ var app = new Vue({
                         symbol: 'circle',
                         symbolSize: '5',
                         itemStyle: {
-                            normal: {color: downColor}
+                            normal: {color: upColor}
                         },
                         label: {
                             position: 'inside',
@@ -1421,7 +1421,7 @@ var app = new Vue({
                     targetPrice = beichiPrice - diffPrice
                     currentPercent = ((beichiPrice - currentPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
-                        stopWinPercent = ((currentPrice-stopWinPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                        stopWinPercent = ((beichiPrice-stopWinPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                     }
                 }
                 var targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * marginLevel).toFixed(2)
