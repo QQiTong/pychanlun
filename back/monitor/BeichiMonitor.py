@@ -1,3 +1,5 @@
+import logging
+import traceback
 from back.Calc import Calc
 from back.KlineDataTool import KlineDataTool
 from jqdatasdk import *
@@ -14,10 +16,9 @@ from back.Mail import Mail
 import pydash
 from back.funcat.api import *
 from back.config import config
-from mongoengine import *
 import os
 import json
-from back.monitor.BeichiLog import BeichiLog
+from ..db import DBPyChanlun
 
 '''
 背驰监控
@@ -39,9 +40,18 @@ periodList2 = ['3min', '5min', '15min', '30min', '60min', '4hour']
 
 mail = Mail()
 
+def saveBeichiLog(symbol, period, price, signal, remark):
+    DBPyChanlun['beichi_log'].insert_one({
+        'date_created': datetime.datetime.now().strftime("%m-%d %H:%M"),
+        'symbol': symbol,
+        'period': period,
+        'price': round(price, 2),
+        'signal': signal,
+        'remark': remark
+    })
 
 def getDominantSymbol():
-    with open(os.path.join(os.path.dirname('__file__'), "../../futureSymbol.json"), 'r') as load_f:
+    with open(os.path.join(os.path.dirname(__file__), "../../futureSymbol.json"), 'r') as load_f:
         symbolList = json.load(load_f)
         print(symbolList)
     dominantSymbolList = []
@@ -54,6 +64,7 @@ def getDominantSymbol():
 # 监控期货
 # timeScope 监控距离现在多少分钟的
 def monitorFuturesAndDigitCoin(type):
+    logger = logging.getLogger()
     timeScope = 2
     lastTimeMap = {}
     lastTimeAmaMap = {}
@@ -84,12 +95,7 @@ def monitorFuturesAndDigitCoin(type):
     print(lastTimeMap)
     print(lastTimeAmaMap)
     startTime = int(time.time())
-    # 连接数据库
-    cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
-    mongodbSettings = cfg.MONGODB_SETTINGS
-    connect('pychanlun', host=mongodbSettings['host'], port=mongodbSettings['port'],
-            username=mongodbSettings['username'], password=mongodbSettings['password'],
-            authentication_source='admin')
+
     try:
         while True:
             for i in range(len(symbolList)):
@@ -147,8 +153,7 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
                             sendEmail(msg)
-                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,remark=lastBuyValue)
-                            mLog.save()
+                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower, remark=lastBuyValue)
 
                     if len(result['sellMACDBCData']['date']) > 0:
                         notHigher = result['notHigher']
@@ -161,9 +166,7 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                                             remark=lastSellValue)
-                            mLog.save()
+                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher, remark=lastSellValue)
                             sendEmail(msg)
 
                     # 监控高级别
@@ -178,9 +181,7 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                                             remark=lastBuyValue)
-                            mLog.save()
+                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower, remark=lastBuyValue)
                             sendEmail(msg)
 
                     if len(result['sellHigherMACDBCData']['date']) > 0:
@@ -193,21 +194,20 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            mLog = BeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                                             remark=lastSellValue)
-                            mLog.save()
+                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher, remark=lastSellValue)
                             sendEmail(msg)
                     if type == "1":
                         time.sleep(0)
                     else:
                         time.sleep(5)
     except Exception:
+        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
         if type == "1":
-            print("期货出异常了",Exception)
+            print("期货出异常了", Exception)
 
             threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
         else:
-            print("火币出异常了",Exception)
+            print("火币出异常了", Exception)
             threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
 def sendEmail(msg):

@@ -9,7 +9,6 @@ from back.funcat.api import *
 
 import sys
 from rqdatac import *
-from mongoengine import connect
 import os
 
 from back.monitor.BeichiLog import BeichiLog

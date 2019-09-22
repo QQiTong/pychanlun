@@ -1,10 +1,9 @@
 import rqdatac as rq
-from mongoengine import connect
 import os
 import json
-from back.monitor.BeichiLog import BeichiLog
 from back.config import config
 from datetime import datetime, timedelta
+from ..db import DBPyChanlun
 
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
@@ -38,11 +37,11 @@ class BusinessService:
             for j in range(len(periodList)):
                 period = periodList[j]
                 symbolListMap[symbol][period] = ""
-
-        for beichiItem in BeichiLog.objects:
+        beichi_log_list = DBPyChanlun['beichi_log'].find()
+        for beichiItem in beichi_log_list:
             # todo 以后增加了沪金后 取整需要去掉
-            msg = beichiItem.remark, str(round(beichiItem.price, 2)), str(beichiItem.date_created)
-            symbolListMap[beichiItem.symbol][beichiItem.period] = msg
+            msg = beichiItem['remark'], str(round(beichiItem['price'], 2)), str(beichiItem['date_created'])
+            symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
         print("背驰列表", symbolListMap)
         return symbolListMap
 

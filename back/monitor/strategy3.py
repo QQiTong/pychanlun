@@ -5,10 +5,10 @@ import pandas as pd
 import talib as ta
 import numpy as np
 import rx
+import pymongo
 from rx.scheduler import ThreadPoolScheduler
 from rx.scheduler.eventloop import AsyncIOScheduler
 from rx import operators as ops
-from mongoengine.context_managers import *
 
 import pydash
 import json
@@ -25,9 +25,7 @@ from .. import entanglement as entanglement
 from .. import divergence as divergence
 from ..Mail import Mail
 from .. import Duan
-from ..model.Symbol import Symbol
-from ..model.Bar import Bar
-from ..model.Strategy3Log import Strategy3Log
+from ..db import DBPyChanlun
 
 
 mail = Mail()
@@ -35,14 +33,12 @@ mail = Mail()
 
 def doExecute(symbol, period1, period2):
     logger = logging.getLogger()
-    logger.info("策略3 %s %s %s" % (symbol.code, period1, period2))
+    logger.info("策略3 %s %s %s" % (symbol['code'], period1, period2))
     rawData = {}
-    bars1 = None
-    bars2 = None
-    with switch_collection(Bar, '%s_%s' % (symbol.code.lower(), period1)) as Bar1:
-        bars1 = Bar1.objects.order_by('-_id').limit(1000)
-    with switch_collection(Bar, '%s_%s' % (symbol.code.lower(), period2)) as Bar2:
-        bars2 = Bar2.objects.order_by('-_id').limit(1000)
+    bars1 = DBPyChanlun['%s_%s' % (symbol['code'].lower(), period1)].find().sort('_id', pymongo.DESCENDING).limit(1000)
+    bars1 = list(bars1)
+    bars2 = DBPyChanlun['%s_%s' % (symbol['code'].lower(), period2)].find().sort('_id', pymongo.DESCENDING).limit(1000)
+    bars2 = list(bars2)
     if len(bars1) < 13 or len(bars2) < 13:
         return
     period1Time = []
@@ -52,11 +48,11 @@ def doExecute(symbol, period1, period2):
     period1Close = []
     len1 = len(bars1)
     for i in range(len1 - 1, -1, -1):
-        period1Time.append(int(time.mktime(bars1[i].id.timetuple())))
-        period1High.append(bars1[i].high)
-        period1Low.append(bars1[i].low)
-        period1Open.append(bars1[i].open)
-        period1Close.append(bars1[i].close)
+        period1Time.append(int(time.mktime(bars1[i]['_id'].timetuple())))
+        period1High.append(bars1[i]['high'])
+        period1Low.append(bars1[i]['low'])
+        period1Open.append(bars1[i]['open'])
+        period1Close.append(bars1[i]['close'])
     period2Time = []
     period2High = []
     period2Low = []
@@ -64,11 +60,11 @@ def doExecute(symbol, period1, period2):
     period2Close = []
     len2 = len(bars2)
     for i in range(len2 - 1, -1, -1):
-        period2Time.append(int(time.mktime(bars2[i].id.timetuple())))
-        period2High.append(bars2[i].high)
-        period2Low.append(bars2[i].low)
-        period2Open.append(bars2[i].open)
-        period2Close.append(bars2[i].close)
+        period2Time.append(int(time.mktime(bars2[i]['_id'].timetuple())))
+        period2High.append(bars2[i]['high'])
+        period2Low.append(bars2[i]['low'])
+        period2Open.append(bars2[i]['open'])
+        period2Close.append(bars2[i]['close'])
     # 计算MACD
     period1Diff, period1Dea, period1Macd = ta.MACD(np.array([float(x) for x in period1Close]), fastperiod=12, slowperiod=26, signalperiod=9)
     period1Diff = np.nan_to_num(period1Diff)
@@ -148,7 +144,7 @@ def doExecute(symbol, period1, period2):
         if isDiver:
             return
         # 高周期MACD在0轴上吗
-        msg = { 'code': symbol.code, 'signal': 'XB', 'name': '线底背驰', 'period': period1 }
+        msg = { 'code': symbol['code'], 'signal': 'XB', 'name': '线底背驰', 'period': period1 }
         if period2Macd[-1] < 0:
             msg['category'] = '%s MACD零轴下' % period2
         else:
@@ -203,7 +199,7 @@ def doExecute(symbol, period1, period2):
         if isDiver:
             return
         # 高级别MACD在0轴下吗
-        msg = { 'code': symbol.code, 'signal': 'XB', 'name': '线底背驰', 'period': period1 }
+        msg = { 'code': symbol['code'], 'signal': 'XB', 'name': '线底背驰', 'period': period1 }
         if period2Macd[-1] > 0:
             msg['category'] = '%s MACD零轴上' % period2
         else:
@@ -215,8 +211,13 @@ def doExecute(symbol, period1, period2):
 
 
 def saveLog(symbol, period, raw_data, signal, remark):
-    mLog = Strategy3Log(symbol = symbol, period = period, raw_data = raw_data, signal = True, remark = remark)
-    mLog.save()
+    DBPyChanlun['strategy3_log'].insert_one({
+        'symbol': symbol['code'],
+        'period': period,
+        'raw_data': raw_data,
+        'signal': True,
+        'remark': remark
+    })
 
 
 def doCaculate(symbol):
@@ -241,8 +242,8 @@ def doMonitor():
     """
     logger = logging.getLogger()
     logger.info("策略3 监控")
-
-    rx.from_(Symbol.objects()).subscribe(
+    symbol_list = DBPyChanlun['symbol'].find()
+    rx.from_(symbol_list).subscribe(
         on_next = lambda symbol: doCaculate(symbol),
         on_error = lambda e: logger.info("Error Occurred: {0}".format(e)),
         on_completed = lambda: logger.info("Done!"),

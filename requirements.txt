@@ -5,8 +5,6 @@ pydash
 jqdatasdk
 apscheduler
 pymongo
-mongoengine
-flask-mongoengine
 gunicorn
 gevent
 json-logging-py
