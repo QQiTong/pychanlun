@@ -27,7 +27,7 @@ def app():
          ('rqdatad-pro.ricequant.com', 16011))
 
     scheduler = BlockingScheduler({
-        'apscheduler.timezone': 'Asia/shanghai'
+        'apscheduler.timezone': 'Asia/Shanghai'
     })
     atexit.register(lambda: scheduler.shutdown(wait=False))
 
