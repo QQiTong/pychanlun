@@ -5,7 +5,7 @@ BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     SCHEDULER_API_ENABLED = True
-    SCHEDULER_TIMEZONE = 'Asia/shanghai'
+    SCHEDULER_TIMEZONE = 'Asia/Shanghai'
     pass
 
 
