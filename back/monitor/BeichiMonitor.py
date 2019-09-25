@@ -79,7 +79,7 @@ def monitorFuturesAndDigitCoin(type):
         periodList = periodList2
     else:
         symbolList = symbolListDigitCoin
-        periodList = periodList1
+        periodList = periodList2
 
     for i in range(len(symbolList)):
         symbol = symbolList[i]
@@ -206,6 +206,7 @@ def monitorFuturesAndDigitCoin(type):
             threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
         else:
             print("火币出异常了", Exception)
+            time.sleep(5)
             threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
 def sendEmail(msg):

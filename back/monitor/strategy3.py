@@ -126,6 +126,9 @@ def doExecute(symbol, period1, period2):
         isDiver = pydash.find_index(divergence_down[-5:-1], lambda x: x == 1) > -1
         if not isDiver:
             return
+        # 获取最后一次底背驰的时间
+        lastXBIndex = pydash.find_last_index(divergence_down[-5:-1], lambda x: x == 1)
+        lastXB = datetime.utcfromtimestamp(period1Time[lastXBIndex])
         # 高周期是否顶背驰
         divergence_down, divergence_up = divergence.calc(
             period2Time,
@@ -151,8 +154,7 @@ def doExecute(symbol, period1, period2):
             msg['category'] = '%s MACD零轴上' % period2
         # 底背驰信号
         msg = json.dumps(msg, ensure_ascii=False, indent=4)
-        mailResult = mail.send(msg)
-        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg)
+        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg,beichi_time=lastXB)
 
     # 计算死叉
     period1DeadCross = CROSS(period1Dea, period1Diff)
@@ -191,6 +193,10 @@ def doExecute(symbol, period1, period2):
         divergence_down, divergence_up = divergence.calc(period1Time, period1Macd, period1Diff, period1Dea, period1BiProcess.biList, period1DuanResult)
         # 本周期是否有顶背驰
         isDiver = pydash.find_index(divergence_up[-5:-1], lambda x: x == 1) > -1
+
+        # 获取最后一次顶背驰的时间
+        lastXTIndex = pydash.find_last_index(divergence_down[-5:-1], lambda x: x == 1)
+        lastXT = datetime.utcfromtimestamp(period1Time[lastXTIndex])
         if not isDiver:
             return
         # 高周期是否底背驰
@@ -199,25 +205,39 @@ def doExecute(symbol, period1, period2):
         if isDiver:
             return
         # 高级别MACD在0轴下吗
-        msg = { 'code': symbol['code'], 'signal': 'XB', 'name': '线底背驰', 'period': period1 }
+        msg = { 'code': symbol['code'], 'signal': 'XT', 'name': '线顶背驰', 'period': period1 }
         if period2Macd[-1] > 0:
             msg['category'] = '%s MACD零轴上' % period2
         else:
             msg['category'] = '%s MACD零轴下' % period2
         # 底背驰信号
         msg = json.dumps(msg, ensure_ascii=False, indent=4)
-        mailResult = mail.send(msg)
-        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg)
+        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg,beichi_time=lastXT)
 
 
-def saveLog(symbol, period, raw_data, signal, remark):
-    DBPyChanlun['strategy3_log'].insert_one({
-        'symbol': symbol['code'],
-        'period': period,
-        'raw_data': raw_data,
-        'signal': True,
-        'remark': remark
-    })
+def saveLog(symbol, period, raw_data, signal, remark,beichi_time):
+    # 使用beichi_time ,symbol , peroid 作为查询条件, 查询到了更新,查询不到插入,并且发送邮件
+    lastBeichi = DBPyChanlun['strategy3_log'].find_one({'symbol':symbol['code'], 'peroid':period,'beichi_time':beichi_time})
+
+    if lastBeichi is not None:
+        print("test更新", symbol, period, lastBeichi)
+        DBPyChanlun['strategy3_log'] \
+            .find_one_and_update({'symbol': symbol['code'], 'period': period},
+                                 {'$set': {'date_created': datetime.utcnow()}, '$inc': {'update_count': 1}},
+                                 upsert=True)
+    else:
+        print("test新增", symbol, period, lastBeichi)
+        DBPyChanlun['strategy3_log'].insert_one({
+            'symbol': symbol['code'],
+            'period': period,
+            'raw_data': raw_data,
+            'signal': True,
+            'remark': remark,
+            'date_created':datetime.utcnow(),#记录插入的时间
+            'beichi_time':beichi_time, #背驰发生的时间
+            'update_count':1, # 这条背驰记录的更新次数
+        })
+        mailResult = mail.send(remark)
 
 
 def doCaculate(symbol):

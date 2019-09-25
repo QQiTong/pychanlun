@@ -10,12 +10,12 @@ from back.funcat.api import *
 import sys
 from rqdatac import *
 import os
-
+import pymongo
 
 from back.config import config
 import rqdatac as rq
 import requests
-
+from back.db import DBPyChanlun
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
@@ -31,47 +31,54 @@ def getDominantSymbol():
 
 
 def testDb():
-    # with open("../futureSymbol.json", 'r') as load_f:
-    #     load_dict = json.load(load_f)
-    #     print(load_dict)
     # init('license',
     #      'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
     #      ('rqdatad-pro.ricequant.com', 16011))
-    # cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
-    # mongodbSettings = cfg.MONGODB_SETTINGS
-    # connect('pychanlun', host=mongodbSettings['host'], port=mongodbSettings['port'],
-    #         username=mongodbSettings['username'], password=mongodbSettings['password'], authentication_source='admin')
-    # mLog = BeichiLog(symbol="BTC_CQ", period="30min", price=18000, signal=True,remark='XB')
-    # mLog = BeichiLog(symbol="RU2001", period="4hour", price=16001, signal=True,remark='XT')
-    # mLog = BeichiLog(symbol="RU2001", period="4hour", price=16000, signal=True,remark='XT')
-    # mLog.save()
-    symbolList = config['symbolList']
-    print(symbolList)
+
+    # test = DBPyChanlun['strategy3_log']\
+    #     .find_one_and_update({'symbol':'TA2001', 'period':'30m'},
+    #                         {'$set': {'beichi_time': 33},'$inc':{'update_count':1}},
+    #                            upsert=False)
+
+    test = DBPyChanlun['strategy3_log']\
+        .find({'symbol':'TA2001', 'period':'30m'})
+    print(list(test))
+
     return False
 
+
 def testChange():
-    # dominantSymbolList = getDominantSymbol()
-    # symbolChangeMap = {}
+    init('license',
+         'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
+         ('rqdatad-pro.ricequant.com', 16011))
+    dominantSymbolList = getDominantSymbol()
+    symbolChangeMap = {}
     end = datetime.now() + timedelta(1)
-    start = datetime.now() + timedelta(-1)
-    # for i in range(len(dominantSymbolList)):
-    #     item = dominantSymbolList[i]
-    #     df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-    #                       start_date=start, end_date=end)
-    #     df1m = rq.get_price(item, frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
-    #                       start_date=start, end_date=end)
-    #     preday = df1d.iloc[len(df1d)-1, 3]
-    #     today = df1m.iloc[len(df1m)-1, 3]
-    #     change = (today - preday) / preday
-    #     symbolChangeMap[item] = change
-    #     print(change)
+    start = datetime.now() + timedelta(-7)
+    for i in range(len(dominantSymbolList)):
+        item = dominantSymbolList[i]
+        print(item)
+        df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+                            start_date=start, end_date=end)
+        df1m = rq.get_price(item, frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
+                            start_date=start, end_date=end)
+        if df1d is None or df1m is None:
+            change = "--"
+        else:
+            preday = df1d.iloc[0, 3]
+            today = df1m.iloc[0, 3]
+            change = (today - preday) / preday
+        symbolChangeMap[item] = change
+        print(change)
     return False
+
 
 def testProxy():
     proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
     # url = 'http://www.baidu.com'
     # requests.post(url, proxies=proxies, verify=False)  # verify是否验证服务器的SSL证书
     return False
+
 
 def testHuobi():
     proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
@@ -83,10 +90,18 @@ def testHuobi():
     }
     r = requests.get(hbdmUrl, params=payload1, proxies=proxies, verify=False)
     print(json.loads(r.text)['data'])
+def testPydash():
+    a = [1,2 ,1,5]
+    b= pydash.find_index(a,lambda x: x ==1)
+    print(b)
+def testTime():
+    stamp = 1568091600
+    test = datetime.fromtimestamp(stamp)
+    print(test)
 
 def app():
-    # testHuobi()
     testDb()
+
 
 if __name__ == '__main__':
     app()

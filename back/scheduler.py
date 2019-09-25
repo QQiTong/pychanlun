@@ -5,10 +5,10 @@ import os
 import atexit
 
 from rqdatac import *
-from .config import config
+from back.config import config
 
-from .monitor import MarketData
-from .monitor import CleanData
+from back.monitor import MarketData
+from back.monitor import CleanData
 from back.monitor import strategy3
 
 
