@@ -17,12 +17,13 @@ class HuobiDataBackend(DataBackend):
 
     @lru_cache(maxsize=4096)
     def get_price(self, code, start, end, period):
+        proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
         payload = {
             'period': period,
             'symbol': code,
             'size': end - start
         }
-        r = requests.get(self.endpoint, params=payload)
+        r = requests.get(self.endpoint, params=payload,proxies=proxies, verify=False)
         retJson = json.loads(r.text)
         data = retJson['data']
         recdata = []
