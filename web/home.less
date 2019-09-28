@@ -7,27 +7,34 @@
     display: flex;
     justify-content: center;
 }
-.search-container{
+
+.search-container {
     margin: 0 20px;
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    span{
+
+    span {
         font-weight: bold;
     }
-    input{
+
+    input {
         margin-left: 10px;
     }
 }
-.remark-item{
-    width:500px;
-}
-.change-item{
-    width:100px;
+
+.remark-item {
+    width: 500px;
 }
 
-.current-market{
+.change-item {
+    width: 100px;
+}
+
+.current-market {
     margin: 10px 20px;
+    min-height: 810px;
+
     a {
         cursor: pointer;
 
@@ -37,15 +44,54 @@
     }
 }
 
+.th-calc-margin-rate {
+    min-width: 100px;
+}
+
+.td-calc-margin-rate {
+    cursor: pointer;
+}
+
+.calc-account {
+    margin: 10px 20px;
+    border: 1px solid #ccc;
+    padding: 5px 0;
+    .calc-account-container {
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .calc-account-item {
+        display: flex;
+        flex-direction: column;
+        margin-right: 5px;
+
+        .input-account {
+            width: 80px;
+        }
+
+        .radio-container {
+            display: flex;
+            justify-content: flex-start;
+            min-width: 200px;
+        }
+    }
+    .btn-calc{
+        width:100px;
+        height:50px;
+    }
+}
+
 .bold {
     font-weight: bold;
 }
-.light{
-    color:gray !important;
+
+.light {
+    color: gray !important;
 }
 
-.home{
-    color:red;
-    cursor:pointer;
+.home {
+    color: red;
+    cursor: pointer;
     font-weight: bold;
 }

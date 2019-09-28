@@ -6,7 +6,31 @@ var app = new Vue({
         periodList: ['3min', '5min', '15min', '30min', '60min', '4hour', '1day'],
         beichiList: {},
         changeList: {},//涨跌幅
+        marginLevelCompany: 1.125,
         firstRequestDominant: true,
+
+        //start用于仓位管理计算
+        currentMarginRate:null,
+        // 合约乘数
+        contractMultiplier:null,
+        // 账户总额
+        account:null,
+        //开仓价格
+        openPrice:null,
+        //止损价格
+        stopPrice:null,
+        //开仓手数
+        maxOrderCount:null,
+        //资金使用率
+        accountUseRate:null,
+        //最大资金使用率
+        maxAccountUseRate:0.3,
+        //止损系数
+        stopRate:0.03,
+
+
+        //end仓位管理计算
+
         digitCoinsSymbolList: [{
             contract_multiplier: 1,
             de_listed_date: "forever",
@@ -51,7 +75,6 @@ var app = new Vue({
         }
     },
     mounted() {
-        // this.getDominantSymbol()
         this.getBeichiList()
         this.getChangeiList()
         setInterval(() => {
@@ -113,6 +136,39 @@ var app = new Vue({
         },
         jumpToKline(symbol) {
             window.open("./kline.html?symbol=" + symbol)
+        },
+        fillMarginRate(marginRate,contract_multiplier){
+            this.currentMarginRate = Number((marginRate*this.marginLevelCompany).toFixed(2))
+            this.contractMultiplier = contract_multiplier
+        },
+        calcAccount(){
+            // 计算最大能使用的资金
+            let maxAccountUse = this.account *10000* this.maxAccountUseRate
+            // 计算最大止损金额
+            let maxStopMoney = this.account *10000* this.stopRate
+            // 计算1手需要的保证金
+            let perOrderMargin = this.openPrice * this.contractMultiplier * this.currentMarginRate
+
+            // 1手止损的金额
+            let perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier
+
+            // 根据止损算出的开仓手数
+            this.maxOrderCount = Math.floor(maxStopMoney / perOrderStopMoney)
+
+            // 根据最大资金使用率算出的开仓手数
+            let maxOrderCount2 = Math.floor(maxAccountUse / perOrderMargin)
+
+
+
+
+
+            // 计算当前资金使用率
+            this.accountUseRate =  (this.maxOrderCount * perOrderMargin) / this.account / 10000
+            console.log("maxAccountUse:",maxAccountUse," maxStopMoney :",maxStopMoney ," perOrderMargin:",
+                perOrderMargin," maxOrderCount:",this.maxOrderCount," maxOrderCount2:",maxOrderCount2," perOrderStopMoney:",perOrderStopMoney,
+                " accountUseRate:",this.accountUseRate)
         }
+
+
     }
 })

@@ -130,10 +130,10 @@ var app = new Vue({
                         that.sendRequest(symbol, '60min', update)
                         break;
                     case 6:
-                        that.sendRequest(symbol, '4hour', update)
+                        // that.sendRequest(symbol, '4hour', update)
                         break;
                     case 7:
-                        that.sendRequest(symbol, '1day', update)
+                        // that.sendRequest(symbol, '1day', update)
                         break;
                 }
             }
