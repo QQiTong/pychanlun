@@ -216,5 +216,5 @@ def sendEmail(msg):
         print("发送失败")
     else:
         print("发送成功")
-threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
 threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

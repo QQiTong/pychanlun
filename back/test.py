@@ -16,6 +16,7 @@ from back.config import config
 import rqdatac as rq
 import requests
 from back.db import DBPyChanlun
+
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
@@ -40,8 +41,8 @@ def testDb():
     #                         {'$set': {'beichi_time': 33},'$inc':{'update_count':1}},
     #                            upsert=False)
 
-    test = DBPyChanlun['strategy3_log']\
-        .find({'symbol':'TA2001', 'period':'30m'})
+    test = DBPyChanlun['strategy3_log'] \
+        .find({'symbol': 'TA2001', 'period': '30m'})
     print(list(test))
 
     return False
@@ -90,17 +91,110 @@ def testHuobi():
     }
     r = requests.get(hbdmUrl, params=payload1, proxies=proxies, verify=False)
     print(json.loads(r.text)['data'])
+
+
 def testPydash():
-    a = [1,2 ,1,5]
-    b= pydash.find_index(a,lambda x: x ==1)
+    a = [1, 2, 1, 5]
+    b = pydash.find_index(a, lambda x: x == 1)
     print(b)
+
+
 def testTime():
     stamp = 1568091600
     test = datetime.fromtimestamp(stamp)
     print(test)
 
+
+def getBtcData(period):
+    url = "https://www.bitmex.com/api/udf/history"
+    dtime = datetime.now()
+    toDate = int(time.mktime(dtime.timetuple()))
+    target = 0
+    fromDate = 0
+    # 最大是10080 ,但是数量大了前端会卡顿
+    if period == "1m":
+        period = '1'
+        fromDate = toDate - 24 * 60 * 60
+    elif period == "3m":
+        period = '1'
+        target = 3
+        fromDate = toDate - 24 * 60 * 60 * 4
+    elif period == "5m":
+        period = '5'
+        fromDate = toDate - 1000 * 5 * 60
+    elif period == "15m":
+        period = '1'
+        target = 15
+        fromDate = toDate - 2000 * 5 * 60
+
+    elif period == "30m":
+        period = '1'
+        target = 30
+        fromDate = toDate - 2000 * 5 * 60
+    elif period == "60m":
+        period = '60'
+        fromDate = toDate - 10 * 1000 * 5 * 60
+    elif period == "240m":
+        period = '1'
+        target = 240
+        fromDate = toDate - 1000 * 5 * 60
+    elif period == '1d':
+        period = 'D'
+        fromDate = toDate - 1000 * 60 * 60 * 24
+    elif period == '7d':
+        period = 'D'
+        target = 7
+        fromDate = toDate - 1000 * 5 * 60 * 24
+
+    payload = {
+        'resolution': period,
+        'symbol': 'XBTUSD',  # 合约类型，如永续合约:XBTUSD
+        'from': fromDate,
+        'to': toDate
+    }
+    header = {"accept": "*/*", "accept-encoding": "gzip, deflate, br",
+              "accept-language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+              "origin": "https://static.bitmex.com",
+              "referer": "https://static.bitmex.com/",
+              }
+    startTime = datetime.now()
+    proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
+    r = requests.get(url, params=payload, headers=header, proxies=proxies)
+    endTime = datetime.now() - startTime
+    klines = json.loads(r.text)
+    print(target, len(klines))
+
+
+def getBtcData2():
+    url = "https://www.bitmex.com/api/v1/trade/bucketed"
+    proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
+    payload = {
+        "binSize": "1m",
+        "symbol": "XBTUSD",
+        "count": 750,
+        "startTime": "2019-09-01 21:13"
+    }
+    r = requests.get(url, params=payload, proxies=proxies)
+    print(r)
+
+def testBitmex():
+    for i in range(100):
+        getBtcData2()
+        # getBtcData2()
+        # getBtcData2()
+        # getBtcData('1m')
+        # getBtcData('3m')
+        # getBtcData('5m')
+        # getBtcData('15m')
+        # getBtcData('30m')
+    # getBtcData('60m')
+    # getBtcData('240m')
+    # getBtcData('1d')
+    # getBtcData('7d')
+
+
 def app():
-    testDb()
+    testBitmex()
 
 
 if __name__ == '__main__':

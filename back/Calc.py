@@ -248,11 +248,19 @@ class Calc:
         higherDuanProcess = DuanProcess()
         higherDuanResult = higherDuanProcess.handle(duanResult, highList, lowList)
 
+        # 高高一级别段处理
+        higherHigherDuanProcess = DuanProcess()
+        higherHigherDuanResult = higherHigherDuanProcess.handle(higherDuanResult, highList, lowList)
+
         # print("段结果:", len(biResult), len(duanResult))
 
         entanglementList = entanglement.calcEntanglements(timeList, duanResult, biResult, highList, lowList)
         # 段中枢
         entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanResult, duanResult, highList, lowList)
+
+        # 高级别段中枢
+        entanglementHigherHigherList = entanglement.calcEntanglements(timeList, higherHigherDuanResult, higherDuanResult, highList,
+                                                                lowList)
 
         # 中枢处理
         # zhongShu = ZhongShuProcess()
@@ -266,6 +274,7 @@ class Calc:
 
         zsdata, zsflag = getZhongShuData(entanglementList)
         duan_zsdata, duan_zsflag = getZhongShuData(entanglementHigherList)
+        higher_duan_zsdata, higher_duan_zsflag = getZhongShuData(entanglementHigherHigherList)
         # print("中枢数据:", zsdata, zsflag)
 
         # 拼接json数据
@@ -281,6 +290,7 @@ class Calc:
         resJson['duandata'] = getDuanData(biProcess, duanProcess, timeList)
 
         resJson['higherDuanData'] = getDuanData(biProcess, higherDuanProcess, timeList)
+        resJson['higherHigherDuanData'] = getDuanData(biProcess, higherHigherDuanProcess, timeList)
 
         resJson['diff'] = getMacd(closePriceList)[0].tolist()
         resJson['dea'] = getMacd(closePriceList)[1].tolist()
@@ -295,6 +305,8 @@ class Calc:
         resJson['zsflag'] = zsflag
         resJson['duan_zsdata'] = duan_zsdata
         resJson['duan_zsflag'] = duan_zsflag
+        resJson['higher_duan_zsdata'] = higher_duan_zsdata
+        resJson['higher_duan_zsflag'] = higher_duan_zsflag
 
         # 获取大级别macd
         resJson['diffBigLevel'] = getMacd(closeListBigLevel)[0].tolist()
