@@ -1526,7 +1526,7 @@ var app = new Vue({
                     targetPrice = beichiPrice - diffPrice
                     currentPercent = ((beichiPrice - currentPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
-                        stopWinPercent = ((beichiPrice-stopWinPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                        stopWinPercent = ((beichiPrice - stopWinPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                     }
                 }
                 var targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * marginLevel).toFixed(2)
