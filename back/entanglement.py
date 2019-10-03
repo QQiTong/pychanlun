@@ -104,6 +104,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
     }
     for i in range(len(e_list)):
         e = e_list[i]
+        e_next = e_list[i+1] if i+1 < len(e_list) else None
         if e.direction == 1:
             # 上涨中枢，找第一次的拉回
             e_end = e.end
@@ -116,6 +117,8 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                         r = x
                         break
                     if duan_series[x] == -1:
+                        break
+                    if e_next is not None and x >= e_next.end:
                         break
                 if r >= 0:
                     result['sell_zs_huila']['date'].append(time_series[r])
@@ -131,6 +134,8 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                         r = x
                         break
                     if duan_series[x] == -1:
+                        break
+                    if e_next is not None and x >= e_next.end:
                         break
                 if r >= 0:
                     result['buy_zs_huila']['date'].append(time_series[r])
