@@ -614,7 +614,7 @@ var app = new Vue({
                             //     animation: false
                             // },
                             markPoint: {
-                                data: resultData.huilaiValues,
+                                data: resultData.huilaValues,
                                 animation: false
                             },
                             markArea: {
@@ -1205,18 +1205,18 @@ var app = new Vue({
                         {
                             coord: duan_zsdata[i][0],
                             itemStyle: {
-                                color: 'purple',
+                                color: higherUpColor,
                                 borderWidth: '2',
-                                borderColor: 'purple',
+                                borderColor: higherUpColor,
                                 opacity: 0.2,
                             }
                         },
                         {
                             coord: duan_zsdata[i][1],
                             itemStyle: {
-                                color: 'purple',
+                                color: higherUpColor,
                                 borderWidth: '1',
-                                borderColor: 'purple',
+                                borderColor: higherUpColor,
                                 opacity: 0.2,
                             }
                         }
@@ -1226,18 +1226,18 @@ var app = new Vue({
                         {
                             coord: duan_zsdata[i][0],
                             itemStyle: {
-                                color: 'green',
+                                color: higherDownColor,
                                 borderWidth: '1',
-                                borderColor: 'green',
+                                borderColor: higherDownColor,
                                 opacity: 0.2,
                             }
                         },
                         {
                             coord: duan_zsdata[i][1],
                             itemStyle: {
-                                color: 'green',
+                                color: higherDownColor,
                                 borderWidth: '1',
-                                borderColor: 'green',
+                                borderColor: higherDownColor,
                                 opacity: 0.2,
                             }
                         }
@@ -1253,18 +1253,18 @@ var app = new Vue({
                         {
                             coord: higher_duan_zsdata[i][0],
                             itemStyle: {
-                                color: 'pink',
+                                color: higherHigherUpColor,
                                 borderWidth: '2',
-                                borderColor: 'pink',
+                                borderColor: higherHigherUpColor,
                                 opacity: 0.1,
                             }
                         },
                         {
                             coord: higher_duan_zsdata[i][1],
                             itemStyle: {
-                                color: 'pink',
+                                color: higherHigherUpColor,
                                 borderWidth: '1',
-                                borderColor: 'pink',
+                                borderColor: higherHigherUpColor,
                                 opacity: 0.1,
                             }
                         }
@@ -1274,18 +1274,18 @@ var app = new Vue({
                         {
                             coord: higher_duan_zsdata[i][0],
                             itemStyle: {
-                                color: bgColor,
+                                color: higherHigherDownColor,
                                 borderWidth: '1',
-                                borderColor: 'blue',
+                                borderColor: higherHigherDownColor,
                                 opacity: 0.1,
                             }
                         },
                         {
                             coord: higher_duan_zsdata[i][1],
                             itemStyle: {
-                                color: bgColor,
+                                color: higherHigherDownColor,
                                 borderWidth: '1',
-                                borderColor: 'blue',
+                                borderColor: higherHigherDownColor,
                                 opacity: 0.1,
                             }
                         }
@@ -1296,7 +1296,7 @@ var app = new Vue({
 
 
             // 中枢拉回
-            var huilaiValues = [];
+            var huilaValues = [];
             for (var i = 0; i < jsonObj.buy_zs_huila.date.length; i++) {
                 var value = {
                     coord: [jsonObj.buy_zs_huila.date[i], jsonObj.buy_zs_huila.data[i]],
@@ -1318,7 +1318,7 @@ var app = new Vue({
                         //borderWidth: 1,
                     },
                 };
-                huilaiValues.push(value);
+                huilaValues.push(value);
             }
             for (var i = 0; i < jsonObj.sell_zs_huila.date.length; i++) {
                 var value = {
@@ -1341,9 +1341,57 @@ var app = new Vue({
                         //borderWidth: 1,
                     },
                 };
-                huilaiValues.push(value);
+                huilaValues.push(value);
+            }
+            // 大级别中枢拉回
+            for (var i = 0; i < jsonObj.buy_zs_huila_higher.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.buy_zs_huila_higher.date[i], jsonObj.buy_zs_huila_higher.data[i]],
+                    value: jsonObj.buy_zs_huila_higher.data[i],
+                    symbolRotate: -90,
+                    symbol: 'pin',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: higherUpColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
+            }
+            for (var i = 0; i < jsonObj.sell_zs_huila_higher.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.sell_zs_huila_higher.date[i], jsonObj.sell_zs_huila_higher.data[i]],
+                    value: jsonObj.sell_zs_huila_higher.data[i],
+                    symbolRotate: 90,
+                    symbol: 'pin',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: higherDownColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
             }
 
+            
             // 买卖点
             // var mmdValues = [];
             // for (var i = 0; i < jsonObj.buyData.date.length; i++) {
@@ -1788,7 +1836,8 @@ var app = new Vue({
                 // ama: amaValues,
 
                 markLineData: markLineData,
-                huilaiValues: huilaiValues,
+                huilaValues: huilaValues,
+
             };
         }
     }
@@ -1809,6 +1858,13 @@ const upColor = 'red';
 const upBorderColor = 'red';
 const downColor = '#14d0cd';
 const downBorderColor = '#14d0cd';
+
+const higherUpColor = "purple"
+const higherDownColor = "green"
+
+const higherHigherUpColor = "pink"
+const higherHigherDownColor = "blue"
+
 
 const macdUpDarkColor = '#EF5350'
 const macdUpLightColor = '#FFCDD2'
