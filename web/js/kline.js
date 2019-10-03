@@ -130,10 +130,10 @@ var app = new Vue({
                         that.sendRequest(symbol, '60min', update)
                         break;
                     case 6:
-                        that.sendRequest(symbol, '4hour', update)
+                        // that.sendRequest(symbol, '4hour', update)
                         break;
                     case 7:
-                        that.sendRequest(symbol, '1day', update)
+                        // that.sendRequest(symbol, '1day', update)
                         break;
                 }
             }
@@ -1019,6 +1019,11 @@ var app = new Vue({
 
             const duan_zsdata = jsonObj.duan_zsdata;
             const duan_zsflag = jsonObj.duan_zsflag;
+
+            const higher_duan_zsdata = jsonObj.higher_duan_zsdata;
+            const higher_duan_zsflag = jsonObj.higher_duan_zsflag;
+
+
             //
             const macddata = jsonObj.macd;
             const diffdata = jsonObj.diff;
@@ -1188,7 +1193,7 @@ var app = new Vue({
                 }
                 zsvalues.push(value);
             }
-
+            //段中枢
             for (var i = 0; i < duan_zsdata.length; i++) {
                 var value;
                 if (duan_zsflag[i] > 0) {
@@ -1217,18 +1222,18 @@ var app = new Vue({
                         {
                             coord: duan_zsdata[i][0],
                             itemStyle: {
-                                color: 'blue',
+                                color: 'green',
                                 borderWidth: '1',
-                                borderColor: downColor,
+                                borderColor: 'green',
                                 opacity: 0.2,
                             }
                         },
                         {
                             coord: duan_zsdata[i][1],
                             itemStyle: {
-                                color: 'blue',
+                                color: 'green',
                                 borderWidth: '1',
-                                borderColor: downColor,
+                                borderColor: 'green',
                                 opacity: 0.2,
                             }
                         }
@@ -1236,6 +1241,55 @@ var app = new Vue({
                 }
                 zsvalues.push(value);
             }
+            //高级别段中枢
+              for (var i = 0; i < higher_duan_zsdata.length; i++) {
+                var value;
+                if (higher_duan_zsflag[i] > 0) {
+                    value = [
+                        {
+                            coord: higher_duan_zsdata[i][0],
+                            itemStyle: {
+                                color: 'pink',
+                                borderWidth: '2',
+                                borderColor: 'pink',
+                                opacity: 0.1,
+                            }
+                        },
+                        {
+                            coord: higher_duan_zsdata[i][1],
+                            itemStyle: {
+                                color: 'pink',
+                                borderWidth: '1',
+                                borderColor: 'pink',
+                                opacity: 0.1,
+                            }
+                        }
+                    ];
+                } else {
+                    value = [
+                        {
+                            coord: higher_duan_zsdata[i][0],
+                            itemStyle: {
+                                color: bgColor,
+                                borderWidth: '1',
+                                borderColor: 'blue',
+                                opacity: 0.1,
+                            }
+                        },
+                        {
+                            coord: higher_duan_zsdata[i][1],
+                            itemStyle: {
+                                color: bgColor,
+                                borderWidth: '1',
+                                borderColor: 'blue',
+                                opacity: 0.1,
+                            }
+                        }
+                    ];
+                }
+                zsvalues.push(value);
+            }
+
             // 买卖点
             // var mmdValues = [];
             // for (var i = 0; i < jsonObj.buyData.date.length; i++) {
@@ -1472,7 +1526,7 @@ var app = new Vue({
                     targetPrice = beichiPrice - diffPrice
                     currentPercent = ((beichiPrice - currentPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
-                        stopWinPercent = ((beichiPrice-stopWinPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                        stopWinPercent = ((beichiPrice - stopWinPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                     }
                 }
                 var targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * marginLevel).toFixed(2)

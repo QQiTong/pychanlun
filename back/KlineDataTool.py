@@ -247,8 +247,8 @@ class KlineDataTool:
         #                fields=['open', 'high', 'low', 'close', 'volume'])
         end = datetime.now() + timedelta(1)
         timeDeltaMap = {
-            '1m': -7,
-            '3m': -31,
+            '1m': -7*3,
+            '3m': -31*3,
             '5m': -31,
             '15m': -31 * 3,
             '30m': -31 * 4,
