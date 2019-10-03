@@ -109,8 +109,10 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             e_end = e.end
             # 离开中枢后的第一个笔结束
             leave = pydash.index_of(bi_series, 1, e_end)
+            print('up leave', leave)
             if leave >= 0:
-                r = pydash.find_index(e_list, lambda x, y: y > leave and close_series[x] < e.top)
+                r = pydash.find_index(close_series, lambda x, y: y > leave and x < e.top)
+                print('r', r)
                 if r >= 0:
                     result['sell_zs_huila']['date'].append(time_series[r])
                     result['sell_zs_huila']['data'].append(close_series[r])
@@ -118,8 +120,10 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 下跌中枢，找第一次的拉回
             e_end = e.end
             leave = pydash.index_of(bi_series, -1, e_end)
+            print('down leave', leave)
             if leave >= 0:
-                r = pydash.find_index(e_list, lambda x, y: y > leave and close_series[x] > e.bottom)
+                r = pydash.find_index(close_series, lambda x, y: y > leave and x > e.bottom)
+                print('r', r)
                 if r >= 0:
                     result['buy_zs_huila']['date'].append(time_series[r])
                     result['buy_zs_huila']['data'].append(close_series[r])
