@@ -253,8 +253,8 @@ class Calc:
         higherHigherDuanResult = higherHigherDuanProcess.handle(higherDuanResult, highList, lowList)
 
         # print("段结果:", len(biResult), len(duanResult))
-
         entanglementList = entanglement.calcEntanglements(timeList, duanResult, biResult, highList, lowList)
+        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biResult)
         # 段中枢
         entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanResult, duanResult, highList, lowList)
 
@@ -362,6 +362,9 @@ class Calc:
 
         resJson['buyHigherMACDBCData'] = buyMACDBCData2
         resJson['sellHigherMACDBCData'] = sellMACDBCData2
+
+        resJson['buy_zs_huila'] = huila['buy_zs_huila']
+        resJson['sell_zs_huila'] =huila['sell_zs_huila']
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pydash
 
 from .funcat.time_series import (fit_series)
 
@@ -88,3 +89,38 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                     if e_up_list[r].formal:
                         e_list.append(e_up_list[r])
     return e_list
+
+
+def la_hui(e_list, time_series, high_series, low_series, open_series, close_series, bi_series):
+    result = {
+        'buy_zs_huila': {
+            'date': [],
+            'data': []
+        },
+        'sell_zs_huila': {
+            'date': [],
+            'data': []
+        }
+    }
+    for i in range(len(e_list)):
+        e = e_list[i]
+        if e.direction == 1:
+            # 上涨中枢，找第一次的拉回
+            e_end = e.end
+            # 离开中枢后的第一个笔结束
+            leave = pydash.index_of(bi_series, 1, e_end)
+            if leave >= 0:
+                r = pydash.find_index(e_list, lambda x, y: y > leave and close_series[x] < e.top)
+                if r >= 0:
+                    result['sell_zs_huila']['date'].append(time_series[r])
+                    result['sell_zs_huila']['data'].append(close_series[r])
+        if e.direction == -1:
+            # 下跌中枢，找第一次的拉回
+            e_end = e.end
+            leave = pydash.index_of(bi_series, -1, e_end)
+            if leave >= 0:
+                r = pydash.find_index(e_list, lambda x, y: y > leave and close_series[x] > e.bottom)
+                if r >= 0:
+                    result['buy_zs_huila']['date'].append(time_series[r])
+                    result['buy_zs_huila']['data'].append(close_series[r])
+    return result
