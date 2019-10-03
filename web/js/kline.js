@@ -613,6 +613,10 @@ var app = new Vue({
                             //     data: resultData.mmdValues,
                             //     animation: false
                             // },
+                            markPoint: {
+                                data: resultData.huilaiValues,
+                                animation: false
+                            },
                             markArea: {
                                 silent: true,
                                 data: resultData.zsvalues,
@@ -1290,6 +1294,56 @@ var app = new Vue({
                 zsvalues.push(value);
             }
 
+
+            // 中枢拉回
+            var huilaiValues = [];
+            for (var i = 0; i < jsonObj.buy_zs_huila.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.buy_zs_huila.date[i], jsonObj.buy_zs_huila.data[i]],
+                    value: jsonObj.buy_zs_huila.data[i],
+                    symbolRotate: -90,
+                    symbol: 'pin',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: upColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaiValues.push(value);
+            }
+            for (var i = 0; i < jsonObj.sell_zs_huila.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.sell_zs_huila.date[i], jsonObj.sell_zs_huila.data[i]],
+                    value: jsonObj.sell_zs_huila.data[i],
+                    symbolRotate: 90,
+                    symbol: 'pin',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: downColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaiValues.push(value);
+            }
+
             // 买卖点
             // var mmdValues = [];
             // for (var i = 0; i < jsonObj.buyData.date.length; i++) {
@@ -1734,6 +1788,7 @@ var app = new Vue({
                 // ama: amaValues,
 
                 markLineData: markLineData,
+                huilaiValues: huilaiValues,
             };
         }
     }
