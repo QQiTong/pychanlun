@@ -254,7 +254,7 @@ class Calc:
 
         # print("段结果:", len(biResult), len(duanResult))
         entanglementList = entanglement.calcEntanglements(timeList, duanResult, biResult, highList, lowList)
-        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biResult)
+        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biResult, duanResult)
         # 段中枢
         entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanResult, duanResult, highList, lowList)
 

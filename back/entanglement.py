@@ -91,7 +91,7 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
     return e_list
 
 
-def la_hui(e_list, time_series, high_series, low_series, open_series, close_series, bi_series):
+def la_hui(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
     result = {
         'buy_zs_huila': {
             'date': [],
@@ -109,22 +109,30 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             e_end = e.end
             # 离开中枢后的第一个笔结束
             leave = pydash.index_of(bi_series, 1, e_end)
-            print('up leave', leave)
             if leave >= 0:
-                r = pydash.find_index(close_series, lambda x, y: y > leave and x < e.top)
-                print('r', r)
+                r = -1
+                for x in range(leave + 1, len(close_series)):
+                    if close_series[x] < e.top:
+                        r = x
+                        break
+                    if duan_series[x] == -1:
+                        break
                 if r >= 0:
                     result['sell_zs_huila']['date'].append(time_series[r])
-                    result['sell_zs_huila']['data'].append(close_series[r])
+                    result['sell_zs_huila']['data'].append(e.top)
         if e.direction == -1:
             # 下跌中枢，找第一次的拉回
             e_end = e.end
             leave = pydash.index_of(bi_series, -1, e_end)
-            print('down leave', leave)
             if leave >= 0:
-                r = pydash.find_index(close_series, lambda x, y: y > leave and x > e.bottom)
-                print('r', r)
+                r = -1
+                for x in range(leave + 1, len(close_series)):
+                    if close_series[x] > e.bottom:
+                        r = x
+                        break
+                    if duan_series[x] == -1:
+                        break
                 if r >= 0:
                     result['buy_zs_huila']['date'].append(time_series[r])
-                    result['buy_zs_huila']['data'].append(close_series[r])
+                    result['buy_zs_huila']['data'].append(e.bottom)
     return result
