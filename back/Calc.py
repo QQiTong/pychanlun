@@ -257,6 +257,7 @@ class Calc:
         huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biResult, duanResult)
         # 段中枢
         entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanResult, duanResult, highList, lowList)
+        huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanResult, higherDuanResult)
 
         # 高级别段中枢
         entanglementHigherHigherList = entanglement.calcEntanglements(timeList, higherHigherDuanResult, higherDuanResult, highList,
@@ -365,6 +366,8 @@ class Calc:
 
         resJson['buy_zs_huila'] = huila['buy_zs_huila']
         resJson['sell_zs_huila'] =huila['sell_zs_huila']
+        resJson['buy_zs_huila_higher'] = huila_higher['buy_zs_huila']
+        resJson['sell_zs_huila_higher'] =huila_higher['sell_zs_huila']
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)
