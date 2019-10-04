@@ -10,7 +10,11 @@ class Entanglement:
         self.startTime = 0
         self.endTime = 0
         self.top = 0
+        self.zg = 0 #中枢高
         self.bottom = 0
+        self.zd = 0 #中枢低
+        self.gg = 0 #中枢高高
+        self.dd = 0 #中枢低低
         self.direction = 0
         self.formal = False
 
@@ -46,7 +50,11 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                             if e_down_list[-1].top >= e_down_list[-2].bottom and e_down_list[-1].bottom <= e_down_list[-2].top:
                                 # 有重叠区间
                                 e_down_list[-2].top = min(e_down_list[-1].top, e_down_list[-2].top)
+                                e_down_list[-2].zg = min(e_down_list[-1].top, e_down_list[-2].top)
+                                e_down_list[-2].gg = max(e_down_list[-1].top, e_down_list[-2].top)
                                 e_down_list[-2].bottom = max(e_down_list[-1].bottom, e_down_list[-2].bottom)
+                                e_down_list[-2].zd = max(e_down_list[-1].bottom, e_down_list[-2].bottom)
+                                e_down_list[-2].dd = min(e_down_list[-1].bottom, e_down_list[-2].bottom)
                                 e_down_list[-2].end = e_down_list[-1].end
                                 e_down_list[-2].endTime = time_data[e_down_list[-2].end]
                                 e_down_list[-2].formal = True
@@ -80,7 +88,11 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                             if e_up_list[-1].bottom <= e_up_list[-2].top and e_up_list[-1].top >= e_up_list[-2].bottom:
                                 # 有重叠区间
                                 e_up_list[-2].top = min(e_up_list[-1].top, e_up_list[-2].top)
+                                e_up_list[-2].zg = min(e_up_list[-1].top, e_up_list[-2].top)
+                                e_up_list[-2].gg = max(e_up_list[-1].top, e_up_list[-2].top)
                                 e_up_list[-2].bottom = max(e_up_list[-1].bottom, e_up_list[-2].bottom)
+                                e_up_list[-2].zd = max(e_up_list[-1].bottom, e_up_list[-2].bottom)
+                                e_up_list[-2].dd = min(e_up_list[-1].bottom, e_up_list[-2].bottom)
                                 e_up_list[-2].end = e_up_list[-1].end
                                 e_up_list[-2].endTime = time_data[e_up_list[-2].end]
                                 e_up_list[-2].formal = True
@@ -140,4 +152,18 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                 if r >= 0:
                     result['buy_zs_huila']['date'].append(time_series[r])
                     result['buy_zs_huila']['data'].append(e.bottom)
+    return result
+
+
+def tu_potu(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+    result = {
+        'buy_zs_tupo': {
+            'date': [],
+            'data': []
+        },
+        'sell_zs_tupo': {
+            'date': [],
+            'data': []
+        }
+    }
     return result

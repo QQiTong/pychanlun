@@ -11,22 +11,14 @@ class Config:
 
 class DevelopmentConfig(Config):
     MONGODB_SETTINGS = {
-        'host': '120.77.209.6',
-        'port': 27017,
-        'db': 'pychanlun',
-        'username': 'pychanlun',
-        'password': 'chanlun123456'
+        'url': 'mongodb://root:Chanlun123456@dds-wz973894a77e58141351-pub.mongodb.rds.aliyuncs.com:3717,dds-wz973894a77e58142114-pub.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=mgset-16710813'
     }
     pass
 
 
 class ProductionConfig(Config):
     MONGODB_SETTINGS = {
-        'host': 'localhost',
-        'port': 27017,
-        'db': 'pychanlun',
-        'username': '',
-        'password': ''
+        'url': 'mongodb://root:Chanlun123456@dds-wz973894a77e58141351-pub.mongodb.rds.aliyuncs.com:3717,dds-wz973894a77e58142114-pub.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=mgset-16710813'
     }
     pass
 
