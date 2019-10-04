@@ -5,6 +5,7 @@
 import logging
 from datetime import datetime, timedelta
 import time
+import pytz
 import pandas as pd
 import talib as ta
 import numpy as np
@@ -31,7 +32,7 @@ from ..Mail import Mail
 from .. import Duan
 from ..db import DBPyChanlun
 
-
+tz = pytz.timezone('Asia/Shanghai')
 mail = Mail()
 
 def doExecute(symbol, period):
@@ -110,13 +111,20 @@ def doExecute(symbol, period):
         saveLog(symbol, period, raw_data, True, '突破中枢开空', higher_zs_tupo['sell_zs_tupo']['date'][i], higher_zs_tupo['sell_zs_tupo']['data'][i], 'SellShort')
 
 def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position):
-    last_fire = DBPyChanlun['strategy4_log'].find_one({'symbol': symbol['code'], 'peroid': period, 'fire_time': fire_time, 'position': position})
+    last_fire = DBPyChanlun['strategy4_log'].find_one({
+        'symbol': symbol['code'],
+        'peroid': period,
+        'fire_time': fire_time,
+        'position': position
+    })
 
     if last_fire is not None:
         DBPyChanlun['strategy4_log'].find_one_and_update({
             'symbol': symbol['code'], 'period': period, 'fire_time': fire_time, 'position': position
         }, {
             '$set': {
+                'remark': remark,
+                'price': price,
                 'date_created': datetime.utcnow()
             },
             '$inc': {

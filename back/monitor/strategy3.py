@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 import time
+import pytz
 import pandas as pd
 import talib as ta
 import numpy as np
@@ -27,7 +28,7 @@ from ..Mail import Mail
 from .. import Duan
 from ..db import DBPyChanlun
 
-
+tz = pytz.timezone('Asia/Shanghai')
 mail = Mail()
 
 
@@ -129,6 +130,7 @@ def doExecute(symbol, period1, period2):
         # 获取最后一次底背驰的时间
         lastXBIndex = pydash.find_last_index(divergence_down[-5:-1], lambda x: x == 1)
         lastXB = datetime.utcfromtimestamp(period1Time[lastXBIndex])
+        lastXBPrice = period1Low[lastXBIndex]
         # 高周期是否顶背驰
         divergence_down, divergence_up = divergence.calc(
             period2Time,
@@ -147,14 +149,14 @@ def doExecute(symbol, period1, period2):
         if isDiver:
             return
         # 高周期MACD在0轴上吗
-        msg = { 'code': symbol['code'], 'signal': 'XB', 'name': '线底背驰', 'period': period1 }
+        msg = { 'code': symbol['code'], 'signal': 'XB', 'name': '线底背驰', 'period': period1, 'fire_time': lastXB.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S'), 'price': lastXBPrice }
         if period2Macd[-1] < 0:
             msg['category'] = '%s MACD零轴下' % period2
         else:
             msg['category'] = '%s MACD零轴上' % period2
         # 底背驰信号
         msg = json.dumps(msg, ensure_ascii=False, indent=4)
-        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg,beichi_time=lastXB)
+        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg, fire_time=lastXB, price=lastXBPrice, position='BuyLong')
 
     # 计算死叉
     period1DeadCross = CROSS(period1Dea, period1Diff)
@@ -197,6 +199,7 @@ def doExecute(symbol, period1, period2):
         # 获取最后一次顶背驰的时间
         lastXTIndex = pydash.find_last_index(divergence_down[-5:-1], lambda x: x == 1)
         lastXT = datetime.utcfromtimestamp(period1Time[lastXTIndex])
+        lastXTPrice = period1High[lastXTIndex]
         if not isDiver:
             return
         # 高周期是否底背驰
@@ -205,25 +208,35 @@ def doExecute(symbol, period1, period2):
         if isDiver:
             return
         # 高级别MACD在0轴下吗
-        msg = { 'code': symbol['code'], 'signal': 'XT', 'name': '线顶背驰', 'period': period1 }
+        msg = { 'code': symbol['code'], 'signal': 'XT', 'name': '线顶背驰', 'period': period1, 'fire_time': lastXT.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S'), 'price': lastXTPrice}
         if period2Macd[-1] > 0:
             msg['category'] = '%s MACD零轴上' % period2
         else:
             msg['category'] = '%s MACD零轴下' % period2
         # 底背驰信号
         msg = json.dumps(msg, ensure_ascii=False, indent=4)
-        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg, beichi_time=lastXT)
+        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg, fire_time=lastXT, price=lastXTPrice, position='SellShort')
 
 
-def saveLog(symbol, period, raw_data, signal, remark, beichi_time):
-    # 使用beichi_time ,symbol , peroid 作为查询条件, 查询到了更新,查询不到插入,并且发送邮件
-    lastBeichi = DBPyChanlun['strategy3_log'].find_one({'symbol': symbol['code'], 'peroid': period,'beichi_time': beichi_time})
+def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position):
+    last_fire = DBPyChanlun['strategy3_log'].find_one({
+        'symbol': symbol['code'],
+        'peroid': period,
+        'fire_time': fire_time,
+        'position': position
+    })
 
-    if lastBeichi is not None:
-        DBPyChanlun['strategy3_log'] \
-            .find_one_and_update({'symbol': symbol['code'], 'period': period},
-                                 {'$set': {'date_created': datetime.utcnow()}, '$inc': {'update_count': 1}},
-                                 upsert=True)
+    if last_fire is not None:
+        DBPyChanlun['strategy3_log'].find_one_and_update({
+            'symbol': symbol['code'], 'period': period, 'fire_time': fire_time, 'position': position
+        }, {
+            '$set': {
+                'remark': remark,
+                'price': price,
+                'date_created': datetime.utcnow()
+            },
+            '$inc': {'update_count': 1}
+        }, upsert=True)
     else:
         date_created = datetime.utcnow()
         DBPyChanlun['strategy3_log'].insert_one({
@@ -233,10 +246,12 @@ def saveLog(symbol, period, raw_data, signal, remark, beichi_time):
             'signal': True,
             'remark': remark,
             'date_created': date_created,#记录插入的时间
-            'beichi_time': beichi_time, #背驰发生的时间
+            'fire_time': fire_time, #背驰发生的时间,
+            'price': price,
+            'position': position,
             'update_count': 1, # 这条背驰记录的更新次数
         })
-        if (date_created - beichi_time).total_seconds() < 600:
+        if (date_created - fire_time).total_seconds() < 600:
             # 在10分钟内的触发邮件通知
             mailResult = mail.send(remark)
             print(mailResult)
