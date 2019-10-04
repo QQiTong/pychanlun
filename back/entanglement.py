@@ -190,5 +190,5 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                     break
             if r > 0:
                 result['sell_zs_tupo']['date'].append(time_series[r])
-                result['sell_zs_tupo']['date'].append(e.dd)
+                result['sell_zs_tupo']['data'].append(e.dd)
     return result
