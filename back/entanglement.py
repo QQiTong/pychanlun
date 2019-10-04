@@ -155,7 +155,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
     return result
 
 
-def tu_potu(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def tu_po(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
     result = {
         'buy_zs_tupo': {
             'date': [],
@@ -166,4 +166,29 @@ def tu_potu(e_list, time_series, high_series, low_series, open_series, close_ser
             'data': []
         }
     }
+    for i in range(len(e_list)):
+        e = e_list[i]
+        e_next = e_list[i+1] if i+1 < len(e_list) else None
+        if e.direction == 1:
+            r = -1
+            for x in range(e.end+1, len(close_series)):
+                if close_series[x] > e.gg:
+                    r = x
+                    break
+                if duan_series[x] == 1:
+                    break
+            if r > 0:
+                result['buy_zs_tupo']['date'].append(time_series[r])
+                result['buy_zs_tupo']['data'].append(e.gg)
+        if e.direction == -1:
+            r = -1
+            for x in range(e.end+1, len(close_series)):
+                if close_series[x] < e.dd:
+                    r = x
+                    break
+                if duan_series[x] == -1:
+                    break
+            if r > 0:
+                result['sell_zs_tupo']['date'].append(time_series[r])
+                result['sell_zs_tupo']['date'].append(e.dd)
     return result

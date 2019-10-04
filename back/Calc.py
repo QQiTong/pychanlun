@@ -255,9 +255,11 @@ class Calc:
         # print("段结果:", len(biResult), len(duanResult))
         entanglementList = entanglement.calcEntanglements(timeList, duanResult, biResult, highList, lowList)
         huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biResult, duanResult)
+        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biResult, duanResult)
         # 段中枢
         entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanResult, duanResult, highList, lowList)
         huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanResult, higherDuanResult)
+        tupo_higher = entanglement.tu_po(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanResult, higherDuanResult)
 
         # 高级别段中枢
         entanglementHigherHigherList = entanglement.calcEntanglements(timeList, higherHigherDuanResult, higherDuanResult, highList,
@@ -368,6 +370,11 @@ class Calc:
         resJson['sell_zs_huila'] =huila['sell_zs_huila']
         resJson['buy_zs_huila_higher'] = huila_higher['buy_zs_huila']
         resJson['sell_zs_huila_higher'] =huila_higher['sell_zs_huila']
+
+        resJson['buy_zs_tupo'] = tupo['buy_zs_tupo']
+        resJson['sell_zs_tupo'] = tupo['sell_zs_tupo']
+        resJson['buy_zs_tupo_higher'] = tupo_higher['buy_zs_tupo']
+        resJson['sell_zs_tupo_higher'] = tupo_higher['sell_zs_tupo']
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)
