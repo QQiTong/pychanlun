@@ -5,11 +5,12 @@ import os
 import atexit
 
 from rqdatac import *
-from back.config import config
+from .config import config
 
-from back.monitor import MarketData
-from back.monitor import CleanData
-from back.monitor import strategy3
+from .monitor import MarketData
+from .monitor import CleanData
+from .monitor import strategy3
+from .db import DBPyChanlun
 
 
 def app():
@@ -25,9 +26,11 @@ def app():
     })
     atexit.register(lambda: scheduler.shutdown(wait=False))
 
-    scheduler.add_job(MarketData.getMarketData1, 'cron', minute='*/1', hour='*')
-    scheduler.add_job(MarketData.getMarketData2, 'cron', minute='*/5', hour='*')
-    scheduler.add_job(strategy3.doMonitor, 'cron', minute='*/1', hour="*")
+    # 一个标的一个任务下载行情数据
+    symbol_list = DBPyChanlun['symbol'].find()
+    for symbol in symbol_list:
+        scheduler.add_job(MarketData.getMarketData, 'interval', [symbol], seconds=3)
+        scheduler.add_job(strategy3.doCaculate, 'interval', [symbol], seconds=3)
     scheduler.add_job(CleanData.doClean, 'interval', hours = 1)
 
     scheduler.start()

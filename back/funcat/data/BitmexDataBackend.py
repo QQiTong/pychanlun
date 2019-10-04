@@ -10,7 +10,6 @@ class BitmexDataBackend(DataBackend):
     def __init__(self):
         self.endpoint = "https://www.bitmex.com/api/udf/history"
 
-    @lru_cache(maxsize=4096)
     def get_price(self, code, start, end, period):
         payload = {
             'resolution': period,

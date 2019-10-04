@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import pandas as pd
 import talib as ta
@@ -217,27 +217,29 @@ def doExecute(symbol, period1, period2):
 
 def saveLog(symbol, period, raw_data, signal, remark,beichi_time):
     # 使用beichi_time ,symbol , peroid 作为查询条件, 查询到了更新,查询不到插入,并且发送邮件
-    lastBeichi = DBPyChanlun['strategy3_log'].find_one({'symbol':symbol['code'], 'peroid':period,'beichi_time':beichi_time})
+    lastBeichi = DBPyChanlun['strategy3_log'].find_one({'symbol': symbol['code'], 'peroid': period,'beichi_time': beichi_time})
 
     if lastBeichi is not None:
-        print("test更新", symbol, period, lastBeichi)
         DBPyChanlun['strategy3_log'] \
             .find_one_and_update({'symbol': symbol['code'], 'period': period},
                                  {'$set': {'date_created': datetime.utcnow()}, '$inc': {'update_count': 1}},
                                  upsert=True)
     else:
-        print("test新增", symbol, period, lastBeichi)
+        date_created = datetime.utcnow()
         DBPyChanlun['strategy3_log'].insert_one({
             'symbol': symbol['code'],
             'period': period,
             'raw_data': raw_data,
             'signal': True,
             'remark': remark,
-            'date_created':datetime.utcnow(),#记录插入的时间
-            'beichi_time':beichi_time, #背驰发生的时间
-            'update_count':1, # 这条背驰记录的更新次数
+            'date_created': date_created,#记录插入的时间
+            'beichi_time': beichi_time, #背驰发生的时间
+            'update_count': 1, # 这条背驰记录的更新次数
         })
-        mailResult = mail.send(remark)
+        if (date_created - beichi_time).total_seconds() < 600:
+            # 在10分钟内的触发邮件通知
+            mailResult = mail.send(remark)
+            print(mailResult)
 
 
 def doCaculate(symbol):
@@ -255,16 +257,3 @@ def doCaculate(symbol):
         except BaseException as e:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
 
-
-def doMonitor():
-    """
-    策略3 监控
-    """
-    logger = logging.getLogger()
-    logger.info("策略3 监控")
-    symbol_list = DBPyChanlun['symbol'].find()
-    rx.from_(symbol_list).subscribe(
-        on_next = lambda symbol: doCaculate(symbol),
-        on_error = lambda e: logger.info("Error Occurred: {0}".format(e)),
-        on_completed = lambda: logger.info("Done!"),
-    )

@@ -15,7 +15,6 @@ class HuobiDataBackend(DataBackend):
         '''
         self.endpoint = "https://api.hbdm.com/market/history/kline"
 
-    @lru_cache(maxsize=4096)
     def get_price(self, code, start, end, period):
         proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
         payload = {
