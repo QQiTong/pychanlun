@@ -212,10 +212,10 @@ def doExecute(symbol, period1, period2):
             msg['category'] = '%s MACD零轴下' % period2
         # 底背驰信号
         msg = json.dumps(msg, ensure_ascii=False, indent=4)
-        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg,beichi_time=lastXT)
+        saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg, beichi_time=lastXT)
 
 
-def saveLog(symbol, period, raw_data, signal, remark,beichi_time):
+def saveLog(symbol, period, raw_data, signal, remark, beichi_time):
     # 使用beichi_time ,symbol , peroid 作为查询条件, 查询到了更新,查询不到插入,并且发送邮件
     lastBeichi = DBPyChanlun['strategy3_log'].find_one({'symbol': symbol['code'], 'peroid': period,'beichi_time': beichi_time})
 

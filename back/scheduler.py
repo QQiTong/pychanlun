@@ -10,6 +10,7 @@ from .config import config
 from .monitor import MarketData
 from .monitor import CleanData
 from .monitor import strategy3
+from .monitor import strategy4
 from .db import DBPyChanlun
 
 
@@ -31,6 +32,7 @@ def app():
     for symbol in symbol_list:
         scheduler.add_job(MarketData.getMarketData, 'interval', [symbol], seconds=3)
         scheduler.add_job(strategy3.doCaculate, 'interval', [symbol], seconds=3)
+        scheduler.add_job(strategy4.doCaculate, 'interval', [symbol], seconds=3)
     scheduler.add_job(CleanData.doClean, 'interval', hours = 1)
 
     scheduler.start()
