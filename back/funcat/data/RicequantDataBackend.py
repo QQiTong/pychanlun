@@ -18,5 +18,10 @@ class RicequantDataBackend(DataBackend):
         df.set_index("time", inplace=True)
         return df
 
+    @lru_cache(maxsize=1000)
     def get_trading_hours(self, code, trading_date, market='cn'):
         return rq.get_trading_hours(code, trading_date, expected_fmt='datetime', market=market)
+
+    @lru_cache(maxsize=1000)
+    def get_trading_dates(self, start_date, end_date, market='cn'):
+        return rq.get_trading_dates(start_date, end_date, market)
