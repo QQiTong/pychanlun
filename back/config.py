@@ -11,7 +11,8 @@ class Config:
 
 class DevelopmentConfig(Config):
     MONGODB_SETTINGS = {
-        'url': 'mongodb://root:Chanlun123456@dds-wz973894a77e58141351-pub.mongodb.rds.aliyuncs.com:3717,dds-wz973894a77e58142114-pub.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=mgset-16710813'
+        'url': 'mongodb://root:Chanlun123456@dds-wz973894a77e58141351-pub.mongodb.rds.aliyuncs.com:3717,dds-wz973894a77e58142114-pub.mongodb.rds.aliyuncs.com:3717/pychanlun?authSource=admin&replicaSet=mgset-16710813'
+        # 'url': 'mongodb://127.0.0.1:27017/pychanlun'
     }
     pass
 

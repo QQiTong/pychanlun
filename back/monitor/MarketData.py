@@ -4,12 +4,14 @@ import multiprocessing
 import rx
 import asyncio
 import pytz
+import pymongo
 import pandas as pd
 from threading import current_thread
 from datetime import datetime, timedelta
 from rx.scheduler import ThreadPoolScheduler
 from rx.scheduler.eventloop import AsyncIOScheduler
 from rx import operators as ops
+from bson.codec_options import CodecOptions
 
 from ..db import DBPyChanlun
 from ..funcat.data.HuobiDataBackend import HuobiDataBackend
@@ -20,6 +22,8 @@ pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
 
 loop = asyncio.get_event_loop()
 aio_scheduler = AsyncIOScheduler(loop=loop)
+
+tz = pytz.timezone('Asia/Shanghai')
 
 ohlc_dict = { 'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum' }
 
@@ -55,43 +59,91 @@ def getMarketDataHUOBI(symbol):
     df1w = df1d.resample('W', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
     saveData(symbol['code'], df1w, "1w")
 
+def get_market_data_ricequant_incr(symbol, period, period_alias = None):
+    if period_alias is None:
+        period_alias = period
+    logger = logging.getLogger()
+    code = symbol['code']
+    dataBackend = RicequantDataBackend()
+    last = DBPyChanlun['%s_%s' % (code.lower(), period)].with_options(
+        codec_options=CodecOptions(tz_aware=True, tzinfo=tz)
+    ).find().sort('_id', pymongo.DESCENDING).limit(1)
+    last = list(last)
+    if len(last) == 0:
+        last = None
+    else:
+        last = last[0]
+    # 默认先下载30天的数据
+    now_datetime = datetime.now(tz)
+    start_datetime = datetime.now(tz) + timedelta(days=-30)
+    # 今天的开始时间
+    start_of_day = datetime(now_datetime.year, now_datetime.month, now_datetime.day, tzinfo=tz)
+    if last is not None:
+        start_datetime = last['_id']
+    # 如果开始日期不是今天，那么一天一天地下载历史数据
+    if start_datetime < start_of_day:
+        start_datetime = datetime(start_datetime.year, start_datetime.month, start_datetime.day, tzinfo=tz)
+    while start_datetime < start_of_day:
+        end_datetime = datetime(start_datetime.year, start_datetime.month, start_datetime.day, 23, 59, 59, tzinfo=tz)
+        df = dataBackend.get_price(symbol['code'], start_datetime.strftime('%Y-%m-%d'), end_datetime.strftime('%Y-%m-%d'), period)
+        # 带5分钟重叠
+        start_datetime = start_datetime + timedelta(days=1)
+        if df is None:
+            continue
+        logger.info("保存行情数据 %s %s %s" % (code, period_alias, end_datetime))
+        saveData(symbol['code'], df, period_alias)
+
+    end_datetime = datetime(start_datetime.year, start_datetime.month, start_datetime.day, 23, 59, 59, tzinfo=tz)
+    df = dataBackend.get_price(symbol['code'], start_datetime.strftime('%Y-%m-%d'), end_datetime.strftime('%Y-%m-%d'), period)
+    if df is None:
+        return
+    logger.info("保存行情数据 %s %s %s" % (code, period_alias, end_datetime))
+    saveData(symbol['code'], df, period_alias)
 
 def getMarketDataRICEQUANT(symbol):
-    dataBackend = RicequantDataBackend()
-    start = datetime.now() + timedelta(-3)
-    end = datetime.now() + timedelta(1)
-    df1m = dataBackend.get_price(symbol['code'], start, end, '1m')
-    if df1m is None:
-        return
-    saveData(symbol['code'], df1m, "1m")
-    # 3m数据
-    df3m = df1m.resample('3T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    saveData(symbol['code'], df3m, "3m")
-    # 5m数据
-    df5m = df1m.resample('5T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    saveData(symbol['code'], df5m, "5m")
-    # 15m数据
-    df15m = df1m.resample('15T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    saveData(symbol['code'], df15m, "15m")
-    # 30m数据
-    df30m = df1m.resample('30T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    saveData(symbol['code'], df30m, "30m")
-    # 1h数据
-    df1h = df1m.resample('60T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    saveData(symbol['code'], df1h, "1h")
+    get_market_data_ricequant_incr(symbol, '1m')
+    get_market_data_ricequant_incr(symbol, '3m')
+    get_market_data_ricequant_incr(symbol, '5m')
+    get_market_data_ricequant_incr(symbol, '15m')
+    get_market_data_ricequant_incr(symbol, '30m')
+    get_market_data_ricequant_incr(symbol, '60m', '1h')
+    get_market_data_ricequant_incr(symbol, '240m', '4h')
+    get_market_data_ricequant_incr(symbol, '1d')
+    # dataBackend = RicequantDataBackend()
+    # start = datetime.now() + timedelta(-3)
+    # end = datetime.now() + timedelta(1)
+    # df1m = dataBackend.get_price(symbol['code'], start, end, '1m')
+    # if df1m is None:
+    #     return
+    # saveData(symbol['code'], df1m, "1m")
+    # # 3m数据
+    # df3m = df1m.resample('3T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    # saveData(symbol['code'], df3m, "3m")
+    # # 5m数据
+    # df5m = df1m.resample('5T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    # saveData(symbol['code'], df5m, "5m")
+    # # 15m数据
+    # df15m = df1m.resample('15T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    # saveData(symbol['code'], df15m, "15m")
+    # # 30m数据
+    # df30m = df1m.resample('30T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    # saveData(symbol['code'], df30m, "30m")
+    # # 1h数据
+    # df1h = df1m.resample('60T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    # saveData(symbol['code'], df1h, "1h")
 
-    start = datetime.now() + timedelta(-3)
-    end = datetime.now() + timedelta(1)
+    # start = datetime.now() + timedelta(-3)
+    # end = datetime.now() + timedelta(1)
 
-    # 4h数据
-    df4h = dataBackend.get_price(symbol['code'], start, end, '240m')
-    saveData(symbol['code'], df4h, "4h")
-    # 1d数据
-    df1d = dataBackend.get_price(symbol['code'], start, end, '1d')
-    saveData(symbol['code'], df1d, "1d")
-    # 1w数据
-    df1w = df1d.resample('W', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    saveData(symbol['code'], df1w, "1w")
+    # # 4h数据
+    # df4h = dataBackend.get_price(symbol['code'], start, end, '240m')
+    # saveData(symbol['code'], df4h, "4h")
+    # # 1d数据
+    # df1d = dataBackend.get_price(symbol['code'], start, end, '1d')
+    # saveData(symbol['code'], df1d, "1d")
+    # # 1w数据
+    # df1w = df1d.resample('W', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    # saveData(symbol['code'], df1w, "1w")
 
 def getMarketData(symbol):
     logger = logging.getLogger()
@@ -107,7 +159,6 @@ def getMarketData(symbol):
 
 def saveData(code, df, period):
     logger = logging.getLogger()
-    logger.info("保存行情数据 %s %s" % (code, period))
     for time, row in df.iterrows():
         try:
             DBPyChanlun['%s_%s' % (code.lower(), period)].find_one_and_update({

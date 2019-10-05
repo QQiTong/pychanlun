@@ -17,3 +17,6 @@ class RicequantDataBackend(DataBackend):
         df['time'] = df.index.tz_localize('Asia/Shanghai')
         df.set_index("time", inplace=True)
         return df
+
+    def get_trading_hours(self, code, trading_date, market='cn'):
+        return rq.get_trading_hours(code, trading_date, expected_fmt='datetime', market=market)
