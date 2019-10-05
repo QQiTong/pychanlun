@@ -30,9 +30,10 @@ def app():
     # 一个标的一个任务下载行情数据
     symbol_list = DBPyChanlun['symbol'].find()
     for symbol in symbol_list:
-        scheduler.add_job(MarketData.getMarketData, 'interval', [symbol], seconds=3)
-        scheduler.add_job(strategy3.doCaculate, 'interval', [symbol], seconds=3)
-        scheduler.add_job(strategy4.doCaculate, 'interval', [symbol], seconds=3)
+        s = {'code': symbol['code'], 'backend': symbol['backend']}
+        scheduler.add_job(MarketData.getMarketData, 'interval', [s], seconds=15)
+        scheduler.add_job(strategy3.doCaculate, 'interval', [s], seconds=15)
+        scheduler.add_job(strategy4.doCaculate, 'interval', [s], seconds=15)
     scheduler.add_job(CleanData.doClean, 'interval', hours = 1)
 
     scheduler.start()
