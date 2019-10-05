@@ -41,8 +41,9 @@ def dominant():
 # 获取所有背驰列表
 @app.route('/api/get_beichi_list')
 def get_beichi_list():
+    strategyType = request.args.get("strategyType") or "4"
     businessService = BusinessService()
-    beichiListResult = businessService.getBeichiList()
+    beichiListResult = businessService.getBeichiList(strategyType)
     return Response(json.dumps(beichiListResult), mimetype='application/json')
 
 # 获取涨跌幅信息

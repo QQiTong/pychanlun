@@ -1,9 +1,10 @@
 var app = new Vue({
     el: '#app',
     data: {
+        strategyType:4,
         keyword: '',
         futureSymbolList: [],
-        periodList: ['3min', '5min', '15min', '30min', '60min', '4hour', '1day'],
+        periodList: ['3m', '5m', '15m', '30m', '60m'],
         beichiList: {},
         changeList: {},//涨跌幅
         marginLevelCompany: 1.125,
@@ -77,10 +78,10 @@ var app = new Vue({
     mounted() {
         this.getBeichiList()
         this.getChangeiList()
-        setInterval(() => {
-            this.getBeichiList()
-            this.getChangeiList()
-        }, 10000)
+        // setInterval(() => {
+        //     this.getBeichiList()
+        //     this.getChangeiList()
+        // }, 10000)
 
     },
     methods: {
@@ -106,6 +107,7 @@ var app = new Vue({
             let that = this
             $.ajax({
                 url: '/api/get_beichi_list',
+                data: {'strategyType':that.strategyType},
                 type: 'get',
                 success: function (data) {
                     console.log("获取背驰列表:", data)
@@ -167,8 +169,11 @@ var app = new Vue({
             console.log("maxAccountUse:",maxAccountUse," maxStopMoney :",maxStopMoney ," perOrderMargin:",
                 perOrderMargin," maxOrderCount:",this.maxOrderCount," maxOrderCount2:",maxOrderCount2," perOrderStopMoney:",perOrderStopMoney,
                 " accountUseRate:",this.accountUseRate)
+        },
+        switchStrategy(strategyType){
+            this.strategyType = strategyType
+            this.getBeichiList()
         }
-
 
     }
 })
