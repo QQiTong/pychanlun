@@ -178,7 +178,7 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
                 msg['category'] = '%s MACD零轴上' % period2
             # 底背驰信号
             msg = json.dumps(msg, ensure_ascii=False, indent=4)
-            saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg, fire_time=lastXB, price=lastXBPrice, position='BuyLong', is_debug=is_debug)
+            saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg, fire_time=xb, price=xb_price, position='BuyLong', is_debug=is_debug)
     for i in range(len(divergence_up)):
         if divergence_up[i] == 1:
             if pydash.find_index(higher_divergence_down[i-5:i+5], lambda x: x == 1) > -1:
@@ -208,7 +208,7 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
                 msg['category'] = '%s MACD零轴下' % period2
             # 顶背驰信号
             msg = json.dumps(msg, ensure_ascii=False, indent=4)
-            saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg, fire_time=lastXT, price=lastXTPrice, position='SellShort', is_debug=is_debug)
+            saveLog(symbol = symbol, period = period1, raw_data = rawData, signal = True, remark = msg, fire_time=xb, price=xb_price, position='SellShort', is_debug=is_debug)
 
 
 def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position, is_debug):
