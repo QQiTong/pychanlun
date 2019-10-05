@@ -66,7 +66,7 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
     logger = logging.getLogger()
     code = symbol['code']
     dataBackend = RicequantDataBackend()
-    last = DBPyChanlun['%s_%s' % (code.lower(), period)].with_options(
+    last = DBPyChanlun['%s_%s' % (code.lower(), period_alias)].with_options(
         codec_options=CodecOptions(tz_aware=True, tzinfo=tz)
     ).find().sort('_id', pymongo.DESCENDING).limit(1)
     last = list(last)
@@ -97,6 +97,15 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
         if trading_hours is None or len(trading_hours) == 0:
             start_datetime = start_datetime + timedelta(days=1)
             continue
+        if last_datetime is not None:
+            if period_alias == '1d' and last is not None:
+                if last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
+                    start_datetime = start_datetime + timedelta(days=1)
+                    continue
+            else:
+                if last_datetime >= trading_hours[-1][1].replace(tzinfo=tz):
+                    start_datetime = start_datetime + timedelta(days=1)
+                    continue
         df = dataBackend.get_price(symbol['code'], start_datetime.strftime('%Y-%m-%d'), end_datetime.strftime('%Y-%m-%d'), period)
 
         if df is None:
@@ -114,10 +123,14 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
     if trading_hours is None or len(trading_hours) == 0:
         return
     if last_datetime is not None:
-        hours_index = pydash.find_last_index(trading_hours, lambda x: x[1].replace(tzinfo=tz) < now_datetime)
-        if hours_index >= 0:
-            if last_datetime >= trading_hours[hours_index][1].replace(tzinfo=tz):
+        if period_alias == '1d' and last is not None:
+            if last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
                 return
+        else:
+            hours_index = pydash.find_last_index(trading_hours, lambda x: x[1].replace(tzinfo=tz) < now_datetime)
+            if hours_index >= 0:
+                if last_datetime >= trading_hours[hours_index][1].replace(tzinfo=tz):
+                    return
     df = dataBackend.get_price(symbol['code'], start_datetime.strftime('%Y-%m-%d'), end_datetime.strftime('%Y-%m-%d'), period)
     if df is None:
         return
