@@ -17,6 +17,10 @@
 }
 .search-container input {
   margin-left: 10px;
+  margin-right: 10px;
+}
+.search-container button {
+  margin-right: 10px;
 }
 .remark-item {
   width: 500px;
