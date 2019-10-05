@@ -1397,8 +1397,8 @@ var app = new Vue({
                     value: jsonObj.buy_zs_tupo.data[i],
                     symbolRotate: 0,
                     symbol: 'arrow',
+                    symbolSize:30,
                     symbolOffset: [0, '0%'],
-                    symbolSize:10,
                     itemStyle: {
                         normal: {color: upColor, opacity: '0.9'}
                     },
@@ -1421,9 +1421,9 @@ var app = new Vue({
                     coord: [jsonObj.sell_zs_tupo.date[i], jsonObj.sell_zs_tupo.data[i]],
                     value: jsonObj.sell_zs_tupo.data[i],
                     symbolRotate: 180,
+                    symbolSize:30,
                     symbol: 'arrow',
                     symbolOffset: [0, '0%'],
-                    symbolSize:10,
                     itemStyle: {
                         normal: {color: downColor, opacity: '0.9'}
                     },
@@ -1446,6 +1446,7 @@ var app = new Vue({
                     coord: [jsonObj.buy_zs_tupo_higher.date[i], jsonObj.buy_zs_tupo_higher.data[i]],
                     value: jsonObj.buy_zs_tupo_higher.data[i],
                     symbolRotate: 0,
+                    symbolSize:30,
                     symbol: 'arrow',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
@@ -1469,6 +1470,7 @@ var app = new Vue({
                     coord: [jsonObj.sell_zs_tupo_higher.date[i], jsonObj.sell_zs_tupo_higher.data[i]],
                     value: jsonObj.sell_zs_tupo_higher.data[i],
                     symbolRotate: 180,
+                    symbolSize:30,
                     symbol: 'arrow',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
