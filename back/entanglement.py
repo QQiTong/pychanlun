@@ -218,14 +218,16 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
             # 离开中枢后的第一段结束
             leave_end_index = pydash.index_of(duan_series, 1, e.end)
             if leave_end_index >= 0:
-                # 存在3买
+                # 存在强3买
                 buy3 = False
+                resist_index = -1
+                resist_price = 0
                 for j in range(e.end+1, leave_end_index):
-                    if bi_series[j] == -1 and low_series[j] > e.zg:
+                    if bi_series[j] == -1 and low_series[j] > e.gg:
                         buy3 = True
+                        resist_index = j
+                        resist_price = low_series[resist_index]
                 if buy3:
-                    resist_index = pydash.find_last_index(bi_series[:leave_end_index], lambda x: x == -1)
-                    resist_price = low_series[resist_index]
                     for k in range(leave_end_index+1, len(close_series)):
                         if bi_series[k] == -1:
                             break
@@ -240,12 +242,14 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
             if leave_end_index >= 0:
                 # 存在3卖
                 sell3 = False
+                resist_index = -1
+                resist_price = 0
                 for j in range(e.end+1, leave_end_index):
-                    if bi_series[j] == 1 and high_series[j] > e.zd:
+                    if bi_series[j] == 1 and high_series[j] > e.dd:
                         sell3 = True
+                        resist_index = j
+                        resist_price = high_series[resist_index]
                 if sell3:
-                    resist_index = pydash.find_last_index(bi_series[:leave_end_index], lambda x: x == 1)
-                    resist_price = high_series[resist_index]
                     for k in range(leave_end_index+1, len(close_series)):
                         if bi_series[k] == 1:
                             break
