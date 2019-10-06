@@ -200,3 +200,59 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 result['sell_zs_tupo']['date'].append(time_series[r])
                 result['sell_zs_tupo']['data'].append(e.dd)
     return result
+
+def v_reverse(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+    result = {
+        'buy_v_reverse': {
+            'date': [],
+            'data': []
+        },
+        'sell_v_reverse': {
+            'date': [],
+            'data': []
+        }
+    }
+    for i in range(len(e_list)):
+        e = e_list[i]
+        if e.direction == 1:
+            # 离开中枢后的第一段结束
+            leave_end_index = pydash.index_of(duan_series, 1, e.end)
+            if leave_end_index >= 0:
+                # 存在3买
+                buy3 = False
+                for j in range(e.end+1, leave_end_index):
+                    if bi_series[j] == -1 and low_series[j] > e.zg:
+                        buy3 = True
+                if buy3:
+                    resist_index = pydash.find_last_index(bi_series[:leave_end_index], lambda x: x == -1)
+                    resist_price = low_series[resist_index]
+                    for k in range(leave_end_index+1, len(close_series)):
+                        if bi_series[k] == -1:
+                            break
+                        if close_series[k] < resist_price:
+                            if pydash.find_last_index(result['sell_v_reverse']['date'], lambda x: x == time_series[k]) == -1:
+                                result['sell_v_reverse']['date'].append(time_series[k])
+                                result['sell_v_reverse']['data'].append(resist_price)
+                            break
+        if e.direction == -1:
+            # 离开中枢后的第一段结束
+            leave_end_index = pydash.index_of(duan_series, -1, e.end)
+            if leave_end_index >= 0:
+                # 存在3卖
+                sell3 = False
+                for j in range(e.end+1, leave_end_index):
+                    if bi_series[j] == 1 and high_series[j] > e.zd:
+                        sell3 = True
+                if sell3:
+                    resist_index = pydash.find_last_index(bi_series[:leave_end_index], lambda x: x == 1)
+                    resist_price = high_series[resist_index]
+                    for k in range(leave_end_index+1, len(close_series)):
+                        if bi_series[k] == 1:
+                            break
+                        if close_series[k] > resist_price:
+                            if pydash.find_last_index(result['buy_v_reverse']['date'], lambda x: x == time_series[k]) == -1:
+                                result['buy_v_reverse']['date'].append(time_series[k])
+                                result['buy_v_reverse']['data'].append(resist_price)
+                            break
+
+    return result
