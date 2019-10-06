@@ -1489,6 +1489,109 @@ var app = new Vue({
                 };
                 huilaValues.push(value);
             }
+            // 3买卖V反
+            for (var i = 0; i < jsonObj.buy_v_reverse.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.buy_v_reverse.date[i], jsonObj.buy_v_reverse.data[i]],
+                    value: jsonObj.buy_v_reverse.data[i],
+                    symbolRotate: 0,
+                    symbol: 'diamond',
+                    symbolSize:30,
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: upColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
+            }
+
+            for (var i = 0; i < jsonObj.sell_v_reverse.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.sell_v_reverse.date[i], jsonObj.sell_v_reverse.data[i]],
+                    value: jsonObj.sell_v_reverse.data[i],
+                    symbolRotate: 180,
+                    symbolSize:30,
+                    symbol: 'diamond',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: downColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
+            }
+
+             // 3买卖V反 大级别
+            for (var i = 0; i < jsonObj.buy_v_reverse_higher.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.buy_v_reverse_higher.date[i], jsonObj.buy_v_reverse_higher.data[i]],
+                    value: jsonObj.buy_v_reverse_higher.data[i],
+                    symbolRotate: 0,
+                    symbol: 'diamond',
+                    symbolSize:30,
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: higherUpColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
+            }
+
+            for (var i = 0; i < jsonObj.sell_v_reverse_higher.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.sell_v_reverse_higher.date[i], jsonObj.sell_v_reverse_higher.data[i]],
+                    value: jsonObj.sell_v_reverse_higher.data[i],
+                    symbolRotate: 180,
+                    symbolSize:30,
+                    symbol: 'diamond',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: higherDownColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
+            }
+
+
 
 
 
