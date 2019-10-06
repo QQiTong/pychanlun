@@ -59,29 +59,29 @@ class Calc:
         # 火币dm接口参数 本级别和大级别映射
         # 火币深度不够,无法容纳大资金
         self.levelMap = {
-            '1min': '5min',
-            '3min': '15min',
-            '15min': '60min',
-            '60min': '1day',
-            '1day': '1week',
-            '5min': '30min',
-            '30min': '4hour',
-            '4hour': '1week',
-            # '1week': '1week'
+            '1m': '5m',
+            '3m': '15m',
+            '15m': '60m',
+            '60m': '1d',
+            '1d': '1w',
+            '5m': '30m',
+            '30m': '4h',
+            '4h': '1w',
+            # '1w': '1w'
         }
 
         self.huobiPeriodMap = {
-            '1min': '1min',
+            '1m': '1min',
             # 火币没有提供3min的数据 需要合成
-            '3min': '3min',
-            '5min': '5min',
-            '15min': '15min',
-            '60min': '60min',
+            '3m': '3m',
+            '5m': '5min',
+            '15m': '15min',
+            '60m': '60min',
 
-            '30min': '30min',
-            '4hour': '4hour',
-            '1day': '1day',
-            '1week': '1week'
+            '30m': '30min',
+            '4h': '4hour',
+            '1d': '1day',
+            '1w': '1week'
         }
 
         # bitmex 小级别大级别映射
@@ -123,15 +123,15 @@ class Calc:
         }
         #     period参数转换
         self.periodMap = {
-            '1min': '1m',
-            '3min': '3m',
-            '15min': '15m',
-            '60min': '60m',
-            '1day': '1d',
-            '5min': '5m',
-            '30min': '30m',
-            '4hour': '240m',
-            '1week': '3d'
+            '1m': '1m',
+            '3m': '3m',
+            '15m': '15m',
+            '60m': '60m',
+            '1d': '1d',
+            '5m': '5m',
+            '30m': '30m',
+            '4h': '240m',
+            '1w': '3d'
         }
 
     def calcData(self, period, symbol, save=False):

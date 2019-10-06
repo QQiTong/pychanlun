@@ -112,28 +112,28 @@ var app = new Vue({
             for (var i = 0; i < 8; i++) {
                 switch (i) {
                     case 0:
-                        that.sendRequest(symbol, '1min', update)
+                        that.sendRequest(symbol, '1m', update)
                         break;
                     case 1:
-                        that.sendRequest(symbol, '3min', update)
+                        that.sendRequest(symbol, '3m', update)
                         break;
                     case 2:
-                        that.sendRequest(symbol, '5min', update)
+                        that.sendRequest(symbol, '5m', update)
                         break;
                     case 3:
-                        that.sendRequest(symbol, '15min', update)
+                        that.sendRequest(symbol, '15m', update)
                         break;
                     case 4:
-                        that.sendRequest(symbol, '30min', update)
+                        that.sendRequest(symbol, '30m', update)
                         break;
                     case 5:
-                        that.sendRequest(symbol, '60min', update)
+                        that.sendRequest(symbol, '60m', update)
                         break;
                     case 6:
-                        // that.sendRequest(symbol, '4hour', update)
+                        // that.sendRequest(symbol, '4h', update)
                         break;
                     case 7:
-                        // that.sendRequest(symbol, '1day', update)
+                        // that.sendRequest(symbol, '1d', update)
                         break;
                 }
             }
@@ -207,22 +207,22 @@ var app = new Vue({
             let marginLevel = (1 / (that.futureSymbolMap[that.symbol].margin_rate * this.marginLevelCompany)).toFixed(2)
             subText = "杠杆倍数: " + marginLevel + " 每手保证金: " + this.marginPrice + " 合约乘数: " + this.contractMultiplier + " 交易时间: " + that.futureSymbolMap[that.symbol].trading_hours + " 交割时间: " + that.futureSymbolMap[that.symbol].maturity_date
             var currentChart = myChart1
-            if (kxType === '1min') {
+            if (kxType === '1m') {
                 currentChart = myChart1
-            } else if (kxType === '3min') {
+            } else if (kxType === '3m') {
                 currentChart = myChart3
-            } else if (kxType === '5min') {
+            } else if (kxType === '5m') {
                 currentChart = myChart5
-            } else if (kxType === '15min') {
+            } else if (kxType === '15m') {
                 currentChart = myChart15
-            } else if (kxType === '30min') {
+            } else if (kxType === '30m') {
                 currentChart = myChart30
-            } else if (kxType === '60min') {
+            } else if (kxType === '60m') {
                 currentChart = myChart60
-            } else if (kxType === '4hour') {
+            } else if (kxType === '4h') {
                 currentChart = myChart240
-            } else if (kxType === '1day') {
-                currentChart = myChart1Day
+            } else if (kxType === '1d') {
+                currentChart = myChart1d
             }
             var option;
             if (update === 'update') {
@@ -260,10 +260,10 @@ var app = new Vue({
                             // myLevel1: {
                             //     show: true,
                             //     title: '1分钟',
-                            //     icon: 'image://img/icon_1min.png',
+                            //     icon: 'image://img/icon_1m.png',
                             //     onclick: function () {
-                            //         kxType = '1min'
-                            //         option.title.subtext = '1min'
+                            //         kxType = '1m'
+                            //         option.title.subtext = '1m'
                             //
                             //         refresh('refresh');
                             //     }
@@ -271,10 +271,10 @@ var app = new Vue({
                             // myLevel3: {
                             //     show: true,
                             //     title: '3分钟',
-                            //     icon: 'image://img/icon_3min.png',
+                            //     icon: 'image://img/icon_3m.png',
                             //     onclick: function () {
-                            //         kxType = '3min'
-                            //         option.title.subtext = '3min'
+                            //         kxType = '3m'
+                            //         option.title.subtext = '3m'
                             //
                             //         refresh('refresh');
                             //     }
@@ -282,10 +282,10 @@ var app = new Vue({
                             // myLevel5: {
                             //     show: true,
                             //     title: '5分钟',
-                            //     icon: 'image://img/icon_5min.png',
+                            //     icon: 'image://img/icon_5m.png',
                             //     onclick: function () {
-                            //         kxType = '5min'
-                            //         option.title.subtext = '5min'
+                            //         kxType = '5m'
+                            //         option.title.subtext = '5m'
                             //         refresh('refresh');
                             //
                             //     }
@@ -293,20 +293,20 @@ var app = new Vue({
                             // myLevel15: {
                             //     show: true,
                             //     title: '15分钟',
-                            //     icon: 'image://img/icon_15min.png',
+                            //     icon: 'image://img/icon_15m.png',
                             //     onclick: function () {
-                            //         that.kxType = '15min'
-                            //         option.title.subtext = '15min'
+                            //         that.kxType = '15m'
+                            //         option.title.subtext = '15m'
                             //         refresh();
                             //     }
                             // },
                             // myLevel30: {
                             //     show: true,
                             //     title: '30分钟',
-                            //     icon: 'image://img/icon_30min.png',
+                            //     icon: 'image://img/icon_30m.png',
                             //     onclick: function () {
-                            //         that.kxType = '30min'
-                            //         option.title.subtext = '30min'
+                            //         that.kxType = '30m'
+                            //         option.title.subtext = '30m'
                             //         refresh();
                             //     }
                             // },
@@ -315,8 +315,8 @@ var app = new Vue({
                             //         title: '60分钟',
                             //         icon: 'image://img/icon_1h.png',
                             //         onclick: function () {
-                            //             that.kxType = '60min'
-                            //             option.title.subtext = '60min'
+                            //             that.kxType = '60m'
+                            //             option.title.subtext = '60m'
                             //             refresh();
                             //         }
                             //     },
@@ -325,8 +325,8 @@ var app = new Vue({
                             //         title: '240分钟',
                             //         icon: 'image://img/icon_4h.png',
                             //         onclick: function () {
-                            //             that.kxType = '60min'
-                            //             option.title.subtext = '60min'
+                            //             that.kxType = '60m'
+                            //             option.title.subtext = '60m'
                             //             refresh();
                             //         }
                             //     },
@@ -336,8 +336,8 @@ var app = new Vue({
                             //         icon: 'image://img/icon_1d.png',
                             //         background: '#555',
                             //         onclick: function () {
-                            //             that.kxType = '1day'
-                            //             option.title.subtext = '1day'
+                            //             that.kxType = '1d'
+                            //             option.title.subtext = '1d'
                             //             refresh();
                             //         }
                             //     },
@@ -2056,7 +2056,7 @@ const myChart15 = echarts.init(document.getElementById('main15'));
 const myChart30 = echarts.init(document.getElementById('main30'));
 const myChart60 = echarts.init(document.getElementById('main60'));
 const myChart240 = echarts.init(document.getElementById('main240'));
-const myChart1Day = echarts.init(document.getElementById('main1Day'));
+const myChart1d = echarts.init(document.getElementById('main1d'));
 
 const bgColor = '#202529';
 const upColor = 'red';

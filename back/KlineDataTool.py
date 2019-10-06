@@ -153,8 +153,8 @@ class KlineDataTool:
     def getDigitCoinData(self, symbol, period):
         url = hbdmUrl
         target = 0
-        #  火币没有提供3min的k线, 只能用1min进行合成
-        if period == '3min':
+        #  火币没有提供3m的k线, 只能用1m进行合成
+        if period == '3m':
             period = '1min'
             target = 3
         payload = {
