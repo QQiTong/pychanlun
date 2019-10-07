@@ -138,8 +138,8 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                         break
                     if duan_series[x] == -1:
                         break
-                    if e_next is not None and x >= e_next.end:
-                        break
+                    # if e_next is not None and x >= e_next.end:
+                    #     break
                 if r >= 0:
                     result['sell_zs_huila']['date'].append(time_series[r])
                     result['sell_zs_huila']['data'].append(e.top)
@@ -155,8 +155,8 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                         break
                     if duan_series[x] == -1:
                         break
-                    if e_next is not None and x >= e_next.end:
-                        break
+                    # if e_next is not None and x >= e_next.end:
+                    #     break
                 if r >= 0:
                     result['buy_zs_huila']['date'].append(time_series[r])
                     result['buy_zs_huila']['data'].append(e.bottom)
@@ -227,6 +227,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                         buy3 = True
                         resist_index = j
                         resist_price = low_series[resist_index]
+                        break
                 if buy3:
                     for k in range(leave_end_index+1, len(close_series)):
                         if bi_series[k] == -1:
@@ -249,6 +250,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                         sell3 = True
                         resist_index = j
                         resist_price = high_series[resist_index]
+                        break
                 if sell3:
                     for k in range(leave_end_index+1, len(close_series)):
                         if bi_series[k] == 1:
