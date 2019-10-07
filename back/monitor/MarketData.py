@@ -167,7 +167,6 @@ def getMarketDataRICEQUANT(symbol):
 
 def getMarketData(symbol):
     logger = logging.getLogger()
-    logger.info("下载市场行情数据 %s" % symbol['code'])
     df1m = None
     try:
         if symbol['backend'] == 'HUOBI':
