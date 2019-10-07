@@ -27,12 +27,15 @@ from .. import divergence as divergence
 from ..Mail import Mail
 from .. import Duan
 from ..db import DBPyChanlun
+from .MarketData import is_data_feeding
 
 tz = pytz.timezone('Asia/Shanghai')
 mail = Mail()
 
 
 def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
+    if not is_data_feeding(symbol['code'], period1):
+        return
     logger = logging.getLogger()
     logger.info("策略3 %s %s %s" % (symbol['code'], period1, period2))
     if is_debug:
