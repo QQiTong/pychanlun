@@ -51,6 +51,46 @@ def saveBeichiLog(symbol, period, price, signal, remark):
         'remark': remark
     })
 
+def saveStrategy4Log(symbol, period, raw_data, signal, remark, fire_time, price, position):
+    last_fire = DBPyChanlun['strategy4_log'].find_one({
+        'symbol': symbol['code'],
+        'peroid': period,
+        'fire_time': fire_time,
+        'position': position
+    })
+
+    if last_fire is not None:
+        DBPyChanlun['strategy4_log'].find_one_and_update({
+            'symbol': symbol['code'], 'period': period, 'fire_time': fire_time, 'position': position
+        }, {
+            '$set': {
+                'remark': remark,
+                'price': price,
+                'date_created': datetime.utcnow()
+            },
+            '$inc': {
+                'update_count': 1
+            }
+        }, upsert=True)
+    else:
+        date_created = datetime.utcnow()
+        DBPyChanlun['strategy4_log'].insert_one({
+            'symbol': symbol['code'],
+            'period': period,
+            'raw_data': raw_data,
+            'signal': True,
+            'remark': remark,
+            'date_created': date_created,#记录插入的时间
+            'fire_time': fire_time, #背驰发生的时间
+            'price': price,
+            'position': position,
+            'update_count': 1, # 这条背驰记录的更新次数
+        })
+        if (date_created - fire_time).total_seconds() < 600:
+            # 在10分钟内的触发邮件通知
+            mailResult = mail.send("%s %s %s %s" % (symbol['code'], fire_time, price, position))
+            print(mailResult)
+
 def getDominantSymbol():
     symbolList = config['symbolList']
     dominantSymbolList = []
@@ -213,7 +253,7 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
                             sendEmail(msg)
-                            # saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower, remark=lastBuyValue)
+                            saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
 
                     if len(result['sell_zs_huila']['date']) > 0:
                         # notHigher = result['notHigher']
@@ -226,8 +266,7 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeHuilaMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, 'huiLa T',lastSellDate, lastSellData, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            # saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                            #               remark=lastSellValue)
+                            saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
                             sendEmail(msg)
 
                     # 监控高级别回拉
@@ -245,7 +284,8 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
                             sendEmail(msg)
-                            # saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower, remark=lastBuyValue)
+                            saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
+                                             'BuyLong')
 
                     if len(result['sell_zs_huila_higher']['date']) > 0:
                         # notHigher = result['notHigher']
@@ -258,8 +298,8 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeHuilaMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, 'higher huiLa T', lastSellDate, lastSellData, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            # saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                            #               remark=lastSellValue)
+                            saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
+                                             'BuyLong')
                             sendEmail(msg)
             if type == "1":
                 time.sleep(0)

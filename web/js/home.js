@@ -155,13 +155,13 @@ var app = new Vue({
             let perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier
 
             // 根据止损算出的开仓手数
-            this.maxOrderCount = Math.floor(maxStopMoney / perOrderStopMoney)
+            let maxOrderCount1 = Math.floor(maxStopMoney / perOrderStopMoney)
 
             // 根据最大资金使用率算出的开仓手数
             let maxOrderCount2 = Math.floor(maxAccountUse / perOrderMargin)
 
 
-
+            this.maxOrderCount = maxOrderCount1 > maxOrderCount2 ? maxOrderCount2 :maxOrderCount1
 
 
             // 计算当前资金使用率
