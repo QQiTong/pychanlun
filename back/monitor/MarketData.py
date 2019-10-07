@@ -195,3 +195,4 @@ def saveData(code, df, period):
             }, upsert = True)
         except BaseException as e:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
+    set_data_feeding(code, period, True)
