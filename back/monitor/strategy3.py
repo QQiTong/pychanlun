@@ -45,6 +45,10 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
         bars1 = list(bars1)
         bars2 = DBPyChanlun['%s_%s' % (symbol['code'].lower(), period2)].find().sort('_id', pymongo.DESCENDING).limit(1000)
         bars2 = list(bars2)
+        # 对齐时间
+        t = min(bars1[0]['_id'], bars2[0]['_id'])
+        bars1 = pydash.filter_(bars1, lambda x: x['_id'] <= t)
+        bars2 = pydash.filter_(bars2, lambda x: x['_id'] <= t)
     else:
         bars1 = DBPyChanlun['%s_%s' % (symbol['code'].lower(), period1)].find({
             '_id': { '$lte': inspect_time }

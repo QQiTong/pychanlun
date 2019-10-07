@@ -3,10 +3,9 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import sys
 import os
 import atexit
-
+import pydash
 from rqdatac import *
 from .config import config
-
 from .monitor import MarketData
 from .monitor import CleanData
 from .monitor import strategy3
