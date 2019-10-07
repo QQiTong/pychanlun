@@ -31,8 +31,8 @@ def app():
     for symbol in symbol_list:
         s = {'code': symbol['code'], 'backend': symbol['backend']}
         scheduler.add_job(MarketData.getMarketData, 'interval', [s], seconds=15)
-        scheduler.add_job(strategy3.doCaculate, 'interval', [s], seconds=15)
-        scheduler.add_job(strategy4.doCaculate, 'interval', [s], seconds=15)
+        scheduler.add_job(strategy3.doCaculate, 'interval', [s], seconds=60)
+        scheduler.add_job(strategy4.doCaculate, 'interval', [s], seconds=60)
     scheduler.add_job(CleanData.doClean, 'interval', hours = 1)
 
     scheduler.start()
