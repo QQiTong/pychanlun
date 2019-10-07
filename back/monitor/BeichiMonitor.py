@@ -51,45 +51,45 @@ def saveBeichiLog(symbol, period, price, signal, remark):
         'remark': remark
     })
 
-def saveStrategy4Log(symbol, period, raw_data, signal, remark, fire_time, price, position):
-    last_fire = DBPyChanlun['strategy4_log'].find_one({
-        'symbol': symbol['code'],
-        'peroid': period,
-        'fire_time': fire_time,
-        'position': position
-    })
-
-    if last_fire is not None:
-        DBPyChanlun['strategy4_log'].find_one_and_update({
-            'symbol': symbol['code'], 'period': period, 'fire_time': fire_time, 'position': position
-        }, {
-            '$set': {
-                'remark': remark,
-                'price': price,
-                'date_created': datetime.utcnow()
-            },
-            '$inc': {
-                'update_count': 1
-            }
-        }, upsert=True)
-    else:
-        date_created = datetime.utcnow()
-        DBPyChanlun['strategy4_log'].insert_one({
-            'symbol': symbol['code'],
-            'period': period,
-            'raw_data': raw_data,
-            'signal': True,
-            'remark': remark,
-            'date_created': date_created,#记录插入的时间
-            'fire_time': fire_time, #背驰发生的时间
-            'price': price,
-            'position': position,
-            'update_count': 1, # 这条背驰记录的更新次数
-        })
-        if (date_created - fire_time).total_seconds() < 600:
-            # 在10分钟内的触发邮件通知
-            mailResult = mail.send("%s %s %s %s" % (symbol['code'], fire_time, price, position))
-            print(mailResult)
+# def saveStrategy4Log(symbol, period, raw_data, signal, remark, fire_time, price, position):
+#     last_fire = DBPyChanlun['strategy4_log'].find_one({
+#         'symbol': symbol['code'],
+#         'peroid': period,
+#         'fire_time': fire_time,
+#         'position': position
+#     })
+#
+#     if last_fire is not None:
+#         DBPyChanlun['strategy4_log'].find_one_and_update({
+#             'symbol': symbol['code'], 'period': period, 'fire_time': fire_time, 'position': position
+#         }, {
+#             '$set': {
+#                 'remark': remark,
+#                 'price': price,
+#                 'date_created': datetime.utcnow()
+#             },
+#             '$inc': {
+#                 'update_count': 1
+#             }
+#         }, upsert=True)
+#     else:
+#         date_created = datetime.utcnow()
+#         DBPyChanlun['strategy4_log'].insert_one({
+#             'symbol': symbol['code'],
+#             'period': period,
+#             'raw_data': raw_data,
+#             'signal': True,
+#             'remark': remark,
+#             'date_created': date_created,#记录插入的时间
+#             'fire_time': fire_time, #背驰发生的时间
+#             'price': price,
+#             'position': position,
+#             'update_count': 1, # 这条背驰记录的更新次数
+#         })
+#         if (date_created - fire_time).total_seconds() < 600:
+#             # 在10分钟内的触发邮件通知
+#             mailResult = mail.send("%s %s %s %s" % (symbol['code'], fire_time, price, position))
+#             print(mailResult)
 
 def getDominantSymbol():
     symbolList = config['symbolList']
@@ -243,7 +243,7 @@ def monitorFuturesAndDigitCoin(type):
                     if len(result['buy_zs_huila']['date']) > 0:
                         lastBuyDate = result['buy_zs_huila']['date'][-1]
                         lastBuyData = result['buy_zs_huila']['data'][-1]
-                        # notLower = result['notLower']
+                        notLower = result['notLower']
 
                         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
                         # print("current judge:", symbol, period, lastBuyDate, notLower)
@@ -253,10 +253,12 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
                             sendEmail(msg)
-                            saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
+                            # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
+                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                                           remark=msg)
 
                     if len(result['sell_zs_huila']['date']) > 0:
-                        # notHigher = result['notHigher']
+                        notHigher = result['notHigher']
                         lastSellDate = result['sell_zs_huila']['date'][-1]
                         lastSellData = result['sell_zs_huila']['data'][-1]
 
@@ -266,7 +268,9 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeHuilaMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, 'huiLa T',lastSellDate, lastSellData, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
+                            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
+                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+                                          remark=msg)
                             sendEmail(msg)
 
                     # 监控高级别回拉
@@ -274,7 +278,7 @@ def monitorFuturesAndDigitCoin(type):
                     if len(result['buy_zs_huila_higher']['date']) > 0:
                         lastBuyDate = result['buy_zs_huila_higher']['date'][-1]
                         lastBuyData = result['buy_zs_huila_higher']['data'][-1]
-                        # notLower = result['notLower']
+                        notLower = result['notLower']
 
                         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
                         # print("current judge:", symbol, period, lastBuyDate, notLower)
@@ -284,11 +288,13 @@ def monitorFuturesAndDigitCoin(type):
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
                             sendEmail(msg)
-                            saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
-                                             'BuyLong')
+                            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
+                            #                  'BuyLong')
+                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                                          remark=msg)
 
                     if len(result['sell_zs_huila_higher']['date']) > 0:
-                        # notHigher = result['notHigher']
+                        notHigher = result['notHigher']
                         lastSellDate = result['sell_zs_huila_higher']['date'][-1]
                         lastSellData = result['sell_zs_huila_higher']['data'][-1]
 
@@ -298,8 +304,10 @@ def monitorFuturesAndDigitCoin(type):
                             lastTimeHuilaMap[symbol][period] = dateStamp
                             msg = "current:", symbol, period, 'higher huiLa T', lastSellDate, lastSellData, closePrice, time.strftime(
                                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
-                                             'BuyLong')
+                            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
+                            #                  'BuyLong')
+                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+                                          remark=msg)
                             sendEmail(msg)
             if type == "1":
                 time.sleep(0)
