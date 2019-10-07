@@ -165,7 +165,7 @@ var app = new Vue({
 
 
             // 计算当前资金使用率
-            this.accountUseRate =  (this.maxOrderCount * perOrderMargin) / this.account / 10000
+            this.accountUseRate =  ((this.maxOrderCount * perOrderMargin) / this.account / 10000).toFixed(2)
             console.log("maxAccountUse:",maxAccountUse," maxStopMoney :",maxStopMoney ," perOrderMargin:",
                 perOrderMargin," maxOrderCount:",this.maxOrderCount," maxOrderCount2:",maxOrderCount2," perOrderStopMoney:",perOrderStopMoney,
                 " accountUseRate:",this.accountUseRate)
