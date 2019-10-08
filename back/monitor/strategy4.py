@@ -114,6 +114,7 @@ def doExecute(symbol, period):
         saveLog(symbol, period, raw_data, True, '突破中枢开空', higher_zs_tupo['sell_zs_tupo']['date'][i], higher_zs_tupo['sell_zs_tupo']['data'][i], 'SellShort')
 
 def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position):
+    logger = logging.getLogger()
     last_fire = DBPyChanlun['strategy4_log'].find_one({
         'symbol': symbol['code'],
         'peroid': period,
@@ -150,8 +151,15 @@ def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position
         })
         if (date_created - fire_time).total_seconds() < 600:
             # 在10分钟内的触发邮件通知
-            mailResult = mail.send("%s %s %s %s" % (symbol['code'], fire_time, price, position))
-            print(mailResult)
+            msg = {
+                "开仓策略": "策略4",
+                "标的代码": symbol['code'],
+                "触发时间": fire_time.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S'),
+                "触发价格": price,
+                "开仓方向": position
+            }
+            mailResult = mail.send(json.dumps(msg))
+            logger.info(mailResult)
 
 
 def doCaculate(symbol):
