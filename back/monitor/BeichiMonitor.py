@@ -272,13 +272,13 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         # print("current judge:", symbol, period, lastBuyDate, notLower)
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
-            msg = "current:", symbol, period, 'huiLa B', lastBuyDate, lastBuyData, closePrice, time.strftime(
+            msg = "current:", symbol, period, 'huila B', lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             sendEmail(msg)
             # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="huiLa B")
+                          remark="huila B")
 
     if len(result['sell_zs_huila']['date']) > 0:
         notHigher = result['notHigher']
@@ -307,14 +307,14 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
                 # print("current judge:", symbol, period, lastBuyDate, notLower)
                 if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
                     lastTimeHuilaMap[symbol][period] = dateStamp
-                    msg = "current:", symbol, period, 'higher huiLa B', lastBuyDate, lastBuyData, closePrice, time.strftime(
+                    msg = "current:", symbol, period, 'higher huila B', lastBuyDate, lastBuyData, closePrice, time.strftime(
                         '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
                     sendEmail(msg)
                     # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
                     #                  'BuyLong')
                     saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                                  remark="higher huiLa B")
+                                  remark="higher huila B")
 
             if len(result['sell_zs_huila_higher']['date']) > 0:
                 notHigher = result['notHigher']
@@ -410,10 +410,10 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
 '''
 def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVreverseMap, symbol, period,
                                 closePrice):
-    # 监控突破
-    if len(result['buy_zs_tupo']['date']) > 0:
-        lastBuyDate = result['buy_zs_tupo']['date'][-1]
-        lastBuyData = result['buy_zs_tupo']['data'][-1]
+    # 监控V反
+    if len(result['buy_v_reverse']['date']) > 0:
+        lastBuyDate = result['buy_v_reverse']['date'][-1]
+        lastBuyData = result['buy_v_reverse']['data'][-1]
         notLower = result['notLower']
 
         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
@@ -427,10 +427,10 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
                           remark="Vreverse B")
 
-    if len(result['sell_zs_tupo']['date']) > 0:
+    if len(result['sell_v_reverse']['date']) > 0:
         notHigher = result['notHigher']
-        lastSellDate = result['sell_zs_tupo']['date'][-1]
-        lastSellData = result['sell_zs_tupo']['data'][-1]
+        lastSellDate = result['sell_v_reverse']['date'][-1]
+        lastSellData = result['sell_v_reverse']['data'][-1]
 
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastSellDate, notHigher)
@@ -443,11 +443,11 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
                           remark="Vreverse T")
             sendEmail(msg)
 
-            # 监控高级别突破
+            # 监控高级别V反
 
-            if len(result['buy_zs_tupo_higher']['date']) > 0:
-                lastBuyDate = result['buy_zs_tupo_higher']['date'][-1]
-                lastBuyData = result['buy_zs_tupo_higher']['data'][-1]
+            if len(result['buy_v_reverse_higher']['date']) > 0:
+                lastBuyDate = result['buy_v_reverse_higher']['date'][-1]
+                lastBuyData = result['buy_v_reverse_higher']['data'][-1]
                 notLower = result['notLower']
 
                 dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
@@ -461,10 +461,10 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
                     saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
                                   remark="higher Vreverse B")
 
-            if len(result['sell_zs_tupo_higher']['date']) > 0:
+            if len(result['sell_v_reverse_higher']['date']) > 0:
                 notHigher = result['notHigher']
-                lastSellDate = result['sell_zs_tupo_higher']['date'][-1]
-                lastSellData = result['sell_zs_tupo_higher']['data'][-1]
+                lastSellDate = result['sell_v_reverse_higher']['date'][-1]
+                lastSellData = result['sell_v_reverse_higher']['data'][-1]
 
                 dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
                 # print("current judge:", symbol, period, lastSellDate, notHigher)
