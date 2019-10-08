@@ -20,6 +20,7 @@ import os
 import json
 from back.db import DBPyChanlun
 from back.config import config
+
 '''
 背驰监控
 '''
@@ -37,19 +38,21 @@ symbolListDigitCoin = ['BTC_CQ'
 #
 # periodList2 = ['3min', '5min', '15min', '30min', '60min', '4hour']
 periodList = ['3m', '5m', '15m', '30m', '60m']
-periodList2 =['3m', '5m', '15m', '30m', '60m']
+periodList2 = ['3m', '5m', '15m', '30m', '60m']
 
 mail = Mail()
 
+
 def saveBeichiLog(symbol, period, price, signal, remark):
     DBPyChanlun['beichi_log'].insert_one({
-        'date_created': datetime.datetime.now().strftime("%m-%d %H:%M"),
+        'date_created': datetime.now().strftime("%m-%d %H:%M"),
         'symbol': symbol,
         'period': period,
         'price': round(price, 2),
         'signal': signal,
         'remark': remark
     })
+
 
 # def saveStrategy4Log(symbol, period, raw_data, signal, remark, fire_time, price, position):
 #     last_fire = DBPyChanlun['strategy4_log'].find_one({
@@ -100,6 +103,7 @@ def getDominantSymbol():
         dominantSymbolList.append(dominantSymbol)
     return dominantSymbolList
 
+
 # 监控期货
 # timeScope 监控距离现在多少分钟的
 def monitorFuturesAndDigitCoin(type):
@@ -141,180 +145,25 @@ def monitorFuturesAndDigitCoin(type):
                 for j in range(len(periodList)):
                     symbol = symbolList[i]
                     period = periodList[j]
-
                     calc = Calc()
                     # 当前时间戳 秒为单位
                     currentTime = int(time.time())
-
                     lastTime = lastTimeMap[symbol][period]
                     lastHuilaTime = lastTimeHuilaMap[symbol][period]
-
                     diffTime = currentTime - lastTime
-                    print("current:", symbol, period,datetime.now())
-
+                    print("current:", symbol, period, datetime.now())
                     result = calc.calcData(period, symbol)
                     closePrice = result['close'][-1]
-                    # ama
-                    # ama = result['ama']
-                    # if (ama[-3] < ama[-2] and ama[-1] < ama[-2] and period == '60min'):
-                    #     if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                    #         lastTimeMap[symbol][period] = dateStamp
-                    #         msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "down", time.strftime(
-                    #             '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                    #         print(msg)
-                    #         mailResult = mail.send(str(msg))
-                    #         if not mailResult:
-                    #             print("发送失败")
-                    #         else:
-                    #             print("发送成功")
-                    # if (ama[-3] > ama[-2] and ama[-1] > ama[-2] and period == '60min'):
-                    #     if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                    #         msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, "up", time.strftime(
-                    #             '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                    #         print(msg)
-                    #         mailResult = mail.send(str(msg))
-                    #         if not mailResult:
-                    #             print("发送失败")
-                    #         else:
-                    #             print("发送成功")
+                    monitorBeichi(result, lastTime, currentTime, timeScope, lastTimeMap, symbol, period, closePrice)
+                    monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap, symbol, period,closePrice)
 
-                    if len(result['buyMACDBCData']['date']) > 0:
-                        lastBuyDate = result['buyMACDBCData']['date'][-1]
-                        lastBuyValue = result['buyMACDBCData']['value'][-1]
-                        firstBi = result['buyMACDBCData']['stop_win_price'][-1]
-
-                        notLower = result['notLower']
-                        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-                        # print("current judge:", symbol, period, lastBuyDate, notLower)
-                        if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
-                            lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-                            sendEmail(msg)
-                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower, remark=lastBuyValue)
-
-                    if len(result['sellMACDBCData']['date']) > 0:
-                        notHigher = result['notHigher']
-                        lastSellDate = result['sellMACDBCData']['date'][-1]
-                        lastSellValue = result['sellMACDBCData']['value'][-1]
-
-                        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-                        # print("current judge:", symbol, period, lastSellDate, notHigher)
-                        if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
-                            lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher, remark=lastSellValue)
-                            sendEmail(msg)
-
-                    # 监控高级别背驰
-                    if len(result['buyHigherMACDBCData']['date']) > 0:
-                        lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
-                        lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
-
-                        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-                        notLower = result['notLower']
-                        # print("current judge:", symbol, period, lastBuyDate, notLower)
-                        if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
-                            lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            # saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                            #               remark=lastBuyValue)
-                            sendEmail(msg)
-
-                    if len(result['sellHigherMACDBCData']['date']) > 0:
-                        lastSellDate = result['sellHigherMACDBCData']['date'][-1]
-                        lastSellValue = result['sellHigherMACDBCData']['value'][-1]
-                        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-                        notHigher = result['notHigher']
-                        # print("current judge:", symbol, period, lastSellDate, notHigher)
-                        if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
-                            lastTimeMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            # saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                            #               remark=lastSellValue)
-                            sendEmail(msg)
-
-                    # 监控回拉
-
-                    if len(result['buy_zs_huila']['date']) > 0:
-                        lastBuyDate = result['buy_zs_huila']['date'][-1]
-                        lastBuyData = result['buy_zs_huila']['data'][-1]
-                        notLower = result['notLower']
-
-                        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-                        # print("current judge:", symbol, period, lastBuyDate, notLower)
-                        if lastHuilaTime != dateStamp  and currentTime - dateStamp <= 60 * timeScope:
-                            lastTimeHuilaMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period,'huiLa B', lastBuyDate, lastBuyData, closePrice, time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-                            sendEmail(msg)
-                            # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
-                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                                           remark=msg)
-
-                    if len(result['sell_zs_huila']['date']) > 0:
-                        notHigher = result['notHigher']
-                        lastSellDate = result['sell_zs_huila']['date'][-1]
-                        lastSellData = result['sell_zs_huila']['data'][-1]
-
-                        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-                        # print("current judge:", symbol, period, lastSellDate, notHigher)
-                        if lastHuilaTime != dateStamp  and currentTime - dateStamp <= 60 * timeScope:
-                            lastTimeHuilaMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, 'huiLa T',lastSellDate, lastSellData, closePrice, time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
-                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                                          remark=msg)
-                            sendEmail(msg)
-
-                    # 监控高级别回拉
-
-                    if len(result['buy_zs_huila_higher']['date']) > 0:
-                        lastBuyDate = result['buy_zs_huila_higher']['date'][-1]
-                        lastBuyData = result['buy_zs_huila_higher']['data'][-1]
-                        notLower = result['notLower']
-
-                        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-                        # print("current judge:", symbol, period, lastBuyDate, notLower)
-                        if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                            lastTimeHuilaMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, 'higher huiLa B', lastBuyDate, lastBuyData, closePrice, time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-                            sendEmail(msg)
-                            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
-                            #                  'BuyLong')
-                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                                          remark=msg)
-
-                    if len(result['sell_zs_huila_higher']['date']) > 0:
-                        notHigher = result['notHigher']
-                        lastSellDate = result['sell_zs_huila_higher']['date'][-1]
-                        lastSellData = result['sell_zs_huila_higher']['data'][-1]
-
-                        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-                        # print("current judge:", symbol, period, lastSellDate, notHigher)
-                        if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-                            lastTimeHuilaMap[symbol][period] = dateStamp
-                            msg = "current:", symbol, period, 'higher huiLa T', lastSellDate, lastSellData, closePrice, time.strftime(
-                                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
-                            #                  'BuyLong')
-                            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                                          remark=msg)
-                            sendEmail(msg)
             if type == "1":
                 time.sleep(0)
             else:
                 time.sleep(5)
     except Exception:
         logger.info("Error Occurred: {0}".format(traceback.format_exc()))
+        print("Error Occurred: {0}".format(traceback.format_exc()))
         if type == "1":
             print("期货出异常了", Exception)
 
@@ -324,6 +173,151 @@ def monitorFuturesAndDigitCoin(type):
             time.sleep(5)
             threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
 
+
+'''
+监控背驰
+'''
+def monitorBeichi(result, lastTime, currentTime, timeScope, lastTimeMap, symbol, period, closePrice):
+    # 监控背驰
+    if len(result['buyMACDBCData']['date']) > 0:
+        lastBuyDate = result['buyMACDBCData']['date'][-1]
+        lastBuyValue = result['buyMACDBCData']['value'][-1]
+        firstBi = result['buyMACDBCData']['stop_win_price'][-1]
+
+        notLower = result['notLower']
+        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+        # print("current judge:", symbol, period, lastBuyDate, notLower)
+        if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeMap[symbol][period] = dateStamp
+            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+            sendEmail(msg)
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                          remark=lastBuyValue)
+
+    if len(result['sellMACDBCData']['date']) > 0:
+        notHigher = result['notHigher']
+        lastSellDate = result['sellMACDBCData']['date'][-1]
+        lastSellValue = result['sellMACDBCData']['value'][-1]
+
+        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+        # print("current judge:", symbol, period, lastSellDate, notHigher)
+        if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeMap[symbol][period] = dateStamp
+            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+                          remark=lastSellValue)
+            sendEmail(msg)
+
+    # 监控高级别背驰
+    if len(result['buyHigherMACDBCData']['date']) > 0:
+        lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
+        lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
+
+        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+        notLower = result['notLower']
+        # print("current judge:", symbol, period, lastBuyDate, notLower)
+        if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeMap[symbol][period] = dateStamp
+            msg = "current:", symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            # saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+            #               remark=lastBuyValue)
+            sendEmail(msg)
+
+    if len(result['sellHigherMACDBCData']['date']) > 0:
+        lastSellDate = result['sellHigherMACDBCData']['date'][-1]
+        lastSellValue = result['sellHigherMACDBCData']['value'][-1]
+        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+        notHigher = result['notHigher']
+        # print("current judge:", symbol, period, lastSellDate, notHigher)
+        if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeMap[symbol][period] = dateStamp
+            msg = "current:", symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            # saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+            #               remark=lastSellValue)
+            sendEmail(msg)
+
+
+'''
+监控回拉
+'''
+def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap, symbol, period, closePrice):
+    # 监控回拉
+    if len(result['buy_zs_huila']['date']) > 0:
+        lastBuyDate = result['buy_zs_huila']['date'][-1]
+        lastBuyData = result['buy_zs_huila']['data'][-1]
+        notLower = result['notLower']
+
+        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+        # print("current judge:", symbol, period, lastBuyDate, notLower)
+        if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeHuilaMap[symbol][period] = dateStamp
+            msg = "current:", symbol, period, 'huiLa B', lastBuyDate, lastBuyData, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+            sendEmail(msg)
+            # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                          remark="huiLa B")
+
+    if len(result['sell_zs_huila']['date']) > 0:
+        notHigher = result['notHigher']
+        lastSellDate = result['sell_zs_huila']['date'][-1]
+        lastSellData = result['sell_zs_huila']['data'][-1]
+
+        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+        # print("current judge:", symbol, period, lastSellDate, notHigher)
+        if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeHuilaMap[symbol][period] = dateStamp
+            msg = "current:", symbol, period, 'huiLa T', lastSellDate, lastSellData, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+                          remark="huiLa T")
+            sendEmail(msg)
+
+            # 监控高级别回拉
+
+            if len(result['buy_zs_huila_higher']['date']) > 0:
+                lastBuyDate = result['buy_zs_huila_higher']['date'][-1]
+                lastBuyData = result['buy_zs_huila_higher']['data'][-1]
+                notLower = result['notLower']
+
+                dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+                # print("current judge:", symbol, period, lastBuyDate, notLower)
+                if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                    lastTimeHuilaMap[symbol][period] = dateStamp
+                    msg = "current:", symbol, period, 'higher huiLa B', lastBuyDate, lastBuyData, closePrice, time.strftime(
+                        '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+                    sendEmail(msg)
+                    # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
+                    #                  'BuyLong')
+                    saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                                  remark="higher huiLa B")
+
+            if len(result['sell_zs_huila_higher']['date']) > 0:
+                notHigher = result['notHigher']
+                lastSellDate = result['sell_zs_huila_higher']['date'][-1]
+                lastSellData = result['sell_zs_huila_higher']['data'][-1]
+
+                dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+                # print("current judge:", symbol, period, lastSellDate, notHigher)
+                if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+                    lastTimeHuilaMap[symbol][period] = dateStamp
+                    msg = "current:", symbol, period, 'higher huiLa T', lastSellDate, lastSellData, closePrice, time.strftime(
+                        '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                    # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
+                    #                  'BuyLong')
+                    saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+                                  remark="higher huiLa T")
+                    sendEmail(msg)
+
+
 def sendEmail(msg):
     print(msg)
     mailResult = mail.send(str(msg))
@@ -331,5 +325,6 @@ def sendEmail(msg):
         print("发送失败")
     else:
         print("发送成功")
-# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+
+threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
 threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

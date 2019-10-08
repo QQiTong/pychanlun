@@ -192,10 +192,21 @@ def testBitmex():
     # getBtcData('1d')
     # getBtcData('7d')
 
+def saveBeichiLog(symbol, period, price, signal, remark):
+    DBPyChanlun['beichi_log'].insert_one({
+        'date_created': datetime.now().strftime("%m-%d %H:%M"),
+        'symbol': symbol,
+        'period': period,
+        'price': round(price, 2),
+        'signal': signal,
+        'remark': remark
+    })
+def testBeichiDb():
+    saveBeichiLog(symbol="BTC_CQ", period="60m", price=8166, signal=True, remark="测试")
 
 def app():
-    testBitmex()
-
+    # testBitmex()
+    testBeichiDb()
 
 if __name__ == '__main__':
     app()
