@@ -154,9 +154,11 @@ def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position
             msg = {
                 "开仓策略": "策略4",
                 "标的代码": symbol['code'],
+                "触发周期": period,
                 "触发时间": fire_time.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S'),
                 "触发价格": price,
-                "开仓方向": position
+                "开仓方向": position,
+                "备注": remark
             }
             mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
             logger.info(mailResult)
