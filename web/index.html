@@ -114,11 +114,13 @@
                 </td>
                <td :class="{ 'danger':changeList[symbolInfo.order_book_id]>=0,'success':changeList[symbolInfo.order_book_id]<=0}">{{ (changeList[symbolInfo.order_book_id] *100*(1/symbolInfo.margin_rate)).toFixed(2) }}%</td>
                 <td class="td-calc-margin-rate"
-                    @click="fillMarginRate(symbolInfo.margin_rate,symbolInfo.contract_multiplier)">{{ (symbolInfo.margin_rate * marginLevelCompany).toFixed(2) }}
+                    @click="fillMarginRate(symbolInfo)">{{ (symbolInfo.margin_rate * marginLevelCompany).toFixed(2) }}
                     填入
                 </td>
-               <td v-for="periodItem in periodList" :class="{ 'danger':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XB')!=-1 ,
-                 'success':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XT') !=-1}">
+               <td v-for="periodItem in periodList" :class="{ 'danger':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XB')!=-1||
+               beichiList[symbolInfo.order_book_id][periodItem].indexOf('huiLa B')!=-1,
+                 'success':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XT') !=-1||
+                 beichiList[symbolInfo.order_book_id][periodItem].indexOf('huiLa T') !=-1}">
                     <span v-for="item in beichiList[symbolInfo.order_book_id][periodItem]">{{ item }}
                     </span>
                 </td>

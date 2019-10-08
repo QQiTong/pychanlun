@@ -1,7 +1,7 @@
 var app = new Vue({
     el: '#app',
     data: {
-        strategyType:4,
+        strategyType: 4,
         keyword: '',
         futureSymbolList: [],
         periodList: ['3m', '5m', '15m', '30m', '60m'],
@@ -11,29 +11,31 @@ var app = new Vue({
         firstRequestDominant: true,
 
         //start用于仓位管理计算
-        currentMarginRate:null,
+        currentSymbol: null,
+        currentMarginRate: null,
         // 合约乘数
-        contractMultiplier:null,
+        contractMultiplier: null,
         // 账户总额
-        account:null,
+        account: null,
         //开仓价格
-        openPrice:null,
+        openPrice: null,
         //止损价格
-        stopPrice:null,
+        stopPrice: null,
         //开仓手数
-        maxOrderCount:null,
+        maxOrderCount: null,
         //资金使用率
-        accountUseRate:null,
+        accountUseRate: null,
         //最大资金使用率
-        maxAccountUseRate:0.3,
+        maxAccountUseRate: 0.3,
         //止损系数
-        stopRate:0.03,
-
+        stopRate: 0.03,
+        //数字货币手续费 20倍杠杆
+        digitCoinFee:0.012,
 
         //end仓位管理计算
 
         digitCoinsSymbolList: [{
-            contract_multiplier: 1,
+            contract_multiplier: 20,
             de_listed_date: "forever",
             exchange: "HUOBI",
             listed_date: "forever",
@@ -47,9 +49,10 @@ var app = new Vue({
             type: "Future",
             underlying_order_book_id: "null",
             underlying_symbol: "BTC_CQ",
+            feeRate:0.012
         },
             {
-                contract_multiplier: 1,
+                contract_multiplier: 20,
                 de_listed_date: "forever",
                 exchange: "HUOBI",
                 listed_date: "forever",
@@ -107,7 +110,7 @@ var app = new Vue({
             let that = this
             $.ajax({
                 url: '/api/get_beichi_list',
-                data: {'strategyType':that.strategyType},
+                data: {'strategyType': that.strategyType},
                 type: 'get',
                 success: function (data) {
                     console.log("获取背驰列表:", data)
@@ -139,38 +142,68 @@ var app = new Vue({
         jumpToKline(symbol) {
             window.open("./kline.html?symbol=" + symbol)
         },
-        fillMarginRate(marginRate,contract_multiplier){
-            this.currentMarginRate = Number((marginRate*this.marginLevelCompany).toFixed(2))
-            this.contractMultiplier = contract_multiplier
+        fillMarginRate(symbolInfo) {
+            this.currentMarginRate = Number((symbolInfo.margin_rate * this.marginLevelCompany).toFixed(2))
+            this.contractMultiplier = symbolInfo.contract_multiplier
+            this.currentSymbol = symbolInfo.underlying_symbol
         },
-        calcAccount(){
-            // 计算最大能使用的资金
-            let maxAccountUse = this.account *10000* this.maxAccountUseRate
-            // 计算最大止损金额
-            let maxStopMoney = this.account *10000* this.stopRate
-            // 计算1手需要的保证金
-            let perOrderMargin = this.openPrice * this.contractMultiplier * this.currentMarginRate
+        /**
+         *  BTC期货属于币本位， 商品期货属于法币本位,他们的仓位管理计算不一样
+         */
+        calcAccount() {
+            if (this.currentSymbol.indexOf("_CQ")===-1) {
+                // 计算最大能使用的资金
+                let maxAccountUse = this.account * 10000 * this.maxAccountUseRate
+                // 计算最大止损金额
+                let maxStopMoney = this.account * 10000 * this.stopRate
+                // 计算1手需要的保证金
+                let perOrderMargin = this.openPrice * this.contractMultiplier * this.currentMarginRate
 
-            // 1手止损的金额
-            let perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier
+                // 1手止损的金额
+                let perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier
 
-            // 根据止损算出的开仓手数
-            let maxOrderCount1 = Math.floor(maxStopMoney / perOrderStopMoney)
+                // 根据止损算出的开仓手数
+                let maxOrderCount1 = Math.floor(maxStopMoney / perOrderStopMoney)
 
-            // 根据最大资金使用率算出的开仓手数
-            let maxOrderCount2 = Math.floor(maxAccountUse / perOrderMargin)
-
-
-            this.maxOrderCount = maxOrderCount1 > maxOrderCount2 ? maxOrderCount2 :maxOrderCount1
+                // 根据最大资金使用率算出的开仓手数
+                let maxOrderCount2 = Math.floor(maxAccountUse / perOrderMargin)
 
 
-            // 计算当前资金使用率
-            this.accountUseRate =  ((this.maxOrderCount * perOrderMargin) / this.account / 10000).toFixed(2)
-            console.log("maxAccountUse:",maxAccountUse," maxStopMoney :",maxStopMoney ," perOrderMargin:",
-                perOrderMargin," maxOrderCount:",this.maxOrderCount," maxOrderCount2:",maxOrderCount2," perOrderStopMoney:",perOrderStopMoney,
-                " accountUseRate:",this.accountUseRate)
+                this.maxOrderCount = maxOrderCount1 > maxOrderCount2 ? maxOrderCount2 : maxOrderCount1
+
+
+                // 计算当前资金使用率
+                this.accountUseRate = ((this.maxOrderCount * perOrderMargin) / this.account / 10000).toFixed(2)
+                console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " perOrderMargin:",
+                    perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", perOrderStopMoney,
+                    " accountUseRate:", this.accountUseRate)
+            }else{
+                 // 计算最大能使用的资金
+                let maxAccountUse = this.account * 10000 * this.maxAccountUseRate
+                // 计算最大止损金额
+                let maxStopMoney = this.account * 10000 * this.stopRate
+
+
+                // 止损的比例
+                let totalStopRate = (Math.abs(this.openPrice - this.stopPrice)/this.openPrice+this.digitCoinFee) * (1/this.currentMarginRate)
+                // 根据止损算出的开仓手数
+                let maxOrderCount1 =  Math.floor(maxStopMoney  / totalStopRate / 100)
+
+                 // 根据最大资金使用率算出的开仓手数
+                let maxOrderCount2 = Math.floor(maxAccountUse / totalStopRate / 100)
+                this.maxOrderCount = maxOrderCount1 > maxOrderCount2 ? maxOrderCount2 : maxOrderCount1
+                // 计算n手需要的保证金
+                let totalMargin = this.maxOrderCount * 100 / (1/this.margin_rate) / this.openPrice
+                // 考虑到滑点等情况 ，手续费全部按 吃单成交 20倍杠杆买卖各0.6% 共1.2%
+                console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " totalStopRate:",
+                    totalStopRate, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, "totalMargin:", totalMargin,
+                    " accountUseRate:", this.accountUseRate)
+
+            }
+
+
         },
-        switchStrategy(strategyType){
+        switchStrategy(strategyType) {
             this.strategyType = strategyType
             this.getBeichiList()
         }
