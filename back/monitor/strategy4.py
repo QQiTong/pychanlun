@@ -158,7 +158,7 @@ def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position
                 "触发价格": price,
                 "开仓方向": position
             }
-            mailResult = mail.send(json.dumps(msg))
+            mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
             logger.info(mailResult)
 
 
