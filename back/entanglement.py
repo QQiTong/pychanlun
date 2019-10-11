@@ -52,16 +52,20 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                         if len(e_down_list) > 1:
                             # 看是否有重叠区间
                             if e_down_list[-1].top >= e_down_list[-2].bottom and e_down_list[-1].bottom <= e_down_list[-2].top:
-                                # 有重叠区间
-                                e_down_list[-2].top = min(e_down_list[-1].top, e_down_list[-2].top)
-                                e_down_list[-2].zg = min(e_down_list[-1].zg, e_down_list[-2].zg)
-                                e_down_list[-2].gg = max(e_down_list[-1].gg, e_down_list[-2].gg)
-                                e_down_list[-2].bottom = max(e_down_list[-1].bottom, e_down_list[-2].bottom)
-                                e_down_list[-2].zd = max(e_down_list[-1].zd, e_down_list[-2].zd)
-                                e_down_list[-2].dd = min(e_down_list[-1].dd, e_down_list[-2].dd)
-                                e_down_list[-2].end = e_down_list[-1].end
-                                e_down_list[-2].endTime = time_data[e_down_list[-2].end]
-                                e_down_list[-2].formal = True
+                            # 有重叠区间
+                                if not e_down_list[-2].formal:
+                                    e_down_list[-2].top = min(e_down_list[-1].top, e_down_list[-2].top)
+                                    e_down_list[-2].zg = min(e_down_list[-1].zg, e_down_list[-2].zg)
+                                    e_down_list[-2].gg = max(e_down_list[-1].gg, e_down_list[-2].gg)
+                                    e_down_list[-2].bottom = max(e_down_list[-1].bottom, e_down_list[-2].bottom)
+                                    e_down_list[-2].zd = max(e_down_list[-1].zd, e_down_list[-2].zd)
+                                    e_down_list[-2].dd = min(e_down_list[-1].dd, e_down_list[-2].dd)
+                                    e_down_list[-2].end = e_down_list[-1].end
+                                    e_down_list[-2].endTime = time_data[e_down_list[-2].end]
+                                    e_down_list[-2].formal = True
+                                else:
+                                    e_down_list[-2].end = e_down_list[-1].end
+                                    e_down_list[-2].endTime = time_data[e_down_list[-2].end]
                                 e_down_list.pop()
                 for r in range(len(e_down_list)):
                     if e_down_list[r].formal:
@@ -94,16 +98,20 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                         if len(e_up_list) > 1:
                             # 看是否有重叠区间
                             if e_up_list[-1].bottom <= e_up_list[-2].top and e_up_list[-1].top >= e_up_list[-2].bottom:
-                                # 有重叠区间
-                                e_up_list[-2].top = min(e_up_list[-1].top, e_up_list[-2].top)
-                                e_up_list[-2].zg = min(e_up_list[-1].zg, e_up_list[-2].zg)
-                                e_up_list[-2].gg = max(e_up_list[-1].gg, e_up_list[-2].gg)
-                                e_up_list[-2].bottom = max(e_up_list[-1].bottom, e_up_list[-2].bottom)
-                                e_up_list[-2].zd = max(e_up_list[-1].zd, e_up_list[-2].zd)
-                                e_up_list[-2].dd = min(e_up_list[-1].dd, e_up_list[-2].dd)
-                                e_up_list[-2].end = e_up_list[-1].end
-                                e_up_list[-2].endTime = time_data[e_up_list[-2].end]
-                                e_up_list[-2].formal = True
+                            # 有重叠区间
+                                if not e_up_list[-2].formal:
+                                    e_up_list[-2].top = min(e_up_list[-1].top, e_up_list[-2].top)
+                                    e_up_list[-2].zg = min(e_up_list[-1].zg, e_up_list[-2].zg)
+                                    e_up_list[-2].gg = max(e_up_list[-1].gg, e_up_list[-2].gg)
+                                    e_up_list[-2].bottom = max(e_up_list[-1].bottom, e_up_list[-2].bottom)
+                                    e_up_list[-2].zd = max(e_up_list[-1].zd, e_up_list[-2].zd)
+                                    e_up_list[-2].dd = min(e_up_list[-1].dd, e_up_list[-2].dd)
+                                    e_up_list[-2].end = e_up_list[-1].end
+                                    e_up_list[-2].endTime = time_data[e_up_list[-2].end]
+                                    e_up_list[-2].formal = True
+                                else:
+                                    e_up_list[-2].end = e_up_list[-1].end
+                                    e_up_list[-2].endTime = time_data[e_up_list[-2].end]
                                 e_up_list.pop()
                 for r in range(len(e_up_list)):
                     if e_up_list[r].formal:
