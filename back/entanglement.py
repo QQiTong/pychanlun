@@ -64,6 +64,8 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                                     e_down_list[-2].endTime = time_data[e_down_list[-2].end]
                                     e_down_list[-2].formal = True
                                 else:
+                                    e_down_list[-2].gg = max(e_down_list[-1].gg, e_down_list[-2].gg)
+                                    e_down_list[-2].dd = min(e_down_list[-1].dd, e_down_list[-2].dd)
                                     e_down_list[-2].end = e_down_list[-1].end
                                     e_down_list[-2].endTime = time_data[e_down_list[-2].end]
                                 e_down_list.pop()
@@ -110,6 +112,8 @@ def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                                     e_up_list[-2].endTime = time_data[e_up_list[-2].end]
                                     e_up_list[-2].formal = True
                                 else:
+                                    e_up_list[-2].gg = max(e_up_list[-1].gg, e_up_list[-2].gg)
+                                    e_up_list[-2].dd = min(e_up_list[-1].dd, e_up_list[-2].dd)
                                     e_up_list[-2].end = e_up_list[-1].end
                                     e_up_list[-2].endTime = time_data[e_up_list[-2].end]
                                 e_up_list.pop()
