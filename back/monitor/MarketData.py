@@ -105,7 +105,8 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
         if trading_dates is None or len(trading_dates) == 0:
             start_datetime = start_datetime + timedelta(days=1)
             continue
-        trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'))
+        magic = int(now_datetime.timestamp() / 1800)
+        trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'), magic=magic)
         if trading_hours is None or len(trading_hours) == 0:
             start_datetime = start_datetime + timedelta(days=1)
             continue
@@ -132,7 +133,8 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
     if trading_dates is None or len(trading_dates) == 0:
         set_data_feeding(symbol['code'], period_alias, False)
         return
-    trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'))
+    magic = int(now_datetime.timestamp() / 1800)
+    trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'), magic=magic)
     if trading_hours is None or len(trading_hours) == 0:
         set_data_feeding(symbol['code'], period_alias, False)
         return

@@ -235,12 +235,12 @@ def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position
             '$set': {
                 'remark': remark,
                 'price': price,
-                'date_created': datetime.utcnow()
+                'date_created': datetime.now(tz)
             },
             '$inc': {'update_count': 1}
         }, upsert=True)
     else:
-        date_created = datetime.utcnow()
+        date_created = datetime.now(tz)
         DBPyChanlun['strategy3_log'].insert_one({
             'symbol': symbol['code'],
             'period': period,

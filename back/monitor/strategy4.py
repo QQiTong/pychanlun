@@ -19,6 +19,8 @@ import pydash
 import json
 import traceback
 
+from bson.codec_options import CodecOptions
+
 from ..funcat.data.HuobiDataBackend import HuobiDataBackend
 from ..funcat.utils import get_int_date
 from ..funcat.api import *
@@ -42,7 +44,9 @@ def doExecute(symbol, period):
     logger = logging.getLogger()
     logger.info("策略4 %s %s" % (symbol['code'], period))
     raw_data = {}
-    bars = DBPyChanlun['%s_%s' % (symbol['code'].lower(), period)].find().sort('_id', pymongo.DESCENDING).limit(1000)
+    bars = DBPyChanlun['%s_%s' % (symbol['code'].lower(), period)].with_options(
+        codec_options=CodecOptions(tz_aware=True, tzinfo=tz)
+    ).find().sort('_id', pymongo.DESCENDING).limit(1000)
     bars = list(bars)
     if len(bars) < 13:
         return
@@ -115,7 +119,9 @@ def doExecute(symbol, period):
 
 def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position):
     logger = logging.getLogger()
-    last_fire = DBPyChanlun['strategy4_log'].find_one({
+    last_fire = DBPyChanlun['strategy4_log'].with_options(
+        codec_options=CodecOptions(tz_aware=True, tzinfo=tz)
+    ).find_one({
         'symbol': symbol['code'],
         'peroid': period,
         'fire_time': fire_time,
@@ -123,20 +129,22 @@ def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position
     })
 
     if last_fire is not None:
-        DBPyChanlun['strategy4_log'].find_one_and_update({
+        DBPyChanlun['strategy4_log'].with_options(
+            codec_options=CodecOptions(tz_aware=True, tzinfo=tz)
+        ).find_one_and_update({
             'symbol': symbol['code'], 'period': period, 'fire_time': fire_time, 'position': position
         }, {
             '$set': {
                 'remark': remark,
                 'price': price,
-                'date_created': datetime.utcnow()
+                'date_created': datetime.now(tz)
             },
             '$inc': {
                 'update_count': 1
             }
         }, upsert=True)
     else:
-        date_created = datetime.utcnow()
+        date_created = datetime.now(tz)
         DBPyChanlun['strategy4_log'].insert_one({
             'symbol': symbol['code'],
             'period': period,
