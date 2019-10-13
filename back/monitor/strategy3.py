@@ -224,15 +224,15 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
 
 def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position, is_debug):
     logger = logging.getLogger()
-    last_fire = DBPyChanlun['strategy3_log'].find_one({
+    last_fire = DBPyChanlun['strategy3_log'].find({
         'symbol': symbol['code'],
-        'peroid': period,
+        'period': period,
         'fire_time': fire_time,
         'position': position
-    })
+    }).count()
     if is_debug:
         logger.debug(last_fire)
-    if last_fire is not None:
+    if last_fire > 0:
         DBPyChanlun['strategy3_log'].find_one_and_update({
             'symbol': symbol['code'], 'period': period, 'fire_time': fire_time, 'position': position
         }, {

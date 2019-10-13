@@ -119,16 +119,13 @@ def doExecute(symbol, period):
 
 def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position):
     logger = logging.getLogger()
-    last_fire = DBPyChanlun['strategy4_log'].with_options(
-        codec_options=CodecOptions(tz_aware=True, tzinfo=tz)
-    ).find_one({
+    last_fire = DBPyChanlun['strategy4_log'].find({
         'symbol': symbol['code'],
-        'peroid': period,
+        'period': period,
         'fire_time': fire_time,
         'position': position
-    })
-
-    if last_fire is not None:
+    }).count()
+    if last_fire > 0:
         DBPyChanlun['strategy4_log'].with_options(
             codec_options=CodecOptions(tz_aware=True, tzinfo=tz)
         ).find_one_and_update({
