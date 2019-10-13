@@ -73,7 +73,8 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
     period1Close = []
     len1 = len(bars1)
     for i in range(len1 - 1, -1, -1):
-        period1Time.append(int(time.mktime(bars1[i]['_id'].timetuple())))
+        # period1Time.append(int(time.mktime(bars1[i]['_id'].timetuple())))
+        period1Time.append(bars1[i]['_id'])
         period1High.append(bars1[i]['high'])
         period1Low.append(bars1[i]['low'])
         period1Open.append(bars1[i]['open'])
@@ -85,7 +86,8 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
     period2Close = []
     len2 = len(bars2)
     for i in range(len2 - 1, -1, -1):
-        period2Time.append(int(time.mktime(bars2[i]['_id'].timetuple())))
+        # period2Time.append(int(time.mktime(bars2[i]['_id'].timetuple())))
+        period2Time.append(bars2[i]['_id'])
         period2High.append(bars2[i]['high'])
         period2Low.append(bars2[i]['low'])
         period2Open.append(bars2[i]['open'])
@@ -168,7 +170,8 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
                 if is_debug: print('创新低了')
                 continue
             # 信号成立
-            xb = datetime.utcfromtimestamp(period1Time[i])
+            # xb = datetime.utcfromtimestamp(period1Time[i])
+            xb = period1Time[i]
             xb_price = period1Low[i]
             # 高周期MACD在0轴上吗
             msg = {
@@ -198,7 +201,8 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
             if period1High[i] > period1High[i2]:
                 if is_debug: print('创新高了')
                 continue
-            xb = datetime.utcfromtimestamp(period1Time[i])
+            # xb = datetime.utcfromtimestamp(period1Time[i])
+            xb = period1Time[i]
             xb_price = period1High[i]
             # 高级别MACD在0轴下吗
             msg = {
