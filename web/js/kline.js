@@ -145,6 +145,7 @@ var app = new Vue({
             option.series[0].data = resultData.values;
             option.series[0].markArea.data = resultData.zsvalues;
             option.series[0].markLine.data = resultData.markLineData;
+            option.series[0].markPoint.data = resultData.huilaValues;
             option.series[1].data = resultData.biValues;
             option.series[2].data = resultData.duanValues;
             option.series[2].markPoint.data = resultData.duanPriceValues;

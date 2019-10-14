@@ -38,6 +38,7 @@ symbolListDigitCoin = ['BTC_CQ'
 #
 # periodList2 = ['3min', '5min', '15min', '30min', '60min', '4hour']
 periodList = ['3m', '5m', '15m', '30m', '60m']
+periodList1 = ['1m','3m', '5m', '15m', '30m', '60m']
 periodList2 = ['3m', '5m', '15m', '30m', '60m']
 
 mail = Mail()
@@ -108,7 +109,7 @@ def getDominantSymbol():
 # timeScope 监控距离现在多少分钟的
 def monitorFuturesAndDigitCoin(type):
     logger = logging.getLogger()
-    timeScope = 2
+    timeScope = 3
     lastTimeMap = {}
     lastTimeHuilaMap = {}
     lastTimeTupoMap = {}
@@ -127,7 +128,7 @@ def monitorFuturesAndDigitCoin(type):
         periodList = periodList2
     else:
         symbolList = symbolListDigitCoin
-        periodList = periodList2
+        periodList = periodList1
 
     for i in range(len(symbolList)):
         symbol = symbolList[i]
@@ -487,5 +488,5 @@ def sendEmail(msg):
         print("发送成功")
 
 
-threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
 threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

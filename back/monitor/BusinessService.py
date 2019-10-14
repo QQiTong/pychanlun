@@ -8,6 +8,7 @@ from ..db import DBPyChanlun
 # periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 periodList = ['3m', '5m', '15m', '30m', '60m']
 
+
 class BusinessService:
     def __init__(self):
         print('beichi List init')
@@ -22,7 +23,7 @@ class BusinessService:
             dominantSymbolList.append(dominantSymbol)
         return dominantSymbolList
 
-    def getBeichiList(self,strategyType):
+    def getBeichiList(self, strategyType):
 
         if strategyType == "0":
             return self.getNormalBeichiList()
@@ -46,11 +47,13 @@ class BusinessService:
                 symbolListMap[symbol][period] = ""
         beichi_log_list = DBPyChanlun['beichi_log'].find()
         for beichiItem in beichi_log_list:
-            msg = beichiItem['remark'], str(round(beichiItem['price'], 2)), str(beichiItem['date_created'])
+            msg = beichiItem['remark'], str(round(beichiItem['price'], 2)), str(beichiItem['date_created']), str(
+                beichiItem['signal'])
             if beichiItem['symbol'] in symbolListMap:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
         print("背驰列表", symbolListMap)
         return symbolListMap
+
     def getStrategy3BeichiList(self):
         symbolList = self.getDominantSymbol()
         symbolList.append("BTC_CQ")
@@ -70,7 +73,6 @@ class BusinessService:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
         print("背驰列表", symbolListMap)
         return symbolListMap
-
 
     def getStrategy4BeichiList(self):
         symbolList = self.getDominantSymbol()
@@ -112,6 +114,6 @@ class BusinessService:
                 change = (today - preday) / preday
             symbolChangeMap[item] = change
             # print(change)
-        print("涨跌幅信息",symbolChangeMap)
+        print("涨跌幅信息", symbolChangeMap)
 
         return symbolChangeMap
