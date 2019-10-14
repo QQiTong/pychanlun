@@ -73,7 +73,8 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
     period1Close = []
     len1 = len(bars1)
     for i in range(len1 - 1, -1, -1):
-        period1Time.append(int(time.mktime(bars1[i]['_id'].timetuple())))
+        # period1Time.append(int(time.mktime(bars1[i]['_id'].timetuple())))
+        period1Time.append(bars1[i]['_id'])
         period1High.append(bars1[i]['high'])
         period1Low.append(bars1[i]['low'])
         period1Open.append(bars1[i]['open'])
@@ -85,7 +86,8 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
     period2Close = []
     len2 = len(bars2)
     for i in range(len2 - 1, -1, -1):
-        period2Time.append(int(time.mktime(bars2[i]['_id'].timetuple())))
+        # period2Time.append(int(time.mktime(bars2[i]['_id'].timetuple())))
+        period2Time.append(bars2[i]['_id'])
         period2High.append(bars2[i]['high'])
         period2Low.append(bars2[i]['low'])
         period2Open.append(bars2[i]['open'])
@@ -168,7 +170,8 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
                 if is_debug: print('创新低了')
                 continue
             # 信号成立
-            xb = datetime.utcfromtimestamp(period1Time[i])
+            # xb = datetime.utcfromtimestamp(period1Time[i])
+            xb = period1Time[i]
             xb_price = period1Low[i]
             # 高周期MACD在0轴上吗
             msg = {
@@ -198,7 +201,8 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
             if period1High[i] > period1High[i2]:
                 if is_debug: print('创新高了')
                 continue
-            xb = datetime.utcfromtimestamp(period1Time[i])
+            # xb = datetime.utcfromtimestamp(period1Time[i])
+            xb = period1Time[i]
             xb_price = period1High[i]
             # 高级别MACD在0轴下吗
             msg = {
@@ -220,27 +224,27 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
 
 def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position, is_debug):
     logger = logging.getLogger()
-    last_fire = DBPyChanlun['strategy3_log'].find_one({
+    last_fire = DBPyChanlun['strategy3_log'].find({
         'symbol': symbol['code'],
-        'peroid': period,
+        'period': period,
         'fire_time': fire_time,
         'position': position
-    })
+    }).count()
     if is_debug:
         logger.debug(last_fire)
-    if last_fire is not None:
+    if last_fire > 0:
         DBPyChanlun['strategy3_log'].find_one_and_update({
             'symbol': symbol['code'], 'period': period, 'fire_time': fire_time, 'position': position
         }, {
             '$set': {
                 'remark': remark,
                 'price': price,
-                'date_created': datetime.utcnow()
+                'date_created': datetime.now(tz)
             },
             '$inc': {'update_count': 1}
         }, upsert=True)
     else:
-        date_created = datetime.utcnow()
+        date_created = datetime.now(tz)
         DBPyChanlun['strategy3_log'].insert_one({
             'symbol': symbol['code'],
             'period': period,
