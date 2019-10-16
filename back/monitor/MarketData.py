@@ -105,26 +105,27 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
         if trading_dates is None or len(trading_dates) == 0:
             start_datetime = start_datetime + timedelta(days=1)
             continue
-        magic = int(now_datetime.timestamp() / 1800)
-        trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'), magic=magic)
-        if trading_hours is None or len(trading_hours) == 0:
-            start_datetime = start_datetime + timedelta(days=1)
-            continue
-        if last_datetime is not None:
-            if period_alias == '1d' and last is not None:
-                if last.get('date_created') is not None and last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
-                    start_datetime = start_datetime + timedelta(days=1)
-                    continue
-            else:
-                if last_datetime >= trading_hours[-1][1].replace(tzinfo=tz):
-                    start_datetime = start_datetime + timedelta(days=1)
-                    continue
+        # get_trading_hours 返回的时间是不对的
+        # magic = int(now_datetime.timestamp() / 1800)
+        # trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'), magic=magic)
+        # if trading_hours is None or len(trading_hours) == 0:
+        #     start_datetime = start_datetime + timedelta(days=1)
+        #     continue
+        # if last_datetime is not None:
+        #     if period_alias == '1d' and last is not None:
+        #         if last.get('date_created') is not None and last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
+        #             start_datetime = start_datetime + timedelta(days=1)
+        #             continue
+        #     else:
+        #         if last_datetime >= trading_hours[-1][1].replace(tzinfo=tz):
+        #             start_datetime = start_datetime + timedelta(days=1)
+        #             continue
         df = dataBackend.get_price(symbol['code'], start_datetime.strftime('%Y-%m-%d'), end_datetime.strftime('%Y-%m-%d'), period)
 
         if df is None:
             start_datetime = start_datetime + timedelta(days=1)
             continue
-        logger.info("保存行情数据 %s %s %s" % (code, period_alias, end_datetime))
+        logger.info("保存行情数据 %s %s %s %s" % (code, period_alias, start_datetime, end_datetime))
         saveData(symbol['code'], df, period_alias)
         start_datetime = start_datetime + timedelta(days=1)
 
@@ -133,27 +134,28 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
     if trading_dates is None or len(trading_dates) == 0:
         set_data_feeding(symbol['code'], period_alias, False)
         return
-    magic = int(now_datetime.timestamp() / 1800)
-    trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'), magic=magic)
-    if trading_hours is None or len(trading_hours) == 0:
-        set_data_feeding(symbol['code'], period_alias, False)
-        return
-    if last_datetime is not None:
-        if period_alias == '1d' and last is not None:
-            if last.get('date_created') is not None and last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
-                set_data_feeding(symbol['code'], period_alias, False)
-                return
-        else:
-            hours_index = pydash.find_last_index(trading_hours, lambda x: x[1].replace(tzinfo=tz) < now_datetime)
-            if hours_index >= 0:
-                if last_datetime >= trading_hours[hours_index][1].replace(tzinfo=tz):
-                    set_data_feeding(symbol['code'], period_alias, False)
-                    return
+    # get_trading_hours 返回的时间是不对的
+    # magic = int(now_datetime.timestamp() / 1800)
+    # trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'), magic=magic)
+    # if trading_hours is None or len(trading_hours) == 0:
+    #     set_data_feeding(symbol['code'], period_alias, False)
+    #     return
+    # if last_datetime is not None:
+    #     if period_alias == '1d' and last is not None:
+    #         if last.get('date_created') is not None and last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
+    #             set_data_feeding(symbol['code'], period_alias, False)
+    #             return
+    #     else:
+    #         hours_index = pydash.find_last_index(trading_hours, lambda x: x[1].replace(tzinfo=tz) < now_datetime)
+    #         if hours_index >= 0:
+    #             if last_datetime >= trading_hours[hours_index][1].replace(tzinfo=tz):
+    #                 set_data_feeding(symbol['code'], period_alias, False)
+    #                 return
     df = dataBackend.get_price(symbol['code'], start_datetime.strftime('%Y-%m-%d'), end_datetime.strftime('%Y-%m-%d'), period)
     if df is None:
         set_data_feeding(symbol['code'], period_alias, False)
         return
-    logger.info("保存行情数据 %s %s %s" % (code, period_alias, end_datetime))
+    logger.info("保存行情数据 %s %s %s %s" % (code, period_alias, start_datetime, end_datetime))
     saveData(symbol['code'], df, period_alias)
     set_data_feeding(symbol['code'], period_alias, True)
 

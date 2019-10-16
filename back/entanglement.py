@@ -2,6 +2,7 @@
 import pydash
 
 from .funcat.time_series import (fit_series)
+from . import series_tool
 
 class Entanglement:
     def __init__(self):

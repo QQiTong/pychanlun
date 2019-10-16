@@ -39,7 +39,9 @@ tz = pytz.timezone('Asia/Shanghai')
 mail = Mail()
 
 def doExecute(symbol, period):
+    logger = logging.getLogger()
     if not is_data_feeding(symbol['code'], period):
+        logger.info("%s 不是交易时间 跳过%s监控" % (symbol['code'], period))
         return
     logger = logging.getLogger()
     logger.info("策略4 %s %s" % (symbol['code'], period))
