@@ -120,7 +120,7 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
         #         if last_datetime >= trading_hours[-1][1].replace(tzinfo=tz):
         #             start_datetime = start_datetime + timedelta(days=1)
         #             continue
-        df = dataBackend.get_price(symbol['code'], start_datetime, end_datetime, period)
+        df = dataBackend.get_price(symbol['code'], start_datetime, end_datetime + timedelta(1), period)
 
         if df is None:
             start_datetime = start_datetime + timedelta(days=1)
@@ -151,7 +151,8 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
     #             if last_datetime >= trading_hours[hours_index][1].replace(tzinfo=tz):
     #                 set_data_feeding(symbol['code'], period_alias, False)
     #                 return
-    df = dataBackend.get_price(symbol['code'], start_datetime, end_datetime, period)
+    df = dataBackend.get_price(symbol['code'], start_datetime, end_datetime + timedelta(1), period)
+    print(df)
     if df is None:
         set_data_feeding(symbol['code'], period_alias, False)
         return
