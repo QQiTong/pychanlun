@@ -142,7 +142,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 上涨中枢，找第一次的拉回
             e_end = e.end
             # 离开中枢后的第一个笔结束
-            leave = pydash.index_of(bi_series, 1, e_end)
+            leave = series_tool.find_index(bi_series, lambda x: x == 1, e_end)
             if leave >= 0:
                 r = -1
                 for x in range(leave + 1, len(close_series)):
@@ -160,6 +160,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 下跌中枢，找第一次的拉回
             e_end = e.end
             leave = pydash.index_of(bi_series, -1, e_end)
+            leave = series_tool.find_index(bi_series, lambda x: x == -1, e_end)
             if leave >= 0:
                 r = -1
                 for x in range(leave + 1, len(close_series)):

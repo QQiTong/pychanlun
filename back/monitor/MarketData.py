@@ -152,7 +152,6 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
     #                 set_data_feeding(symbol['code'], period_alias, False)
     #                 return
     df = dataBackend.get_price(symbol['code'], start_datetime, end_datetime + timedelta(1), period)
-    print(df)
     if df is None:
         set_data_feeding(symbol['code'], period_alias, False)
         return
