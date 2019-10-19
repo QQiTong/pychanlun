@@ -38,7 +38,7 @@ from .MarketData import is_data_feeding
 tz = pytz.timezone('Asia/Shanghai')
 mail = Mail()
 
-def doExecute(symbol, period):
+def doExecute(symbol, period, inspect_time = None, is_debug = False):
     logger = logging.getLogger()
     if not is_data_feeding(symbol['code'], period):
         logger.info("%s 不是交易时间 跳过%s监控" % (symbol['code'], period))
@@ -171,12 +171,12 @@ def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position
             logger.info(mailResult)
 
 
-def doCaculate(symbol):
+def doCaculate(symbol, inspect_time = None, is_debug = False):
     logger = logging.getLogger()
     periods = ['3m', '5m', '15m', '30m', '1h', '4h','1d']
     for period in periods:
         try:
-            doExecute(symbol, period)
+            doExecute(symbol, period, inspect_time, is_debug)
         except BaseException as e:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
 

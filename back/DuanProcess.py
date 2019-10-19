@@ -99,4 +99,26 @@ class DuanProcess:
                             self.result[nLastG] = 1
                             fTop0 = 0
                             fBot0 = 0
+            if self.result[i] == 1:
+                h = highList[i]
+                for j in range(i, nLastD, -1):
+                    if self.result[j] == -1:
+                        break
+                    if biResult[j] == 1 and highList[j] > h:
+                        h = highList[j]
+                        nLastG = j
+                        self.result[nLastG] = 1
+                        self.result[i] = 0
+                        i = j
+            elif self.result[i] == -1:
+                l = lowList[i]
+                for j in range(i, nLastG, -1):
+                    if self.result[j] == 1:
+                        break
+                    if biResult[j] == -1 and lowList[j] < l:
+                        l = lowList[j]
+                        nLastD = j
+                        self.result[nLastD] = -1
+                        self.result[i] = 0
+                        i = j
         return self.result
