@@ -139,7 +139,6 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None, is_debug
         if df is None:
             start_datetime = start_datetime + timedelta(days=1)
             continue
-        logger.info("保存行情数据 %s %s %s %s" % (code, period_alias, start_datetime, end_datetime))
         saveData(symbol['code'], df, period_alias)
         start_datetime = start_datetime + timedelta(days=1)
 
@@ -180,7 +179,6 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None, is_debug
     df = dataBackend.get_price(symbol['code'], start_datetime, end_datetime + timedelta(1), period)
     if df is None:
         return
-    logger.info("保存行情数据 %s %s %s %s" % (code, period_alias, start_datetime, end_datetime))
     saveData(symbol['code'], df, period_alias)
 
 def getMarketDataRICEQUANT(symbol, is_debug = False):
@@ -224,3 +222,7 @@ def saveData(code, df, period):
         except BaseException as e:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
     DBPyChanlun['symbol'].update_one({ "code": code }, { "$set": { "market_data_updated": datetime.now(tz) } })
+    start_datetime = df.index.min()
+    end_datetime = df.index.max()
+    logger.info("保存行情数据 %s %s %s %s" % (code, period, start_datetime, end_datetime))
+
