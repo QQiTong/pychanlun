@@ -6,7 +6,7 @@ import atexit
 import pydash
 import pytz
 from rqdatac import *
-from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.executors.pool import ThreadPoolExecutor
 
 from .config import config
 from .monitor import MarketData
@@ -28,8 +28,7 @@ def app():
     symbol_list = list(DBPyChanlun['symbol'].find())
     size = len(symbol_list)
     executors = {
-        'default': ThreadPoolExecutor(size*3),
-        'processpool': ProcessPoolExecutor(size)
+        'default': ThreadPoolExecutor(size*5),
     }
     scheduler = BlockingScheduler(executors=executors, timezone=tz)
     atexit.register(lambda: scheduler.shutdown(wait=False))
@@ -37,8 +36,8 @@ def app():
     for symbol in symbol_list:
         s = {'code': symbol['code'], 'backend': symbol['backend']}
         scheduler.add_job(MarketData.getMarketData, 'interval', [s], seconds=15)
-        scheduler.add_job(strategy3.doCaculate, 'interval', [s], seconds=60)
-        scheduler.add_job(strategy4.doCaculate, 'interval', [s], seconds=60)
+        scheduler.add_job(strategy3.doCaculate, 'interval', [s], seconds=30)
+        scheduler.add_job(strategy4.doCaculate, 'interval', [s], seconds=30)
     scheduler.add_job(CleanData.doClean, 'interval', hours = 1)
 
     scheduler.start()
