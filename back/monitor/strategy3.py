@@ -31,8 +31,9 @@ mail = Mail()
 
 
 def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
-    if not is_data_feeding(symbol['code'], period1):
-        return
+    if not is_debug:
+        if not is_data_feeding(symbol['code'], period1):
+            return
     logger = logging.getLogger()
     logger.info("策略3 %s %s %s" % (symbol['code'], period1, period2))
     if is_debug:

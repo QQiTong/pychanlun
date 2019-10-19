@@ -28,17 +28,13 @@ tz = pytz.timezone('Asia/Shanghai')
 
 ohlc_dict = { 'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum' }
 
-data_feeding = {}
-
-def set_data_feeding(code, period, b):
-    if data_feeding.get(code) is None:
-        data_feeding[code] = {}
-    data_feeding[code][period] = b
 
 def is_data_feeding(code, period):
-    if data_feeding.get(code) is None:
-        return False
-    return data_feeding[code].get(period, False)
+    # 通过判断5分钟内有数据更新
+    data = DBPyChanlun['%s_%s' % (code.lower(), period)].find({
+        'date_created': { '$gte': datetime.now(pytz.timezone("Asia/Shanghai"))-timedelta(minutes=5) }
+    })
+    return len(list(data)) > 0
 
 def getMarketDataHUOBI(symbol):
     dataBackend = HuobiDataBackend()
@@ -150,7 +146,6 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None, is_debug
     end_datetime = datetime(start_datetime.year, start_datetime.month, start_datetime.day, 23, 59, 59, tzinfo=tz)
     trading_dates = dataBackend.get_trading_dates(start_date=start_datetime.strftime('%Y%m%d'), end_date=start_datetime.strftime('%Y%m%d'))
     if trading_dates is None or len(trading_dates) == 0:
-        set_data_feeding(symbol['code'], period_alias, False)
         return
     # get_trading_hours 返回的时间是不对的
     magic = int(now_datetime.timestamp() / 1800)
@@ -172,26 +167,21 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None, is_debug
             break
         trading_hours.append(trading_hour)
     if trading_hours is None or len(trading_hours) == 0:
-        set_data_feeding(symbol['code'], period_alias, False)
         return
     if last_datetime is not None:
         if period_alias == '1d' and last is not None:
             if last.get('date_created') is not None and last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
-                set_data_feeding(symbol['code'], period_alias, False)
                 return
         else:
             hours_index = pydash.find_last_index(trading_hours, lambda x: x[1].replace(tzinfo=tz) < now_datetime)
             if hours_index >= 0:
                 if last_datetime >= trading_hours[hours_index][1].replace(tzinfo=tz):
-                    set_data_feeding(symbol['code'], period_alias, False)
                     return
     df = dataBackend.get_price(symbol['code'], start_datetime, end_datetime + timedelta(1), period)
     if df is None:
-        set_data_feeding(symbol['code'], period_alias, False)
         return
     logger.info("保存行情数据 %s %s %s %s" % (code, period_alias, start_datetime, end_datetime))
     saveData(symbol['code'], df, period_alias)
-    set_data_feeding(symbol['code'], period_alias, True)
 
 def getMarketDataRICEQUANT(symbol, is_debug = False):
     get_market_data_ricequant_incr(symbol, '1m', period_alias=None, is_debug=is_debug)
@@ -233,5 +223,4 @@ def saveData(code, df, period):
             }, upsert = True)
         except BaseException as e:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
-    set_data_feeding(code, period, True)
     DBPyChanlun['symbol'].update_one({ "code": code }, { "$set": { "market_data_updated": datetime.now(tz) } })
