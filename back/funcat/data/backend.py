@@ -10,3 +10,6 @@ class DataBackend(object):
 
     def get_trading_dates(self, start_date, end_date, market='cn'):
         raise NotImplementedError
+
+    def get_next_trading_date(self, trading_date, n=1, market='cn'):
+        raise NotImplementedError

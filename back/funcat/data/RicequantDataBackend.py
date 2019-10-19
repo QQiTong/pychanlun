@@ -25,3 +25,7 @@ class RicequantDataBackend(DataBackend):
     @lru_cache(maxsize=1000)
     def get_trading_dates(self, start_date, end_date, market='cn'):
         return rq.get_trading_dates(start_date, end_date, market)
+
+    @lru_cache(maxsize=1000)
+    def get_next_trading_date(self, trading_date, n=1, market='cn'):
+        return rq.get_next_trading_date(trading_date)

@@ -7,9 +7,6 @@ import talib as ta
 import numpy as np
 import rx
 import pymongo
-from rx.scheduler import ThreadPoolScheduler
-from rx.scheduler.eventloop import AsyncIOScheduler
-from rx import operators as ops
 
 import pydash
 import json
@@ -277,4 +274,5 @@ def doCaculate(symbol, inspect_time = None, is_debug = False):
             doExecute(symbol, pairs[i]['current'], pairs[i]['higher'], inspect_time, is_debug)
         except BaseException as e:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
+    DBPyChanlun['symbol'].update_one({ "code": symbol['code'] }, { "$set": { "strategy_3_updated": datetime.now(tz) } })
 

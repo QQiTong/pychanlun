@@ -72,7 +72,7 @@ def getMarketDataHUOBI(symbol):
     df1w = df1d.resample('W', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
     saveData(symbol['code'], df1w, "1w")
 
-def get_market_data_ricequant_incr(symbol, period, period_alias = None):
+def get_market_data_ricequant_incr(symbol, period, period_alias = None, is_debug = False):
     if period_alias is None:
         period_alias = period
     logger = logging.getLogger()
@@ -91,6 +91,8 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
     start_datetime = datetime.now(tz) + timedelta(days=-30)
     # 今天的开始时间
     start_of_day = datetime(now_datetime.year, now_datetime.month, now_datetime.day, tzinfo=tz)
+    # 今天的结束日期
+    end_of_day = datetime(now_datetime.year, now_datetime.month, now_datetime.day, 23, 59, 59, tzinfo=tz)
     last_datetime = None
     if last is not None:
         last_datetime = last['_id']
@@ -106,20 +108,36 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
             start_datetime = start_datetime + timedelta(days=1)
             continue
         # get_trading_hours 返回的时间是不对的
-        # magic = int(now_datetime.timestamp() / 1800)
-        # trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'), magic=magic)
-        # if trading_hours is None or len(trading_hours) == 0:
-        #     start_datetime = start_datetime + timedelta(days=1)
-        #     continue
-        # if last_datetime is not None:
-        #     if period_alias == '1d' and last is not None:
-        #         if last.get('date_created') is not None and last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
-        #             start_datetime = start_datetime + timedelta(days=1)
-        #             continue
-        #     else:
-        #         if last_datetime >= trading_hours[-1][1].replace(tzinfo=tz):
-        #             start_datetime = start_datetime + timedelta(days=1)
-        #             continue
+        magic = int(now_datetime.timestamp() / 1800)
+        trading_date = start_datetime.strftime('%Y-%m-%d')
+        trading_hours1 = dataBackend.get_trading_hours(code=code, trading_date=trading_date, magic=magic)
+        trading_date = dataBackend.get_next_trading_date(trading_date).strftime('%Y-%m-%d')
+        trading_hours2 = dataBackend.get_trading_hours(code=code, trading_date=trading_date, magic=magic)
+        trading_hours = []
+        for trading_hour in trading_hours1:
+            trading_hour[0] = trading_hour[0].replace(tzinfo=tz)
+            trading_hour[1] = trading_hour[1].replace(tzinfo=tz)
+            if trading_hour[1] >end_of_day:
+                break
+            trading_hours.append(trading_hour)
+        for trading_hour in trading_hours2:
+            trading_hour[0] = trading_hour[0].replace(tzinfo=tz)
+            trading_hour[1] = trading_hour[1].replace(tzinfo=tz)
+            if trading_hour[1] >end_of_day:
+                break
+            trading_hours.append(trading_hour)
+        if trading_hours is None or len(trading_hours) == 0:
+            start_datetime = start_datetime + timedelta(days=1)
+            continue
+        if last_datetime is not None:
+            if period_alias == '1d' and last is not None:
+                if last.get('date_created') is not None and last['date_created'] > trading_hours[-1][1]:
+                    start_datetime = start_datetime + timedelta(days=1)
+                    continue
+            else:
+                if last_datetime >= trading_hours[-1][1]:
+                    start_datetime = start_datetime + timedelta(days=1)
+                    continue
         df = dataBackend.get_price(symbol['code'], start_datetime, end_datetime + timedelta(1), period)
 
         if df is None:
@@ -135,22 +153,38 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
         set_data_feeding(symbol['code'], period_alias, False)
         return
     # get_trading_hours 返回的时间是不对的
-    # magic = int(now_datetime.timestamp() / 1800)
-    # trading_hours = dataBackend.get_trading_hours(code=code, trading_date=start_datetime.strftime('%Y-%m-%d'), magic=magic)
-    # if trading_hours is None or len(trading_hours) == 0:
-    #     set_data_feeding(symbol['code'], period_alias, False)
-    #     return
-    # if last_datetime is not None:
-    #     if period_alias == '1d' and last is not None:
-    #         if last.get('date_created') is not None and last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
-    #             set_data_feeding(symbol['code'], period_alias, False)
-    #             return
-    #     else:
-    #         hours_index = pydash.find_last_index(trading_hours, lambda x: x[1].replace(tzinfo=tz) < now_datetime)
-    #         if hours_index >= 0:
-    #             if last_datetime >= trading_hours[hours_index][1].replace(tzinfo=tz):
-    #                 set_data_feeding(symbol['code'], period_alias, False)
-    #                 return
+    magic = int(now_datetime.timestamp() / 1800)
+    trading_date = start_datetime.strftime('%Y-%m-%d')
+    trading_hours1 = dataBackend.get_trading_hours(code=code, trading_date=trading_date, magic=magic)
+    trading_date = dataBackend.get_next_trading_date(trading_date).strftime('%Y-%m-%d')
+    trading_hours2 = dataBackend.get_trading_hours(code=code, trading_date=trading_date, magic=magic)
+    trading_hours = []
+    for trading_hour in trading_hours1:
+        trading_hour[0] = trading_hour[0].replace(tzinfo=tz)
+        trading_hour[1] = trading_hour[1].replace(tzinfo=tz)
+        if trading_hour[1] >end_of_day:
+            break
+        trading_hours.append(trading_hour)
+    for trading_hour in trading_hours2:
+        trading_hour[0] = trading_hour[0].replace(tzinfo=tz)
+        trading_hour[1] = trading_hour[1].replace(tzinfo=tz)
+        if trading_hour[1] >end_of_day:
+            break
+        trading_hours.append(trading_hour)
+    if trading_hours is None or len(trading_hours) == 0:
+        set_data_feeding(symbol['code'], period_alias, False)
+        return
+    if last_datetime is not None:
+        if period_alias == '1d' and last is not None:
+            if last.get('date_created') is not None and last['date_created'] > trading_hours[-1][1].replace(tzinfo=tz):
+                set_data_feeding(symbol['code'], period_alias, False)
+                return
+        else:
+            hours_index = pydash.find_last_index(trading_hours, lambda x: x[1].replace(tzinfo=tz) < now_datetime)
+            if hours_index >= 0:
+                if last_datetime >= trading_hours[hours_index][1].replace(tzinfo=tz):
+                    set_data_feeding(symbol['code'], period_alias, False)
+                    return
     df = dataBackend.get_price(symbol['code'], start_datetime, end_datetime + timedelta(1), period)
     if df is None:
         set_data_feeding(symbol['code'], period_alias, False)
@@ -159,24 +193,25 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None):
     saveData(symbol['code'], df, period_alias)
     set_data_feeding(symbol['code'], period_alias, True)
 
-def getMarketDataRICEQUANT(symbol):
-    get_market_data_ricequant_incr(symbol, '1m')
-    get_market_data_ricequant_incr(symbol, '3m')
-    get_market_data_ricequant_incr(symbol, '5m')
-    get_market_data_ricequant_incr(symbol, '15m')
-    get_market_data_ricequant_incr(symbol, '30m')
-    get_market_data_ricequant_incr(symbol, '60m', '1h')
-    get_market_data_ricequant_incr(symbol, '240m', '4h')
-    get_market_data_ricequant_incr(symbol, '1d')
+def getMarketDataRICEQUANT(symbol, is_debug = False):
+    get_market_data_ricequant_incr(symbol, '1m', period_alias=None, is_debug=is_debug)
+    get_market_data_ricequant_incr(symbol, '3m', period_alias=None, is_debug=is_debug)
+    get_market_data_ricequant_incr(symbol, '5m', period_alias=None, is_debug=is_debug)
+    get_market_data_ricequant_incr(symbol, '15m', period_alias=None, is_debug=is_debug)
+    get_market_data_ricequant_incr(symbol, '30m', period_alias=None, is_debug=is_debug)
+    get_market_data_ricequant_incr(symbol, '60m', '1h', is_debug)
+    get_market_data_ricequant_incr(symbol, '240m', '4h', is_debug)
+    get_market_data_ricequant_incr(symbol, '1d', period_alias=None, is_debug=is_debug)
 
-def getMarketData(symbol):
+def getMarketData(symbol, is_debug = False):
+
     logger = logging.getLogger()
     df1m = None
     try:
         if symbol['backend'] == 'HUOBI':
             getMarketDataHUOBI(symbol)
         if symbol['backend'] == 'RICEQUANT':
-            getMarketDataRICEQUANT(symbol)
+            getMarketDataRICEQUANT(symbol, is_debug)
     except BaseException as e:
         logger.info("Error Occurred: {0}".format(traceback.format_exc()))
 
@@ -199,3 +234,4 @@ def saveData(code, df, period):
         except BaseException as e:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
     set_data_feeding(code, period, True)
+    DBPyChanlun['symbol'].update_one({ "code": code }, { "$set": { "market_data_updated": datetime.now(tz) } })
