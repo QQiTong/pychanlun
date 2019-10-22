@@ -1794,7 +1794,7 @@ var app = new Vue({
                 bcMACDValues.push(value);
             }
             var markLineData = [];
-            var lastBeichiType = getLastBeichiData(jsonObj.buyMACDBCData, jsonObj.sellMACDBCData)
+            var lastBeichiType = getLastHuilaData(jsonObj.buy_zs_huila, jsonObj.sell_zs_huila)
             var lastBeichi = null;
             let marginLevel = Number((1 / (this.futureSymbolMap[this.symbol].margin_rate * this.marginLevelCompany)).toFixed(2))
             // 当前价格
@@ -1806,13 +1806,13 @@ var app = new Vue({
             // console.log("最后的背驰:", kxType, lastBeichiType)
             if (lastBeichiType !== 0) {
                 if (lastBeichiType === -1) {
-                    lastBeichi = jsonObj.buyMACDBCData
+                    lastBeichi = jsonObj.buy_zs_huila
                 } else {
-                    lastBeichi = jsonObj.sellMACDBCData
+                    lastBeichi = jsonObj.sell_zs_huila
                 }
 
                 // 背驰时的价格
-                var beichiPrice = lastBeichi['beichi_price'][lastBeichi['beichi_price'].length - 1]
+                var beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
                 // 止损价格
                 var stopLosePrice = lastBeichi['stop_lose_price'][lastBeichi['stop_lose_price'].length - 1]
                 // 第一次成笔的止盈价格
@@ -1923,32 +1923,32 @@ var app = new Vue({
                     symbolSize: 1,
                 }
                 // 第一次成笔的目标价位
-                var markLineStopWin = {
-                    yAxis: stopWinPrice,
-                    lineStyle: {
-                        normal: {
-                            opacity: 1,
-                            type: 'dashed',
-                            width: 1,
-                            color: 'green'
-                        },
-                    },
-                    label: {
-                        normal: {
-                            color: 'green',
-                            formatter: '笔盈:' + stopWinPrice.toFixed(2) + ' (' + stopWinPercent + '%)',
-                        }
-                    },
-                    symbol: 'circle',
-                    symbolSize: 1,
-                }
+                // var markLineStopWin = {
+                //     yAxis: stopWinPrice,
+                //     lineStyle: {
+                //         normal: {
+                //             opacity: 1,
+                //             type: 'dashed',
+                //             width: 1,
+                //             color: 'green'
+                //         },
+                //     },
+                //     label: {
+                //         normal: {
+                //             color: 'green',
+                //             formatter: '笔盈:' + stopWinPrice.toFixed(2) + ' (' + stopWinPercent + '%)',
+                //         }
+                //     },
+                //     symbol: 'circle',
+                //     symbolSize: 1,
+                // }
                 markLineData.push(markLineCurrent)
                 markLineData.push(markLineBeichi)
                 markLineData.push(markLineTarget)
                 markLineData.push(markLineStop)
-                if (stopWinPrice !== 0) {
-                    markLineData.push(markLineStopWin)
-                }
+                // if (stopWinPrice !== 0) {
+                //     markLineData.push(markLineStopWin)
+                // }
 
             }
 
@@ -2133,6 +2133,38 @@ function getLastBeichiData(buyMACDBCData, sellMACDBCData) {
         }
     }
 }
+/**
+ *
+ * @param buy_zs_huila
+ * @param sell_zs_huila
+ * @returns number 0:没有背驰  -1 底背弛 1顶背驰
+ */
+function getLastHuilaData(buy_zs_huila, sell_zs_huila) {
+    var buyTimeStamp = 0
+    var sellTimeStamp = 0
+    if (buy_zs_huila.date.length > 0) {
+        var buyTimeStr = buy_zs_huila.date[buy_zs_huila.date.length - 1]
+        buyTimeStamp = timeStrToStamp(buyTimeStr)
+    }
+    if (sell_zs_huila.date.length > 0) {
+        var sellTimeStr = sell_zs_huila.date[sell_zs_huila.date.length - 1]
+        sellTimeStamp = timeStrToStamp(sellTimeStr)
+    }
+    if (buyTimeStamp === 0 && sellTimeStamp === 0) {
+        return 0
+    } else if (buyTimeStamp !== 0 && sellTimeStamp === 0) {
+        return -1
+    } else if (buyTimeStamp === 0 && sellTimeStamp !== 0) {
+        return 1
+    } else {
+        if (buyTimeStamp > sellTimeStamp) {
+            return -1
+        } else {
+            return 1
+        }
+    }
+}
+
 
 function timeStrToStamp(timeStr) {
     date = timeStr.substring(0, 19);

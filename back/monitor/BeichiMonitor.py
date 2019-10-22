@@ -39,7 +39,7 @@ symbolListDigitCoin = ['BTC_CQ'
 # periodList2 = ['3min', '5min', '15min', '30min', '60min', '4hour']
 periodList = ['3m', '5m', '15m', '30m', '60m']
 periodList1 = ['1m','3m', '5m', '15m', '30m', '60m']
-periodList2 = ['3m', '5m', '15m', '30m', '60m']
+periodList2 = ['3m', '5m', '15m', '30m', '60m','4h']
 
 mail = Mail()
 
@@ -488,5 +488,5 @@ def sendEmail(msg):
         print("发送成功")
 
 
-# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
-threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
+threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+# threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
