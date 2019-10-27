@@ -2,9 +2,10 @@ import requests
 import json
 import pandas as pd
 import numpy as np
-from .backend import DataBackend
+from back.funcat.data.backend import DataBackend
+from back.config import cfg
 
-from ..utils import lru_cache, get_str_date_from_int, get_int_date
+from back.funcat.utils import lru_cache, get_str_date_from_int, get_int_date
 
 class HuobiDataBackend(DataBackend):
 
@@ -16,13 +17,12 @@ class HuobiDataBackend(DataBackend):
         self.endpoint = "https://api.hbdm.com/market/history/kline"
 
     def get_price(self, code, start, end, period):
-        proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
         payload = {
             'period': period,
             'symbol': code,
             'size': end - start
         }
-        r = requests.get(self.endpoint, params=payload,proxies=proxies, verify=False)
+        r = requests.get(self.endpoint, params=payload,proxies=cfg.PROXIES, verify=False)
         retJson = json.loads(r.text)
         data = retJson['data']
         recdata = []

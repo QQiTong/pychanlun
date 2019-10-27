@@ -6,7 +6,10 @@ BASEDIR = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SCHEDULER_API_ENABLED = True
     SCHEDULER_TIMEZONE = 'Asia/Shanghai'
-    pass
+    PROXIES = {
+        "http": "socks5://127.0.0.1:10808",
+        "https": "socks5://127.0.0.1:10808"
+    }
 
 
 class DevelopmentConfig(Config):
@@ -22,7 +25,6 @@ class ProductionConfig(Config):
         'url': 'mongodb://root:Chanlun123456@dds-wz973894a77e58141351-pub.mongodb.rds.aliyuncs.com:3717,dds-wz973894a77e58142114-pub.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=mgset-16710813'
     }
     pass
-
 
 config = {
     'default': DevelopmentConfig,
@@ -64,3 +66,5 @@ config = {
         '1w'
     ]
 }
+
+cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
