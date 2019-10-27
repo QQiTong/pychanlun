@@ -1,19 +1,22 @@
+import os, sys
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
+
 import logging
 from apscheduler.schedulers.blocking import BlockingScheduler
-import sys
-import os
 import atexit
 import pydash
 import pytz
 from rqdatac import *
 from apscheduler.executors.pool import ThreadPoolExecutor
 
-from .config import config
-from .monitor import MarketData
-from .monitor import CleanData
-from .monitor import strategy3
-from .monitor import strategy4
-from .db import DBPyChanlun
+from back.config import config
+from back.monitor import MarketData
+from back.monitor import CleanData
+from back.monitor import strategy3
+from back.monitor import strategy4
+from back.db import DBPyChanlun
 
 tz = pytz.timezone('Asia/Shanghai')
 

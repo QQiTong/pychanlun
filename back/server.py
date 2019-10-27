@@ -1,13 +1,15 @@
+import os, sys
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
+
 from flask import Flask, request, Response
 import json
-import os
-from jqdatasdk import *
+import numpy as np
 from rqdatac import *
 from back.Calc import Calc
 from back.monitor.BusinessService import BusinessService
-import numpy as np
 from back.config import config
-
 import rqdatac as rq
 
 app = Flask(__name__)

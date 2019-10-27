@@ -1,6 +1,5 @@
 from back.Calc import Calc
 from back.KlineDataTool import KlineDataTool
-from jqdatasdk import *
 from datetime import datetime, timedelta, timezone
 import time
 import bitmex

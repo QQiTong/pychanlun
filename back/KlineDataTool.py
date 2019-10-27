@@ -1,6 +1,5 @@
 import requests
 import json
-from jqdatasdk import *
 from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
