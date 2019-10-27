@@ -11,3 +11,4 @@ web/package-lock.json
 front/web/
 front/web.zip
 .vscode
+logs/*.log
