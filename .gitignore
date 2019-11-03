@@ -14,3 +14,4 @@ front/web.zip
 *.log
 *.pid
 web/temp/*
+*.log.*

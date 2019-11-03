@@ -14,14 +14,14 @@ class Config:
 
 class DevelopmentConfig(Config):
     MONGODB_SETTINGS = {
-        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://root:Chanlun123456@dds-wz973894a77e58141351-pub.mongodb.rds.aliyuncs.com:3717,dds-wz973894a77e58142114-pub.mongodb.rds.aliyuncs.com:3717/pychanlun?authSource=admin&replicaSet=mgset-16710813')
+        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://localhost:27017/pychanlun')
     }
     pass
 
 
 class ProductionConfig(Config):
     MONGODB_SETTINGS = {
-        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://root:Chanlun123456@dds-wz973894a77e58141351-pub.mongodb.rds.aliyuncs.com:3717,dds-wz973894a77e58142114-pub.mongodb.rds.aliyuncs.com:3717/pychanlun?authSource=admin&replicaSet=mgset-16710813')
+        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://localhost:27017/pychanlun')
     }
     pass
 
