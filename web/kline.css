@@ -167,12 +167,27 @@
   justify-content: center;
 }
 .echarts-list .echarts-item {
-  width: 1260px;
-  height: 1000px;
+  width: 845px;
+  height: 650px;
   border: 1px solid #fff;
 }
 .echarts {
-  height: 1000px;
+  height: 650px;
+}
+.echarts-list-big {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.echarts-list-big .echarts-item-big {
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  border: 1px solid #fff;
+}
+.echarts-big {
+  height: 100vh;
 }
 .bold {
   font-weight: bold;

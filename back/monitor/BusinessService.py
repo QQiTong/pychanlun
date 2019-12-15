@@ -47,7 +47,7 @@ class BusinessService:
                 symbolListMap[symbol][period] = ""
         beichi_log_list = DBPyChanlun['beichi_log'].find()
         for beichiItem in beichi_log_list:
-            msg = beichiItem['remark'], str(round(beichiItem['price'], 2)), str(beichiItem['date_created']), str(
+            msg = beichiItem['remark']+" "+str(round(beichiItem['price'], 2))+" "+ str(beichiItem['date_created'])+" "+ str(
                 beichiItem['signal'])
             if beichiItem['symbol'] in symbolListMap:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg

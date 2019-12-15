@@ -13,26 +13,17 @@ from back import divergence
 from back.BiProcess import BiProcess
 from back.DuanProcess import DuanProcess
 from back.KlineProcess import KlineProcess
-
+import back.entanglement as entanglement
+from numpy import array
+import talib as ta
+import numpy as np
 
 class ChanLunStrategy(CtaTemplate):
     """"""
-
     author = "parker"
-
-    fast_window = 12
-    slow_window = 26
-    signal_window = 9
-
-    fast_ma0 = 0.0
-    fast_ma1 = 0.0
-
-    slow_ma0 = 0.0
-    slow_ma1 = 0.0
-    change = 0.0002
-
-    parameters = ["fast_window", "slow_window","change"]
-    variables = ["fast_ma0", "fast_ma1", "slow_ma0", "slow_ma1"]
+    amount = 1
+    parameters = ["amount"]
+    # variables = ["fast_ma0", "fast_ma1", "slow_ma0", "slow_ma1"]
 
     def __init__(self, cta_engine, strategy_name, vt_symbol, setting):
         """"""
@@ -40,17 +31,9 @@ class ChanLunStrategy(CtaTemplate):
             cta_engine, strategy_name, vt_symbol, setting
         )
 
-        self.bg = BarGenerator(self.on_bar, 3, self.on_3min_bar)
-        self.am = ArrayManager(2000)
-        #added
-        self.buyFlag = False
-        self.sellFlag = False
-        # 当前价格
-        self.currentPrice = 0
-        # 止损价格
-        self.stopPrice = 0
-        # 止赢价格
-        self.targetPrice = 0
+        self.bg = BarGenerator(self.on_bar, 15, self.on_15min_bar)
+        self.am = ArrayManager()
+        self.fixed_size = 1
 
     def on_init(self):
         """
@@ -83,7 +66,7 @@ class ChanLunStrategy(CtaTemplate):
         """
         self.bg.update_bar(bar)
 
-    def on_3min_bar(self, bar: BarData):
+    def on_15min_bar(self, bar: BarData):
         """"""
         self.cancel_all()
 
@@ -115,66 +98,97 @@ class ChanLunStrategy(CtaTemplate):
 
         duanProcess = DuanProcess()
         duanResult = duanProcess.handle(biResult, high_array, low_array)
+        entanglementList = entanglement.calcEntanglements(time_array, duanResult, biResult, high_array, low_array)
+        huila = entanglement.la_hui(entanglementList, time_array, high_array, low_array, open_array, close_array,
+                                    biResult, duanResult)
+        diff_array = self.getMacd(close_array)[0].tolist()
+        dea_array = self.getMacd(close_array)[1].tolist()
+        macd_array = self.getMacd(close_array)[2].tolist()
 
-        diff_array,dea_array,macd_array = am.macd(self.fast_window, self.slow_window, self.signal_window, array=True)
 
+        beichiData = divergence.calcAndNote(time_array, high_array, low_array, open_array, close_array, macd_array,
+                                            diff_array, dea_array, biProcess.biList, biResult, duanResult)
+        buyMACDBCData = beichiData['buyMACDBCData']
+        sellMACDBCData = beichiData['sellMACDBCData']
+        # print("拉回数据:",huila)
+        # print("时间：",time_array[-1],close_array[-1])
 
-        beichiData = divergence.calc(time_array, macd_array, diff_array, dea_array, biProcess.biList, duanResult)
-
-        print("背驰数据:",beichiData)
-        if len(beichiData.buyMACDBCData) > 0:
-            lastBeichiData = beichiData.buyMACDBCData[-1]
+        if len(huila['buy_zs_huila']['date']) > 0:
+            buy_zs_huila = huila['buy_zs_huila']
             # 最后一个信号和当前时间相等, 开始观察
-            if bar.datetime.strftime("%Y-%m-%d %H:%M") == lastBeichiData['date'][-1]:
-                self.buyFlag = True
-                self.sellFlag = False
-                self.currentPrice = bar.close_price
-                print(lastBeichiData['date'][-1],"线顶背->当前价格",)
+            print("买-当前bar时间：",bar.datetime.strftime("%Y-%m-%d %H:%M")," 拉回时间：",buy_zs_huila['date'][-1])
+            if bar.datetime.strftime("%Y-%m-%d %H:%M") == buy_zs_huila['date'][-1]:
+                self.long_stop_lose = buy_zs_huila['stop_lose_price'][-1]
+                self.long_stop_win = buy_zs_huila['stop_win_price'][-1]
+                self.long_signal_price = buy_zs_huila['data'][-1]
+                self.long_signal_date = buy_zs_huila['date'][-1]
+                if self.pos == 0:
+                    # self.currentPrice = bar.close_price
+                    # 同时下停止委托单
+                    print("开多:时间 ", self.long_signal_date," 价格:",self.long_signal_price," ohlc:", bar.open_price,bar.high_price,bar.low_price,bar.close_price
+                          ," 止损：",self.long_stop_lose," 止盈：",self.long_stop_win)
+                    self.buy(close_array[-1], self.amount)
+                elif self.pos < 0:
+                    # 出现反向信号，平掉空单
+                    print("出现反向信号，平掉空单,开多单 最新价：", bar.close_price, " ohlc:",
+                          bar.open_price, bar.high_price, bar.low_price, bar.close_price,
+                          " 止损：", self.long_stop_lose, " 止盈：", self.long_stop_win)
+                    self.cover(bar.close_price, abs(self.pos))
+                    # 开多单
+                    self.buy(self.long_signal_price, self.amount)
+        if self.pos > 0:
+            # print("持有多单：当前价格：", am.close_array[-1], " 止损：", self.long_stop_lose, " 止盈：", self.long_stop_win)
+            if am.close_array[-1] <= self.long_stop_lose:
+                print("下多单止损单 时间：", time_array[-1], " 价格:", self.long_stop_lose, " ohlc:",
+                      bar.open_price, bar.high_price, bar.low_price, bar.close_price)
+                self.sell(self.long_stop_lose, abs(self.pos), False)
+            elif am.close_array[-1] >= self.long_stop_win:
+                print("下多单止赢单 时间：", time_array[-1], " 价格:", self.long_stop_win, " ohlc:",
+                      bar.open_price, bar.high_price, bar.low_price, bar.close_price)
+                self.sell(self.long_stop_win, abs(self.pos), False)
+            # 本级别出现顶背驰止盈
+            # if len(sellMACDBCData['date']) > 0 and sellMACDBCData['date'][-1]
 
-        if len(beichiData.sellMACDBCData) > 0:
-            lastBeichiData = beichiData.sellMACDBCData[-1]
+
+
+
+
+
+
+        if len(huila['sell_zs_huila']['date']) > 0:
+            sell_zs_huila = huila['sell_zs_huila']
             # 最后一个信号和当前时间相等, 开始观察
-            if bar.datetime.strftime("%Y-%m-%d %H:%M") == lastBeichiData['date'][-1]:
-                self.sellFlag = True
-                self.buyFlag = False
-                self.currentPrice = bar.close_price
+            print("卖-当前bar时间：", bar.datetime.strftime("%Y-%m-%d %H:%M"), " 拉回时间：", sell_zs_huila['date'][-1])
+            if bar.datetime.strftime("%Y-%m-%d %H:%M") == sell_zs_huila['date'][-1]:
+                self.short_stop_lose = sell_zs_huila['stop_lose_price'][-1]
+                self.short_stop_win = sell_zs_huila['stop_win_price'][-1]
+                self.short_signal_price = sell_zs_huila['data'][-1]
+                self.short_signal_date = sell_zs_huila['date'][-1]
+                if self.pos == 0:
+                    # self.currentPrice = bar.close_price
+                    # 同时下停止委托单
 
-                print(lastBeichiData['date'][-1],"线顶背",)
+                    print("开空:时间 ", self.short_signal_date, " 价格:", self.short_signal_price, " ohlc:", bar.open_price,
+                          bar.high_price, bar.low_price, bar.close_price," 止损：",self.short_stop_lose," 止盈：",self.short_stop_win)
+                    self.short(close_array[-1], self.amount)
+                elif self.pos > 0:
+                    # 出现反向信号，平掉多单
+                    print("出现反向信号，平掉多单,开空单 最新价：", bar.close_price, " ohlc:",
+                          bar.open_price, bar.high_price, bar.low_price, bar.close_price,
+                          " 止损：", self.short_stop_lose, " 止盈：", self.short_stop_win)
+                    self.sell(bar.close_price, abs(self.pos))
+                    self.short(self.short_signal_price, self.amount)
+        if self.pos < 0:
+            # print("持有空单：当前价格：", am.close_array[-1], " 止损：", self.short_stop_lose, " 止盈：", self.short_stop_win)
+            if am.close_array[-1] >= self.short_stop_lose:
+                print("下空单止损单 时间：", time_array[-1], " 价格:", self.short_stop_lose, " ohlc:",
+                      bar.open_price, bar.high_price, bar.low_price, bar.close_price)
+                self.cover(self.short_stop_lose, abs(self.pos), False)
+            elif am.close_array[-1] <= self.short_stop_win:
+                print("下空单止盈单 时间：", time_array[-1], " 价格:", self.short_stop_win, " ohlc:",
+                      bar.open_price, bar.high_price, bar.low_price, bar.close_price)
+                self.cover(self.short_stop_win, abs(self.pos), False)
 
-        # dif, dea, macd = am.macd(self.fast_window, self.slow_window,self.signal_window,array=True)
-        # self.fast_ma0 = dif[-1]
-        # self.fast_ma1 = dif[-2]
-        #
-        # self.slow_ma0 = dea[-1]
-        # self.slow_ma1 = dea[-2]
-        #
-        # cross_over = self.fast_ma0 > self.slow_ma0 and self.fast_ma1 < self.slow_ma1
-        # cross_below = self.fast_ma0 < self.slow_ma0 and self.fast_ma1 > self.slow_ma1
-        #
-        # # 涨跌幅
-        # buy_condition = (bar.close_price - bar.open_price) / bar.open_price >= self.change
-        # sell_condition = (bar.close_price - bar.open_price) / bar.open_price <= -self.change
-        # # print("am长度:",len(am.close))
-        # # and buy_condition and sell_condition
-        # if cross_over:
-        #     if self.pos == 0 and buy_condition :
-        #         print("开多:", bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
-        #         self.buy(bar.close_price, 1)
-        #     elif self.pos < 0:
-        #         print("平空:", bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
-        #         self.cover(bar.close_price, 1)
-        #         # self.buy(bar.close_price, 1)
-        #
-        # elif cross_below:
-        #     if self.pos == 0 and sell_condition:
-        #         print("开空:",bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
-        #
-        #         self.short(bar.close_price, 1)
-        #     elif self.pos > 0:
-        #         print("平多:", bar.datetime, bar.open_price,bar.high_price,bar.low_price,bar.close_price, dif[-1], dea[-1], macd[-1])
-        #         self.sell(bar.close_price, 1)
-        #         # self.short(bar.close_price, 1)
-        # self.put_event()
 
     def on_order(self, order: OrderData):
         """
@@ -186,10 +200,33 @@ class ChanLunStrategy(CtaTemplate):
         """
         Callback of new trade data update.
         """
+        # orderId = trade.orderid
+        # # 多单成交后
+        # if self.pos > 0:
+        #     print("多单成交 orderId:", orderId, "止损：",self.long_stop_lose," 止盈：", self.long_stop_win,
+        #           "当前价格：",self.am.close_array[-1])
+        #     self.sell(self.long_stop_lose, abs(self.pos), True)
+        #     self.sell(self.long_stop_win, abs(self.pos), True)
+        # elif self.pos < 0:
+        #     print("空单成交 orderId:", orderId, "止损：",self.short_stop_lose," 止盈：", self.short_stop_win,
+        #           "当前价格：",self.am.close_array[-1])
+        #     self.cover(self.short_stop_lose, abs(self.pos), True)
+        #     self.cover(self.short_stop_lose, abs(self.pos), True)
+        # else:
+        #     # 本身的止盈止损单也会触发而成交
+        #     print("止盈止损单触发回调orderId",orderId)
+
         self.put_event()
 
     def on_stop_order(self, stop_order: StopOrder):
         """
         Callback of stop order update.
         """
+        print("on_stop_order",stop_order)
         pass
+
+    def getMacd(self,closePriceList):
+        close = array(closePriceList)
+        macd = ta.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
+        result = np.nan_to_num(macd)
+        return result

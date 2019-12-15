@@ -135,6 +135,9 @@ class Calc:
         }
 
     def calcData(self, period, symbol, save=False):
+        start = time.clock()  # 开始计时
+        # 统计程序执行时间
+
         klineList = []
 
         # def processKline():
@@ -153,10 +156,10 @@ class Calc:
             # 期货
             currentPeriod = self.periodMap[period]
             klineData = klineDataTool.getFutureData(symbol, currentPeriod, 1000)
-            bigLevelPeriod = self.futureLevelMap[currentPeriod]
-            klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 1000)
-            klineDataBigLevel = pydash.filter_(klineDataBigLevel,
-                                               lambda klineItem: klineItem['time'] >= klineData[0]['time'])
+            # bigLevelPeriod = self.futureLevelMap[currentPeriod]
+            # klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 1000)
+            # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
+            #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
         # print("从接口到的数据", klineData)
         # 存数据快照，调试时候用
         if save:
@@ -178,7 +181,7 @@ class Calc:
         #     klineDataBigLevel = json.load(f)
 
         jsonObj = klineData
-        jsonObjBigLevel = klineDataBigLevel
+        # jsonObjBigLevel = klineDataBigLevel
 
         openPriceList = []
         highList = []
@@ -191,12 +194,12 @@ class Calc:
         closeListBigLevel = []
         timeListBigLevel = []
 
-        for i in range(len(jsonObjBigLevel)):
-            item = jsonObjBigLevel[i]
-            closeListBigLevel.append(round(float(item['close']), 2))
-            localTime = time.localtime(item['time'])
-            strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
-            timeListBigLevel.append(strTime)
+        # for i in range(len(jsonObjBigLevel)):
+        #     item = jsonObjBigLevel[i]
+        #     closeListBigLevel.append(round(float(item['close']), 2))
+        #     localTime = time.localtime(item['time'])
+        #     strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
+        #     timeListBigLevel.append(strTime)
 
         for i in range(len(jsonObj)):
             item = jsonObj[i]
@@ -211,7 +214,7 @@ class Calc:
             volumeList.append(round(float(item['volume']), 2))
 
         # K线所在笔的方向
-        directionList = [0 for i in range(len(timeList))]
+        # directionList = [0 for i in range(len(timeList))]
 
         # print(highList)
         # print(lowList)
@@ -235,8 +238,8 @@ class Calc:
         for i in range(len(biProcess.biList)):
             item = biProcess.biList[i]
             biResult[item.klineList[-1].middle] = item.direction
-            for j in range(item.start + 1, item.end + 1):
-                directionList[j] = item.direction
+            # for j in range(item.start + 1, item.end + 1):
+            #     directionList[j] = item.direction
 
         # print("笔结果:", len(biProcess.biList), biResult)
 
@@ -297,14 +300,14 @@ class Calc:
         resJson['higherDuanData'] = getDuanData(biProcess, higherDuanProcess, timeList)
         resJson['higherHigherDuanData'] = getDuanData(biProcess, higherHigherDuanProcess, timeList)
 
-        resJson['diff'] = getMacd(closePriceList)[0].tolist()
-        resJson['dea'] = getMacd(closePriceList)[1].tolist()
-        resJson['macd'] = getMacd(closePriceList)[2].tolist()
-        resJson['macdAreaData'] = calcArea(resJson['diff'], resJson['macd'], timeList)
-        resJson['boll_up'] = getBoll(closePriceList)[0].tolist()
-        resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
-        resJson['boll_bottom'] = getBoll(closePriceList)[2].tolist()
-        resJson['ama'] = getAma(closePriceList).tolist()
+        # resJson['diff'] = getMacd(closePriceList)[0].tolist()
+        # resJson['dea'] = getMacd(closePriceList)[1].tolist()
+        # resJson['macd'] = getMacd(closePriceList)[2].tolist()
+        # resJson['macdAreaData'] = calcArea(resJson['diff'], resJson['macd'], timeList)
+        # resJson['boll_up'] = getBoll(closePriceList)[0].tolist()
+        # resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
+        # resJson['boll_bottom'] = getBoll(closePriceList)[2].tolist()
+        # resJson['ama'] = getAma(closePriceList).tolist()
         resJson['volume'] = volumeList
         resJson['zsdata'] = zsdata
         resJson['zsflag'] = zsflag
@@ -314,40 +317,40 @@ class Calc:
         resJson['higher_duan_zsflag'] = higher_duan_zsflag
 
         # 获取大级别macd
-        resJson['diffBigLevel'] = getMacd(closeListBigLevel)[0].tolist()
-        resJson['deaBigLevel'] = getMacd(closeListBigLevel)[1].tolist()
-        resJson['macdBigLevel'] = getMacd(closeListBigLevel)[2].tolist()
-        resJson['dateBigLevel'] = timeListBigLevel
+        # resJson['diffBigLevel'] = getMacd(closeListBigLevel)[0].tolist()
+        # resJson['deaBigLevel'] = getMacd(closeListBigLevel)[1].tolist()
+        # resJson['macdBigLevel'] = getMacd(closeListBigLevel)[2].tolist()
+        # resJson['dateBigLevel'] = timeListBigLevel
 
-        diffList = resJson['diff']
-        deaList = resJson['dea']
-        macdList = resJson['macd']
+        # diffList = resJson['diff']
+        # deaList = resJson['dea']
+        # macdList = resJson['macd']
 
         # 背驰计算
         time_array = np.array(timeList)
-        macd_array = np.array(macdList)
-        diff_array = np.array(diffList)
-        dea_array = np.array(deaList)
-        high_array = np.array(highList)
-        low_array = np.array(lowList)
-        open_array = np.array(openPriceList)
-        close_array = np.array(closePriceList)
-        beichiData = divergence.calcAndNote(time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array, biProcess.biList, biResult, duanResult)
-        beichiData2 = divergence.calcAndNote(time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array, biProcess.biList, biResult, higherDuanResult, True)
-        buyMACDBCData = beichiData['buyMACDBCData']
-        sellMACDBCData = beichiData['sellMACDBCData']
-        buyMACDBCData2 = beichiData2['buyMACDBCData']
-        sellMACDBCData2 = beichiData2['sellMACDBCData']
+        # macd_array = np.array(macdList)
+        # diff_array = np.array(diffList)
+        # dea_array = np.array(deaList)
+        # high_array = np.array(highList)
+        # low_array = np.array(lowList)
+        # open_array = np.array(openPriceList)
+        # close_array = np.array(closePriceList)
+        # beichiData = divergence.calcAndNote(time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array, biProcess.biList, biResult, duanResult)
+        # beichiData2 = divergence.calcAndNote(time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array, biProcess.biList, biResult, higherDuanResult, True)
+        # buyMACDBCData = beichiData['buyMACDBCData']
+        # sellMACDBCData = beichiData['sellMACDBCData']
+        # buyMACDBCData2 = beichiData2['buyMACDBCData']
+        # sellMACDBCData2 = beichiData2['sellMACDBCData']
 
-        buyHigherMACDBCData = {}
-        buyHigherMACDBCData['date'] = []
-        buyHigherMACDBCData['data'] = []
-        buyHigherMACDBCData['value'] = []
-
-        sellHigherMACDBCData = {}
-        sellHigherMACDBCData['date'] = []
-        sellHigherMACDBCData['data'] = []
-        sellHigherMACDBCData['value'] = []
+        # buyHigherMACDBCData = {}
+        # buyHigherMACDBCData['date'] = []
+        # buyHigherMACDBCData['data'] = []
+        # buyHigherMACDBCData['value'] = []
+        #
+        # sellHigherMACDBCData = {}
+        # sellHigherMACDBCData['date'] = []
+        # sellHigherMACDBCData['data'] = []
+        # sellHigherMACDBCData['value'] = []
 
         # strategy3计算
         resJson['notLower'] = calcNotLower(duanResult, lowList)
@@ -362,11 +365,11 @@ class Calc:
         #         sellHigherMACDBCData['date'].append(sellMACDBCData2['date'][x])
         #         sellHigherMACDBCData['data'].append(sellMACDBCData2['data'][x])
         #         sellHigherMACDBCData['value'].append(sellMACDBCData2['value'][x])
-        resJson['buyMACDBCData'] = buyMACDBCData
-        resJson['sellMACDBCData'] = sellMACDBCData
-
-        resJson['buyHigherMACDBCData'] = buyMACDBCData2
-        resJson['sellHigherMACDBCData'] = sellMACDBCData2
+        # resJson['buyMACDBCData'] = buyMACDBCData
+        # resJson['sellMACDBCData'] = sellMACDBCData
+        #
+        # resJson['buyHigherMACDBCData'] = buyMACDBCData2
+        # resJson['sellHigherMACDBCData'] = sellMACDBCData2
 
         resJson['buy_zs_huila'] = huila['buy_zs_huila']
         resJson['sell_zs_huila'] =huila['sell_zs_huila']
@@ -385,6 +388,9 @@ class Calc:
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)
+
+        elapsed = (time.clock() - start)  # 结束计时
+        print("程序执行的时间:" + str(elapsed) + "s")  # 印出时间
         return resJson
 
 

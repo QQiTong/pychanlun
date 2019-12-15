@@ -189,19 +189,38 @@
     justify-content: center;
 
     .echarts-item {
-        width: 1260px;
-        height: 1000px;
+        //width: 845px;
+        //height: 650px;
+        width: 845px;
+        height: 650px;
         border: 1px solid #fff;
     }
 }
 
 .echarts {
     //width: 1260px;
-    height: 1000px;
+    height: 650px;
     //text-align: center;
     //line-height: 500px;
     //font-weight: bold;
     //color: #688a80;
+}
+
+.echarts-list-big {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    .echarts-item-big {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        border: 1px solid #fff;
+    }
+}
+
+.echarts-big {
+    height: 100vh;
 }
 
 .bold {

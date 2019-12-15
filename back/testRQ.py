@@ -30,34 +30,42 @@ period = '3m'
 # }
 # end = datetime.now() + timedelta(1)
 end = datetime.now() + timedelta(1)
-df = rq.get_price('AU1912', frequency='240m', fields=['open', 'high', 'low', 'close', 'volume'],
-                  start_date='2019-08-28', end_date='2019-09-12')
-ohlc_dict = {
-    'open': 'first',
-    'high': 'max',
-    'low': 'min',
-    'close': 'last',
-    'volume': 'sum'
-}
+df = rq.get_price('MA2001', frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+                  start_date='2019-12-11', end_date='2019-12-13')
+print(df)
+# df2 = rq.get_price('FU2005', frequency='60m', fields=['open', 'high', 'low', 'close', 'volume'],
+#                   start_date='2019-08-28', end_date='2019-11-30')
+# df3 = rq.get_price('FU2005', frequency='240m', fields=['open', 'high', 'low', 'close', 'volume'],
+#                   start_date='2019-08-28', end_date='2019-11-30')
+# df4 = rq.get_price('FU2005', frequency='5m', fields=['open', 'high', 'low', 'close', 'volume'],
+#                   start_date='2019-08-28', end_date='2019-11-30')
+# ohlc_dict = {
+#     'open': 'first',
+#     'high': 'max',
+#     'low': 'min',
+#     'close': 'last',
+#     'volume': 'sum'
+# }
 # df.index = pd.DatetimeIndex(df.index)
 
 # 聚合k线
 # df = df.resample('4H', closed='left', label='left') \
 #     .agg(ohlc_dict).dropna(how='any')
-print(df)
+
+
 
 # 品种列表
 
-symbolListFuture = ['RB2001', 'HC2001', 'RU2001', 'NI1911', 'FU2001', 'ZN1911', 'SP2001', 'BU1912',
-                    # 'CU1910', 'AL1910','AU1912', 'AG1912',
-                    'MA2001', 'TA2001', 'SR2001', 'OI2001', 'AP1910', 'CF2001',
-                    'M2001', 'I2001', 'EG2001', 'J2001', 'JM2001', 'PP2001', 'L2001'
-                    # 'RM2001','FG2001', 'ZC1911','CJ1912','Y2001', 'P2001','L2001', 'C2001','V2001', 'A2001', 'B1910'
-                    ]
-symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU',
-              'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
-              'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
-              ]
+# symbolListFuture = ['RB2001', 'HC2001', 'RU2001', 'NI1911', 'FU2001', 'ZN1911', 'SP2001', 'BU1912',
+#                     # 'CU1910', 'AL1910','AU1912', 'AG1912',
+#                     'MA2001', 'TA2001', 'SR2001', 'OI2001', 'AP1910', 'CF2001',
+#                     'M2001', 'I2001', 'EG2001', 'J2001', 'JM2001', 'PP2001', 'L2001'
+#                     # 'RM2001','FG2001', 'ZC1911','CJ1912','Y2001', 'P2001','L2001', 'C2001','V2001', 'A2001', 'B1910'
+#                     ]
+# symbolList = ['RB', 'HC', 'RU', 'NI', 'FU', 'ZN', 'SP', 'BU',
+#               'MA', 'TA', 'SR', 'OI', 'AP', 'CF',
+#               'M', 'I', 'EG', 'J', 'JM', 'PP', 'L'
+#               ]
 
 # dominantSymbolInfoList = []
 # for i in range(len(symbolList)):

@@ -22,14 +22,33 @@ periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
 def getDominantSymbol():
+    # symbolList = config['symbolList']
+    # dominantSymbolInfoList = []
+    #
+    # dominantSymbolList = []
+    # for i in range(len(symbolList)):
+    #     df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
+    #     dominantSymbol = df[-1]
+    #     dominantSymbolList.append(dominantSymbol)
+    #     dominantSymbolInfo = rq.instruments(dominantSymbol)
+    #     dominantSymbolInfoList.append(dominantSymbolInfo.__dict__)
+    #     print("当前主力合约:", dominantSymbolInfoList)
+    # return dominantSymbolList
+    # 需要监控的合约
     symbolList = config['symbolList']
-
+    # 主力合约列表
     dominantSymbolList = []
+    # 主力合约详细信息
+    dominantSymbolInfoList = {}
     for i in range(len(symbolList)):
         df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
         dominantSymbol = df[-1]
         dominantSymbolList.append(dominantSymbol)
-    return dominantSymbolList
+        dominantSymbolInfo = rq.instruments(dominantSymbol)
+        dominantSymbolInfoList[dominantSymbol] = dominantSymbolInfo.__dict__
+
+    print("当前主力合约:", dominantSymbolInfoList)
+    print("当前主力合约2:", dominantSymbolList)
 
 
 def testDb():
@@ -54,24 +73,24 @@ def testChange():
          'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
          ('rqdatad-pro.ricequant.com', 16011))
     dominantSymbolList = getDominantSymbol()
-    symbolChangeMap = {}
-    end = datetime.now() + timedelta(1)
-    start = datetime.now() + timedelta(-7)
-    for i in range(len(dominantSymbolList)):
-        item = dominantSymbolList[i]
-        print(item)
-        df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-                            start_date=start, end_date=end)
-        df1m = rq.get_price(item, frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
-                            start_date=start, end_date=end)
-        if df1d is None or df1m is None:
-            change = "--"
-        else:
-            preday = df1d.iloc[0, 3]
-            today = df1m.iloc[0, 3]
-            change = (today - preday) / preday
-        symbolChangeMap[item] = change
-        print(change)
+    # symbolChangeMap = {}
+    # end = datetime.now() + timedelta(1)
+    # start = datetime.now() + timedelta(-7)
+    # for i in range(len(dominantSymbolList)):
+    #     item = dominantSymbolList[i]
+    #     print(item)
+    #     df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+    #                         start_date=start, end_date=end)
+    #     df1m = rq.get_price(item, frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
+    #                         start_date=start, end_date=end)
+    #     if df1d is None or df1m is None:
+    #         change = "--"
+    #     else:
+    #         preday = df1d.iloc[0, 3]
+    #         today = df1m.iloc[0, 3]
+    #         change = (today - preday) / preday
+    #     symbolChangeMap[item] = change
+    #     print(change)
     return False
 
 
@@ -203,7 +222,8 @@ def saveBeichiLog(symbol, period, price, signal, remark):
         'remark': remark
     })
 def testBeichiDb():
-    saveBeichiLog(symbol="BTC_CQ", period="60m", price=8166, signal=True, remark="测试")
+    saveBeichiLog(symbol="BTC_CQ", period="15m", price=8166, signal=True, remark="break B")
+    saveBeichiLog(symbol="BTC_CQ", period="30m", price=8166, signal=True, remark="Vfan B")
 
 def testHuila():
     init('license',
@@ -214,8 +234,9 @@ def testHuila():
     print("结果：",result)
 def app():
     # testBitmex()
-    # testBeichiDb()
-    testHuila()
+    testBeichiDb()
+    # testHuila()
+    # testChange()
 
 if __name__ == '__main__':
     app()

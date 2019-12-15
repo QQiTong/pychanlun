@@ -5,10 +5,52 @@ var app = new Vue({
         futureSymbolMap: {},
         timer: null,
         symbol: "",
+        kxType:"",
         requestFlag: true,
         marginLevelCompany: 1.125,// 不同期货公司提高的点数不一样
         marginPrice: 0,//每手需要的保证金
         contractMultiplier: 1,
+
+        //start用于仓位管理计算
+        currentSymbol: null,
+        currentMarginRate: null,
+        // 合约乘数
+        contractMultiplier: null,
+        // 账户总额
+        account: 10,
+        //开仓价格
+        openPrice: null,
+        //止损价格
+        stopPrice: null,
+        //开仓手数
+        maxOrderCount: null,
+        //资金使用率
+        accountUseRate: null,
+        //最大资金使用率
+        maxAccountUseRate: 0.1,
+        //止损系数
+        stopRate: 0.01,
+        //数字货币手续费 20倍杠杆
+        digitCoinFee: 0.0006,
+
+        // 1手需要的保证金
+        perOrderMargin: 0,
+        // 1手止损金额
+        perOrderStopMoney: 0,
+        // 1手止损百分比
+        perOrderStopRate: 0,
+        // 总保证金
+        totalOrderMargin: 0,
+        // 总止损额
+        totalOrderStopMoney: 0,
+
+        // 动态止盈价格(动态止盈部分手数使剩下的止损也不亏钱)
+        dynamicWinPrice: null,
+        // 动态止盈手数
+        dynamicWinCount: 0,
+        //end仓位管理计算
+
+
         digitCoinsSymbolList: [{
             contract_multiplier: 1,
             de_listed_date: "forever",
@@ -46,8 +88,13 @@ var app = new Vue({
         this.getDominantSymbol()
         let that = this;
         this.symbol = getParams('symbol') || 'BTC_CQ'
-        console.log("symbol", this.symbol)
-        document.title = this.symbol
+        this.kxType = getParams('kxType')
+        //  大图只显示选中的k线图
+        if(this.kxType !==""){
+           document.getElementById(this.kxType).style.display = "block"
+        }
+        console.log("symbol", this.symbol,this.kxType)
+
         // 取出本地缓存
         let symbolList = window.localStorage.getItem("symbolList")
         this.futureSymbolList = JSON.parse(symbolList)
@@ -89,7 +136,13 @@ var app = new Vue({
         switchSymbol(symbol, update) {
             this.symbol = symbol
             let that = this;
-            document.title = symbol
+            // document.title = symbol
+            if(this.kxType!==""){
+                document.title = symbol + "-"+this.kxType
+            }else{
+                document.title = symbol 
+            }
+
             if (that.timer) {
                 clearTimeout(that.timer)
                 that.timer = setInterval(() => {
@@ -150,28 +203,29 @@ var app = new Vue({
             option.series[2].data = resultData.duanValues;
             option.series[2].markPoint.data = resultData.duanPriceValues;
 
-            option.series[3].data = calculateMA(resultData, 5);
-            option.series[4].data = calculateMA(resultData, 10);
-            option.series[5].data = resultData.macd;
-            option.series[6].data = resultData.diff;
-            option.series[6].markPoint.data = resultData.bcMACDValues;
-            option.series[7].data = resultData.dea;
-            option.series[7].markPoint.data = resultData.macdAreaValues;
+            option.series[3].data = resultData.higherDuanValues;
+            option.series[4].data = calculateMA(resultData, 5);
+            option.series[5].data = calculateMA(resultData, 10);
+            // option.series[5].data = resultData.macd;
+            // option.series[6].data = resultData.diff;
+            // option.series[6].markPoint.data = resultData.bcMACDValues;
+            // option.series[7].data = resultData.dea;
+            // option.series[7].markPoint.data = resultData.macdAreaValues;
 
-            option.series[8].data = resultData.macdBigLevel;
-            option.series[9].data = resultData.diffBigLevel;
-            option.series[10].data = resultData.deaBigLevel;
+            // option.series[8].data = resultData.macdBigLevel;
+            // option.series[9].data = resultData.diffBigLevel;
+            // option.series[10].data = resultData.deaBigLevel;
 
             // option.series[11].data = resultData.volume;
-            option.series[11].data = resultData.higherDuanValues;
+
             // option.series[15].data = resultData.markLineData;
 
 
             option.xAxis[0].data = resultData.time;
-            option.xAxis[1].data = resultData.time;
-            option.xAxis[2].data = resultData.timeBigLevel;
+            // option.xAxis[1].data = resultData.time;
+            // option.xAxis[2].data = resultData.timeBigLevel;
             // option.xAxis[3].data = resultData.time;
-            var lastPrice = resultData.close[resultData.close.length - 1]
+            // var lastPrice = resultData.close[resultData.close.length - 1]
 
 
             return option
@@ -253,22 +307,19 @@ var app = new Vue({
                     },
                     toolbox: {
                         orient: 'horizontal',
-                        itemSize: 16,
+                        itemSize: 20,
                         itemGap: 8,
                         top: 16,
                         right: '1.4%',
                         feature: {
-                            // myLevel1: {
-                            //     show: true,
-                            //     title: '1分钟',
-                            //     icon: 'image://img/icon_1m.png',
-                            //     onclick: function () {
-                            //         kxType = '1m'
-                            //         option.title.subtext = '1m'
-                            //
-                            //         refresh('refresh');
-                            //     }
-                            // },
+                            myLevel1: {
+                                show: true,
+                                title: '放大',
+                                icon: 'image://img/big-kline.png',
+                                onclick: function () {
+                                    window.open("kline-big.html?symbol="+that.symbol+"&kxType="+kxType)
+                                }
+                            },
                             // myLevel3: {
                             //     show: true,
                             //     title: '3分钟',
@@ -367,9 +418,9 @@ var app = new Vue({
                             //     },
                         },
                     },
-                    color: ['yellow', 'green', 'blue', 'white', 'white', 'white', 'white', 'white'],
+                    color: ['yellow', 'green', 'blue', 'white', 'white','red' /*'white', 'white', 'white'*/],
                     legend: {
-                        data: ['笔', '段', '高级别段', 'MA5', 'MA10', '布林上轨', '布林中轨', '布林下轨'],
+                        data: ['笔', '段', '高级别段', 'MA5', 'MA10','MA60' /*'布林上轨', '布林中轨', '布林下轨'*/],
 
                         selected: {
                             '笔': true,
@@ -377,9 +428,7 @@ var app = new Vue({
                             '高级别段': true,
                             'MA5': false,
                             'MA10': false,
-                            '布林上轨': false,
-                            '布林中轨': false,
-                            '布林下轨': false,
+                            'MA60': false,
                             // 'markline': true
                         },
                         top: 10,
@@ -390,22 +439,22 @@ var app = new Vue({
                     grid: [
                         {//直角坐标系
                             left: '0%',
-                            right: '10%',
-                            height: '57%',
+                            right: '8%',
+                            height: '85%',
                             top: 50,
                         },
-                        {
-                            top: '65%',
-                            height: '20%',
-                            left: '0%',
-                            right: '10%',
-                        },
-                        {
-                            top: '80%',
-                            height: '15%',
-                            left: '0%',
-                            right: '10%',
-                        },
+                        // {
+                        //     top: '65%',
+                        //     height: '20%',
+                        //     left: '0%',
+                        //     right: '10%',
+                        // },
+                        // {
+                        //     top: '80%',
+                        //     height: '15%',
+                        //     left: '0%',
+                        //     right: '10%',
+                        // },
                         // {
                         //     top: '90%',
                         //     height: '5%',
@@ -437,32 +486,32 @@ var app = new Vue({
                             //     }
                             // }
                         },
-                        {
-                            type: 'category',
-                            gridIndex: 1,
-                            data: resultData.time,
-                            axisTick: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {lineStyle: {color: '#8392A5'}}
-
-
-                        },
-                        {
-                            type: 'category',
-                            gridIndex: 2,
-                            data: resultData.timeBigLevel,
-                            axisTick: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: false
-                            },
-                            // axisLine: {lineStyle: {color: '#8392A5'}}
-                        },
+                        // {
+                        //     type: 'category',
+                        //     gridIndex: 1,
+                        //     data: resultData.time,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {lineStyle: {color: '#8392A5'}}
+                        //
+                        //
+                        // },
+                        // {
+                        //     type: 'category',
+                        //     gridIndex: 2,
+                        //     data: resultData.timeBigLevel,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: false
+                        //     },
+                        //     // axisLine: {lineStyle: {color: '#8392A5'}}
+                        // },
                         // {
                         //     type: 'category',
                         //     gridIndex: 3,
@@ -492,38 +541,38 @@ var app = new Vue({
                             axisLine: {lineStyle: {color: bgColor}},
                         },
                         //本级别macd
-                        {
-                            gridIndex: 1,
-                            splitNumber: 2,
-                            axisTick: {
-                                show: false
-                            },
-                            splitLine: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
-                        },
+                        // {
+                        //     gridIndex: 1,
+                        //     splitNumber: 2,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     splitLine: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
+                        // },
                         //大级别macd
-                        {
-                            gridIndex: 2,
-                            splitNumber: 2,
-                            axisLine: {
-                                onZero: false
-                            },
-                            axisTick: {
-                                show: false
-                            },
-                            splitLine: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {lineStyle: {color: '#8392A5'}},
-                        },
+                        // {
+                        //     gridIndex: 2,
+                        //     splitNumber: 2,
+                        //     axisLine: {
+                        //         onZero: false
+                        //     },
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     splitLine: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {lineStyle: {color: '#8392A5'}},
+                        // },
                         // 成交量
                         // {
                         //     gridIndex: 3,
@@ -552,13 +601,6 @@ var app = new Vue({
                             end: 100,
                             minSpan: 10,
                         },
-                        {
-                            type: 'inside',
-                            xAxisIndex: [0, 1],
-                            start: zoomStart,
-                            end: 100,
-                            minSpan: 10,
-                        },
                         // {
                         //     type: 'inside',
                         //     xAxisIndex: [0, 1],
@@ -566,34 +608,41 @@ var app = new Vue({
                         //     end: 100,
                         //     minSpan: 10,
                         // },
-                        {
-                            xAxisIndex: [0, 1, 2],
-                            type: 'slider',
-                            start: zoomStart,
-                            end: 100,
-                            top: '95%',
-                            minSpan: 10,
-                            textStyle: {
-                                color: '#8392A5'
-                            },
-                            dataBackground: {
-                                areaStyle: {
-                                    color: '#8392A5'
-                                },
-                                lineStyle: {
-                                    opacity: 0.8,
-                                    color: '#8392A5'
-                                }
-                            },
-                            handleStyle: {
-                                color: '#fff',
-                                shadowBlur: 3,
-                                shadowColor: 'rgba(0, 0, 0, 0.6)',
-                                shadowOffsetX: 2,
-                                shadowOffsetY: 2
-                            }
-
-                        }
+                        // {
+                        //     type: 'inside',
+                        //     xAxisIndex: [0, 1],
+                        //     start: zoomStart,
+                        //     end: 100,
+                        //     minSpan: 10,
+                        // },
+                        // {
+                        //     xAxisIndex: [0, 1, 2],
+                        //     type: 'slider',
+                        //     start: zoomStart,
+                        //     end: 100,
+                        //     top: '95%',
+                        //     minSpan: 10,
+                        //     textStyle: {
+                        //         color: '#8392A5'
+                        //     },
+                        //     dataBackground: {
+                        //         areaStyle: {
+                        //             color: '#8392A5'
+                        //         },
+                        //         lineStyle: {
+                        //             opacity: 0.8,
+                        //             color: '#8392A5'
+                        //         }
+                        //     },
+                        //     handleStyle: {
+                        //         color: '#fff',
+                        //         shadowBlur: 3,
+                        //         shadowColor: 'rgba(0, 0, 0, 0.6)',
+                        //         shadowOffsetX: 2,
+                        //         shadowOffsetY: 2
+                        //     }
+                        //
+                        // }
                     ],
                     series: [
                         //index 0
@@ -610,10 +659,6 @@ var app = new Vue({
                                     borderColor0: downBorderColor
                                 }
                             },
-                            // markPoint: {
-                            //     data: resultData.mmdValues,
-                            //     animation: false
-                            // },
                             markPoint: {
                                 data: resultData.huilaValues,
                                 animation: false
@@ -668,6 +713,23 @@ var app = new Vue({
                         },
                         //index 3
                         {
+                            name: '高级别段',
+                            type: 'line',
+                            z: 1,
+                            data: resultData.higherDuanValues,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 1,
+                                    type: 'solid',
+                                    width: 2,
+                                    color: 'blue'
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false
+                        },
+                        //index 4
+                        {
                             name: 'MA5',
                             type: 'line',
                             data: calculateMA(resultData, 5),
@@ -683,7 +745,7 @@ var app = new Vue({
                             symbol: 'none',
                             animation: false
                         },
-                        //index 4
+                        //index 5
                         {
                             name: 'MA10',
                             type: 'line',
@@ -700,158 +762,174 @@ var app = new Vue({
                             symbol: 'none',
                             animation: false
                         },
-                        //index 5
-                        {
-                            name: 'MACD',
-                            type: 'bar',
-                            xAxisIndex: 1,
-                            yAxisIndex: 1,
-                            data: resultData.macd,
-                            barWidth: 2,
-                            itemStyle: {
-                                normal: {
-                                    color: function (params) {
-                                        var colorList;
-                                        if (params.data >= 0) {
-                                            if (params.data >= macdUpLastValue) {
-                                                colorList = macdUpDarkColor
-                                            } else {
-                                                colorList = macdUpLightColor
-                                            }
-                                            macdUpLastValue = params.data
-                                        } else {
-                                            if (params.data <= macdDownLastValue) {
-                                                colorList = macdDownDarkColor
-                                            } else {
-                                                colorList = macdDownLightColor
-                                            }
-                                            macdDownLastValue = params.data
-                                        }
-                                        return colorList;
-                                    },
-                                }
-                            }
-                        },
-                        //index 6
-
-                        {
-                            name: 'DIFF',
+                         {
+                            name: 'MA60',
                             type: 'line',
-                            xAxisIndex: 1,
-                            yAxisIndex: 1,
-                            data: resultData.diff,
+                            data: calculateMA(resultData, 60),
                             smooth: true,
                             lineStyle: {
                                 normal: {
                                     opacity: 1,
                                     type: 'solid',
-                                    width: 1,
-                                    color: 'white'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false,
-                            markPoint: {
-                                data: resultData.bcMACDValues
-                            },
-                        },
-                        //index 7
-
-                        {
-                            name: 'DEA',
-                            type: 'line',
-                            xAxisIndex: 1,
-                            yAxisIndex: 1,
-                            data: resultData.dea,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 1,
-                                    color: 'yellow'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false,
-                            markPoint: {
-                                data: resultData.macdAreaValues
-                            },
-                        },
-                        //index 8
-                        //大级别MACD
-                        {
-                            name: 'BigMACD',
-                            type: 'bar',
-                            xAxisIndex: 2,
-                            yAxisIndex: 2,
-                            data: resultData.macdBigLevel,
-                            barWidth: 3,
-                            itemStyle: {
-                                normal: {
-                                    color: function (params) {
-                                        var colorList;
-
-                                        if (params.data >= 0) {
-                                            if (params.data >= bigMacdUpLastValue) {
-                                                colorList = macdUpDarkColor
-                                            } else {
-                                                colorList = macdUpLightColor
-                                            }
-                                            bigMacdUpLastValue = params.data
-                                        } else {
-                                            if (params.data <= bigMacdDownLastValue) {
-                                                colorList = macdDownDarkColor
-                                            } else {
-                                                colorList = macdDownLightColor
-                                            }
-                                            bigMacdDownLastValue = params.data
-                                        }
-                                        return colorList;
-                                    },
-                                }
-                            }
-                        },
-                        {
-                            name: 'DIFF',
-                            type: 'line',
-                            xAxisIndex: 2,
-                            yAxisIndex: 2,
-                            data: resultData.diffBigLevel,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 1,
-                                    color: 'white'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false,
-                            markPoint: {
-                                // data: resultData.bcMACDValues
-                            },
-                        },
-                        //index 9
-                        {
-                            name: 'DEA',
-                            type: 'line',
-                            xAxisIndex: 2,
-                            yAxisIndex: 2,
-                            data: resultData.deaBigLevel,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 1,
-                                    color: 'yellow'
+                                    width: 2,
+                                    color: "red"
                                 },
                             },
                             symbol: 'none',
                             animation: false
                         },
+                        //index 5
+                        // {
+                        //     name: 'MACD',
+                        //     type: 'bar',
+                        //     xAxisIndex: 1,
+                        //     yAxisIndex: 1,
+                        //     data: resultData.macd,
+                        //     barWidth: 2,
+                        //     itemStyle: {
+                        //         normal: {
+                        //             color: function (params) {
+                        //                 var colorList;
+                        //                 if (params.data >= 0) {
+                        //                     if (params.data >= macdUpLastValue) {
+                        //                         colorList = macdUpDarkColor
+                        //                     } else {
+                        //                         colorList = macdUpLightColor
+                        //                     }
+                        //                     macdUpLastValue = params.data
+                        //                 } else {
+                        //                     if (params.data <= macdDownLastValue) {
+                        //                         colorList = macdDownDarkColor
+                        //                     } else {
+                        //                         colorList = macdDownLightColor
+                        //                     }
+                        //                     macdDownLastValue = params.data
+                        //                 }
+                        //                 return colorList;
+                        //             },
+                        //         }
+                        //     }
+                        // },
+                        //index 6
+
+                        // {
+                        //     name: 'DIFF',
+                        //     type: 'line',
+                        //     xAxisIndex: 1,
+                        //     yAxisIndex: 1,
+                        //     data: resultData.diff,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'white'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false,
+                        //     markPoint: {
+                        //         data: resultData.bcMACDValues
+                        //     },
+                        // },
+                        //index 7
+
+                        // {
+                        //     name: 'DEA',
+                        //     type: 'line',
+                        //     xAxisIndex: 1,
+                        //     yAxisIndex: 1,
+                        //     data: resultData.dea,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'yellow'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false,
+                        //     markPoint: {
+                        //         data: resultData.macdAreaValues
+                        //     },
+                        // },
+                        //index 8
+                        //大级别MACD
+                        // {
+                        //     name: 'BigMACD',
+                        //     type: 'bar',
+                        //     xAxisIndex: 2,
+                        //     yAxisIndex: 2,
+                        //     data: resultData.macdBigLevel,
+                        //     barWidth: 3,
+                        //     itemStyle: {
+                        //         normal: {
+                        //             color: function (params) {
+                        //                 var colorList;
+                        //
+                        //                 if (params.data >= 0) {
+                        //                     if (params.data >= bigMacdUpLastValue) {
+                        //                         colorList = macdUpDarkColor
+                        //                     } else {
+                        //                         colorList = macdUpLightColor
+                        //                     }
+                        //                     bigMacdUpLastValue = params.data
+                        //                 } else {
+                        //                     if (params.data <= bigMacdDownLastValue) {
+                        //                         colorList = macdDownDarkColor
+                        //                     } else {
+                        //                         colorList = macdDownLightColor
+                        //                     }
+                        //                     bigMacdDownLastValue = params.data
+                        //                 }
+                        //                 return colorList;
+                        //             },
+                        //         }
+                        //     }
+                        // },
+                        // {
+                        //     name: 'DIFF',
+                        //     type: 'line',
+                        //     xAxisIndex: 2,
+                        //     yAxisIndex: 2,
+                        //     data: resultData.diffBigLevel,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'white'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false,
+                        //     markPoint: {
+                        //         // data: resultData.bcMACDValues
+                        //     },
+                        // },
+                        //index 9
+                        // {
+                        //     name: 'DEA',
+                        //     type: 'line',
+                        //     xAxisIndex: 2,
+                        //     yAxisIndex: 2,
+                        //     data: resultData.deaBigLevel,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'yellow'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false
+                        // },
                         //index 10
                         // {
                         //     name: 'Volume',
@@ -877,122 +955,7 @@ var app = new Vue({
                         //         }
                         //     }
                         // },
-                        //index 11
-                        {
-                            name: '高级别段',
-                            type: 'line',
-                            z: 1,
-                            data: resultData.higherDuanValues,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 2,
-                                    color: 'blue'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        },
-                        //index 12
-                        {
-                            name: '布林上轨',
-                            type: 'line',
-                            data: resultData.boll_up,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 0.6,
-                                    type: 'dotted',
-                                    width: 1,
-                                    color: '#fff'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        },
-                        //index 13
-                        {
-                            name: '布林中轨',
-                            type: 'line',
-                            data: resultData.boll_middle,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 0.5,
-                                    type: 'dotted',
-                                    width: 1,
-                                    color: "#fff"
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        },
-                        //index 14
-                        {
-                            name: '布林下轨',
-                            type: 'line',
-                            data: resultData.boll_bottom,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 0.6,
-                                    type: 'dotted',
-                                    width: 1,
-                                    color: '#fff'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        },
-                        //index 15
-                        // {
-                        //     name: 'markline',
-                        //     type: 'line',
-                        //     data: resultData.markLineData,
-                        //     label:{
-                        //         normal:{
-                        //             show:true,
-                        //             position:'end',
-                        //             formatter:'止损前高'
-                        //         }
-                        //     },
-                        //     smooth: true,
-                        //     lineStyle: {
-                        //         normal: {
-                        //             opacity: 1,
-                        //             type: 'dash',
-                        //             width: 0.8,
-                        //             color: 'yellow'
-                        //         },
-                        //     },
-                        //     itemStyle: {
-                        //         normal: {
-                        //             width: 0,
-                        //             color: 'yellow'
-                        //         }
-                        //     },
-                        //     symbol: 'circle',
-                        //     animation: false
-                        // },
-                        // 16
-                        // {
-                        //     name: 'ama',
-                        //     data: resultData.ama,
-                        //     type: 'line',
-                        //     lineStyle: {
-                        //         normal: {
-                        //             opacity: 1,
-                        //             type: 'solid',
-                        //             width: 2,
-                        //         },
-                        //     },
-                        //     itemStyle:{
-                        //         normal:{
-                        //             color:'#ffffffff'
-                        //         }
-                        //     }
-                        // }
+
                     ],
                     graphic: [],
                 };
@@ -1030,63 +993,15 @@ var app = new Vue({
 
 
             //
-            const macddata = jsonObj.macd;
-            const diffdata = jsonObj.diff;
-            const deadata = jsonObj.dea;
+            // const macddata = jsonObj.macd;
+            // const diffdata = jsonObj.diff;
+            // const deadata = jsonObj.dea;
 
-            const macdBigLevel = jsonObj.macdBigLevel;
-            const diffBigLevel = jsonObj.diffBigLevel;
-            const deaBigLevel = jsonObj.deaBigLevel;
+            // const macdBigLevel = jsonObj.macdBigLevel;
+            // const diffBigLevel = jsonObj.diffBigLevel;
+            // const deaBigLevel = jsonObj.deaBigLevel;
+            // const dateBigLevel = jsonObj.dateBigLevel;
 
-            const dateBigLevel = jsonObj.dateBigLevel;
-            const boll_up = jsonObj.boll_up;
-            const boll_middle = jsonObj.boll_middle;
-            const boll_bottom = jsonObj.boll_bottom;
-            // const ama = jsonObj.ama;
-            // const info = jsonObj.info;
-            // const isTradeTime = jsonObj.isTradeTime;
-            // const basicInfo = jsonObj.basicInfo;
-            // const concept = jsonObj.concept;
-
-
-            // var amaValues = [];
-            // var totalPoint = stockDate.length - 1
-            //
-            // for (var i = 1; i <= stockDate.length-1; i++) {
-            //     var amaValue = ama[i] == 0 ? '-' : ama[i];
-            //     var amaValue = ama[i]
-            //     var colorStopItem1 = {}
-            //     var colorStopItem2 = {}
-            //         if(amaValue !='-'){
-            //             if ( amaValue > amaLastValue) {
-            //             colorStopItem1 = {
-            //                 offset: Math.abs(i - 1) / totalPoint,
-            //                 color: 'red'
-            //             }
-            //             colorStopItem2 = {
-            //                 offset: Math.abs(i) / totalPoint,
-            //                 color: 'red'
-            //             }
-            //         } else {
-            //             colorStopItem1 = {
-            //                 offset: Math.abs((i - 1)) / totalPoint,
-            //                 color: 'green'
-            //             }
-            //             colorStopItem2 = {
-            //                 offset: Math.abs(i) / totalPoint,
-            //                 color: 'green'
-            //             }
-            //         }
-            //         colorStops.push(colorStopItem1)
-            //         colorStops.push(colorStopItem2)
-            //
-            //         amaLastValue = amaValue
-            //         amaValues.push(amaValue)
-            //         }
-            //
-            // }
-
-            var categoryData = [];
             var values = [];
             for (var i = 0; i < stockDate.length; i++) {
                 values.push([stockOpen[i], stockClose[i], stockLow[i], stockHigh[i]]);
@@ -1311,7 +1226,7 @@ var app = new Vue({
                     label: {
                         //position: ['-50%','50%'],
                         position: 'inside',
-                        offset: [0, 5],
+                        offset: [5, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
@@ -1334,7 +1249,7 @@ var app = new Vue({
                     label: {
                         //position: ['-50%','50%'],
                         position: 'inside',
-                        offset: [0, 5],
+                        offset: [-5, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
@@ -1358,7 +1273,7 @@ var app = new Vue({
                     label: {
                         //position: ['-50%','50%'],
                         position: 'inside',
-                        offset: [0, 5],
+                        offset: [5, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
@@ -1381,7 +1296,7 @@ var app = new Vue({
                     label: {
                         //position: ['-50%','50%'],
                         position: 'inside',
-                        offset: [0, 5],
+                        offset: [-5, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
@@ -1716,83 +1631,83 @@ var app = new Vue({
             //     mmdValues.push(value);
             // }
             //
-            var macdAreaValues = [];
-            for (var i = 0; i < jsonObj.macdAreaData.date.length; i++) {
-                var value
-                if (jsonObj.macdAreaData.value[i] > 0) {
-                    value = {
-                        coord: [jsonObj.macdAreaData.date[i], jsonObj.macdAreaData.data[i]],
-                        value: jsonObj.macdAreaData.value[i],
-                        symbolRotate: 180,
-                        symbol: 'circle',
-                        symbolSize: '5',
-                        itemStyle: {
-                            normal: {color: downColor}
-                        },
-                        label: {
-                            position: 'inside',
-                            offset: [0, -30],
-                            textBorderColor: upColor,
-                            textBorderWidth: 2,
-                            color: 'white',
-                        },
-                    };
-                } else {
-                    value = {
-                        coord: [jsonObj.macdAreaData.date[i], jsonObj.macdAreaData.data[i]],
-                        value: Math.abs(jsonObj.macdAreaData.value[i]),
-                        symbolRotate: 180,
-                        symbol: 'circle',
-                        symbolSize: '5',
-                        itemStyle: {
-                            normal: {color: upColor}
-                        },
-                        label: {
-                            position: 'inside',
-                            offset: [0, 20],
-                            textBorderColor: downColor,
-                            textBorderWidth: 2,
-                            color: 'white',
-                        },
-                    };
-                }
+            // var macdAreaValues = [];
+            // for (var i = 0; i < jsonObj.macdAreaData.date.length; i++) {
+            //     var value
+            //     if (jsonObj.macdAreaData.value[i] > 0) {
+            //         value = {
+            //             coord: [jsonObj.macdAreaData.date[i], jsonObj.macdAreaData.data[i]],
+            //             value: jsonObj.macdAreaData.value[i],
+            //             symbolRotate: 180,
+            //             symbol: 'circle',
+            //             symbolSize: '5',
+            //             itemStyle: {
+            //                 normal: {color: downColor}
+            //             },
+            //             label: {
+            //                 position: 'inside',
+            //                 offset: [0, -30],
+            //                 textBorderColor: upColor,
+            //                 textBorderWidth: 2,
+            //                 color: 'white',
+            //             },
+            //         };
+            //     } else {
+            //         value = {
+            //             coord: [jsonObj.macdAreaData.date[i], jsonObj.macdAreaData.data[i]],
+            //             value: Math.abs(jsonObj.macdAreaData.value[i]),
+            //             symbolRotate: 180,
+            //             symbol: 'circle',
+            //             symbolSize: '5',
+            //             itemStyle: {
+            //                 normal: {color: upColor}
+            //             },
+            //             label: {
+            //                 position: 'inside',
+            //                 offset: [0, 20],
+            //                 textBorderColor: downColor,
+            //                 textBorderWidth: 2,
+            //                 color: 'white',
+            //             },
+            //         };
+            //     }
+            //
+            //     macdAreaValues.push(value);
+            // }
 
-                macdAreaValues.push(value);
-            }
 
-
-            var bcMACDValues = [];
-            for (var i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
-                var value = {
-                    coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
-                    value: jsonObj.buyMACDBCData.value[i],
-                    symbolRotate: -180,
-                    symbol: 'pin',
-                    itemStyle: {
-                        normal: {color: 'red'}
-                    },
-                    label: {
-                        position: 'inside',
-                        offset: [0, 10],
-                        textBorderColor: 'red',
-                        textBorderWidth: 2,
-                        color: 'white',
-                    },
-                };
-                bcMACDValues.push(value);
-            }
-            for (var i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
-                var value = {
-                    coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
-                    value: jsonObj.sellMACDBCData.value[i],
-                    symbolRotate: 0,
-                    symbol: 'pin',
-                    itemStyle: {
-                        normal: {color: 'green'}
-                    }
-                };
-                bcMACDValues.push(value);
-            }
+            // var bcMACDValues = [];
+            // for (var i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
+            //     var value = {
+            //         coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
+            //         value: jsonObj.buyMACDBCData.value[i],
+            //         symbolRotate: -180,
+            //         symbol: 'pin',
+            //         itemStyle: {
+            //             normal: {color: 'red'}
+            //         },
+            //         label: {
+            //             position: 'inside',
+            //             offset: [0, 10],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 2,
+            //             color: 'white',
+            //         },
+            //     };
+            //     bcMACDValues.push(value);
+            // }
+            // for (var i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
+            //     var value = {
+            //         coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
+            //         value: jsonObj.sellMACDBCData.value[i],
+            //         symbolRotate: 0,
+            //         symbol: 'pin',
+            //         itemStyle: {
+            //             normal: {color: 'green'}
+            //         }
+            //     };
+            //     bcMACDValues.push(value);
+            // }
             var markLineData = [];
             var lastBeichiType = getLastHuilaData(jsonObj.buy_zs_huila, jsonObj.sell_zs_huila)
             var lastBeichi = null;
@@ -1838,8 +1753,14 @@ var app = new Vue({
                     }
                 }
                 var targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * marginLevel).toFixed(2)
-
-
+                // 准备参数
+                this.openPrice = beichiPrice;
+                this.stopPrice = stopLosePrice;
+                // 当前保证金比例
+                this.currentMarginRate = this.futureSymbolMap[this.symbol].margin_rate * this.marginLevelCompany
+                this.currentSymbol = this.symbol;
+                // 计算开仓手数
+                this.calcAccount()
                 // console.log(beichiPrice, stopLosePrice, diffPrice, targetPrice)
                 // 当前最新价
                 var markLineCurrent = {
@@ -1857,7 +1778,7 @@ var app = new Vue({
                     label: {
                         normal: {
                             color: 'yellow',
-                            formatter: '新:' + currentPrice.toFixed(2) + " (" + currentPercent + "%)",
+                            formatter: '新:' + currentPrice.toFixed(2) + "\n (" + currentPercent + "%)",
                         },
                     },
                 }
@@ -1877,7 +1798,7 @@ var app = new Vue({
                     label: {
                         normal: {
                             color: 'white',
-                            formatter: '开:' + beichiPrice.toFixed(2) + " (" + marginLevel + '倍)',
+                            formatter: '开:' + beichiPrice.toFixed(2) + "\n ( " + this.maxOrderCount+ ' 手 )',
                         },
                     },
                 }
@@ -1898,7 +1819,7 @@ var app = new Vue({
                     label: {
                         normal: {
                             color: upColor,
-                            formatter: '止:' + stopLosePrice.toFixed(2) + ' (-' + targetPercent + '%)',
+                            formatter: '损:' + stopLosePrice.toFixed(2) + '\n (-' + targetPercent + '%)',
                         },
                     },
                 }
@@ -1916,7 +1837,7 @@ var app = new Vue({
                     label: {
                         normal: {
                             color: downColor,
-                            formatter: '盈:' + targetPrice.toFixed(2) + ' (' + targetPercent + '%)',
+                            formatter: '动:' + targetPrice.toFixed(2) + '\n (' + targetPercent + '%)',
                         }
                     },
                     symbol: 'circle',
@@ -1957,64 +1878,64 @@ var app = new Vue({
 
 
             // 高级别macd背驰点标注 buyHigherMACDBCData
-            for (var i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
-                var value = {
-                    coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.data[i]],
-                    value: jsonObj.buyHigherMACDBCData.value[i],
-                    symbolRotate: 90,
-                    symbol: 'pin',
-                    itemStyle: {
-                        normal: {color: 'Purple'}
-                    },
-                    label: {
-                        position: 'inside',
-                        offset: [-5, 5],
-                        textBorderColor: 'Purple',
-                        textBorderWidth: 1,
-                        color: 'white',
-                    },
-                };
-                bcMACDValues.push(value);
-            }
-            for (var i = 0; i < jsonObj.sellHigherMACDBCData.date.length; i++) {
-                var value = {
-                    coord: [jsonObj.sellHigherMACDBCData.date[i], jsonObj.sellHigherMACDBCData.data[i]],
-                    value: jsonObj.sellHigherMACDBCData.value[i],
-                    symbolRotate: 90,
-                    symbol: 'pin',
-                    label: {
-                        position: 'inside',
-                        offset: [-5, 5],
-                        textBorderColor: 'blue',
-                        textBorderWidth: 1,
-                        color: 'white',
-                    },
-                    itemStyle: {
-                        normal: {color: 'blue'}
-                    }
-                };
-                bcMACDValues.push(value);
-            }
-
-            // 布林带
-            const fixLength = 5;
-            for (var i = 0; i < macddata.length; i++) {
-                if (boll_up[i] === 0 || boll_up[i] === '-') {
-                    boll_up[i] = '-';
-                } else {
-                    boll_up[i] = boll_up[i].toFixed(fixLength);
-                }
-                if (boll_middle[i] === 0 || boll_middle[i] === '-') {
-                    boll_middle[i] = '-';
-                } else {
-                    boll_middle[i] = boll_middle[i].toFixed(fixLength);
-                }
-                if (boll_bottom[i] === 0 || boll_bottom[i] === '-') {
-                    boll_bottom[i] = '-';
-                } else {
-                    boll_bottom[i] = boll_bottom[i].toFixed(fixLength);
-                }
-            }
+            // for (var i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
+            //     var value = {
+            //         coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.data[i]],
+            //         value: jsonObj.buyHigherMACDBCData.value[i],
+            //         symbolRotate: 90,
+            //         symbol: 'pin',
+            //         itemStyle: {
+            //             normal: {color: 'Purple'}
+            //         },
+            //         label: {
+            //             position: 'inside',
+            //             offset: [-5, 5],
+            //             textBorderColor: 'Purple',
+            //             textBorderWidth: 1,
+            //             color: 'white',
+            //         },
+            //     };
+            //     bcMACDValues.push(value);
+            // }
+            // for (var i = 0; i < jsonObj.sellHigherMACDBCData.date.length; i++) {
+            //     var value = {
+            //         coord: [jsonObj.sellHigherMACDBCData.date[i], jsonObj.sellHigherMACDBCData.data[i]],
+            //         value: jsonObj.sellHigherMACDBCData.value[i],
+            //         symbolRotate: 90,
+            //         symbol: 'pin',
+            //         label: {
+            //             position: 'inside',
+            //             offset: [-5, 5],
+            //             textBorderColor: 'blue',
+            //             textBorderWidth: 1,
+            //             color: 'white',
+            //         },
+            //         itemStyle: {
+            //             normal: {color: 'blue'}
+            //         }
+            //     };
+            //     bcMACDValues.push(value);
+            // }
+            //
+            // // 布林带
+            // const fixLength = 5;
+            // for (var i = 0; i < macddata.length; i++) {
+            //     if (boll_up[i] === 0 || boll_up[i] === '-') {
+            //         boll_up[i] = '-';
+            //     } else {
+            //         boll_up[i] = boll_up[i].toFixed(fixLength);
+            //     }
+            //     if (boll_middle[i] === 0 || boll_middle[i] === '-') {
+            //         boll_middle[i] = '-';
+            //     } else {
+            //         boll_middle[i] = boll_middle[i].toFixed(fixLength);
+            //     }
+            //     if (boll_bottom[i] === 0 || boll_bottom[i] === '-') {
+            //         boll_bottom[i] = '-';
+            //     } else {
+            //         boll_bottom[i] = boll_bottom[i].toFixed(fixLength);
+            //     }
+            // }
             return {
                 time: stockDate,
                 values: values,
@@ -2025,27 +1946,80 @@ var app = new Vue({
                 higherDuanValues: higherDuanValues,
                 zsvalues: zsvalues,
                 zsflag: zsflag,
-                macd: macddata,
-                diff: diffdata,
-                dea: deadata,
-                macdBigLevel: macdBigLevel,
-                diffBigLevel: diffBigLevel,
-                deaBigLevel: deaBigLevel,
-                timeBigLevel: dateBigLevel,
-                boll_up: boll_up,
-                boll_middle: boll_middle,
-                boll_bottom: boll_bottom,
+                // macd: macddata,
+                // diff: diffdata,
+                // dea: deadata,
+                // macdBigLevel: macdBigLevel,
+                // diffBigLevel: diffBigLevel,
+                // deaBigLevel: deaBigLevel,
+                // timeBigLevel: dateBigLevel,
+                // boll_up: boll_up,
+                // boll_middle: boll_middle,
+                // boll_bottom: boll_bottom,
                 // mmdValues: mmdValues,
-                bcMACDValues: bcMACDValues,
+                // bcMACDValues: bcMACDValues,
                 close: stockClose,
-                macdAreaValues: macdAreaValues,
+                // macdAreaValues: macdAreaValues,
                 // ama: amaValues,
 
                 markLineData: markLineData,
                 huilaValues: huilaValues,
 
             };
-        }
+        },
+        //计算开仓手数
+        calcAccount() {
+            if (this.currentMarginRate == null) {
+                alert("请选择保证金系数，开仓价，止损价")
+                return
+            }
+            // 计算最大能使用的资金
+            let maxAccountUse = this.account * 10000 * this.maxAccountUseRate
+            // 计算最大止损金额
+            let maxStopMoney = this.account * 10000 * this.stopRate
+            // 1手止损的金额
+
+            if (this.currentSymbol.indexOf("_CQ") === -1) {
+                // 计算1手需要的保证金
+                this.perOrderMargin = Math.floor(this.openPrice * this.contractMultiplier * this.currentMarginRate)
+                this.perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier
+                // 1手止损的百分比
+                this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
+            } else {
+                // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
+                this.perOrderMargin = 5
+                this.perOrderStopRate = (Math.abs(this.openPrice - this.stopPrice) / this.openPrice + this.digitCoinFee) * 20
+                this.perOrderStopMoney = Number((this.perOrderMargin * this.perOrderStopRate).toFixed(2))
+            }
+
+            // 根据止损算出的开仓手数(四舍五入)
+            let maxOrderCount1 = Math.round(maxStopMoney / this.perOrderStopMoney)
+
+            // 根据最大资金使用率算出的开仓手数(四舍五入)
+            let maxOrderCount2 = Math.round(maxAccountUse / this.perOrderMargin)
+
+
+            this.maxOrderCount = maxOrderCount1 > maxOrderCount2 ? maxOrderCount2 : maxOrderCount1
+            // 总保证金
+            this.totalOrderMargin = this.perOrderMargin * this.maxOrderCount
+
+            // 总止损额
+            this.totalOrderStopMoney = this.perOrderStopMoney * this.maxOrderCount
+
+            // 计算当前资金使用率
+            this.accountUseRate = ((this.maxOrderCount * this.perOrderMargin) / this.account / 10000).toFixed(2)
+
+            // 计算动态止盈手数， 即剩下仓位被止损也不会亏钱
+            // 动止手数 * （动止价-开仓价）* 合约乘数 = （开仓手数-动止手数）* 1手止损
+            // 动止手数  = 开仓手数 * 1手止损  /( （动止价-开仓价）* 合约乘数 + 1手止损)
+            // 如果填入了动止价
+            if (this.dynamicWinPrice != null) {
+                this.dynamicWinCount = Math.round(this.maxOrderCount * this.perOrderStopMoney / ((this.dynamicWinPrice - this.openPrice) * this.contractMultiplier + this.perOrderStopMoney))
+            }
+            console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " perOrderMargin:",
+                this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
+                " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate)
+        },
     }
 })
 

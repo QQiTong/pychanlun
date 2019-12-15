@@ -37,40 +37,45 @@
                 <label for="stopPrice">止损价</label>
                 <input type="text" class="input-account" id="stopPrice" v-model.number="stopPrice">
             </div>
+             <div class="calc-account-item">
+                <label for="stopPrice">动止价(选填)</label>
+                <input type="text" class="input-account" id="dynamicWinPrice" v-model.number="dynamicWinPrice">
+            </div>
             <div class="calc-account-item">
                 <label for="max-account-use-rate">最大资金使用率</label>
                 <div class="radio-container">
                     <label class="radio-inline">
+                        <input type="radio" name="max-account-use-rate" v-model.number="maxAccountUseRate" value="0.1">0.1
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="max-account-use-rate" v-model.number="maxAccountUseRate" value="0.2">0.2
+                    </label>
+                    <label class="radio-inline">
                         <input type="radio" name="max-account-use-rate" v-model.number="maxAccountUseRate" value="0.3">0.3
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="max-account-use-rate" v-model.number="maxAccountUseRate" value="0.4">0.4
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="max-account-use-rate" v-model.number="maxAccountUseRate" value="0.5">0.5
                     </label>
                 </div>
 
             </div>
             <div class="calc-account-item">
-                <label for="">入场方式及止损系数</label>
+                <label for="">入场方式及止损系数(相对总资金)</label>
                 <div>
+
                     <label class="radio-inline">
                         <input type="radio" name="optionsRadiosinline" id="optionsRadios5" v-model.number="stopRate"
-                               value="0.04">双级别 0.04
+                               value="0.01">二级套 0.01
                     </label>
                     <label class="radio-inline">
                         <input type="radio" name="optionsRadiosinline" id="optionsRadios5" v-model.number="stopRate"
-                               value="0.03">三级套 0.03
+                               value="0.02">三级套 0.02
                     </label>
                     <label class="radio-inline">
                         <input type="radio" name="optionsRadiosinline" id="optionsRadios5" v-model.number="stopRate"
-                               value="0.02">二级套 0.02
+                               value="0.03">双级别 0.03
                     </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios5" v-model.number="stopRate"
-                               value="0.03">策略3 0.03
-                    </label>
+                    <!-- <label class="radio-inline">
+                         <input type="radio" name="optionsRadiosinline" id="optionsRadios5" v-model.number="stopRate"
+                                value="0.03">策略3 0.03
+                     </label>-->
                 </div>
             </div>
             <div class="calc-account-item">
@@ -84,21 +89,47 @@
             <div class="calc-account-item">
                 <button @click="calcAccount" class="btn-calc btn-primary">计算</button>
             </div>
+            <div class="calc-account-item">
+                <label for="">1手保证金</label>
+                <input type="text" class="input-account" v-model.number="perOrderMargin" disabled>
+            </div>
+            <div class="calc-account-item">
+                <label for="">1手止损的金额</label>
+                <input type="text" class="input-account" v-model.number="perOrderStopMoney" disabled>
+            </div>
+            <div class="calc-account-item">
+                <label for="">止损百分比(相对保证金)</label>
+                <input type="text" class="input-account" v-model.number="perOrderStopRate" disabled>
+            </div>
+
+            <div class="calc-account-item">
+                <label for="">总保证金</label>
+                <input type="text" class="input-account" v-model.number="totalOrderMargin" disabled>
+
+            </div>
+            <div class="calc-account-item">
+                <label for="">总止损额</label>
+                <input type="text" class="input-account" v-model.number="totalOrderStopMoney" disabled>
+            </div>
+            <div class="calc-account-item">
+                <label for="">动止手数</label>
+                <input type="text" class="input-account" v-model.number="dynamicWinCount" disabled>
+            </div>
         </div>
 
     </div>
     <div class="search-container">
         <span>搜索:</span><input type="text" v-model="value2Computed" placeholder="品种代码">
-        <button @click="switchStrategy('0')">策略0 综合监控</button>
-        <button @click="switchStrategy('3')">策略3</button>
-        <button @click="switchStrategy('4')">策略4</button>
+        <button @click="switchStrategy('0')">综合监控</button>
+        <!--<button @click="switchStrategy('3')">策略3</button>
+        <button @click="switchStrategy('4')">策略4</button>-->
     </div>
     <div class="current-market">
         <table class="table table-striped table-bordered table-condensed table-hover">
             <thead>
             <tr>
                 <td class="remark-item">品种</td>
-                <td class="change-item">涨跌</td>
+                <!--<td class="change-item">涨跌</td>-->
                 <td class="th-calc-margin-rate">保证金比率</td>
                 <td class="remark-item">3m</td>
                 <td class="remark-item">5m</td>
@@ -116,20 +147,14 @@
                         {{ symbolInfo.symbol }} ({{ symbolInfo.underlying_symbol }})
                     </a>
                 </td>
-                <td :class="{ 'danger':changeList[symbolInfo.order_book_id]>=0,'success':changeList[symbolInfo.order_book_id]<=0}">{{ (changeList[symbolInfo.order_book_id] *100*(1/symbolInfo.margin_rate)).toFixed(2) }}%</td>
+               <!-- <td :class="{ 'danger':changeList[symbolInfo.order_book_id]>=0,'success':changeList[symbolInfo.order_book_id]<=0}">{{ (changeList[symbolInfo.order_book_id] *100*(1/symbolInfo.margin_rate)).toFixed(2) }}</td>-->
                 <td class="td-calc-margin-rate"
-                    @click="fillMarginRate(symbolInfo)">{{ (symbolInfo.margin_rate * marginLevelCompany).toFixed(2) }}
+                    @click="fillMarginRate(symbolInfo)">{{ (symbolInfo.margin_rate * marginLevelCompany).toFixed(3) }}
                     填入
                 </td>
-                <td v-for="periodItem in periodList" :class="{ 'danger':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XB')!=-1||
-               beichiList[symbolInfo.order_book_id][periodItem].indexOf('huila B')!=-1||
-               beichiList[symbolInfo.order_book_id][periodItem].indexOf('tupo B')!=-1||
-               beichiList[symbolInfo.order_book_id][periodItem].indexOf('Vreverse B')!=-1,
-                 'success':beichiList[symbolInfo.order_book_id][periodItem].indexOf('XT') !=-1||
-                 beichiList[symbolInfo.order_book_id][periodItem].indexOf('huila T') !=-1 ||
-                 beichiList[symbolInfo.order_book_id][periodItem].indexOf('tupo T') !=-1 ||
-                 beichiList[symbolInfo.order_book_id][periodItem].indexOf('Vreverse T')!=-1}">
-                    <span v-for="item in beichiList[symbolInfo.order_book_id][periodItem]">{{ item }}
+                <td v-for="periodItem in periodList" :class="{ 'danger':beichiList[symbolInfo.order_book_id][periodItem].indexOf('B')!=-1,
+                 'success':beichiList[symbolInfo.order_book_id][periodItem].indexOf('S') !=-1}">
+                    <span>{{ beichiList[symbolInfo.order_book_id][periodItem] }}
                     </span>
                 </td>
             </tr>
