@@ -110,18 +110,20 @@ def get_market_data_ricequant_incr(symbol, period, period_alias = None, is_debug
         trading_date = dataBackend.get_next_trading_date(trading_date).strftime('%Y-%m-%d')
         trading_hours2 = dataBackend.get_trading_hours(code=code, trading_date=trading_date, magic=magic)
         trading_hours = []
-        for trading_hour in trading_hours1:
-            trading_hour[0] = trading_hour[0].replace(tzinfo=tz)
-            trading_hour[1] = trading_hour[1].replace(tzinfo=tz)
-            if trading_hour[1] >end_of_day:
-                break
-            trading_hours.append(trading_hour)
-        for trading_hour in trading_hours2:
-            trading_hour[0] = trading_hour[0].replace(tzinfo=tz)
-            trading_hour[1] = trading_hour[1].replace(tzinfo=tz)
-            if trading_hour[1] >end_of_day:
-                break
-            trading_hours.append(trading_hour)
+        if trading_hours1 is not None:
+            for trading_hour in trading_hours1:
+                trading_hour[0] = trading_hour[0].replace(tzinfo=tz)
+                trading_hour[1] = trading_hour[1].replace(tzinfo=tz)
+                if trading_hour[1] >end_of_day:
+                    break
+                trading_hours.append(trading_hour)
+        if trading_hours2 is not None:
+            for trading_hour in trading_hours2:
+                trading_hour[0] = trading_hour[0].replace(tzinfo=tz)
+                trading_hour[1] = trading_hour[1].replace(tzinfo=tz)
+                if trading_hour[1] >end_of_day:
+                    break
+                trading_hours.append(trading_hour)
         if trading_hours is None or len(trading_hours) == 0:
             start_datetime = start_datetime + timedelta(days=1)
             continue

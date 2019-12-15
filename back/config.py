@@ -6,22 +6,22 @@ BASEDIR = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SCHEDULER_API_ENABLED = True
     SCHEDULER_TIMEZONE = 'Asia/Shanghai'
-    pass
+    PROXIES = {
+        "http": "socks5://127.0.0.1:10808",
+        "https": "socks5://127.0.0.1:10808"
+    }
 
 
 class DevelopmentConfig(Config):
     MONGODB_SETTINGS = {
-        # 'url': 'mongodb://root:Chanlun123456@dds-wz973894a77e58141351-pub.mongodb.rds.aliyuncs.com:3717,dds-wz973894a77e58142114-pub.mongodb.rds.aliyuncs.com:3717/pychanlun?authSource=admin&replicaSet=mgset-16710813'
-        'url': 'mongodb://127.0.0.1:27017/pychanlun'
+        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://localhost:27017/pychanlun')
     }
     pass
 
 
 class ProductionConfig(Config):
     MONGODB_SETTINGS = {
-        # 'url': 'mongodb://root:Chanlun123456@dds-wz973894a77e58141351-pub.mongodb.rds.aliyuncs.com:3717,dds-wz973894a77e58142114-pub.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=mgset-16710813'
-        'url': 'mongodb://127.0.0.1:27017/pychanlun'
-
+        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://localhost:27017/pychanlun')
     }
     pass
 
@@ -69,3 +69,5 @@ config = {
         '1w'
     ]
 }
+
+cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]

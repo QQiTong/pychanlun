@@ -10,3 +10,8 @@ __pycache__
 web/package-lock.json
 front/web/
 front/web.zip
+.vscode
+*.log
+*.pid
+web/temp/*
+*.log.*

@@ -1,5 +1,4 @@
 from back.KlineDataTool import KlineDataTool
-from jqdatasdk import *
 import numpy as np
 import pandas as pd
 from numpy import array
