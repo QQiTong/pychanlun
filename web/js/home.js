@@ -167,7 +167,7 @@ var app = new Vue({
          */
         calcAccount() {
             if (this.currentMarginRate == null) {
-                alert("请选择保证金系数，开仓价，止损价")
+                alert("请填入保证金系数，开仓价，止损价")
                 return
             }
             // 计算最大能使用的资金

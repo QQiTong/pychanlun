@@ -52,6 +52,7 @@
 .calc-account .calc-account-container {
   display: flex;
   justify-content: flex-start;
+  flex-wrap: wrap;
 }
 .calc-account .calc-account-item {
   display: flex;
