@@ -536,5 +536,5 @@ def calMaxOrderCount(dominantSymbol,openPrice,stopPrice):
     maxOrderCount = maxOrderCount2 if maxOrderCount1 > maxOrderCount2 else maxOrderCount1
     return maxOrderCount
 
-# threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
-threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
+threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+# threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

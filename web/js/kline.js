@@ -261,10 +261,12 @@ var app = new Vue({
             dataTitle = that.symbol + "  " + kxType
             let marginLevel = (1 / (that.futureSymbolMap[that.symbol].margin_rate * this.marginLevelCompany)).toFixed(2)
             subText = "杠杆倍数: " + marginLevel + " 每手保证金: " + this.marginPrice + " 合约乘数: " + this.contractMultiplier + " 交易时间: " + that.futureSymbolMap[that.symbol].trading_hours + " 交割时间: " + that.futureSymbolMap[that.symbol].maturity_date
-            var currentChart = myChart1
-            if (kxType === '1m') {
-                currentChart = myChart1
-            } else if (kxType === '3m') {
+            var currentChart = null
+            // if (kxType === '1m') {
+            //     currentChart = myChart1
+            // } else
+            //
+            if (kxType === '3m') {
                 currentChart = myChart3
             } else if (kxType === '5m') {
                 currentChart = myChart5
@@ -276,9 +278,10 @@ var app = new Vue({
                 currentChart = myChart60
             } else if (kxType === '4h') {
                 currentChart = myChart240
-            } else if (kxType === '1d') {
-                currentChart = myChart1d
             }
+            // else if (kxType === '1d') {
+            //     currentChart = myChart1d
+            // }
             var option;
             if (update === 'update') {
                 // console.log('更新了', update);
@@ -2028,14 +2031,14 @@ var app = new Vue({
 })
 
 
-const myChart1 = echarts.init(document.getElementById('main1'));
+// const myChart1 = echarts.init(document.getElementById('main1'));
 const myChart3 = echarts.init(document.getElementById('main3'));
 const myChart5 = echarts.init(document.getElementById('main5'));
 const myChart15 = echarts.init(document.getElementById('main15'));
 const myChart30 = echarts.init(document.getElementById('main30'));
 const myChart60 = echarts.init(document.getElementById('main60'));
 const myChart240 = echarts.init(document.getElementById('main240'));
-const myChart1d = echarts.init(document.getElementById('main1d'));
+// const myChart1d = echarts.init(document.getElementById('main1d'));
 
 const bgColor = '#202529';
 const upColor = 'red';
@@ -2066,7 +2069,7 @@ var amaFlag = false
 setTimeout(function () {
     window.onresize = function () {
         console.log('resize')
-        myChart1.resize();
+        // myChart1.resize();
     }
 }, 200);
 
