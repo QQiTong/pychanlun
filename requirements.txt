@@ -8,3 +8,5 @@ gunicorn
 gevent
 json-logging-py
 rx
+pytest
+pytest-html
