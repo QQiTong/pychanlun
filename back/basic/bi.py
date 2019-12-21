@@ -123,7 +123,34 @@ def AdjustBi(count, bi, high, low, index):
 # high 最高价的序列
 # low 最低价的序列
 def CalcBi(count, bi, high, low):
+    # gIndex 记录搜寻的第一个高点位置
+    gIndex = 0
+    # dIndex 记录搜寻的第一个低点位置
+    dIndex = 0
+    # start 记录第一笔找到后，后面继续开始计算的起点
+    start = 0
     for i in range(1, count):
+        if high[i] > high[gIndex]:
+            gIndex = i
+            if gIndex > dIndex:
+                # 新高后看是否成立向上笔
+                if IsBi(count, bi, high, low, dIndex, gIndex, 1, True):
+                    bi[dIndex] = -1
+                    bi[gIndex] = 1
+                    start = i + 1
+                    break
+        if low[i] < low[dIndex]:
+            dIndex = i
+            if dIndex > gIndex:
+                # 新低后看是否成立向下笔
+                if IsBi(count, bi, high, low, gIndex, dIndex, -1, True):
+                    bi[gIndex] = 1
+                    bi[dIndex] = -1
+                    start = i + 1
+                    break
+    # 前面我们计算出了第一笔的位置
+    # 后面开始计算后面的笔
+    for i in range(start, count):
         x = i - 1
         for j in range(x, 0, -1):
             if bi[j] == -1:
