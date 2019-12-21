@@ -12,6 +12,7 @@ import copy
 import pydash
 from datetime import datetime
 
+from back.basic.bi import CalcBi
 from back import Duan
 from back.KlineDataTool import KlineDataTool
 from back.ZhongShuProcess import ZhongShuProcess
@@ -221,31 +222,14 @@ class Calc:
         # print(timeList)
 
         # k线处理
-        klineProcess = KlineProcess()
-        count = len(highList)
-        for i in range(count):
-            klineProcess.add(highList[i], lowList[i], timeList[i])
-
-        # print('处理后的k线:', klineProcess.klineList, "原始k线:", len(klineProcess.klineRawList));
-        # 处理后的k线
-        # for i in range(len(klineProcess.klineList)):
-        #     prn_obj(klineProcess.klineList[i])
-        # 笔处理
-        biProcess = BiProcess()
-        biProcess.handle(klineProcess.klineList)
+        count = len(timeList)
         # 笔结果
-        biResult = [0 for i in range(len(timeList))]
-        for i in range(len(biProcess.biList)):
-            item = biProcess.biList[i]
-            biResult[item.klineList[-1].middle] = item.direction
-            # for j in range(item.start + 1, item.end + 1):
-            #     directionList[j] = item.direction
-
-        # print("笔结果:", len(biProcess.biList), biResult)
+        biList = [0 for i in range(count)]
+        CalcBi(count, biList, highList, lowList)
 
         # 段处理
         duanProcess = DuanProcess()
-        duanResult = duanProcess.handle(biResult, highList, lowList)
+        duanResult = duanProcess.handle(biList, highList, lowList)
 
         # 高一级别段处理
         higherDuanProcess = DuanProcess()
@@ -256,10 +240,10 @@ class Calc:
         higherHigherDuanResult = higherHigherDuanProcess.handle(higherDuanResult, highList, lowList)
 
         # print("段结果:", len(biResult), len(duanResult))
-        entanglementList = entanglement.calcEntanglements(timeList, duanResult, biResult, highList, lowList)
-        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biResult, duanResult)
-        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biResult, duanResult)
-        v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biResult, duanResult)
+        entanglementList = entanglement.calcEntanglements(timeList, duanResult, biList, highList, lowList)
+        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanResult)
+        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanResult)
+        v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanResult)
         # 段中枢
         entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanResult, duanResult, highList, lowList)
         huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanResult, higherDuanResult)
@@ -294,11 +278,11 @@ class Calc:
         resJson['low'] = lowList
         resJson['close'] = closePriceList
 
-        resJson['bidata'] = getBiData(biProcess, timeList)
-        resJson['duandata'] = getDuanData(biProcess, duanProcess, timeList)
+        resJson['bidata'] = getLineData(timeList, biList, highList, lowList)
+        resJson['duandata'] = getLineData(timeList, duanResult, highList, lowList)
 
-        resJson['higherDuanData'] = getDuanData(biProcess, higherDuanProcess, timeList)
-        resJson['higherHigherDuanData'] = getDuanData(biProcess, higherHigherDuanProcess, timeList)
+        resJson['higherDuanData'] = getLineData(timeList, higherDuanResult, highList, lowList)
+        resJson['higherHigherDuanData'] = getLineData(timeList, higherHigherDuanResult, highList, lowList)
 
         # resJson['diff'] = getMacd(closePriceList)[0].tolist()
         # resJson['dea'] = getMacd(closePriceList)[1].tolist()
@@ -394,60 +378,19 @@ class Calc:
         return resJson
 
 
-def getBiData(biProcess, timeList):
-    resBiData = {}
-
-    biData = []
-    biDate = []
-    for i in range(0, len(biProcess.biList) + 1, 1):
-        # bi = biProcess.biList[i]
-
-        #  第一笔和最后一笔特殊处理
-        if i == 0:
-            bi = biProcess.biList[i]
-            if bi.direction == 1:
-                biData.append(bi.low)
-            else:
-                biData.append(bi.high)
-            biDate.append(timeList[0])
-        else:
-            bi = biProcess.biList[i - 1]
-            if bi.direction == 1:
-                biData.append(bi.high)
-            else:
-                biData.append(bi.low)
-            biDate.append(timeList[bi.klineList[-1].middle])
-        # print(bi.start, bi.end, bi.klineList[-1].middle, bi.low, bi.high, bi.direction)
-    resBiData['data'] = biData
-    resBiData['date'] = biDate
-    return resBiData
-
-
-def getDuanData(biProcess, duanProcess, timeList):
-    resDuanData = {}
-
-    duanData = []
-    duanDate = []
-    for i in range(len(timeList)):
-        if duanProcess.result[i] == 0:
-            continue
-        if duanProcess.result[i] == 1:
-            for j in range(0, len(biProcess.biList), 1):
-                bi = biProcess.biList[j]
-                if i == bi.klineList[-1].middle:
-                    duanData.append(bi.high)
-                    break
-        elif duanProcess.result[i] == -1:
-            for j in range(0, len(biProcess.biList), 1):
-                bi = biProcess.biList[j]
-                if i == bi.klineList[-1].middle:
-                    duanData.append(bi.low)
-                    break
-        duanDate.append(timeList[i])
-    resDuanData['data'] = duanData
-    resDuanData['date'] = duanDate
-    return resDuanData
-
+def getLineData(timeList, signalList, highList, lowList):
+    res = {
+        'data': [],
+        'date': []
+    }
+    for i in range(0, len(timeList), 1):
+        if signalList[i] == 1:
+            res['data'].append(highList[i])
+            res['date'].append(timeList[i])
+        elif signalList[i] == -1:
+            res['data'].append(lowList[i])
+            res['date'].append(timeList[i])
+    return res
 
 def getZhongShuData(entanglementList):
     zsdata = []

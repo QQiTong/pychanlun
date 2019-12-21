@@ -8,6 +8,7 @@ import pydash
 
 import rqdatac as rq
 from rqdatac import *
+from back.config import cfg
 
 # url = "http://api.zb.cn/data/v1/kline?market=btc_usdt"
 # 火币合约接口 全局代理后200ms内 , 不代理1s左右
@@ -163,8 +164,7 @@ class KlineDataTool:
         }
 
         startTime = datetime.now()
-        proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
-        r = requests.get(url, params=payload, proxies=proxies, verify=False)
+        r = requests.get(url, params=payload, proxies=cfg.PROXIES, verify=False)
         endTime = datetime.now() - startTime
         klines = json.loads(r.text)['data']
         # print("火币接口花费时间:", endTime, datetime.now(), r)
