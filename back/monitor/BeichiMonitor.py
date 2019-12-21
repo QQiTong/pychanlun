@@ -110,7 +110,7 @@ def getDominantSymbol():
         dominantSymbolList.append(dominantSymbol)
         dominantSymbolInfo = rq.instruments(dominantSymbol)
         dominantSymbolInfoList[dominantSymbol] = dominantSymbolInfo.__dict__
-    return dominantSymbolList,dominantSymbolInfoList
+    return dominantSymbolList, dominantSymbolInfoList
 
 
 # 监控期货
@@ -123,7 +123,6 @@ def monitorFuturesAndDigitCoin(type):
     lastTimeTupoMap = {}
     lastTimeVreverseMap = {}
 
-
     symbolList = []
     if type == "1":
         # auth('13088887055', 'chanlun123456')
@@ -133,8 +132,8 @@ def monitorFuturesAndDigitCoin(type):
              'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
              ('rqdatad-pro.ricequant.com', 16011))
         # 主力合约，主力合约详细信息
-        symbolList,dominantSymbolInfoList = getDominantSymbol()
-        print("主力合约信息：",dominantSymbolInfoList)
+        symbolList, dominantSymbolInfoList = getDominantSymbol()
+        print("主力合约信息：", dominantSymbolInfoList)
         periodList = periodList1
     else:
         symbolList = symbolListDigitCoin
@@ -182,8 +181,9 @@ def monitorFuturesAndDigitCoin(type):
                                  closePrice)
                     monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, symbol, period,
                                 closePrice)
-                    monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVreverseMap, symbol, period,
-                                closePrice)
+                    monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVreverseMap, symbol,
+                                    period,
+                                    closePrice)
 
             if type == "1":
                 time.sleep(0)
@@ -205,6 +205,8 @@ def monitorFuturesAndDigitCoin(type):
 '''
 监控背驰
 '''
+
+
 def monitorBeichi(result, lastTime, currentTime, timeScope, lastTimeMap, symbol, period, closePrice):
     # 监控背驰
     if len(result['buyMACDBCData']['date']) > 0:
@@ -273,6 +275,8 @@ def monitorBeichi(result, lastTime, currentTime, timeScope, lastTimeMap, symbol,
 '''
 监控回拉
 '''
+
+
 def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap, symbol, period, closePrice):
     # 监控回拉
     if len(result['buy_zs_huila']['date']) > 0:
@@ -285,7 +289,7 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         # print("current judge:", symbol, period, lastBuyDate, notLower)
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(symbol,closePrice,stop_lose_price)
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
             msg = symbol, period, 'huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             if maxOrderCount >= 1:
@@ -305,7 +309,7 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'huila S ', maxOrderCount,lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period, 'huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
@@ -327,7 +331,7 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'higher huila B ', maxOrderCount,lastBuyDate, lastBuyData, closePrice, time.strftime(
+            msg = symbol, period, 'higher huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             if maxOrderCount >= 1:
@@ -349,7 +353,7 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
 
-            msg = symbol, period, 'higher huila S ', maxOrderCount,lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period, 'higher huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
             #                  'BuyLong')
@@ -362,6 +366,8 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
 '''
 监控突破
 '''
+
+
 def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, symbol, period, closePrice):
     # 监控突破
     if len(result['buy_zs_tupo']['date']) > 0:
@@ -430,11 +436,14 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
                           remark="higher tupo S")
             sendEmail(msg)
 
+
 '''
 监控3买卖 V反
 '''
+
+
 def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVreverseMap, symbol, period,
-                                closePrice):
+                    closePrice):
     # 监控V反
     if len(result['buy_v_reverse']['date']) > 0:
         lastBuyDate = result['buy_v_reverse']['date'][-1]
@@ -443,7 +452,7 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
 
         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
             lastTimeVreverseMap[symbol][period] = dateStamp
             msg = symbol, period, 'Vreverse B', lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -459,7 +468,7 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
 
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
             lastTimeVreverseMap[symbol][period] = dateStamp
             msg = symbol, period, 'Vreverse S', lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -477,7 +486,7 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
 
         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
             lastTimeVreverseMap[symbol][period] = dateStamp
             msg = symbol, period, 'higher Vreverse B', lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -493,7 +502,7 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
 
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
             lastTimeVreverseMap[symbol][period] = dateStamp
             msg = symbol, period, 'higher Vreverse S', lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -511,8 +520,9 @@ def sendEmail(msg):
     else:
         print("发送成功")
 
+
 # 计算出开仓手数（止损系数，资金使用率双控）
-def calMaxOrderCount(dominantSymbol,openPrice,stopPrice):
+def calMaxOrderCount(dominantSymbol, openPrice, stopPrice):
     margin_rate = dominantSymbolInfoList[dominantSymbol]['margin_rate']
     contract_multiplier = dominantSymbolInfoList[dominantSymbol]['contract_multiplier']
 
@@ -526,7 +536,7 @@ def calMaxOrderCount(dominantSymbol,openPrice,stopPrice):
     # 1手止损的金额
     perOrderStopMoney = abs(openPrice - stopPrice) * contract_multiplier
     # 1手止损的百分比
-    perOrderStopRate = round((perOrderStopMoney / perOrderMargin),2)
+    perOrderStopRate = round((perOrderStopMoney / perOrderMargin), 2)
 
     # 根据止损算出的开仓手数(四舍五入)
     maxOrderCount1 = round(maxStopMoney / perOrderStopMoney)
@@ -535,6 +545,7 @@ def calMaxOrderCount(dominantSymbol,openPrice,stopPrice):
     maxOrderCount2 = round(maxAccountUse / perOrderMargin)
     maxOrderCount = maxOrderCount2 if maxOrderCount1 > maxOrderCount2 else maxOrderCount1
     return maxOrderCount
+
 
 threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
 # threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

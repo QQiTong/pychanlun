@@ -164,9 +164,9 @@ var app = new Vue({
 
             for (var i = 0; i < 8; i++) {
                 switch (i) {
-                    case 0:
-                        that.sendRequest(symbol, '1m', update)
-                        break;
+                    // case 0:
+                    //     that.sendRequest(symbol, '1m', update)
+                    //     break;
                     case 1:
                         that.sendRequest(symbol, '3m', update)
                         break;
@@ -185,9 +185,9 @@ var app = new Vue({
                     case 6:
                         that.sendRequest(symbol, '4h', update)
                         break;
-                    case 7:
-                        that.sendRequest(symbol, '1d', update)
-                        break;
+                    // case 7:
+                    //     that.sendRequest(symbol, '1d', update)
+                    //     break;
                 }
             }
 
@@ -1784,7 +1784,7 @@ var app = new Vue({
                     label: {
                         normal: {
                             color: 'yellow',
-                            formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent + "% \n损盈比: 1 : "
+                            formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent + "% \n盈亏比: 1 : "
                                 + (currentPercent / targetPercent).toFixed(1),
                         },
                     },
@@ -1826,7 +1826,7 @@ var app = new Vue({
                     label: {
                         normal: {
                             color: upColor,
-                            formatter: '止损: ' + stopLosePrice.toFixed(2) + '\n (-' + targetPercent + '%)',
+                            formatter: '止损: ' + stopLosePrice.toFixed(2) + '\n盈利率: -' + targetPercent + '%',
                         },
                     },
                 }
