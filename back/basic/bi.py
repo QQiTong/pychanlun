@@ -81,7 +81,7 @@ def AdjustBi(count, bi, high, low, index):
                             break
                     if i > 0:
                         # 两笔找全，看看是不是可以合并
-                        if g1 >= g2 and d1 >= d2:
+                        if high[g1] >= high[g2] and low[d1] >= low[d2]:
                             for j in range(d2 + 1, g1):
                                 bi[j] = 0
     elif bi[index] == -1:
@@ -112,7 +112,7 @@ def AdjustBi(count, bi, high, low, index):
                             break
                     if i > 0:
                         # 两笔找全，看看是不是可以合并
-                        if d1 <= d2 and g1 <= g2:
+                        if low[d1] <= low[d2] and high[g1] <= high[g2]:
                             for j in range(d2 + 1, g1):
                                 bi[j] = 0
 

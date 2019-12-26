@@ -8,3 +8,5 @@ def testCalcBi():
     CalcBi(count, bi, high, low)
     assert bi[0] == -1
     assert bi[4] == 1
+    for i in range(1,4):
+        assert bi[i] == 0
