@@ -1,15 +1,6 @@
 # 笔算法
 
-
-# 判断起点和终点之间是否成笔
-# count 数据序列长度
-# bi 笔信号输出序列
-# high 最高价序列
-# low 最低价序列
-# from_index 起点(含)
-# to_index 终点(含)
-# dir 笔方向
-def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
+def MergeCandles(high, low, from_index, to_index, dir):
     candles = []
     for i in range(from_index, to_index + 1):
         if len(candles) == 0:
@@ -29,6 +20,18 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
                     candles[-1]['high'] = high[i]
                 elif dir == -1:
                     candles[-1]['low'] = low[i]
+    return candles
+
+# 判断起点和终点之间是否成笔
+# count 数据序列长度
+# bi 笔信号输出序列
+# high 最高价序列
+# low 最低价序列
+# from_index 起点(含)
+# to_index 终点(含)
+# dir 笔方向
+def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
+    candles = MergeCandles(high, low, from_index, to_index, dir)
     if len(candles) >= 5:
         return True
     elif not strict:
