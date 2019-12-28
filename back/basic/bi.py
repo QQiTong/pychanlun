@@ -31,28 +31,90 @@ def MergeCandles(high, low, from_index, to_index, dir):
 # to_index 终点(含)
 # dir 笔方向
 def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
-    candles = MergeCandles(high, low, from_index, to_index, dir)
-    if len(candles) >= 5:
-        return True
-    elif not strict:
+    if not strict:
         if dir == 1:
-            j = 0
+            i = from_index - 1
             for i in range(from_index - 1, 0, -1):
                 if bi[i] == 1:
-                    j = i
                     break
-            if candles[-1]['high'] > high[j]:
+            if high[to_index] > high[i]:
                 return True
         elif dir == -1:
-            j = 0
+            i = from_index - 1
             for i in range(from_index - 1, 0, -1):
                 if bi[i] == -1:
-                    j = i
                     break
-            if candles[-1]['low'] < low[j]:
+            if low[to_index] < low[i]:
                 return True
-    return False
-
+    if to_index - from_index < 4:
+        # K柱数量不够不成笔
+        return False
+    candles = MergeCandles(high, low, from_index, to_index, dir)
+    if len(candles) < 5:
+        # 合并后K柱数量不够不成笔
+        return False
+    # 查看顶底是否重叠
+    if dir == 1:
+        i = from_index - 1
+        for i in range(from_index - 1, 0, -1):
+            if bi[i] == 1:
+                break
+        candlesPrev = MergeCandles(high, low, i, from_index, -1)
+        candlesCurr = candles
+        candlesNext = []
+        k = to_index
+        for j in range(to_index + 1, count):
+            if high[j] > high[k]:
+                k = j
+                candlesCurr = MergeCandles(high, low, from_index, k, 1)
+            else:
+                candlesNext = MergeCandles(high, low, k, j, -1)
+                if len(candlesNext) >= 2:
+                    break
+        if len(candlesPrev) >= 2  and len(candlesCurr) >= 2 and len(candlesNext) >= 2:
+            bottomHigh = max(candlesCurr[1]['high'], candlesPrev[-2]['high'])
+            topLow = min(candlesCurr[-2]['low'], candlesNext[1]['low'])
+            # 顶和底有重叠，不能成笔
+            if topLow <= bottomHigh:
+                return False
+            # isValid 表示是否有独立K柱不和底或顶重叠
+            isValid = False
+            for t in range(2, len(candlesCurr) - 3):
+                if candlesCurr[t]['low'] > bottomHigh or candlesCurr[t]['high'] < topLow:
+                    isValid = True
+            if not isValid:
+                return False
+    elif dir == -1:
+        i = from_index - 1
+        for i in range(from_index, 0, -1):
+            if bi[i] == -1:
+                break
+        candlesPrev = MergeCandles(high, low, i, from_index, 1)
+        candlesCurr = candles
+        candlesNext = []
+        k = to_index
+        for j in range(to_index + 1, count):
+            if low[j] < low[k]:
+                k = j
+                candlesCurr = MergeCandles(high, low, from_index, k, -1)
+            else:
+                candlesNext = MergeCandles(high, low, k, j, 1)
+                if len(candlesNext) >= 2:
+                    break
+        if len(candlesPrev) >= 2  and len(candlesCurr) >= 2 and len(candlesNext) >= 2:
+            topLow = min(candlesCurr[1]['low'], candlesPrev[-2]['low'])
+            bottomHigh = max(candlesCurr[-2]['high'], candlesNext[1]['high'])
+            # 顶和底有重叠，不能成笔
+            if bottomHigh >= topLow:
+                return False
+            # isValid 表示是否有独立K柱不和底或顶重叠
+            isValid = False
+            for t in range(2, len(candlesCurr) - 3):
+                if candlesCurr[t]['low'] > bottomHigh or candlesCurr[t]['high'] < topLow:
+                    isValid = True
+            if not isValid:
+                return False
+    return True
 
 # index传入前一笔的结束位置，如果前一笔不是严格的笔，进行合并。
 # 合并要符合闪电形态，而且只合一次。
@@ -126,59 +188,28 @@ def AdjustBi(count, bi, high, low, index):
 # high 最高价的序列
 # low 最低价的序列
 def CalcBi(count, bi, high, low):
-    # gIndex 记录搜寻的第一个高点位置
-    gIndex = 0
-    # dIndex 记录搜寻的第一个低点位置
-    dIndex = 0
-    # start 记录第一笔找到后，后面继续开始计算的起点
-    start = 0
+    # 标记分型的顶底
     for i in range(1, count):
-        if high[i] > high[gIndex]:
-            gIndex = i
-            if gIndex > dIndex:
-                # 新高后看是否成立向上笔
-                if IsBi(count, bi, high, low, dIndex, gIndex, 1, True):
-                    bi[dIndex] = -1
-                    bi[gIndex] = 1
-                    start = i + 1
-                    break
-        if low[i] < low[dIndex]:
-            dIndex = i
-            if dIndex > gIndex:
-                # 新低后看是否成立向下笔
-                if IsBi(count, bi, high, low, gIndex, dIndex, -1, True):
-                    bi[gIndex] = 1
-                    bi[dIndex] = -1
-                    start = i + 1
-                    break
-    # 前面我们计算出了第一笔的位置
-    # 后面开始计算后面的笔
-    for i in range(start, count):
         x = i - 1
-        for j in range(x, 0, -1):
-            if bi[j] == -1:
-                x = j
+        for x in range(i - 1, 0, -1):
+            if bi[x] == -1:
                 break
-        # x 前底
-        h = max(high[x:i])
-        # h 前底到前一根K柱为止的最高价
-        b1 = high[i] > h
+        maxHigh = max(high[x:i])
+        # 是新高
+        b1 = high[i] > maxHigh
         if b1 and IsBi(count, bi, high, low, x, i, 1, False):
             bi[i] = 1
-            # 笔顶成立或者笔顶延伸
             for t in range(x + 1, i):
                 bi[t] = 0
             AdjustBi(count, bi, high, low, x)
 
         y = i - 1
-        for j in range(y, 0, -1):
-            if bi[j] == 1:
-                y = j
+        for y in range(i -1, 0, -1):
+            if bi[y] == 1:
                 break
-        # y 前顶
-        l = min(low[y:i])
-        # l 前顶到前一根K柱为止的最低价
-        b2 = low[i] < l
+        minLow = min(low[y:i])
+        # 是新低
+        b2 = low[i] < minLow
         if b2 and IsBi(count, bi, high, low, y, i, -1, False):
             bi[i] = -1
             for t in range(y + 1, i):
