@@ -84,7 +84,7 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
                 return False
             # isValid 表示是否有独立K柱不和底或顶重叠
             isValid = False
-            for t in range(2, len(candlesCurr) - 3):
+            for t in range(2, len(candlesCurr) - 2):
                 if candlesCurr[t]['low'] >= bottomHigh or candlesCurr[t]['high'] <= topLow:
                     isValid = True
             if not isValid:
@@ -114,7 +114,7 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
                 return False
             # isValid 表示是否有独立K柱不和底或顶重叠
             isValid = False
-            for t in range(2, len(candlesCurr) - 3):
+            for t in range(2, len(candlesCurr) - 2):
                 if candlesCurr[t]['low'] >= bottomHigh or candlesCurr[t]['high'] <= topLow:
                     isValid = True
             if not isValid:
@@ -183,7 +183,7 @@ def AdjustBi(count, bi, high, low, index):
                     if i > 0:
                         # 两笔找全，看看是不是可以合并
                         if low[d1] <= low[d2] and high[g1] <= high[g2]:
-                            for j in range(d2 + 1, g1):
+                            for j in range(g2 + 1, d1):
                                 bi[j] = 0
 
 
