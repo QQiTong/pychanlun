@@ -53,7 +53,7 @@ class KlineDataTool:
     #     elif period == "60m":
     #         period = '60'
     #         fromDate = toDate - 10 * 1000 * 5 * 60
-    #     elif period == "240m":
+    #     elif period == "210m":
     #         period = '1'
     #         target = 240
     #         fromDate = toDate - 1000 * 5 * 60
@@ -247,12 +247,12 @@ class KlineDataTool:
         end = datetime.now() + timedelta(1)
         timeDeltaMap = {
             '1m': -7*3,
-            '3m': -31*3,
+            '3m': -31,
             '5m': -31,
             '15m': -31 * 3,
             '30m': -31 * 8,
             '60m': -31 * 8,
-            '240m': -31 * 8,
+            '210m': -31 * 8,
             '1d': -31 * 10,
             '3d': -31 * 30
         }
@@ -261,14 +261,14 @@ class KlineDataTool:
         df = rq.get_price(symbol, frequency=period,
                           fields=['open', 'high', 'low', 'close', 'volume'], start_date=start_date, end_date=end)
 
-        # df = get_price('RB1910.XSGE', frequency='240m', end_date=datetime.now(), count=200,
+        # df = get_price('RB1910.XSGE', frequency='210m', end_date=datetime.now(), count=200,
         #                fields=['open', 'high', 'low', 'close', 'volume'])
-        # todo 米匡240m 数据有问题,比通达信和文化财经多一个时间,需要手动去除,但是手动去除也不准,需要等米匡修复
-        # todo 米匡回复: 240m 是按照交易时间切分的, 一天固定3根k线,而文华财经和通达信是一天固定2根,后面自己处理吧
-        # if period == '240m':
+        # todo 米匡210m 数据有问题,比通达信和文化财经多一个时间,需要手动去除,但是手动去除也不准,需要等米匡修复
+        # todo 米匡回复: 210m 是按照交易时间切分的, 一天固定3根k线,而文华财经和通达信是一天固定2根,后面自己处理吧
+        # if period == '210m':
         #     cols = [x for i, x in enumerate(df.index) if '23:00:00' in str(df.index[i])]
         #     df = df.drop(cols)
-        # if period == '240m':
+        # if period == '210m':
         #     ohlc_dict = {
         #         'open': 'first',
         #         'high': 'max',

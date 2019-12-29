@@ -452,7 +452,7 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
 
         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
+        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 10:
             lastTimeVreverseMap[symbol][period] = dateStamp
             msg = symbol, period, 'Vreverse B', lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -468,7 +468,7 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
 
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
+        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 10:
             lastTimeVreverseMap[symbol][period] = dateStamp
             msg = symbol, period, 'Vreverse S', lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))

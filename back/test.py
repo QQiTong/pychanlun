@@ -154,9 +154,9 @@ def getBtcData(period):
     elif period == "60m":
         period = '60'
         fromDate = toDate - 10 * 1000 * 5 * 60
-    elif period == "240m":
+    elif period == "210m":
         period = '1'
-        target = 240
+        target = 210
         fromDate = toDate - 1000 * 5 * 60
     elif period == '1d':
         period = 'D'
@@ -208,7 +208,7 @@ def testBitmex():
         # getBtcData('15m')
         # getBtcData('30m')
     # getBtcData('60m')
-    # getBtcData('240m')
+    # getBtcData('210m')
     # getBtcData('1d')
     # getBtcData('7d')
 

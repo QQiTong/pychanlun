@@ -80,7 +80,7 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
             bottomHigh = max(candlesCurr[1]['high'], candlesPrev[-2]['high'])
             topLow = min(candlesCurr[-2]['low'], candlesNext[1]['low'])
             # 顶和底有重叠，不能成笔
-            if topLow <= bottomHigh:
+            if topLow < bottomHigh:
                 return False
             # isValid 表示是否有独立K柱不和底或顶重叠
             isValid = False
@@ -110,7 +110,7 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
             topLow = min(candlesCurr[1]['low'], candlesPrev[-2]['low'])
             bottomHigh = max(candlesCurr[-2]['high'], candlesNext[1]['high'])
             # 顶和底有重叠，不能成笔
-            if bottomHigh >= topLow:
+            if bottomHigh > topLow:
                 return False
             # isValid 表示是否有独立K柱不和底或顶重叠
             isValid = False

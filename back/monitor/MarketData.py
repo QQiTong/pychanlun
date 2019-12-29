@@ -192,7 +192,7 @@ def getMarketDataRICEQUANT(symbol, is_debug = False):
     get_market_data_ricequant_incr(symbol, '15m', period_alias=None, is_debug=is_debug)
     get_market_data_ricequant_incr(symbol, '30m', period_alias=None, is_debug=is_debug)
     get_market_data_ricequant_incr(symbol, '60m', '1h', is_debug)
-    get_market_data_ricequant_incr(symbol, '240m', '4h', is_debug)
+    get_market_data_ricequant_incr(symbol, '210m', '4h', is_debug)
     get_market_data_ricequant_incr(symbol, '1d', period_alias=None, is_debug=is_debug)
 
 def getMarketData(symbol, is_debug = False):

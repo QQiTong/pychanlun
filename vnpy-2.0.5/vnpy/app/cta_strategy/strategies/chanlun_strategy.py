@@ -31,7 +31,7 @@ class ChanLunStrategy(CtaTemplate):
             cta_engine, strategy_name, vt_symbol, setting
         )
 
-        self.bg = BarGenerator(self.on_bar, 15, self.on_15min_bar)
+        self.bg = BarGenerator(self.on_bar, 5, self.on_5min_bar)
         self.am = ArrayManager()
         self.fixed_size = 1
 
@@ -66,7 +66,7 @@ class ChanLunStrategy(CtaTemplate):
         """
         self.bg.update_bar(bar)
 
-    def on_15min_bar(self, bar: BarData):
+    def on_5min_bar(self, bar: BarData):
         """"""
         self.cancel_all()
 
