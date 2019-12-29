@@ -2,23 +2,28 @@
 
 def MergeCandles(high, low, from_index, to_index, dir):
     candles = []
+    # dir 指笔的运行方向
+    # direction 指包含处理的方向
+    direction = -dir
     for i in range(from_index, to_index + 1):
         if len(candles) == 0:
             candles.append({'high': high[i], 'low': low[i]})
         else:
             if high[i] > candles[-1]['high'] and low[i] > candles[-1]['low']:
                 candles.append({'high': high[i], 'low': low[i]})
+                direction = 1
             elif high[i] < candles[-1]['high'] and low[i] < candles[-1]['low']:
                 candles.append({'high': high[i], 'low': low[i]})
+                direction = -1
             elif high[i] <= candles[-1]['high'] and low[i] >= candles[-1]['low']:
-                if dir == 1:
+                if direction == 1:
                     candles[-1]['low'] = low[i]
-                elif dir == -1:
+                elif direction == -1:
                     candles[-1]['high'] = high[i]
             elif high[i] >= candles[-1]['high'] and low[i] <= candles[-1]['low']:
-                if dir == 1:
+                if direction == 1:
                     candles[-1]['high'] = high[i]
-                elif dir == -1:
+                elif direction == -1:
                     candles[-1]['low'] = low[i]
     return candles
 
