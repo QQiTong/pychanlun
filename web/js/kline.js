@@ -1511,6 +1511,109 @@ var app = new Vue({
             }
 
 
+            // 线段破坏
+            for (var i = 0; i < jsonObj.buy_duan_break.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.buy_duan_break.date[i], jsonObj.buy_duan_break.data[i]],
+                    value: jsonObj.buy_duan_break.data[i],
+                    symbolRotate: 0,
+                    symbol: 'circle',
+                    symbolSize: 10,
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: upColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
+            }
+
+            for (var i = 0; i < jsonObj.sell_duan_break.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.sell_duan_break.date[i], jsonObj.sell_duan_break.data[i]],
+                    value: jsonObj.sell_duan_break.data[i],
+                    symbolRotate: 180,
+                    symbolSize: 10,
+                    symbol: 'circle',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: downColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
+            }
+            //大级别线段破坏
+            for (var i = 0; i < jsonObj.buy_duan_break_higher.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.buy_duan_break_higher.date[i], jsonObj.buy_duan_break_higher.data[i]],
+                    value: jsonObj.buy_duan_break_higher.data[i],
+                    symbolRotate: 0,
+                    symbolSize: 10,
+                    symbol: 'circle',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: higherUpColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
+            }
+            for (var i = 0; i < jsonObj.sell_duan_break_higher.date.length; i++) {
+                var value = {
+                    coord: [jsonObj.sell_duan_break_higher.date[i], jsonObj.sell_duan_break_higher.data[i]],
+                    value: jsonObj.sell_duan_break_higher.data[i],
+                    symbolRotate: 180,
+                    symbolSize: 10,
+                    symbol: 'circle',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: higherDownColor, opacity: '0.9'}
+                    },
+                    label: {
+                        //position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        //borderColor: 'blue',
+                        //borderWidth: 1,
+                    },
+                };
+                huilaValues.push(value);
+            }
+
+
+
+
             // 买卖点
             // var mmdValues = [];
             // for (var i = 0; i < jsonObj.buyData.date.length; i++) {

@@ -38,7 +38,7 @@ symbolListDigitCoin = ['BTC_CQ'
 # periodList2 = ['3min', '5min', '15min', '30min', '60min', '4hour']
 periodList = ['3m', '5m', '15m', '30m', '60m']
 periodList1 = ['3m', '5m', '15m', '30m', '60m']
-periodList2 = ['3m', '5m', '15m', '30m', '60m','4h']
+periodList2 = ['3m', '5m', '15m', '30m', '60m', '4h']
 dominantSymbolInfoList = {}
 # 账户资金
 account = 10
@@ -122,6 +122,7 @@ def monitorFuturesAndDigitCoin(type):
     lastTimeHuilaMap = {}
     lastTimeTupoMap = {}
     lastTimeVreverseMap = {}
+    lastTimeDuanBreakMap = {}
 
     symbolList = []
     if type == "1":
@@ -171,6 +172,8 @@ def monitorFuturesAndDigitCoin(type):
                     lastHuilaTime = lastTimeHuilaMap[symbol][period]
                     lastTupoTime = lastTimeTupoMap[symbol][period]
                     lastVreverseTime = lastTimeVreverseMap[symbol][period]
+                    lastDuanBreakTime = lastTimeDuanBreakMap[symbol][period]
+
                     diffTime = currentTime - lastTime
                     print("current:", symbol, period, datetime.now())
                     result = calc.calcData(period, symbol)
@@ -184,7 +187,8 @@ def monitorFuturesAndDigitCoin(type):
                     monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVreverseMap, symbol,
                                     period,
                                     closePrice)
-
+                    monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTimeDuanBreakMap,
+                                     symbol, period, closePrice)
             if type == "1":
                 time.sleep(0)
             else:
@@ -510,6 +514,98 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
                           remark="higher Vreverse S")
             sendEmail(msg)
+
+
+'''
+监控 线段破坏
+'''
+
+
+def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTimeDuanBreakMap, symbol, period,
+                     closePrice):
+    # 监控线段破坏
+    if len(result['buy_duan_break']['date']) > 0:
+        lastBuyDate = result['buy_duan_break']['date'][-1]
+        lastBuyData = result['buy_duan_break']['data'][-1]
+        stop_lose_price = result['buy_duan_break']['stop_lose_price'][-1]
+        notLower = result['notLower']
+
+        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+        # print("current judge:", symbol, period, lastBuyDate, notLower)
+        if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeDuanBreakMap[symbol][period] = dateStamp
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+            msg = symbol, period, 'duan break B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            if maxOrderCount >= 1:
+                sendEmail(msg)
+            # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                          remark="duan break B")
+
+    if len(result['sell_duan_break']['date']) > 0:
+        notHigher = result['notHigher']
+        lastSellDate = result['sell_duan_break']['date'][-1]
+        lastSellData = result['sell_duan_break']['data'][-1]
+        stop_lose_price = result['sell_duan_break']['stop_lose_price'][-1]
+
+        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+        # print("current judge:", symbol, period, lastSellDate, notHigher)
+        if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeDuanBreakMap[symbol][period] = dateStamp
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+            msg = symbol, period, 'duan break S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+                          remark="duan break S")
+            if maxOrderCount >= 1:
+                sendEmail(msg)
+
+    # 监控高级别回拉
+
+    if len(result['buy_duan_break_higher']['date']) > 0:
+        lastBuyDate = result['buy_duan_break_higher']['date'][-1]
+        lastBuyData = result['buy_duan_break_higher']['data'][-1]
+        stop_lose_price = result['buy_duan_break_higher']['stop_lose_price'][-1]
+
+        notLower = result['notLower']
+
+        dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
+        # print("current judge:", symbol, period, lastBuyDate, notLower)
+        if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeDuanBreakMap[symbol][period] = dateStamp
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+            msg = symbol, period, 'higher huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+            if maxOrderCount >= 1:
+                sendEmail(msg)
+            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
+            #                  'BuyLong')
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
+                          remark="higher huila B")
+
+    if len(result['sell_duan_break_higher']['date']) > 0:
+        notHigher = result['notHigher']
+        lastSellDate = result['sell_duan_break_higher']['date'][-1]
+        lastSellData = result['sell_duan_break_higher']['data'][-1]
+        stop_lose_price = result['sell_duan_break_higher']['stop_lose_price'][-1]
+
+        dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
+        # print("current judge:", symbol, period, lastSellDate, notHigher)
+        if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeDuanBreakMap[symbol][period] = dateStamp
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+
+            msg = symbol, period, 'higher huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
+            #                  'BuyLong')
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
+                          remark="higher huila S")
+            if maxOrderCount >= 1:
+                sendEmail(msg)
 
 
 def sendEmail(msg):
