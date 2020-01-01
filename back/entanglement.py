@@ -319,6 +319,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                     break
                 if bi_series[j] == -1:
                      anchor = j
+                     break
             if anchor > 0:
                 for k in range(anchor + 1, len(time_series)):
                     if duan_series[k] == -1:
@@ -335,6 +336,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                     break
                 if bi_series[j] == 1:
                      anchor = j
+                     break
             if anchor > 0:
                 for k in range(anchor + 1, len(time_series)):
                     if duan_series[k] == 1:
