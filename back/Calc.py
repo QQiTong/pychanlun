@@ -375,7 +375,7 @@ class Calc:
         resJson['buy_duan_break'] = duan_pohuai['buy_duan_break']
         resJson['sell_duan_break'] = duan_pohuai['sell_duan_break']
         resJson['buy_duan_break_higher'] = duan_pohuai_higher['buy_duan_break']
-        resJson['sell_duan_break_higher'] = duan_pohuai_higher['buy_duan_break']
+        resJson['sell_duan_break_higher'] = duan_pohuai_higher['sell_duan_break']
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)
