@@ -146,6 +146,7 @@ def monitorFuturesAndDigitCoin(type):
         lastTimeHuilaMap[symbol] = {}
         lastTimeTupoMap[symbol] = {}
         lastTimeVreverseMap[symbol] = {}
+        lastTimeDuanBreakMap[symbol]= {}
 
         for j in range(len(periodList)):
             period = periodList[j]
@@ -153,10 +154,12 @@ def monitorFuturesAndDigitCoin(type):
             lastTimeHuilaMap[symbol][period] = 0
             lastTimeTupoMap[symbol][period] = 0
             lastTimeVreverseMap[symbol][period] = 0
+            lastTimeDuanBreakMap[symbol][period] = 0
     print(lastTimeMap)
     print(lastTimeHuilaMap)
     print(lastTimeTupoMap)
     print(lastTimeVreverseMap)
+    print(lastTimeDuanBreakMap)
     startTime = int(time.time())
 
     try:
