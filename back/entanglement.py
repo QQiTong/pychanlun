@@ -296,3 +296,52 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                             break
 
     return result
+
+
+def po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+    result = {
+        'buy_duan_break': {
+            'date': [],
+            'data': [],
+            'stop_lose_price': []
+        },
+        'sell_duan_break': {
+            'date': [],
+            'data': [],
+            'stop_lose_price': []
+        }
+    }
+    for i in range(len(duan_series)):
+        if duan_series[i] == 1:
+            anchor = 0
+            for j in range(i + 1, len(time_series)):
+                if duan_series[j] == -1:
+                    break
+                if bi_series[j] == -1:
+                     anchor = j
+            if anchor > 0:
+                for k in range(anchor + 1, len(time_series)):
+                    if duan_series[k] == -1:
+                        break
+                    if close_series[k] < low_series[anchor]:
+                        result['sell_duan_break']['date'].append(time_series[k])
+                        result['sell_duan_break']['data'].append(low_series[anchor])
+                        result['sell_duan_break']['stop_lose_price'].append(high_series[i])
+                        break
+        elif duan_series[i] == -1:
+            anchor = 0
+            for j in range(i + 1, len(time_series)):
+                if duan_series[j] == 1:
+                    break
+                if bi_series[j] == 1:
+                     anchor = j
+            if anchor > 0:
+                for k in range(anchor + 1, len(time_series)):
+                    if duan_series[k] == 1:
+                        break
+                    if close_series[k] > high_series[anchor]:
+                        result['buy_duan_break']['date'].append(time_series[k])
+                        result['buy_duan_break']['data'].append(high_series[anchor])
+                        result['buy_duan_break']['stop_lose_price'].append(low_series[i])
+                        break
+    return result
