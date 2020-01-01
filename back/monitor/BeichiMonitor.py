@@ -538,13 +538,13 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
         if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeDuanBreakMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'duan break B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
+            msg = symbol, period, 'break B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             if maxOrderCount >= 1:
                 sendEmail(msg)
             # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="duan break B")
+                          remark="break B")
 
     if len(result['sell_duan_break']['date']) > 0:
         notHigher = result['notHigher']
@@ -557,15 +557,15 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
         if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeDuanBreakMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'duan break S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period, 'break S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="duan break S")
+                          remark="break S")
             if maxOrderCount >= 1:
                 sendEmail(msg)
 
-    # 监控高级别回拉
+    # 监控高级别线段破坏
 
     if len(result['buy_duan_break_higher']['date']) > 0:
         lastBuyDate = result['buy_duan_break_higher']['date'][-1]
@@ -579,7 +579,7 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
         if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeDuanBreakMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'higher huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
+            msg = symbol, period, 'higher break B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             if maxOrderCount >= 1:
@@ -587,7 +587,7 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
             #                  'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="higher huila B")
+                          remark="higher break B")
 
     if len(result['sell_duan_break_higher']['date']) > 0:
         notHigher = result['notHigher']
@@ -601,12 +601,12 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
             lastTimeDuanBreakMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
 
-            msg = symbol, period, 'higher huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period, 'higher break S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
             #                  'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="higher huila S")
+                          remark="higher break S")
             if maxOrderCount >= 1:
                 sendEmail(msg)
 
