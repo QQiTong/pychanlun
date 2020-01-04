@@ -196,26 +196,28 @@ def CalcBi(count, bi, high, low):
     # 标记分型的顶底
     for i in range(1, count):
         x = i - 1
-        for x in range(i - 1, 0, -1):
+        for x in range(i - 1, -1, -1):
             if bi[x] == -1:
                 break
         maxHigh = max(high[x:i])
         # 是新高
         b1 = high[i] > maxHigh
         if b1 and IsBi(count, bi, high, low, x, i, 1, False):
+            bi[x] = -1
             bi[i] = 1
             for t in range(x + 1, i):
                 bi[t] = 0
             AdjustBi(count, bi, high, low, x)
 
         y = i - 1
-        for y in range(i -1, 0, -1):
+        for y in range(i -1, -1, -1):
             if bi[y] == 1:
                 break
         minLow = min(low[y:i])
         # 是新低
         b2 = low[i] < minLow
         if b2 and IsBi(count, bi, high, low, y, i, -1, False):
+            bi[y] = 1
             bi[i] = -1
             for t in range(y + 1, i):
                 bi[t] = 0
