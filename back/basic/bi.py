@@ -1,4 +1,4 @@
-# 笔算法
+from back.basic.comm import FindPrevEq
 
 def MergeCandles(high, low, from_index, to_index, dir):
     candles = []
@@ -38,18 +38,12 @@ def MergeCandles(high, low, from_index, to_index, dir):
 def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
     if not strict:
         if dir == 1:
-            i = from_index - 1
-            for i in range(from_index - 1, 0, -1):
-                if bi[i] == 1:
-                    break
-            if high[to_index] > high[i]:
+            g1 = FindPrevEq(bi, 1, from_index)
+            if g1 >= 0 and high[to_index] > high[g1]:
                 return True
         elif dir == -1:
-            i = from_index - 1
-            for i in range(from_index - 1, 0, -1):
-                if bi[i] == -1:
-                    break
-            if low[to_index] < low[i]:
+            d1 = FindPrevEq(bi, -1, from_index)
+            if d1 >= 0 and low[to_index] < low[d1]:
                 return True
     if to_index - from_index < 4:
         # K柱数量不够不成笔
@@ -58,12 +52,13 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
     if len(candles) < 5:
         # 合并后K柱数量不够不成笔
         return False
+    if len(candles) >= 13:
+        # 满足13K就不看是否重叠了
+        return True
     # 查看顶底是否重叠
     if dir == 1:
-        i = from_index - 1
-        for i in range(from_index - 1, 0, -1):
-            if bi[i] == 1:
-                break
+        i = FindPrevEq(bi, 1, from_index)
+        i = max(0, i)
         candlesPrev = MergeCandles(high, low, i, from_index, -1)
         candlesCurr = candles
         candlesNext = []
@@ -90,10 +85,8 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
             if not isValid:
                 return False
     elif dir == -1:
-        i = from_index - 1
-        for i in range(from_index, 0, -1):
-            if bi[i] == -1:
-                break
+        i = FindPrevEq(bi, -1, from_index)
+        i = max(0, 1)
         candlesPrev = MergeCandles(high, low, i, from_index, 1)
         candlesCurr = candles
         candlesNext = []
@@ -125,10 +118,7 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
 # 合并要符合闪电形态，而且只合一次。
 def AdjustBi(count, bi, high, low, index):
     if bi[index] == 1:
-        i = 0
-        for i in range(index - 1, 0, -1):
-            if bi[i] == -1:
-                break
+        i = FindPrevEq(bi, -1, index)
         if i > 0:
             if not IsBi(count, bi, high, low, i, index, 1, True):
                 # 不是严格成笔，需要调整
@@ -138,28 +128,15 @@ def AdjustBi(count, bi, high, low, index):
                 d1 = i
                 # g2记录前一笔的高的位置
                 # d2记录前一笔的低的位置
-                g2 = 0
-                d2 = 0
-                for i in range(i - 1, 0, -1):
-                    if bi[i] == 1:
-                        g2 = i
-                        break
-                if i > 0:
-                    for i in range(i - 1, 0, -1):
-                        if bi[i] == -1:
-                            d2 = i
-                            break
-                    if i > 0:
-                        # 两笔找全，看看是不是可以合并
-                        if high[g1] >= high[g2] and low[d1] >= low[d2]:
-                            for j in range(d2 + 1, g1):
-                                bi[j] = 0
+                g2 = FindPrevEq(bi, 1, d1)
+                d2 = FindPrevEq(bi, -1, g2)
+                if d2 >= 0:
+                    # 两笔找全，看看是不是可以合并
+                    if high[g1] >= high[g2] and low[d1] >= low[d2]:
+                        for j in range(d2 + 1, g1):
+                            bi[j] = 0
     elif bi[index] == -1:
-        i = 0
-        for i in range(index - 1, 0, -1):
-            if bi[i] == 1:
-                # 找到前面的高点
-                break
+        i = FindPrevEq(bi, 1, index)
         if i > 0:
             if not IsBi(count, bi, high, low, i, index, -1, True):
                 # 不是严格成笔，需要调整
@@ -169,22 +146,13 @@ def AdjustBi(count, bi, high, low, index):
                 g1 = i
                 # d2记录前一笔的低的位置
                 # g2记录前一笔的高的位置
-                g2 = 0
-                d2 = 0
-                for i in range(i - 1, 0, -1):
-                    if bi[i] == -1:
-                        d2 = i
-                        break
-                if i > 0:
-                    for i in range(i - 1, 0, -1):
-                        if bi[i] == 1:
-                            g2 = i
-                            break
-                    if i > 0:
-                        # 两笔找全，看看是不是可以合并
-                        if low[d1] <= low[d2] and high[g1] <= high[g2]:
-                            for j in range(g2 + 1, d1):
-                                bi[j] = 0
+                d2 = FindPrevEq(bi, -1, g1)
+                g2 = FindPrevEq(bi, 1, d2)
+                if g2 >= 0:
+                    # 两笔找全，看看是不是可以合并
+                    if low[d1] <= low[d2] and high[g1] <= high[g2]:
+                        for j in range(g2 + 1, d1):
+                            bi[j] = 0
 
 
 # 计算笔信号
@@ -195,28 +163,27 @@ def AdjustBi(count, bi, high, low, index):
 def CalcBi(count, bi, high, low):
     # 标记分型的顶底
     for i in range(1, count):
-        x = i - 1
-        for x in range(i - 1, -1, -1):
-            if bi[x] == -1:
-                break
+        # x 前一个笔低点
+        x = FindPrevEq(bi, -1, i)
+        x = max(0, x)
+        # y 前一个笔高点
+        y = FindPrevEq(bi, 1, i)
+        y = max(0, y)
+
         maxHigh = max(high[x:i])
         # 是新高
         b1 = high[i] > maxHigh
-        if b1 and IsBi(count, bi, high, low, x, i, 1, False):
+        if b1 and (y > x or IsBi(count, bi, high, low, x, i, 1, False)):
             bi[x] = -1
             bi[i] = 1
             for t in range(x + 1, i):
                 bi[t] = 0
             AdjustBi(count, bi, high, low, x)
 
-        y = i - 1
-        for y in range(i -1, -1, -1):
-            if bi[y] == 1:
-                break
         minLow = min(low[y:i])
         # 是新低
         b2 = low[i] < minLow
-        if b2 and IsBi(count, bi, high, low, y, i, -1, False):
+        if b2 and (x > y or IsBi(count, bi, high, low, y, i, -1, False)):
             bi[y] = 1
             bi[i] = -1
             for t in range(y + 1, i):
