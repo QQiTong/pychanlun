@@ -1848,6 +1848,8 @@ var app = new Vue({
                 var diffPrice = Math.abs(beichiPrice - stopLosePrice)
                 // 当前收益百分比
                 var currentPercent = ""
+                // 当前收益（单位万/元）
+                var currentProfit = ""
                 if (lastBeichiType === 1|| lastBeichiType === 2) {
                     targetPrice = beichiPrice + diffPrice
                     currentPercent = ((currentPrice - beichiPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
@@ -1871,6 +1873,8 @@ var app = new Vue({
                 // 计算开仓手数
                 this.calcAccount()
                 // console.log(beichiPrice, stopLosePrice, diffPrice, targetPrice)
+                // 单位是万
+                currentProfit = ((this.maxOrderCount * this.marginPrice *  Number(currentPercent) /100) /10000).toFixed(2)
                 // 当前最新价
                 var markLineCurrent = {
                     yAxis: currentPrice,
@@ -1887,7 +1891,7 @@ var app = new Vue({
                     label: {
                         normal: {
                             color: 'yellow',
-                            formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent + "% \n盈亏比: 1 : "
+                            formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent +"% \n盈利额: "+currentProfit+ " 万 \n盈亏比: 1 : "
                                 + (currentPercent / targetPercent).toFixed(1),
                         },
                     },
