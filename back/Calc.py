@@ -13,12 +13,10 @@ import pydash
 from datetime import datetime
 
 from back.basic.bi import CalcBi
+from back.basic.duan import CalcDuan
 from back import Duan
 from back.KlineDataTool import KlineDataTool
 from back.ZhongShuProcess import ZhongShuProcess
-from back.BiProcess import BiProcess
-from back.DuanProcess import DuanProcess
-from back.KlineProcess import KlineProcess
 from back.Tools import Tools
 import back.divergence as divergence
 import back.entanglement as entanglement
@@ -214,47 +212,38 @@ class Calc:
             timeList.append(strTime)
             volumeList.append(round(float(item['volume']), 2))
 
-        # K线所在笔的方向
-        # directionList = [0 for i in range(len(timeList))]
-
-        # print(highList)
-        # print(lowList)
-        # print(timeList)
-
-        # k线处理
         count = len(timeList)
         # 笔结果
         biList = [0 for i in range(count)]
         CalcBi(count, biList, highList, lowList)
 
         # 段处理
-        duanProcess = DuanProcess()
-        duanResult = duanProcess.handle(biList, highList, lowList)
+        duanList = [0 for i in range(count)]
+        CalcDuan(count, duanList, biList, highList, lowList)
 
         # 高一级别段处理
-        higherDuanProcess = DuanProcess()
-        higherDuanResult = higherDuanProcess.handle(duanResult, highList, lowList)
+        higherDuanList = [0 for i in range(count)]
+        CalcDuan(count, higherDuanList, duanList, highList, lowList)
 
         # 高高一级别段处理
-        higherHigherDuanProcess = DuanProcess()
-        higherHigherDuanResult = higherHigherDuanProcess.handle(higherDuanResult, highList, lowList)
+        higherHigherDuanList = [0 for i in range(count)]
+        CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
 
         # print("段结果:", len(biResult), len(duanResult))
-        entanglementList = entanglement.calcEntanglements(timeList, duanResult, biList, highList, lowList)
-        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanResult)
-        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanResult)
-        v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanResult)
-        duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, biList, duanResult)
+        entanglementList = entanglement.calcEntanglements(timeList, duanList, biList, highList, lowList)
+        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
+        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
+        v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
+        duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
         # 段中枢
-        entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanResult, duanResult, highList, lowList)
-        huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanResult, higherDuanResult)
-        tupo_higher = entanglement.tu_po(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanResult, higherDuanResult)
-        v_reverse_higher = entanglement.v_reverse(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanResult, higherDuanResult)
-        duan_pohuai_higher = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, duanResult, higherDuanResult)
+        entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanList, duanList, highList, lowList)
+        huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
+        tupo_higher = entanglement.tu_po(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
+        v_reverse_higher = entanglement.v_reverse(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
+        duan_pohuai_higher = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
 
         # 高级别段中枢
-        entanglementHigherHigherList = entanglement.calcEntanglements(timeList, higherHigherDuanResult, higherDuanResult, highList,
-                                                                lowList)
+        entanglementHigherHigherList = entanglement.calcEntanglements(timeList, higherHigherDuanList, higherDuanList, highList, lowList)
 
         # 中枢处理
         # zhongShu = ZhongShuProcess()
@@ -281,10 +270,10 @@ class Calc:
         resJson['close'] = closePriceList
 
         resJson['bidata'] = getLineData(timeList, biList, highList, lowList)
-        resJson['duandata'] = getLineData(timeList, duanResult, highList, lowList)
+        resJson['duandata'] = getLineData(timeList, duanList, highList, lowList)
 
-        resJson['higherDuanData'] = getLineData(timeList, higherDuanResult, highList, lowList)
-        resJson['higherHigherDuanData'] = getLineData(timeList, higherHigherDuanResult, highList, lowList)
+        resJson['higherDuanData'] = getLineData(timeList, higherDuanList, highList, lowList)
+        resJson['higherHigherDuanData'] = getLineData(timeList, higherHigherDuanList, highList, lowList)
 
         # resJson['diff'] = getMacd(closePriceList)[0].tolist()
         # resJson['dea'] = getMacd(closePriceList)[1].tolist()
@@ -339,8 +328,8 @@ class Calc:
         # sellHigherMACDBCData['value'] = []
 
         # strategy3计算
-        resJson['notLower'] = calcNotLower(duanResult, lowList)
-        resJson['notHigher'] = calcNotHigher(duanResult, highList)
+        resJson['notLower'] = calcNotLower(duanList, lowList)
+        resJson['notHigher'] = calcNotHigher(duanList, highList)
         # for x in range(len(buyMACDBCData2['date'])):
         #     if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
         #         buyHigherMACDBCData['date'].append(buyMACDBCData2['date'][x])
@@ -464,8 +453,8 @@ def getAma(closePriceList):
     return result
 
 
-def calcNotLower(duanResult, lowList):
-    if Duan.notLower(duanResult, lowList):
+def calcNotLower(duanList, lowList):
+    if Duan.notLower(duanList, lowList):
         macdPos = ""
         # if macd15m[-1] >= 0:
         #     macdPos = "大级别MACD零轴上"
@@ -477,8 +466,8 @@ def calcNotLower(duanResult, lowList):
         return False
 
 
-def calcNotHigher(duanResult, highList):
-    if Duan.notHigher(duanResult, highList):
+def calcNotHigher(duanList, highList):
+    if Duan.notHigher(duanList, highList):
         macdPos = ""
         # if macd15m[-1] >= 0:
         #     macdPos = "大级别MACD零轴上"
