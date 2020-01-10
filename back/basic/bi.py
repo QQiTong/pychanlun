@@ -106,11 +106,16 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
             if bottomHigh > topLow:
                 return False
             # isValid 表示是否有独立K柱不和底或顶重叠
-            isValid = False
+            isValid1 = False
+            isValid2 = False
             for t in range(2, len(candlesCurr) - 2):
-                if candlesCurr[t]['high'] > bottomHigh and candlesCurr[t]['low'] < topLow:
-                    isValid = True
-            if not isValid:
+                if not isValid1 and candlesCurr[t]['high'] > bottomHigh:
+                    isValid1 = True
+                if not isValid2 and candlesCurr[t]['low'] < topLow:
+                    isValid2 = True
+                if isValid1 and isValid2:
+                    break
+            if not isValid1 or not isValid2:
                 return False
     return True
 
