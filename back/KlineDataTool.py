@@ -164,7 +164,7 @@ class KlineDataTool:
         }
 
         startTime = datetime.now()
-        r = requests.get(url, params=payload, proxies=cfg.PROXIES, verify=False)
+        r = requests.get(url, params=payload,  verify=False)
         endTime = datetime.now() - startTime
         klines = json.loads(r.text)['data']
         # print("火币接口花费时间:", endTime, datetime.now(), r)
@@ -247,8 +247,8 @@ class KlineDataTool:
         end = datetime.now() + timedelta(1)
         timeDeltaMap = {
             '1m': -7*3,
-            '3m': -31,
-            '5m': -31,
+            '3m': -31*3,
+            '5m': -31*3,
             '15m': -31 * 3,
             '30m': -31 * 8,
             '60m': -31 * 8,

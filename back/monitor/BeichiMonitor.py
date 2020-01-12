@@ -41,7 +41,7 @@ periodList1 = ['3m', '5m', '15m', '30m', '60m']
 periodList2 = ['3m', '5m', '15m', '30m', '60m', '4h']
 dominantSymbolInfoList = {}
 # 账户资金
-account = 10
+account = 19
 maxAccountUseRate = 0.1
 stopRate = 0.01
 mail = Mail()
@@ -146,7 +146,7 @@ def monitorFuturesAndDigitCoin(type):
         lastTimeHuilaMap[symbol] = {}
         lastTimeTupoMap[symbol] = {}
         lastTimeVreverseMap[symbol] = {}
-        lastTimeDuanBreakMap[symbol]= {}
+        lastTimeDuanBreakMap[symbol] = {}
 
         for j in range(len(periodList)):
             period = periodList[j]
@@ -380,16 +380,18 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
     if len(result['buy_zs_tupo']['date']) > 0:
         lastBuyDate = result['buy_zs_tupo']['date'][-1]
         lastBuyData = result['buy_zs_tupo']['data'][-1]
+        stop_lose_price = result['buy_zs_tupo']['stop_lose_price'][-1]
         notLower = result['notLower']
 
         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastBuyDate, notLower)
         if lastTupoTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeTupoMap[symbol][period] = dateStamp
-            msg = symbol, period, 'tupo B', lastBuyDate, lastBuyData, closePrice, time.strftime(
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+            msg = symbol, period, 'tupo B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-            sendEmail(msg)
+            if maxOrderCount >= 1:
+                sendEmail(msg)
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
                           remark="tupo B")
 
@@ -397,33 +399,38 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
         notHigher = result['notHigher']
         lastSellDate = result['sell_zs_tupo']['date'][-1]
         lastSellData = result['sell_zs_tupo']['data'][-1]
-
+        stop_lose_price = result['sell_zs_tupo']['stop_lose_price'][-1]
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastSellDate, notHigher)
         if lastTupoTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeTupoMap[symbol][period] = dateStamp
-            msg = symbol, period, 'tupo S', lastSellDate, lastSellData, closePrice, time.strftime(
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+            msg = symbol, period, 'tupo S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
                           remark="tupo S")
-            sendEmail(msg)
+            if maxOrderCount >= 1:
+                sendEmail(msg)
 
     # 监控高级别突破
 
     if len(result['buy_zs_tupo_higher']['date']) > 0:
         lastBuyDate = result['buy_zs_tupo_higher']['date'][-1]
         lastBuyData = result['buy_zs_tupo_higher']['data'][-1]
+        stop_lose_price = result['buy_zs_tupo_higher']['stop_lose_price'][-1]
         notLower = result['notLower']
 
         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastBuyDate, notLower)
         if lastTupoTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeTupoMap[symbol][period] = dateStamp
-            msg = symbol, period, 'higher tupo B', lastBuyDate, lastBuyData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
 
-            sendEmail(msg)
+            msg = symbol, period, 'higher tupo B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            if maxOrderCount >= 1:
+                sendEmail(msg)
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
                           remark="higher tupo B")
 
@@ -431,17 +438,20 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
         notHigher = result['notHigher']
         lastSellDate = result['sell_zs_tupo_higher']['date'][-1]
         lastSellData = result['sell_zs_tupo_higher']['data'][-1]
+        stop_lose_price = result['sell_zs_tupo_higher']['stop_lose_price'][-1]
 
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastSellDate, notHigher)
         if lastTupoTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeTupoMap[symbol][period] = dateStamp
-            msg = symbol, period, 'higher tupo S', lastSellDate, lastSellData, closePrice, time.strftime(
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+            msg = symbol, period, 'higher tupo S ', maxOrderCount,lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
                           remark="higher tupo S")
-            sendEmail(msg)
+            if maxOrderCount >= 1:
+                sendEmail(msg)
 
 
 '''
@@ -455,15 +465,17 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
     if len(result['buy_v_reverse']['date']) > 0:
         lastBuyDate = result['buy_v_reverse']['date'][-1]
         lastBuyData = result['buy_v_reverse']['data'][-1]
+        stop_lose_price = result['buy_v_reverse']['stop_lose_price'][-1]
+
         notLower = result['notLower']
 
         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastBuyDate, notLower)
         if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 10:
             lastTimeVreverseMap[symbol][period] = dateStamp
-            msg = symbol, period, 'Vreverse B', lastBuyDate, lastBuyData, closePrice, time.strftime(
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+            msg = symbol, period, 'Vreverse B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
             sendEmail(msg)
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
                           remark="Vreverse B")
@@ -472,12 +484,15 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
         notHigher = result['notHigher']
         lastSellDate = result['sell_v_reverse']['date'][-1]
         lastSellData = result['sell_v_reverse']['data'][-1]
+        stop_lose_price = result['sell_v_reverse']['stop_lose_price'][-1]
 
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastSellDate, notHigher)
         if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 10:
             lastTimeVreverseMap[symbol][period] = dateStamp
-            msg = symbol, period, 'Vreverse S', lastSellDate, lastSellData, closePrice, time.strftime(
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+
+            msg = symbol, period, 'Vreverse S ',maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
@@ -489,13 +504,16 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
     if len(result['buy_v_reverse_higher']['date']) > 0:
         lastBuyDate = result['buy_v_reverse_higher']['date'][-1]
         lastBuyData = result['buy_v_reverse_higher']['data'][-1]
+        stop_lose_price = result['buy_v_reverse_higher']['stop_lose_price'][-1]
         notLower = result['notLower']
 
         dateStamp = int(time.mktime(time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastBuyDate, notLower)
         if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
             lastTimeVreverseMap[symbol][period] = dateStamp
-            msg = symbol, period, 'higher Vreverse B', lastBuyDate, lastBuyData, closePrice, time.strftime(
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+
+            msg = symbol, period, 'higher Vreverse B ', maxOrderCount,lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             sendEmail(msg)
@@ -506,12 +524,15 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
         notHigher = result['notHigher']
         lastSellDate = result['sell_v_reverse_higher']['date'][-1]
         lastSellData = result['sell_v_reverse_higher']['data'][-1]
+        stop_lose_price = result['sell_v_reverse_higher']['stop_lose_price'][-1]
 
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
         # print("current judge:", symbol, period, lastSellDate, notHigher)
         if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
             lastTimeVreverseMap[symbol][period] = dateStamp
-            msg = symbol, period, 'higher Vreverse S', lastSellDate, lastSellData, closePrice, time.strftime(
+            maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
+
+            msg = symbol, period, 'higher Vreverse S ',maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,

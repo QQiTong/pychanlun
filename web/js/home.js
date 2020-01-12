@@ -16,7 +16,12 @@ var app = new Vue({
         // 合约乘数
         contractMultiplier: null,
         // 账户总额
-        account: 10,
+        account: 19,
+
+        // 期货账户总额
+        futuresAccount: 19,
+        // 数字货币账户总额
+        digitCoinAccount:0.01,
         //开仓价格
         openPrice: null,
         //止损价格
@@ -170,24 +175,25 @@ var app = new Vue({
                 alert("请填入保证金系数，开仓价，止损价")
                 return
             }
-            // 计算最大能使用的资金
-            let maxAccountUse = this.account * 10000 * this.maxAccountUseRate
-            // 计算最大止损金额
-            let maxStopMoney = this.account * 10000 * this.stopRate
-            // 1手止损的金额
-
             if (this.currentSymbol.indexOf("_CQ") === -1) {
+                this.account = this.futuresAccount
                 // 计算1手需要的保证金
                 this.perOrderMargin = Math.floor(this.openPrice * this.contractMultiplier * this.currentMarginRate)
                 this.perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier
                 // 1手止损的百分比
                 this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
             } else {
+                this.account = this.digitCoinAccount
                 // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
                 this.perOrderMargin = 5
-                this.perOrderStopRate = (Math.abs(this.openPrice - this.stopPrice) / this.openPrice + this.digitCoinFee) * 20
+                this.perOrderStopRate = ((Math.abs(this.openPrice - this.stopPrice) / this.openPrice + this.digitCoinFee) * 20).toFixed(2)
                 this.perOrderStopMoney = Number((this.perOrderMargin * this.perOrderStopRate).toFixed(2))
             }
+            // 计算最大能使用的资金
+            let maxAccountUse = this.account * 10000 * this.maxAccountUseRate
+            // 计算最大止损金额
+            let maxStopMoney = this.account * 10000 * this.stopRate
+            // 1手止损的金额
 
             // 根据止损算出的开仓手数(四舍五入)
             let maxOrderCount1 = Math.round(maxStopMoney / this.perOrderStopMoney)

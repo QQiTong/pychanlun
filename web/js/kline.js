@@ -17,7 +17,11 @@ var app = new Vue({
         // 合约乘数
         contractMultiplier: null,
         // 账户总额
-        account: 10,
+        account: 19,
+        // 期货账户总额
+        futuresAccount: 19,
+        // 数字货币账户总额
+        digitCoinAccount: 0.01,
         //开仓价格
         openPrice: null,
         //止损价格
@@ -1612,8 +1616,6 @@ var app = new Vue({
             }
 
 
-
-
             // 买卖点
             // var mmdValues = [];
             // for (var i = 0; i < jsonObj.buyData.date.length; i++) {
@@ -1810,7 +1812,7 @@ var app = new Vue({
             //     bcMACDValues.push(value);
             // }
             var markLineData = [];
-            var lastBeichiType = getLastBeichiData(jsonObj.buy_zs_huila, jsonObj.sell_zs_huila, jsonObj.buy_zs_huila_higher, jsonObj.sell_zs_huila_higher)
+            var lastBeichiType = getLastBeichiData(jsonObj)
             var lastBeichi = null
             let marginLevel = Number((1 / (this.futureSymbolMap[this.symbol].margin_rate * this.marginLevelCompany)).toFixed(2))
             // 当前价格
@@ -1822,6 +1824,7 @@ var app = new Vue({
             // console.log("最后的背驰:", kxType, lastBeichiType)
             if (lastBeichiType !== 0) {
                 switch (lastBeichiType) {
+                    // 回拉
                     case 1:
                         lastBeichi = jsonObj.buy_zs_huila
                         break
@@ -1834,6 +1837,46 @@ var app = new Vue({
                     case 4:
                         lastBeichi = jsonObj.sell_zs_huila_higher
                         break
+                    //线段破坏
+                    case 5:
+                        lastBeichi = jsonObj.buy_duan_break
+                        break
+                    case 6:
+                        lastBeichi = jsonObj.buy_duan_break_higher
+                        break
+                    case 7:
+                        lastBeichi = jsonObj.sell_duan_break
+                        break
+                    case 8:
+                        lastBeichi = jsonObj.sell_duan_break_higher
+                        break
+                    //突破
+                    case 9:
+                        lastBeichi = jsonObj.buy_zs_tupo
+                        break
+                    case 10:
+                        lastBeichi = jsonObj.buy_zs_tupo_higher
+                        break
+                    case 11:
+                        lastBeichi = jsonObj.sell_zs_tupo
+                        break
+                    case 12:
+                        lastBeichi = jsonObj.sell_zs_tupo_higher
+                        break
+                    // V反
+                    case 13:
+                        lastBeichi = jsonObj.buy_v_reverse
+                        break
+                    case 14:
+                        lastBeichi = jsonObj.buy_v_reverse_higher
+                        break
+                    case 15:
+                        lastBeichi = jsonObj.sell_v_reverse
+                        break
+                    case 16:
+                        lastBeichi = jsonObj.sell_v_reverse_higher
+                        break
+
                 }
                 // 背驰时的价格
                 var beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
@@ -1850,7 +1893,8 @@ var app = new Vue({
                 var currentPercent = ""
                 // 当前收益（单位万/元）
                 var currentProfit = ""
-                if (lastBeichiType === 1|| lastBeichiType === 2) {
+                if (lastBeichiType === 1 || lastBeichiType === 2 || lastBeichiType === 5 || lastBeichiType === 6||
+                    lastBeichiType === 9 || lastBeichiType === 10 || lastBeichiType === 13 || lastBeichiType === 14) {
                     targetPrice = beichiPrice + diffPrice
                     currentPercent = ((currentPrice - beichiPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
@@ -1874,7 +1918,7 @@ var app = new Vue({
                 this.calcAccount()
                 // console.log(beichiPrice, stopLosePrice, diffPrice, targetPrice)
                 // 单位是万
-                currentProfit = ((this.maxOrderCount * this.marginPrice *  Number(currentPercent) /100) /10000).toFixed(2)
+                currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
                 // 当前最新价
                 var markLineCurrent = {
                     yAxis: currentPrice,
@@ -1891,7 +1935,7 @@ var app = new Vue({
                     label: {
                         normal: {
                             color: 'yellow',
-                            formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent +"% \n盈利额: "+currentProfit+ " 万 \n盈亏比: 1 : "
+                            formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent + "% \n盈利额: " + currentProfit + " 万 \n盈亏比: 1 : "
                                 + (currentPercent / targetPercent).toFixed(1),
                         },
                     },
@@ -2087,24 +2131,26 @@ var app = new Vue({
                 alert("请选择保证金系数，开仓价，止损价")
                 return
             }
-            // 计算最大能使用的资金
-            let maxAccountUse = this.account * 10000 * this.maxAccountUseRate
-            // 计算最大止损金额
-            let maxStopMoney = this.account * 10000 * this.stopRate
-            // 1手止损的金额
-
             if (this.currentSymbol.indexOf("_CQ") === -1) {
+                this.account = this.futuresAccount
                 // 计算1手需要的保证金
                 this.perOrderMargin = Math.floor(this.openPrice * this.contractMultiplier * this.currentMarginRate)
                 this.perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier
                 // 1手止损的百分比
                 this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
             } else {
+                this.account = this.digitCoinAccount
                 // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
                 this.perOrderMargin = 5
                 this.perOrderStopRate = (Math.abs(this.openPrice - this.stopPrice) / this.openPrice + this.digitCoinFee) * 20
                 this.perOrderStopMoney = Number((this.perOrderMargin * this.perOrderStopRate).toFixed(2))
             }
+
+            // 计算最大能使用的资金
+            let maxAccountUse = this.account * 10000 * this.maxAccountUseRate
+            // 计算最大止损金额
+            let maxStopMoney = this.account * 10000 * this.stopRate
+            // 1手止损的金额
 
             // 根据止损算出的开仓手数(四舍五入)
             let maxOrderCount1 = Math.round(maxStopMoney / this.perOrderStopMoney)
@@ -2182,45 +2228,169 @@ setTimeout(function () {
 
 /**
  *
- * @param buy_zs_huila
- * @param sell_zs_huila
- * @returns number // 1 本级别买  2 高级别买  3 本级别卖 4 高级别卖
+ * @param jsonObj
+ * @returns number
+ * 1 本级别买回拉  2 高级别买回拉  3 本级别卖回拉 4 高级别卖回拉
+ * 5 本级别线段破坏买 6 高级别线段破坏买  7 本级别线段破坏卖 8 高级别线段破坏卖
+ * 9 本级别中枢突破买 10 高级别中枢突破买 11 本级别中枢突破卖 12 高级别中枢突破卖
+ * 13 本级别三卖V买 14 高级别三卖V买 15 本级别三买V卖 16 高级别三买V卖
  */
-function getLastBeichiData(buy_zs_huila, sell_zs_huila, buy_zs_huila_higher, sell_zs_huila_higher) {
-    var buyTimeStamp = 0
-    var higherBuyTimeStamp = 0
-    var sellTimeStamp = 0
-    var higherSellTimeStamp = 0
+function getLastBeichiData(jsonObj) {
+    // 回拉
+    var buy_zs_huila = jsonObj.buy_zs_huila
+    var buy_zs_huila_higher = jsonObj.buy_zs_huila_higher
+    var sell_zs_huila = jsonObj.sell_zs_huila
+    var sell_zs_huila_higher = jsonObj.sell_zs_huila_higher
+    // 线段破坏
+    var buy_duan_break = jsonObj.buy_duan_break
+    var buy_duan_break_higher = jsonObj.buy_duan_break_higher
+    var sell_duan_break = jsonObj.sell_duan_break
+    var sell_duan_break_higher = jsonObj.sell_duan_break_higher
 
+    // 突破
+    var buy_zs_tupo = jsonObj.buy_zs_tupo
+    var buy_zs_tupo_higher = jsonObj.buy_zs_tupo_higher
+    var sell_zs_tupo = jsonObj.sell_zs_tupo
+    var sell_zs_tupo_higher = jsonObj.sell_zs_tupo_higher
+
+    // V反
+    var buy_v_reverse = jsonObj.buy_v_reverse
+    var buy_v_reverse_higher = jsonObj.buy_v_reverse_higher
+    var sell_v_reverse = jsonObj.sell_v_reverse
+    var sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
+
+
+    // 回拉
+    var buy_zs_huila_stamp = 0
+    var buy_zs_huila_higher_stamp = 0
+    var sell_zs_huila_Stamp = 0
+    var sell_zs_huila_higher_stamp = 0
+    // 线段破坏
+    var buy_duan_break_stamp = 0
+    var buy_duan_break_higher_stamp = 0
+    var sell_duan_break_stamp = 0
+    var sell_duan_break_higher_stamp = 0
+    // 突破
+    var buy_zs_tupo_stamp = 0
+    var buy_zs_tupo_higher_stamp = 0
+    var sell_zs_tupo_stamp = 0
+    var sell_zs_tupo_higher_stamp = 0
+    // V反
+    var buy_v_reverse_stamp = 0
+    var buy_v_reverse_higher_stamp = 0
+    var sell_v_reverse_stamp = 0
+    var sell_v_reverse_higher_stamp = 0
+
+    var buyTimeStr
+    var higherBuyTimeStr
+    var sellTimeStr
+    var higherSellTimeStr
+    // 回拉
     if (buy_zs_huila.date.length > 0) {
-        var buyTimeStr = buy_zs_huila.date[buy_zs_huila.date.length - 1]
-        buyTimeStamp = timeStrToStamp(buyTimeStr)
+        buyTimeStr = buy_zs_huila.date[buy_zs_huila.date.length - 1]
+        buy_zs_huila_stamp = timeStrToStamp(buyTimeStr)
     }
     if (buy_zs_huila_higher.date.length > 0) {
-        var higherBuyTimeStr = buy_zs_huila_higher.date[buy_zs_huila_higher.date.length - 1]
-        higherBuyTimeStamp = timeStrToStamp(higherBuyTimeStr)
+        higherBuyTimeStr = buy_zs_huila_higher.date[buy_zs_huila_higher.date.length - 1]
+        buy_zs_huila_higher_stamp = timeStrToStamp(higherBuyTimeStr)
     }
     if (sell_zs_huila.date.length > 0) {
-        var sellTimeStr = sell_zs_huila.date[sell_zs_huila.date.length - 1]
-        sellTimeStamp = timeStrToStamp(sellTimeStr)
+        sellTimeStr = sell_zs_huila.date[sell_zs_huila.date.length - 1]
+        sell_zs_huila_Stamp = timeStrToStamp(sellTimeStr)
     }
     if (sell_zs_huila_higher.date.length > 0) {
-        var higherSellTimeStr = sell_zs_huila_higher.date[sell_zs_huila_higher.date.length - 1]
-        higherSellTimeStamp = timeStrToStamp(higherSellTimeStr)
+        higherSellTimeStr = sell_zs_huila_higher.date[sell_zs_huila_higher.date.length - 1]
+        sell_zs_huila_higher_stamp = timeStrToStamp(higherSellTimeStr)
     }
-    var timeArray  = [buyTimeStamp,higherBuyTimeStamp,sellTimeStamp,higherSellTimeStamp]
+
+    // 线段破坏
+    if (buy_duan_break.date.length > 0) {
+        buyTimeStr = buy_duan_break.date[buy_duan_break.date.length - 1]
+        buy_duan_break_stamp = timeStrToStamp(buyTimeStr)
+    }
+    if (buy_duan_break_higher.date.length > 0) {
+        higherBuyTimeStr = buy_duan_break_higher.date[buy_duan_break_higher.date.length - 1]
+        buy_duan_break_higher_stamp = timeStrToStamp(higherBuyTimeStr)
+    }
+    if (sell_duan_break.date.length > 0) {
+        sellTimeStr = sell_duan_break.date[sell_duan_break.date.length - 1]
+        sell_duan_break_stamp = timeStrToStamp(sellTimeStr)
+    }
+    if (sell_duan_break_higher.date.length > 0) {
+        higherSellTimeStr = sell_duan_break_higher.date[sell_duan_break_higher.date.length - 1]
+        sell_duan_break_higher_stamp = timeStrToStamp(higherSellTimeStr)
+    }
+    // 突破
+    if (buy_zs_tupo.date.length > 0) {
+        buyTimeStr = buy_zs_tupo.date[buy_zs_tupo.date.length - 1]
+        buy_zs_tupo_stamp = timeStrToStamp(buyTimeStr)
+    }
+    if (buy_zs_tupo_higher.date.length > 0) {
+        higherBuyTimeStr = buy_zs_tupo_higher.date[buy_zs_tupo_higher.date.length - 1]
+        buy_zs_tupo_higher_stamp = timeStrToStamp(higherBuyTimeStr)
+    }
+    if (sell_zs_tupo.date.length > 0) {
+        sellTimeStr = sell_zs_tupo.date[sell_zs_tupo.date.length - 1]
+        sell_zs_tupo_stamp = timeStrToStamp(sellTimeStr)
+    }
+    if (sell_zs_tupo_higher.date.length > 0) {
+        higherSellTimeStr = sell_zs_tupo_higher.date[sell_zs_tupo_higher.date.length - 1]
+        sell_zs_tupo_higher_stamp = timeStrToStamp(higherSellTimeStr)
+    }
+    // V反
+    if (buy_v_reverse.date.length > 0) {
+        buyTimeStr = buy_v_reverse.date[buy_v_reverse.date.length - 1]
+        buy_v_reverse_stamp = timeStrToStamp(buyTimeStr)
+    }
+    if (buy_v_reverse_higher.date.length > 0) {
+        higherBuyTimeStr = buy_v_reverse_higher.date[buy_v_reverse_higher.date.length - 1]
+        buy_v_reverse_higher_stamp = timeStrToStamp(higherBuyTimeStr)
+    }
+    if (sell_v_reverse.date.length > 0) {
+        sellTimeStr = sell_v_reverse.date[sell_v_reverse.date.length - 1]
+        sell_v_reverse_stamp = timeStrToStamp(sellTimeStr)
+    }
+    if (sell_v_reverse_higher.date.length > 0) {
+        higherSellTimeStr = sell_v_reverse_higher.date[sell_v_reverse_higher.date.length - 1]
+        sell_v_reverse_higher_stamp = timeStrToStamp(higherSellTimeStr)
+    }
+
+
+    // 当线段破坏和中枢突破时间相等的时候，使用中枢突破信号，因为中枢突破止损更小
+    if (buy_zs_tupo_stamp === buy_duan_break_stamp) {
+        buy_duan_break_stamp = 0
+    }
+    if (buy_zs_tupo_higher_stamp === buy_duan_break_higher_stamp) {
+        buy_duan_break_higher_stamp = 0
+    }
+    if (sell_zs_tupo_stamp === sell_duan_break_stamp) {
+        sell_duan_break_stamp = 0
+    }
+    if (sell_zs_tupo_higher_stamp === sell_duan_break_higher_stamp) {
+        sell_duan_break_higher_stamp = 0
+    }
+
+    var timeArray = [buy_zs_huila_stamp, buy_zs_huila_higher_stamp, sell_zs_huila_Stamp, sell_zs_huila_higher_stamp,
+        buy_duan_break_stamp, buy_duan_break_higher_stamp, sell_duan_break_stamp, sell_duan_break_higher_stamp,
+        buy_zs_tupo_stamp, buy_zs_tupo_higher_stamp, sell_zs_tupo_stamp, sell_zs_tupo_higher_stamp,
+        buy_v_reverse_stamp, buy_v_reverse_higher_stamp, sell_v_reverse_stamp, sell_v_reverse_higher_stamp]
     var maxPos = 0
     var maxTime = timeArray[0]
-    for(var i =0;i<timeArray.length;i++){
-        if(timeArray[i] > maxTime){
+    for (var i = 0; i < timeArray.length; i++) {
+        if (timeArray[i] > maxTime) {
             maxTime = timeArray[i]
             maxPos = i
         }
     }
-    if(buyTimeStamp === 0 && higherBuyTimeStamp ===0 && sellTimeStamp===0 &&higherSellTimeStamp===0  ){
+
+    if (buy_zs_huila_stamp === 0 && buy_zs_huila_higher_stamp === 0 && sell_zs_huila_Stamp === 0 && sell_zs_huila_higher_stamp === 0 &&
+        buy_duan_break_stamp === 0 && buy_duan_break_higher_stamp === 0 && sell_duan_break_stamp === 0 && sell_duan_break_higher_stamp === 0 &&
+        buy_zs_tupo_stamp === 0 && buy_zs_tupo_higher_stamp === 0 && sell_zs_tupo_stamp === 0 && sell_zs_tupo_higher_stamp === 0 &&
+        buy_v_reverse_stamp === 0 && buy_v_reverse_higher_stamp === 0 && sell_v_reverse_stamp === 0 && sell_v_reverse_higher_stamp
+    ) {
         return 0
-    }else{
-        return maxPos+1
+    } else {
+        return maxPos + 1
     }
 }
 

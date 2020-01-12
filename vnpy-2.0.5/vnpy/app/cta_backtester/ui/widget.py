@@ -78,7 +78,7 @@ class BacktesterManager(QtWidgets.QWidget):
         )
 
         self.rate_line = QtWidgets.QLineEdit("0.0001")
-        self.slippage_line = QtWidgets.QLineEdit("0.2")
+        self.slippage_line = QtWidgets.QLineEdit("0")
         self.size_line = QtWidgets.QLineEdit("10")
         self.pricetick_line = QtWidgets.QLineEdit("1")
         self.capital_line = QtWidgets.QLineEdit("10000")

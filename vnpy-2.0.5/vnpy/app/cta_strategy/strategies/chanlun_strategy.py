@@ -17,6 +17,7 @@ import back.entanglement as entanglement
 from numpy import array
 import talib as ta
 import numpy as np
+from back.basic.bi import CalcBi
 
 class ChanLunStrategy(CtaTemplate):
     """"""
@@ -31,8 +32,8 @@ class ChanLunStrategy(CtaTemplate):
             cta_engine, strategy_name, vt_symbol, setting
         )
 
-        self.bg = BarGenerator(self.on_bar, 5, self.on_5min_bar)
-        self.am = ArrayManager()
+        self.bg = BarGenerator(self.on_bar, 3, self.on_3min_bar)
+        self.am = ArrayManager(200)
         self.fixed_size = 1
 
     def on_init(self):
@@ -40,7 +41,7 @@ class ChanLunStrategy(CtaTemplate):
         Callback when strategy is inited.
         """
         self.write_log("策略初始化")
-        self.load_bar(10)
+        self.load_bar(5)
 
     def on_start(self):
         """
@@ -66,50 +67,74 @@ class ChanLunStrategy(CtaTemplate):
         """
         self.bg.update_bar(bar)
 
-    def on_5min_bar(self, bar: BarData):
+    def on_3min_bar(self, bar: BarData):
         """"""
-        self.cancel_all()
+        # self.cancel_all()
 
         am = self.am
         am.update_bar(bar)
         if not am.inited:
             return
 
-        open_array = am.open_array
-        high_array = am.high_array
-        low_array = am.low_array
-        close_array = am.close_array
-        time_array = am.time_array
+        openList = am.open_array
+        highList = am.high_array
+        lowList = am.low_array
+        closeList = am.close_array
+        timeList = am.time_array
 
-        klineProcess = KlineProcess()
-        count = len(open_array)
-        for i in range(count):
-            klineProcess.add(high_array[i], low_array[i],time_array)
-
-        # 笔处理
-        biProcess = BiProcess()
-        biProcess.handle(klineProcess.klineList)
-
+        # klineProcess = KlineProcess()
+        # count = len(open_array)
+        # for i in range(count):
+        #     klineProcess.add(high_array[i], low_array[i],time_array)
+        #
+        # # 笔处理
+        # biProcess = BiProcess()
+        # biProcess.handle(klineProcess.klineList)
+        #
+        # # 笔结果
+        # biResult = [0 for i in range(len(close_array))]
+        # for i in range(len(biProcess.biList)):
+        #     item = biProcess.biList[i]
+        #     biResult[item.klineList[-1].middle] = item.direction
+        #
+        # duanProcess = DuanProcess()
+        # duanResult = duanProcess.handle(biResult, high_array, low_array)
+        # entanglementList = entanglement.calcEntanglements(time_array, duanResult, biResult, high_array, low_array)
+        # huila = entanglement.la_hui(entanglementList, time_array, high_array, low_array, open_array, close_array,
+        #                             biResult, duanResult)
+        #
+        # duan_pohuai = entanglement.po_huai(time_array, high_array, low_array, open_array, close_array, biResult,
+        #                                    duanResult)
+        # k线处理
+        count = len(timeList)
         # 笔结果
-        biResult = [0 for i in range(len(close_array))]
-        for i in range(len(biProcess.biList)):
-            item = biProcess.biList[i]
-            biResult[item.klineList[-1].middle] = item.direction
+        biList = [0 for i in range(count)]
+        CalcBi(count, biList, highList, lowList)
 
+        # 段处理
         duanProcess = DuanProcess()
-        duanResult = duanProcess.handle(biResult, high_array, low_array)
-        entanglementList = entanglement.calcEntanglements(time_array, duanResult, biResult, high_array, low_array)
-        huila = entanglement.la_hui(entanglementList, time_array, high_array, low_array, open_array, close_array,
-                                    biResult, duanResult)
-        diff_array = self.getMacd(close_array)[0].tolist()
-        dea_array = self.getMacd(close_array)[1].tolist()
-        macd_array = self.getMacd(close_array)[2].tolist()
+        duanResult = duanProcess.handle(biList, highList, lowList)
+
+        # 高一级别段处理
+        higherDuanProcess = DuanProcess()
+        higherDuanResult = higherDuanProcess.handle(duanResult, highList, lowList)
+
+        # 高高一级别段处理
+        higherHigherDuanProcess = DuanProcess()
+        higherHigherDuanResult = higherHigherDuanProcess.handle(higherDuanResult, highList, lowList)
+
+        # print("段结果:", len(biResult), len(duanResult))
+        entanglementList = entanglement.calcEntanglements(timeList, duanResult, biList, highList, lowList)
+        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openList, closeList,
+                                    biList, duanResult)
+        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openList, closeList, biList,
+                                  duanResult)
+        v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openList, closeList,
+                                           biList, duanResult)
+        duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openList, closeList, biList,
+                                           duanResult)
 
 
-        beichiData = divergence.calcAndNote(time_array, high_array, low_array, open_array, close_array, macd_array,
-                                            diff_array, dea_array, biProcess.biList, biResult, duanResult)
-        buyMACDBCData = beichiData['buyMACDBCData']
-        sellMACDBCData = beichiData['sellMACDBCData']
         # print("拉回数据:",huila)
         # print("时间：",time_array[-1],close_array[-1])
 
@@ -127,25 +152,31 @@ class ChanLunStrategy(CtaTemplate):
                     # 同时下停止委托单
                     print("开多:时间 ", self.long_signal_date," 价格:",self.long_signal_price," ohlc:", bar.open_price,bar.high_price,bar.low_price,bar.close_price
                           ," 止损：",self.long_stop_lose," 止盈：",self.long_stop_win)
-                    self.buy(close_array[-1], self.amount)
+                    self.buy(bar.close_price, self.amount,False)
                 elif self.pos < 0:
                     # 出现反向信号，平掉空单
                     print("出现反向信号，平掉空单,开多单 最新价：", bar.close_price, " ohlc:",
                           bar.open_price, bar.high_price, bar.low_price, bar.close_price,
                           " 止损：", self.long_stop_lose, " 止盈：", self.long_stop_win)
-                    self.cover(bar.close_price, abs(self.pos))
+                    self.cover(bar.close_price, abs(self.pos),False)
                     # 开多单
-                    self.buy(self.long_signal_price, self.amount)
+                    self.buy(bar.close_price, self.amount,False)
         if self.pos > 0:
             # print("持有多单：当前价格：", am.close_array[-1], " 止损：", self.long_stop_lose, " 止盈：", self.long_stop_win)
             if am.close_array[-1] <= self.long_stop_lose:
-                print("下多单止损单 时间：", time_array[-1], " 价格:", self.long_stop_lose, " ohlc:",
+                print("下多单止损单 时间：", timeList[-1], " 价格:", self.long_stop_lose, " ohlc:",
                       bar.open_price, bar.high_price, bar.low_price, bar.close_price)
-                self.sell(self.long_stop_lose, abs(self.pos), False)
-            elif am.close_array[-1] >= self.long_stop_win:
-                print("下多单止赢单 时间：", time_array[-1], " 价格:", self.long_stop_win, " ohlc:",
-                      bar.open_price, bar.high_price, bar.low_price, bar.close_price)
-                self.sell(self.long_stop_win, abs(self.pos), False)
+                self.sell(bar.close_price, abs(self.pos), False)
+            # elif am.close_array[-1] >= self.long_stop_win:
+            #     print("下多单止赢单 时间：", time_array[-1], " 价格:", self.long_stop_win, " ohlc:",
+            #           bar.open_price, bar.high_price, bar.low_price, bar.close_price)
+            #     self.sell(self.long_stop_win, abs(self.pos), False)
+
+            if len(duan_pohuai['sell_duan_break']['date']) > 0 and bar.datetime.strftime("%Y-%m-%d %H:%M") == duan_pohuai['sell_duan_break']['date'][-1]:
+                print("下多单止赢单 时间：", timeList[-1], " 价格:", self.long_stop_win, " ohlc:",
+                                bar.open_price, bar.high_price, bar.low_price, bar.close_price)
+                self.sell(bar.close_price, abs(self.pos), False)
+
             # 本级别出现顶背驰止盈
             # if len(sellMACDBCData['date']) > 0 and sellMACDBCData['date'][-1]
 
@@ -170,25 +201,29 @@ class ChanLunStrategy(CtaTemplate):
 
                     print("开空:时间 ", self.short_signal_date, " 价格:", self.short_signal_price, " ohlc:", bar.open_price,
                           bar.high_price, bar.low_price, bar.close_price," 止损：",self.short_stop_lose," 止盈：",self.short_stop_win)
-                    self.short(close_array[-1], self.amount)
+                    self.short(self.short_signal_price, self.amount,False)
                 elif self.pos > 0:
                     # 出现反向信号，平掉多单
                     print("出现反向信号，平掉多单,开空单 最新价：", bar.close_price, " ohlc:",
                           bar.open_price, bar.high_price, bar.low_price, bar.close_price,
                           " 止损：", self.short_stop_lose, " 止盈：", self.short_stop_win)
-                    self.sell(bar.close_price, abs(self.pos))
-                    self.short(self.short_signal_price, self.amount)
+                    self.sell(bar.close_price, abs(self.pos),False)
+                    self.short(bar.close_price, self.amount,False)
         if self.pos < 0:
             # print("持有空单：当前价格：", am.close_array[-1], " 止损：", self.short_stop_lose, " 止盈：", self.short_stop_win)
             if am.close_array[-1] >= self.short_stop_lose:
-                print("下空单止损单 时间：", time_array[-1], " 价格:", self.short_stop_lose, " ohlc:",
+                print("下空单止损单 时间：", timeList[-1], " 价格:", self.short_stop_lose, " ohlc:",
                       bar.open_price, bar.high_price, bar.low_price, bar.close_price)
-                self.cover(self.short_stop_lose, abs(self.pos), False)
-            elif am.close_array[-1] <= self.short_stop_win:
-                print("下空单止盈单 时间：", time_array[-1], " 价格:", self.short_stop_win, " ohlc:",
-                      bar.open_price, bar.high_price, bar.low_price, bar.close_price)
-                self.cover(self.short_stop_win, abs(self.pos), False)
-
+                self.cover(bar.close_price, abs(self.pos), False)
+            # elif am.close_array[-1] <= self.short_stop_win:
+            #     print("下空单止盈单 时间：", time_array[-1], " 价格:", self.short_stop_win, " ohlc:",
+            #           bar.open_price, bar.high_price, bar.low_price, bar.close_price)
+            #     self.cover(self.short_stop_win, abs(self.pos), False)
+            if len(duan_pohuai['buy_duan_break']['date']) > 0 and bar.datetime.strftime("%Y-%m-%d %H:%M") == \
+                duan_pohuai['buy_duan_break']['date'][-1]:
+                print("下空单止盈单 时间：", timeList[-1], " 价格:", self.short_stop_win, " ohlc:",
+                                bar.open_price, bar.high_price, bar.low_price, bar.close_price)
+                self.cover(bar.close_price, abs(self.pos), False)
 
     def on_order(self, order: OrderData):
         """
@@ -225,8 +260,3 @@ class ChanLunStrategy(CtaTemplate):
         print("on_stop_order",stop_order)
         pass
 
-    def getMacd(self,closePriceList):
-        close = array(closePriceList)
-        macd = ta.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
-        result = np.nan_to_num(macd)
-        return result
