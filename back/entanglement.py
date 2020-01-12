@@ -3,6 +3,7 @@ import pydash
 
 from .funcat.time_series import (fit_series)
 from . import series_tool
+from back.basic.comm import FindPrevEq
 
 class Entanglement:
     def __init__(self):
@@ -130,13 +131,13 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             'date': [],
             'data': [],
             'stop_lose_price': [],
-            'stop_win_price':[],
+            'stop_win_price':[]
         },
         'sell_zs_huila': {
             'date': [],
             'data': [],
             'stop_lose_price': [],
-            'stop_win_price': [],
+            'stop_win_price': []
         }
     }
     for i in range(len(e_list)):
@@ -201,11 +202,15 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
     result = {
         'buy_zs_tupo': {
             'date': [],
-            'data': []
+            'data': [],
+            'stop_lose_price': [],
+            'stop_win_price': []
         },
         'sell_zs_tupo': {
             'date': [],
-            'data': []
+            'data': [],
+            'stop_lose_price': [],
+            'stop_win_price': []
         }
     }
     for i in range(len(e_list)):
@@ -222,6 +227,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
             if r > 0:
                 result['buy_zs_tupo']['date'].append(time_series[r])
                 result['buy_zs_tupo']['data'].append(e.gg)
+                result['buy_zs_tupo']['stop_lose_price'].append(e.zg)
         if e.direction == -1:
             r = -1
             for x in range(e.end+1, len(close_series)):
@@ -233,17 +239,22 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
             if r > 0:
                 result['sell_zs_tupo']['date'].append(time_series[r])
                 result['sell_zs_tupo']['data'].append(e.dd)
+                result['sell_zs_tupo']['stop_lose_price'].append(e.zd)
     return result
 
 def v_reverse(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
     result = {
         'buy_v_reverse': {
             'date': [],
-            'data': []
+            'data': [],
+            'stop_lose_price': [],
+            'stop_win_price': []
         },
         'sell_v_reverse': {
             'date': [],
-            'data': []
+            'data': [],
+            'stop_lose_price': [],
+            'stop_win_price': []
         }
     }
     for i in range(len(e_list)):
@@ -270,6 +281,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                             if pydash.find_last_index(result['sell_v_reverse']['date'], lambda x: x == time_series[k]) == -1:
                                 result['sell_v_reverse']['date'].append(time_series[k])
                                 result['sell_v_reverse']['data'].append(resist_price)
+                                result['sell_v_reverse']['stop_lose_price'].append(high_series[leave_end_index])
                             break
         if e.direction == -1:
             # 离开中枢后的第一段结束
@@ -293,6 +305,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                             if pydash.find_last_index(result['buy_v_reverse']['date'], lambda x: x == time_series[k]) == -1:
                                 result['buy_v_reverse']['date'].append(time_series[k])
                                 result['buy_v_reverse']['data'].append(resist_price)
+                                result['buy_v_reverse']['stop_lose_price'].append(low_series[leave_end_index])
                             break
 
     return result
@@ -303,12 +316,14 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
         'buy_duan_break': {
             'date': [],
             'data': [],
-            'stop_lose_price': []
+            'stop_lose_price': [],
+            'stop_win_price': []
         },
         'sell_duan_break': {
             'date': [],
             'data': [],
-            'stop_lose_price': []
+            'stop_lose_price': [],
+            'stop_win_price': []
         }
     }
     for i in range(len(duan_series)):
