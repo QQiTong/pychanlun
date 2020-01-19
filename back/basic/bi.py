@@ -181,21 +181,36 @@ def CalcBi(count, bi, high, low):
         y = max(0, y)
 
         maxHigh = max(high[x:i])
+        minLow = min(low[y:i])
+
         # 是新高
         b1 = high[i] > maxHigh
-        if b1 and (y > x or IsBi(count, bi, high, low, x, i, 1, False)):
-            bi[x] = -1
-            bi[i] = 1
-            for t in range(x + 1, i):
-                bi[t] = 0
-            AdjustBi(count, bi, high, low, x)
-
-        minLow = min(low[y:i])
         # 是新低
         b2 = low[i] < minLow
-        if b2 and (x > y or IsBi(count, bi, high, low, y, i, -1, False)):
-            bi[y] = 1
-            bi[i] = -1
-            for t in range(y + 1, i):
-                bi[t] = 0
-            AdjustBi(count, bi, high, low, y)
+
+        if (b1 and b2):
+            for idx in range(i-1, -1, -1):
+                if bi[idx] == 1 and high[idx] > high[i]:
+                    bi[i] = -1
+                    for k in range(idx+1, i):
+                        bi[k] = 0
+                    break
+                elif bi[idx] == -1 and low[idx] < low[i]:
+                    bi[i] = 1
+                    for k in range(idx+1, i):
+                        bi[k] = 0
+                    break
+        elif b1:
+            if y > x or IsBi(count, bi, high, low, x, i, 1, False):
+                bi[x] = -1
+                bi[i] = 1
+                for t in range(x + 1, i):
+                    bi[t] = 0
+                AdjustBi(count, bi, high, low, x)
+        elif b2:
+            if x > y or IsBi(count, bi, high, low, y, i, -1, False):
+                bi[y] = 1
+                bi[i] = -1
+                for t in range(y + 1, i):
+                    bi[t] = 0
+                AdjustBi(count, bi, high, low, y)
