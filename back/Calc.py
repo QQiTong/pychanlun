@@ -16,7 +16,6 @@ from back.basic.bi import CalcBi
 from back.basic.duan import CalcDuan
 from back import Duan
 from back.KlineDataTool import KlineDataTool
-from back.ZhongShuProcess import ZhongShuProcess
 from back.Tools import Tools
 import back.divergence as divergence
 import back.entanglement as entanglement
@@ -244,16 +243,6 @@ class Calc:
 
         # 高级别段中枢
         entanglementHigherHigherList = entanglement.CalcEntanglements(timeList, higherHigherDuanList, higherDuanList, highList, lowList)
-
-        # 中枢处理
-        # zhongShu = ZhongShuProcess()
-        # zhongShuHigh = zhongShu.initHigh(biResult, highList, lowList)
-        # zhongShuLow = zhongShu.initLow(biResult, highList, lowList)
-        # zhongShuStartEnd = zhongShu.initStartEnd(biResult, highList, lowList)
-
-        # print('笔中枢高:', len(zhongShuHigh), zhongShuHigh)
-        # print('笔中枢低:', len(zhongShuLow), zhongShuLow)
-        # print('笔中枢开始结束:', len(zhongShuStartEnd), zhongShuStartEnd)
 
         zsdata, zsflag = getZhongShuData(entanglementList)
         duan_zsdata, duan_zsflag = getZhongShuData(entanglementHigherList)

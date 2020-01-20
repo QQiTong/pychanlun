@@ -22,15 +22,15 @@ from ..funcat.data.HuobiDataBackend import HuobiDataBackend
 from ..funcat.utils import get_int_date
 from ..funcat.api import *
 
-from ..KlineProcess import KlineProcess
-from ..BiProcess import BiProcess
-from ..DuanProcess import DuanProcess
 from .. import entanglement as entanglement
 from .. import divergence as divergence
 from ..Mail import Mail
 from .. import Duan
 from ..db import DBPyChanlun
 from .MarketData import is_data_feeding
+
+from back.basic.bi import CalcBi, CalcBiList
+from back.basic.duan import CalcDuan
 
 tz = pytz.timezone('Asia/Shanghai')
 mail = Mail()
@@ -39,7 +39,7 @@ def doExecute(symbol, period, inspect_time = None, is_debug = False):
     logger = logging.getLogger()
     if not is_debug:
         if not is_data_feeding(symbol['code'], period):
-            logger.info("%s 不是交易时间 跳过%s监控" % (symbol['code'], period))
+            logger.info("%s 无数据更新 跳过%s监控" % (symbol['code'], period))
             return
     logger.info("策略4 %s %s" % (symbol['code'], period))
     raw_data = {}
@@ -61,23 +61,16 @@ def doExecute(symbol, period, inspect_time = None, is_debug = False):
         low_series.append(bars[i]['low'])
         open_series.append(bars[i]['open'])
         close_series.append(bars[i]['close'])
-    kline_process = KlineProcess()
-    for i in range(count):
-        kline_process.add(high_series[i], low_series[i], time_series[i])
-    bi_process = BiProcess()
-    bi_process.handle(kline_process.klineList)
-    direction_series = [0 for i in range(count)]
+
     # 笔信号
     bi_series = [0 for i in range(count)]
-    for i in range(len(bi_process.biList)):
-        item = bi_process.biList[i]
-        bi_series[item.klineList[-1].middle] = item.direction
-        for j in range(item.start + 1, item.end + 1):
-            direction_series[j] = item.direction
-    duan_process = DuanProcess()
-    duan_series = duan_process.handle(bi_series, high_series, low_series)
-    higher_duan_process = DuanProcess()
-    higher_duan_series = higher_duan_process.handle(duan_series, high_series, low_series)
+    CalcBi(count, bi_series, high_series, low_series)
+    duan_series = [0 for i in range(count)]
+    CalcDuan(count, duan_series, bi_series, high_series, low_series)
+
+    higher_duan_series = [0 for i in range(count)]
+    CalcDuan(count, higher_duan_series, duan_series, high_series, low_series)
+
     # 笔中枢的会拉和突破
     entanglement_list = entanglement.CalcEntanglements(time_series, duan_series, bi_series, high_series, low_series)
     zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)

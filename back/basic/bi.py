@@ -214,3 +214,20 @@ def CalcBi(count, bi, high, low):
                 for t in range(y + 1, i):
                     bi[t] = 0
                 AdjustBi(count, bi, high, low, y)
+
+
+def CalcBiList(count, bi, high, low):
+    biList = []
+    for i in range(0, count):
+        candle = { "high": high[i], "low": low[i] }
+        if bi[i] == 1:
+            bi = { "start": i, "end": i, "direction": -1, "candleList": [ candle ] }
+            biList.append(bi)
+        elif bi[i] == -1:
+            bi = { "start": i, "end": i, "direction": 1, "candleList": [ candle ] }
+            biList.append(bi)
+        else:
+            if len(biList) > 0:
+                biList[-1]["end"] = i
+                biList[-1]["candleList"].append(candle)
+    return biList

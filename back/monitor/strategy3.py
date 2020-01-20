@@ -16,9 +16,6 @@ from ..funcat.data.HuobiDataBackend import HuobiDataBackend
 from ..funcat.utils import get_int_date
 from ..funcat.api import *
 
-from ..KlineProcess import KlineProcess
-from ..BiProcess import BiProcess
-from ..DuanProcess import DuanProcess
 from .. import entanglement as entanglement
 from .. import divergence as divergence
 from ..Mail import Mail
@@ -26,15 +23,19 @@ from .. import Duan
 from ..db import DBPyChanlun
 from .MarketData import is_data_feeding
 
+from back.basic.bi import CalcBi, CalcBiList
+from back.basic.duan import CalcDuan
+
 tz = pytz.timezone('Asia/Shanghai')
 mail = Mail()
 
 
 def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
+    logger = logging.getLogger()
     if not is_debug:
         if not is_data_feeding(symbol['code'], period1):
+            logger.info("%s 无数据更新 跳过%s监控" % (symbol['code'], period1))
             return
-    logger = logging.getLogger()
     logger.info("策略3 %s %s %s" % (symbol['code'], period1, period2))
     if is_debug:
         print(period1, period2, 'inspect_time', inspect_time)
@@ -100,30 +101,21 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
     period2Dea = np.nan_to_num(period2Dea)
     period2Macd = np.nan_to_num(period2Macd)
 
-    # 本周期K线处理
-    period1KlineProcess = KlineProcess()
-    for i in range(len1):
-        period1KlineProcess.add(period1High[i], period1Low[i], period1Time[i])
     # 本周期笔处理
-    period1BiProcess = BiProcess()
-    period1BiProcess.handle(period1KlineProcess.klineList)
-    period1BiResult = period1BiProcess.biResult(len1)
+    period1BiResult = [0 for i in range(len1)]
+    CalcBi(len1, period1BiResult, period1High, period1Low)
     # 本周期段处理
-    period1DuanProcess = DuanProcess()
-    period1DuanResult = period1DuanProcess.handle(period1BiResult, period1High, period1Low)
+    period1DuanResult = [0 for i in range(len1)]
+    CalcDuan(len1, period1DuanResult, period1BiResult, period1High, period1Low)
 
-    # 高周期K线处理
-    period2KlineProcess = KlineProcess()
-    for i in range(len2):
-        period2KlineProcess.add(period2High[i], period2Low[i], period2Time[i])
     # 高周期笔处理
-    period2BiProcess = BiProcess()
-    period2BiProcess.handle(period2KlineProcess.klineList)
-    period2BiResult = period2BiProcess.biResult(len2)
+    period2BiResult = [0 for i in range(len2)]
+    CalcBi(len2, period2BiResult, period2High, period2Low)
     # 高周期段处理
-    period2DuanProcess = DuanProcess()
-    period2DuanResult = period2DuanProcess.handle(period2BiResult, period2High, period2Low)
+    period2DuanResult = [0 for i in range(len2)]
+    CalcDuan(len2, period2DuanResult, period2BiResult, period2High, period2Low)
 
+    biList1 = CalcBiList(len1, period1BiResult, period1High, period1Low)
     divergence_down, divergence_up = divergence.calc(
         period1Time,
         period1High,
@@ -133,7 +125,7 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
         period1Macd,
         period1Diff,
         period1Dea,
-        period1BiProcess.biList,
+        biList1,
         period1BiResult,
         period1DuanResult
     )
@@ -142,6 +134,7 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
         print('divergence_up', divergence_up)
 
     # 高周期是否顶背驰
+    biList2 = CalcBiList(len2, period2BiResult, period2High, period2Low)
     higher_divergence_down, higher_divergence_up = divergence.calc(
         period2Time,
         period2High,
@@ -151,7 +144,7 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
         period2Macd,
         period2Diff,
         period2Dea,
-        period2BiProcess.biList,
+        biList2,
         period2BiResult,
         period2DuanResult
     )
@@ -267,8 +260,7 @@ def doCaculate(symbol, inspect_time = None, is_debug = False):
         { 'current': '3m', 'higher': '15m' },
         { 'current': '5m', 'higher': '30m' },
         { 'current': '15m', 'higher': '1h' },
-        { 'current': '30m', 'higher': '4h' },
-        { 'current': '1h', 'higher': '1d' }
+        { 'current': '30m', 'higher': '4h' }
     ]
     for i in range(len(pairs)):
         try:
