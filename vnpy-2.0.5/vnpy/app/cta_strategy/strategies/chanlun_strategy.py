@@ -99,7 +99,7 @@ class ChanLunStrategy(CtaTemplate):
         #
         # duanProcess = DuanProcess()
         # duanResult = duanProcess.handle(biResult, high_array, low_array)
-        # entanglementList = entanglement.calcEntanglements(time_array, duanResult, biResult, high_array, low_array)
+        # entanglementList = entanglement.CalcEntanglements(time_array, duanResult, biResult, high_array, low_array)
         # huila = entanglement.la_hui(entanglementList, time_array, high_array, low_array, open_array, close_array,
         #                             biResult, duanResult)
         #
@@ -124,7 +124,7 @@ class ChanLunStrategy(CtaTemplate):
         higherHigherDuanResult = higherHigherDuanProcess.handle(higherDuanResult, highList, lowList)
 
         # print("段结果:", len(biResult), len(duanResult))
-        entanglementList = entanglement.calcEntanglements(timeList, duanResult, biList, highList, lowList)
+        entanglementList = entanglement.CalcEntanglements(timeList, duanResult, biList, highList, lowList)
         huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openList, closeList,
                                     biList, duanResult)
         tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openList, closeList, biList,

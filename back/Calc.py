@@ -230,20 +230,20 @@ class Calc:
         CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
 
         # print("段结果:", len(biResult), len(duanResult))
-        entanglementList = entanglement.calcEntanglements(timeList, duanList, biList, highList, lowList)
+        entanglementList = entanglement.CalcEntanglements(timeList, duanList, biList, highList, lowList)
         huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
         tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
         v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
         duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
         # 段中枢
-        entanglementHigherList = entanglement.calcEntanglements(timeList, higherDuanList, duanList, highList, lowList)
+        entanglementHigherList = entanglement.CalcEntanglements(timeList, higherDuanList, duanList, highList, lowList)
         huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
         tupo_higher = entanglement.tu_po(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
         v_reverse_higher = entanglement.v_reverse(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
         duan_pohuai_higher = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
 
         # 高级别段中枢
-        entanglementHigherHigherList = entanglement.calcEntanglements(timeList, higherHigherDuanList, higherDuanList, highList, lowList)
+        entanglementHigherHigherList = entanglement.CalcEntanglements(timeList, higherHigherDuanList, higherDuanList, highList, lowList)
 
         # 中枢处理
         # zhongShu = ZhongShuProcess()

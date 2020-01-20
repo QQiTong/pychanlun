@@ -21,7 +21,7 @@ class Entanglement:
         self.formal = False
 
 
-def calcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
+def CalcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
     time_data, duan_data, bi_data, high_data, low_data = fit_series(time_data, duan_data, bi_data, high_data, low_data)
     count = len(time_data)
     e_list = []
