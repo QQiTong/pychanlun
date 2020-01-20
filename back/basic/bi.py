@@ -59,69 +59,43 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
     if dir == 1:
         i = FindPrevEq(bi, 1, from_index)
         i = max(0, i)
-        candlesPrev = MergeCandles(high, low, i, from_index, -1)
-        candlesCurr = candles
-        candlesNext = []
-        k = to_index
-        for j in range(to_index + 1, count):
-            if high[j] > high[k]:
-                k = j
-                candlesCurr = MergeCandles(high, low, from_index, k, 1)
-            else:
-                candlesNext = MergeCandles(high, low, k, j, -1)
-                if len(candlesNext) >= 2:
-                    break
-        if len(candlesPrev) >= 2  and len(candlesCurr) >= 2 and len(candlesNext) >= 2:
-            bottomHigh = max(candlesCurr[1]['high'], candlesPrev[-2]['high'])
-            topLow = min(candlesCurr[-2]['low'], candlesNext[1]['low'])
-            # 顶和底有重叠，不能成笔
-            if topLow < bottomHigh:
-                return False
-            # isValid 表示是否有独立K柱不和底或顶重叠
-            isValid1 = False
-            isValid2 = False
-            for t in range(2, len(candlesCurr) - 2):
-                if not isValid1 and candlesCurr[t]['high'] > bottomHigh:
-                    isValid1 = True
-                if not isValid2 and candlesCurr[t]['low'] < topLow:
-                    isValid2 = True
-                if isValid1 and isValid2:
-                    break
-            if not isValid1 or not isValid2:
-                return False
+        bottomHigh = candles[1]['high']
+        topLow = candles[-2]['low']
+        # 顶和底有重叠，不能成笔
+        if topLow < bottomHigh:
+            return False
+        # isValid 表示是否有独立K柱不和底或顶重叠
+        isValid1 = False
+        isValid2 = False
+        for t in range(2, len(candles) - 2):
+            if not isValid1 and candles[t]['high'] > bottomHigh:
+                isValid1 = True
+            if not isValid2 and candles[t]['low'] < topLow:
+                isValid2 = True
+            if isValid1 and isValid2:
+                break
+        if not isValid1 or not isValid2:
+            return False
     elif dir == -1:
         i = FindPrevEq(bi, -1, from_index)
         i = max(0, 1)
-        candlesPrev = MergeCandles(high, low, i, from_index, 1)
-        candlesCurr = candles
-        candlesNext = []
-        k = to_index
-        for j in range(to_index + 1, count):
-            if low[j] < low[k]:
-                k = j
-                candlesCurr = MergeCandles(high, low, from_index, k, -1)
-            else:
-                candlesNext = MergeCandles(high, low, k, j, 1)
-                if len(candlesNext) >= 2:
-                    break
-        if len(candlesPrev) >= 2  and len(candlesCurr) >= 2 and len(candlesNext) >= 2:
-            topLow = min(candlesCurr[1]['low'], candlesPrev[-2]['low'])
-            bottomHigh = max(candlesCurr[-2]['high'], candlesNext[1]['high'])
-            # 顶和底有重叠，不能成笔
-            if bottomHigh > topLow:
-                return False
-            # isValid 表示是否有独立K柱不和底或顶重叠
-            isValid1 = False
-            isValid2 = False
-            for t in range(2, len(candlesCurr) - 2):
-                if not isValid1 and candlesCurr[t]['high'] > bottomHigh:
-                    isValid1 = True
-                if not isValid2 and candlesCurr[t]['low'] < topLow:
-                    isValid2 = True
-                if isValid1 and isValid2:
-                    break
-            if not isValid1 or not isValid2:
-                return False
+        topLow = candles[1]['low']
+        bottomHigh = candles[-2]['high']
+        # 顶和底有重叠，不能成笔
+        if bottomHigh > topLow:
+            return False
+        # isValid 表示是否有独立K柱不和底或顶重叠
+        isValid1 = False
+        isValid2 = False
+        for t in range(2, len(candles) - 2):
+            if not isValid1 and candles[t]['high'] > bottomHigh:
+                isValid1 = True
+            if not isValid2 and candles[t]['low'] < topLow:
+                isValid2 = True
+            if isValid1 and isValid2:
+                break
+        if not isValid1 or not isValid2:
+            return False
     return True
 
 # index传入前一笔的结束位置，如果前一笔不是严格的笔，进行合并。
