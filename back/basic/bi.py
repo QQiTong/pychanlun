@@ -1,19 +1,22 @@
 from back.basic.comm import FindPrevEq
 
-def MergeCandles(high, low, from_index, to_index, dir):
+def MergeCandles(high, low, open_price, close_price, from_index, to_index, dir):
     candles = []
     # dir 指笔的运行方向
     # direction 指包含处理的方向
     direction = -dir
     for i in range(from_index, to_index + 1):
         if len(candles) == 0:
-            candles.append({'high': high[i], 'low': low[i]})
+            candle = {'high': high[i], 'low': low[i], 'sticks': []}
+            candles.append(candle)
         else:
             if high[i] > candles[-1]['high'] and low[i] > candles[-1]['low']:
-                candles.append({'high': high[i], 'low': low[i]})
+                candle = { 'high': high[i], 'low': low[i], 'sticks': [] }
+                candles.append(candle)
                 direction = 1
             elif high[i] < candles[-1]['high'] and low[i] < candles[-1]['low']:
-                candles.append({'high': high[i], 'low': low[i]})
+                candle = { 'high': high[i], 'low': low[i], 'sticks': [] }
+                candles.append(candle)
                 direction = -1
             elif high[i] <= candles[-1]['high'] and low[i] >= candles[-1]['low']:
                 if direction == 1:
@@ -25,6 +28,7 @@ def MergeCandles(high, low, from_index, to_index, dir):
                     candles[-1]['high'] = high[i]
                 elif direction == -1:
                     candles[-1]['low'] = low[i]
+        candles[-1]['sticks'].append({ 'h': max(open_price[i], close_price[i]), 'l': min(open_price[i], close_price[i]) })
     return candles
 
 # 判断起点和终点之间是否成笔
@@ -35,7 +39,7 @@ def MergeCandles(high, low, from_index, to_index, dir):
 # from_index 起点(含)
 # to_index 终点(含)
 # dir 笔方向
-def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
+def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, dir, strict=False):
     if not strict:
         if dir == 1:
             g1 = FindPrevEq(bi, 1, from_index)
@@ -48,7 +52,7 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
     if to_index - from_index < 4:
         # K柱数量不够不成笔
         return False
-    candles = MergeCandles(high, low, from_index, to_index, dir)
+    candles = MergeCandles(high, low, open_price, close_price, from_index, to_index, dir)
     if len(candles) < 5:
         # 合并后K柱数量不够不成笔
         return False
@@ -59,8 +63,20 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
     if dir == 1:
         i = FindPrevEq(bi, 1, from_index)
         i = max(0, i)
-        bottomHigh = candles[1]['high']
-        topLow = candles[-2]['low']
+        bottomHigh = 0
+        topLow = 0
+        sticks = candles[0]['sticks'] + candles[1]['sticks']
+        for idx in range(0, len(sticks)):
+            if bottomHigh == 0:
+                bottomHigh = sticks[idx]['h']
+            elif sticks[idx]['h'] > bottomHigh:
+                bottomHigh = sticks[idx]['h']
+        sticks = candles[-2]['sticks'] + candles[-1]['sticks']
+        for idx in range(0, len(sticks)):
+            if topLow == 0:
+                topLow = sticks[idx]['l']
+            elif sticks[idx]['l'] < topLow:
+                topLow = sticks[idx]['l']
         # 顶和底有重叠，不能成笔
         if topLow < bottomHigh:
             return False
@@ -68,10 +84,14 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
         isValid1 = False
         isValid2 = False
         for t in range(2, len(candles) - 2):
-            if not isValid1 and candles[t]['high'] > bottomHigh:
-                isValid1 = True
-            if not isValid2 and candles[t]['low'] < topLow:
-                isValid2 = True
+            if not isValid1:
+                for idx in range(0, len(candles[t]['sticks'])):
+                    if candles[t]['sticks'][idx]['h'] > bottomHigh:
+                        isValid1 = True
+            if not isValid2:
+                for idx in range(0, len(candles[t]['sticks'])):
+                    if candles[t]['sticks'][idx]['l'] < topLow:
+                        isValid2 = True
             if isValid1 and isValid2:
                 break
         if not isValid1 or not isValid2:
@@ -79,8 +99,20 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
     elif dir == -1:
         i = FindPrevEq(bi, -1, from_index)
         i = max(0, 1)
-        topLow = candles[1]['low']
-        bottomHigh = candles[-2]['high']
+        topLow = 0
+        bottomHigh = 0
+        sticks = candles[0]['sticks'] + candles[1]['sticks']
+        for idx in range(0, len(sticks)):
+            if topLow == 0:
+                topLow = sticks[idx]['l']
+            elif sticks[idx]['l'] < topLow:
+                topLow = sticks[idx]['l']
+        sticks = candles[-2]['sticks'] + candles[-1]['sticks']
+        for idx in range(0, len(sticks)):
+            if bottomHigh == 0:
+                bottomHigh = sticks[idx]['h']
+            elif sticks[idx]['h'] > bottomHigh:
+                bottomHigh = sticks[idx]['h']
         # 顶和底有重叠，不能成笔
         if bottomHigh > topLow:
             return False
@@ -88,10 +120,14 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
         isValid1 = False
         isValid2 = False
         for t in range(2, len(candles) - 2):
-            if not isValid1 and candles[t]['high'] > bottomHigh:
-                isValid1 = True
+            if not isValid1:
+                for idx in range(0, len(candles[t]['sticks'])):
+                    if candles[t]['sticks'][idx]['h'] > bottomHigh:
+                        isValid1 = True
             if not isValid2 and candles[t]['low'] < topLow:
-                isValid2 = True
+                for idx in range(0, len(candles[t]['sticks'])):
+                    if candles[t]['sticks'][idx]['l'] > topLow:
+                        isValid2 = True
             if isValid1 and isValid2:
                 break
         if not isValid1 or not isValid2:
@@ -100,11 +136,11 @@ def IsBi(count, bi, high, low, from_index, to_index, dir, strict=False):
 
 # index传入前一笔的结束位置，如果前一笔不是严格的笔，进行合并。
 # 合并要符合闪电形态，而且只合一次。
-def AdjustBi(count, bi, high, low, index):
+def AdjustBi(count, bi, high, low, open_price, close_price, index):
     if bi[index] == 1:
         i = FindPrevEq(bi, -1, index)
         if i > 0:
-            if not IsBi(count, bi, high, low, i, index, 1, True):
+            if not IsBi(count, bi, high, low, open_price, close_price, i, index, 1, True):
                 # 不是严格成笔，需要调整
                 # g1记录当前笔的高的位置
                 # d1记录当前笔的低的位置
@@ -122,7 +158,7 @@ def AdjustBi(count, bi, high, low, index):
     elif bi[index] == -1:
         i = FindPrevEq(bi, 1, index)
         if i > 0:
-            if not IsBi(count, bi, high, low, i, index, -1, True):
+            if not IsBi(count, bi, high, low, open_price, close_price, i, index, -1, True):
                 # 不是严格成笔，需要调整
                 # d1记录当前笔的低的位置
                 # g1记录当前笔的高的位置
@@ -144,7 +180,7 @@ def AdjustBi(count, bi, high, low, index):
 # bi 输出的笔信号序列
 # high 最高价的序列
 # low 最低价的序列
-def CalcBi(count, bi, high, low):
+def CalcBi(count, bi, high, low, open_price, close_price):
     # 标记分型的顶底
     for i in range(1, count):
         # x 前一个笔低点
@@ -175,24 +211,24 @@ def CalcBi(count, bi, high, low):
                         bi[k] = 0
                     break
         elif b1:
-            if y > x or IsBi(count, bi, high, low, x, i, 1, False):
+            if y > x or IsBi(count, bi, high, low, open_price, close_price, x, i, 1, False):
                 bi[x] = -1
                 bi[i] = 1
                 for t in range(x + 1, i):
                     bi[t] = 0
-                AdjustBi(count, bi, high, low, x)
+                AdjustBi(count, bi, high, low, open_price, close_price, x)
         elif b2:
-            if x > y or IsBi(count, bi, high, low, y, i, -1, False):
+            if x > y or IsBi(count, bi, high, low, open_price, close_price, y, i, -1, False):
                 bi[y] = 1
                 bi[i] = -1
                 for t in range(y + 1, i):
                     bi[t] = 0
-                AdjustBi(count, bi, high, low, y)
+                AdjustBi(count, bi, high, low, open_price, close_price, y)
 
 
 def CalcBiList(count, bi, high, low):
     biList = []
-    for i in range(0, count):
+    for i in range(count):
         candle = { "high": high[i], "low": low[i] }
         if bi[i] == 1:
             bi = { "start": i, "end": i, "direction": -1, "candleList": [ candle ] }

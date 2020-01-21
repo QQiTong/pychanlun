@@ -64,7 +64,7 @@ def doExecute(symbol, period, inspect_time = None, is_debug = False):
 
     # 笔信号
     bi_series = [0 for i in range(count)]
-    CalcBi(count, bi_series, high_series, low_series)
+    CalcBi(count, bi_series, high_series, low_series, open_series, close_series)
     duan_series = [0 for i in range(count)]
     CalcDuan(count, duan_series, bi_series, high_series, low_series)
 

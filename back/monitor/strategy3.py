@@ -103,14 +103,14 @@ def doExecute(symbol, period1, period2, inspect_time = None, is_debug = False):
 
     # 本周期笔处理
     period1BiResult = [0 for i in range(len1)]
-    CalcBi(len1, period1BiResult, period1High, period1Low)
+    CalcBi(len1, period1BiResult, period1High, period1Low, period1Open, period1Close)
     # 本周期段处理
     period1DuanResult = [0 for i in range(len1)]
     CalcDuan(len1, period1DuanResult, period1BiResult, period1High, period1Low)
 
     # 高周期笔处理
     period2BiResult = [0 for i in range(len2)]
-    CalcBi(len2, period2BiResult, period2High, period2Low)
+    CalcBi(len2, period2BiResult, period2High, period2Low, period2Open, period2Close)
     # 高周期段处理
     period2DuanResult = [0 for i in range(len2)]
     CalcDuan(len2, period2DuanResult, period2BiResult, period2High, period2Low)

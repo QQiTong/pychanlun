@@ -14,3 +14,35 @@ def FindNextEq(a, v, i, end):
             result = x
             break
     return result
+
+def FindPrevGt(a, v, i):
+    result = -1
+    for x in range(i - 1, -1, -1):
+        if a[x] > v:
+            result = x
+            break
+    return result
+
+def FindNextGt(a, v, i, end):
+    result = -1
+    for x in range(i, end):
+        if a[x] > v:
+            result = x
+            break
+    return result
+
+def FindPrevLt(a, v, i):
+    result = -1
+    for x in range(i - 1, -1, -1):
+        if a[x] < v:
+            result = x
+            break
+    return result
+
+def FindNextLt(a, v, i, end):
+    result = -1
+    for x in range(i, end):
+        if a[x] < v:
+            result = x
+            break
+    return result

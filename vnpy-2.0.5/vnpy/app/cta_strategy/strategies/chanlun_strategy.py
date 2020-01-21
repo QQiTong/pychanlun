@@ -109,7 +109,7 @@ class ChanLunStrategy(CtaTemplate):
         count = len(timeList)
         # 笔结果
         biList = [0 for i in range(count)]
-        CalcBi(count, biList, highList, lowList)
+        CalcBi(count, biList, highList, lowList, openList, closeList)
 
         # 段处理
         duanProcess = DuanProcess()
