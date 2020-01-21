@@ -61,18 +61,16 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
         return True
     # 查看顶底是否重叠
     if dir == 1:
-        i = FindPrevEq(bi, 1, from_index)
-        i = max(0, i)
         bottomHigh = 0
         topLow = 0
         sticks = candles[0]['sticks'] + candles[1]['sticks']
-        for idx in range(0, len(sticks)):
+        for idx in range(len(sticks)):
             if bottomHigh == 0:
                 bottomHigh = sticks[idx]['h']
             elif sticks[idx]['h'] > bottomHigh:
                 bottomHigh = sticks[idx]['h']
         sticks = candles[-2]['sticks'] + candles[-1]['sticks']
-        for idx in range(0, len(sticks)):
+        for idx in range(len(sticks)):
             if topLow == 0:
                 topLow = sticks[idx]['l']
             elif sticks[idx]['l'] < topLow:
@@ -81,20 +79,18 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
         if topLow < bottomHigh:
             return False
         # isValid 表示是否有独立K柱不和底或顶重叠
-        isValid1 = False
-        isValid2 = False
+        isValid = False
         for t in range(2, len(candles) - 2):
-            if not isValid1:
-                for idx in range(0, len(candles[t]['sticks'])):
-                    if candles[t]['sticks'][idx]['h'] > bottomHigh:
-                        isValid1 = True
-            if not isValid2:
-                for idx in range(0, len(candles[t]['sticks'])):
+            for idx in range(len(candles[t]['sticks'])):
+                if candles[t]['sticks'][idx]['h'] > bottomHigh:
+                    isValid = True
+                    break
+            if not isValid:
+                for idx in range(len(candles[t]['sticks'])):
                     if candles[t]['sticks'][idx]['l'] < topLow:
-                        isValid2 = True
-            if isValid1 and isValid2:
-                break
-        if not isValid1 or not isValid2:
+                        isValid = True
+                        break
+        if not isValid:
             return False
     elif dir == -1:
         i = FindPrevEq(bi, -1, from_index)
@@ -117,20 +113,18 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
         if bottomHigh > topLow:
             return False
         # isValid 表示是否有独立K柱不和底或顶重叠
-        isValid1 = False
-        isValid2 = False
+        isValid = False
         for t in range(2, len(candles) - 2):
-            if not isValid1:
-                for idx in range(0, len(candles[t]['sticks'])):
-                    if candles[t]['sticks'][idx]['h'] > bottomHigh:
-                        isValid1 = True
-            if not isValid2 and candles[t]['low'] < topLow:
+            for idx in range(0, len(candles[t]['sticks'])):
+                if candles[t]['sticks'][idx]['h'] > bottomHigh:
+                    isValid = True
+                    break
+            if not isValid:
                 for idx in range(0, len(candles[t]['sticks'])):
                     if candles[t]['sticks'][idx]['l'] > topLow:
-                        isValid2 = True
-            if isValid1 and isValid2:
-                break
-        if not isValid1 or not isValid2:
+                        isValid = True
+                        break
+        if not isValid:
             return False
     return True
 
