@@ -42,7 +42,7 @@ python pychanlun\cli server run
 python pychanlun\cli server
 ```
 
-还可以以模式方式启动api服务。
+还可以以模块方式启动api服务。
 
 ```cmd
 python -m pychanlun

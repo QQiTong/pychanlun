@@ -3,6 +3,7 @@
 import os, sys
 
 from flask import Flask, request, Response
+from waitress import serve
 import json
 import numpy as np
 from rqdatac import *
@@ -59,4 +60,4 @@ def save_stock_date():
     return Response(json.dumps(result), mimetype='application/json')
 
 def run(**kwargs):
-    app.run(host = '0.0.0.0')
+    serve(app, host='0.0.0.0', port=5000)
