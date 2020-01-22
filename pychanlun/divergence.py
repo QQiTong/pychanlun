@@ -4,9 +4,9 @@ import pydash
 import numpy as np
 import json
 
-from .funcat.time_series import (fit_series, NumericSeries)
-from .funcat.api import *
-from . import Duan
+from pychanlun.funcat.time_series import (fit_series, NumericSeries)
+from pychanlun.funcat.api import *
+from pychanlun import Duan
 
 
 '''

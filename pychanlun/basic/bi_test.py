@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from pychanlun.basic.bi import CalcBi
 
 def testCalcBi():

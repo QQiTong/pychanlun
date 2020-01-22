@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 def find_index(series, func, start=0, stop=None):
     if stop is None:
         stop = len(series)

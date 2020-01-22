@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 策略4：回拉中枢或者突破中枢开仓
 """
@@ -18,16 +20,16 @@ import traceback
 
 from bson.codec_options import CodecOptions
 
-from ..funcat.data.HuobiDataBackend import HuobiDataBackend
-from ..funcat.utils import get_int_date
-from ..funcat.api import *
+from pychanlun.funcat.data.HuobiDataBackend import HuobiDataBackend
+from pychanlun.funcat.utils import get_int_date
+from pychanlun.funcat.api import *
 
-from .. import entanglement as entanglement
-from .. import divergence as divergence
-from ..Mail import Mail
-from .. import Duan
-from ..db import DBPyChanlun
-from .MarketData import is_data_feeding
+from pychanlun import entanglement as entanglement
+from pychanlun import divergence as divergence
+from pychanlun.Mail import Mail
+from pychanlun import Duan
+from pychanlun.db import DBPyChanlun
+from pychanlun.monitor.MarketData import is_data_feeding
 
 from pychanlun.basic.bi import CalcBi, CalcBiList
 from pychanlun.basic.duan import CalcDuan

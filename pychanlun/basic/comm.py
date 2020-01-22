@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 def FindPrevEq(a, v, i):
     result = -1
     for x in range(i - 1, -1, -1):

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from pychanlun.basic.comm import FindPrevEq, FindNextEq
 
 def CalcDuan(count, duan, bi, high, low):

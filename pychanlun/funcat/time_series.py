@@ -3,7 +3,7 @@
 import six
 import numpy as np
 
-from .utils import wrap_formula_exc, FormulaException
+from pychanlun.funcat.utils import wrap_formula_exc, FormulaException
 
 
 def fit_series(*series_list):

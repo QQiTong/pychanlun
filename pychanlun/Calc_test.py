@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
 import logging
 import sys
 from rqdatac import *
-from .Calc import Calc
+from pychanlun.Calc import Calc
 
 if __name__ == '__main__':
     init('license',

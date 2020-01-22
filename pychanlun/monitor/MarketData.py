@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import logging
 import traceback
 import multiprocessing
@@ -14,9 +16,9 @@ from rx.scheduler.eventloop import AsyncIOScheduler
 from rx import operators as ops
 from bson.codec_options import CodecOptions
 
-from ..db import DBPyChanlun
-from ..funcat.data.HuobiDataBackend import HuobiDataBackend
-from ..funcat.data.RicequantDataBackend import RicequantDataBackend
+from pychanlun.db import DBPyChanlun
+from pychanlun.funcat.data.HuobiDataBackend import HuobiDataBackend
+from pychanlun.funcat.data.RicequantDataBackend import RicequantDataBackend
 
 optimal_thread_count = multiprocessing.cpu_count() * 5
 pool_scheduler = ThreadPoolScheduler(optimal_thread_count)

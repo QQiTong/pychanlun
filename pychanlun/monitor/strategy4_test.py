@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
 import logging
 import sys
-from .strategy4 import doCaculate
-from ..db import DBPyChanlun
+from pychanlun.monitor.strategy4 import doCaculate
+from pychanlun.db import DBPyChanlun
 
 if __name__ == '__main__':
     logging.basicConfig(stream=sys.stdout, level=logging.INFO,

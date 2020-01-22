@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pydash
 from pychanlun.funcat.api import *
 

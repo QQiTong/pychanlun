@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import rqdatac as rq
 from rqdatac import *
 import numpy as np

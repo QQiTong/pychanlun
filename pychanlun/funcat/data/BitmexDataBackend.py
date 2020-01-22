@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import requests
 import json
 import numpy as np
-from .backend import DataBackend
+from pychanlun.funcat.data.backend import DataBackend
 
-from ..utils import lru_cache, get_str_date_from_int, get_int_date
+from pychanlun.funcat.utils import lru_cache, get_str_date_from_int, get_int_date
 
 class BitmexDataBackend(DataBackend):
 

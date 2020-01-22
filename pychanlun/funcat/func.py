@@ -6,8 +6,8 @@ from functools import reduce
 import numpy as np
 import talib
 
-from .utils import FormulaException, rolling_window, handle_numpy_warning
-from .time_series import (
+from pychanlun.funcat.utils import FormulaException, rolling_window, handle_numpy_warning
+from pychanlun.funcat.time_series import (
     MarketDataSeries,
     NumericSeries,
     BoolSeries,

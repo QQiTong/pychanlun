@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+
 import numpy as np
 
-from .time_series import MarketDataSeries
-from .func import (
+from pychanlun.funcat.time_series import MarketDataSeries
+from pychanlun.funcat.func import (
     SumSeries,
     AbsSeries,
     StdSeries,

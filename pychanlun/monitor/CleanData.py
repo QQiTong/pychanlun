@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime, timedelta
 import logging
 import pytz
-from ..db import DBPyChanlun
+from pychanlun.db import DBPyChanlun
 
 # 清理久远的数据，数据库不要变的太大，行情数据保留360天
 def doClean():

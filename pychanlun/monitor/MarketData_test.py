@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
 import logging
 import sys
 from rqdatac import *
-from .MarketData import getMarketData
-from ..db import DBPyChanlun
+from pychanlun.monitor.MarketData import getMarketData
+from pychanlun.db import DBPyChanlun
 
 if __name__ == '__main__':
     init('license',

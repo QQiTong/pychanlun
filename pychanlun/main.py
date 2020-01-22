@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from pychanlun.Calc import Calc
 from pychanlun.KlineDataTool import KlineDataTool
 from datetime import datetime, timedelta, timezone

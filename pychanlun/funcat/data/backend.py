@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#
 
 class DataBackend(object):
     def get_price(self, code, start, end, period):

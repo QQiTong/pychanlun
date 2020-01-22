@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
-from .strategy3 import doCaculate
-from ..db import DBPyChanlun
+from pychanlun.monitor.strategy3 import doCaculate
+from pychanlun.db import DBPyChanlun
 
 if __name__ == '__main__':
     symbol = DBPyChanlun['symbol'].find_one({ 'code': 'FU2001' })

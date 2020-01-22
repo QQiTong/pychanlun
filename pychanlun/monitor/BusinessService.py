@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import rqdatac as rq
 import os
 import json
 from pychanlun.config import config
 from datetime import datetime, timedelta
-from ..db import DBPyChanlun
+from pychanlun.db import DBPyChanlun
 
 # periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 periodList = ['3m', '5m', '15m', '30m', '60m']

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+
 import pydash
 
-from .funcat.time_series import (fit_series)
-from . import series_tool
+from pychanlun.funcat.time_series import (fit_series)
+from pychanlun import series_tool
 from pychanlun.basic.comm import FindPrevEq
 
 class Entanglement:
