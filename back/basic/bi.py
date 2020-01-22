@@ -82,14 +82,14 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
         isValid = False
         for t in range(2, len(candles) - 2):
             for idx in range(len(candles[t]['sticks'])):
-                if candles[t]['sticks'][idx]['h'] > bottomHigh:
+                if candles[t]['sticks'][idx]['l'] >= bottomHigh and candles[t]['sticks'][idx]['h'] <= topLow:
                     isValid = True
                     break
-            if not isValid:
-                for idx in range(len(candles[t]['sticks'])):
-                    if candles[t]['sticks'][idx]['l'] < topLow:
-                        isValid = True
-                        break
+            # if not isValid:
+            #     for idx in range(len(candles[t]['sticks'])):
+            #         if candles[t]['sticks'][idx]['l'] < topLow:
+            #             isValid = True
+            #             break
         if not isValid:
             return False
     elif dir == -1:
@@ -116,14 +116,14 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
         isValid = False
         for t in range(2, len(candles) - 2):
             for idx in range(0, len(candles[t]['sticks'])):
-                if candles[t]['sticks'][idx]['h'] > bottomHigh:
+                if candles[t]['sticks'][idx]['l'] >= bottomHigh and candles[t]['sticks'][idx]['h'] <= topLow:
                     isValid = True
                     break
-            if not isValid:
-                for idx in range(0, len(candles[t]['sticks'])):
-                    if candles[t]['sticks'][idx]['l'] > topLow:
-                        isValid = True
-                        break
+            # if not isValid:
+            #     for idx in range(0, len(candles[t]['sticks'])):
+            #         if candles[t]['sticks'][idx]['l'] > topLow:
+            #             isValid = True
+            #             break
         if not isValid:
             return False
     return True
