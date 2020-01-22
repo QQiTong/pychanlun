@@ -3,7 +3,7 @@ import pydash
 
 from .funcat.time_series import (fit_series)
 from . import series_tool
-from back.basic.comm import FindPrevEq
+from pychanlun.basic.comm import FindPrevEq
 
 class Entanglement:
     def __init__(self):

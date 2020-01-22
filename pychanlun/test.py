@@ -3,20 +3,20 @@ import json
 import time
 import pydash
 from datetime import datetime, timedelta
-import re
-from back.Calc import Calc
-from back.KlineDataTool import KlineDataTool
-from back.funcat.api import *
+
+from pychanlun.Calc import Calc
+from pychanlun.KlineDataTool import KlineDataTool
+from pychanlun.funcat.api import *
 
 import sys
 from rqdatac import *
 import os
 import pymongo
 
-from back.config import config
+from pychanlun.config import config
 import rqdatac as rq
 import requests
-from back.db import DBPyChanlun
+from pychanlun.db import DBPyChanlun
 
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
@@ -232,22 +232,11 @@ def testHuila():
     calc = Calc()
     result = calc.calcData("3m","RB2001")
     print("结果：",result)
-
-def testReg():
-    a = "RB2005"
-    b = "88"
-    # c = re.findall("\d+",a)
-    # strinfo = re.compile('/d+/')
-    a = re.sub('\d+',b,a)
-    print(a)
-    print(b)
-    # print(c)
 def app():
     # testBitmex()
-    # testBeichiDb()
+    testBeichiDb()
     # testHuila()
     # testChange()
-    testReg()
 
 if __name__ == '__main__':
     app()

@@ -1,5 +1,5 @@
-from back.Calc import Calc
-from back.KlineDataTool import KlineDataTool
+from pychanlun.Calc import Calc
+from pychanlun.KlineDataTool import KlineDataTool
 from datetime import datetime, timedelta, timezone
 import time
 import bitmex

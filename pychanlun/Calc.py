@@ -12,13 +12,13 @@ import copy
 import pydash
 from datetime import datetime
 
-from back.basic.bi import CalcBi
-from back.basic.duan import CalcDuan
-from back import Duan
-from back.KlineDataTool import KlineDataTool
-from back.Tools import Tools
-import back.divergence as divergence
-import back.entanglement as entanglement
+from pychanlun.basic.bi import CalcBi
+from pychanlun.basic.duan import CalcDuan
+from pychanlun import Duan
+from pychanlun.KlineDataTool import KlineDataTool
+from pychanlun.Tools import Tools
+import pychanlun.divergence as divergence
+import pychanlun.entanglement as entanglement
 
 # 币安的数据结构
 # [

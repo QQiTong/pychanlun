@@ -1,2 +1,2 @@
 cd /d %~dp0
-python -m back.scheduler
+python -m pychanlun.scheduler

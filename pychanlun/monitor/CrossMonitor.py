@@ -1,11 +1,11 @@
-from back.KlineDataTool import KlineDataTool
+from pychanlun.KlineDataTool import KlineDataTool
 import numpy as np
 import pandas as pd
 from numpy import array
 import talib as ta
 import time
 
-from back.Mail import Mail
+from pychanlun.Mail import Mail
 '''
 金叉死叉监控
 '''

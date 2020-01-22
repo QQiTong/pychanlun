@@ -2,10 +2,10 @@ import requests
 import json
 import pandas as pd
 import numpy as np
-from back.funcat.data.backend import DataBackend
-from back.config import cfg
+from pychanlun.funcat.data.backend import DataBackend
+from pychanlun.config import cfg
 
-from back.funcat.utils import lru_cache, get_str_date_from_int, get_int_date
+from pychanlun.funcat.utils import lru_cache, get_str_date_from_int, get_int_date
 
 class HuobiDataBackend(DataBackend):
 

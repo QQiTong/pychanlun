@@ -1,4 +1,4 @@
-from back.basic.comm import FindPrevEq
+from pychanlun.basic.comm import FindPrevEq
 
 def MergeCandles(high, low, open_price, close_price, from_index, to_index, dir):
     candles = []
@@ -85,11 +85,8 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
                 if candles[t]['sticks'][idx]['l'] >= bottomHigh and candles[t]['sticks'][idx]['h'] <= topLow:
                     isValid = True
                     break
-            # if not isValid:
-            #     for idx in range(len(candles[t]['sticks'])):
-            #         if candles[t]['sticks'][idx]['l'] < topLow:
-            #             isValid = True
-            #             break
+            if isValid:
+                break
         if not isValid:
             return False
     elif dir == -1:
@@ -115,15 +112,12 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
         # isValid 表示是否有独立K柱不和底或顶重叠
         isValid = False
         for t in range(2, len(candles) - 2):
-            for idx in range(0, len(candles[t]['sticks'])):
+            for idx in range(len(candles[t]['sticks'])):
                 if candles[t]['sticks'][idx]['l'] >= bottomHigh and candles[t]['sticks'][idx]['h'] <= topLow:
                     isValid = True
                     break
-            # if not isValid:
-            #     for idx in range(0, len(candles[t]['sticks'])):
-            #         if candles[t]['sticks'][idx]['l'] > topLow:
-            #             isValid = True
-            #             break
+            if isValid:
+                break
         if not isValid:
             return False
     return True

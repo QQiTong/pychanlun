@@ -8,11 +8,11 @@ import pydash
 
 import rqdatac as rq
 from rqdatac import *
-from back.config import cfg
+from pychanlun.config import cfg
 
 # url = "http://api.zb.cn/data/v1/kline?market=btc_usdt"
 # 火币合约接口 全局代理后200ms内 , 不代理1s左右
-from back.ComposeKline import ComposeKline
+from pychanlun.ComposeKline import ComposeKline
 import re
 hbdmUrl = "http://api.hbdm.com/market/history/kline"
 '''

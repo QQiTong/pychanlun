@@ -1,4 +1,4 @@
-from back.basic.bi import CalcBi
+from pychanlun.basic.bi import CalcBi
 
 def testCalcBi():
     count = 5
