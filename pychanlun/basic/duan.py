@@ -1,4 +1,4 @@
-from back.basic.comm import FindPrevEq, FindNextEq
+from pychanlun.basic.comm import FindPrevEq, FindNextEq
 
 def CalcDuan(count, duan, bi, high, low):
     firstBiD = FindNextEq(bi, -1, 0, count)

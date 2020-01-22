@@ -1,5 +1,5 @@
 import pydash
-from back.funcat.api import *
+from pychanlun.funcat.api import *
 
 
 def notHigher(duan_s, high_s):

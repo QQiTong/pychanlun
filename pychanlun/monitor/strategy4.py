@@ -29,8 +29,8 @@ from .. import Duan
 from ..db import DBPyChanlun
 from .MarketData import is_data_feeding
 
-from back.basic.bi import CalcBi, CalcBiList
-from back.basic.duan import CalcDuan
+from pychanlun.basic.bi import CalcBi, CalcBiList
+from pychanlun.basic.duan import CalcDuan
 
 tz = pytz.timezone('Asia/Shanghai')
 mail = Mail()

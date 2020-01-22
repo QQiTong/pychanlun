@@ -12,12 +12,12 @@ import pytz
 from rqdatac import *
 from apscheduler.executors.pool import ThreadPoolExecutor
 
-from back.config import config
-from back.monitor import MarketData
-from back.monitor import CleanData
-from back.monitor import strategy3
-from back.monitor import strategy4
-from back.db import DBPyChanlun
+from pychanlun.config import config
+from pychanlun.monitor import MarketData
+from pychanlun.monitor import CleanData
+from pychanlun.monitor import strategy3
+from pychanlun.monitor import strategy4
+from pychanlun.db import DBPyChanlun
 
 tz = pytz.timezone('Asia/Shanghai')
 

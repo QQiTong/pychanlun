@@ -1,7 +1,7 @@
 import logging
 import traceback
-from back.Calc import Calc
-from back.KlineDataTool import KlineDataTool
+from pychanlun.Calc import Calc
+from pychanlun.KlineDataTool import KlineDataTool
 import numpy as np
 import pandas as pd
 from numpy import array
@@ -11,14 +11,14 @@ from datetime import datetime
 from rqdatac import *
 import time
 import threading
-from back.Mail import Mail
+from pychanlun.Mail import Mail
 import pydash
-from back.funcat.api import *
-from back.config import config
+from pychanlun.funcat.api import *
+from pychanlun.config import config
 import os
 import json
-from back.db import DBPyChanlun
-from back.config import config
+from pychanlun.db import DBPyChanlun
+from pychanlun.config import config
 
 '''
 背驰监控

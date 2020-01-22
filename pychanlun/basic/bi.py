@@ -1,4 +1,4 @@
-from back.basic.comm import FindPrevEq
+from pychanlun.basic.comm import FindPrevEq
 
 def MergeCandles(high, low, open_price, close_price, from_index, to_index, dir):
     candles = []

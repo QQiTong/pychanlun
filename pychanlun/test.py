@@ -4,19 +4,19 @@ import time
 import pydash
 from datetime import datetime, timedelta
 
-from back.Calc import Calc
-from back.KlineDataTool import KlineDataTool
-from back.funcat.api import *
+from pychanlun.Calc import Calc
+from pychanlun.KlineDataTool import KlineDataTool
+from pychanlun.funcat.api import *
 
 import sys
 from rqdatac import *
 import os
 import pymongo
 
-from back.config import config
+from pychanlun.config import config
 import rqdatac as rq
 import requests
-from back.db import DBPyChanlun
+from pychanlun.db import DBPyChanlun
 
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 

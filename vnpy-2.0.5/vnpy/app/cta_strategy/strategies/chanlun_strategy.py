@@ -9,15 +9,15 @@ from vnpy.app.cta_strategy import (
     ArrayManager,
 )
 
-from back import divergence
-from back.BiProcess import BiProcess
-from back.DuanProcess import DuanProcess
-from back.KlineProcess import KlineProcess
-import back.entanglement as entanglement
+from pychanlun import divergence
+from pychanlun.BiProcess import BiProcess
+from pychanlun.DuanProcess import DuanProcess
+from pychanlun.KlineProcess import KlineProcess
+import pychanlun.entanglement as entanglement
 from numpy import array
 import talib as ta
 import numpy as np
-from back.basic.bi import CalcBi
+from pychanlun.basic.bi import CalcBi
 
 class ChanLunStrategy(CtaTemplate):
     """"""

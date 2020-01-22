@@ -1,7 +1,7 @@
 import rqdatac as rq
 import os
 import json
-from back.config import config
+from pychanlun.config import config
 from datetime import datetime, timedelta
 from ..db import DBPyChanlun
 

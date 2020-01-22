@@ -7,9 +7,9 @@ from flask import Flask, request, Response
 import json
 import numpy as np
 from rqdatac import *
-from back.Calc import Calc
-from back.monitor.BusinessService import BusinessService
-from back.config import config
+from pychanlun.Calc import Calc
+from pychanlun.monitor.BusinessService import BusinessService
+from pychanlun.config import config
 import rqdatac as rq
 
 app = Flask(__name__)
