@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from rqdatac import init
 
 init(
