@@ -3,7 +3,7 @@ import json
 import time
 import pydash
 from datetime import datetime, timedelta
-
+import re
 from back.Calc import Calc
 from back.KlineDataTool import KlineDataTool
 from back.funcat.api import *
@@ -232,11 +232,22 @@ def testHuila():
     calc = Calc()
     result = calc.calcData("3m","RB2001")
     print("结果：",result)
+
+def testReg():
+    a = "RB2005"
+    b = "88"
+    # c = re.findall("\d+",a)
+    # strinfo = re.compile('/d+/')
+    a = re.sub('\d+',b,a)
+    print(a)
+    print(b)
+    # print(c)
 def app():
     # testBitmex()
-    testBeichiDb()
+    # testBeichiDb()
     # testHuila()
     # testChange()
+    testReg()
 
 if __name__ == '__main__':
     app()

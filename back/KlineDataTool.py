@@ -13,7 +13,7 @@ from back.config import cfg
 # url = "http://api.zb.cn/data/v1/kline?market=btc_usdt"
 # 火币合约接口 全局代理后200ms内 , 不代理1s左右
 from back.ComposeKline import ComposeKline
-
+import re
 hbdmUrl = "http://api.hbdm.com/market/history/kline"
 '''
 period 1min, 5min, 15min, 30min, 60min,4hour,1day, 1mon
@@ -236,7 +236,8 @@ class KlineDataTool:
             # print("处理结果:", processedKlineList)
             return processedKlineList
 
-    def getFutureData(self, symbol, period, size):
+    # endDate 查看主力合约历史k线
+    def getFutureData(self, symbol, period, endDate):
         # 聚宽数据源
         startTime = datetime.now()
         # print("可调用条数:", get_query_count())
@@ -244,11 +245,16 @@ class KlineDataTool:
         #               include_now=True, end_dt=datetime.now())
         # df = get_price(symbol, frequency=period, end_date=datetime.now(), count=size,
         #                fields=['open', 'high', 'low', 'close', 'volume'])
-        end = datetime.now() + timedelta(1)
+
+        if endDate is None:
+            end = datetime.now() + timedelta(1)
+        else :
+            end = datetime.strptime(endDate,"%Y-%m-%d")
+            symbol = re.sub('\d+', "88", symbol)
         timeDeltaMap = {
             '1m': -7*3,
-            '3m': -15,
-            '5m': -31,
+            '3m': -31*3,
+            '5m': -31*3,
             '15m': -31 * 3,
             '30m': -31 * 8,
             '60m': -31 * 8,
@@ -256,7 +262,7 @@ class KlineDataTool:
             '1d': -31 * 10,
             '3d': -31 * 30
         }
-        start_date = datetime.now() + timedelta(timeDeltaMap[period])
+        start_date =  end + timedelta(timeDeltaMap[period])
 
         df = rq.get_price(symbol, frequency=period,
                           fields=['open', 'high', 'low', 'close', 'volume'], start_date=start_date, end_date=end)

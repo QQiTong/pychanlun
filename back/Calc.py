@@ -132,7 +132,7 @@ class Calc:
             '1w': '3d'
         }
 
-    def calcData(self, period, symbol, save=False):
+    def calcData(self, period, symbol, save=False,endDate=None):
         start = time.clock()  # 开始计时
         # 统计程序执行时间
 
@@ -147,13 +147,13 @@ class Calc:
         klineDataTool = KlineDataTool()
         if '_CQ' in symbol:
             klineData = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[period])
-            klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[self.levelMap[period]])
-            klineDataBigLevel = pydash.filter_(klineDataBigLevel,
-                                               lambda klineItem: klineItem['time'] >= klineData[0]['time'])
+            # klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[self.levelMap[period]])
+            # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
+            #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
         else:
             # 期货
             currentPeriod = self.periodMap[period]
-            klineData = klineDataTool.getFutureData(symbol, currentPeriod, 1000)
+            klineData = klineDataTool.getFutureData(symbol, currentPeriod, endDate)
             # bigLevelPeriod = self.futureLevelMap[currentPeriod]
             # klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 1000)
             # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
@@ -165,9 +165,9 @@ class Calc:
             with codecs.open(os.path.join(base_dir, 'klineData.json'), 'w', encoding='utf-8') as f:
                 json_str = json.dumps(klineData, ensure_ascii=False, indent=4)
                 f.write(json_str)
-            with codecs.open(os.path.join(base_dir, 'klineDataBigLevel.json'), 'w', encoding='utf-8') as f:
-                json_str = json.dumps(klineDataBigLevel, ensure_ascii=False, indent=4)
-                f.write(json_str)
+            # with codecs.open(os.path.join(base_dir, 'klineDataBigLevel.json'), 'w', encoding='utf-8') as f:
+            #     json_str = json.dumps(klineDataBigLevel, ensure_ascii=False, indent=4)
+            #     f.write(json_str)
 
         # 读入本都数据
         # flask 读入本地文件需要这样写

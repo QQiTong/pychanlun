@@ -25,7 +25,8 @@ def data():
     calc = Calc()
     period = request.args.get("period") or "1min"
     symbol = request.args.get("symbol") or "BTC_CQ"
-    result = calc.calcData(period, symbol)
+    endDate = request.args.get("endDate")
+    result = calc.calcData(period, symbol,False,endDate)
     return Response(json.dumps(result), mimetype='application/json')
 # 获取主力合约
 @app.route('/api/dominant')

@@ -8,6 +8,7 @@
     <link href="bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="./kline.css">
+    <link rel="stylesheet" href="laydate/theme/default/laydate.css?v=5.0.9" id="layuicss-laydate">
 </head>
 <body>
 <div id="app">
@@ -18,7 +19,13 @@
                     <a>{{ symbolInfo.order_book_id }}</a></li>
             </ul>
     </nav>-->
+    查看主力合约历史数据：<input type="text" class="demo-input" placeholder="请选择日期" id="test1" lay-key="1" :value="endDate">
+                         <button @click="switchHistoryPeriod('3m')">3m</button>   <button @click="switchHistoryPeriod('5m')">5m</button>
+    <button @click="switchHistoryPeriod('15m')">15m</button> <button @click="switchHistoryPeriod('30m')">30m</button>
+    <button @click="switchHistoryPeriod('60m')">60m</button> <button @click="switchHistoryPeriod('4h')">210m</button>
+<button @click="historyKline">提交</button>
 </div>
+
 <div class="echarts-list-big">
     <div class="echarts-item-big" id="5m">
         <div id="main5" class="echarts-big">
@@ -64,5 +71,20 @@
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/kline.js?v=2"></script>
+<script src="laydate/laydate.js"></script>
+<script type="text/javascript">
+lay('#version').html('-v'+ laydate.v);
+let that = this
+//执行一个laydate实例
+laydate.render({
+  elem: '#test1', //指定元素
+  done: function(value, date, endDate){
+    console.log(value); //得到日期生成的值，如：2017-08-18
+    window.historyKline(value)
+  }
+});
+
+
+</script>
 </body>
 </html>

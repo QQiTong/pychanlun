@@ -1,3 +1,18 @@
+Date.prototype.format = function (fmt) {
+    var o = {
+        "M+": this.getMonth() + 1, //月份
+        "d+": this.getDate(), //日
+        "h+": this.getHours(), //小时
+        "m+": this.getMinutes(), //分
+        "s+": this.getSeconds(), //秒
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+        "S": this.getMilliseconds() //毫秒
+    };
+    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return fmt;
+}
 var app = new Vue({
     el: '#app',
     data: {
@@ -53,7 +68,8 @@ var app = new Vue({
         // 动态止盈手数
         dynamicWinCount: 0,
         //end仓位管理计算
-
+        // 结束日期
+        endDate: null,
 
         digitCoinsSymbolList: [{
             contract_multiplier: 1,
@@ -89,6 +105,7 @@ var app = new Vue({
             }]
     },
     mounted() {
+        window.historyKline  = this.historyKline
         this.getDominantSymbol()
         let that = this;
         this.symbol = getParams('symbol') || 'BTC_CQ'
@@ -115,6 +132,7 @@ var app = new Vue({
                 // console.log('wait...')
             }
         }, 10000);
+
     },
     methods: {
         getDominantSymbol() {
@@ -165,33 +183,38 @@ var app = new Vue({
                 update = 'refresh'
             }
             console.log("切换币种:", symbol)
+            // 如果是大图，只请求一个周期的数据
+            if (this.kxType !== "") {
+                that.sendRequest(symbol, this.kxType, update)
 
-            for (var i = 0; i < 8; i++) {
-                switch (i) {
-                    // case 0:
-                    //     that.sendRequest(symbol, '1m', update)
-                    //     break;
-                    case 1:
-                        that.sendRequest(symbol, '3m', update)
-                        break;
-                    case 2:
-                        that.sendRequest(symbol, '5m', update)
-                        break;
-                    case 3:
-                        that.sendRequest(symbol, '15m', update)
-                        break;
-                    case 4:
-                        that.sendRequest(symbol, '30m', update)
-                        break;
-                    case 5:
-                        that.sendRequest(symbol, '60m', update)
-                        break;
-                    case 6:
-                        that.sendRequest(symbol, '4h', update)
-                        break;
-                    // case 7:
-                    //     that.sendRequest(symbol, '1d', update)
-                    //     break;
+            } else {
+                for (var i = 0; i < 8; i++) {
+                    switch (i) {
+                        // case 0:
+                        //     that.sendRequest(symbol, '1m', update)
+                        //     break;
+                        case 1:
+                            that.sendRequest(symbol, '3m', update)
+                            break;
+                        case 2:
+                            that.sendRequest(symbol, '5m', update)
+                            break;
+                        case 3:
+                            that.sendRequest(symbol, '15m', update)
+                            break;
+                        case 4:
+                            that.sendRequest(symbol, '30m', update)
+                            break;
+                        case 5:
+                            that.sendRequest(symbol, '60m', update)
+                            break;
+                        case 6:
+                            that.sendRequest(symbol, '4h', update)
+                            break;
+                        // case 7:
+                        //     that.sendRequest(symbol, '1d', update)
+                        //     break;
+                    }
                 }
             }
 
@@ -237,9 +260,15 @@ var app = new Vue({
         sendRequest(symbol, kxType, update) {
             let that = this;
             that.requestFlag = false;
+            var data
+            if (that.endDate != null) {
+                data = {'symbol': symbol, 'period': kxType, 'endDate': that.endDate}
+            } else {
+                data = {'symbol': symbol, 'period': kxType}
+            }
             $.ajax({
                 url: '/api/stock_data',
-                data: {'symbol': symbol, 'period': kxType},
+                data: data,
                 type: 'get',
                 success: function (data) {
                     that.requestFlag = true;
@@ -1893,7 +1922,7 @@ var app = new Vue({
                 var currentPercent = ""
                 // 当前收益（单位万/元）
                 var currentProfit = ""
-                if (lastBeichiType === 1 || lastBeichiType === 2 || lastBeichiType === 5 || lastBeichiType === 6||
+                if (lastBeichiType === 1 || lastBeichiType === 2 || lastBeichiType === 5 || lastBeichiType === 6 ||
                     lastBeichiType === 9 || lastBeichiType === 10 || lastBeichiType === 13 || lastBeichiType === 14) {
                     targetPrice = beichiPrice + diffPrice
                     currentPercent = ((currentPrice - beichiPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
@@ -2180,6 +2209,27 @@ var app = new Vue({
                 this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
                 " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate)
         },
+        //获取主力合约历史k线
+        historyKline(endDate) {
+            console.log("click", this.symbol)
+            // endDate = new Date().format("yyyy-MM-dd");
+            this.endDate = endDate
+            console.log("endDate:",this.endDate)
+            this.switchSymbol(this.symbol, "refresh")
+        },
+        switchHistoryPeriod(kxType) {
+            this.kxType = kxType;
+            this.replaceParamVal("kxType",kxType)
+            // this.switchSymbol(this.symbol, "refresh")
+        },
+        replaceParamVal(paramName, replaceWith) {
+            var oUrl = window.location.href.toString();
+            var re = eval('/(' + paramName + '=)([^&]*)/gi');
+            var nUrl = oUrl.replace(re, paramName + '=' + replaceWith);
+            this.location = nUrl;
+            window.location.href = nUrl
+        }
+
     }
 })
 
