@@ -10,3 +10,7 @@ json-logging-py
 rx
 pytest
 pytest-html
+ratelimit
+waitress
+tornado
+click

@@ -15,3 +15,4 @@ front/web.zip
 *.pid
 web/temp/*
 *.log.*
+pychanlun.egg-info/
