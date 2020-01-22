@@ -85,6 +85,8 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
                 if candles[t]['sticks'][idx]['l'] >= bottomHigh and candles[t]['sticks'][idx]['h'] <= topLow:
                     isValid = True
                     break
+            if isValid:
+                break
         if not isValid:
             return False
     elif dir == -1:
@@ -114,6 +116,8 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
                 if candles[t]['sticks'][idx]['l'] >= bottomHigh and candles[t]['sticks'][idx]['h'] <= topLow:
                     isValid = True
                     break
+            if isValid:
+                break
         if not isValid:
             return False
     return True
