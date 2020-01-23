@@ -165,7 +165,7 @@ def saveLog(symbol, period, raw_data, signal, remark, fire_time, price, position
 
 def doCaculate(symbol, inspect_time = None, is_debug = False):
     logger = logging.getLogger()
-    periods = ['3m', '5m', '15m', '30m', '1h', '4h','1d']
+    periods = ['3m', '5m', '15m', '30m', '1h', '210m','1d']
     for period in periods:
         try:
             doExecute(symbol, period, inspect_time, is_debug)

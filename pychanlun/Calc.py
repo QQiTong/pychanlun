@@ -65,8 +65,8 @@ class Calc:
             '60m': '1d',
             '1d': '1w',
             '5m': '30m',
-            '30m': '4h',
-            '4h': '1w',
+            '30m': '210m',
+            '210m': '1w',
             # '1w': '1w'
         }
 
@@ -79,7 +79,7 @@ class Calc:
             '60m': '60min',
 
             '30m': '30min',
-            '4h': '4hour',
+            '210m': '4hour',
             '1d': '1day',
             '1w': '1week'
         }
@@ -130,8 +130,8 @@ class Calc:
             '1d': '1d',
             '5m': '5m',
             '30m': '30m',
-            '4h': '210m',
-            '1w': '3d'
+            '210m': '210m',
+            '1w': '1w'
         }
 
     def calcData(self, period, symbol, save=False,endDate=None):

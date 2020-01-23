@@ -22,7 +22,7 @@
     查看主力合约历史数据：<input type="text" class="demo-input" placeholder="请选择日期" id="test1" lay-key="1" :value="endDate">
                          <button @click="switchHistoryPeriod('3m')">3m</button>   <button @click="switchHistoryPeriod('5m')">5m</button>
     <button @click="switchHistoryPeriod('15m')">15m</button> <button @click="switchHistoryPeriod('30m')">30m</button>
-    <button @click="switchHistoryPeriod('60m')">60m</button> <button @click="switchHistoryPeriod('4h')">210m</button>
+    <button @click="switchHistoryPeriod('60m')">60m</button> <button @click="switchHistoryPeriod('210m')">210m</button>
 <button @click="historyKline">提交</button>
 </div>
 
@@ -36,7 +36,7 @@
         </div>
     </div>
     <div class="echarts-item-big" id="210m">
-        <div id="main240" class="echarts-big">
+        <div id="main210" class="echarts-big">
         </div>
     </div>
 
@@ -80,7 +80,9 @@ laydate.render({
   elem: '#test1', //指定元素
   done: function(value, date, endDate){
     console.log(value); //得到日期生成的值，如：2017-08-18
-    window.historyKline(value)
+    window.replaceParamVal("endDate",value)
+    // window.historyKline(value)
+
   }
 });
 

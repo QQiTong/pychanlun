@@ -255,8 +255,8 @@ class KlineDataTool:
             symbol = re.sub('\d+', "88", symbol)
         timeDeltaMap = {
             '1m': -7*3,
-            '3m': -31*3,
-            '5m': -31*3,
+            '3m': -31,
+            '5m': -31,
             '15m': -31 * 3,
             '30m': -31 * 8,
             '60m': -31 * 8,

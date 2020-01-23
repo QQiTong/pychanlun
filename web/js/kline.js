@@ -20,7 +20,7 @@ var app = new Vue({
         futureSymbolMap: {},
         timer: null,
         symbol: "",
-        kxType: "",
+        period: "",
         requestFlag: true,
         marginLevelCompany: 1.125,// 不同期货公司提高的点数不一样
         marginPrice: 0,//每手需要的保证金
@@ -106,15 +106,17 @@ var app = new Vue({
     },
     mounted() {
         window.historyKline  = this.historyKline
+        window.replaceParamVal = this.replaceParamVal
         this.getDominantSymbol()
         let that = this;
         this.symbol = getParams('symbol') || 'BTC_CQ'
-        this.kxType = getParams('kxType')
+        this.period = getParams('period')
         //  大图只显示选中的k线图
-        if (this.kxType !== "") {
-            document.getElementById(this.kxType).style.display = "block"
+        if (this.period !== "") {
+            document.getElementById(this.period).style.display = "block"
+            this.endDate = getParams('endDate')
         }
-        console.log("symbol", this.symbol, this.kxType)
+        console.log("symbol", this.symbol, this.period)
 
         // 取出本地缓存
         let symbolList = window.localStorage.getItem("symbolList")
@@ -159,8 +161,8 @@ var app = new Vue({
             this.symbol = symbol
             let that = this;
             // document.title = symbol
-            if (this.kxType !== "") {
-                document.title = symbol + "-" + this.kxType
+            if (this.period !== "") {
+                document.title = symbol + "-" + this.period
             } else {
                 document.title = symbol
             }
@@ -184,8 +186,8 @@ var app = new Vue({
             }
             console.log("切换币种:", symbol)
             // 如果是大图，只请求一个周期的数据
-            if (this.kxType !== "") {
-                that.sendRequest(symbol, this.kxType, update)
+            if (this.period !== "") {
+                that.sendRequest(symbol, this.period, update)
 
             } else {
                 for (var i = 0; i < 8; i++) {
@@ -209,7 +211,7 @@ var app = new Vue({
                             that.sendRequest(symbol, '60m', update)
                             break;
                         case 6:
-                            that.sendRequest(symbol, '4h', update)
+                            that.sendRequest(symbol, '210m', update)
                             break;
                         // case 7:
                         //     that.sendRequest(symbol, '1d', update)
@@ -220,7 +222,7 @@ var app = new Vue({
 
 
         },
-        refreshOption(chart, resultData, kxType) {
+        refreshOption(chart, resultData, period) {
             var option = chart.getOption();
             option.series[0].data = resultData.values;
             option.series[0].markArea.data = resultData.zsvalues;
@@ -257,14 +259,14 @@ var app = new Vue({
 
             return option
         },
-        sendRequest(symbol, kxType, update) {
+        sendRequest(symbol, period, update) {
             let that = this;
             that.requestFlag = false;
             var data
             if (that.endDate != null) {
-                data = {'symbol': symbol, 'period': kxType, 'endDate': that.endDate}
+                data = {'symbol': symbol, 'period': period, 'endDate': that.endDate}
             } else {
-                data = {'symbol': symbol, 'period': kxType}
+                data = {'symbol': symbol, 'period': period}
             }
             $.ajax({
                 url: '/api/stock_data',
@@ -274,9 +276,9 @@ var app = new Vue({
                     that.requestFlag = true;
                     // $(".loading-style-4").hide();
                     that.symbol = symbol;
-                    // var result = draw(data, 'refresh', kxType);
-                    var result = that.draw(data, update, kxType);
-                    // 如果请求的symbol 和kxType 不一致 ,直接return
+                    // var result = draw(data, 'refresh', period);
+                    var result = that.draw(data, update, period);
+                    // 如果请求的symbol 和period 不一致 ,直接return
                 },
                 error: function (error) {
                     that.requestFlag = true;
@@ -286,39 +288,39 @@ var app = new Vue({
             });
         },
 
-        draw(stockJsonData, update, kxType) {
+        draw(stockJsonData, update, period) {
             var that = this;
             var zoomStart = 55
-            const resultData = this.splitData(stockJsonData, kxType);
+            const resultData = this.splitData(stockJsonData, period);
 
-            dataTitle = that.symbol + "  " + kxType
+            dataTitle = that.symbol + "  " + period
             let marginLevel = (1 / (that.futureSymbolMap[that.symbol].margin_rate * this.marginLevelCompany)).toFixed(2)
             subText = "杠杆倍数: " + marginLevel + " 每手保证金: " + this.marginPrice + " 合约乘数: " + this.contractMultiplier + " 交易时间: " + that.futureSymbolMap[that.symbol].trading_hours + " 交割时间: " + that.futureSymbolMap[that.symbol].maturity_date
             var currentChart = null
-            // if (kxType === '1m') {
+            // if (period === '1m') {
             //     currentChart = myChart1
             // } else
             //
-            if (kxType === '3m') {
+            if (period === '3m') {
                 currentChart = myChart3
-            } else if (kxType === '5m') {
+            } else if (period === '5m') {
                 currentChart = myChart5
-            } else if (kxType === '15m') {
+            } else if (period === '15m') {
                 currentChart = myChart15
-            } else if (kxType === '30m') {
+            } else if (period === '30m') {
                 currentChart = myChart30
-            } else if (kxType === '60m') {
+            } else if (period === '60m') {
                 currentChart = myChart60
-            } else if (kxType === '4h') {
-                currentChart = myChart240
+            } else if (period === '210m') {
+                currentChart = myChart210
             }
-            // else if (kxType === '1d') {
+            // else if (period === '1d') {
             //     currentChart = myChart1d
             // }
             var option;
             if (update === 'update') {
                 // console.log('更新了', update);
-                option = that.refreshOption(currentChart, resultData, kxType)
+                option = that.refreshOption(currentChart, resultData, period)
 
             } else {
                 option = {
@@ -353,7 +355,7 @@ var app = new Vue({
                                 title: '放大',
                                 icon: 'image://img/big-kline.png',
                                 onclick: function () {
-                                    window.open("kline-big.html?symbol=" + that.symbol + "&kxType=" + kxType)
+                                    window.open("kline-big.html?symbol=" + that.symbol + "&period=" + period+"&endDate="+new Date().format("yyyy-MM-dd"))
                                 }
                             },
                             // myLevel3: {
@@ -361,7 +363,7 @@ var app = new Vue({
                             //     title: '3分钟',
                             //     icon: 'image://img/icon_3m.png',
                             //     onclick: function () {
-                            //         kxType = '3m'
+                            //         period = '3m'
                             //         option.title.subtext = '3m'
                             //
                             //         refresh('refresh');
@@ -372,7 +374,7 @@ var app = new Vue({
                             //     title: '5分钟',
                             //     icon: 'image://img/icon_5m.png',
                             //     onclick: function () {
-                            //         kxType = '5m'
+                            //         period = '5m'
                             //         option.title.subtext = '5m'
                             //         refresh('refresh');
                             //
@@ -383,7 +385,7 @@ var app = new Vue({
                             //     title: '15分钟',
                             //     icon: 'image://img/icon_15m.png',
                             //     onclick: function () {
-                            //         that.kxType = '15m'
+                            //         that.period = '15m'
                             //         option.title.subtext = '15m'
                             //         refresh();
                             //     }
@@ -393,7 +395,7 @@ var app = new Vue({
                             //     title: '30分钟',
                             //     icon: 'image://img/icon_30m.png',
                             //     onclick: function () {
-                            //         that.kxType = '30m'
+                            //         that.period = '30m'
                             //         option.title.subtext = '30m'
                             //         refresh();
                             //     }
@@ -403,7 +405,7 @@ var app = new Vue({
                             //         title: '60分钟',
                             //         icon: 'image://img/icon_1h.png',
                             //         onclick: function () {
-                            //             that.kxType = '60m'
+                            //             that.period = '60m'
                             //             option.title.subtext = '60m'
                             //             refresh();
                             //         }
@@ -411,9 +413,9 @@ var app = new Vue({
                             //     myLevel240: {
                             //         show: true,
                             //         title: '240分钟',
-                            //         icon: 'image://img/icon_4h.png',
+                            //         icon: 'image://img/icon_210m.png',
                             //         onclick: function () {
-                            //             that.kxType = '60m'
+                            //             that.period = '60m'
                             //             option.title.subtext = '60m'
                             //             refresh();
                             //         }
@@ -424,7 +426,7 @@ var app = new Vue({
                             //         icon: 'image://img/icon_1d.png',
                             //         background: '#555',
                             //         onclick: function () {
-                            //             that.kxType = '1d'
+                            //             that.period = '1d'
                             //             option.title.subtext = '1d'
                             //             refresh();
                             //         }
@@ -435,7 +437,7 @@ var app = new Vue({
                             //         icon: 'image://img/icon_1w.png',
                             //         background: '#555',
                             //         onclick: function () {
-                            //             that.kxType = '1week'
+                            //             that.period = '1week'
                             //             option.title.subtext = '1week'
                             //             refresh();
                             //         }
@@ -1003,7 +1005,7 @@ var app = new Vue({
             // }
             currentChart.setOption(option);
         },
-        splitData(jsonObj, kxType) {
+        splitData(jsonObj, period) {
             const stockDate = jsonObj.date;
             const stockHigh = jsonObj.high;
             const stockLow = jsonObj.low;
@@ -1850,7 +1852,7 @@ var app = new Vue({
             this.contractMultiplier = this.futureSymbolMap[this.symbol].contract_multiplier;
             // 1手需要的保证金
             this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
-            // console.log("最后的背驰:", kxType, lastBeichiType)
+            // console.log("最后的背驰:", period, lastBeichiType)
             if (lastBeichiType !== 0) {
                 switch (lastBeichiType) {
                     // 回拉
@@ -2104,25 +2106,6 @@ var app = new Vue({
             //     bcMACDValues.push(value);
             // }
             //
-            // // 布林带
-            // const fixLength = 5;
-            // for (var i = 0; i < macddata.length; i++) {
-            //     if (boll_up[i] === 0 || boll_up[i] === '-') {
-            //         boll_up[i] = '-';
-            //     } else {
-            //         boll_up[i] = boll_up[i].toFixed(fixLength);
-            //     }
-            //     if (boll_middle[i] === 0 || boll_middle[i] === '-') {
-            //         boll_middle[i] = '-';
-            //     } else {
-            //         boll_middle[i] = boll_middle[i].toFixed(fixLength);
-            //     }
-            //     if (boll_bottom[i] === 0 || boll_bottom[i] === '-') {
-            //         boll_bottom[i] = '-';
-            //     } else {
-            //         boll_bottom[i] = boll_bottom[i].toFixed(fixLength);
-            //     }
-            // }
             return {
                 time: stockDate,
                 values: values,
@@ -2212,14 +2195,14 @@ var app = new Vue({
         //获取主力合约历史k线
         historyKline(endDate) {
             console.log("click", this.symbol)
-            // endDate = new Date().format("yyyy-MM-dd");
+
             this.endDate = endDate
             console.log("endDate:",this.endDate)
             this.switchSymbol(this.symbol, "refresh")
         },
-        switchHistoryPeriod(kxType) {
-            this.kxType = kxType;
-            this.replaceParamVal("kxType",kxType)
+        switchHistoryPeriod(period) {
+            this.period = period;
+            this.replaceParamVal("period",period)
             // this.switchSymbol(this.symbol, "refresh")
         },
         replaceParamVal(paramName, replaceWith) {
@@ -2240,7 +2223,7 @@ const myChart5 = echarts.init(document.getElementById('main5'));
 const myChart15 = echarts.init(document.getElementById('main15'));
 const myChart30 = echarts.init(document.getElementById('main30'));
 const myChart60 = echarts.init(document.getElementById('main60'));
-const myChart240 = echarts.init(document.getElementById('main240'));
+const myChart210 = echarts.init(document.getElementById('main210'));
 // const myChart1d = echarts.init(document.getElementById('main1d'));
 
 const bgColor = '#202529';
