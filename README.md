@@ -33,19 +33,37 @@ pychanlun server
 如果没有安装，可以这样启动。
 
 ```cmd
-python pychanlun\cli server run
+python pychanlun\cli.py server run
 ```
 
 或者
 
 ```cmd
-python pychanlun\cli server
+python pychanlun\cli.py server
 ```
 
 还可以以模块方式启动api服务。
 
 ```cmd
 python -m pychanlun
+```
+
+## 启动背驰监控程序
+
+```cmd
+pychanlun monitor beichi
+```
+
+或者
+
+```cmd
+python pychanlun\cli.py monitor beichi
+```
+
+或者默认启动的也是背驰监控
+
+```cmd
+pychanlun monitor
 ```
 
 ## 其它

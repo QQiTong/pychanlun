@@ -92,8 +92,6 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
         if not isValid:
             return False
     elif dir == -1:
-        i = FindPrevEq(bi, -1, from_index)
-        i = max(0, 1)
         topLow = 0
         bottomHigh = 0
         sticks = candles[0]['sticks'] + candles[1]['sticks']
