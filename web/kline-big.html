@@ -19,11 +19,29 @@
                     <a>{{ symbolInfo.order_book_id }}</a></li>
             </ul>
     </nav>-->
-    查看主力合约历史数据：<input type="text" class="demo-input" placeholder="请选择日期" id="test1" lay-key="1" :value="endDate">
+    日期：<input type="text" class="demo-input" placeholder="请选择日期" id="test1" lay-key="1" :value="endDate">
                          <button @click="switchHistoryPeriod('3m')">3m</button>   <button @click="switchHistoryPeriod('5m')">5m</button>
     <button @click="switchHistoryPeriod('15m')">15m</button> <button @click="switchHistoryPeriod('30m')">30m</button>
     <button @click="switchHistoryPeriod('60m')">60m</button> <button @click="switchHistoryPeriod('210m')">210m</button>
-<button @click="historyKline">提交</button>
+    常用合约快速切换：<button @click="switchHistorySymbol('RB2005')">RB</button>
+    <button @click="switchHistorySymbol('HC2005')">HC</button>
+    <button @click="switchHistorySymbol('FU2005')">FU</button>
+    <button @click="switchHistorySymbol('RU2005')">RU</button>
+    <button @click="switchHistorySymbol('NI2003')">NI</button>
+    <button @click="switchHistorySymbol('PP2005')">PP</button>
+    <button @click="switchHistorySymbol('MA2005')">MA</button>
+    <button @click="switchHistorySymbol('SR2005')">SR</button>
+    <button @click="switchHistorySymbol('EG2005')">EG</button>
+    <button @click="switchHistorySymbol('RM2005')">RM</button>
+    <button @click="switchHistorySymbol('M2005')">M</button>
+    <button @click="switchHistorySymbol('J2005')">J</button>
+    <button @click="switchHistorySymbol('JM2005')">JM</button>
+    <button @click="switchHistorySymbol('I2005')">I</button>
+    <button @click="switchHistorySymbol('Y2005')">Y</button>
+    <button @click="switchHistorySymbol('OI2005')">OI</button>
+
+<!--  -->
+<!--<button @click="historyKline">提交</button>-->
 </div>
 
 <div class="echarts-list-big">

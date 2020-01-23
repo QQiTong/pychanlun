@@ -105,7 +105,7 @@ var app = new Vue({
             }]
     },
     mounted() {
-        window.historyKline  = this.historyKline
+        // window.historyKline  = this.historyKline
         window.replaceParamVal = this.replaceParamVal
         this.getDominantSymbol()
         let that = this;
@@ -2193,16 +2193,21 @@ var app = new Vue({
                 " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate)
         },
         //获取主力合约历史k线
-        historyKline(endDate) {
-            console.log("click", this.symbol)
-
-            this.endDate = endDate
-            console.log("endDate:",this.endDate)
-            this.switchSymbol(this.symbol, "refresh")
-        },
+        // historyKline(endDate) {
+        //     console.log("click", this.symbol)
+        //
+        //     this.endDate = endDate
+        //     console.log("endDate:",this.endDate)
+        //     this.switchSymbol(this.symbol, "refresh")
+        // },
         switchHistoryPeriod(period) {
             this.period = period;
             this.replaceParamVal("period",period)
+            // this.switchSymbol(this.symbol, "refresh")
+        },
+        switchHistorySymbol(symbol) {
+            this.symbol = symbol;
+            this.replaceParamVal("symbol",symbol)
             // this.switchSymbol(this.symbol, "refresh")
         },
         replaceParamVal(paramName, replaceWith) {
