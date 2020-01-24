@@ -36,9 +36,13 @@ def run(**kwargs):
 
 def calculate(info):
     logger = logging.getLogger()
-    logger.info(info)
     code = info["code"]
     period = info["period"]
+    cutoff_time = datetime.now(tz) - timedelta(days=360)
+    DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).delete_many({
+            "_id": { "$lte": cutoff_time }
+        })
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(3000)
     bars = list(bars)
@@ -86,11 +90,11 @@ def calculate(info):
 
     count = len(zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '突破中枢开多', zs_tupo['buy_zs_tupo']
+        save_signal(code, period, '突破中枢预多', zs_tupo['buy_zs_tupo']
                     ['date'][i], zs_tupo['buy_zs_tupo']['data'][i], 'BUY_LONG')
     count = len(zs_tupo['sell_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '突破中枢开空', zs_tupo['sell_zs_tupo']
+        save_signal(code, period, '突破中枢预空', zs_tupo['sell_zs_tupo']
                     ['date'][i], zs_tupo['sell_zs_tupo']['data'][i], 'SELL_SHORT')
 
     # 段中枢的回拉和突破
@@ -112,17 +116,19 @@ def calculate(info):
 
     count = len(higher_zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '突破中枢开多', higher_zs_tupo['buy_zs_tupo']
+        save_signal(code, period, '突破中枢预多', higher_zs_tupo['buy_zs_tupo']
                     ['date'][i], higher_zs_tupo['buy_zs_tupo']['data'][i], 'BUY_LONG')
     count = len(higher_zs_tupo['sell_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '突破中枢开空',
+        save_signal(code, period, '突破中枢预空',
                     higher_zs_tupo['sell_zs_tupo']['date'][i], higher_zs_tupo['sell_zs_tupo']['data'][i], 'SELL_SHORT')
 
 
 def save_signal(code, period, remark, fire_time, price, position):
+    logger = logging.getLogger()
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
+        logger.info("%s %s %s %s %s" % (code, period, remark, fire_time, price))
         DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find_one_and_update({
             "code": code, "period": period, "fire_time": fire_time, "position": position
         }, {
