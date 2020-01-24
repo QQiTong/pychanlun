@@ -12,36 +12,14 @@
 </head>
 <body>
 <div id="app">
-    <!--<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-            <ul class="nav navbar-nav">
-                <li><a onclick="goHome()">首页</a></li>
-                <li v-for="symbolInfo in futureSymbolList" @click="switchSymbol(symbolInfo.order_book_id)">
-                    <a>{{ symbolInfo.order_book_id }}</a></li>
-            </ul>
-    </nav>-->
-    日期：<input type="text" class="demo-input" placeholder="请选择日期" id="test1" lay-key="1" :value="endDate">
+    日期：<input type="text" class="demo-input" placeholder="请选择日期" id="selectDate" lay-key="1" :value="endDate">
                          <button @click="switchHistoryPeriod('3m')">3m</button>   <button @click="switchHistoryPeriod('5m')">5m</button>
     <button @click="switchHistoryPeriod('15m')">15m</button> <button @click="switchHistoryPeriod('30m')">30m</button>
     <button @click="switchHistoryPeriod('60m')">60m</button> <button @click="switchHistoryPeriod('210m')">210m</button>
-    常用合约快速切换：<button @click="switchHistorySymbol('RB2005')">RB</button>
-    <button @click="switchHistorySymbol('HC2005')">HC</button>
-    <button @click="switchHistorySymbol('FU2005')">FU</button>
-    <button @click="switchHistorySymbol('RU2005')">RU</button>
-    <button @click="switchHistorySymbol('NI2003')">NI</button>
-    <button @click="switchHistorySymbol('PP2005')">PP</button>
-    <button @click="switchHistorySymbol('MA2005')">MA</button>
-    <button @click="switchHistorySymbol('SR2005')">SR</button>
-    <button @click="switchHistorySymbol('EG2005')">EG</button>
-    <button @click="switchHistorySymbol('RM2005')">RM</button>
-    <button @click="switchHistorySymbol('M2005')">M</button>
-    <button @click="switchHistorySymbol('J2005')">J</button>
-    <button @click="switchHistorySymbol('JM2005')">JM</button>
-    <button @click="switchHistorySymbol('I2005')">I</button>
-    <button @click="switchHistorySymbol('Y2005')">Y</button>
-    <button @click="switchHistorySymbol('OI2005')">OI</button>
-
-<!--  -->
-<!--<button @click="historyKline">提交</button>-->
+    合约切换：
+    <button v-for="symbolInfo in futureSymbolList" @click="switchHistorySymbol(symbolInfo.order_book_id)">
+      {{ symbolInfo.underlying_symbol }}
+    </button>
 </div>
 
 <div class="echarts-list-big">
@@ -91,16 +69,12 @@
 <script type="text/javascript" src="js/kline.js?v=2"></script>
 <script src="laydate/laydate.js"></script>
 <script type="text/javascript">
-lay('#version').html('-v'+ laydate.v);
-let that = this
 //执行一个laydate实例
 laydate.render({
-  elem: '#test1', //指定元素
+  elem: '#selectDate', //指定元素
   done: function(value, date, endDate){
     console.log(value); //得到日期生成的值，如：2017-08-18
     window.replaceParamVal("endDate",value)
-    // window.historyKline(value)
-
   }
 });
 

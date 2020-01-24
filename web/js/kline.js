@@ -24,13 +24,12 @@ var app = new Vue({
         requestFlag: true,
         marginLevelCompany: 1.125,// 不同期货公司提高的点数不一样
         marginPrice: 0,//每手需要的保证金
-        contractMultiplier: 1,
 
         //start用于仓位管理计算
         currentSymbol: null,
         currentMarginRate: null,
         // 合约乘数
-        contractMultiplier: null,
+        contractMultiplier: 1,
         // 账户总额
         account: 19,
         // 期货账户总额
@@ -105,9 +104,7 @@ var app = new Vue({
             }]
     },
     mounted() {
-        // window.historyKline  = this.historyKline
         window.replaceParamVal = this.replaceParamVal
-        this.getDominantSymbol()
         let that = this;
         this.symbol = getParams('symbol') || 'BTC_CQ'
         this.period = getParams('period')
@@ -120,23 +117,37 @@ var app = new Vue({
 
         // 取出本地缓存
         let symbolList = window.localStorage.getItem("symbolList")
-        this.futureSymbolList = JSON.parse(symbolList)
-        this.futureSymbolMap = {}
-        for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
-            let symbolItem = this.futureSymbolList[i]
-            this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
-        }
-        this.switchSymbol(this.symbol, 'refresh')
-        that.timer = setInterval(() => {
-            if (that.requestFlag) {
-                that.switchSymbol(that.symbol, 'update')
-            } else {
-                // console.log('wait...')
+        // 本地缓存有主力合约数据
+        if (symbolList != null) {
+            this.futureSymbolList = JSON.parse(symbolList)
+            this.futureSymbolMap = {}
+            for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
+                let symbolItem = this.futureSymbolList[i]
+                this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
             }
-        }, 10000);
-
+            this.requestSymbolData()
+        }else{
+            // 新设备 直接进入大图页面 先获取主力合约数据
+            this.getDominantSymbol()
+        }
     },
     methods: {
+        // 请求数据
+        requestSymbolData(){
+            let that = this
+            this.switchSymbol(this.symbol, 'refresh')
+            // 如果是大图关闭轮询
+            if (this.period !== "") {
+                return
+            }
+            that.timer = setInterval(() => {
+                if (that.requestFlag) {
+                    that.switchSymbol(that.symbol, 'update')
+                } else {
+                    // console.log('wait...')
+                }
+            }, 10000);
+        },
         getDominantSymbol() {
             let that = this;
             $.ajax({
@@ -151,6 +162,8 @@ var app = new Vue({
                         let symbolItem = that.futureSymbolList[i]
                         that.futureSymbolMap[symbolItem.order_book_id] = symbolItem
                     }
+                    window.localStorage.setItem("symbolList", JSON.stringify(that.futureSymbolList))
+                    that.requestSymbolData()
                 },
                 error: function (error) {
                     console.log("获取主力合约失败:", error)
@@ -355,7 +368,7 @@ var app = new Vue({
                                 title: '放大',
                                 icon: 'image://img/big-kline.png',
                                 onclick: function () {
-                                    window.open("kline-big.html?symbol=" + that.symbol + "&period=" + period+"&endDate="+new Date().format("yyyy-MM-dd"))
+                                    window.open("kline-big.html?symbol=" + that.symbol + "&period=" + period + "&endDate=" + new Date().format("yyyy-MM-dd"))
                                 }
                             },
                             // myLevel3: {
@@ -2202,12 +2215,12 @@ var app = new Vue({
         // },
         switchHistoryPeriod(period) {
             this.period = period;
-            this.replaceParamVal("period",period)
+            this.replaceParamVal("period", period)
             // this.switchSymbol(this.symbol, "refresh")
         },
         switchHistorySymbol(symbol) {
             this.symbol = symbol;
-            this.replaceParamVal("symbol",symbol)
+            this.replaceParamVal("symbol", symbol)
             // this.switchSymbol(this.symbol, "refresh")
         },
         replaceParamVal(paramName, replaceWith) {
