@@ -47,6 +47,7 @@ def run(**kwargs):
     pool.close()
     pool.join()
 
+
 def parse_and_save(info):
     logger = logging.getLogger()
     logger.info("code=%s filepath=%s", info["code"], info["filepath"])
@@ -54,6 +55,18 @@ def parse_and_save(info):
     reader = TdxLCMinBarReader()
     df = reader.get_df(info["filepath"])
     df = df[df.index >= start_time]
+    save_data(info["code"], "5m", df)
+
+    ohlc = { 'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum', 'amount': 'sum' }
+    # 合成15分钟数据
+    df15m = df.resample('15T', closed='right', label='right').agg(ohlc).dropna(how='any')
+    save_data(info["code"], "15m", df15m)
+    df30m = df.resample('30T', closed='right', label='right').agg(ohlc).dropna(how='any')
+    save_data(info["code"], "30m", df30m)
+    return True
+
+
+def save_data(code, period, df):
     batch = []
     for time, row in df.iterrows():
         batch.append(UpdateOne({
@@ -69,9 +82,8 @@ def parse_and_save(info):
             }
         }, upsert = True))
         if len(batch) >= 1000:
-            DBPyChanlun["%s_5m" % info["code"]].bulk_write(batch)
+            DBPyChanlun["%s_%s" % (code, period)].bulk_write(batch)
             batch = []
     if len(batch) > 0:
-        DBPyChanlun["%s_5m" % info["code"]].bulk_write(batch)
+        DBPyChanlun["%s_%s" % (code, period)].bulk_write(batch)
         batch = []
-    return True
