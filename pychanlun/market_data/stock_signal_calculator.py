@@ -19,6 +19,12 @@ tz = pytz.timezone('Asia/Shanghai')
 
 
 def run(**kwargs):
+    # 清理掉1年以上的数据
+    cutoff_time = datetime.now(tz) - timedelta(days=360)
+    DBPyChanlun["stock_signal"].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).delete_many({
+            "fire_time": {"$lte": cutoff_time}
+        })
     codes = []
     collist = DBPyChanlun.list_collection_names()
     for code in collist:
@@ -38,10 +44,11 @@ def calculate(info):
     logger = logging.getLogger()
     code = info["code"]
     period = info["period"]
+    # 清理掉1年以上的数据
     cutoff_time = datetime.now(tz) - timedelta(days=360)
     DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).delete_many({
-            "_id": { "$lte": cutoff_time }
+            "_id": {"$lte": cutoff_time}
         })
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(3000)
@@ -78,24 +85,34 @@ def calculate(info):
                                    low_series, open_series, close_series, bi_series, duan_series)
     zs_tupo = entanglement.tu_po(entanglement_list, time_series, high_series,
                                  low_series, open_series, close_series, bi_series, duan_series)
+    v_reverse = entanglement.v_reverse(entanglement_list, time_series, high_series,
+                                       low_series, open_series, close_series, bi_series, duan_series)
 
     count = len(zs_huila['buy_zs_huila']['date'])
     for i in range(count):
-        save_signal(code, period, '拉回中枢确认底背',
+        save_signal(code, period, '拉回笔中枢确认底背',
                     zs_huila['buy_zs_huila']['date'][i], zs_huila['buy_zs_huila']['data'][i], 'BUY_LONG')
     count = len(zs_huila['sell_zs_huila']['date'])
     for i in range(count):
-        save_signal(code, period, '拉回中枢确认顶背', zs_huila['sell_zs_huila']
+        save_signal(code, period, '拉回笔中枢确认顶背', zs_huila['sell_zs_huila']
                     ['date'][i], zs_huila['sell_zs_huila']['data'][i], 'SELL_SHORT')
 
     count = len(zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '突破中枢预多', zs_tupo['buy_zs_tupo']
+        save_signal(code, period, '升破笔中枢预多', zs_tupo['buy_zs_tupo']
                     ['date'][i], zs_tupo['buy_zs_tupo']['data'][i], 'BUY_LONG')
     count = len(zs_tupo['sell_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '突破中枢预空', zs_tupo['sell_zs_tupo']
+        save_signal(code, period, '跌破笔中枢预空', zs_tupo['sell_zs_tupo']
                     ['date'][i], zs_tupo['sell_zs_tupo']['data'][i], 'SELL_SHORT')
+    count = len(v_reverse['buy_v_reverse']['date'])
+    for i in range(count):
+        save_signal(code, period, '笔中枢三卖V', v_reverse['buy_v_reverse']
+                    ['date'][i], v_reverse['buy_v_reverse']['data'][i], 'BUY_LONG')
+    count = len(v_reverse['sell_v_reverse']['date'])
+    for i in range(count):
+        save_signal(code, period, '笔中枢三买V', v_reverse['sell_v_reverse']
+                    ['date'][i], v_reverse['sell_v_reverse']['data'][i], 'SELL_SHORT')
 
     # 段中枢的回拉和突破
     higher_entaglement_list = entanglement.CalcEntanglements(
@@ -104,31 +121,42 @@ def calculate(info):
                                           low_series, open_series, close_series, duan_series, higher_duan_series)
     higher_zs_tupo = entanglement.tu_po(higher_entaglement_list, time_series, high_series,
                                         low_series, open_series, close_series, duan_series, higher_duan_series)
+    higher_v_reverse = entanglement.v_reverse(higher_entaglement_list, time_series, high_series,
+                                              low_series, open_series, close_series, duan_series, higher_duan_series)
 
     count = len(higher_zs_huila['buy_zs_huila']['date'])
     for i in range(count):
-        save_signal(code, period, '拉回中枢确认底背', higher_zs_huila['buy_zs_huila']
+        save_signal(code, period, '拉回段中枢确认底背', higher_zs_huila['buy_zs_huila']
                     ['date'][i], higher_zs_huila['buy_zs_huila']['data'][i], 'BUY_LONG')
     count = len(higher_zs_huila['sell_zs_huila']['date'])
     for i in range(count):
-        save_signal(code, period, '拉回中枢确认顶背', higher_zs_huila['sell_zs_huila']
+        save_signal(code, period, '拉回段中枢确认顶背', higher_zs_huila['sell_zs_huila']
                     ['date'][i], higher_zs_huila['sell_zs_huila']['data'][i], 'SELL_SHORT')
 
     count = len(higher_zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '突破中枢预多', higher_zs_tupo['buy_zs_tupo']
+        save_signal(code, period, '升破段中枢预多', higher_zs_tupo['buy_zs_tupo']
                     ['date'][i], higher_zs_tupo['buy_zs_tupo']['data'][i], 'BUY_LONG')
     count = len(higher_zs_tupo['sell_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '突破中枢预空',
+        save_signal(code, period, '跌破段中枢预空',
                     higher_zs_tupo['sell_zs_tupo']['date'][i], higher_zs_tupo['sell_zs_tupo']['data'][i], 'SELL_SHORT')
 
+    count = len(higher_v_reverse['buy_v_reverse']['date'])
+    for i in range(count):
+        save_signal(code, period, '段中枢三卖V', higher_v_reverse['buy_v_reverse']
+                    ['date'][i], higher_v_reverse['buy_v_reverse']['data'][i], 'BUY_LONG')
+    count = len(higher_v_reverse['sell_v_reverse']['date'])
+    for i in range(count):
+        save_signal(code, period, '段中枢三买V', higher_v_reverse['sell_v_reverse']
+                    ['date'][i], higher_v_reverse['sell_v_reverse']['data'][i], 'SELL_SHORT')
 
 def save_signal(code, period, remark, fire_time, price, position):
     logger = logging.getLogger()
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
-        logger.info("%s %s %s %s %s" % (code, period, remark, fire_time, price))
+        logger.info("%s %s %s %s %s" %
+                    (code, period, remark, fire_time, price))
         DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find_one_and_update({
             "code": code, "period": period, "fire_time": fire_time, "position": position
         }, {
