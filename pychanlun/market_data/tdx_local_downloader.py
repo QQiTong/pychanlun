@@ -50,7 +50,7 @@ def run(**kwargs):
 def parse_and_save(info):
     logger = logging.getLogger()
     logger.info("code=%s filepath=%s", info["code"], info["filepath"])
-    start_time = datetime.now() + timedelta(days=info["days"])
+    start_time = datetime.now() - timedelta(days=info["days"])
     reader = TdxLCMinBarReader()
     df = reader.get_df(info["filepath"])
     df = df[df.index >= start_time]
@@ -68,10 +68,10 @@ def parse_and_save(info):
                 "amount": round(row["amount"].item(), 2)
             }
         }, upsert = True))
-        if len(batch) >=100:
-            DBPyChanlun[info["code"]].bulk_write(batch)
+        if len(batch) >= 1000:
+            DBPyChanlun["%s_5m" % info["code"]].bulk_write(batch)
             batch = []
     if len(batch) > 0:
-        DBPyChanlun[info["code"]].bulk_write(batch)
+        DBPyChanlun["%s_5m" % info["code"]].bulk_write(batch)
         batch = []
     return True
