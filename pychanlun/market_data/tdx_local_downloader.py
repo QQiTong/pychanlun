@@ -8,6 +8,7 @@ from pychanlun.db import DBPyChanlun
 import pytz
 from datetime import datetime, timedelta
 from multiprocessing import Pool
+from pymongo import UpdateOne
 
 """
 rx: https://rxpy.readthedocs.io/en/latest/get_started.html
@@ -53,8 +54,9 @@ def parse_and_save(info):
     reader = TdxLCMinBarReader()
     df = reader.get_df(info["filepath"])
     df = df[df.index >= start_time]
+    batch = []
     for time, row in df.iterrows():
-        DBPyChanlun[info["code"]].find_one_and_update({
+        batch.append(UpdateOne({
             "_id": time.replace(tzinfo=tz)
         }, {
             "$set": {
@@ -65,5 +67,11 @@ def parse_and_save(info):
                 "volume": round(row["volume"].item(), 2),
                 "amount": round(row["amount"].item(), 2)
             }
-        }, upsert = True)
+        }, upsert = True))
+        if len(batch) >=100:
+            DBPyChanlun[info["code"]].bulk_write(batch)
+            batch = []
+    if len(batch) > 0:
+        DBPyChanlun[info["code"]].bulk_write(batch)
+        batch = []
     return True
