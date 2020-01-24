@@ -9,7 +9,7 @@ import click
 from pychanlun import server as apiserver
 from pychanlun.monitor import BeichiMonitor
 import logging
-from pychanlun.market_data import tdx_local_downloader
+from pychanlun.market_data import tdx_local_downloader, stock_signal_calculator
 
 
 @click.group()
@@ -62,7 +62,9 @@ def stock(**kwargs):
             tdx_local_downloader.run(**kwargs)
             logger.info("从通达信下载股票数据 完成")
     elif command == "calculate":
-        pass
+        logger.info("股票信号计算 开始")
+        stock_signal_calculator.run(**kwargs)
+        logger.info("股票信号计算 结束")
 
 if __name__ == '__main__':
     run()
