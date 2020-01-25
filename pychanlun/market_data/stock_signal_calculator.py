@@ -14,6 +14,7 @@ from pychanlun.basic.duan import CalcDuan
 from pychanlun import Duan
 from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
+from pychanlun.basic.comm import FindPrevEq, FindPrevEntanglement
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -51,7 +52,7 @@ def calculate(info):
             "_id": {"$lte": cutoff_time}
         })
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(3000)
+        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
     bars = list(bars)
     if len(bars) < 13:
         return
@@ -88,32 +89,6 @@ def calculate(info):
     v_reverse = entanglement.v_reverse(entanglement_list, time_series, high_series,
                                        low_series, open_series, close_series, bi_series, duan_series)
 
-    count = len(zs_huila['buy_zs_huila']['date'])
-    for i in range(count):
-        save_signal(code, period, '拉回笔中枢确认底背',
-                    zs_huila['buy_zs_huila']['date'][i], zs_huila['buy_zs_huila']['data'][i], 'BUY_LONG')
-    count = len(zs_huila['sell_zs_huila']['date'])
-    for i in range(count):
-        save_signal(code, period, '拉回笔中枢确认顶背', zs_huila['sell_zs_huila']
-                    ['date'][i], zs_huila['sell_zs_huila']['data'][i], 'SELL_SHORT')
-
-    count = len(zs_tupo['buy_zs_tupo']['date'])
-    for i in range(count):
-        save_signal(code, period, '升破笔中枢预多', zs_tupo['buy_zs_tupo']
-                    ['date'][i], zs_tupo['buy_zs_tupo']['data'][i], 'BUY_LONG')
-    count = len(zs_tupo['sell_zs_tupo']['date'])
-    for i in range(count):
-        save_signal(code, period, '跌破笔中枢预空', zs_tupo['sell_zs_tupo']
-                    ['date'][i], zs_tupo['sell_zs_tupo']['data'][i], 'SELL_SHORT')
-    count = len(v_reverse['buy_v_reverse']['date'])
-    for i in range(count):
-        save_signal(code, period, '笔中枢三卖V', v_reverse['buy_v_reverse']
-                    ['date'][i], v_reverse['buy_v_reverse']['data'][i], 'BUY_LONG')
-    count = len(v_reverse['sell_v_reverse']['date'])
-    for i in range(count):
-        save_signal(code, period, '笔中枢三买V', v_reverse['sell_v_reverse']
-                    ['date'][i], v_reverse['sell_v_reverse']['data'][i], 'SELL_SHORT')
-
     # 段中枢的回拉和突破
     higher_entaglement_list = entanglement.CalcEntanglements(
         time_series, higher_duan_series, duan_series, high_series, low_series)
@@ -124,6 +99,74 @@ def calculate(info):
     higher_v_reverse = entanglement.v_reverse(higher_entaglement_list, time_series, high_series,
                                               low_series, open_series, close_series, duan_series, higher_duan_series)
 
+    # 笔中枢信号的记录
+    count = len(zs_huila['buy_zs_huila']['date'])
+    for i in range(count):
+        fire_time = zs_huila['buy_zs_huila']['date'][i]
+        price = zs_huila['buy_zs_huila']['data'][i]
+        tags = []
+        # 当前级别的中枢
+        ent = FindPrevEntanglement(entanglement_list, fire_time)
+        # 中枢开始的段
+        duan_start = FindPrevEq(duan_series, 1, ent.start)
+        # 段的开始如果在更大级别的中枢，就是双盘
+        higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
+        if ent and higher_ent and duan_start > 0:
+            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
+                if price < (higher_ent.zg + higher_ent.zd)/2:
+                    tags.append("双盘")
+        save_signal(code, period, '拉回笔中枢确认底背', fire_time, price, 'BUY_LONG', tags)
+
+    count = len(zs_huila['sell_zs_huila']['date'])
+    for i in range(count):
+        save_signal(code, period, '拉回笔中枢确认顶背', zs_huila['sell_zs_huila']
+                    ['date'][i], zs_huila['sell_zs_huila']['data'][i], 'SELL_SHORT')
+
+    count = len(zs_tupo['buy_zs_tupo']['date'])
+    for i in range(count):
+        fire_time = zs_tupo['buy_zs_tupo']['date'][i]
+        price = zs_tupo['buy_zs_tupo']['data'][i]
+        tags = []
+        # 当前级别的中枢
+        ent = FindPrevEntanglement(entanglement_list, fire_time)
+        # 中枢开始的段
+        duan_start = FindPrevEq(duan_series, 1, ent.start)
+        # 段的开始如果在更大级别的中枢，就是双盘
+        higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
+        if ent and higher_ent and duan_start > 0:
+            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
+                if price < (higher_ent.zg + higher_ent.zd)/2:
+                    tags.append("双盘")
+        save_signal(code, period, '升破笔中枢预多', fire_time, price, 'BUY_LONG', tags)
+
+    count = len(zs_tupo['sell_zs_tupo']['date'])
+    for i in range(count):
+        save_signal(code, period, '跌破笔中枢预空', zs_tupo['sell_zs_tupo']
+                    ['date'][i], zs_tupo['sell_zs_tupo']['data'][i], 'SELL_SHORT')
+
+    count = len(v_reverse['buy_v_reverse']['date'])
+    for i in range(count):
+        fire_time = v_reverse['buy_v_reverse']['date'][i]
+        price = v_reverse['buy_v_reverse']['data'][i]
+        tags = []
+        # 当前级别的中枢
+        ent = FindPrevEntanglement(entanglement_list, fire_time)
+        # 中枢开始的段
+        duan_start = FindPrevEq(duan_series, 1, ent.start)
+        # 段的开始如果在更大级别的中枢，就是双盘
+        higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
+        if ent and higher_ent and duan_start > 0:
+            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
+                if price < (higher_ent.zg + higher_ent.zd)/2:
+                    tags.append("双盘")
+        save_signal(code, period, '笔中枢三卖V', fire_time, price, 'BUY_LONG', tags)
+
+    count = len(v_reverse['sell_v_reverse']['date'])
+    for i in range(count):
+        save_signal(code, period, '笔中枢三买V', v_reverse['sell_v_reverse']
+                    ['date'][i], v_reverse['sell_v_reverse']['data'][i], 'SELL_SHORT')
+
+    # 段中枢信号的记录
     count = len(higher_zs_huila['buy_zs_huila']['date'])
     for i in range(count):
         save_signal(code, period, '拉回段中枢确认底背', higher_zs_huila['buy_zs_huila']
@@ -151,12 +194,11 @@ def calculate(info):
         save_signal(code, period, '段中枢三买V', higher_v_reverse['sell_v_reverse']
                     ['date'][i], higher_v_reverse['sell_v_reverse']['data'][i], 'SELL_SHORT')
 
-def save_signal(code, period, remark, fire_time, price, position):
+def save_signal(code, period, remark, fire_time, price, position, tags = []):
     logger = logging.getLogger()
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
-        logger.info("%s %s %s %s %s" %
-                    (code, period, remark, fire_time, price))
+        logger.info("%s %s %s %s %s %s" % (code, period, remark, tags, fire_time, price))
         DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find_one_and_update({
             "code": code, "period": period, "fire_time": fire_time, "position": position
         }, {
@@ -166,6 +208,7 @@ def save_signal(code, period, remark, fire_time, price, position):
                 'remark': remark,
                 'fire_time': fire_time,
                 'price': price,
-                'position': position
+                'position': position,
+                'tags': tags
             }
         }, upsert=True)

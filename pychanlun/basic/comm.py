@@ -48,3 +48,9 @@ def FindNextLt(a, v, i, end):
             result = x
             break
     return result
+
+def FindPrevEntanglement(entanglement_list, t):
+    for idx in range(len(entanglement_list) - 1, -1, -1):
+        if entanglement_list[idx].endTime < t:
+            return entanglement_list[idx]
+    return None
