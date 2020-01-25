@@ -14,7 +14,8 @@ from pychanlun.basic.duan import CalcDuan
 from pychanlun import Duan
 from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
-from pychanlun.basic.comm import FindPrevEq, FindPrevEntanglement
+from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
+from pychanlun.basic.pattern import Perfect
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -109,12 +110,15 @@ def calculate(info):
         ent = FindPrevEntanglement(entanglement_list, fire_time)
         # 中枢开始的段
         duan_start = FindPrevEq(duan_series, 1, ent.start)
+        duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
         # 段的开始如果在更大级别的中枢，就是双盘
         higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
         if ent and higher_ent and duan_start > 0:
             if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                 if price < (higher_ent.zg + higher_ent.zd)/2:
                     tags.append("双盘")
+        if Perfect(duan_series, high_series, low_series, duan_end+1):
+            tags.append("完备")
         save_signal(code, period, '拉回笔中枢确认底背', fire_time, price, 'BUY_LONG', tags)
 
     count = len(zs_huila['sell_zs_huila']['date'])
@@ -131,12 +135,15 @@ def calculate(info):
         ent = FindPrevEntanglement(entanglement_list, fire_time)
         # 中枢开始的段
         duan_start = FindPrevEq(duan_series, 1, ent.start)
+        duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
         # 段的开始如果在更大级别的中枢，就是双盘
         higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
         if ent and higher_ent and duan_start > 0:
             if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                 if price < (higher_ent.zg + higher_ent.zd)/2:
                     tags.append("双盘")
+        if Perfect(duan_series, high_series, low_series, duan_end+1):
+            tags.append("完备")
         save_signal(code, period, '升破笔中枢预多', fire_time, price, 'BUY_LONG', tags)
 
     count = len(zs_tupo['sell_zs_tupo']['date'])
@@ -153,12 +160,15 @@ def calculate(info):
         ent = FindPrevEntanglement(entanglement_list, fire_time)
         # 中枢开始的段
         duan_start = FindPrevEq(duan_series, 1, ent.start)
+        duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
         # 段的开始如果在更大级别的中枢，就是双盘
         higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
         if ent and higher_ent and duan_start > 0:
             if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                 if price < (higher_ent.zg + higher_ent.zd)/2:
                     tags.append("双盘")
+        if Perfect(duan_series, high_series, low_series, duan_end+1):
+            tags.append("完备")
         save_signal(code, period, '笔中枢三卖V', fire_time, price, 'BUY_LONG', tags)
 
     count = len(v_reverse['sell_v_reverse']['date'])
