@@ -16,3 +16,5 @@ front/web.zip
 web/temp/*
 *.log.*
 pychanlun.egg-info/
+dist/
+package-lock.json
