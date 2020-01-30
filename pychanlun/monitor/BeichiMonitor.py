@@ -291,6 +291,7 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
     if len(result['buy_zs_huila']['date']) > 0:
         lastBuyDate = result['buy_zs_huila']['date'][-1]
         lastBuyData = result['buy_zs_huila']['data'][-1]
+        tag = result['buy_zs_huila']['tag'][-1]
         stop_lose_price = result['buy_zs_huila']['stop_lose_price'][-1]
         notLower = result['notLower']
 
@@ -299,18 +300,19 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
+            msg = symbol, period,tag, ' huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             if maxOrderCount >= 1:
                 sendEmail(msg)
             # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="huila B")
+                          remark="huila B"+tag)
 
     if len(result['sell_zs_huila']['date']) > 0:
         notHigher = result['notHigher']
         lastSellDate = result['sell_zs_huila']['date'][-1]
         lastSellData = result['sell_zs_huila']['data'][-1]
+        tag = result['sell_zs_huila']['tag'][-1]
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
 
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
@@ -318,11 +320,11 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period,tag, ' huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="huila S")
+                          remark="huila S"+tag)
             if maxOrderCount >= 1:
                 sendEmail(msg)
 
@@ -331,6 +333,7 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
     if len(result['buy_zs_huila_higher']['date']) > 0:
         lastBuyDate = result['buy_zs_huila_higher']['date'][-1]
         lastBuyData = result['buy_zs_huila_higher']['data'][-1]
+        tag = result['buy_zs_huila_higher']['tag'][-1]
         stop_lose_price = result['buy_zs_huila_higher']['stop_lose_price'][-1]
 
         notLower = result['notLower']
@@ -340,7 +343,7 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'higher huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
+            msg = symbol, period,tag, ' higher huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             if maxOrderCount >= 1:
@@ -348,12 +351,14 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
             #                  'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="higher huila B")
+                          remark="higher huila B"+tag)
 
     if len(result['sell_zs_huila_higher']['date']) > 0:
         notHigher = result['notHigher']
         lastSellDate = result['sell_zs_huila_higher']['date'][-1]
         lastSellData = result['sell_zs_huila_higher']['data'][-1]
+        tag = result['sell_zs_huila_higher']['tag'][-1]
+
         stop_lose_price = result['sell_zs_huila_higher']['stop_lose_price'][-1]
 
         dateStamp = int(time.mktime(time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
@@ -362,12 +367,12 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
 
-            msg = symbol, period, 'higher huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period,tag, ' higher huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
             #                  'BuyLong')
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="higher huila S")
+                          remark="higher huila S"+tag)
             if maxOrderCount >= 1:
                 sendEmail(msg)
 

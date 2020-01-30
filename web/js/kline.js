@@ -1267,7 +1267,7 @@ var app = new Vue({
             for (var i = 0; i < jsonObj.buy_zs_huila.date.length; i++) {
                 var value = {
                     coord: [jsonObj.buy_zs_huila.date[i], jsonObj.buy_zs_huila.data[i]],
-                    value: jsonObj.buy_zs_huila.data[i],
+                    value: jsonObj.buy_zs_huila.data[i]+jsonObj.buy_zs_huila.tag[i],
                     symbolRotate: -90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
@@ -1290,7 +1290,7 @@ var app = new Vue({
             for (var i = 0; i < jsonObj.sell_zs_huila.date.length; i++) {
                 var value = {
                     coord: [jsonObj.sell_zs_huila.date[i], jsonObj.sell_zs_huila.data[i]],
-                    value: jsonObj.sell_zs_huila.data[i],
+                    value: jsonObj.sell_zs_huila.data[i]+jsonObj.sell_zs_huila.tag[i],
                     symbolRotate: 90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
@@ -1314,7 +1314,7 @@ var app = new Vue({
             for (var i = 0; i < jsonObj.buy_zs_huila_higher.date.length; i++) {
                 var value = {
                     coord: [jsonObj.buy_zs_huila_higher.date[i], jsonObj.buy_zs_huila_higher.data[i]],
-                    value: jsonObj.buy_zs_huila_higher.data[i],
+                    value: jsonObj.buy_zs_huila_higher.data[i]+jsonObj.buy_zs_huila_higher.tag[i],
                     symbolRotate: -90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
@@ -1337,7 +1337,7 @@ var app = new Vue({
             for (var i = 0; i < jsonObj.sell_zs_huila_higher.date.length; i++) {
                 var value = {
                     coord: [jsonObj.sell_zs_huila_higher.date[i], jsonObj.sell_zs_huila_higher.data[i]],
-                    value: jsonObj.sell_zs_huila_higher.data[i],
+                    value: jsonObj.sell_zs_huila_higher.data[i]+jsonObj.sell_zs_huila_higher.tag[i],
                     symbolRotate: 90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
