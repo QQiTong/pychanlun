@@ -1,4 +1,4 @@
-from pychanlun.basic.comm import FindPrevEq
+from pychanlun.basic.comm import FindPrevEq, FindPrevEntanglement
 
 
 """
@@ -30,3 +30,38 @@ def PerfectForSellShort(signal_series, high_series, low_series, idx):
             return True
     return False
 
+
+"""
+判断是不是双盘结构，下跌中的双盘
+"""
+def DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time):
+    # 当前级别的中枢
+    ent = FindPrevEntanglement(entanglement_list, fire_time)
+    # 中枢开始的段
+    duan_start = FindPrevEq(duan_series, 1, ent.start)
+    duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
+    # 段的开始如果在更大级别的中枢，就是双盘
+    higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
+    if ent and higher_ent and duan_start > 0:
+            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
+                if price < (higher_ent.zg + higher_ent.zd)/2:
+                    return True
+    return False
+
+
+"""
+判断是不是双盘结构，上涨中的双盘
+"""
+def DualEntangleForSellShort(duan_series, entanglement_list, higher_entaglement_list, fire_time):
+    # 当前级别的中枢
+    ent = FindPrevEntanglement(entanglement_list, fire_time)
+    # 中枢开始的段
+    duan_start = FindPrevEq(duan_series, -1, ent.start)
+    duan_end = FindNextEq(duan_series, 1, duan_start, len(duan_series))
+    # 段的开始如果在更大级别的中枢，就是双盘
+    higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
+    if ent and higher_ent and duan_start > 0:
+            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
+                if price > (higher_ent.zg + higher_ent.zd)/2:
+                    return True
+    return False
