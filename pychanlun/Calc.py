@@ -21,6 +21,7 @@ from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.Tools import Tools
 import pychanlun.divergence as divergence
 import pychanlun.entanglement as entanglement
+from pychanlun.basic.pattern import DualEntangleForBuyLong, DualEntangleForSellShort
 
 # 币安的数据结构
 # [
@@ -242,6 +243,72 @@ class Calc:
         tupo_higher = entanglement.tu_po(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
         v_reverse_higher = entanglement.v_reverse(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
         duan_pohuai_higher = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
+
+        # 计算是不是双盘结构
+        huila["sell_zs_huila"]["tag"] = []
+        for idx in range(len(huila["sell_zs_huila"]["date"])):
+            fire_time = huila["sell_zs_huila"]["date"][idx]
+            fire_price = huila["sell_zs_huila"]["data"][idx]
+            if DualEntangleForSellShort(duanList, entanglementList, entanglementHigherList, fire_time, fire_price):
+                huila["sell_zs_huila"]["tag"].append("双盘")
+            else:
+                huila["sell_zs_huila"]["tag"].append("")
+        huila["buy_zs_huila"]["tag"] = []
+        for idx in range(len(huila["buy_zs_huila"]["date"])):
+            fire_time = huila["buy_zs_huila"]["date"][idx]
+            fire_price = huila["buy_zs_huila"]["data"][idx]
+            if DualEntangleForBuyLong(duanList, entanglementList, entanglementHigherList, fire_time, fire_price):
+                huila["buy_zs_huila"]["tag"].append("双盘")
+            else:
+                huila["buy_zs_huila"]["tag"].append("")
+        tupo["sell_zs_tupo"]["tag"] = []
+        for idx in range(len(tupo["sell_zs_tupo"]["date"])):
+            fire_time = tupo["sell_zs_tupo"]["date"][idx]
+            fire_price = tupo["sell_zs_tupo"]["data"][idx]
+            if DualEntangleForSellShort(duanList, entanglementList, entanglementHigherList, fire_time, fire_price):
+                tupo["sell_zs_tupo"]["tag"].append("双盘")
+            else:
+                tupo["sell_zs_tupo"]["tag"].append("")
+        tupo["buy_zs_tupo"]["tag"] = []
+        for idx in range(len(tupo["buy_zs_tupo"]["date"])):
+            fire_time = tupo["buy_zs_tupo"]["date"][idx]
+            fire_price = tupo["buy_zs_tupo"]["data"][idx]
+            if DualEntangleForBuyLong(duanList, entanglementList, entanglementHigherList, fire_time, fire_price):
+                tupo["buy_zs_tupo"]["tag"].append("双盘")
+            else:
+                tupo["buy_zs_tupo"]["tag"].append("")
+        v_reverse["sell_v_reverse"]["tag"] = []
+        for idx in range(len(v_reverse["sell_v_reverse"]["date"])):
+            fire_time = v_reverse["sell_v_reverse"]["date"][idx]
+            fire_price = v_reverse["sell_v_reverse"]["data"][idx]
+            if DualEntangleForSellShort(duanList, entanglementList, entanglementHigherList, fire_time, fire_price):
+                v_reverse["sell_v_reverse"]["tag"].append("双盘")
+            else:
+                v_reverse["sell_v_reverse"]["tag"].append("")
+        v_reverse["buy_v_reverse"]["tag"] = []
+        for idx in range(len(v_reverse["buy_v_reverse"]["date"])):
+            fire_time = v_reverse["buy_v_reverse"]["date"][idx]
+            fire_price = v_reverse["buy_v_reverse"]["data"][idx]
+            if DualEntangleForBuyLong(duanList, entanglementList, entanglementHigherList, fire_time, fire_price):
+                v_reverse["buy_v_reverse"]["tag"].append("双盘")
+            else:
+                v_reverse["buy_v_reverse"]["tag"].append("")
+        duan_pohuai["sell_duan_break"]["tag"] = []
+        for idx in range(len(duan_pohuai["sell_duan_break"]["date"])):
+            fire_time = duan_pohuai["sell_duan_break"]["date"][idx]
+            fire_price = duan_pohuai["sell_duan_break"]["data"][idx]
+            if DualEntangleForSellShort(duanList, entanglementList, entanglementHigherList, fire_time, fire_price):
+                duan_pohuai["sell_duan_break"]["tag"].append("双盘")
+            else:
+                duan_pohuai["sell_duan_break"]["tag"].append("")
+        duan_pohuai["buy_duan_break"]["tag"] = []
+        for idx in range(len(duan_pohuai["buy_duan_break"]["date"])):
+            fire_time = duan_pohuai["buy_duan_break"]["date"][idx]
+            fire_price = duan_pohuai["buy_duan_break"]["data"][idx]
+            if DualEntangleForBuyLong(duanList, entanglementList, entanglementHigherList, fire_time, fire_price):
+                duan_pohuai["buy_duan_break"]["tag"].append("双盘")
+            else:
+                duan_pohuai["buy_duan_break"]["tag"].append("")
 
         # 高级别段中枢
         entanglementHigherHigherList = entanglement.CalcEntanglements(timeList, higherHigherDuanList, higherDuanList, highList, lowList)
