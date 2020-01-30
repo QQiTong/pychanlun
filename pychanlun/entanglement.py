@@ -5,6 +5,7 @@ import pydash
 from pychanlun.funcat.time_series import (fit_series)
 from pychanlun import series_tool
 from pychanlun.basic.comm import FindPrevEq
+from pychanlun.basic.pattern import PerfectForBuyLong, PerfectForSellShort
 
 class Entanglement:
     def __init__(self):
@@ -172,7 +173,11 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     else:
                         result['sell_zs_huila']['stop_lose_price'].append(0)
                         result['sell_zs_huila']['stop_win_price'].append(0)
-                    result['sell_zs_huila']['tag'].append('')
+
+                    if PerfectForSellShort(duan_series, high_series, low_series, r):
+                        result['sell_zs_huila']['tag'].append('完备')
+                    else:
+                        result['sell_zs_huila']['tag'].append('')
         if e.direction == -1:
             # 下跌中枢，找第一次的拉回
             e_end = e.end
@@ -199,7 +204,11 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     else:
                         result['buy_zs_huila']['stop_lose_price'].append(0)
                         result['buy_zs_huila']['stop_win_price'].append(0)
-                    result['buy_zs_huila']['tag'].append('')
+
+                    if PerfectForBuyLong(duan_series, high_series, low_series, r):
+                        result['buy_zs_huila']['tag'].append('完备')
+                    else:
+                        result['buy_zs_huila']['tag'].append('')
     return result
 
 
@@ -235,7 +244,10 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 result['buy_zs_tupo']['date'].append(time_series[r])
                 result['buy_zs_tupo']['data'].append(e.gg)
                 result['buy_zs_tupo']['stop_lose_price'].append(e.zg)
-                result['buy_zs_tupo']['tag'].append('')
+                if PerfectForBuyLong(duan_series, high_series, low_series, r):
+                    result['buy_zs_tupo']['tag'].append('完备')
+                else:
+                    result['buy_zs_tupo']['tag'].append('')
         if e.direction == -1:
             r = -1
             for x in range(e.end+1, len(close_series)):
@@ -248,7 +260,10 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 result['sell_zs_tupo']['date'].append(time_series[r])
                 result['sell_zs_tupo']['data'].append(e.dd)
                 result['sell_zs_tupo']['stop_lose_price'].append(e.zd)
-                result['sell_zs_tupo']['tag'].append('')
+                if PerfectForSellShort(duan_series, high_series, low_series, r):
+                    result['sell_zs_tupo']['tag'].append('完备')
+                else:
+                    result['sell_zs_tupo']['tag'].append('')
     return result
 
 def v_reverse(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
@@ -293,7 +308,10 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                                 result['sell_v_reverse']['date'].append(time_series[k])
                                 result['sell_v_reverse']['data'].append(resist_price)
                                 result['sell_v_reverse']['stop_lose_price'].append(high_series[leave_end_index])
-                                result['sell_v_reverse']['tag'].append('')
+                                if PerfectForSellShort(duan_series, high_series, low_series, k):
+                                    result['sell_v_reverse']['tag'].append('完备')
+                                else:
+                                    result['sell_v_reverse']['tag'].append('')
                             break
         if e.direction == -1:
             # 离开中枢后的第一段结束
@@ -318,7 +336,10 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                                 result['buy_v_reverse']['date'].append(time_series[k])
                                 result['buy_v_reverse']['data'].append(resist_price)
                                 result['buy_v_reverse']['stop_lose_price'].append(low_series[leave_end_index])
-                                result['buy_v_reverse']['tag'].append('')
+                                if PerfectForBuyLong(duan_series, high_series, low_series, k):
+                                    result['buy_v_reverse']['tag'].append('完备')
+                                else:
+                                    result['buy_v_reverse']['tag'].append('')
                             break
 
     return result
@@ -358,7 +379,10 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                         result['sell_duan_break']['date'].append(time_series[k])
                         result['sell_duan_break']['data'].append(low_series[anchor])
                         result['sell_duan_break']['stop_lose_price'].append(high_series[i])
-                        result['sell_duan_break']['tag'].append('')
+                        if PerfectForSellShort(duan_series, high_series, low_series, k):
+                            result['sell_duan_break']['tag'].append('完备')
+                        else:
+                            result['sell_duan_break']['tag'].append('')
                         break
         elif duan_series[i] == -1:
             anchor = 0
@@ -376,6 +400,9 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                         result['buy_duan_break']['date'].append(time_series[k])
                         result['buy_duan_break']['data'].append(high_series[anchor])
                         result['buy_duan_break']['stop_lose_price'].append(low_series[i])
-                        result['buy_duan_break']['tag'].append('')
+                        if PerfectForBuyLong(duan_series, high_series, low_series, k):
+                            result['buy_duan_break']['tag'].append('完备')
+                        else:
+                            result['buy_duan_break']['tag'].append('')
                         break
     return result
