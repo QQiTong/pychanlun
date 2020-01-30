@@ -15,7 +15,7 @@ from pychanlun import Duan
 from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.pattern import Perfect
+from pychanlun.basic.pattern import PerfectForBuyLong
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -117,7 +117,7 @@ def calculate(info):
             if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                 if price < (higher_ent.zg + higher_ent.zd)/2:
                     tags.append("双盘")
-        if Perfect(duan_series, high_series, low_series, duan_end+1):
+        if PerfectForBuyLong(duan_series, high_series, low_series, duan_end+1):
             tags.append("完备")
         save_signal(code, period, '拉回笔中枢确认底背', fire_time, price, 'BUY_LONG', tags)
 
@@ -142,7 +142,7 @@ def calculate(info):
             if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                 if price < (higher_ent.zg + higher_ent.zd)/2:
                     tags.append("双盘")
-        if Perfect(duan_series, high_series, low_series, duan_end+1):
+        if PerfectForBuyLong(duan_series, high_series, low_series, duan_end+1):
             tags.append("完备")
         save_signal(code, period, '升破笔中枢预多', fire_time, price, 'BUY_LONG', tags)
 
@@ -167,7 +167,7 @@ def calculate(info):
             if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                 if price < (higher_ent.zg + higher_ent.zd)/2:
                     tags.append("双盘")
-        if Perfect(duan_series, high_series, low_series, duan_end+1):
+        if PerfectForBuyLong(duan_series, high_series, low_series, duan_end+1):
             tags.append("完备")
         save_signal(code, period, '笔中枢三卖V', fire_time, price, 'BUY_LONG', tags)
 
