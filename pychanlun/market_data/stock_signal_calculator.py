@@ -16,6 +16,8 @@ from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.pattern import PerfectForBuyLong
+import talib as ta
+import numpy as np
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -35,7 +37,6 @@ def run(**kwargs):
             code = match.group(1)
             period = match.group(4)
             codes.append({"code": code, "period": period})
-
     pool = Pool()
     pool.map(calculate, codes)
     pool.close()
@@ -203,6 +204,50 @@ def calculate(info):
     for i in range(count):
         save_signal(code, period, '段中枢三买V', higher_v_reverse['sell_v_reverse']
                     ['date'][i], higher_v_reverse['sell_v_reverse']['data'][i], 'SELL_SHORT')
+
+    # 缠论一买，二买，三买计算
+    count = len(time_series)
+    diff, dea, macd = ta.MACD(np.array([float(x) for x in close_series]), fastperiod=12, slowperiod=26, signalperiod=9)
+    for idx in range(count):
+        d1 = FindPrevEq(duan_series, -1, idx)
+        g1 = FindPrevEq(duan_series, 1, idx)
+        # 是下跌线段
+        if d1 > g1 > 0:
+            # 找下跌线段开始到目前最低的笔高
+            llvh = high_series[g1]
+            for x in range(g1+1, idx):
+                if bi_series[x] == 1 and high_series[x] < llvh:
+                    llvh = high_series[x]
+            # 前面一笔上是不是第一次突破llvh
+            bi_c = 0
+            bi_s = d1
+            while True:
+                bi_e = FindNextEq(bi_series, 1, bi_s, idx)
+                if bi_e == -1:
+                    # 没有向上笔了
+                    break
+                # 找到一个向上笔
+                if low_series[bi_s] <= llvh and high_series[bi_e] > llvh:
+                    bi_c = bi_c + 1
+                bi_s = FindNextEq(bi_series, -1, bi_e, idx)
+                if bi_s == -1:
+                    break
+            if bi_c == 1:
+                # 只有一次突破，现在是不是向下笔
+                bi_d1 = FindPrevEq(bi_series, -1, idx)
+                bi_g1 = FindPrevEq(bi_series, 1, idx)
+                if bi_d1 > bi_g1 > 0:
+                    if macd[idx-1] <= 0 and macd[idx] > 0:
+                        is_signal = True
+                        for y in range(bi_d1+1, idx):
+                            if macd[y-1] <= 0 and macd[y] > 0:
+                                # 前面出现过
+                                is_signal = False
+                                break
+                        # 成立
+                        if is_signal:
+                            save_signal(code, period, '转折', time_series[idx], close_series[idx], 'BUY_LONG')
+
 
 def save_signal(code, period, remark, fire_time, price, position, tags = []):
     logger = logging.getLogger()
