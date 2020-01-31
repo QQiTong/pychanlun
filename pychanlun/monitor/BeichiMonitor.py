@@ -40,7 +40,7 @@ symbolListDigitCoin = ['BTC_CQ'
 # periodList2 = ['3min', '5min', '15min', '30min', '60min', '4hour']
 periodList = ['3m', '5m', '15m', '30m', '60m']
 periodList1 = ['3m', '5m', '15m', '30m', '60m']
-periodList2 = ['3m', '5m', '15m', '30m', '60m', '210m']
+periodList2 = ['3m', '5m', '15m', '30m', '60m', '240m']
 dominantSymbolInfoList = {}
 # 账户资金
 account = 19

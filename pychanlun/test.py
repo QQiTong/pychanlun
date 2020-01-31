@@ -19,7 +19,11 @@ from pychanlun.config import config
 import rqdatac as rq
 import requests
 from pychanlun.db import DBPyChanlun
-
+from tqsdk import TqApi
+from datetime import datetime, timedelta
+import numpy as np
+import pandas as pd
+from tqsdk import tafunc
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
@@ -156,9 +160,9 @@ def getBtcData(period):
     elif period == "60m":
         period = '60'
         fromDate = toDate - 10 * 1000 * 5 * 60
-    elif period == "210m":
+    elif period == "240m":
         period = '1'
-        target = 210
+        target = 240
         fromDate = toDate - 1000 * 5 * 60
     elif period == '1d':
         period = 'D'
@@ -210,7 +214,7 @@ def testBitmex():
         # getBtcData('15m')
         # getBtcData('30m')
     # getBtcData('60m')
-    # getBtcData('210m')
+    # getBtcData('240m')
     # getBtcData('1d')
     # getBtcData('7d')
 
@@ -236,9 +240,34 @@ def testHuila():
     print("结果：",result)
 def app():
     # testBitmex()
-    testBeichiDb()
+    # testBeichiDb()
     # testHuila()
     # testChange()
+    testTQ()
+def testTQ():
+    api = TqApi()
+    df = api.get_kline_serial("SHFE.rb2005", 60*240)
+    nparray = np.array(df)
+    npKlineList = nparray.tolist()
+    # npIndexList = pd.to_numeric(df.index) // 1000000000
+    klineList = []
+
+    for i in range(len(npKlineList)):
+        # timeStamp = int(time.mktime(npKlineList[i][0].timetuple()))
+        # timeStamp = int(time.mktime(df.index[i].timetuple()))
+        timeStamp =str(tafunc.time_to_datetime(npKlineList[i][0]))
+        item = {}
+        item['time'] = timeStamp
+        item['open'] = 0 if pd.isna(npKlineList[i][2]) else npKlineList[i][2]
+        item['high'] = 0 if pd.isna(npKlineList[i][3]) else npKlineList[i][3]
+        item['low'] = 0 if pd.isna(npKlineList[i][4]) else npKlineList[i][4]
+        item['close'] = 0 if pd.isna(npKlineList[i][5]) else npKlineList[i][5]
+        item['volume'] = 0 if pd.isna(npKlineList[i][6]) else npKlineList[i][6]
+        print(item)
+        klineList.append(item)
+    # print(klineList)
+    api.wait_update()
+
 
 if __name__ == '__main__':
     app()

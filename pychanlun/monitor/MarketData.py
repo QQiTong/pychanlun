@@ -62,7 +62,7 @@ def getMarketDataHUOBI(symbol):
     saveData(symbol['code'], df1h, "1h")
     # 4h数据
     df4h = df1m.resample('4H', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
-    saveData(symbol['code'], df4h, "210m")
+    saveData(symbol['code'], df4h, "240m")
     # 1d数据
     df1d = dataBackend.get_price(symbol['code'], 0, 500, '1day')
     saveData(symbol['code'], df1d, "1d")
@@ -194,7 +194,7 @@ def getMarketDataRICEQUANT(symbol, is_debug = False):
     get_market_data_ricequant_incr(symbol, '15m', period_alias=None, is_debug=is_debug)
     get_market_data_ricequant_incr(symbol, '30m', period_alias=None, is_debug=is_debug)
     get_market_data_ricequant_incr(symbol, '60m', '1h', is_debug)
-    get_market_data_ricequant_incr(symbol, '210m', '210m', is_debug)
+    get_market_data_ricequant_incr(symbol, '240m', '240m', is_debug)
     get_market_data_ricequant_incr(symbol, '1d', period_alias=None, is_debug=is_debug)
 
 def getMarketData(symbol, is_debug = False):

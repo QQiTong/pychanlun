@@ -262,7 +262,7 @@ def doCaculate(symbol, inspect_time = None, is_debug = False):
         { 'current': '3m', 'higher': '15m' },
         { 'current': '5m', 'higher': '30m' },
         { 'current': '15m', 'higher': '1h' },
-        { 'current': '30m', 'higher': '210m' }
+        { 'current': '30m', 'higher': '240m' }
     ]
     for i in range(len(pairs)):
         try:

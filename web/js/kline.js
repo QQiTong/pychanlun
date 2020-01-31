@@ -224,7 +224,7 @@ var app = new Vue({
                             that.sendRequest(symbol, '60m', update)
                             break;
                         case 6:
-                            that.sendRequest(symbol, '210m', update)
+                            that.sendRequest(symbol, '240m', update)
                             break;
                         // case 7:
                         //     that.sendRequest(symbol, '1d', update)
@@ -324,8 +324,8 @@ var app = new Vue({
                 currentChart = myChart30
             } else if (period === '60m') {
                 currentChart = myChart60
-            } else if (period === '210m') {
-                currentChart = myChart210
+            } else if (period === '240m') {
+                currentChart = myChart240
             }
             // else if (period === '1d') {
             //     currentChart = myChart1d
@@ -426,7 +426,7 @@ var app = new Vue({
                             //     myLevel240: {
                             //         show: true,
                             //         title: '240分钟',
-                            //         icon: 'image://img/icon_210m.png',
+                            //         icon: 'image://img/icon_240m.png',
                             //         onclick: function () {
                             //             that.period = '60m'
                             //             option.title.subtext = '60m'
@@ -2241,7 +2241,7 @@ const myChart5 = echarts.init(document.getElementById('main5'));
 const myChart15 = echarts.init(document.getElementById('main15'));
 const myChart30 = echarts.init(document.getElementById('main30'));
 const myChart60 = echarts.init(document.getElementById('main60'));
-const myChart210 = echarts.init(document.getElementById('main210'));
+const myChart240 = echarts.init(document.getElementById('main240'));
 // const myChart1d = echarts.init(document.getElementById('main1d'));
 
 const bgColor = '#202529';

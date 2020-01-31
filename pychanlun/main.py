@@ -31,13 +31,13 @@ class Main:
         # calc.calcData('3min')
         # auth('13088887055', 'chanlun123456')
         # klineDataTool = KlineDataTool()
-        # result = klineDataTool.getFutureData('RB1910.XSGE', '210m', 200)
+        # result = klineDataTool.getFutureData('RB1910.XSGE', '240m', 200)
         # result = klineDataTool.getKlineData('3min',200)
 
         # df = get_price('RB1910.XSGE', frequency='1m', end_date=datetime.now(), count=500,
         #                fields=['open', 'high', 'low', 'close', 'volume'])
 
-        # resultDf = df.resample('210T',closed='left', label='left')\
+        # resultDf = df.resample('240T',closed='left', label='left')\
         #     .agg(ohlc_dict).dropna(how='any')
         # print(resultDf)
         # client = bitmex.bitmex()
@@ -58,7 +58,7 @@ class Main:
             'endTime': datetime.now()  # 结束时间，格式：2018-07-23T00:00:00.000Z
             #        'startTime':startTime #开始时间，格式：2018-06-23T00:00:00.000Z
         }
-        #  3m,15m,30m,210m 用pandas合成
+        #  3m,15m,30m,240m 用pandas合成
         # dtime = datetime.now()
         # toTime = int(time.mktime(dtime.timetuple()))
         # print("----", toTime)
@@ -68,7 +68,7 @@ class Main:
         #  15分钟 from : 15* 24*60    resolution 5
         #  30分钟 from : 30* 24*60    resolution 5
         #  60分钟 from : 7天前    resolution 60
-        #  210分钟 from : 半年前    resolution 60
+        #  240分钟 from : 半年前    resolution 60
         #  1day from : 半年前    resolution D
         # payload2 = {
         #     'resolution': '1',
@@ -151,9 +151,9 @@ class Main:
         elif period == "60m":
             period = '60'
             fromDate = toDate - 1000 * 60 * 60
-        elif period == "210m":
+        elif period == "240m":
             period = '1'
-            target = 210
+            target = 240
             fromDate = toDate - 10080 * 60
         elif period == '1d':
             period = 'D'

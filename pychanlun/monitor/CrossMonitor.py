@@ -108,8 +108,8 @@ while True:
                 if currentTime - lastTime < 1000 * 60 * 60:
                     print("continue->", symbolList[i], "->", n, periodList[j])
                     continue
-            elif periodList[j] == '210m':
-                if currentTime - lastTime < 1000 * 60 * 210:
+            elif periodList[j] == '240m':
+                if currentTime - lastTime < 1000 * 60 * 240:
                     continue
 
             if n == 1 and lastTime != currentTime and difDeaAvg <= 0:
