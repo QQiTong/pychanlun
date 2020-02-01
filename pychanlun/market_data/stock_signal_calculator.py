@@ -15,7 +15,7 @@ from pychanlun import Duan
 from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.pattern import PerfectForBuyLong
+from pychanlun.basic.pattern import PerfectForBuyLong, BuyPosition
 import talib as ta
 import numpy as np
 
@@ -246,7 +246,15 @@ def calculate(info):
                                 break
                         # 成立
                         if is_signal:
-                            save_signal(code, period, '转折', time_series[idx], close_series[idx], 'BUY_LONG')
+                            p = BuyPosition(entanglement_list, duan_series, bi_series, high_series, low_series, idx)
+                            remark = "转折"
+                            if p == 1:
+                                remark = "一买"
+                            elif p == 2:
+                                remark = "二买"
+                            elif p == 3:
+                                remark = "三买"
+                            save_signal(code, period, remark, time_series[idx], close_series[idx], 'BUY_LONG')
 
 
 def save_signal(code, period, remark, fire_time, price, position, tags = []):

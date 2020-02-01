@@ -67,3 +67,35 @@ def DualEntangleForSellShort(duan_series, entanglement_list, higher_entaglement_
                     if fire_price > (higher_ent.zg + higher_ent.zd)/2:
                         return True
     return False
+
+
+"""
+判断1,2,3买形态位置
+"""
+def BuyPosition(e_list, duan_series, bi_series, high_series, low_series, idx):
+    d1 = FindPrevEq(duan_series, -1, idx+1)
+    g1 = FindPrevEq(duan_series, 1, idx+1)
+    d2 = FindPrevEq(duan_series, -1, g1)
+    if g1 > d1:
+        return 0
+    e = None
+    for i in range(len(e_list)-1, -1, -1):
+        print(i)
+        if e_list[i].start > idx:
+            continue
+        elif e_list[i].start <= idx and e_list[i].end >= idx:
+            # 在中枢中
+            e = e_list[i]
+            break
+        elif e_list[i].end < idx:
+            # 找到前面的中枢
+            e = e_list[i]
+            break
+    if e:
+        if low_series[d1] > e.zg:
+            return 3
+        elif low_series[d1] >= low_series[d2] or low_series[idx] >= low_series[d2]:
+            return 2
+        else:
+            return 1
+    return 0
