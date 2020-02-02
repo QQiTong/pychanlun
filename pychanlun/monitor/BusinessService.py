@@ -139,7 +139,7 @@ class BusinessService:
             item['period'] = row["period"]
             item['price'] = row["price"]
             item['remark'] = row["remark"]
-            item['tags'] = row["tags"]
+            item['tags'] = ", ".join(row["tags"])
             signalList.append(item)
         return signalList
 
