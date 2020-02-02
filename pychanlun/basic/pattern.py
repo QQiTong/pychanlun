@@ -80,7 +80,6 @@ def BuyPosition(e_list, duan_series, bi_series, high_series, low_series, idx):
         return 0
     e = None
     for i in range(len(e_list)-1, -1, -1):
-        print(i)
         if e_list[i].start > idx:
             continue
         elif e_list[i].start <= idx and e_list[i].end >= idx:

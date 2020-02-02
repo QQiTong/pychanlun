@@ -11,11 +11,19 @@ import pydash
 import rqdatac as rq
 from rqdatac import *
 from pychanlun.config import cfg
+from pychanlun.db import DBPyChanlun
+from bson.codec_options import CodecOptions
+import pytz
+import pymongo
+
+tz = pytz.timezone('Asia/Shanghai')
+
 
 # url = "http://api.zb.cn/data/v1/kline?market=btc_usdt"
 # 火币合约接口 全局代理后200ms内 , 不代理1s左右
 from pychanlun.ComposeKline import ComposeKline
 import re
+
 hbdmUrl = "http://api.hbdm.com/market/history/kline"
 '''
 period 1min, 5min, 15min, 30min, 60min,4hour,1day, 1mon
@@ -311,4 +319,41 @@ class KlineDataTool:
         # print("函数时间", endTime)
         # if period=='3d':
         # print(len(klineList))
+        return klineList
+
+
+    def getStockData(self, symbol, period, endDate):
+        startTime = datetime.now()
+        if endDate is None:
+            end = datetime.now() + timedelta(1)
+        else :
+            end = datetime.strptime(endDate,"%Y-%m-%d")
+        timeDeltaMap = {
+            '1m': -7*3,
+            '3m': -31*3,
+            '5m': -31*3,
+            '15m': -31 * 3,
+            '30m': -31 * 8,
+            '60m': -31 * 8,
+            '240m': -31 * 8,
+            '1d': -31 * 10,
+            '3d': -31 * 30
+        }
+        start_date =  end + timedelta(timeDeltaMap[period])
+        code = "%s_%s" % (symbol, period)
+        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "_id": { "$gte": start_date, "$lte": end }
+        }).sort("_ID", pymongo.ASCENDING)
+        df = pd.DataFrame(list(data_list))
+
+        klineList = []
+        for idx, row in df.iterrows():
+            item = {}
+            item['time'] = int(time.mktime(row["_id"].timetuple()))
+            item['open'] = 0 if pd.isna(row["open"]) else row["open"]
+            item['high'] = 0 if pd.isna(row["high"]) else row["high"]
+            item['low'] = 0 if pd.isna(row["low"]) else row["low"]
+            item['close'] = 0 if pd.isna(row["close"]) else row["close"]
+            item['volume'] = 0 if pd.isna(row["volume"]) else row["volume"]
+            klineList.append(item)
         return klineList

@@ -22,6 +22,7 @@ from pychanlun.Tools import Tools
 import pychanlun.divergence as divergence
 import pychanlun.entanglement as entanglement
 from pychanlun.basic.pattern import DualEntangleForBuyLong, DualEntangleForSellShort
+import re
 
 # 币安的数据结构
 # [
@@ -135,51 +136,28 @@ class Calc:
             '1w': '1w'
         }
 
-    def calcData(self, period, symbol, save=False,endDate=None):
+    def calcData(self, period, symbol, save=False, endDate=None):
         start = time.clock()  # 开始计时
         # 统计程序执行时间
 
-        klineList = []
-
-        # def processKline():
-        #     count = len(highList)
-        #     for i in range(count):
-        #         add(highList[i], lowList[i], timeList[i])
-
-        # 获取接口数据
         klineDataTool = KlineDataTool()
-        if '_CQ' in symbol:
-            klineData = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[period])
-            # klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[self.levelMap[period]])
-            # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
-            #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
+        match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
+        if match_stock is not None:
+            klineData = klineDataTool.getStockData(symbol, period, endDate)
         else:
-            # 期货
-            currentPeriod = self.periodMap[period]
-            klineData = klineDataTool.getFutureData(symbol, currentPeriod, endDate)
-            # bigLevelPeriod = self.futureLevelMap[currentPeriod]
-            # klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 1000)
-            # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
-            #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
-        # print("从接口到的数据", klineData)
-        # 存数据快照，调试时候用
-        if save:
-            base_dir = os.path.dirname(__file__)
-            with codecs.open(os.path.join(base_dir, 'klineData.json'), 'w', encoding='utf-8') as f:
-                json_str = json.dumps(klineData, ensure_ascii=False, indent=4)
-                f.write(json_str)
-            # with codecs.open(os.path.join(base_dir, 'klineDataBigLevel.json'), 'w', encoding='utf-8') as f:
-            #     json_str = json.dumps(klineDataBigLevel, ensure_ascii=False, indent=4)
-            #     f.write(json_str)
-
-        # 读入本都数据
-        # flask 读入本地文件需要这样写
-        # base_dir = os.path.dirname(__file__)
-        # print(base_dir)
-        # with codecs.open(os.path.join(base_dir, 'klineData.json'), encoding='utf-8') as f:
-        #     klineData = json.load(f)
-        # with codecs.open(os.path.join(base_dir, 'klineDataBigLevel.json'), encoding='utf-8') as f:
-        #     klineDataBigLevel = json.load(f)
+            if '_CQ' in symbol:
+                klineData = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[period])
+                # klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[self.levelMap[period]])
+                # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
+                #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
+            else:
+                # 期货
+                currentPeriod = self.periodMap[period]
+                klineData = klineDataTool.getFutureData(symbol, currentPeriod, endDate)
+                # bigLevelPeriod = self.futureLevelMap[currentPeriod]
+                # klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 1000)
+                # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
+                #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
 
         jsonObj = klineData
         # jsonObjBigLevel = klineDataBigLevel

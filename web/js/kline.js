@@ -307,8 +307,11 @@ var app = new Vue({
             const resultData = this.splitData(stockJsonData, period);
 
             dataTitle = that.symbol + "  " + period
-            let marginLevel = (1 / (that.futureSymbolMap[that.symbol].margin_rate * this.marginLevelCompany)).toFixed(2)
-            subText = "杠杆倍数: " + marginLevel + " 每手保证金: " + this.marginPrice + " 合约乘数: " + this.contractMultiplier + " 交易时间: " + that.futureSymbolMap[that.symbol].trading_hours + " 交割时间: " + that.futureSymbolMap[that.symbol].maturity_date
+            const margin_rate = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].margin_rate || 1;
+            let marginLevel = (1 / (margin_rate * this.marginLevelCompany)).toFixed(2)
+            const trading_hours = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].trading_hours;
+            const maturity_date = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].maturity_date;
+            subText = "杠杆倍数: " + marginLevel + " 每手保证金: " + this.marginPrice + " 合约乘数: " + this.contractMultiplier + " 交易时间: " + trading_hours + " 交割时间: " + maturity_date;
             var currentChart = null
             // if (period === '1m') {
             //     currentChart = myChart1
@@ -1858,11 +1861,12 @@ var app = new Vue({
             var markLineData = [];
             var lastBeichiType = getLastBeichiData(jsonObj)
             var lastBeichi = null
-            let marginLevel = Number((1 / (this.futureSymbolMap[this.symbol].margin_rate * this.marginLevelCompany)).toFixed(2))
+            const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
+            let marginLevel = Number((1 / (margin_rate * this.marginLevelCompany)).toFixed(2))
             // 当前价格
             var currentPrice = stockClose[stockClose.length - 1]
             // 合约乘数
-            this.contractMultiplier = this.futureSymbolMap[this.symbol].contract_multiplier;
+            this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1;
             // 1手需要的保证金
             this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
             // console.log("最后的背驰:", period, lastBeichiType)
@@ -1956,7 +1960,8 @@ var app = new Vue({
                 this.openPrice = beichiPrice;
                 this.stopPrice = stopLosePrice;
                 // 当前保证金比例
-                this.currentMarginRate = this.futureSymbolMap[this.symbol].margin_rate * this.marginLevelCompany
+                const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
+                this.currentMarginRate = margin_rate * this.marginLevelCompany
                 this.currentSymbol = this.symbol;
                 // 计算开仓手数
                 this.calcAccount()
