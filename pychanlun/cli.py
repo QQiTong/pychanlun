@@ -23,6 +23,7 @@ pychanlun server run
 """
 @run.command()
 @click.argument("command", default="run")
+@click.option('--port', type=int, default=5000)
 def server(**kwargs):
     """运行服务端"""
     command = kwargs.get('command')

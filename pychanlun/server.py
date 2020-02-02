@@ -67,4 +67,5 @@ def get_stock_signal_list():
     return Response(json.dumps(stockSignalList), mimetype='application/json')
 
 def run(**kwargs):
-    serve(app, host='0.0.0.0', port=5000)
+    port = kwargs.get("port", 5000)
+    serve(app, host='0.0.0.0', port=port)

@@ -25,13 +25,13 @@ pm2 start D:\pychanlun\back\scheduler.py --interpreter python -n pychanlun-sched
 用pm2启动api服务:
 
 ```cmd
-pm2 start D:\pychanlun\back\server.py --interpreter python -n pychanlun-server
+pm2 start pychanlun -n pychanlun-server -- server run --port 18888
 ```
 
 用pm2启动web服务(nginx)
 
 ```cmd
-pm2 start nginx -x -- -p D:/pychanlun/web/nginx
+pm2 start nginx -x -- -p D:/production/pychanlun/web/nginx
 ```
 
 保存服务记录，使服务可以随系统后自动启动
