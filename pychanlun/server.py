@@ -62,10 +62,16 @@ def save_stock_date():
 # 获取股票信号列表
 @app.route('/api/get_stock_signal_list')
 def get_stock_signal_list():
+    page = int(request.args.get("page") or "1")
     businessService = BusinessService()
-    stockSignalList = businessService.getStockSignalList()
+    stockSignalList = businessService.getStockSignalList(page)
     return Response(json.dumps(stockSignalList), mimetype='application/json')
 
 def run(**kwargs):
     port = kwargs.get("port", 5000)
     serve(app, host='0.0.0.0', port=port)
+
+
+if __name__ == '__main__':
+    print(sys.path)
+    app.run()

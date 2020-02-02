@@ -6,13 +6,14 @@ var app = new Vue({
         beichiList: {}
     },
     mounted() {
-        this.getSignalList()
+        const page = getParams('page') || '1';
+        this.getSignalList(page)
     },
     methods: {
-        getSignalList() {
+        getSignalList(page) {
             let that = this
             $.ajax({
-                url: '/api/get_stock_signal_list',
+                url: `/api/get_stock_signal_list?page=${page}`,
                 type: 'get',
                 success: function (data) {
                     that.signalList = data
@@ -27,3 +28,23 @@ var app = new Vue({
         }
     }
 });
+
+function getParams(name) {
+    let res = ''
+    let categoryStr = window.location.href.split('?')[1] || ''
+    if (categoryStr.length > 1) {
+        let arr = categoryStr.split('&')
+        for (let i = 0, len = arr.length; i < len; i++) {
+            let pair = arr[i]
+            let key = pair.split('=')[0]
+            let value = pair.split('=')[1]
+
+            if (key === name) {
+                res = value
+                console.log('coinName', res)
+                break
+            }
+        }
+    }
+    return res
+}
