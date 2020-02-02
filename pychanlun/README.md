@@ -25,7 +25,7 @@ pm2 start D:\pychanlun\back\scheduler.py --interpreter python -n pychanlun-sched
 用pm2启动api服务:
 
 ```cmd
-pm2 start pychanlun -n pychanlun-server -- server run --port 18888
+pm2 start pychanlun -n pychanlun-api-server -- server run --port 18888
 ```
 
 用pm2启动web服务(nginx)
