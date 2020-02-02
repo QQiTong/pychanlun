@@ -1969,87 +1969,102 @@ var app = new Vue({
                 // 单位是万
                 currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
                 // 当前最新价
-                var markLineCurrent = {
-                    yAxis: currentPrice,
-                    lineStyle: {
-                        normal: {
-                            opacity: 1,
-                            type: 'dash',
-                            width: 1,
-                            color: 'yellow'
+                if (currentPrice) {
+                    var markLineCurrent = {
+                        yAxis: currentPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dash',
+                                width: 1,
+                                color: 'yellow'
+                            },
                         },
-                    },
-                    symbol: 'circle',
-                    symbolSize: 1,
-                    label: {
-                        normal: {
-                            color: 'yellow',
-                            formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent + "% \n盈利额: " + currentProfit + " 万 \n盈亏比: 1 : "
-                                + (currentPercent / targetPercent).toFixed(1),
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: 'yellow',
+                                formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent + "% \n盈利额: " + currentProfit + " 万 \n盈亏比: 1 : "
+                                    + (currentPercent / targetPercent).toFixed(1),
+                            },
                         },
-                    },
+                    }
+                    markLineData.push(markLineCurrent)
                 }
+
                 // 保本位
-                var markLineBeichi = {
-                    yAxis: beichiPrice,
-                    lineStyle: {
-                        normal: {
-                            opacity: 1,
-                            type: 'dashed',
-                            width: 1,
-                            color: 'white'
+                if (beichiPrice) {
+                    var markLineBeichi = {
+                        yAxis: beichiPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: 'white'
+                            },
                         },
-                    },
-                    symbol: 'circle',
-                    symbolSize: 1,
-                    label: {
-                        normal: {
-                            color: 'white',
-                            formatter: '开仓: ' + beichiPrice.toFixed(2) + "\n数量: " + this.maxOrderCount + ' 手',
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: 'white',
+                                formatter: '开仓: ' + beichiPrice.toFixed(2) + "\n数量: " + this.maxOrderCount + ' 手',
+                            },
                         },
-                    },
+                    }
+                    markLineData.push(markLineBeichi)
                 }
 
                 //止损位
-                var markLineStop = {
-                    yAxis: stopLosePrice,
-                    lineStyle: {
-                        normal: {
-                            opacity: 1,
-                            type: 'dashed',
-                            width: 1,
-                            color: upColor
+                if (stopLosePrice) {
+                    var markLineStop = {
+                        yAxis: stopLosePrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: upColor
+                            },
                         },
-                    },
-                    symbol: 'circle',
-                    symbolSize: 1,
-                    label: {
-                        normal: {
-                            color: upColor,
-                            formatter: '止损: ' + stopLosePrice.toFixed(2) + '\n盈利率: -' + targetPercent + '%',
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: upColor,
+                                formatter: '止损: ' + stopLosePrice.toFixed(2) + '\n盈利率: -' + targetPercent + '%',
+                            },
                         },
-                    },
+                    }
+                    markLineData.push(markLineStop)
                 }
+
                 // 目标价位
-                var markLineTarget = {
-                    yAxis: targetPrice,
-                    lineStyle: {
-                        normal: {
-                            opacity: 1,
-                            type: 'dashed',
-                            width: 1,
-                            color: downColor
+                if (targetPrice) {
+                    var markLineTarget = {
+                        yAxis: targetPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: downColor
+                            },
                         },
-                    },
-                    label: {
-                        normal: {
-                            color: downColor,
-                            formatter: '动态止盈: ' + targetPrice.toFixed(2) + '\n (' + targetPercent + '%)',
-                        }
-                    },
-                    symbol: 'circle',
-                    symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: downColor,
+                                formatter: '动态止盈: ' + targetPrice.toFixed(2) + '\n (' + targetPercent + '%)',
+                            }
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                    }
+                    markLineData.push(markLineTarget)
                 }
+
                 // 第一次成笔的目标价位
                 // var markLineStopWin = {
                 //     yAxis: stopWinPrice,
@@ -2070,10 +2085,7 @@ var app = new Vue({
                 //     symbol: 'circle',
                 //     symbolSize: 1,
                 // }
-                markLineData.push(markLineCurrent)
-                markLineData.push(markLineBeichi)
-                markLineData.push(markLineTarget)
-                markLineData.push(markLineStop)
+
                 // if (stopWinPrice !== 0) {
                 //     markLineData.push(markLineStopWin)
                 // }
