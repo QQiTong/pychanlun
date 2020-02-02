@@ -324,10 +324,10 @@ class KlineDataTool:
 
     def getStockData(self, symbol, period, endDate):
         startTime = datetime.now()
-        if endDate is None:
+        if endDate is None or endDate == "":
             end = datetime.now() + timedelta(1)
-        else :
-            end = datetime.strptime(endDate,"%Y-%m-%d")
+        else:
+            end = datetime.strptime(endDate, "%Y-%m-%d")
         timeDeltaMap = {
             '1m': -7*3,
             '3m': -31*3,

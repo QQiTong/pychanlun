@@ -6,6 +6,13 @@ import json
 from pychanlun.config import config
 from datetime import datetime, timedelta
 from pychanlun.db import DBPyChanlun
+from bson.codec_options import CodecOptions
+import pytz
+import pymongo
+import pandas as pd
+import time
+
+tz = pytz.timezone('Asia/Shanghai')
 
 # periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 periodList = ['3m', '5m', '15m', '30m', '60m']
@@ -119,3 +126,20 @@ class BusinessService:
         print("涨跌幅信息", symbolChangeMap)
 
         return symbolChangeMap
+
+    def getStockSignalList(self):
+        data_list = DBPyChanlun["stock_signal"].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        }).sort("fire_time", pymongo.DESCENDING).limit(1000)
+        df = pd.DataFrame(list(data_list))
+        signalList = []
+        for idx, row in df.iterrows():
+            item = {}
+            item['code'] = row["code"]
+            item['fire_time'] = row["fire_time"].strftime("%Y-%m-%d %H:%M")
+            item['period'] = row["period"]
+            item['price'] = row["price"]
+            item['remark'] = row["remark"]
+            item['tags'] = row["tags"]
+            signalList.append(item)
+        return signalList
+

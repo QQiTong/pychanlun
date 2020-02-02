@@ -20,7 +20,7 @@ def data():
     period = request.args.get("period") or "1min"
     symbol = request.args.get("symbol") or "BTC_CQ"
     endDate = request.args.get("endDate")
-    result = calc.calcData(period, symbol,False,endDate)
+    result = calc.calcData(period, symbol, False, endDate)
     return Response(json.dumps(result), mimetype='application/json')
 
 # 获取主力合约
@@ -58,6 +58,13 @@ def save_stock_date():
     symbol = request.args.get("symbol") or "BTC_CQ"
     result = calc.calcData(period, symbol, True)
     return Response(json.dumps(result), mimetype='application/json')
+
+# 获取股票信号列表
+@app.route('/api/get_stock_signal_list')
+def get_stock_signal_list():
+    businessService = BusinessService()
+    stockSignalList = businessService.getStockSignalList()
+    return Response(json.dumps(stockSignalList), mimetype='application/json')
 
 def run(**kwargs):
     serve(app, host='0.0.0.0', port=5000)
