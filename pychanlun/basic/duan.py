@@ -87,10 +87,12 @@ def CalcDuan(count, duan, bi, high, low):
                                 if i2 < i:
                                     i = i2
 
-def CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList):
+def CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod=""):
     idx = 0
     for i in range(len(biListBigLevel)):
         bigT2 = timeIndexListBigLevel[i]
+        if bigLevelPeriod == "1d" or bigLevelPeriod == "3d":
+            bigT2 = bigT2 + 64800
         if biListBigLevel[i] == 1:
             h = highList[idx]
             x = idx

@@ -141,6 +141,7 @@ class Calc:
         # 统计程序执行时间
 
         cat = None
+        bigLevelPeriod = None
 
         klineDataTool = KlineDataTool()
         match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
@@ -163,12 +164,12 @@ class Calc:
                 klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, endDate)
                 # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
                 #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
-                bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
-                klineDataBigLevel2 = klineDataTool.getFutureData(symbol, bigLevelPeriod2, endDate)
+                # bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
+                # klineDataBigLevel2 = klineDataTool.getFutureData(symbol, bigLevelPeriod2, endDate)
 
         jsonObj = klineData
         jsonObjBigLevel = klineDataBigLevel
-        jsonObjBigLevel2 = klineDataBigLevel2
+        # jsonObjBigLevel2 = klineDataBigLevel2
 
         openPriceList = []
         highList = []
@@ -189,7 +190,7 @@ class Calc:
             closePriceList.append(round(float(item['close']), 2))
             timeList.append(strTime)
             volumeList.append(round(float(item['volume']), 2))
-            timeIndexList.append(localTime)
+            timeIndexList.append(time.mktime(localTime))
 
         # 获取大级别数据
         openPriceListBigLevel = []
@@ -208,7 +209,7 @@ class Calc:
                 lowListBigLevel.append(round(float(item['low']), 2))
                 openPriceListBigLevel.append(round(float(item['open']), 2))
                 closePriceListBigLevel.append(round(float(item['close']), 2))
-                timeIndexListBigLevel.append(localTime)
+                timeIndexListBigLevel.append(time.mktime(localTime))
 
         # 获取大大级别数据
         # openPriceListBigLevel2 = []
@@ -243,7 +244,7 @@ class Calc:
         # 本级别段处理
         duanList = [0 for i in range(count)]
         if cat == "FUTURE":
-            CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList)
+            CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod)
         else:
             CalcDuan(count, duanList, biList, highList, lowList)
 
