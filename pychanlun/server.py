@@ -17,8 +17,8 @@ app = Flask(__name__)
 @app.route('/api/stock_data')
 def data():
     calc = Calc()
-    period = request.args.get("period") or "1min"
-    symbol = request.args.get("symbol") or "BTC_CQ"
+    period = request.args.get("period")
+    symbol = request.args.get("symbol")
     endDate = request.args.get("endDate")
     result = calc.calcData(period, symbol, False, endDate)
     return Response(json.dumps(result), mimetype='application/json')

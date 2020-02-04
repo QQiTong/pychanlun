@@ -32,8 +32,8 @@ period = '3m'
 # }
 # end = datetime.now() + timedelta(1)
 # end = datetime.now() + timedelta(1)
-df = rq.get_price('RB88', frequency='210m', fields=['open', 'high', 'low', 'close','volume'],
-                   end_date='2019-10-23')
+df = rq.get_price('RB1905', frequency='3m', fields=['open', 'high', 'low', 'close','volume'],
+                   )
 print(df)
 # df2 = rq.get_price('FU2005', frequency='60m', fields=['open', 'high', 'low', 'close', 'volume'],
 #                   start_date='2019-08-28', end_date='2019-11-30')

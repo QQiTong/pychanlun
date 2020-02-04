@@ -260,7 +260,7 @@ class KlineDataTool:
             end = datetime.now() + timedelta(1)
         else :
             end = datetime.strptime(endDate,"%Y-%m-%d")
-            symbol = re.sub('\d+', "88", symbol)
+            # symbol = re.sub('\d+', "88", symbol)
         timeDeltaMap = {
             '1m': -7*3,
             '3m': -31*3,
