@@ -199,14 +199,14 @@ def CalcBi(count, bi, high, low, open_price, close_price):
                         bi[k] = 0
                     break
         elif b1:
-            if y > x or IsBi(count, bi, high, low, open_price, close_price, x, i, 1, False):
+            if (x == y and x == 0)  or y > x or IsBi(count, bi, high, low, open_price, close_price, x, i, 1, False):
                 bi[x] = -1
                 bi[i] = 1
                 for t in range(x + 1, i):
                     bi[t] = 0
                 AdjustBi(count, bi, high, low, open_price, close_price, x)
         elif b2:
-            if x > y or IsBi(count, bi, high, low, open_price, close_price, y, i, -1, False):
+            if (x == y and y == 0) or x > y or IsBi(count, bi, high, low, open_price, close_price, y, i, -1, False):
                 bi[y] = 1
                 bi[i] = -1
                 for t in range(y + 1, i):
