@@ -14,7 +14,7 @@ init(
 )
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(threadName)s %(levelname)s %(message)s')
-logger = logging.getLogger()
-logfile = os.path.join(BASE_DIR, "logs\pychanlun.log")
-fh = handlers.RotatingFileHandler(filename=logfile, maxBytes=10*1024*1024, backupCount=5)
-logger.addHandler(fh)
+# logger = logging.getLogger()
+# logfile = os.path.join(BASE_DIR, "logs\pychanlun.log")
+# fh = handlers.RotatingFileHandler(filename=logfile, maxBytes=10*1024*1024, backupCount=5)
+# logger.addHandler(fh)
