@@ -86,3 +86,30 @@ def CalcDuan(count, duan, bi, high, low):
                                 duan[i2] = 1
                                 if i2 < i:
                                     i = i2
+
+def CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList):
+    idx = 0
+    for i in range(len(biListBigLevel)):
+        bigT2 = timeIndexListBigLevel[i]
+        if biListBigLevel[i] == 1:
+            h = highList[idx]
+            x = idx
+            for x in range(idx, count):
+                if timeIndexList[x] <= bigT2:
+                    if highList[x] >= h:
+                        h = highList[x]
+                        idx = x
+                else:
+                    break
+            duanList[idx] = 1
+        elif biListBigLevel[i] == -1:
+            l = lowList[idx]
+            x = idx
+            for x in range(idx, count):
+                if timeIndexList[x] <= bigT2:
+                    if lowList[x] <= l:
+                        l = lowList[x]
+                        idx = x
+                else:
+                    break
+            duanList[idx] = -1

@@ -15,7 +15,7 @@ import pydash
 from datetime import datetime
 
 from pychanlun.basic.bi import CalcBi
-from pychanlun.basic.duan import CalcDuan
+from pychanlun.basic.duan import CalcDuan, CalcDuanExp
 from pychanlun import Duan
 from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.Tools import Tools
@@ -140,45 +140,43 @@ class Calc:
         start = time.clock()  # 开始计时
         # 统计程序执行时间
 
+        cat = None
+
         klineDataTool = KlineDataTool()
         match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
         if match_stock is not None:
+            cat = "STOCK"
             klineData = klineDataTool.getStockData(symbol, period, endDate)
         else:
             if '_CQ' in symbol:
+                cat = "DIGIT_COIN"
                 klineData = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[period])
                 # klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[self.levelMap[period]])
                 # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
                 #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
             else:
                 # 期货
+                cat = "FUTURE"
                 currentPeriod = self.periodMap[period]
                 klineData = klineDataTool.getFutureData(symbol, currentPeriod, endDate)
-                # bigLevelPeriod = self.futureLevelMap[currentPeriod]
-                # klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, 1000)
+                bigLevelPeriod = self.futureLevelMap[currentPeriod]
+                klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, endDate)
                 # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
                 #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
+                bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
+                klineDataBigLevel2 = klineDataTool.getFutureData(symbol, bigLevelPeriod2, endDate)
 
         jsonObj = klineData
-        # jsonObjBigLevel = klineDataBigLevel
+        jsonObjBigLevel = klineDataBigLevel
+        jsonObjBigLevel2 = klineDataBigLevel2
 
         openPriceList = []
         highList = []
         lowList = []
         closePriceList = []
         timeList = []
+        timeIndexList = []
         volumeList = []
-
-        # 获取大级别macd
-        closeListBigLevel = []
-        timeListBigLevel = []
-
-        # for i in range(len(jsonObjBigLevel)):
-        #     item = jsonObjBigLevel[i]
-        #     closeListBigLevel.append(round(float(item['close']), 2))
-        #     localTime = time.localtime(item['time'])
-        #     strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
-        #     timeListBigLevel.append(strTime)
 
         for i in range(len(jsonObj)):
             item = jsonObj[i]
@@ -191,23 +189,79 @@ class Calc:
             closePriceList.append(round(float(item['close']), 2))
             timeList.append(strTime)
             volumeList.append(round(float(item['volume']), 2))
+            timeIndexList.append(localTime)
+
+        # 获取大级别数据
+        openPriceListBigLevel = []
+        highListBigLevel = []
+        lowListBigLevel = []
+        closePriceListBigLevel = []
+        timeListBigLevel = []
+        timeIndexListBigLevel = []
+        if cat == "FUTURE":
+            for i in range(len(jsonObjBigLevel)):
+                item = jsonObjBigLevel[i]
+                localTime = time.localtime(item['time'])
+                strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
+                timeListBigLevel.append(strTime)
+                highListBigLevel.append(round(float(item['high']), 2))
+                lowListBigLevel.append(round(float(item['low']), 2))
+                openPriceListBigLevel.append(round(float(item['open']), 2))
+                closePriceListBigLevel.append(round(float(item['close']), 2))
+                timeIndexListBigLevel.append(localTime)
+
+        # 获取大大级别数据
+        # openPriceListBigLevel2 = []
+        # highListBigLevel2 = []
+        # lowListBigLevel2 = []
+        # closePriceListBigLevel2 = []
+        # timeListBigLevel2 = []
+        # timeIndexListBigLevel2 = []
+        # if cat == "FUTURE":
+        #     for i in range(len(jsonObjBigLevel2)):
+        #         item = jsonObjBigLevel[i]
+        #         localTime = time.localtime(item['time'])
+        #         strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
+        #         timeListBigLevel2.append(strTime)
+        #         highListBigLevel2.append(round(float(item['high']), 2))
+        #         lowListBigLevel2.append(round(float(item['low']), 2))
+        #         openPriceListBigLevel2.append(round(float(item['open']), 2))
+        #         closePriceListBigLevel2.append(round(float(item['close']), 2))
+        #         timeIndexListBigLevel2.append(localTime)
 
         count = len(timeList)
         # 笔结果
         biList = [0 for i in range(count)]
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList)
 
-        # 段处理
+        biListBigLevel = [0 for i in range(len(timeListBigLevel))]
+        CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
+
+        # biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
+        # CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
+
+        # 本级别段处理
         duanList = [0 for i in range(count)]
-        CalcDuan(count, duanList, biList, highList, lowList)
+        if cat == "FUTURE":
+            CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList)
+        else:
+            CalcDuan(count, duanList, biList, highList, lowList)
 
         # 高一级别段处理
         higherDuanList = [0 for i in range(count)]
-        CalcDuan(count, higherDuanList, duanList, highList, lowList)
+        if cat == "FUTURE":
+            # CalcDuanExp(count, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
+            pass
+        else:
+            CalcDuan(count, higherDuanList, duanList, highList, lowList)
 
         # 高高一级别段处理
         higherHigherDuanList = [0 for i in range(count)]
-        CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
+        if cat == "FUTURE":
+            # CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
+            pass
+        else:
+            CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
 
         # print("段结果:", len(biResult), len(duanResult))
         entanglementList = entanglement.CalcEntanglements(timeList, duanList, biList, highList, lowList)
