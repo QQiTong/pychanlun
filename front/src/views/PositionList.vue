@@ -1,0 +1,531 @@
+<template>
+    <div class="position-list-main">
+        <el-button type="primary" @click="handleCreatePos" size="mini" class="query-position-form">
+            新增
+        </el-button>
+        <!--        持仓对话框-->
+        <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" :fullscreen="true">
+            <el-form ref="positionFormRef" :rules="rules" :model="positionForm" label-position="left"
+                     label-width="90px"
+                     size="mini" :inline="true">
+                <el-row>
+                    <el-col :span="6">
+                        <el-form-item label="品种" prop="symbol">
+                            <el-select v-model="positionForm.symbol" class="form-input" placeholder="请选择">
+                                <el-option v-for="item in futureSymbolList" :key="item.order_book_id"
+                                           :label="item.order_book_id"
+                                           :value="item.order_book_id"/>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="入场信号" prop="signal">
+                            <el-select v-model="positionForm.signal" class="form-input" placeholder="请选择">
+                                <el-option v-for="item in signalTypeOptions" :key="item.key" :label="item.display_name"
+                                           :value="item.key"/>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="方向" prop="direction">
+                            <el-select v-model="positionForm.direction" class="form-input" placeholder="请选择">
+                                <el-option v-for="item in directionOptions" :key="item.key" :label="item.display_name"
+                                           :value="item.key"/>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="周期图" prop="period">
+                            <el-select v-model="positionForm.period" class="form-input" placeholder="请选择">
+                                <el-option v-for="item in periodOptions" :key="item.key" :label="item.display_name"
+                                           :value="item.key"/>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="6">
+                        <el-form-item label="入场时间">
+                            <el-date-picker v-model="positionForm.enterTime" type="datetime" placeholder="选择时间"
+                                            class="form-input"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="入场价格" prop="price">
+                            <el-input v-model.number="positionForm.price" type="number"
+                                      placeholder="请输入" class="form-input"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="数量" prop="amount">
+                            <el-input v-model.number="positionForm.amount" type="number"
+                                      placeholder="请输入" class="form-input"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="预期级别" prop="nestLevel">
+                            <el-select v-model="positionForm.nestLevel" class="form-input" placeholder="请选择">
+                                <el-option :key="2" label="2级套"
+                                           value="2级套"/>
+                                <el-option :key="3" label="3级套"
+                                           value="3级套"/>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="6">
+                        <el-form-item label="状态" prop="status">
+                            <el-select v-model="positionForm.status" class="form-input" placeholder="请选择">
+                                <el-option v-for="item in statusOptions" :key="item.key" :label="item.display_name"
+                                           :value="item.key"/>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="危险系数">
+                            <el-rate v-model="positionForm.importance" :colors="rateColors"
+                                     :max="3"
+                                     style="margin-top:8px;"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="入场逻辑" prop="enterReason">
+                            <el-input v-model="positionForm.enterReason" :autosize="{ minRows: 4, maxRows: 4}"
+                                      type="textarea"
+                                      class="form-input"
+                                      placeholder="请输入"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="持仓逻辑">
+                            <el-input v-model="positionForm.holdReason" :autosize="{ minRows: 4, maxRows: 4}"
+                                      type="textarea"
+                                      class="form-input"
+                                      placeholder="请输入"/>
+                        </el-form-item>
+                    </el-col>
+
+                </el-row>
+                <!-- 动态止盈start -->
+                <!--    编辑状态-->
+                <el-divider content-position="left">持仓过程记录（ 动态止盈 | 加仓 | 锁仓 | 止损 ）</el-divider>
+                <el-row v-for="(dynamicPosition, index) in positionForm.dynamicPositionList">
+                    <el-col :span="5">
+                        <el-form-item label="时间">
+                            <el-date-picker v-model="dynamicPosition.time" type="datetime" placeholder="选择时间"
+                                            class="form-input"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="价格">
+                            <el-input v-model="dynamicPosition.price" type="number" placeholder="输入价格"
+                                      class="form-input"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="数量">
+                            <el-input v-model="dynamicPosition.amount" type="number" placeholder="输入数量"
+                                      class="form-input"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="原因">
+                            <el-input v-model="dynamicPosition.reason" :autosize="{ minRows: 2, maxRows: 4}"
+                                      type="textarea"
+                                      class="long-textarea"
+                                      placeholder="请输入"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="1">
+                        <el-button @click.prevent="removeDynamicPosition(index)" size="mini" type="danger"
+                                   icon="el-icon-delete">删除
+                        </el-button>
+                    </el-col>
+
+                </el-row>
+                <el-button @click="addDynamicPosition" size="mini" type="success">新增持仓操作</el-button>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false" size="mini">
+                    取消
+                </el-button>
+                <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()" size="mini">
+                    确定
+                </el-button>
+            </div>
+        </el-dialog>
+        <!--        持仓列表-->
+        <el-table
+            :key="tableKey"
+            v-loading="listLoading"
+            :data="positionList"
+            border
+            fit
+            highlight-current-row
+            style="width: 100%;"
+            size="mini"
+        >
+            <el-table-column type="expand" label="展开">
+                <template slot-scope="props">
+                    <el-table
+                        :data="props.row.dynamicPositionList"
+                        border
+                        fit
+                        highlight-current-row
+                        style="width: 100%;"
+                        size="mini"
+                    >
+                        <el-table-column label="动态操作时间" align="center" width="120">
+                            <template slot-scope="{row}">
+                                <span>{{ row.time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="动态操作价格" prop="price" align="center" width="120"/>
+                        <el-table-column label="动态操作数量" prop="amount" align="center" width="120"/>
+                        <el-table-column label="动态操作原因" prop="reason" align="center"/>
+                    </el-table>
+                </template>
+            </el-table-column>
+            <el-table-column label="品种" prop="symbol" align="center" width="70">
+                <template slot-scope="{row}">
+                    <el-link type="primary" :underline="false" @click="handleJumpToKline(row.symbol)">{{ row.symbol }}
+                    </el-link>
+                </template>
+            </el-table-column>
+            <el-table-column label="周期" prop="period" align="center" width="50"/>
+            <el-table-column label="入场时间" align="center" width="120">
+                <template slot-scope="{row}">
+                    <span>{{ row.enterTime | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="信号" align="center" width="50">
+                <template slot-scope="{row}">
+                    <span>{{ row.signal| signalTypeFilter }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="方向" prop="direction" align="center" width="55">
+                <template slot-scope="{row}">
+                    <el-tag :type="row.direction | directionTagFilter">
+                        <span>{{ row.direction | directionFilter }}</span>
+                    </el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column label="入场价格" prop="price" align="center" width="100"/>
+            <el-table-column label="数量" prop="amount" align="center" width="100"/>
+            <el-table-column label="预期" prop="nestLevel" align="center" width="70"/>
+            <el-table-column label="危险系数" prop="important" align="center" width="100">
+                <template slot-scope="{row}">
+                    <el-rate
+                        disabled
+                        v-model="row.importance"
+                        :colors="rateColors">
+                    </el-rate>
+                </template>
+            </el-table-column>
+            <el-table-column label="入场逻辑" prop="enterReason" align="center" width="300"/>
+            <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300"/>
+            <el-table-column label="状态" width="100">
+                <template slot-scope="{row}">
+                    <el-tag :type="row.status | statusTagFilter">
+                        {{ row.status |statusFilter }}
+                    </el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" align="center">
+                <template slot-scope="{row,$index}">
+                    <el-button type="primary" size="mini" @click="handleUpdate(row)" icon="el-icon-edit">
+                        编辑
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+</template>
+
+<script>
+    import CommonTool from '@/tool/CommonTool'
+    import {userApi} from '@/api/UserApi'
+
+    const signalTypeOptions = [
+        {key: 'tupo', display_name: '突破'},
+        {key: 'lahui', display_name: '拉回'},
+        {key: 'break', display_name: '破坏'},
+        {key: 'vfan', display_name: 'V反'}
+    ]
+    const directionOptions = [
+        {key: 'long', display_name: '多'},
+        {key: 'short', display_name: '空'},
+    ]
+    const statusOptions = [
+        {key: 'holding', display_name: '持仓中'},
+        {key: 'prepare', display_name: '预埋单'},
+        {key: 'end', display_name: '结束'},
+    ]
+    const periodOptions = [
+        {key: '3m', display_name: '3m'},
+        {key: '5m', display_name: '5m'},
+        {key: '15m', display_name: '15m'},
+        {key: '30m', display_name: '30m'},
+        {key: '60m', display_name: '60m'},
+        {key: '240m', display_name: '240m'},
+    ]
+    // arr to obj, such as { CN : "China", US : "USA" }
+    const signalTypeKeyValue = signalTypeOptions.reduce((acc, cur) => {
+        acc[cur.key] = cur.display_name
+        return acc
+    }, {})
+    const statusKeyValue = statusOptions.reduce((acc, cur) => {
+        acc[cur.key] = cur.display_name
+        return acc
+    }, {})
+    const directionKeyValue = directionOptions.reduce((acc, cur) => {
+        acc[cur.key] = cur.display_name
+        return acc
+    }, {})
+    export default {
+        name: 'PositionList',
+        filters: {
+            statusTagFilter(status) {
+                const statusMap = {
+                    holding: 'success',
+                    prepare: 'info',
+                    end: 'danger'
+                }
+                return statusMap[status]
+            },
+            directionTagFilter(direction) {
+                const directionMap = {
+                    long: 'danger',
+                    short: 'primary',
+                }
+                return directionMap[direction]
+            },
+            directionFilter(direction) {
+                return directionKeyValue[direction]
+            },
+            signalTypeFilter(type) {
+                return signalTypeKeyValue[type]
+            },
+            statusFilter(type) {
+                return statusKeyValue[type]
+            },
+            parseTime(time, fmt) {
+                return CommonTool.parseTime(time, fmt)
+            }
+        },
+        props: {
+            futureSymbolList: {
+                type: Array,
+                default: []
+            },
+        },
+        data() {
+            return {
+                rateColors: ['#99A9BF', '#F7BA2A', '#FF9900'],
+                tableKey: 0,
+                listLoading: false,
+                // 持仓列表
+                positionList: [],
+                // 表单
+                positionForm: {
+                    importance: 3,
+                    enterTime: new Date(),
+                    symbol: '',
+                    period: '',
+                    signal: '',
+                    status: '',
+                    //方向
+                    direction: '',
+                    //价格
+                    price: '',
+                    //数量
+                    amount: '',
+                    //区间套级别
+                    nestLevel: '',
+                    //介入逻辑
+                    enterReason: '',
+                    //持仓逻辑
+                    holdReason: '',
+                    //动态止盈,加仓，止损，锁仓列表
+                    dynamicPositionList: [
+
+                    ],
+                },
+                rules: {
+                    signal: [{required: true, message: '请选择入场信号', trigger: 'change'}],
+                    enterTime: [{type: 'date', required: true, message: '请选择入场时间', trigger: 'change'}],
+                    symbol: [{required: true, message: '请选择品种', trigger: 'change'}],
+                    period: [{required: true, message: '请选择周期图', trigger: 'change'}],
+                    status: [{required: true, message: '请选择状态', trigger: 'change'}],
+                    direction: [{required: true, message: '请选择方向', trigger: 'change'}],
+                    price: [{required: true, message: '请输入价格', trigger: 'blur'}],
+                    amount: [{required: true, message: '请输入数量', trigger: 'blur'}],
+                    nestLevel: [{required: true, message: '请选择预期级别', trigger: 'change'}],
+                    enterReason: [{required: true, message: '请输入入场逻辑', trigger: 'blur'}],
+                },
+                dialogFormVisible: false,
+                dialogStatus: '',
+                textMap: {
+                    update: '编辑',
+                    create: '新增'
+                },
+                statusOptions,
+                signalTypeOptions,
+                periodOptions,
+                directionOptions
+
+            }
+        },
+        mounted() {
+            this.getPosition()
+        },
+        methods: {
+            handleJumpToKline(symbol) {
+                console.log(this.$parent)
+                this.$parent.jumpToKline(symbol)
+            },
+
+            getPosition() {
+                userApi.getPosition().then((res) => {
+                    this.positionList = res
+                    console.log("后端返回的持仓列表", res)
+                }).catch(error => {
+                    console.log("获取持仓列表失败", error)
+                })
+            },
+            handleModifyStatus(row, status) {
+                this.$message({
+                    message: '操作Success',
+                    type: 'success'
+                })
+                row.status = status
+            },
+
+
+            resetForm() {
+                this.positionForm = {
+                    importance: 1,
+                    enterTime: new Date(),
+                    symbol: '',
+                    period: '',
+                    status: '',
+                    signal: '',
+                    direction: '',
+                    price: '',
+                    amount: '',
+                    nestLevel: '',
+                    enterReason: '',
+                    holdReason: '',
+                    dynamicPositionList: []
+
+                }
+            },
+            addDynamicPosition() {
+                this.positionForm.dynamicPositionList.push({
+                    time: new Date(),
+                    price: '',
+                    amount: '',
+                    reason: ''
+                },);
+            },
+            removeDynamicPosition(index) {
+                this.positionForm.dynamicPositionList.splice(index, 1)
+            },
+            // 新增持仓
+            handleCreatePos() {
+                this.resetForm()
+                this.dialogStatus = 'create'
+                this.dialogFormVisible = true
+                this.$nextTick(() => {
+                    this.$refs['positionFormRef'].clearValidate()
+                })
+            },
+            createData() {
+                this.$refs['positionFormRef'].validate((valid) => {
+                    if (valid) {
+                        userApi.createPosition(this.positionForm).then((res) => {
+                            console.log("新增结果", res)
+                            this.dialogFormVisible = false
+                            this.$notify({
+                                title: 'Success',
+                                message: '新增成功',
+                                type: 'success',
+                                duration: 2000
+                            })
+                            //拉取后端接口获取最新持仓列表
+                            this.getPosition()
+                        }).catch((error) => {
+                            console.log("新增失败:", error)
+                        })
+                    }
+                })
+            },
+            handleUpdate(row) {
+                this.positionForm = Object.assign({}, row) // copy obj
+                this.dialogStatus = 'update'
+                this.dialogFormVisible = true
+                this.$nextTick(() => {
+                    this.$refs['positionFormRef'].clearValidate()
+                })
+            },
+            updateData() {
+                this.$refs['positionFormRef'].validate((valid) => {
+                    if (valid) {
+                        // const tempData = Object.assign({}, this.positionForm)
+                        userApi.updatePosition(this.positionForm).then((res) => {
+                            console.log("更新结果", res)
+                            this.dialogFormVisible = false
+                            this.$notify({
+                                title: 'Success',
+                                message: '更新成功',
+                                type: 'success',
+                                duration: 2000
+                            })
+                            //拉取后端接口获取最新持仓列表
+                            this.getPosition()
+                        }).catch((error) => {
+                            console.log("更新持仓失败:", error)
+                        })
+                    }
+                })
+            },
+            handleDelete(row, index) {
+                this.$notify({
+                    title: 'Success',
+                    message: 'Delete Successfully',
+                    type: 'success',
+                    duration: 2000
+                })
+                this.positionList.splice(index, 1)
+            },
+            // formatJson(filterVal) {
+            //     return this.positionList.map(v => filterVal.map(j => {
+            //         if (j === 'enterTime') {
+            //             return parseTime(v[j])
+            //         } else {
+            //             return v[j]
+            //         }
+            //     }))
+            // },
+            // getSortClass: function (key) {
+            //     const sort = this.positionListQuery.sort
+            //     return sort === `+${key}` ? 'ascending' : 'descending'
+            // }
+        }
+    }
+</script>
+<style lang="stylus">
+    .position-list-main {
+        .form-input {
+            width: 200px !important;
+        }
+
+        .long-textarea {
+            width: 400px;
+        }
+        .query-position-form{
+            margin-bottom 10px;
+        }
+    }
+</style>

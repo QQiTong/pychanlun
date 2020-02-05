@@ -13,7 +13,6 @@ from pychanlun.config import config
 import rqdatac as rq
 
 app = Flask(__name__)
-
 @app.route('/api/stock_data')
 def data():
     calc = Calc()
@@ -66,6 +65,34 @@ def get_stock_signal_list():
     businessService = BusinessService()
     stockSignalList = businessService.getStockSignalList(page)
     return Response(json.dumps(stockSignalList), mimetype='application/json')
+# 新增持仓信息
+@app.route('/api/create_position',methods = ["POST"])
+def create_position():
+    position = request.get_json()
+    businessService = BusinessService()
+    inserted_id = businessService.createPosition(position)
+    res = {
+        "id":str(inserted_id)
+    }
+    return Response(json.dumps(res), mimetype='application/json')
+
+# 更新持仓信息
+@app.route('/api/update_position',methods = ["POST"])
+def update_position():
+    position = request.get_json()
+    businessService = BusinessService()
+    businessService.updatePosition(position)
+    res = {
+        "code": "ok"
+    }
+    return Response(json.dumps(res), mimetype='application/json')
+
+# 查询持仓列表
+@app.route('/api/get_position')
+def get_position():
+    businessService = BusinessService()
+    positionList = businessService.getPositionList()
+    return Response(json.dumps(positionList), mimetype='application/json')
 
 def run(**kwargs):
     port = kwargs.get("port", 5000)

@@ -10,6 +10,7 @@ from bson.codec_options import CodecOptions
 import pytz
 import pymongo
 import pandas as pd
+from bson import ObjectId
 import time
 
 tz = pytz.timezone('Asia/Shanghai')
@@ -56,7 +57,8 @@ class BusinessService:
                 symbolListMap[symbol][period] = ""
         beichi_log_list = DBPyChanlun['beichi_log'].find()
         for beichiItem in beichi_log_list:
-            msg = beichiItem['remark']+" "+str(round(beichiItem['price'], 2))+" "+ str(beichiItem['date_created'])+" "+ str(
+            msg = beichiItem['remark'] + " " + str(round(beichiItem['price'], 2)) + " " + str(
+                beichiItem['date_created']) + " " + str(
                 beichiItem['signal'])
             if beichiItem['symbol'] in symbolListMap:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
@@ -128,8 +130,9 @@ class BusinessService:
         return symbolChangeMap
 
     def getStockSignalList(self, page=1):
-        data_list = DBPyChanlun["stock_signal"].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        }).sort("fire_time", pymongo.DESCENDING).skip((page-1)*1000).limit(1000)
+        data_list = DBPyChanlun["stock_signal"].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+            {
+            }).sort("fire_time", pymongo.DESCENDING).skip((page - 1) * 1000).limit(1000)
         df = pd.DataFrame(list(data_list))
         signalList = []
         for idx, row in df.iterrows():
@@ -142,3 +145,46 @@ class BusinessService:
             item['tags'] = ", ".join(row["tags"])
             signalList.append(item)
         return signalList
+
+    def getPositionList(self):
+        positionList = []
+        result = DBPyChanlun["position_record"]
+        for x in result.find():
+            x['_id'] = str(x['_id'])
+            positionList.append(x)
+        return positionList
+
+    def createPosition(self, position):
+        result = DBPyChanlun['position_record'].insert_one({
+            'enterTime': position['enterTime'],
+            'symbol': position['symbol'],
+            'period': position['period'],
+            'signal': position['signal'],
+            'status': position['status'],
+            'direction': position['direction'],
+            'price': position['price'],
+            'amount': position['amount'],
+            'nestLevel': position['nestLevel'],
+            'enterReason': position['enterReason'],
+            'holdReason': position['holdReason'],
+            'importance': position['importance'],
+            'dynamicPositionList': position['dynamicPositionList'],
+        })
+        return result.inserted_id
+
+    def updatePosition(self, position):
+        DBPyChanlun['position_record'].update_one({'_id': ObjectId(position['_id'])}, {"$set": {
+            'enterTime': position['enterTime'],
+            'symbol': position['symbol'],
+            'period': position['period'],
+            'signal': position['signal'],
+            'status': position['status'],
+            'direction': position['direction'],
+            'price': position['price'],
+            'amount': position['amount'],
+            'nestLevel': position['nestLevel'],
+            'enterReason': position['enterReason'],
+            'holdReason': position['holdReason'],
+            'importance': position['importance'],
+            'dynamicPositionList': position['dynamicPositionList']
+        }})

@@ -1,18 +1,23 @@
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const FileManagerPlugin = require('filemanager-webpack-plugin')
+const path = require('path')
+
 var FStream = require('fs')
 let dev = 'http://127.0.0.1:5000'
 let sit = 'http://47.75.57.245'
 const os = require('os')
 // const UglifyJsParallelPlugin = require('webpack-uglify-parallel')
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-
+function resolve(dir) {
+  return path.join(__dirname, dir)
+}
 module.exports = {
   // 基本路径
   outputDir: 'web',
   baseUrl: './',
   productionSourceMap: false,
   // filenameHashing:true,
+
   configureWebpack: config => {
     // TIP 发布到线上后 process.env.VUE_APP_VERSION 又被还原了 没有效果，
     // TIP 换成 config.plugins[1].definitions['process.env'].VUE_APP_VERSION 实测可行
@@ -54,6 +59,9 @@ module.exports = {
     } else {
       // mutate for development...
     }
+  },
+  chainWebpack:(config)=>{
+      config.resolve.alias.set('@',resolve('/src'))
   },
   // 配置多页面入口
   pages: {

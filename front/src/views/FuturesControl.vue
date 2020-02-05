@@ -66,8 +66,7 @@
             </el-form>
         </el-row>
         <!--持仓区域-->
-        <el-row>
-        </el-row>
+        <PositionList :futureSymbolList="futureSymbolList"></PositionList>
         <el-row>
             <div class="current-market">
                 <el-table
@@ -91,9 +90,9 @@
                             </el-input>
                         </template>
                         <template slot-scope="scope">
-                            <a @click="jumpToKline(scope.row.order_book_id)">
+                            <el-link type="primary" :underline="false" @click="jumpToKline(scope.row.order_book_id)">
                                 {{scope.row.order_book_id}}
-                            </a>
+                            </el-link>
                         </template>
                     </el-table-column>
                     <el-table-column

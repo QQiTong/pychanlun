@@ -14,9 +14,9 @@
                 width="180"
             >
                 <template slot-scope="scope">
-                    <el-button @click="jumpToKline(scope.row.code,scope.row.period)" type="text" size="small">
+                    <el-link type="primary" :underline="false" @click="jumpToKline(scope.row.code,scope.row.period)">
                         {{scope.row.code}}
-                    </el-button>
+                    </el-link>
                 </template>
             </el-table-column>
             <el-table-column

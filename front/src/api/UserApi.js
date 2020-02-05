@@ -55,5 +55,32 @@ export const userApi = {
             url: `/api/dominant`,
             method: 'get',
         })
+    },
+    //持仓操作
+    // 新增一个持仓
+    createPosition(data) {
+        let url = `/api/create_position`
+        return axios({
+            url: url,
+            method: 'post',
+            data: data
+        })
+    },
+    // 查询持仓
+    getPosition() {
+        let url = `/api/get_position`
+        return axios({
+            url: url,
+            method: 'get'
+        })
+    },
+    // 更新持仓
+    updatePosition(data) {
+        let url = `/api/update_position`
+        return axios({
+            url: url,
+            method: 'post',
+            data: data
+        })
     }
 }

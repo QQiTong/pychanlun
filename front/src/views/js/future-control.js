@@ -1,21 +1,22 @@
 // @ is an alias to /src
-import {userApi} from '../../api/UserApi'
-import CommonTool from "../../tool/CommonTool";
+import {userApi} from '@/api/UserApi'
+import CommonTool from "@/tool/CommonTool";
 // import {mapGetters, mapMutations} from 'vuex'
 // let moment = require('moment')
 // import echarts from 'echarts/lib/echarts'
 import MyHeader from '../MyHeader'
+import PositionList from '../PositionList'
 
 export default {
     name: 'futures-control',
-    components:{
-      "MyHeader":MyHeader
+    components: {
+        "MyHeader": MyHeader,
+        "PositionList": PositionList
     },
     data() {
         return {
-            loading:true,
+            loading: true,
             calcPosForm: {
-
                 //start用于仓位管理计算
                 currentSymbol: null,
                 currentMarginRate: null,
@@ -146,7 +147,7 @@ export default {
                     underlying_order_book_id: "null",
                     underlying_symbol: "ETH_CQ",
                 }],
-            symbolSearch:''
+            symbolSearch: ''
         }
     },
     computed: {
