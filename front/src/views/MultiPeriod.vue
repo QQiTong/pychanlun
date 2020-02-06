@@ -11,21 +11,11 @@
                 placeholder="选择日期"
                 format="yyyy 年 MM 月 dd 日"
                 value-format="yyyy-MM-dd"
-                size="mini">
+                size="mini"
+                @change="submitSymbol"
+                class="ml-5">
             </el-date-picker>
-            <!--            <el-button size="mini" v-for="symbolInfo in futureSymbolList" @click="switchHistorySymbol(symbolInfo.order_book_id)">-->
-            <!--                {{ symbolInfo.underlying_symbol }}-->
-            <!--            </el-Button>-->
-            <el-select v-model="selectedSymbol" placeholder="请选择品种" size="mini">
-                <el-option
-                    v-for="symbolInfo in futureSymbolList"
-                    :key="symbolInfo.order_book_id"
-                    :label="symbolInfo.underlying_symbol"
-                    :value="symbolInfo.order_book_id">
-                </el-option>
-            </el-select>
-            <el-input v-model="inputSymbol" placeholder="请输入股票代码" size="mini" class="stock-input"></el-input>
-            <el-button @click="submitSymbol" size="mini"> 提交</el-button>
+            <el-input v-model="inputSymbol" placeholder="请输入股票代码" size="mini" class="stock-input ml-5" @change="submitSymbol"/>
         </div>
 
         <div class="echarts-list">

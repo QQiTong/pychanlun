@@ -437,7 +437,7 @@ class Calc:
         # print(resJsonStr)
 
         elapsed = (time.clock() - start)  # 结束计时
-        print("程序执行的时间:" + str(elapsed) + "s")  # 印出时间
+        print("程序执行的时间:" + str(round(elapsed,2)) + "s")  # 印出时间
         return resJson
 
 

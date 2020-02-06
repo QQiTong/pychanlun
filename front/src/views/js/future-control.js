@@ -15,7 +15,7 @@ export default {
     },
     data() {
         return {
-            loading: true,
+            beichiListLoading: true,
             calcPosForm: {
                 //start用于仓位管理计算
                 currentSymbol: null,
@@ -61,7 +61,6 @@ export default {
                 dynamicWinCount: 0,
                 //end仓位管理计算
             },
-            strategyType: 0,
             keyword: '',
             futureSymbolList: [],
             periodList: ['3m', '5m', '15m', '30m', '60m'],
@@ -147,7 +146,9 @@ export default {
                     underlying_order_book_id: "null",
                     underlying_symbol: "ETH_CQ",
                 }],
-            symbolSearch: ''
+            symbolSearch: '',
+            percentage:0,
+
         }
     },
     computed: {
@@ -160,13 +161,22 @@ export default {
             }
         }
     },
+    filters: {
+        changeTagFilter(change) {
+            if(change>0){
+                return 'danger'
+            }else{
+                return 'primay'
+            }
+        }
+    },
     mounted() {
         this.getBeichiList()
-        // this.getChangeiList()
-        // setInterval(() => {
-        //     this.getBeichiList()
-        //     this.getChangeiList()
-        // }, 10000)
+        this.getChangeiList()
+        setInterval(() => {
+            this.getBeichiList()
+            this.getChangeiList()
+        }, 20000)
 
     },
     methods: {
@@ -184,17 +194,31 @@ export default {
                 this.futureSymbolList.push(...this.digitCoinsSymbolList)
                 window.localStorage.setItem("symbolList", JSON.stringify(this.futureSymbolList))
                 this.firstRequestDominant = false
-                this.loading = false
+                this.beichiListLoading = false
             }).catch((error) => {
                 console.log("获取主力合约失败:", error)
                 this.firstRequestDominant = false
             })
         },
         getBeichiList() {
-            userApi.getBeichiList(this.strategyType).then(res => {
+            userApi.getBeichiList().then(res => {
                 console.log("获取背驰列表:", res)
                 this.beichiList = res
                 if (this.firstRequestDominant) {
+                    // 主力合约后端需要2秒才能返回，前端不要每次都去请求
+                    // 本地缓存有主力合约数据
+                    let symbolList = window.localStorage.getItem("symbolList")
+                    if (symbolList != null) {
+                        this.beichiListLoading = false
+                        this.futureSymbolList = JSON.parse(symbolList)
+                        this.futureSymbolMap = {}
+                        console.log("111", this.futureSymbolList)
+                        for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
+                            let symbolItem = this.futureSymbolList[i]
+                            this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
+                        }
+                    }
+                    // 静默更新主力合约
                     this.getDominantSymbol()
                 }
             }).catch((error) => {
@@ -204,7 +228,19 @@ export default {
         getChangeiList() {
             userApi.getChangeiList().then(res => {
                 this.changeList = res
-                console.log("获取涨跌幅列表:", res)
+                // 计算多空分布
+                let long = 0
+                let short = 0
+                for (let item in this.changeList) {
+                    if (this.changeList[item] > 0) {
+                        long = long + 1
+                    } else {
+                        short = short + 1
+                    }
+                }
+                this.percentage = long / (long + short) * 100
+
+                console.log("获取涨跌幅列表 计算百分比", res,this.percentage)
             }).catch(() => {
                 console.log("获取涨跌幅失败:", error)
             })
@@ -279,11 +315,13 @@ export default {
                 this.calcPosForm.perOrderMargin, " maxOrderCount:", this.calcPosForm.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.calcPosForm.perOrderStopMoney,
                 " accountUseRate:", this.calcPosForm.accountUseRate, " perOrderStopRate:", this.calcPosForm.perOrderStopRate)
         },
-        switchStrategy(strategyType) {
-            this.strategyType = strategyType
-            this.getBeichiList()
-        }
-
+        customColorMethod(percentage) {
+            if (percentage < 50) {
+                return '#409EFF';
+            } else{
+                return '#F56C6C';
+            }
+        },
     }
 
 }

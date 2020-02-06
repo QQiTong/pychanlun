@@ -2,6 +2,7 @@
     <div class="future-control-main">
         <MyHeader></MyHeader>
         <!--仓位计算-->
+        <el-divider content-position="center">仓位计算器</el-divider>
         <el-row>
             <el-form :inline="true" size="mini" :model="calcPosForm" class="demo-form-inline">
                 <el-form-item label="资产总额">
@@ -66,11 +67,14 @@
             </el-form>
         </el-row>
         <!--持仓区域-->
+        <el-divider content-position="center">持仓列表</el-divider>
         <PositionList :futureSymbolList="futureSymbolList"></PositionList>
+        <el-divider content-position="center">信号列表 | 多空分布</el-divider>
+        <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true" :stroke-width="24" ></el-progress>
         <el-row>
             <div class="current-market">
                 <el-table
-                    v-loading="loading"
+                    v-loading="beichiListLoading"
                     :data=
                         "futureSymbolList.filter(data => !symbolSearch || data.order_book_id.toLowerCase().includes(symbolSearch.toLowerCase()))"
                     size="mini"
@@ -97,14 +101,27 @@
                     </el-table-column>
                     <el-table-column
                         label="保证金比率"
-                        width="180"
+                        width="100"
                     >
                         <template slot-scope="scope">
-                            <a @click="fillMarginRate(scope.row)">
+                            <el-link @click="fillMarginRate(scope.row)" :underline="false">
                                 {{ (scope.row.margin_rate *marginLevelCompany).toFixed(3)}}
-                            </a>
+                            </el-link>
                         </template>
                     </el-table-column>
+
+                     <el-table-column
+                        label="涨跌幅"
+                        width="100"
+                    >
+                        <template slot-scope="scope">
+                            <el-tag effect="dark" :type="changeList[scope.row.order_book_id]|changeTagFilter">
+                                 {{ (changeList[scope.row.order_book_id] * (1 / scope.row.margin_rate *marginLevelCompany) *100).toFixed(1)}}%
+                            </el-tag>
+
+                        </template>
+                    </el-table-column>
+
                     <el-table-column
                         label="3m">
                         <template slot-scope="scope">

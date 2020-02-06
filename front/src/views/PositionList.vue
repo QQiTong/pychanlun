@@ -187,7 +187,7 @@
                     </el-table>
                 </template>
             </el-table-column>
-            <el-table-column label="品种" prop="symbol" align="center" width="70">
+            <el-table-column label="品种" prop="symbol" align="center" width="80">
                 <template slot-scope="{row}">
                     <el-link type="primary" :underline="false" @click="handleJumpToKline(row.symbol)">{{ row.symbol }}
                     </el-link>

@@ -13,6 +13,7 @@ import CommonTool from "../../tool/CommonTool"
 // import 'echarts/lib/component/legend'
 // import 'echarts/lib/component/title'
 import {Button, Select} from 'element-ui';
+
 export default {
 
     data() {
@@ -20,7 +21,10 @@ export default {
             // 防重复请求
             requestFlag: true,
             // 控制加载动画是否第一次请求
-            firstFlag: [true, true, true, true, true, true],
+            firstFlag: [true, true, true, true, true, true, true],
+            // 大图
+            myChart: null,
+            // 多周期图
             myChart3: null,
             myChart5: null,
             myChart15: null,
@@ -150,36 +154,35 @@ export default {
             // 选中的品种
             selectedSymbol: '',
             // 输入的交割过的期货品种 或者 股票品种
-            inputSymbol: ''
+            inputSymbol: '',
+            periodList: ['3m', '5m', '15m', '30m', '60m', '240m']
         }
     },
 
     mounted() {
         console.log("---", CommonTool.dateFormat("yyyy-MM-dd"))
         this.symbol = this.getParams('symbol')
+        // 不共用symbol对象, symbol是双向绑定的
+        this.inputSymbol = JSON.parse(JSON.stringify(this.symbol))
         this.period = this.getParams('period')
         //  大图只显示选中的k线图
         if (this.period !== "") {
-            document.getElementById(this.period).style.display = "block"
             this.endDate = this.getParams('endDate')
+            this.myChart = this.$echarts.init(document.getElementById('main'));
+        } else {
+            this.myChart3 = this.$echarts.init(document.getElementById('main3'));
+            this.myChart5 = this.$echarts.init(document.getElementById('main5'));
+            this.myChart15 = this.$echarts.init(document.getElementById('main15'));
+            this.myChart30 = this.$echarts.init(document.getElementById('main30'));
+            this.myChart60 = this.$echarts.init(document.getElementById('main60'));
+            this.myChart240 = this.$echarts.init(document.getElementById('main240'));
         }
-
-
-        this.myChart3 = this.$echarts.init(document.getElementById('main3'));
-        this.myChart5 = this.$echarts.init(document.getElementById('main5'));
-        this.myChart15 = this.$echarts.init(document.getElementById('main15'));
-        this.myChart30 = this.$echarts.init(document.getElementById('main30'));
-        this.myChart60 = this.$echarts.init(document.getElementById('main60'));
-        this.myChart240 = this.$echarts.init(document.getElementById('main240'));
-
         // 取出本地缓存
         let symbolList = window.localStorage.getItem("symbolList")
         // 本地缓存有主力合约数据
         if (symbolList != null) {
-
             this.futureSymbolList = JSON.parse(symbolList)
             this.futureSymbolMap = {}
-            console.log("111", this.futureSymbolList)
             for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
                 let symbolItem = this.futureSymbolList[i]
                 this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
@@ -240,15 +243,14 @@ export default {
         },
         submitSymbol() {
             if (this.inputSymbol !== '') {
-                this.symbol = this.inputSymbol
-            } else if(this.selectedSymbol!==''){
-                this.symbol = this.selectedSymbol
-            }else{
+                this.symbol = this.inputSymbol.indexOf("sz.") === -1 ? this.inputSymbol.toUpperCase() : this.inputSymbol
+            } else {
                 alert("请输入品种")
                 return
             }
             // 切换symbol 重置第一次请求标志
-            this.firstFlag = [true, true, true, true, true, true]
+            // 一个大图+ 6个小图
+            this.firstFlag = [true, true, true, true, true, true, true]
             this.switchSymbol(this.symbol, 'reload')
 
             // this.replaceParamVal("symbol",this.symbol)
@@ -290,6 +292,14 @@ export default {
 
             })
         },
+        switchPeriod(period) {
+            console.log("切换周期", this.period, period)
+            // 重置加载
+            this.firstFlag[0] = true
+            this.period = period
+            this.switchSymbol(this.symbol, 'reload')
+        },
+
         switchSymbol(symbol, update) {
             this.symbol = symbol
             let that = this;
@@ -359,56 +369,64 @@ export default {
         },
         getStockData(requestData, update) {
             this.requestFlag = false
-            if (this.firstFlag[0] === true) {
-                this.myChart3.showLoading()
+            if (this.period !== "") {
+                if (this.firstFlag[0] === true) {
+                    this.myChart.showLoading()
+                }
+            } else {
+                if (this.firstFlag[1] === true) {
+                    this.myChart3.showLoading()
+                }
+                if (this.firstFlag[2] === true) {
+                    this.myChart5.showLoading()
+                }
+                if (this.firstFlag[3] === true) {
+                    this.myChart15.showLoading()
+                }
+                if (this.firstFlag[4] === true) {
+                    this.myChart30.showLoading()
+                }
+                if (this.firstFlag[5] === true) {
+                    this.myChart60.showLoading()
+                }
+                if (this.firstFlag[6] === true) {
+                    this.myChart240.showLoading()
+                }
             }
-            if (this.firstFlag[1] === true) {
-                this.myChart5.showLoading()
-            }
-            if (this.firstFlag[2] === true) {
-                this.myChart15.showLoading()
-            }
-            if (this.firstFlag[3] === true) {
-                this.myChart30.showLoading()
-            }
-            if (this.firstFlag[4] === true) {
-                this.myChart60.showLoading()
-            }
-            if (this.firstFlag[5] === true) {
-                this.myChart240.showLoading()
-            }
+
+
             userApi.stockData(requestData).then(res => {
 
                 this.requestFlag = true
-                if (requestData.period === '3m') {
-                    this.myChart3.hideLoading()
+                if (this.period !== "") {
+                    this.myChart.hideLoading()
                     this.firstFlag[0] = false
+                } else {
+                    if (requestData.period === '3m') {
+                        this.myChart3.hideLoading()
+                        this.firstFlag[1] = false
+                    }
+                    if (requestData.period === '5m') {
+                        this.myChart5.hideLoading()
+                        this.firstFlag[2] = false
+                    }
+                    if (requestData.period === '15m') {
+                        this.myChart15.hideLoading()
+                        this.firstFlag[3] = false
+                    }
+                    if (requestData.period === '30m') {
+                        this.myChart30.hideLoading()
+                        this.firstFlag[4] = false
+                    }
+                    if (requestData.period === '60m') {
+                        this.myChart60.hideLoading()
+                        this.firstFlag[5] = false
+                    }
+                    if (requestData.period === '240m') {
+                        this.myChart240.hideLoading()
+                        this.firstFlag[6] = false
+                    }
                 }
-                if (requestData.period === '5m') {
-                    this.myChart5.hideLoading()
-                    this.firstFlag[1] = false
-
-                }
-                if (requestData.period === '15m') {
-                    this.myChart15.hideLoading()
-                    this.firstFlag[2] = false
-
-                }
-                if (requestData.period === '30m') {
-                    this.myChart30.hideLoading()
-                    this.firstFlag[3] = false
-
-                }
-                if (requestData.period === '60m') {
-                    this.myChart60.hideLoading()
-                    this.firstFlag[4] = false
-
-                }
-                if (requestData.period === '240m') {
-                    this.myChart240.hideLoading()
-                    this.firstFlag[5] = false
-                }
-
                 // console.log("结果", res)
                 this.draw(res, update, requestData.period);
             }).catch(() => {
@@ -431,18 +449,22 @@ export default {
             //     currentChart = myChart1
             // } else
             //
-            if (period === '3m') {
-                currentChart = this.myChart3
-            } else if (period === '5m') {
-                currentChart = this.myChart5
-            } else if (period === '15m') {
-                currentChart = this.myChart15
-            } else if (period === '30m') {
-                currentChart = this.myChart30
-            } else if (period === '60m') {
-                currentChart = this.myChart60
-            } else if (period === '240m') {
-                currentChart = this.myChart240
+            if (this.period !== "") {
+                currentChart = this.myChart
+            } else {
+                if (period === '3m') {
+                    currentChart = this.myChart3
+                } else if (period === '5m') {
+                    currentChart = this.myChart5
+                } else if (period === '15m') {
+                    currentChart = this.myChart15
+                } else if (period === '30m') {
+                    currentChart = this.myChart30
+                } else if (period === '60m') {
+                    currentChart = this.myChart60
+                } else if (period === '240m') {
+                    currentChart = this.myChart240
+                }
             }
             // else if (period === '1d') {
             //     currentChart = myChart1d
@@ -451,7 +473,6 @@ export default {
             if (update === 'update') {
                 console.log('更新', period);
                 option = that.refreshOption(currentChart, resultData)
-
             } else {
                 console.log('重载', period);
                 option = {
@@ -932,10 +953,10 @@ export default {
                     graphic: [],
                 };
             }
-            console.log("option", currentChart, option)
-            //  大图影响放大按钮
+            // console.log("option", currentChart, option)
+            //  大图隐藏放大按钮
             if (this.period !== "") {
-                option.toolbox.feature ={}
+                option.toolbox.feature = {}
             }
             currentChart.setOption(option);
         },

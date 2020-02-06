@@ -38,15 +38,15 @@ export const userApi = {
             method: 'get',
         })
     },
-    getBeichiList(strategyType) {
+    getBeichiList() {
         return axios({
-            url: `/api/get_beichi_list?strategyType=${strategyType}`,
+            url: `/api/get_beichi_list`,
             method: 'get',
         })
     },
     getChangeiList() {
         return axios({
-            url: `/api/getChangeiList`,
+            url: `/api/get_change_list`,
             method: 'get',
         })
     },

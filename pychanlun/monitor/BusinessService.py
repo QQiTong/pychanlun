@@ -17,22 +17,27 @@ tz = pytz.timezone('Asia/Shanghai')
 
 # periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 periodList = ['3m', '5m', '15m', '30m', '60m']
-
-
+# 主力合约列表
+dominantSymbolList = []
+# 主力合约详细信息
+dominantSymbolInfoList = []
 class BusinessService:
     def __init__(self):
-        print('beichi List init')
-
-    def getDominantSymbol(self):
-
+        print('初始化主力合约...')
+    def initDoinantSynmbol(self):
         symbolList = config['symbolList']
-        dominantSymbolList = []
+        # 主力合约详细信息
         for i in range(len(symbolList)):
             df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
             dominantSymbol = df[-1]
             dominantSymbolList.append(dominantSymbol)
-        return dominantSymbolList
+            dominantSymbolInfo = rq.instruments(dominantSymbol)
+            dominantSymbolInfoList.append(dominantSymbolInfo.__dict__)
+        print("当前主力合约列表:", dominantSymbolList)
+        print("当前主力合约详细信息:", dominantSymbolInfoList)
 
+    def getDoinantSynmbol(self):
+        return dominantSymbolInfoList
     def getBeichiList(self, strategyType):
 
         if strategyType == "0":
@@ -43,7 +48,7 @@ class BusinessService:
             return self.getStrategy4BeichiList()
 
     def getNormalBeichiList(self):
-        symbolList = self.getDominantSymbol()
+        symbolList = dominantSymbolList
         #  把btc eth 加进去
         symbolList.append("BTC_CQ")
         symbolList.append("ETH_CQ")
@@ -51,15 +56,14 @@ class BusinessService:
         for i in range(len(symbolList)):
             symbol = symbolList[i]
             symbolListMap[symbol] = {}
-
             for j in range(len(periodList)):
                 period = periodList[j]
                 symbolListMap[symbol][period] = ""
         beichi_log_list = DBPyChanlun['beichi_log'].find()
         for beichiItem in beichi_log_list:
-            msg = beichiItem['remark'] + " " + str(round(beichiItem['price'], 2)) + " " + str(
+            msg = str(beichiItem['signal']) + " " + str(round(beichiItem['price'], 2)) + " " + str(
                 beichiItem['date_created']) + " " + str(
-                beichiItem['signal'])
+                beichiItem['remark'])
             if beichiItem['symbol'] in symbolListMap:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
         print("背驰列表", symbolListMap)
@@ -106,26 +110,25 @@ class BusinessService:
 
     # 获取涨跌幅数据
     def getChangeList(self):
-        dominantSymbolList = self.getDominantSymbol()
         symbolChangeMap = {}
         end = datetime.now() + timedelta(1)
         start = datetime.now() + timedelta(-1)
         for i in range(len(dominantSymbolList)):
             item = dominantSymbolList[i]
-            print(item)
-            df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-                                start_date=start, end_date=end)
-            df1m = rq.get_price(item, frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
-                                start_date=start, end_date=end)
-            if df1d is None or df1m is None:
-                change = "--"
-            else:
-                preday = df1d.iloc[0, 3]
-                today = df1m.iloc[0, 3]
-                change = (today - preday) / preday
-            symbolChangeMap[item] = change
-            # print(change)
-        print("涨跌幅信息", symbolChangeMap)
+            # print(item)
+            if item is not 'BTC_CQ' and item is not 'ETH_CQ':
+                df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+                                    start_date=start, end_date=end)
+                df1m = rq.current_minute(item)
+                if df1d is None or df1m is None:
+                    change = "--"
+                else:
+                    preday = df1d.iloc[0, 3]
+                    today = df1m.iloc[0, 0]
+                    change = (today - preday) / preday
+                symbolChangeMap[item] = round(change,4)
+                # print(preday,today,change)
+        # print("涨跌幅信息", symbolChangeMap)
 
         return symbolChangeMap
 

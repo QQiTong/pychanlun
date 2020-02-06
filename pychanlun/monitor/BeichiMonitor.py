@@ -305,8 +305,8 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
             if maxOrderCount >= 1:
                 sendEmail(msg)
             # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="huila B"+tag)
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="huila B"+tag,
+                          remark=notLower)
 
     if len(result['sell_zs_huila']['date']) > 0:
         notHigher = result['notHigher']
@@ -323,8 +323,8 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
             msg = symbol, period,tag, ' huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="huila S"+tag)
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="huila S"+tag,
+                          remark=notHigher)
             if maxOrderCount >= 1:
                 sendEmail(msg)
 
@@ -350,8 +350,8 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
                 sendEmail(msg)
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
             #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="higher huila B"+tag)
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher huila B"+tag,
+                          remark=notLower)
 
     if len(result['sell_zs_huila_higher']['date']) > 0:
         notHigher = result['notHigher']
@@ -371,8 +371,8 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
             #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="higher huila S"+tag)
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher huila S"+tag,
+                          remark=notHigher)
             if maxOrderCount >= 1:
                 sendEmail(msg)
 
@@ -399,8 +399,8 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             if maxOrderCount >= 1:
                 sendEmail(msg)
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="tupo B")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="tupo B",
+                          remark=notLower)
 
     if len(result['sell_zs_tupo']['date']) > 0:
         notHigher = result['notHigher']
@@ -415,8 +415,8 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
             msg = symbol, period, 'tupo S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="tupo S")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="tupo S",
+                          remark=notHigher)
             if maxOrderCount >= 1:
                 sendEmail(msg)
 
@@ -438,8 +438,8 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             if maxOrderCount >= 1:
                 sendEmail(msg)
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="higher tupo B")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher tupo B",
+                          remark=notLower)
 
     if len(result['sell_zs_tupo_higher']['date']) > 0:
         notHigher = result['notHigher']
@@ -455,8 +455,8 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
             msg = symbol, period, 'higher tupo S ', maxOrderCount,lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="higher tupo S")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher tupo S",
+                          remark=notHigher)
             if maxOrderCount >= 1:
                 sendEmail(msg)
 
@@ -484,8 +484,8 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
             msg = symbol, period, 'Vreverse B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             sendEmail(msg)
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="Vreverse B")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="Vreverse B",
+                          remark=notLower)
 
     if len(result['sell_v_reverse']['date']) > 0:
         notHigher = result['notHigher']
@@ -502,8 +502,8 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
             msg = symbol, period, 'Vreverse S ',maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="Vreverse S")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="Vreverse S",
+                          remark=notHigher)
             sendEmail(msg)
 
     # 监控高级别V反
@@ -524,8 +524,8 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             sendEmail(msg)
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="higher Vreverse B")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher Vreverse B",
+                          remark=notLower)
 
     if len(result['sell_v_reverse_higher']['date']) > 0:
         notHigher = result['notHigher']
@@ -542,8 +542,8 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
             msg = symbol, period, 'higher Vreverse S ',maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="higher Vreverse S")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher Vreverse S",
+                          remark=notHigher)
             sendEmail(msg)
 
 
@@ -571,8 +571,8 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
             if maxOrderCount >= 1:
                 sendEmail(msg)
             # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="break B")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="break B",
+                          remark=notLower)
 
     if len(result['sell_duan_break']['date']) > 0:
         notHigher = result['notHigher']
@@ -588,8 +588,8 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
             msg = symbol, period, 'break S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="break S")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="break S",
+                          remark=notHigher)
             if maxOrderCount >= 1:
                 sendEmail(msg)
 
@@ -614,8 +614,8 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
                 sendEmail(msg)
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
             #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark="higher break B")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher break B",
+                          remark=notLower)
 
     if len(result['sell_duan_break_higher']['date']) > 0:
         notHigher = result['notHigher']
@@ -633,8 +633,8 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
             #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark="higher break S")
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher break S",
+                          remark=notHigher)
             if maxOrderCount >= 1:
                 sendEmail(msg)
 
