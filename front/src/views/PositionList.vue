@@ -1,8 +1,21 @@
 <template>
     <div class="position-list-main">
-        <el-button type="primary" @click="handleCreatePos" size="mini" class="query-position-form">
-            新增
-        </el-button>
+        <!--持仓查询-->
+        <el-form :inline="true" :model="positionQueryForm" size="mini">
+            <el-form-item label="持仓状态">
+                <el-select v-model="positionQueryForm.status" class="form-input-short" placeholder="请选择"
+                           @change="handleQueryStatusChange">
+                    <el-option key="all" value="all" label="全部"/>
+                    <el-option v-for="item in statusOptions" :key="item.key" :label="item.display_name"
+                               :value="item.key"/>
+                </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="handleCreatePos" size="mini" class="query-position-form">
+                    新增持仓
+                </el-button>
+            </el-form-item>
+        </el-form>
         <!--        持仓对话框-->
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" :fullscreen="true">
             <el-form ref="positionFormRef" :rules="rules" :model="positionForm" label-position="left"
@@ -150,7 +163,8 @@
                 <el-button @click="dialogFormVisible = false" size="mini">
                     取消
                 </el-button>
-                <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()" size="mini">
+                <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()" size="mini"
+                           :loading="submitBtnLoading">
                     确定
                 </el-button>
             </div>
@@ -225,7 +239,11 @@
             </el-table-column>
             <el-table-column label="入场逻辑" prop="enterReason" align="center" width="300"/>
             <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300"/>
-            <el-table-column label="状态" width="100">
+            <el-table-column label="状态" width="100"
+                             :filters="[{ text: '持仓中', value: 'holding' }, { text: '预埋单', value: 'prepare' },{ text: '结束', value: 'end' }]"
+                             :filter-method="filterTags"
+                             filter-placement="bottom-end"
+            >
                 <template slot-scope="{row}">
                     <el-tag :type="row.status | statusTagFilter">
                         {{ row.status |statusFilter }}
@@ -240,6 +258,23 @@
                 </template>
             </el-table-column>
         </el-table>
+        <el-pagination
+            background
+            layout="total,sizes,prev, pager, next"
+            :current-page.sync="listQuery.current"
+            :page-size="listQuery.size"
+            :total="listQuery.total"
+            :page-sizes="[10, 50, 100]"
+            @current-change="handlePageChange"
+            @size-change="handleSizeChange"
+            class="mt-5">
+        </el-pagination>
+
+        <!--                 <el-pagination class="pagination-container" background layout="total,prev, pager, next"-->
+        <!--                           :current-page.sync="listQuery.current" :page-size="listQuery.size"-->
+        <!--                           :total="listQuery.total" @current-change="handlePageChange">-->
+<!--        </el-pagination>-->
+
     </div>
 </template>
 
@@ -327,6 +362,15 @@
                 listLoading: false,
                 // 持仓列表
                 positionList: [],
+                positionQueryForm: {
+                    status: 'all',
+                },
+                // 分页对象
+                listQuery: {
+                    size: 10,
+                    total: 0,
+                    current: 1,
+                },
                 // 表单
                 positionForm: {
                     importance: 3,
@@ -348,9 +392,7 @@
                     //持仓逻辑
                     holdReason: '',
                     //动态止盈,加仓，止损，锁仓列表
-                    dynamicPositionList: [
-
-                    ],
+                    dynamicPositionList: [],
                 },
                 rules: {
                     signal: [{required: true, message: '请选择入场信号', trigger: 'change'}],
@@ -365,6 +407,8 @@
                     enterReason: [{required: true, message: '请输入入场逻辑', trigger: 'blur'}],
                 },
                 dialogFormVisible: false,
+                // 防止重复提交
+                submitBtnLoading: false,
                 dialogStatus: '',
                 textMap: {
                     update: '编辑',
@@ -378,19 +422,36 @@
             }
         },
         mounted() {
-            this.getPosition()
+            this.getPosition(this.positionQueryForm.status, this.listQuery.current,this.listQuery.size)
         },
         methods: {
+            handleSizeChange(currentSize) {
+                this.listQuery.size = currentSize
+                this.getPosition(this.positionQueryForm.status, this.listQuery.current,this.listQuery.size)
+            },
+            handlePageChange(currentPage) {
+                this.listQuery.current = currentPage
+                this.getPosition(this.positionQueryForm.status, this.listQuery.current,this.listQuery.size)
+            },
+            handleQueryStatusChange() {
+                this.getPosition(this.positionQueryForm.status, this.listQuery.current,this.listQuery.size)
+            },
+            filterTags(value, row) {
+                return row.status === value;
+            },
             handleJumpToKline(symbol) {
                 console.log(this.$parent)
                 this.$parent.jumpToKline(symbol)
             },
-
-            getPosition() {
-                userApi.getPosition().then((res) => {
-                    this.positionList = res
+            getPosition(status, page,size) {
+                this.listLoading = true
+                userApi.getPosition(status, page,size).then((res) => {
+                    this.listLoading = false
+                    this.listQuery.total = res.total
+                    this.positionList = res.records
                     console.log("后端返回的持仓列表", res)
                 }).catch(error => {
+                    this.listLoading = false
                     console.log("获取持仓列表失败", error)
                 })
             },
@@ -444,7 +505,9 @@
             createData() {
                 this.$refs['positionFormRef'].validate((valid) => {
                     if (valid) {
+                        this.submitBtnLoading = true
                         userApi.createPosition(this.positionForm).then((res) => {
+                            this.submitBtnLoading = false
                             console.log("新增结果", res)
                             this.dialogFormVisible = false
                             this.$notify({
@@ -456,6 +519,8 @@
                             //拉取后端接口获取最新持仓列表
                             this.getPosition()
                         }).catch((error) => {
+                            this.submitBtnLoading = false
+
                             console.log("新增失败:", error)
                         })
                     }
@@ -472,8 +537,11 @@
             updateData() {
                 this.$refs['positionFormRef'].validate((valid) => {
                     if (valid) {
+                        this.submitBtnLoading = true
                         // const tempData = Object.assign({}, this.positionForm)
                         userApi.updatePosition(this.positionForm).then((res) => {
+                            this.submitBtnLoading = false
+
                             console.log("更新结果", res)
                             this.dialogFormVisible = false
                             this.$notify({
@@ -485,6 +553,7 @@
                             //拉取后端接口获取最新持仓列表
                             this.getPosition()
                         }).catch((error) => {
+                            this.submitBtnLoading = false
                             console.log("更新持仓失败:", error)
                         })
                     }
@@ -520,11 +589,14 @@
         .form-input {
             width: 200px !important;
         }
-
+        .form-input-short {
+            width: 100px !important;
+        }
         .long-textarea {
             width: 400px;
         }
-        .query-position-form{
+
+        .query-position-form {
             margin-bottom 10px;
         }
     }

@@ -106,3 +106,12 @@ hr {
 html {
     overflow-y: scroll;
 }
+.ml-5{
+    margin-left: 5px;
+}
+.mt-t{
+    margin-top: 5px;
+}
+.mr-5{
+    margin-right: 5px;
+}

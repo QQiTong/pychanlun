@@ -45,7 +45,20 @@ export default {
                 higherDownColor: "green",
 
                 higherHigherUpColor: "pink",
-                higherHigherDownColor: "blue"
+                higherHigherDownColor: "blue",
+                // 多周期显示不下,需要配置
+                multiPeriodGrid: {
+                    left: '0%',
+                    right: '18%',
+                    height: '75%',
+                    top: 50
+                },
+                klineBigGrid: {
+                    left: '0%',
+                    right: '7%',
+                    height: '85%',
+                    top: 50
+                },
             },
             // 品种
             symbol: 'RB2005',
@@ -169,6 +182,12 @@ export default {
         if (this.period !== "") {
             this.endDate = this.getParams('endDate')
             this.myChart = this.$echarts.init(document.getElementById('main'));
+            this.chartssize(document.getElementById("mainParent"),
+                document.getElementById('main'));
+            this.myChart.resize()
+            window.addEventListener('resize', () => {
+                this.myChart.resize()
+            })
         } else {
             this.myChart3 = this.$echarts.init(document.getElementById('main3'));
             this.myChart5 = this.$echarts.init(document.getElementById('main5'));
@@ -176,6 +195,27 @@ export default {
             this.myChart30 = this.$echarts.init(document.getElementById('main30'));
             this.myChart60 = this.$echarts.init(document.getElementById('main60'));
             this.myChart240 = this.$echarts.init(document.getElementById('main240'));
+
+            this.chartssize(document.getElementById("main3Parent"), document.getElementById('main3'));
+            this.chartssize(document.getElementById("main15Parent"), document.getElementById('main15'));
+            this.chartssize(document.getElementById("main60Parent"), document.getElementById('main60'));
+            this.chartssize(document.getElementById("main5Parent"), document.getElementById('main5'));
+            this.chartssize(document.getElementById("main30Parent"), document.getElementById('main30'));
+            this.chartssize(document.getElementById("main240Parent"), document.getElementById('main240'));
+            this.myChart3.resize()
+            this.myChart5.resize()
+            this.myChart15.resize()
+            this.myChart30.resize()
+            this.myChart60.resize()
+            this.myChart240.resize()
+            window.addEventListener('resize', () => {
+                this.myChart3.resize()
+                this.myChart5.resize()
+                this.myChart15.resize()
+                this.myChart30.resize()
+                this.myChart60.resize()
+                this.myChart240.resize()
+            });
         }
         // 取出本地缓存
         let symbolList = window.localStorage.getItem("symbolList")
@@ -198,6 +238,20 @@ export default {
         clearTimeout(this.timer)
     },
     methods: {
+        //计算echarts 高度
+        chartssize(container, charts) {
+            function getStyle(el, name) {
+                if (window.getComputedStyle) {
+                    return window.getComputedStyle(el, null);
+                } else {
+                    return el.currentStyle;
+                }
+            }
+
+            let wi = getStyle(container, 'width').width;
+            let hi = getStyle(container, 'height').height;
+            charts.style.height = hi
+        },
         replaceParamVal(paramName, replaceWith) {
             var oUrl = window.location.href.toString();
             var re = eval('/(' + paramName + '=)([^&]*)/gi');
@@ -647,6 +701,7 @@ export default {
                             top: 50,
                         },
                         // {
+
                         //     top: '65%',
                         //     height: '20%',
                         //     left: '0%',
@@ -957,6 +1012,10 @@ export default {
             //  大图隐藏放大按钮
             if (this.period !== "") {
                 option.toolbox.feature = {}
+                option.grid = this.echartsConfig.klineBigGrid
+            }else{
+                option.grid = this.echartsConfig.multiPeriodGrid
+
             }
             currentChart.setOption(option);
         },

@@ -67,8 +67,8 @@ export const userApi = {
         })
     },
     // 查询持仓
-    getPosition() {
-        let url = `/api/get_position`
+    getPosition(status,page,size) {
+        let url = `/api/get_position?status=${status}&page=${page}&size=${size}`
         return axios({
             url: url,
             method: 'get'

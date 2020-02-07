@@ -105,14 +105,16 @@
                 })
             },
             jumpToKline(symbol, period) {
-                this.$router.push({
+                // 总控页面不关闭，开启新页面
+                let routeUrl = this.$router.resolve({
                     path: '/kline-big',
                     query: {
                         symbol: symbol,
                         period: period,
                         endDate: CommonTool.dateFormat("yyyy-MM-dd")
                     }
-                })
+                });
+                window.open(routeUrl.href, '_blank');
             },
             getParams(name) {
                 let res = ''

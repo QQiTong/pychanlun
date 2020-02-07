@@ -149,13 +149,23 @@ class BusinessService:
             signalList.append(item)
         return signalList
 
-    def getPositionList(self):
+    def getPositionList(self,status,page,size):
         positionList = []
-        result = DBPyChanlun["position_record"]
-        for x in result.find():
+        collection = DBPyChanlun["position_record"]
+        # 查询总记录数
+        total = collection.count()
+        if status == 'all':
+            result = collection.find().skip((page - 1) * size).limit(size)
+        else:
+            result = collection.find({'status':status})
+        for x in result:
             x['_id'] = str(x['_id'])
             positionList.append(x)
-        return positionList
+        positionListResult= {
+            'records':positionList,
+            'total':total
+        }
+        return positionListResult
 
     def createPosition(self, position):
         result = DBPyChanlun['position_record'].insert_one({

@@ -1,7 +1,5 @@
 <template>
     <div class="multi-period-main">
-
-
         <div class="input-form">
             <el-button type="primary" @click="jumpToControl('futures')" size="mini">期货总控</el-button>
             <el-button type="danger" @click="jumpToControl('stock')" size="mini">股票总控</el-button>
@@ -19,28 +17,28 @@
         </div>
 
         <div class="echarts-list">
-            <div class="echarts-item">
+            <div class="echarts-item" id="main3Parent">
                 <div id="main3" class="echarts">
                 </div>
             </div>
-            <div class="echarts-item">
+            <div class="echarts-item" id="main15Parent">
                 <div id="main15" class="echarts">
                 </div>
             </div>
-            <div class="echarts-item">
+            <div class="echarts-item" id="main60Parent">
                 <div id="main60" class="echarts">
                 </div>
             </div>
 
-            <div class="echarts-item">
+            <div class="echarts-item" id="main5Parent">
                 <div id="main5" class="echarts">
                 </div>
             </div>
-            <div class="echarts-item">
+            <div class="echarts-item" id="main30Parent">
                 <div id="main30" class="echarts">
                 </div>
             </div>
-            <div class="echarts-item">
+            <div class="echarts-item" id="main240Parent">
                 <div id="main240" class="echarts">
                 </div>
             </div>

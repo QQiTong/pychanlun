@@ -1,156 +1,227 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>全屏</title>
-		<style>
-			/* css reset start */
-			*,
-			*:before,
-			*:after {
-				box-sizing: border-box;
-			}
+<head>
+    <meta charset="utf-8">
+    <title>全屏</title>
+    <style>
+        /* css reset start */
+        *,
+        *:before,
+        *:after {
+            box-sizing: border-box;
+        }
 
-			body {
+        body {
 
-				line-height: 1.42857143;
-				font-size: 14px;
-					color: #252525;
-					font-weight: 400;
-					-webkit-font-smoothing: antialiased;
-			}
+            line-height: 1.42857143;
+            font-size: 14px;
+            color: #252525;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+        }
 
-			body,
-			div,
-			dl,
-			dt,
-			dd,
-			ul,
-			ol,
-			li,
-			h1,
-			h2,
-			h3,
-			h4,
-			h5,
-			h6,
-			pre,
-			code,
-			form,
-			fieldset,
-			legend,
-			input,
-			button,
-			textarea,
-			p,
-			blockquote,
-			th,
-			td {
-				margin: 0;
-				padding: 0;
-			}
+        body,
+        div,
+        dl,
+        dt,
+        dd,
+        ul,
+        ol,
+        div,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        pre,
+        code,
+        form,
+        fieldset,
+        legend,
+        input,
+        button,
+        textarea,
+        p,
+        blockquote,
+        th,
+        td {
+            margin: 0;
+            padding: 0;
+        }
 
-			address,
-			caption,
-			cite,
-			code,
-			dfn,
-			em,
-			strong,
-			th,
-			var {
-				font-style: normal;
-				font-weight:normal;
-			}
+        address,
+        caption,
+        cite,
+        code,
+        dfn,
+        em,
+        strong,
+        th,
+        var {
+            font-style: normal;
+            font-weight: normal;
+        }
 
-			a {
-				text-decoration:none;
-			}
+        a {
+            text-decoration: none;
+        }
 
-			a:hover,
-			a:focus,
-			a:visited {
-				text-decoration: none;
-			}
+        a:hover,
+        a:focus,
+        a:visited {
+            text-decoration: none;
+        }
 
-			img {
-				display: inline-block;
-				max-width: 100%;
-			}
+        img {
+            display: inline-block;
+            max-width: 100%;
+        }
 
-			ol,
-			ul,
-			li {
-				list-style: none;
-			}
-			/* css reset end */
-		</style>
+        ol,
+        ul,
+        div {
+            list-style: none;
+        }
 
-		<style>
-			/* 布局代码 start
-			 这里我用的是header绝对定位的方式实现的，兼容性强。
-			 如果不考虑兼容性可以使用flex，使用flex也同样要设置html,body的height为100%
-			 */
-			html,body{
-				height: 100%;
-			}
-			.app{
-				height: 100%;
-			}
-			.header{
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 60px;
-				background-color: #f60;
-				color: #fff;
-			}
-			.main{
-				height: 100%;
-				padding-top: 60px;
-				background-color: #f10;
-				color: #f60;
-			}
-			.list-wrap{
-				height: 100%;
-			}
-			.list{
-				display: flex;
-				flex-wrap: wrap;
-				justify-content: space-between;
-				height: 100%;
-			}
-			.list-item{
-				width: 33%;
-				height: 49.5%;
-				background-color: #fff;
-			}
-			.list-item:nth-child(4),
-			.list-item:nth-child(5),
-			.list-item:nth-child(6){
-				align-self: flex-end;
-			}
-			/* 布局代码 end */
-		</style>
-	</head>
-	<body>
-		<div class="app">
-			<header class="header">
-				<h1>header</h1>
-			</header>
-			<main class="main">
-				<div class="list-wrap">
-					<ul class="list">
-						<li class="list-item">我是第1个li</li>
-						<li class="list-item">我是第2个li</li>
-						<li class="list-item">我是第3个li</li>
-						<li class="list-item">我是第4个li</li>
-						<li class="list-item">我是第5个li</li>
-						<li class="list-item">我是第6个li</li>
-					</ul>
-				</div>
-			</main>
-		</div>
-	</body>
+        /* css reset end */
+    </style>
+
+    <style>
+        /* 布局代码 start
+         这里我用的是header绝对定位的方式实现的，兼容性强。
+         如果不考虑兼容性可以使用flex，使用flex也同样要设置html,body的height为100%
+         */
+        html, body {
+            height: 100%;
+        }
+
+        .app {
+            height: 100%;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #f60;
+            color: #fff;
+        }
+
+        .main {
+            height: 100%;
+            padding-top: 60px;
+        }
+
+        .list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .list-item {
+            width: 33%;
+            height: 49.5%;
+        }
+        /* 布局代码 end */
+    </style>
+</head>
+<body>
+<div class="app">
+    <header class="header">
+        <h1>header</h1>
+    </header>
+    <main class="main">
+        <div class="list">
+            <div class="list-item" id="myParent1">
+                <div id="myChart1" ></div>
+            </div>
+            <div class="list-item" id="myParent2">
+                <div id="myChart2" ></div>
+            </div>
+            <div class="list-item" id="myParent3">
+                <div id="myChart3" ></div>
+            </div>
+            <div class="list-item" id="myParent4">
+                <div id="myChart4" ></div>
+            </div>
+            <div class="list-item" id="myParent5">
+                <div id="myChart5" ></div>
+            </div>
+            <div class="list-item" id="myParent6">
+                <div id="myChart6" ></div>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="https://cdn.bootcss.com/echarts/4.2.1/echarts.min.js"></script>
+<script type="text/javascript">
+    //为图表计算高度
+    function chartssize(container, charts) {
+        function getStyle(el, name) {
+            if (window.getComputedStyle) {
+                return window.getComputedStyle(el, null);
+            } else {
+                return el.currentStyle;
+            }
+        }
+
+        let wi = getStyle(container, 'width').width;
+        let hi = getStyle(container, 'height').height;
+        charts.style.height = hi
+    }
+
+    var myChart1 = echarts.init(document.getElementById('myChart1'))
+    var myChart2 = echarts.init(document.getElementById('myChart2'))
+    var myChart3 = echarts.init(document.getElementById('myChart3'))
+    var myChart4 = echarts.init(document.getElementById('myChart4'))
+    var myChart5 = echarts.init(document.getElementById('myChart5'))
+    var myChart6 = echarts.init(document.getElementById('myChart6'))
+    var option = {
+        title: {text: '自适应屏幕宽高'},
+        tooltip: {},
+        xAxis: {
+            data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
+        },
+        yAxis: {},
+        series: [{
+            name: '销量',
+            type: 'bar',
+            data: [5, 20, 36, 10, 10, 20]
+        }]
+    }
+    this.chartssize(document.getElementById("myParent1"), document.getElementById('myChart1'));
+    this.chartssize(document.getElementById("myParent2"), document.getElementById('myChart2'));
+    this.chartssize(document.getElementById("myParent3"), document.getElementById('myChart3'));
+    this.chartssize(document.getElementById("myParent4"), document.getElementById('myChart4'));
+    this.chartssize(document.getElementById("myParent5"), document.getElementById('myChart5'));
+    this.chartssize(document.getElementById("myParent6"), document.getElementById('myChart6'));
+    // 绘制图表
+    myChart1.setOption(option);
+    myChart2.setOption(option);
+    myChart3.setOption(option);
+    myChart4.setOption(option);
+    myChart5.setOption(option);
+    myChart6.setOption(option);
+
+    myChart1.resize()
+    myChart2.resize()
+    myChart3.resize()
+    myChart4.resize()
+    myChart5.resize()
+    myChart6.resize()
+    // 宽度现在能做到自适应屏幕宽度，但是高度还是无法自适应
+    window.addEventListener('resize', function () {
+        myChart1.resize()
+        myChart2.resize()
+        myChart3.resize()
+        myChart4.resize()
+        myChart5.resize()
+        myChart6.resize()
+    })
+</script>
+</body>
 </html>

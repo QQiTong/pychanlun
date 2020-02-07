@@ -147,7 +147,7 @@ export default {
                     underlying_symbol: "ETH_CQ",
                 }],
             symbolSearch: '',
-            percentage:0,
+            percentage: 0,
 
         }
     },
@@ -163,9 +163,9 @@ export default {
     },
     filters: {
         changeTagFilter(change) {
-            if(change>0){
+            if (change > 0) {
                 return 'danger'
-            }else{
+            } else {
                 return 'primay'
             }
         }
@@ -238,21 +238,23 @@ export default {
                         short = short + 1
                     }
                 }
-                this.percentage = long / (long + short) * 100
+                this.percentage = parseInt(long / (long + short) * 100)
 
-                console.log("获取涨跌幅列表 计算百分比", res,this.percentage)
+                console.log("获取涨跌幅列表 计算百分比", res, this.percentage)
             }).catch(() => {
                 console.log("获取涨跌幅失败:", error)
             })
         },
         jumpToKline(symbol) {
-            this.$router.push({
-                path: '/multi-period',
-                query: {
+            // 总控页面不关闭，开启新页面
+            let routeUrl = this.$router.resolve({
+                path: "/multi-period",
+                 query: {
                     symbol: symbol,
                     endDate: CommonTool.dateFormat("yyyy-MM-dd")
                 }
-            })
+            });
+            window.open(routeUrl.href, '_blank');
         },
         fillMarginRate(symbolInfo) {
             this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate * this.marginLevelCompany).toFixed(3))
@@ -318,7 +320,7 @@ export default {
         customColorMethod(percentage) {
             if (percentage < 50) {
                 return '#409EFF';
-            } else{
+            } else {
                 return '#F56C6C';
             }
         },

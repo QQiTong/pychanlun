@@ -1,68 +1,68 @@
 <template>
     <div class="future-control-main">
-        <MyHeader></MyHeader>
+        <MyHeader/>
         <!--仓位计算-->
         <el-divider content-position="center">仓位计算器</el-divider>
         <el-row>
             <el-form :inline="true" size="mini" :model="calcPosForm" class="demo-form-inline">
                 <el-form-item label="资产总额">
-                    <el-input v-model="calcPosForm.account" class="form-input"></el-input>
+                    <el-input v-model="calcPosForm.account" class="form-input"/>
                 </el-form-item>
                 <el-form-item label="保证金系数">
-                    <el-input v-model="calcPosForm.currentMarginRate" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.currentMarginRate" class="form-input" disabled/>
                 </el-form-item>
                 <el-form-item label="合约乘数">
-                    <el-input v-model="calcPosForm.contractMultiplier" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.contractMultiplier" class="form-input" disabled/>
                 </el-form-item>
                 <el-form-item label="开仓价格">
-                    <el-input v-model="calcPosForm.openPrice" class="form-input"></el-input>
+                    <el-input v-model="calcPosForm.openPrice" class="form-input"/>
                 </el-form-item>
                 <el-form-item label="止损价格">
-                    <el-input v-model="calcPosForm.stopPrice" class="form-input"></el-input>
+                    <el-input v-model="calcPosForm.stopPrice" class="form-input"/>
                 </el-form-item>
                 <el-form-item label="动止价(选填)">
-                    <el-input v-model="calcPosForm.dynamicWinPrice" class="form-input"></el-input>
+                    <el-input v-model="calcPosForm.dynamicWinPrice" class="form-input"/>
                 </el-form-item>
                 <el-form-item label="最大资金使用率">
                     <el-select v-model="calcPosForm.maxAccountUseRate" class="select-input">
-                        <el-option label="10%" value="0.1"></el-option>
-                        <el-option label="20%" value="0.2"></el-option>
-                        <el-option label="30%" value="0.3"></el-option>
+                        <el-option label="10%" value="0.1"/>
+                        <el-option label="20%" value="0.2"/>
+                        <el-option label="30%" value="0.3"/>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="止损系数">
                     <el-select v-model="calcPosForm.stopRate" class="select-input">
-                        <el-option label="1%" value="0.01"></el-option>
-                        <el-option label="2%" value="0.02"></el-option>
-                        <el-option label="3%" value="0.03"></el-option>
+                        <el-option label="1%" value="0.01"/>
+                        <el-option label="2%" value="0.02"/>
+                        <el-option label="3%" value="0.03"/>
                     </el-select>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="calcAccount">查询</el-button>
                 </el-form-item>
                 <el-form-item label="开仓手数">
-                    <el-input v-model="calcPosForm.maxOrderCount" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.maxOrderCount" class="form-input" disabled/>
                 </el-form-item>
                 <el-form-item label="资金使用率">
-                    <el-input v-model="calcPosForm.accountUseRate" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.accountUseRate" class="form-input" disabled/>
                 </el-form-item>
                 <el-form-item label="1手保证金">
-                    <el-input v-model="calcPosForm.perOrderMargin" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.perOrderMargin" class="form-input" disabled/>
                 </el-form-item>
                 <el-form-item label="1手止损的金额">
-                    <el-input v-model="calcPosForm.perOrderStopMoney" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.perOrderStopMoney" class="form-input" disabled/>
                 </el-form-item>
                 <el-form-item label="止损百分比">
-                    <el-input v-model="calcPosForm.perOrderStopRate" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.perOrderStopRate" class="form-input" disabled/>
                 </el-form-item>
                 <el-form-item label="总保证金">
-                    <el-input v-model="calcPosForm.totalOrderMargin" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.totalOrderMargin" class="form-input" disabled/>
                 </el-form-item>
                 <el-form-item label="总止损额">
-                    <el-input v-model="calcPosForm.totalOrderStopMoney" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.totalOrderStopMoney" class="form-input" disabled/>
                 </el-form-item>
                 <el-form-item label="动止手数">
-                    <el-input v-model="calcPosForm.dynamicWinCount" class="form-input" disabled></el-input>
+                    <el-input v-model="calcPosForm.dynamicWinCount" class="form-input" disabled/>
                 </el-form-item>
             </el-form>
         </el-row>
@@ -70,7 +70,8 @@
         <el-divider content-position="center">持仓列表</el-divider>
         <PositionList :futureSymbolList="futureSymbolList"></PositionList>
         <el-divider content-position="center">信号列表 | 多空分布</el-divider>
-        <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true" :stroke-width="24" ></el-progress>
+        <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true"
+                     :stroke-width="24"/>
         <el-row>
             <div class="current-market">
                 <el-table
@@ -110,13 +111,14 @@
                         </template>
                     </el-table-column>
 
-                     <el-table-column
+                    <el-table-column
                         label="涨跌幅"
                         width="100"
                     >
                         <template slot-scope="scope">
                             <el-tag effect="dark" :type="changeList[scope.row.order_book_id]|changeTagFilter">
-                                 {{ (changeList[scope.row.order_book_id] * (1 / scope.row.margin_rate *marginLevelCompany) *100).toFixed(1)}}%
+                                {{ (changeList[scope.row.order_book_id] * (1 / scope.row.margin_rate
+                                *marginLevelCompany) *100).toFixed(1)}}%
                             </el-tag>
 
                         </template>

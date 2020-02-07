@@ -1,8 +1,8 @@
 <template>
     <div class="kline-big-main">
         <div class="input-form">
-            <el-button type="primary" @click="jumpToControl" size="mini">期货总控</el-button>
-            <el-button type="danger" @click="jumpToControl" size="mini">股票总控</el-button>
+            <el-button type="primary" @click="jumpToControl('futures')" size="mini">期货总控</el-button>
+            <el-button type="danger" @click="jumpToControl('stock')" size="mini">股票总控</el-button>
             <el-button type="success" @click="jumpToMultiPeriod" size="mini">多周期</el-button>
             <el-date-picker
                 v-model="endDate"
@@ -13,15 +13,15 @@
                 size="mini"
                 @change="submitSymbol"
                 class="ml-5"
-                >
+            >
             </el-date-picker>
-            <el-input v-model="inputSymbol" placeholder="期货股票代码回车提交" size="mini" class="stock-input ml-5" @change="submitSymbol"/>
-            <el-button v-for="period in periodList" size="mini" @click="switchPeriod(period)" class="ml-5">{{period}}</el-button>
+            <el-input v-model="inputSymbol" placeholder="期货股票代码回车提交" size="mini" class="stock-input ml-5"
+                      @change="submitSymbol"/>
+            <el-button v-for="period in periodList" size="mini" @click="switchPeriod(period)" class="ml-5">{{period}}
+            </el-button>
         </div>
-        <div class="echarts-list-big">
-             <div class="echarts-item-big">
-                <div id="main" class="echarts-big">
-                </div>
+        <div class="echarts-item-big" id="mainParent">
+            <div id="main">
             </div>
         </div>
     </div>
