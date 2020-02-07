@@ -229,3 +229,52 @@ def CalcBiList(count, bi, high, low):
                 biList[-1]["end"] = i
                 biList[-1]["candleList"].append(candle)
     return biList
+
+
+def FindLastFractalRegion(count, bi_series, time_series, high_series, low_series, open_series, close_series):
+    top_fractal = None
+    bottom_fractal = None
+    g1 = FindPrevEq(bi_series, 1, count)
+    d1 = FindPrevEq(bi_series, -1, count)
+    if g1 > d1:
+        g2 = FindPrevEq(bi_series, 1, d1)
+        candles = MergeCandles(high_series, low_series, open_series, close_series, d1, g1, 1)
+        sticks = candles[-1]["sticks"]
+        dt = time_series[g1]
+        top = high_series[g1]
+        bottom = sticks[0]["l"]
+        for idx in range(len(sticks)):
+            if sticks[idx]["l"] < bottom:
+                bottom = sticks[idx]["l"]
+        top_fractal = { "date": dt, "top": top, "bottom": bottom }
+
+        candles = MergeCandles(high_series, low_series, open_series, close_series, g2, d1, -1)
+        sticks = candles[-1]["sticks"]
+        dt = time_series[d1]
+        bottom = low_series[d1]
+        top = sticks[0]["h"]
+        for idx in range(len(sticks)):
+            if sticks[idx]["h"] > top:
+                top = sticks[idx]["h"]
+        bottom_fractal = { "date": dt, "top": top, "bottom": bottom }
+    else:
+        d2 = FindPrevEq(bi_series, -1, g1)
+        candles = MergeCandles(high_series, low_series, open_series, close_series, g1, d1, -1)
+        sticks = candles[-1]["sticks"]
+        dt = time_series[d1]
+        bottom = low_series[d1]
+        top = sticks[0]["h"]
+        for idx in range(len(sticks)):
+            if sticks[idx]["h"] > top:
+                top = sticks[idx]["h"]
+        bottom_fractal = { "date": dt, "top": top, "bottom": bottom }
+
+        candles = MergeCandles(high_series, low_series, open_series, close_series, d2, g1, 1)
+        sticks = candles[-1]["sticks"]
+        dt = time_series[g1]
+        top = high_series[g1]
+        bottom = sticks[0]["l"]
+        for idx in range(len(sticks)):
+            if sticks[idx]["l"] < bottom:
+                bottom = sticks[idx]["l"]
+        top_fractal = { "date": dt, "top": top, "bottom": bottom }
