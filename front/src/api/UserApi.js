@@ -66,9 +66,17 @@ export const userApi = {
             data: data
         })
     },
-    // 查询持仓
-    getPosition(status,page,size) {
-        let url = `/api/get_position?status=${status}&page=${page}&size=${size}`
+    // 查询单个持仓
+    getPosition(symbol, period,status) {
+        let url = `/api/get_position?symbol=${symbol}&period=${period}&status=${status}`
+        return axios({
+            url: url,
+            method: 'get'
+        })
+    },
+    // 查询持仓列表
+    getPositionList(status, page, size) {
+        let url = `/api/get_position_list?status=${status}&page=${page}&size=${size}`
         return axios({
             url: url,
             method: 'get'

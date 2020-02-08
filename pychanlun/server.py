@@ -89,8 +89,8 @@ def update_position():
 
 
 # 查询持仓列表
-@app.route('/api/get_position')
-def get_position():
+@app.route('/api/get_position_list')
+def get_position_list():
     status = request.args.get("status")
     page = int(request.args.get("page") or "1")
     # 每页显示的条目
@@ -99,6 +99,14 @@ def get_position():
     positionList = businessService.getPositionList(status, page,size)
     return Response(json.dumps(positionList), mimetype='application/json')
 
+# 跟据单个持仓
+@app.route('/api/get_position')
+def get_position():
+    symbol = request.args.get("symbol")
+    period = request.args.get("period") or "all"
+    status = request.args.get("status")
+    singlePosition = businessService.getPosition(symbol, period,status)
+    return Response(json.dumps(singlePosition), mimetype='application/json')
 
 def run(**kwargs):
     port = kwargs.get("port", 5000)

@@ -150,7 +150,11 @@ class BusinessService:
         return signalList
 
     def getPosition(self,symbol,period,status):
-        result = DBPyChanlun["position_record"].find({'symbol':symbol,'period':period,'status':status})
+        if period == 'all':
+            query = {'symbol':symbol,'status':status}
+        else:
+            query = {'symbol':symbol,'period':period,'status':status}
+        result = DBPyChanlun["position_record"].find(query)
         if result.count()>0:
             for x in result:
                 x['_id'] = str(x['_id'])

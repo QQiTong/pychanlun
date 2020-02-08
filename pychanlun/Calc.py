@@ -152,7 +152,7 @@ class Calc:
             if '_CQ' in symbol:
                 cat = "DIGIT_COIN"
                 klineData = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[period])
-                # klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[self.levelMap[period]])
+                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[self.levelMap[period]])
                 # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
                 #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
             else:

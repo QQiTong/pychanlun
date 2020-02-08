@@ -210,6 +210,9 @@ def monitorFuturesAndDigitCoin(type):
                                     closePrice)
                     monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTimeDuanBreakMap,
                                      symbol, period, closePrice)
+                    # monitorFractal(result, lastFractalTime, currentTime, timeScope, lastTimeFractalMap, symbol, period,
+                    #                closePrice)
+
             if type == "1":
                 time.sleep(0)
             else:
@@ -798,6 +801,8 @@ def calStopWinCount(symbol, period, closePrice):
         stopWinCount = round(stopWinPosRate * open_pos_amount)
         print("当前盈亏比", winLoseRate, "当前动止仓位百分比", stopWinPosRate, "动止手数", stopWinCount)
         return stopWinCount
+
+
 def run(**kwargs):
     threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

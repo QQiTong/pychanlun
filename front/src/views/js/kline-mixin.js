@@ -84,7 +84,8 @@ export default {
             futureSymbolList: [],
             futureSymbolMap: {},
             timer: null,
-            marginLevelCompany: 1.125,// 不同期货公司提高的点数不一样
+            // 不同期货公司提高的点数不一样 ,华安是在基础上加1%
+            marginLevelCompany: 0.01,
             marginPrice: 0,//每手需要的保证金
 
             //start用于仓位管理计算
@@ -168,7 +169,13 @@ export default {
             selectedSymbol: '',
             // 输入的交割过的期货品种 或者 股票品种
             inputSymbol: '',
-            periodList: ['3m', '5m', '15m', '30m', '60m', '240m']
+            periodList: ['3m', '5m', '15m', '30m', '60m', '240m'],
+            //是否指显示当前持仓的开平动止
+            isPosition: false,
+            // 当前品种持仓信息
+            currentPosition: null,
+            positionStatus: "holding",
+            dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'}
         }
     },
 
@@ -178,45 +185,12 @@ export default {
         // 不共用symbol对象, symbol是双向绑定的
         this.inputSymbol = JSON.parse(JSON.stringify(this.symbol))
         this.period = this.getParams('period')
-        //  大图只显示选中的k线图
-        if (this.period !== "") {
-            this.endDate = this.getParams('endDate')
-            this.myChart = this.$echarts.init(document.getElementById('main'));
-            this.chartssize(document.getElementById("mainParent"),
-                document.getElementById('main'));
-            this.myChart.resize()
-            window.addEventListener('resize', () => {
-                this.myChart.resize()
-            })
-        } else {
-            this.myChart3 = this.$echarts.init(document.getElementById('main3'));
-            this.myChart5 = this.$echarts.init(document.getElementById('main5'));
-            this.myChart15 = this.$echarts.init(document.getElementById('main15'));
-            this.myChart30 = this.$echarts.init(document.getElementById('main30'));
-            this.myChart60 = this.$echarts.init(document.getElementById('main60'));
-            this.myChart240 = this.$echarts.init(document.getElementById('main240'));
-
-            this.chartssize(document.getElementById("main3Parent"), document.getElementById('main3'));
-            this.chartssize(document.getElementById("main15Parent"), document.getElementById('main15'));
-            this.chartssize(document.getElementById("main60Parent"), document.getElementById('main60'));
-            this.chartssize(document.getElementById("main5Parent"), document.getElementById('main5'));
-            this.chartssize(document.getElementById("main30Parent"), document.getElementById('main30'));
-            this.chartssize(document.getElementById("main240Parent"), document.getElementById('main240'));
-            this.myChart3.resize()
-            this.myChart5.resize()
-            this.myChart15.resize()
-            this.myChart30.resize()
-            this.myChart60.resize()
-            this.myChart240.resize()
-            window.addEventListener('resize', () => {
-                this.myChart3.resize()
-                this.myChart5.resize()
-                this.myChart15.resize()
-                this.myChart30.resize()
-                this.myChart60.resize()
-                this.myChart240.resize()
-            });
+        this.isPosition = this.getParams('isPosition')
+        if (this.isPosition ==='true') {
+            this.getPosition()
         }
+
+        this.initEcharts()
         // 取出本地缓存
         let symbolList = window.localStorage.getItem("symbolList")
         // 本地缓存有主力合约数据
@@ -238,6 +212,59 @@ export default {
         clearTimeout(this.timer)
     },
     methods: {
+        getPosition() {
+            let period = 'all'
+            if (this.period !== "") {
+                period = this.period
+            }
+            userApi.getPosition(this.symbol, period, this.positionStatus).then(res => {
+                this.currentPosition = res
+                console.log("获取当前品种持仓:", res);
+            }).catch(() => {
+                console.log("获取当前品种持仓失败:", error)
+            })
+        },
+        initEcharts() {
+            //  大图只显示选中的k线图
+            if (this.period !== "") {
+                this.endDate = this.getParams('endDate')
+                this.myChart = this.$echarts.init(document.getElementById('main'));
+                this.chartssize(document.getElementById("mainParent"),
+                    document.getElementById('main'));
+                this.myChart.resize()
+                window.addEventListener('resize', () => {
+                    this.myChart.resize()
+                })
+            } else {
+                this.myChart3 = this.$echarts.init(document.getElementById('main3'));
+                this.myChart5 = this.$echarts.init(document.getElementById('main5'));
+                this.myChart15 = this.$echarts.init(document.getElementById('main15'));
+                this.myChart30 = this.$echarts.init(document.getElementById('main30'));
+                this.myChart60 = this.$echarts.init(document.getElementById('main60'));
+                this.myChart240 = this.$echarts.init(document.getElementById('main240'));
+
+                this.chartssize(document.getElementById("main3Parent"), document.getElementById('main3'));
+                this.chartssize(document.getElementById("main15Parent"), document.getElementById('main15'));
+                this.chartssize(document.getElementById("main60Parent"), document.getElementById('main60'));
+                this.chartssize(document.getElementById("main5Parent"), document.getElementById('main5'));
+                this.chartssize(document.getElementById("main30Parent"), document.getElementById('main30'));
+                this.chartssize(document.getElementById("main240Parent"), document.getElementById('main240'));
+                this.myChart3.resize()
+                this.myChart5.resize()
+                this.myChart15.resize()
+                this.myChart30.resize()
+                this.myChart60.resize()
+                this.myChart240.resize()
+                window.addEventListener('resize', () => {
+                    this.myChart3.resize()
+                    this.myChart5.resize()
+                    this.myChart15.resize()
+                    this.myChart30.resize()
+                    this.myChart60.resize()
+                    this.myChart240.resize()
+                });
+            }
+        },
         //计算echarts 高度
         chartssize(container, charts) {
             function getStyle(el, name) {
@@ -279,14 +306,51 @@ export default {
             return res
         },
         jumpToMultiPeriod() {
-            this.$router.push({
-                path: '/multi-period',
-                query: {
-                    symbol: this.symbol,
-                    endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
-                }
-            })
+            if(this.isPosition === 'true'){
+                this.$router.push({
+                    path: '/multi-period',
+                    query: {
+                        symbol: this.symbol,
+                        isPosition:'true',
+                        endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
+                    }
+                })     
+            }else{
+                this.$router.push({
+                    path: '/multi-period',
+                    query: {
+                        symbol: this.symbol,
+                        endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
+                    }
+                })
+            }
         },
+        
+        jumpToKlineBig(period) {
+            if(this.isPosition === 'true'){
+                this.$router.push({
+                    path: '/kline-big',
+                    query: {
+                        symbol: this.symbol,
+                        period: period,
+                        isPosition:'true',
+                        endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
+                    }
+                })     
+            }else{
+                this.$router.push({
+                    path: '/kline-big',
+                    query: {
+                        symbol: this.symbol,
+                        period: period,
+                        endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
+                    }
+                })
+            }
+            
+            
+        },
+        
         jumpToControl(type) {
             console.log("type", type)
             if (type === "futures") {
@@ -494,7 +558,7 @@ export default {
             const resultData = this.splitData(stockJsonData, period);
             var dataTitle = that.symbol + "  " + period
             const margin_rate = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].margin_rate || 1;
-            let marginLevel = (1 / (margin_rate * this.marginLevelCompany)).toFixed(2)
+            let marginLevel = (1 / (margin_rate + this.marginLevelCompany)).toFixed(2)
             const trading_hours = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].trading_hours;
             const maturity_date = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].maturity_date;
             var subText = "杠杆倍数: " + marginLevel + " 每手保证金: " + this.marginPrice + " 合约乘数: " + this.contractMultiplier + " 交易时间: " + trading_hours + " 交割时间: " + maturity_date;
@@ -562,14 +626,7 @@ export default {
                                 title: '放大',
                                 icon: 'image://' + this.periodIcons[10],
                                 onclick: function () {
-                                    that.$router.push({
-                                        path: '/kline-big',
-                                        query: {
-                                            symbol: that.symbol,
-                                            period: period,
-                                            endDate: that.endDate ? that.endDate : CommonTool.dateFormat("yyyy-MM-dd")
-                                        }
-                                    })
+                                    that.jumpToKlineBig(period)
                                 }
                             },
                             //         myLevel3: {
@@ -1013,7 +1070,7 @@ export default {
             if (this.period !== "") {
                 option.toolbox.feature = {}
                 option.grid = this.echartsConfig.klineBigGrid
-            }else{
+            } else {
                 option.grid = this.echartsConfig.multiPeriodGrid
 
             }
@@ -1060,16 +1117,6 @@ export default {
             const higher_duan_zsdata = jsonObj.higher_duan_zsdata;
             const higher_duan_zsflag = jsonObj.higher_duan_zsflag;
 
-
-            //
-            // const macddata = jsonObj.macd;
-            // const diffdata = jsonObj.diff;
-            // const deadata = jsonObj.dea;
-
-            // const macdBigLevel = jsonObj.macdBigLevel;
-            // const diffBigLevel = jsonObj.diffBigLevel;
-            // const deaBigLevel = jsonObj.deaBigLevel;
-            // const dateBigLevel = jsonObj.dateBigLevel;
 
             var values = [];
             for (var i = 0; i < stockDate.length; i++) {
@@ -1676,210 +1723,38 @@ export default {
                 };
                 huilaValues.push(value);
             }
+            let markLineData
+            if(this.isPosition === 'true'){
+                 markLineData = this.getPositionMarklineData(jsonObj)
+            }else{
+                 markLineData = this.getMarklineData(jsonObj)
+            }
+            // console.log("markline", markLineData)
+            return {
+                date: stockDate,
+                values: values,
+                volume: volumeData,
+                biValues: biValues,
+                duanValues: duanValues,
+                duanPriceValues: duanPriceValues,
+                higherDuanValues: higherDuanValues,
+                zsvalues: zsvalues,
+                zsflag: zsflag,
+                close: stockClose,
+                markLineData: markLineData,
+                huilaValues: huilaValues,
 
-
-            // 买卖点
-            // var mmdValues = [];
-            // for (var i = 0; i < jsonObj.buyData.date.length; i++) {
-            //     var value = {
-            //         coord: [jsonObj.buyData.date[i], jsonObj.buyData.data[i]],
-            //         value: jsonObj.buyData.value[i],
-            //         symbolRotate: -180,
-            //         symbol: 'pin',
-            //         symbolOffset: [0, '0%'],
-            //         itemStyle: {
-            //             normal: {color: 'red', opacity: '0.9'}
-            //         },
-            //         label: {
-            //             //position: ['-50%','50%'],
-            //             position: 'inside',
-            //             offset: [0, 10],
-            //             textBorderColor: 'red',
-            //             textBorderWidth: 3,
-            //             color: 'white',
-            //             //borderColor: 'blue',
-            //             //borderWidth: 1,
-            //         },
-            //     };
-            //     mmdValues.push(value);
-            // }
-            // for (var i = 0; i < jsonObj.sellData.date.length; i++) {
-            //     var value = {
-            //         coord: [jsonObj.sellData.date[i], jsonObj.sellData.data[i]],
-            //         value: jsonObj.sellData.value[i],
-            //
-            //         itemStyle: {
-            //             normal: {color: 'green', opacity: '0.9'}
-            //         }
-            //     };
-            //     mmdValues.push(value);
-            // }
-            //var value = {
-            //    name: 'lowest value',
-            //    type: 'min',
-            //    valueDim: 'lowest',
-            //    symbolRotate: -90,
-            //    symbol: 'pin',
-            //    itemStyle: {
-            //        normal: {
-            //            color: 'white',
-            //            opacity: '0.75'
-            //        }
-            //    },
-            //    label: {
-            //        position: 'inside',
-            //        offset: [8, 2],
-            //
-            //        //textBorderWidth: 1,
-            //        color: 'blue',
-            //    },
-            //};
-            //mmdValues.push(value);
-            //var value = {
-            //    name: 'highest value',
-            //    type: 'max',
-            //    valueDim: 'highest',
-            //    symbolRotate: -90,
-            //    symbol: 'pin',
-            //    itemStyle: {
-            //        normal: {
-            //            color: 'white',
-            //            opacity: '0.75'
-            //        }
-            //    },
-            //    label: {
-            //        position: 'inside',
-            //        offset: [8, 2],
-            //        //textBorderColor: 'blue',
-            //        //textBorderWidth: 1,
-            //        color: 'blue',
-            //    },
-            //};
-            //mmdValues.push(value);
-
-            // for (var i = 0; i < jsonObj.buyBCData.date.length; i++) {
-            //     var value = {
-            //         coord: [jsonObj.buyBCData.date[i], jsonObj.buyBCData.data[i]],
-            //         value: jsonObj.buyBCData.value[i],
-            //         symbolRotate: 90,
-            //         symbol: 'pin',
-            //         itemStyle: {
-            //             normal: {color: 'red', opacity: '0.85'}
-            //         },
-            //         label: {
-            //             position: 'inside',
-            //             offset: [-5, 2],
-            //             textBorderColor: 'red',
-            //             textBorderWidth: 2,
-            //             color: 'white',
-            //         },
-            //     };
-            //     mmdValues.push(value);
-            // }
-            // for (var i = 0; i < jsonObj.sellBCData.date.length; i++) {
-            //     var value = {
-            //         coord: [jsonObj.sellBCData.date[i], jsonObj.sellBCData.data[i]],
-            //         value: jsonObj.sellBCData.value[i],
-            //         symbolRotate: 90,
-            //         symbol: 'pin',
-            //         itemStyle: {
-            //             normal: {color: 'green', opacity: '0.85'}
-            //         },
-            //         label: {
-            //             position: 'inside',
-            //             offset: [-5, 2],
-            //             textBorderColor: 'red',
-            //             textBorderWidth: 2,
-            //             color: 'white',
-            //         },
-            //     };
-            //     mmdValues.push(value);
-            // }
-            //
-            // var macdAreaValues = [];
-            // for (var i = 0; i < jsonObj.macdAreaData.date.length; i++) {
-            //     var value
-            //     if (jsonObj.macdAreaData.value[i] > 0) {
-            //         value = {
-            //             coord: [jsonObj.macdAreaData.date[i], jsonObj.macdAreaData.data[i]],
-            //             value: jsonObj.macdAreaData.value[i],
-            //             symbolRotate: 180,
-            //             symbol: 'circle',
-            //             symbolSize: '5',
-            //             itemStyle: {
-            //                 normal: {color: downColor}
-            //             },
-            //             label: {
-            //                 position: 'inside',
-            //                 offset: [0, -30],
-            //                 textBorderColor: upColor,
-            //                 textBorderWidth: 2,
-            //                 color: 'white',
-            //             },
-            //         };
-            //     } else {
-            //         value = {
-            //             coord: [jsonObj.macdAreaData.date[i], jsonObj.macdAreaData.data[i]],
-            //             value: Math.abs(jsonObj.macdAreaData.value[i]),
-            //             symbolRotate: 180,
-            //             symbol: 'circle',
-            //             symbolSize: '5',
-            //             itemStyle: {
-            //                 normal: {color: upColor}
-            //             },
-            //             label: {
-            //                 position: 'inside',
-            //                 offset: [0, 20],
-            //                 textBorderColor: downColor,
-            //                 textBorderWidth: 2,
-            //                 color: 'white',
-            //             },
-            //         };
-            //     }
-            //
-            //     macdAreaValues.push(value);
-            // }
-
-
-            // var bcMACDValues = [];
-            // for (var i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
-            //     var value = {
-            //         coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
-            //         value: jsonObj.buyMACDBCData.value[i],
-            //         symbolRotate: -180,
-            //         symbol: 'pin',
-            //         itemStyle: {
-            //             normal: {color: 'red'}
-            //         },
-            //         label: {
-            //             position: 'inside',
-            //             offset: [0, 10],
-            //             textBorderColor: 'red',
-            //             textBorderWidth: 2,
-            //             color: 'white',
-            //         },
-            //     };
-            //     bcMACDValues.push(value);
-            // }
-            // for (var i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
-            //     var value = {
-            //         coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
-            //         value: jsonObj.sellMACDBCData.value[i],
-            //         symbolRotate: 0,
-            //         symbol: 'pin',
-            //         itemStyle: {
-            //             normal: {color: 'green'}
-            //         }
-            //     };
-            //     bcMACDValues.push(value);
-            // }
+            };
+        },
+        //通用开平动止标注数据
+        getMarklineData(jsonObj) {
             var markLineData = [];
             var lastBeichiType = this.getLastBeichiData(jsonObj)
             var lastBeichi = null
             const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
-            let marginLevel = Number((1 / (margin_rate * this.marginLevelCompany)).toFixed(2))
+            let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
             // 当前价格
-            var currentPrice = stockClose[stockClose.length - 1]
+            var currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
             this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1;
             // 1手需要的保证金
@@ -1945,13 +1820,14 @@ export default {
                 var beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
                 // 止损价格
                 var stopLosePrice = lastBeichi['stop_lose_price'][lastBeichi['stop_lose_price'].length - 1]
-                // 第一次成笔的止盈价格
+                // 第一次止盈价格
                 var stopWinPrice = lastBeichi['stop_win_price'][lastBeichi['stop_win_price'].length - 1]
-                //第一次成笔的止盈百分比
+                //第一次止盈百分比
                 var stopWinPercent = 0
                 // 止盈价格
                 var targetPrice = 0
-                var diffPrice = Math.abs(beichiPrice - stopLosePrice)
+                // 达到2.3倍盈亏比 才能保证动止30% 止损不亏
+                var diffPrice = Math.abs(beichiPrice - stopLosePrice) * 2.3
                 // 当前收益百分比
                 var currentPercent = ""
                 // 当前收益（单位万/元）
@@ -1976,7 +1852,7 @@ export default {
                 this.stopPrice = stopLosePrice;
                 // 当前保证金比例
                 const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
-                this.currentMarginRate = margin_rate * this.marginLevelCompany
+                this.currentMarginRate = margin_rate + this.marginLevelCompany
                 this.currentSymbol = this.symbol;
                 // 计算开仓手数
                 this.calcAccount()
@@ -2080,107 +1956,138 @@ export default {
                     markLineData.push(markLineTarget)
                 }
 
-                // 第一次成笔的目标价位
-                // var markLineStopWin = {
-                //     yAxis: stopWinPrice,
-                //     lineStyle: {
-                //         normal: {
-                //             opacity: 1,
-                //             type: 'dashed',
-                //             width: 1,
-                //             color: 'green'
-                //         },
-                //     },
-                //     label: {
-                //         normal: {
-                //             color: 'green',
-                //             formatter: '笔盈:' + stopWinPrice.toFixed(2) + ' (' + stopWinPercent + '%)',
-                //         }
-                //     },
-                //     symbol: 'circle',
-                //     symbolSize: 1,
-                // }
-
                 // if (stopWinPrice !== 0) {
                 //     markLineData.push(markLineStopWin)
                 // }
 
             }
+            return markLineData
+        },
+        //持仓状态下的开平动止数据
+        /**
+         * @param jsonObj
+         */
+        getPositionMarklineData(jsonObj) {
+            var markLineData = [];
+            const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
+            let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
+            // 当前价格
+            var currentPrice = jsonObj.close[jsonObj.close.length - 1]
+            // 合约乘数
+            this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1;
+            // 1手需要的保证金
+            this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
+            // 开仓价格
+            let openPrice = this.currentPosition.price
+            let openAmount = this.currentPosition.amount
+            let direction = this.currentPosition.direction
+            // 止损价格
+            let stopLosePrice = this.currentPosition.stopLosePrice
+            // 当前盈利百分比
+            let currentPercent = ''
+            if (direction === 'long') {
+                currentPercent = ((currentPrice - openPrice) / openPrice * 100 * marginLevel).toFixed(2)
+            } else {
+                currentPercent = ((openPrice - currentPrice) / openPrice * 100 * marginLevel).toFixed(2)
+            }
+            // 止损百分比
+            let stopLosePercent = (Math.abs(openPrice - stopLosePrice) / stopLosePrice * 100 * marginLevel).toFixed(2)
+            //如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
+            // 当前最新价
+            var markLineCurrent = {
+                yAxis: currentPrice,
+                lineStyle: {
+                    normal: {
+                        opacity: 1,
+                        type: 'dash',
+                        width: 1,
+                        color: 'yellow'
+                    },
+                },
+                symbol: 'circle',
+                symbolSize: 1,
+                label: {
+                    normal: {
+                        color: 'yellow',
+                        formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent + "%\n盈亏比: 1 : "
+                            + (currentPercent / stopLosePercent).toFixed(1),
+                    },
+                },
+            }
+            markLineData.push(markLineCurrent)
+     
+            // 开仓价
+            var markLineOpen = {
+                yAxis: openPrice,
+                lineStyle: {
+                    normal: {
+                        opacity: 1,
+                        type: 'dashed',
+                        width: 1,
+                        color: 'white'
+                    },
+                },
+                symbol: 'circle',
+                symbolSize: 1,
+                label: {
+                    normal: {
+                        color: 'white',
+                        formatter: '开仓: ' + openPrice.toFixed(2) + "\n数量: " + openAmount + ' 手',
+                    },
+                },
+            }
+            markLineData.push(markLineOpen)
 
-
-            // console.log("markline", markLineData)
-
-
-            // 高级别macd背驰点标注 buyHigherMACDBCData
-            // for (var i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
-            //     var value = {
-            //         coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.data[i]],
-            //         value: jsonObj.buyHigherMACDBCData.value[i],
-            //         symbolRotate: 90,
-            //         symbol: 'pin',
-            //         itemStyle: {
-            //             normal: {color: 'Purple'}
-            //         },
-            //         label: {
-            //             position: 'inside',
-            //             offset: [-5, 5],
-            //             textBorderColor: 'Purple',
-            //             textBorderWidth: 1,
-            //             color: 'white',
-            //         },
-            //     };
-            //     bcMACDValues.push(value);
-            // }
-            // for (var i = 0; i < jsonObj.sellHigherMACDBCData.date.length; i++) {
-            //     var value = {
-            //         coord: [jsonObj.sellHigherMACDBCData.date[i], jsonObj.sellHigherMACDBCData.data[i]],
-            //         value: jsonObj.sellHigherMACDBCData.value[i],
-            //         symbolRotate: 90,
-            //         symbol: 'pin',
-            //         label: {
-            //             position: 'inside',
-            //             offset: [-5, 5],
-            //             textBorderColor: 'blue',
-            //             textBorderWidth: 1,
-            //             color: 'white',
-            //         },
-            //         itemStyle: {
-            //             normal: {color: 'blue'}
-            //         }
-            //     };
-            //     bcMACDValues.push(value);
-            // }
-            //
-            return {
-                date: stockDate,
-                values: values,
-                volume: volumeData,
-                biValues: biValues,
-                duanValues: duanValues,
-                duanPriceValues: duanPriceValues,
-                higherDuanValues: higherDuanValues,
-                zsvalues: zsvalues,
-                zsflag: zsflag,
-                // macd: macddata,
-                // diff: diffdata,
-                // dea: deadata,
-                // macdBigLevel: macdBigLevel,
-                // diffBigLevel: diffBigLevel,
-                // deaBigLevel: deaBigLevel,
-                // timeBigLevel: dateBigLevel,
-                // boll_up: boll_up,
-                // boll_middle: boll_middle,
-                // boll_bottom: boll_bottom,
-                // mmdValues: mmdValues,
-                // bcMACDValues: bcMACDValues,
-                close: stockClose,
-                // macdAreaValues: macdAreaValues,
-                // ama: amaValues,
-
-                markLineData: markLineData,
-                huilaValues: huilaValues,
-
-            };
+            // 止损线
+            var markLineStop = {
+                yAxis: stopLosePrice,
+                lineStyle: {
+                    normal: {
+                        opacity: 1,
+                        type: 'dashed',
+                        width: 1,
+                        color: this.echartsConfig.upColor
+                    },
+                },
+                symbol: 'circle',
+                symbolSize: 1,
+                label: {
+                    normal: {
+                        color: this.echartsConfig.upColor,
+                        formatter: '止损: ' + stopLosePrice.toFixed(2) + '\n盈利率: -' + stopLosePercent + '%',
+                    },
+                },
+            }
+            markLineData.push(markLineStop)
+            // 动止记录
+            for (let i = 0; i < this.currentPosition.dynamicPositionList.length; i++) {
+                // 数量
+                let dynamicItem = this.currentPosition.dynamicPositionList[i]
+                // let dynamicPercent = (Math.abs(dynamicItem.price - openPrice) / openPrice * 100 * marginLevel).toFixed(2)
+                let dynamicAmount = dynamicItem.amount
+                let direction = this.dynamicDirectionMap[dynamicItem.direction]
+                let markLineObj = {
+                    yAxis: dynamicItem.price,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'dashed',
+                            width: 1,
+                            color: this.echartsConfig.downColor
+                        },
+                    },
+                    label: {
+                        normal: {
+                            color: this.echartsConfig.downColor,
+                            formatter:  dynamicItem.price +' ' +direction+' ' + dynamicAmount + '手',
+                        }
+                    },
+                    symbol: 'circle',
+                    symbolSize: 1
+                }
+                markLineData.push(markLineObj)
+            }
+            return markLineData
         },
         //计算开仓手数
         calcAccount() {
