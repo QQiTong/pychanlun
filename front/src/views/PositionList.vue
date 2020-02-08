@@ -96,10 +96,9 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="6">
-                        <el-form-item label="危险系数">
-                            <el-rate v-model="positionForm.importance" :colors="rateColors"
-                                     :max="3"
-                                     style="margin-top:8px;"/>
+                        <el-form-item label="止损价格" prop="price">
+                            <el-input v-model.number="positionForm.stopLosePrice" type="number"
+                                      placeholder="请输入" class="form-input"/>
                         </el-form-item>
                     </el-col>
                     <el-col :span="6">
@@ -120,6 +119,18 @@
                     </el-col>
 
                 </el-row>
+                <el-row>
+                     <el-col :span="6">
+                        <el-form-item label="危险系数">
+                            <el-rate v-model="positionForm.importance" :colors="rateColors"
+                                     :max="3"
+                                     style="margin-top:8px;"/>
+                        </el-form-item>
+                    </el-col>
+
+                </el-row>
+
+
                 <!-- 动态止盈start -->
                 <!--    编辑状态-->
                 <el-divider content-position="left">持仓过程记录（ 动态止盈 | 加仓 | 锁仓 | 止损 ）</el-divider>
@@ -273,7 +284,7 @@
         <!--                 <el-pagination class="pagination-container" background layout="total,prev, pager, next"-->
         <!--                           :current-page.sync="listQuery.current" :page-size="listQuery.size"-->
         <!--                           :total="listQuery.total" @current-change="handlePageChange">-->
-<!--        </el-pagination>-->
+        <!--        </el-pagination>-->
 
     </div>
 </template>
@@ -385,6 +396,7 @@
                     price: '',
                     //数量
                     amount: '',
+                    stopLosePrice:'',
                     //区间套级别
                     nestLevel: '',
                     //介入逻辑
@@ -422,19 +434,19 @@
             }
         },
         mounted() {
-            this.getPosition(this.positionQueryForm.status, this.listQuery.current,this.listQuery.size)
+            this.getPosition(this.positionQueryForm.status, this.listQuery.current, this.listQuery.size)
         },
         methods: {
             handleSizeChange(currentSize) {
                 this.listQuery.size = currentSize
-                this.getPosition(this.positionQueryForm.status, this.listQuery.current,this.listQuery.size)
+                this.getPosition(this.positionQueryForm.status, this.listQuery.current, this.listQuery.size)
             },
             handlePageChange(currentPage) {
                 this.listQuery.current = currentPage
-                this.getPosition(this.positionQueryForm.status, this.listQuery.current,this.listQuery.size)
+                this.getPosition(this.positionQueryForm.status, this.listQuery.current, this.listQuery.size)
             },
             handleQueryStatusChange() {
-                this.getPosition(this.positionQueryForm.status, this.listQuery.current,this.listQuery.size)
+                this.getPosition(this.positionQueryForm.status, this.listQuery.current, this.listQuery.size)
             },
             filterTags(value, row) {
                 return row.status === value;
@@ -443,9 +455,9 @@
                 console.log(this.$parent)
                 this.$parent.jumpToKline(symbol)
             },
-            getPosition(status, page,size) {
+            getPosition(status, page, size) {
                 this.listLoading = true
-                userApi.getPosition(status, page,size).then((res) => {
+                userApi.getPosition(status, page, size).then((res) => {
                     this.listLoading = false
                     this.listQuery.total = res.total
                     this.positionList = res.records
@@ -475,6 +487,7 @@
                     direction: '',
                     price: '',
                     amount: '',
+                    stopLosePrice:'',
                     nestLevel: '',
                     enterReason: '',
                     holdReason: '',
@@ -517,7 +530,8 @@
                                 duration: 2000
                             })
                             //拉取后端接口获取最新持仓列表
-                            this.getPosition()
+                              this.getPosition(this.positionQueryForm.status, this.listQuery.current, this.listQuery.size)
+
                         }).catch((error) => {
                             this.submitBtnLoading = false
 
@@ -541,7 +555,6 @@
                         // const tempData = Object.assign({}, this.positionForm)
                         userApi.updatePosition(this.positionForm).then((res) => {
                             this.submitBtnLoading = false
-
                             console.log("更新结果", res)
                             this.dialogFormVisible = false
                             this.$notify({
@@ -551,7 +564,8 @@
                                 duration: 2000
                             })
                             //拉取后端接口获取最新持仓列表
-                            this.getPosition()
+                            this.getPosition(this.positionQueryForm.status, this.listQuery.current, this.listQuery.size)
+
                         }).catch((error) => {
                             this.submitBtnLoading = false
                             console.log("更新持仓失败:", error)
@@ -589,9 +603,11 @@
         .form-input {
             width: 200px !important;
         }
+
         .form-input-short {
             width: 100px !important;
         }
+
         .long-textarea {
             width: 400px;
         }
