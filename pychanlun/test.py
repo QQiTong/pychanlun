@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from pychanlun.Calc import Calc
 from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.funcat.api import *
-
+from pychanlun.monitor import BeichiMonitor
 import sys
 from rqdatac import *
 import os
@@ -24,6 +24,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 from tqsdk import tafunc
+
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
@@ -56,6 +57,7 @@ def getDominantSymbolWithInfo():
     print("当前主力合约:", dominantSymbolInfoList)
     print("当前主力合约2:", dominantSymbolList)
 
+
 def getDominantSymbol():
     symbolList = config['symbolList']
     dominantSymbolList = []
@@ -64,6 +66,7 @@ def getDominantSymbol():
         dominantSymbol = df[-1]
         dominantSymbolList.append(dominantSymbol)
     return dominantSymbolList
+
 
 def testDb():
     # init('license',
@@ -88,7 +91,9 @@ def testChange():
     #      ('rqdatad-pro.ricequant.com', 16011))
     startTime = time.process_time()
     symbolChangeMap = {}
-    dominantSymbolList =  ['RB2005', 'HC2005', 'RU2005', 'NI2004', 'FU2005', 'ZN2003', 'SP2005', 'BU2006', 'AU2006', 'AG2006', 'MA2005', 'TA2005', 'SR2005', 'OI2005', 'AP2005', 'CF2005', 'M2005', 'I2005', 'EG2005', 'J2005', 'JM2005', 'PP2005', 'P2005', 'RM2005', 'Y2005']
+    dominantSymbolList = ['RB2005', 'HC2005', 'RU2005', 'NI2004', 'FU2005', 'ZN2003', 'SP2005', 'BU2006', 'AU2006',
+                          'AG2006', 'MA2005', 'TA2005', 'SR2005', 'OI2005', 'AP2005', 'CF2005', 'M2005', 'I2005',
+                          'EG2005', 'J2005', 'JM2005', 'PP2005', 'P2005', 'RM2005', 'Y2005']
 
     end = datetime.now() + timedelta(1)
     start = datetime.now() + timedelta(-1)
@@ -214,6 +219,7 @@ def getBtcData2():
     r = requests.get(url, params=payload, proxies=proxies)
     print(r)
 
+
 def testBitmex():
     for i in range(100):
         getBtcData2()
@@ -229,6 +235,7 @@ def testBitmex():
     # getBtcData('1d')
     # getBtcData('7d')
 
+
 def saveBeichiLog(symbol, period, price, signal, remark):
     DBPyChanlun['beichi_log'].insert_one({
         'date_created': datetime.now().strftime("%m-%d %H:%M"),
@@ -238,27 +245,25 @@ def saveBeichiLog(symbol, period, price, signal, remark):
         'signal': signal,
         'remark': remark
     })
+
+
 def testBeichiDb():
     saveBeichiLog(symbol="BTC_CQ", period="15m", price=8166, signal=True, remark="break B")
     saveBeichiLog(symbol="BTC_CQ", period="30m", price=8166, signal=True, remark="Vfan B")
+
 
 def testHuila():
     init('license',
          'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
          ('rqdatad-pro.ricequant.com', 16011))
     calc = Calc()
-    result = calc.calcData("3m","RB2001")
-    print("结果：",result)
-def app():
-    # testBitmex()
-    # testBeichiDb()
-    # testHuila()
-    testChange()
-    # testTQ()
-    # testRQ()
+    result = calc.calcData("3m", "RB2001")
+    print("结果：", result)
+
+
 def testTQ():
     api = TqApi()
-    df = api.get_kline_serial("SHFE.rb2005", 60*240)
+    df = api.get_kline_serial("SHFE.rb2005", 60 * 240)
     nparray = np.array(df)
     npKlineList = nparray.tolist()
     # npIndexList = pd.to_numeric(df.index) // 1000000000
@@ -267,7 +272,7 @@ def testTQ():
     for i in range(len(npKlineList)):
         # timeStamp = int(time.mktime(npKlineList[i][0].timetuple()))
         # timeStamp = int(time.mktime(df.index[i].timetuple()))
-        timeStamp =str(tafunc.time_to_datetime(npKlineList[i][0]))
+        timeStamp = str(tafunc.time_to_datetime(npKlineList[i][0]))
         item = {}
         item['time'] = timeStamp
         item['open'] = 0 if pd.isna(npKlineList[i][2]) else npKlineList[i][2]
@@ -280,29 +285,46 @@ def testTQ():
     # print(klineList)
     api.wait_update()
 
+
 def testRQ():
     # start = time.process_time()
-    df = rq.current_minute('RB2005',fields=['open', 'high', 'low', 'close', 'volume'])
-    print(df)
-    print(df.iloc[0, 0])
-    print(df.iloc[0, 1])
-    print(df.iloc[0, 2])
-    print(df.iloc[0, 3])
-    # end = datetime.now() + timedelta(1)
-    # start = datetime.now() + timedelta(-1)
-    # df1d = rq.get_price('RB2005', frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-    #                     start_date=start, end_date=end)
-    # print(df1d)
+    # df = rq.current_minute('RB2005',fields=['open', 'high', 'low', 'close', 'volume'])
+    # print(df)
+    # print(df.iloc[0, 0])
+    # print(df.iloc[0, 1])
+    # print(df.iloc[0, 2])
+    # print(df.iloc[0, 3])
+    end = datetime.now() + timedelta(1)
+    start = datetime.now() + timedelta(-1)
+    df1d = rq.get_price('RB2005', frequency='15d', fields=['open', 'high', 'low', 'close', 'volume'],
+                        )
+    print(df1d)
     # print(df1d.iloc[0,0])
     # print(df1d.iloc[0,1])
     # print(df1d.iloc[0,2])
     # print(df1d.iloc[0,3])
     # elapsed = (time.process_time() - start)  # 结束计时
     # print("程序执行的时间:" + str(elapsed) + "s")  # 印出时间
-
-
-
     return False
+
+
+def testMonitor():
+    # 15F,60F  [3585,3537]
+    #  26  7
+    start = time.clock()
+    BeichiMonitor.calStopWinCount("BU2006",'3m',3200)
+    elapsed = (time.clock() - start)  # 结束计时
+    print("程序执行的时间:" + str(elapsed) + "s")  # 印出时间
+
+def app():
+    # testBitmex()
+    # testBeichiDb()
+    # testHuila()
+    # testChange()
+    # testTQ()
+    # testRQ()
+    testMonitor()
+
 
 if __name__ == '__main__':
     app()

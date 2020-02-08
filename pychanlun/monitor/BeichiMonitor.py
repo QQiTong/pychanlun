@@ -21,6 +21,7 @@ import os
 import json
 from pychanlun.db import DBPyChanlun
 from pychanlun.config import config
+from pychanlun.monitor.BusinessService import BusinessService
 
 '''
 背驰监控
@@ -41,6 +42,16 @@ symbolListDigitCoin = ['BTC_CQ'
 periodList = ['3m', '5m', '15m', '30m', '60m']
 periodList1 = ['3m', '5m', '15m', '30m', '60m']
 periodList2 = ['3m', '5m', '15m', '30m', '60m', '240m']
+# 高级别 高高级别映射
+# 暂时用3d 15d
+futureLevelMap = {
+    '3m': ['15m', '60m'],
+    '5m': ['30m', '240m'],
+    '15m': ['60m', '1d'],
+    '30m': ['240m', '3d'],
+    '60m': ['1d', '3d'],
+    '240m': ['3d', '15d'],
+}
 dominantSymbolInfoList = {}
 # 账户资金
 account = 19
@@ -125,6 +136,7 @@ def monitorFuturesAndDigitCoin(type):
     lastTimeTupoMap = {}
     lastTimeVreverseMap = {}
     lastTimeDuanBreakMap = {}
+    lastTimeFractalMap = {}
 
     symbolList = []
     if type == "1":
@@ -149,6 +161,7 @@ def monitorFuturesAndDigitCoin(type):
         lastTimeTupoMap[symbol] = {}
         lastTimeVreverseMap[symbol] = {}
         lastTimeDuanBreakMap[symbol] = {}
+        lastTimeFractalMap[symbol] = {}
 
         for j in range(len(periodList)):
             period = periodList[j]
@@ -157,11 +170,13 @@ def monitorFuturesAndDigitCoin(type):
             lastTimeTupoMap[symbol][period] = 0
             lastTimeVreverseMap[symbol][period] = 0
             lastTimeDuanBreakMap[symbol][period] = 0
+            lastTimeFractalMap[symbol][period] = 0
     print(lastTimeMap)
     print(lastTimeHuilaMap)
     print(lastTimeTupoMap)
     print(lastTimeVreverseMap)
     print(lastTimeDuanBreakMap)
+    print(lastTimeFractalMap)
     startTime = int(time.time())
 
     try:
@@ -178,6 +193,7 @@ def monitorFuturesAndDigitCoin(type):
                     lastTupoTime = lastTimeTupoMap[symbol][period]
                     lastVreverseTime = lastTimeVreverseMap[symbol][period]
                     lastDuanBreakTime = lastTimeDuanBreakMap[symbol][period]
+                    lastFractalTime = lastTimeFractalMap[symbol][period]
 
                     diffTime = currentTime - lastTime
                     print("current:", symbol, period, datetime.now())
@@ -300,12 +316,12 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period,tag, ' huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
+            msg = symbol, period, tag, ' huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             if maxOrderCount >= 1:
                 sendEmail(msg)
             # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="huila B"+tag,
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="huila B" + tag,
                           remark=notLower)
 
     if len(result['sell_zs_huila']['date']) > 0:
@@ -320,10 +336,10 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period,tag, ' huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period, tag, ' huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="huila S"+tag,
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="huila S" + tag,
                           remark=notHigher)
             if maxOrderCount >= 1:
                 sendEmail(msg)
@@ -343,14 +359,14 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
         if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period,tag, ' higher huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
+            msg = symbol, period, tag, ' higher huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             if maxOrderCount >= 1:
                 sendEmail(msg)
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
             #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher huila B"+tag,
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher huila B" + tag,
                           remark=notLower)
 
     if len(result['sell_zs_huila_higher']['date']) > 0:
@@ -367,11 +383,11 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
             lastTimeHuilaMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
 
-            msg = symbol, period,tag, ' higher huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period, tag, ' higher huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
             #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher huila S"+tag,
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher huila S" + tag,
                           remark=notHigher)
             if maxOrderCount >= 1:
                 sendEmail(msg)
@@ -452,7 +468,7 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
         if lastTupoTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
             lastTimeTupoMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'higher tupo S ', maxOrderCount,lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period, 'higher tupo S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher tupo S",
@@ -499,7 +515,7 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
             lastTimeVreverseMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
 
-            msg = symbol, period, 'Vreverse S ',maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period, 'Vreverse S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="Vreverse S",
@@ -520,7 +536,7 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
             lastTimeVreverseMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
 
-            msg = symbol, period, 'higher Vreverse B ', maxOrderCount,lastBuyDate, lastBuyData, closePrice, time.strftime(
+            msg = symbol, period, 'higher Vreverse B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             sendEmail(msg)
@@ -539,7 +555,7 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
             lastTimeVreverseMap[symbol][period] = dateStamp
             maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price)
 
-            msg = symbol, period, 'higher Vreverse S ',maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
+            msg = symbol, period, 'higher Vreverse S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
             saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher Vreverse S",
@@ -639,6 +655,89 @@ def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTime
                 sendEmail(msg)
 
 
+'''
+监控 持仓品种的向上两个级别的顶底分型
+'''
+def monitorFractal(result, lastFractalTime, currentTime, timeScope, lastTimeFractalMap, symbol, period,
+                   closePrice):
+    # 监控顶分型 如果是持仓品种 顶分型一定有，通过顶分型出现的时间 进行过滤
+    if len(result['sell_fractal']['date']) > 0:
+        # 最后高级别顶分型出现时间
+        lastSellHigherDate = result['sell_fractal']['date'][-1]
+        # 最后高高级别顶分型出现时间
+        lastSellHigherHigherDate = result['sell_fractal']['date'][-2]
+        # lastBuyData = result['sell_fractal']['data'][-1]
+        # 最后高级别顶分型出现价格
+        higher_stop_win_price = result['sell_fractal']['stop_win_price'][-1]
+        # 最后高高级别顶分型出现的价格
+        higher_higher_stop_win_price = result['sell_fractal']['stop_win_price'][-2]
+        # 找到2个级别中最新触发的时间
+        higher_dateStamp = int(time.mktime(time.strptime(lastSellHigherDate, "%Y-%m-%d %H:%M")))
+        higher_higher_dateStamp = int(time.mktime(time.strptime(lastSellHigherHigherDate, "%Y-%m-%d %H:%M")))
+        # 取高级别
+        if higher_dateStamp > higher_higher_dateStamp:
+            stop_win_price = higher_stop_win_price
+            dateStamp = higher_dateStamp
+            lastSellDate = lastSellHigherDate
+            level = 0
+        else:
+            # 取高高级别
+            stop_win_price = higher_higher_stop_win_price
+            dateStamp = higher_higher_dateStamp
+            lastSellDate = lastSellHigherHigherDate
+            level = 1
+        if lastFractalTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeFractalMap[symbol][period] = dateStamp
+            # todo 查库或者直接拿都行
+            open_pos_price = 0
+            open_pos_amount = 0
+            stop_lose_price = 0
+            stopWinCount = calStopWinCount(symbol, period, closePrice)
+            msg = symbol, period, 'fractal S ', stopWinCount, futureLevelMap[period][
+                level], lastSellDate, stop_win_price, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time())), closePrice
+            sendEmail(msg)
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="fractal S", remark="")
+    # 出现底分型
+    if len(result['buy_fractal']['date']) > 0:
+        # 最后高级别顶分型出现时间
+        lastBuyHigherDate = result['buy_fractal']['date'][-1]
+        # 最后高高级别顶分型出现时间
+        lastBuyHigherHigherDate = result['buy_fractal']['date'][-2]
+        # lastBuyData = result['buy_fractal']['data'][-1]
+        # 最后高级别顶分型出现价格
+        higher_stop_win_price = result['buy_fractal']['stop_win_price'][-1]
+        # 最后高高级别顶分型出现的价格
+        higher_higher_stop_win_price = result['buy_fractal']['stop_win_price'][-2]
+        # 找到2个级别中最新触发的时间
+        higher_dateStamp = int(time.mktime(time.strptime(lastBuyHigherDate, "%Y-%m-%d %H:%M")))
+        higher_higher_dateStamp = int(time.mktime(time.strptime(lastBuyHigherHigherDate, "%Y-%m-%d %H:%M")))
+        # 取高级别
+        if higher_dateStamp > higher_higher_dateStamp:
+            stop_win_price = higher_stop_win_price
+            dateStamp = higher_dateStamp
+            lastBuyDate = lastBuyHigherDate
+            level = 0
+        else:
+            # 取高高级别
+            stop_win_price = higher_higher_stop_win_price
+            dateStamp = higher_higher_dateStamp
+            lastBuyDate = lastBuyHigherHigherDate
+            level = 1
+        if lastFractalTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
+            lastTimeFractalMap[symbol][period] = dateStamp
+            # todo 查库或者直接拿都行,不知道哪个性能更好
+            open_pos_price = 0
+            open_pos_amount = 0
+            stop_lose_price = 0
+            stopWinCount = calStopWinCount(symbol, period, closePrice)
+            msg = symbol, period, 'fractal B ', stopWinCount, futureLevelMap[period][
+                level], lastBuyDate, stop_win_price, time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time())), closePrice
+            sendEmail(msg)
+            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="fractal B", remark="")
+
+
 def sendEmail(msg):
     print(msg)
     mailResult = mail.send(str(msg))
@@ -673,6 +772,32 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice):
     maxOrderCount = maxOrderCount2 if maxOrderCount1 > maxOrderCount2 else maxOrderCount1
     return maxOrderCount
 
+
+# 计算动止手数（盈亏比大于2.3：1 动止30%才能保证不亏）
+# 主力合约，开仓价格，开仓数量，止损价格，止盈价格    用最新价来算回更准确，因为触发价可能会有滑点
+def calStopWinCount(symbol, period, closePrice):
+    # 动止公式:  (1 - stopWinPosRate) / stopWinPosRate = winLoseRate
+    # stopWinPosRate: 动态止盈多少仓位
+    # winLoseRate: 当前的盈亏比
+    # 查库耗时 0.005s
+    businessService = BusinessService()
+    positionInfo = businessService.getPosition(symbol, period, 'holding')
+    # 该品种有持仓
+    if positionInfo != -1:
+        print("仓位查库结果：", positionInfo)
+        open_pos_price = positionInfo['price']
+        open_pos_amount = positionInfo['amount']
+        stop_lose_price = positionInfo['stopLosePrice']
+        stop_win_price = closePrice
+        winLoseRate = round(abs(stop_win_price - open_pos_price) / abs(open_pos_price - stop_lose_price), 2)
+        # 标准动止 第1次 高级别 走30%  ， 第2次 高高级别再走30%  ，但如果当前盈亏比已经超过 2.3：1，那么第1次就不用动止30%，需要计算
+        if winLoseRate > 2.3:
+            stopWinPosRate = round(1 / (winLoseRate + 1), 2)
+        else:
+            stopWinPosRate = 0.3
+        stopWinCount = round(stopWinPosRate * open_pos_amount)
+        print("当前盈亏比", winLoseRate, "当前动止仓位百分比", stopWinPosRate, "动止手数", stopWinCount)
+        return stopWinCount
 def run(**kwargs):
     threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

@@ -149,6 +149,14 @@ class BusinessService:
             signalList.append(item)
         return signalList
 
+    def getPosition(self,symbol,period,status):
+        result = DBPyChanlun["position_record"].find({'symbol':symbol,'period':period,'status':status})
+        if result.count()>0:
+            for x in result:
+                x['_id'] = str(x['_id'])
+            return x
+        else:
+            return -1
     def getPositionList(self,status,page,size):
         positionList = []
         collection = DBPyChanlun["position_record"]
