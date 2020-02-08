@@ -4,7 +4,7 @@ from pychanlun.db import DBPyChanlun
 import re
 import os
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from multiprocessing import Pool
 from bson.codec_options import CodecOptions
 import pytz
@@ -37,10 +37,12 @@ def run(**kwargs):
             code = match.group(1)
             period = match.group(4)
             codes.append({"code": code, "period": period})
-    pool = Pool()
+    pool = Pool(50)
     pool.map(calculate, codes)
     pool.close()
     pool.join()
+    # 最近的100条记录输出到通达信软件
+    export_to_tdx()
 
 
 def calculate(info):
@@ -120,7 +122,8 @@ def calculate(info):
                     tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        save_signal(code, period, '拉回笔中枢确认底背', fire_time, price, 'BUY_LONG', tags)
+        save_signal(code, period, '拉回笔中枢确认底背',
+                    fire_time, price, 'BUY_LONG', tags)
 
     count = len(zs_huila['sell_zs_huila']['date'])
     for i in range(count):
@@ -145,7 +148,8 @@ def calculate(info):
                     tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        save_signal(code, period, '升破笔中枢预多', fire_time, price, 'BUY_LONG', tags)
+        save_signal(code, period, '升破笔中枢预多',
+                    fire_time, price, 'BUY_LONG', tags)
 
     count = len(zs_tupo['sell_zs_tupo']['date'])
     for i in range(count):
@@ -207,7 +211,8 @@ def calculate(info):
 
     # 缠论一买，二买，三买计算
     count = len(time_series)
-    diff, dea, macd = ta.MACD(np.array([float(x) for x in close_series]), fastperiod=12, slowperiod=26, signalperiod=9)
+    diff, dea, macd = ta.MACD(np.array(
+        [float(x) for x in close_series]), fastperiod=12, slowperiod=26, signalperiod=9)
     for idx in range(count):
         d1 = FindPrevEq(duan_series, -1, idx)
         g1 = FindPrevEq(duan_series, 1, idx)
@@ -248,7 +253,8 @@ def calculate(info):
                                 break
                         # 成立
                         if is_signal:
-                            p = BuyPosition(entanglement_list, duan_series, bi_series, high_series, low_series, idx)
+                            p = BuyPosition(
+                                entanglement_list, duan_series, bi_series, high_series, low_series, idx)
                             remark = "转折"
                             if p == 1:
                                 remark = "一买"
@@ -256,14 +262,16 @@ def calculate(info):
                                 remark = "二买"
                             elif p == 3:
                                 remark = "三买"
-                            save_signal(code, period, remark, time_series[idx], close_series[idx], 'BUY_LONG')
+                            save_signal(
+                                code, period, remark, time_series[idx], close_series[idx], 'BUY_LONG')
 
 
-def save_signal(code, period, remark, fire_time, price, position, tags = []):
+def save_signal(code, period, remark, fire_time, price, position, tags=[]):
     logger = logging.getLogger()
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
-        logger.info("%s %s %s %s %s %s" % (code, period, remark, tags, fire_time, price))
+        logger.info("%s %s %s %s %s %s" %
+                    (code, period, remark, tags, fire_time, price))
         DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find_one_and_update({
             "code": code, "period": period, "fire_time": fire_time, "position": position
         }, {
@@ -277,3 +285,24 @@ def save_signal(code, period, remark, fire_time, price, position, tags = []):
                 'tags': tags
             }
         }, upsert=True)
+
+
+def export_to_tdx():
+    TDX_HOME = os.environ.get("TDX_HOME")
+    if TDX_HOME is None:
+        logger.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
+        return
+    signals = DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).find({}).sort('fire_time', pymongo.DESCENDING).limit(100)
+    seq = []
+    for signal in list(signals):
+        code = signal["code"]
+        if code.startswith("sh"):
+            code = code.replace("sh", "1")
+        elif code.startswith("sz"):
+            code = code.replace("sz", "0")
+        else:
+            continue
+        seq.append(code + "\n")
+    with open(os.path.join(TDX_HOME, "T0002\\blocknew\\CL%s.blk" % date.today().strftime("%d")), "w") as fo:
+        fo.writelines(seq)

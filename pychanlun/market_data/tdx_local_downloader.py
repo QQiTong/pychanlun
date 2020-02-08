@@ -18,8 +18,8 @@ tz = pytz.timezone('Asia/Shanghai')
 
 def run(**kwargs):
     logger = logging.getLogger()
-    tdx_home = os.environ.get("TDX_HOME")
-    if tdx_home is None:
+    TDX_HOME = os.environ.get("TDX_HOME")
+    if TDX_HOME is None:
         logger.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
 
@@ -27,7 +27,7 @@ def run(**kwargs):
     codes = []
 
     for subdir in ["sh", "sz"]:
-        path = os.path.join(tdx_home, "vipdoc\\%s\\fzline" % subdir)
+        path = os.path.join(TDX_HOME, "vipdoc\\%s\\fzline" % subdir)
         files = os.listdir(path)
         for filename in files:
             code = None
@@ -42,7 +42,7 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    pool = Pool()
+    pool = Pool(50)
     pool.map(parse_and_save, codes)
     pool.close()
     pool.join()
