@@ -43,12 +43,12 @@ def run(**kwargs):
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
     pool = Pool(50)
-    pool.map(parse_and_save, codes)
+    pool.map(parse_and_save_5m, codes)
     pool.close()
     pool.join()
 
 
-def parse_and_save(info):
+def parse_and_save_5m(info):
     logger = logging.getLogger()
     logger.info("code=%s filepath=%s", info["code"], info["filepath"])
     start_time = datetime.now() - timedelta(days=info["days"])
@@ -63,6 +63,8 @@ def parse_and_save(info):
     save_data(info["code"], "15m", df15m)
     df30m = df.resample('30T', closed='right', label='right').agg(ohlc).dropna(how='any')
     save_data(info["code"], "30m", df30m)
+    df60m = df.resample('60T', closed='right', label='right').agg(ohlc).dropna(how='any')
+    save_data(info["code"], "60m", df60m)
     return True
 
 
