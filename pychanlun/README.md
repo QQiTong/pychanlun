@@ -1,41 +1,62 @@
-# 部署
+# PYCHANLUN量化交易系统
 
-## 在Win上用pm2部署服务
+## 在Windows本地机器部署
 
-以下操作都是默认代码在D:\pychanlun
+### 工具
 
-安装pm2:
+#### scoop
+
+推荐使用scoop管理windows软件, 网站：<https://scoop.sh>。
+
+#### nssm
+
+推荐使用nssm把程序部署成windows的服务，网站：<https://nssm.cc/>。
+
+使用scoop安装python,nginx,nssm。我们使用python37，python38可能还会有不兼容的情况。
+
+安装python37需要用到versions bucket。
 
 ```cmd
-npm i pm2 -g
+scoop bucket add versions
 ```
 
-安装pm2-windows-service:
-
 ```cmd
-npm i pm2-windows-service -g
+scoop install python37
+scoop install nginx
+scoop install nssm
 ```
 
-用pm2启动下载数据和监控服务:
+使用nssm把API服务程序安装成windows服务。生产模式服务放在在1888端口，防止和开发模式（使用5000端口）冲突。
 
 ```cmd
-pm2 start D:\development\pychanlun\back\scheduler.py --interpreter python -n pychanlun-scheduler
+nssm install pychanlun-api-service "C:/Users/Administrator/scoop/shims/python.exe"
+nssm set pychanlun-api-service AppDirectory "D:/development/pychanlun"
+nssm set pychanlun-api-service AppParameters "pychanlun/cli.py server run --port 18888"
+nssm start pychanlun-api-service
 ```
 
-用pm2启动api服务:
+使用nssm部署NGINX服务。
+
+网页代码需要打包好，如果存放的目录不一样还要调整D:/development/pychanlun/nginx里面的配置。nginx对接口的代理指向到18888端口。
 
 ```cmd
-pm2 start pychanlun -n pychanlun-api-server -- server run --port 18888
+cd D:\development\pychanlun\front
+npm run build
 ```
 
-用pm2启动web服务(nginx)
-
 ```cmd
-pm2 start nginx -x -- -p D:/development/pychanlun/web/nginx
+nssm install nginx "C:/Users/Administrator/scoop/shims/nginx.exe"
+nssm set nginx AppParameters "-p D:/development/pychanlun/nginx"
+nssm start nginx
 ```
 
-保存服务记录，使服务可以随系统后自动启动
+这样的部署后只要输入<http://localhost>就可以访问系统了。
+
+### 开发模式
+
+在开发模式下，请使用如下方式启动程序，这样就不会和生产模式冲突了。
 
 ```cmd
-pm2 save
+cd D:\development\pychanlun
+python pychanlun\server.py
 ```
