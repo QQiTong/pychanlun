@@ -28,10 +28,13 @@ scoop install nssm
 
 使用nssm把API服务程序安装成windows服务。生产模式服务放在在18888端口，防止和开发模式（使用5000端口）冲突。
 
+MongoDB也要先安装成Windows服务模式，参考MongoDB文档。
+
 ```cmd
 nssm install pychanlun-api-service "C:/Users/Administrator/scoop/shims/python.exe"
 nssm set pychanlun-api-service AppDirectory "D:/development/pychanlun"
 nssm set pychanlun-api-service AppParameters "pychanlun/cli.py server run --port 18888"
+nssm set pychanlun-api-service DependOnService MongoDB
 nssm start pychanlun-api-service
 ```
 
