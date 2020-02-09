@@ -14,7 +14,7 @@ import copy
 import pydash
 from datetime import datetime
 
-from pychanlun.basic.bi import CalcBi
+from pychanlun.basic.bi import CalcBi, FindLastFractalRegion
 from pychanlun.basic.duan import CalcDuan, CalcDuanExp
 from pychanlun import Duan
 from pychanlun.KlineDataTool import KlineDataTool
@@ -164,15 +164,14 @@ class Calc:
                 klineData = klineDataTool.getFutureData(symbol, currentPeriod, endDate)
                 bigLevelPeriod = self.futureLevelMap[currentPeriod]
                 klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, endDate)
-                # klineDataBigLevel = pydash.filter_(klineDataBigLevel,
-                #                                    lambda klineItem: klineItem['time'] >= klineData[0]['time'])
-                # bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
-                # klineDataBigLevel2 = klineDataTool.getFutureData(symbol, bigLevelPeriod2, endDate)
+                bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
+                klineDataBigLevel2 = klineDataTool.getFutureData(symbol, bigLevelPeriod2, endDate)
 
-        jsonObj = klineData
-        jsonObjBigLevel = klineDataBigLevel
-        # jsonObjBigLevel2 = klineDataBigLevel2
+        jsonObj = klineData # 本级别的K线数据
+        jsonObjBigLevel = klineDataBigLevel # 高级别的K线数据
+        jsonObjBigLevel2 = klineDataBigLevel2 # 高高级别的K线数据
 
+        # 本级别数据
         openPriceList = []
         highList = []
         lowList = []
@@ -194,7 +193,7 @@ class Calc:
             volumeList.append(round(float(item['volume']), 2))
             timeIndexList.append(time.mktime(localTime))
 
-        # 获取大级别数据
+        # 高级别数据
         openPriceListBigLevel = []
         highListBigLevel = []
         lowListBigLevel = []
@@ -213,35 +212,39 @@ class Calc:
                 closePriceListBigLevel.append(round(float(item['close']), 2))
                 timeIndexListBigLevel.append(time.mktime(localTime))
 
-        # 获取大大级别数据
-        # openPriceListBigLevel2 = []
-        # highListBigLevel2 = []
-        # lowListBigLevel2 = []
-        # closePriceListBigLevel2 = []
-        # timeListBigLevel2 = []
-        # timeIndexListBigLevel2 = []
-        # if cat == "FUTURE":
-        #     for i in range(len(jsonObjBigLevel2)):
-        #         item = jsonObjBigLevel[i]
-        #         localTime = time.localtime(item['time'])
-        #         strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
-        #         timeListBigLevel2.append(strTime)
-        #         highListBigLevel2.append(round(float(item['high']), 2))
-        #         lowListBigLevel2.append(round(float(item['low']), 2))
-        #         openPriceListBigLevel2.append(round(float(item['open']), 2))
-        #         closePriceListBigLevel2.append(round(float(item['close']), 2))
-        #         timeIndexListBigLevel2.append(localTime)
+        # 高高级别数据
+        openPriceListBigLevel2 = []
+        highListBigLevel2 = []
+        lowListBigLevel2 = []
+        closePriceListBigLevel2 = []
+        timeListBigLevel2 = []
+        timeIndexListBigLevel2 = []
+        if cat == "FUTURE":
+            for i in range(len(jsonObjBigLevel2)):
+                item = jsonObjBigLevel[i]
+                localTime = time.localtime(item['time'])
+                strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
+                timeListBigLevel2.append(strTime)
+                highListBigLevel2.append(round(float(item['high']), 2))
+                lowListBigLevel2.append(round(float(item['low']), 2))
+                openPriceListBigLevel2.append(round(float(item['open']), 2))
+                closePriceListBigLevel2.append(round(float(item['close']), 2))
+                timeIndexListBigLevel2.append(localTime)
 
         count = len(timeList)
-        # 笔结果
+        # 本级别笔
         biList = [0 for i in range(count)]
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList)
 
+        # 高级别笔
         biListBigLevel = [0 for i in range(len(timeListBigLevel))]
         CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
+        fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
 
-        # biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
-        # CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
+        # 高高级别笔
+        biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
+        CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
+        fractialRegion2 = FindLastFractalRegion(len(timeListBigLevel2), biListBigLevel2, timeListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
 
         # 本级别段处理
         duanList = [0 for i in range(count)]
@@ -434,6 +437,7 @@ class Calc:
         resJson['sell_duan_break'] = duan_pohuai['sell_duan_break']
         resJson['buy_duan_break_higher'] = duan_pohuai_higher['buy_duan_break']
         resJson['sell_duan_break_higher'] = duan_pohuai_higher['sell_duan_break']
+        resJson['fractal'] = [fractialRegion, fractialRegion2]
 
         resJsonStr = json.dumps(resJson)
         # print(resJsonStr)

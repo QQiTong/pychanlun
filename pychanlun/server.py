@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os, sys
+import os
+import sys
 
 from flask import Flask, request, Response
 from waitress import serve
@@ -15,7 +16,7 @@ import rqdatac as rq
 app = Flask(__name__)
 businessService = BusinessService()
 
-
+# curl -X GET http://127.0.0.1:5000/api/stock_data?symbol=RB2005&period=5m
 @app.route('/api/stock_data')
 def data():
     calc = Calc()
@@ -27,10 +28,10 @@ def data():
 
 
 # 获取主力合约
+# curl -X GET http://127.0.0.1:5000/api/dominant
 @app.route('/api/dominant')
 def dominant():
     dominantSymbolInfoList = businessService.getDoinantSynmbol()
-    # print("当前主力合约:",dominantSymbolInfoList)
     return Response(json.dumps(dominantSymbolInfoList), mimetype='application/json')
 
 
@@ -95,8 +96,8 @@ def get_position_list():
     page = int(request.args.get("page") or "1")
     # 每页显示的条目
     size = int(request.args.get("size") or "2")
-    print("status--->", status, page,size)
-    positionList = businessService.getPositionList(status, page,size)
+    print("status--->", status, page, size)
+    positionList = businessService.getPositionList(status, page, size)
     return Response(json.dumps(positionList), mimetype='application/json')
 
 # 跟据单个持仓
@@ -105,16 +106,20 @@ def get_position():
     symbol = request.args.get("symbol")
     period = request.args.get("period") or "all"
     status = request.args.get("status")
-    singlePosition = businessService.getPosition(symbol, period,status)
+    singlePosition = businessService.getPosition(symbol, period, status)
     return Response(json.dumps(singlePosition), mimetype='application/json')
+
 
 def run(**kwargs):
     port = kwargs.get("port", 5000)
     # 程序启动初始化主力合约信息,不需要每次都请求
     businessService.initDoinantSynmbol()
+    # 生产模式运行，用waitress服务器
     serve(app, host='0.0.0.0', port=port)
 
 
 if __name__ == '__main__':
-    print(sys.path)
+    # 初始化合约列表
+    businessService.initDoinantSynmbol()
+    # 开发模式运行，用内置服务器
     app.run()

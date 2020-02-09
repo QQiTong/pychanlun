@@ -236,7 +236,7 @@ def FindLastFractalRegion(count, bi_series, time_series, high_series, low_series
     bottom_fractal = None
     g1 = FindPrevEq(bi_series, 1, count)
     d1 = FindPrevEq(bi_series, -1, count)
-    if g1 > d1:
+    if g1 > d1: # 最后是向上笔
         g2 = FindPrevEq(bi_series, 1, d1)
         candles = MergeCandles(high_series, low_series, open_series, close_series, d1, g1, 1)
         sticks = candles[-1]["sticks"]
@@ -257,7 +257,8 @@ def FindLastFractalRegion(count, bi_series, time_series, high_series, low_series
             if sticks[idx]["h"] > top:
                 top = sticks[idx]["h"]
         bottom_fractal = { "date": dt, "top": top, "bottom": bottom }
-    else:
+        return { "direction": 1, "top_fractal": top_fractal, "bottom_fractal": bottom_fractal }
+    else: # 最后是向上笔
         d2 = FindPrevEq(bi_series, -1, g1)
         candles = MergeCandles(high_series, low_series, open_series, close_series, g1, d1, -1)
         sticks = candles[-1]["sticks"]
@@ -278,3 +279,4 @@ def FindLastFractalRegion(count, bi_series, time_series, high_series, low_series
             if sticks[idx]["l"] < bottom:
                 bottom = sticks[idx]["l"]
         top_fractal = { "date": dt, "top": top, "bottom": bottom }
+        return { "direction": -1, "top_fractal": top_fractal, "bottom_fractal": bottom_fractal }
