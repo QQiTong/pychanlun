@@ -125,8 +125,8 @@ class BusinessService:
                 else:
                     preday = df1d.iloc[0, 3]
                     today = df1m.iloc[0, 0]
-                    change = (today - preday) / preday
-                symbolChangeMap[item] = round(change,4)
+                    change = round(((today - preday) / preday),4)
+                symbolChangeMap[item] = change
                 # print(preday,today,change)
         # print("涨跌幅信息", symbolChangeMap)
 

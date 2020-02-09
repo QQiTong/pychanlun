@@ -148,6 +148,8 @@ class Calc:
         if match_stock is not None:
             cat = "STOCK"
             klineData = klineDataTool.getStockData(symbol, period, endDate)
+            bigLevelPeriod = self.futureLevelMap[period]
+            klineDataBigLevel = klineDataTool.getStockData(symbol, bigLevelPeriod, endDate)
         else:
             if '_CQ' in symbol:
                 cat = "DIGIT_COIN"
