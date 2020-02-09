@@ -5,13 +5,13 @@ import CommonTool from "@/tool/CommonTool";
 // let moment = require('moment')
 // import echarts from 'echarts/lib/echarts'
 import MyHeader from '../MyHeader'
-import PositionList from '../PositionList'
+import FuturePositionList from '../FuturePositionList'
 
 export default {
     name: 'futures-control',
     components: {
         "MyHeader": MyHeader,
-        "PositionList": PositionList
+        "FuturePositionList": FuturePositionList
     },
     data() {
         return {

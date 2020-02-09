@@ -1,6 +1,7 @@
 <template>
     <div class="stock-control-main">
         <MyHeader></MyHeader>
+        <StockPositionList/>
         <el-table
             v-loading="loading"
             :data="signalList"
@@ -54,17 +55,19 @@
 
 <script>
     // @ is an alias to /src
-    import {userApi} from '../api/UserApi'
+    import {userApi} from '@/api/UserApi'
     // import {mapGetters, mapMutations} from 'vuex'
     // let moment = require('moment')
     import echarts from 'echarts/lib/echarts'
-    import CommonTool from "../tool/CommonTool";
+    import CommonTool from "@/tool/CommonTool";
     import MyHeader from "./MyHeader";
+    import StockPositionList from "./StockPositionList";
 
     export default {
         name: 'stock-control',
         components: {
-            "MyHeader": MyHeader
+            "MyHeader": MyHeader,
+            "StockPositionList":StockPositionList
         },
         data() {
             return {
