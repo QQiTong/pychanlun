@@ -1,6 +1,6 @@
 // import echarts from 'echarts'
-import {userApi} from "../../api/UserApi";
-import CommonTool from "../../tool/CommonTool"
+import {futureApi} from "@/api/futureApi";
+import CommonTool from "@/tool/CommonTool"
 // import 'echarts/lib/chart/candlestick'
 // import 'echarts/lib/chart/line'
 // import 'echarts/lib/chart/bar'
@@ -217,7 +217,7 @@ export default {
             if (this.period !== "") {
                 period = this.period
             }
-            userApi.getPosition(this.symbol, period, this.positionStatus).then(res => {
+            futureApi.getPosition(this.symbol, period, this.positionStatus).then(res => {
                 this.currentPosition = res
                 console.log("获取当前品种持仓:", res);
             }).catch(() => {
@@ -393,7 +393,7 @@ export default {
         getDominantSymbol() {
             let that = this;
 
-            userApi.dominant().then(res => {
+            futureApi.dominant().then(res => {
                 console.log("获取主力合约:", res);
                 that.futureSymbolList = res;
                 that.futureSymbolList.push(...that.digitCoinsSymbolList)
@@ -513,7 +513,7 @@ export default {
             }
 
 
-            userApi.stockData(requestData).then(res => {
+            futureApi.stockData(requestData).then(res => {
 
                 this.requestFlag = true
                 if (this.period !== "") {

@@ -371,7 +371,7 @@
 
 <script>
 import CommonTool from "@/tool/CommonTool";
-import { userApi } from "@/api/UserApi";
+import { futureApi } from "@/api/futureApi";
 
 const signalTypeOptions = [
   { key: "tupo", display_name: "突破" },
@@ -587,7 +587,7 @@ export default {
     },
     getPositionList(status, page, size) {
       this.listLoading = true;
-      userApi
+      futureApi
         .getPositionList(status, page, size)
         .then(res => {
           this.listLoading = false;
@@ -650,7 +650,7 @@ export default {
       this.$refs["positionFormRef"].validate(valid => {
         if (valid) {
           this.submitBtnLoading = true;
-          userApi
+          futureApi
             .createPosition(this.positionForm)
             .then(res => {
               this.submitBtnLoading = false;
@@ -690,7 +690,7 @@ export default {
         if (valid) {
           this.submitBtnLoading = true;
           // const tempData = Object.assign({}, this.positionForm)
-          userApi
+          futureApi
             .updatePosition(this.positionForm)
             .then(res => {
               this.submitBtnLoading = false;

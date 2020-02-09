@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const userApi = {
+export const futureApi = {
     /**
      * 获取K线数据
      */

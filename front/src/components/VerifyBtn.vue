@@ -5,8 +5,8 @@
 </template>
 
 <script>
-  import { userApi } from '../api/UserApi'
-  import geetestMixin from '../tool/geetest'
+  import { futureApi } from '@/api/futureApi'
+  import geetestMixin from '@/tool/geetest'
 
   export default {
     name: 'VerifyBtn',
@@ -188,7 +188,7 @@
           ...this.captchaSuccess,
           sign: this.sign
         }
-        userApi.sendSms(data, geetest)
+        futureApi.sendSms(data, geetest)
           .then(() => {
             // alert('验证码发送成功!')
           })

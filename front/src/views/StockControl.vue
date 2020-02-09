@@ -55,7 +55,7 @@
 
 <script>
     // @ is an alias to /src
-    import {userApi} from '@/api/UserApi'
+    import {stockApi} from '@/api/stockApi'
     // import {mapGetters, mapMutations} from 'vuex'
     // let moment = require('moment')
     import echarts from 'echarts/lib/echarts'
@@ -99,7 +99,7 @@
                 return row.period === value;
             },
             getSignalList(page) {
-                userApi.getStockSignalList(page).then(res => {
+                stockApi.getStockSignalList(page).then(res => {
                     this.signalList = res
                     this.loading = false
                 }).catch((error) => {

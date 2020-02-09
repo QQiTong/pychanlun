@@ -1,5 +1,5 @@
 // @ is an alias to /src
-import {userApi} from '@/api/UserApi'
+import {futureApi} from '@/api/futureApi'
 import CommonTool from "@/tool/CommonTool";
 // import {mapGetters, mapMutations} from 'vuex'
 // let moment = require('moment')
@@ -188,7 +188,7 @@ export default {
             }
         },
         getDominantSymbol() {
-            userApi.getDominant().then(res => {
+            futureApi.getDominant().then(res => {
                 console.log("获取主力合约:", res)
                 this.futureSymbolList = res;
                 this.futureSymbolList.push(...this.digitCoinsSymbolList)
@@ -201,7 +201,7 @@ export default {
             })
         },
         getBeichiList() {
-            userApi.getBeichiList().then(res => {
+            futureApi.getBeichiList().then(res => {
                 console.log("获取背驰列表:", res)
                 this.beichiList = res
                 if (this.firstRequestDominant) {
@@ -226,7 +226,7 @@ export default {
             })
         },
         getChangeiList() {
-            userApi.getChangeiList().then(res => {
+            futureApi.getChangeiList().then(res => {
                 this.changeList = res
                 // 计算多空分布
                 let long = 0
