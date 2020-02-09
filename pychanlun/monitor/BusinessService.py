@@ -21,25 +21,29 @@ periodList = ['3m', '5m', '15m', '30m', '60m']
 dominantSymbolList = []
 # 主力合约详细信息
 dominantSymbolInfoList = []
+
+
 class BusinessService:
     def __init__(self):
         print('初始化主力合约...')
+
     def initDoinantSynmbol(self):
         symbolList = config['symbolList']
         # 主力合约详细信息
         for i in range(len(symbolList)):
-            df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
+            df = rq.futures.get_dominant(
+                symbolList[i], start_date=None, end_date=None, rule=0)
             dominantSymbol = df[-1]
             dominantSymbolList.append(dominantSymbol)
             dominantSymbolInfo = rq.instruments(dominantSymbol)
             dominantSymbolInfoList.append(dominantSymbolInfo.__dict__)
-        print("当前主力合约列表:", dominantSymbolList)
-        print("当前主力合约详细信息:", dominantSymbolInfoList)
+        # print("当前主力合约列表:", dominantSymbolList)
+        # print("当前主力合约详细信息:", dominantSymbolInfoList)
 
     def getDoinantSynmbol(self):
         return dominantSymbolInfoList
-    def getBeichiList(self, strategyType):
 
+    def getBeichiList(self, strategyType):
         if strategyType == "0":
             return self.getNormalBeichiList()
         elif strategyType == "3":
@@ -66,7 +70,7 @@ class BusinessService:
                 beichiItem['remark'])
             if beichiItem['symbol'] in symbolListMap:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
-        print("背驰列表", symbolListMap)
+        # print("背驰列表", symbolListMap)
         return symbolListMap
 
     def getStrategy3BeichiList(self):
@@ -83,10 +87,11 @@ class BusinessService:
                 symbolListMap[symbol][period] = ""
         beichi_log_list = DBPyChanlun['strategy3_log'].find()
         for beichiItem in beichi_log_list:
-            msg = beichiItem['remark'], str(round(beichiItem['price'], 2)), str(beichiItem['date_created'])
+            msg = beichiItem['remark'], str(
+                round(beichiItem['price'], 2)), str(beichiItem['date_created'])
             if beichiItem['symbol'] in symbolListMap:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
-        print("背驰列表", symbolListMap)
+        # print("背驰列表", symbolListMap)
         return symbolListMap
 
     def getStrategy4BeichiList(self):
@@ -102,10 +107,11 @@ class BusinessService:
                 symbolListMap[symbol][period] = ""
         beichi_log_list = DBPyChanlun['strategy4_log'].find()
         for beichiItem in beichi_log_list:
-            msg = beichiItem['remark'], str(round(beichiItem['price'], 2)), str(beichiItem['date_created'])
+            msg = beichiItem['remark'], str(
+                round(beichiItem['price'], 2)), str(beichiItem['date_created'])
             if beichiItem['symbol'] in symbolListMap:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
-        print("背驰列表", symbolListMap)
+        # print("背驰列表", symbolListMap)
         return symbolListMap
 
     # 获取涨跌幅数据
@@ -125,7 +131,7 @@ class BusinessService:
                 else:
                     preday = df1d.iloc[0, 3]
                     today = df1m.iloc[0, 0]
-                    change = round(((today - preday) / preday),4)
+                    change = round(((today - preday) / preday), 4)
                 symbolChangeMap[item] = change
                 # print(preday,today,change)
         # print("涨跌幅信息", symbolChangeMap)
@@ -149,19 +155,20 @@ class BusinessService:
             signalList.append(item)
         return signalList
 
-    def getPosition(self,symbol,period,status):
+    def getPosition(self, symbol, period, status):
         if period == 'all':
-            query = {'symbol':symbol,'status':status}
+            query = {'symbol': symbol, 'status': status}
         else:
-            query = {'symbol':symbol,'period':period,'status':status}
+            query = {'symbol': symbol, 'period': period, 'status': status}
         result = DBPyChanlun["position_record"].find(query)
-        if result.count()>0:
+        if result.count() > 0:
             for x in result:
                 x['_id'] = str(x['_id'])
             return x
         else:
             return -1
-    def getPositionList(self,status,page,size):
+
+    def getPositionList(self, status, page, size):
         positionList = []
         collection = DBPyChanlun["position_record"]
         # 查询总记录数
@@ -169,13 +176,13 @@ class BusinessService:
         if status == 'all':
             result = collection.find().skip((page - 1) * size).limit(size)
         else:
-            result = collection.find({'status':status})
+            result = collection.find({'status': status})
         for x in result:
             x['_id'] = str(x['_id'])
             positionList.append(x)
-        positionListResult= {
-            'records':positionList,
-            'total':total
+        positionListResult = {
+            'records': positionList,
+            'total': total
         }
         return positionListResult
 
@@ -284,3 +291,4 @@ class BusinessService:
             'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
+
