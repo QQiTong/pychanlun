@@ -257,19 +257,11 @@ class Calc:
 
         # 高一级别段处理
         higherDuanList = [0 for i in range(count)]
-        if cat == "FUTURE":
-            # CalcDuanExp(count, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
-            pass
-        else:
-            CalcDuan(count, higherDuanList, duanList, highList, lowList)
+        CalcDuan(count, higherDuanList, duanList, highList, lowList)
 
         # 高高一级别段处理
         higherHigherDuanList = [0 for i in range(count)]
-        if cat == "FUTURE":
-            # CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
-            pass
-        else:
-            CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
+        CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
 
         # print("段结果:", len(biResult), len(duanResult))
         entanglementList = entanglement.CalcEntanglements(timeList, duanList, biList, highList, lowList)
