@@ -257,11 +257,11 @@ def calculate(info):
                                 entanglement_list, duan_series, bi_series, high_series, low_series, idx)
                             remark = "转折"
                             if p == 1:
-                                remark = "一买"
+                                remark = "一类"
                             elif p == 2:
-                                remark = "二买"
+                                remark = "二类"
                             elif p == 3:
-                                remark = "三买"
+                                remark = "三类"
                             save_signal(
                                 code, period, remark, time_series[idx], close_series[idx], 'BUY_LONG')
 
