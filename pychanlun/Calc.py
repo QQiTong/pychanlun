@@ -240,11 +240,13 @@ class Calc:
         biListBigLevel = [0 for i in range(len(timeListBigLevel))]
         CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
         fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
+        fractialRegion["period"] = bigLevelPeriod
 
         # 高高级别笔
         biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
         CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
         fractialRegion2 = FindLastFractalRegion(len(timeListBigLevel2), biListBigLevel2, timeListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
+        fractialRegion2["period"] = bigLevelPeriod2
 
         # 本级别段处理
         duanList = [0 for i in range(count)]
