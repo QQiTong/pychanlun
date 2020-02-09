@@ -2,14 +2,11 @@
 
 import os, sys
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, BASE_DIR)
-
+import logging
 import click
 from pychanlun import server as apiserver
-from pychanlun.monitor import BeichiMonitor
-import logging
-from pychanlun.market_data import tdx_local_downloader, stock_signal_calculator
+from pychanlun.monitor import BeichiMonitor, stock_signal_calculator
+from pychanlun.market_data import tdx_local_downloader
 
 
 @click.group()
