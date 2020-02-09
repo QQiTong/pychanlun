@@ -221,7 +221,7 @@ class Calc:
         timeIndexListBigLevel2 = []
         if cat == "FUTURE":
             for i in range(len(jsonObjBigLevel2)):
-                item = jsonObjBigLevel[i]
+                item = jsonObjBigLevel2[i]
                 localTime = time.localtime(item['time'])
                 strTime = time.strftime("%Y-%m-%d %H:%M", localTime)
                 timeListBigLevel2.append(strTime)

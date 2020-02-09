@@ -16,7 +16,7 @@ import rqdatac as rq
 app = Flask(__name__)
 businessService = BusinessService()
 
-# curl -X GET http://127.0.0.1:5000/api/stock_data?symbol=RB2005&period=5m
+# curl -X GET 'http://127.0.0.1:5000/api/stock_data?symbol=RB2005&period=5m'
 # 通用接口
 @app.route('/api/stock_data')
 def data():
