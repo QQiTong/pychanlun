@@ -15,7 +15,7 @@ import rqdatac as rq
 app = Flask(__name__)
 businessService = BusinessService()
 
-
+# 通用接口
 @app.route('/api/stock_data')
 def data():
     calc = Calc()
@@ -24,8 +24,15 @@ def data():
     endDate = request.args.get("endDate")
     result = calc.calcData(period, symbol, False, endDate)
     return Response(json.dumps(result), mimetype='application/json')
+@app.route('/api/save_stock_data')
+def save_stock_date():
+    calc = Calc()
+    period = request.args.get("period") or "1min"
+    symbol = request.args.get("symbol") or "BTC_CQ"
+    result = calc.calcData(period, symbol, True)
+    return Response(json.dumps(result), mimetype='application/json')
 
-
+# 期货部分
 # 获取主力合约
 @app.route('/api/dominant')
 def dominant():
@@ -47,23 +54,6 @@ def get_beichi_list():
 def get_change_list():
     changeListResult = businessService.getChangeList()
     return Response(json.dumps(changeListResult), mimetype='application/json')
-
-
-@app.route('/api/save_stock_data')
-def save_stock_date():
-    calc = Calc()
-    period = request.args.get("period") or "1min"
-    symbol = request.args.get("symbol") or "BTC_CQ"
-    result = calc.calcData(period, symbol, True)
-    return Response(json.dumps(result), mimetype='application/json')
-
-
-# 获取股票信号列表
-@app.route('/api/get_stock_signal_list')
-def get_stock_signal_list():
-    page = int(request.args.get("page") or "1")
-    stockSignalList = businessService.getStockSignalList(page)
-    return Response(json.dumps(stockSignalList), mimetype='application/json')
 
 
 # 新增持仓信息
@@ -94,7 +84,7 @@ def get_position_list():
     status = request.args.get("status")
     page = int(request.args.get("page") or "1")
     # 每页显示的条目
-    size = int(request.args.get("size") or "2")
+    size = int(request.args.get("size") or "10")
     print("status--->", status, page,size)
     positionList = businessService.getPositionList(status, page,size)
     return Response(json.dumps(positionList), mimetype='application/json')
@@ -107,6 +97,52 @@ def get_position():
     status = request.args.get("status")
     singlePosition = businessService.getPosition(symbol, period,status)
     return Response(json.dumps(singlePosition), mimetype='application/json')
+
+# --------------------股票部分----------------------------------------------
+# 获取股票信号列表
+@app.route('/api/get_stock_signal_list')
+def get_stock_signal_list():
+    page = int(request.args.get("page") or "1")
+    stockSignalList = businessService.getStockSignalList(page)
+    return Response(json.dumps(stockSignalList), mimetype='application/json')
+# 查询股票持仓列表
+@app.route('/api/get_stock_position_list')
+def get_stock_position_list():
+    status = request.args.get("status")
+    page = int(request.args.get("page") or "1")
+    # 每页显示的条目
+    size = int(request.args.get("size") or "10")
+    print("status--->", status, page, size)
+    stockPositionList = businessService.getStockPositionList(status, page,size)
+    return Response(json.dumps(stockPositionList), mimetype='application/json')
+# 查询单个股票持仓
+@app.route('/api/get_stock_position')
+def get_stock_position():
+    symbol = request.args.get("symbol")
+    period = request.args.get("period") or "all"
+    status = request.args.get("status")
+    singlePosition = businessService.getStockPosition(symbol, period,status)
+    return Response(json.dumps(singlePosition), mimetype='application/json')
+
+# 新增股票持仓信息
+@app.route('/api/create_stock_position', methods=["POST"])
+def create_stock_position():
+    position = request.get_json()
+    inserted_id = businessService.createStockPosition(position)
+    res = {
+        "id": str(inserted_id)
+    }
+    return Response(json.dumps(res), mimetype='application/json')
+
+# 更新股票持仓信息
+@app.route('/api/update_stock_position', methods=["POST"])
+def update_stock_position():
+    position = request.get_json()
+    businessService.updateStockPosition(position)
+    res = {
+        "code": "ok"
+    }
+    return Response(json.dumps(res), mimetype='application/json')
 
 def run(**kwargs):
     port = kwargs.get("port", 5000)

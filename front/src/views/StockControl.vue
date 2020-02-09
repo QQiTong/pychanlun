@@ -1,7 +1,11 @@
 <template>
     <div class="stock-control-main">
         <MyHeader></MyHeader>
+        <el-divider content-position="center">持仓列表</el-divider>
         <StockPositionList/>
+        <el-divider content-position="center">信号列表 | 多空分布</el-divider>
+        <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true"
+                     :stroke-width="24"/>
         <el-table
             v-loading="loading"
             :data="signalList"
@@ -67,14 +71,16 @@
         name: 'stock-control',
         components: {
             "MyHeader": MyHeader,
-            "StockPositionList":StockPositionList
+            "StockPositionList": StockPositionList
         },
         data() {
             return {
                 loading: true,
                 signalList: [],
                 periodList: ['3m', '5m', '15m', '30m', '60m'],
-                beichiList: {}
+                beichiList: {},
+                //todo
+                percentage: 80,
             }
         },
         mounted() {
@@ -137,7 +143,14 @@
                     }
                 }
                 return res
-            }
+            },
+            customColorMethod(percentage) {
+                if (percentage < 50) {
+                    return '#409EFF';
+                } else {
+                    return '#F56C6C';
+                }
+            },
         }
     }
 </script>

@@ -16,14 +16,6 @@ export const stockApi = {
             method: 'get',
         })
     },
-    //获取主力合约
-    dominant() {
-        let url = `/api/dominant`
-        return axios({
-            url: url,
-            method: 'get',
-        })
-    },
     saveStockData(data) {
         let url = `/api/save_stock_data?period=${data.period}&symbol=${data.symbol}`
         return axios({
@@ -38,28 +30,11 @@ export const stockApi = {
             method: 'get',
         })
     },
-    getBeichiList() {
-        return axios({
-            url: `/api/get_beichi_list`,
-            method: 'get',
-        })
-    },
-    getChangeiList() {
-        return axios({
-            url: `/api/get_change_list`,
-            method: 'get',
-        })
-    },
-    getDominant() {
-        return axios({
-            url: `/api/dominant`,
-            method: 'get',
-        })
-    },
+
     //持仓操作
     // 新增一个持仓
     createPosition(data) {
-        let url = `/api/create_position`
+        let url = `/api/create_stock_position`
         return axios({
             url: url,
             method: 'post',
@@ -68,7 +43,7 @@ export const stockApi = {
     },
     // 查询单个持仓
     getPosition(symbol, period,status) {
-        let url = `/api/get_position?symbol=${symbol}&period=${period}&status=${status}`
+        let url = `/api/get_stock_position?symbol=${symbol}&period=${period}&status=${status}`
         return axios({
             url: url,
             method: 'get'
@@ -76,7 +51,7 @@ export const stockApi = {
     },
     // 查询持仓列表
     getPositionList(status, page, size) {
-        let url = `/api/get_position_list?status=${status}&page=${page}&size=${size}`
+        let url = `/api/get_stock_position_list?status=${status}&page=${page}&size=${size}`
         return axios({
             url: url,
             method: 'get'
@@ -84,7 +59,7 @@ export const stockApi = {
     },
     // 更新持仓
     updatePosition(data) {
-        let url = `/api/update_position`
+        let url = `/api/update_stock_position`
         return axios({
             url: url,
             method: 'post',

@@ -215,3 +215,72 @@ class BusinessService:
             'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
+
+    def getStockPositionList(self,status,page,size):
+        positionList = []
+        collection = DBPyChanlun["stock_position_record"]
+        # 查询总记录数
+        total = collection.count()
+        if status == 'all':
+            result = collection.find().skip((page - 1) * size).limit(size)
+        else:
+            result = collection.find({'status': status})
+        for x in result:
+            x['_id'] = str(x['_id'])
+            positionList.append(x)
+        positionListResult = {
+            'records': positionList,
+            'total': total
+        }
+        return positionListResult
+
+    def getStockPosition(self,symbol,period,status):
+        if period == 'all':
+            query = {'symbol':symbol,'status':status}
+        else:
+            query = {'symbol':symbol,'period':period,'status':status}
+        result = DBPyChanlun["stock_position_record"].find(query)
+        if result.count()>0:
+            for x in result:
+                x['_id'] = str(x['_id'])
+            return x
+        else:
+            return -1
+
+    # 新增股票持仓
+    def createStockPosition(self, position):
+        result = DBPyChanlun['stock_position_record'].insert_one({
+            'enterTime': position['enterTime'],
+            'symbol': position['symbol'],
+            'period': position['period'],
+            'signal': position['signal'],
+            'status': position['status'],
+            'direction': position['direction'],
+            'price': position['price'],
+            'amount': position['amount'],
+            'stopLosePrice': position['stopLosePrice'],
+            'nestLevel': position['nestLevel'],
+            'enterReason': position['enterReason'],
+            'holdReason': position['holdReason'],
+            'importance': position['importance'],
+            'dynamicPositionList': position['dynamicPositionList'],
+        })
+        return result.inserted_id
+
+    def updateStockPosition(self, position):
+        DBPyChanlun['position_record'].update_one({'_id': ObjectId(position['_id'])}, {"$set": {
+            'enterTime': position['enterTime'],
+            'symbol': position['symbol'],
+            'period': position['period'],
+            'signal': position['signal'],
+            'status': position['status'],
+            'direction': position['direction'],
+            'price': position['price'],
+            'amount': position['amount'],
+            'stopLosePrice': position['stopLosePrice'],
+            'nestLevel': position['nestLevel'],
+            'enterReason': position['enterReason'],
+            'holdReason': position['holdReason'],
+            'importance': position['importance'],
+            'dynamicPositionList': position['dynamicPositionList']
+        }})
