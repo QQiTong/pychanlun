@@ -314,7 +314,7 @@ export default {
                         isPosition:'true',
                         endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
                     }
-                })     
+                })
             }else{
                 this.$router.push({
                     path: '/multi-period',
@@ -325,7 +325,7 @@ export default {
                 })
             }
         },
-        
+
         jumpToKlineBig(period) {
             if(this.isPosition === 'true'){
                 this.$router.push({
@@ -336,7 +336,7 @@ export default {
                         isPosition:'true',
                         endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
                     }
-                })     
+                })
             }else{
                 this.$router.push({
                     path: '/kline-big',
@@ -347,10 +347,10 @@ export default {
                     }
                 })
             }
-            
-            
+
+
         },
-        
+
         jumpToControl(type) {
             console.log("type", type)
             if (type === "futures") {
@@ -2009,13 +2009,13 @@ export default {
                 label: {
                     normal: {
                         color: 'yellow',
-                        formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent + "%\n盈亏比: 1 : "
+                        formatter: '最新: ' + currentPrice.toFixed(2) + "\n比率: " + currentPercent + "%\n盈亏: 1 : "
                             + (currentPercent / stopLosePercent).toFixed(1),
                     },
                 },
             }
             markLineData.push(markLineCurrent)
-     
+
             // 开仓价
             var markLineOpen = {
                 yAxis: openPrice,
@@ -2032,7 +2032,7 @@ export default {
                 label: {
                     normal: {
                         color: 'white',
-                        formatter: '开仓: ' + openPrice.toFixed(2) + "\n数量: " + openAmount + ' 手',
+                        formatter: '开仓: ' + openPrice.toFixed(2) + "\n　"+this.dynamicDirectionMap[direction] +': '+ openAmount + ' 手',
                     },
                 },
             }
@@ -2054,7 +2054,7 @@ export default {
                 label: {
                     normal: {
                         color: this.echartsConfig.upColor,
-                        formatter: '止损: ' + stopLosePrice.toFixed(2) + '\n盈利率: -' + stopLosePercent + '%',
+                        formatter: '止损: ' + stopLosePrice.toFixed(2) + '\n比率: -' + stopLosePercent + '%',
                     },
                 },
             }
@@ -2079,7 +2079,7 @@ export default {
                     label: {
                         normal: {
                             color: this.echartsConfig.downColor,
-                            formatter:  dynamicItem.price +' ' +direction+' ' + dynamicAmount + '手',
+                            formatter: '动态: '+ dynamicItem.price +' ' +direction+' ' + dynamicAmount + '手',
                         }
                     },
                     symbol: 'circle',
