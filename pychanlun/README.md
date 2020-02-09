@@ -26,7 +26,7 @@ scoop install nginx
 scoop install nssm
 ```
 
-使用nssm把API服务程序安装成windows服务。生产模式服务放在在1888端口，防止和开发模式（使用5000端口）冲突。
+使用nssm把API服务程序安装成windows服务。生产模式服务放在在18888端口，防止和开发模式（使用5000端口）冲突。
 
 ```cmd
 nssm install pychanlun-api-service "C:/Users/Administrator/scoop/shims/python.exe"
