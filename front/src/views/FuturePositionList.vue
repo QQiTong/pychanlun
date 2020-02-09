@@ -41,7 +41,7 @@
         <el-row>
           <el-col :span="6">
             <el-form-item label="品种" prop="symbol">
-              <el-select v-model="positionForm.symbol" class="form-input" placeholder="请选择">
+              <el-select v-model="positionForm.symbol" class="form-input" placeholder="请选择" filterable>
                 <el-option
                   v-for="item in futureSymbolList"
                   :key="item.order_book_id"

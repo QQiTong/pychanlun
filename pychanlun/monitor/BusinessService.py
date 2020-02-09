@@ -25,7 +25,7 @@ dominantSymbolInfoList = []
 
 class BusinessService:
     def __init__(self):
-        print('初始化主力合约...')
+        print('初始化业务对象...')
 
     def initDoinantSynmbol(self):
         symbolList = config['symbolList']

@@ -214,9 +214,9 @@ export default {
     methods: {
         getPosition() {
             let period = 'all'
-            if (this.period !== "") {
-                period = this.period
-            }
+            // if (this.period !== "") {
+            //     period = this.period
+            // }
             futureApi.getPosition(this.symbol, period, this.positionStatus).then(res => {
                 this.currentPosition = res
                 console.log("获取当前品种持仓:", res);
