@@ -42,7 +42,7 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    pool = Pool(50)
+    pool = Pool()
     pool.map(parse_and_save_5m, codes)
     pool.close()
     pool.join()

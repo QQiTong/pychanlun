@@ -37,7 +37,7 @@ def run(**kwargs):
             code = match.group(1)
             period = match.group(4)
             codes.append({"code": code, "period": period})
-    pool = Pool(50)
+    pool = Pool()
     pool.map(calculate, codes)
     pool.close()
     pool.join()
@@ -116,7 +116,7 @@ def calculate(info):
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
         # 段的开始如果在更大级别的中枢，就是双盘
         higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if ent and higher_ent and duan_start > 0:
+        if ent and higher_ent and ent.direction == higher_ent.direction == -1 and ent.zg >= higher_ent.zd and duan_start > 0:
             if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                 if price < (higher_ent.zg + higher_ent.zd)/2:
                     tags.append("双盘")
@@ -142,7 +142,7 @@ def calculate(info):
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
         # 段的开始如果在更大级别的中枢，就是双盘
         higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if ent and higher_ent and duan_start > 0:
+        if ent and higher_ent and ent.direction == higher_ent.direction == 1 and ent.zd <= higher_ent.zg and duan_start > 0:
             if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                 if price < (higher_ent.zg + higher_ent.zd)/2:
                     tags.append("双盘")
