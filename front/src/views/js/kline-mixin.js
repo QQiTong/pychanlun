@@ -46,6 +46,9 @@ export default {
 
                 higherHigherUpColor: "pink",
                 higherHigherDownColor: "blue",
+
+                higherColor :'green',
+                higherHigherColor:'#14d0cd',
                 // 多周期显示不下,需要配置
                 multiPeriodGrid: {
                     left: '0%',
@@ -55,7 +58,7 @@ export default {
                 },
                 klineBigGrid: {
                     left: '0%',
-                    right: '7%',
+                    right: '10%',
                     height: '85%',
                     top: 50
                 },
@@ -1969,6 +1972,117 @@ export default {
          */
         getPositionMarklineData(jsonObj) {
             var markLineData = [];
+
+            // 开仓价格
+            let openPrice = this.currentPosition.price
+            let openAmount = this.currentPosition.amount
+            let direction = this.currentPosition.direction
+            let higherBottomPrice = 0
+            let higherHigherBottomPrice = 0
+            let higherTopPrice = 0
+            let higherHigherTopPrice = 0
+            console.log("分型",direction==='long',jsonObj['fractal'][0]['direction'],jsonObj['fractal'][0]['top_fractal']['bottom']    )
+            //  多单查找顶分型 
+            if(direction==='long'){
+                if(jsonObj['fractal'][0]['direction'] == 1){
+                    higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
+                     // 高级别分型线
+                    var markLineFractal = {
+                        yAxis: higherBottomPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: this.echartsConfig.higherColor
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: this.echartsConfig.higherColor,
+                                formatter: '分: ' +jsonObj['fractal'][0]['period']+' '+higherBottomPrice ,
+                            },
+                        },
+                    }
+                    markLineData.push(markLineFractal)
+                }
+                if(jsonObj['fractal'][1]['direction'] == 1){
+                    higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']  
+                     // 高高级别分型线
+                     var markLineFractal = {
+                        yAxis: higherHigherBottomPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: this.echartsConfig.higherHigherColor
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: this.echartsConfig.higherHigherColor,
+                                formatter: '分: ' +jsonObj['fractal'][1]['period']+' '+higherHigherBottomPrice ,
+                            },
+                        },
+                    }
+                    markLineData.push(markLineFractal)         
+                }
+            }else{
+                // 空单查找底分型
+                if(jsonObj['fractal'][0]['direction'] == -1){
+                    higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
+                    // 高级别分型线
+                    var markLineFractal = {
+                        yAxis: higherTopPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: this.echartsConfig.higherColor
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: this.echartsConfig.higherColor,
+                                formatter: '分: ' +jsonObj['fractal'][0]['period']+' '+higherTopPrice ,
+                            },
+                        },
+                    }
+                    markLineData.push(markLineFractal)           
+                }
+                if(jsonObj['fractal'][1]['direction'] == -1){
+                    higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']  
+                    // 高高级别分型线
+                    var markLineFractal = {
+                        yAxis: higherHigherTopPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: this.echartsConfig.higherHigherColor
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: this.echartsConfig.higherHigherColor,
+                                formatter: '分: ' +jsonObj['fractal'][1]['period']+' '+higherHigherTopPrice ,
+                            },
+                        },
+                    }
+                    markLineData.push(markLineFractal)             
+                }
+            }
             const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
             let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
             // 当前价格
@@ -1977,10 +2091,7 @@ export default {
             this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1;
             // 1手需要的保证金
             this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
-            // 开仓价格
-            let openPrice = this.currentPosition.price
-            let openAmount = this.currentPosition.amount
-            let direction = this.currentPosition.direction
+            
             // 止损价格
             let stopLosePrice = this.currentPosition.stopLosePrice
             // 当前盈利百分比
@@ -2009,8 +2120,9 @@ export default {
                 label: {
                     normal: {
                         color: 'yellow',
-                        formatter: '最新: ' + currentPrice.toFixed(2) + "\n比率: " + currentPercent + "%\n盈亏: 1 : "
-                            + (currentPercent / stopLosePercent).toFixed(1),
+                        // formatter: '最新: ' + currentPrice.toFixed(2) + "\n比率: " + currentPercent + "%\n盈亏: 1 : "
+                        //     + (currentPercent / stopLosePercent).toFixed(1),
+                        formatter: '新: ' + currentPrice.toFixed(2) 
                     },
                 },
             }
@@ -2032,7 +2144,7 @@ export default {
                 label: {
                     normal: {
                         color: 'white',
-                        formatter: '开仓: ' + openPrice.toFixed(2) + "\n　"+this.dynamicDirectionMap[direction] +': '+ openAmount + ' 手',
+                        formatter: '开: ' + openPrice.toFixed(2) +' '+this.dynamicDirectionMap[direction] +': '+ openAmount + ' 手',
                     },
                 },
             }
@@ -2054,11 +2166,12 @@ export default {
                 label: {
                     normal: {
                         color: this.echartsConfig.upColor,
-                        formatter: '止损: ' + stopLosePrice.toFixed(2) + '\n比率: -' + stopLosePercent + '%',
+                        formatter: '止: ' + stopLosePrice.toFixed(2) + ' 比: -' + stopLosePercent + '%',
                     },
                 },
             }
             markLineData.push(markLineStop)
+        
             // 动止记录
             for (let i = 0; i < this.currentPosition.dynamicPositionList.length; i++) {
                 // 数量
@@ -2079,7 +2192,7 @@ export default {
                     label: {
                         normal: {
                             color: this.echartsConfig.downColor,
-                            formatter: '动态: '+ dynamicItem.price +' ' +direction+' ' + dynamicAmount + '手',
+                            formatter: '动: '+ dynamicItem.price +' ' +direction+' ' + dynamicAmount + '手',
                         }
                     },
                     symbol: 'circle',

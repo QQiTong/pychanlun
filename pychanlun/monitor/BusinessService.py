@@ -178,11 +178,12 @@ class BusinessService:
         positionList = []
         collection = DBPyChanlun["position_record"]
         # 查询总记录数
-        total = collection.count()
         if status == 'all':
             result = collection.find().skip((page - 1) * size).limit(size)
+            total = result.count()
         else:
-            result = collection.find({'status': status})
+            result = collection.find({'status': status}).skip((page - 1) * size).limit(size)
+            total = result.count()
         for x in result:
             x['_id'] = str(x['_id'])
             positionList.append(x)

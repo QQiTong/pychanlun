@@ -151,24 +151,13 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="6">
+          <el-col :span="12">
             <el-form-item label="入场逻辑" prop="enterReason">
               <el-input
                 v-model="positionForm.enterReason"
                 :autosize="{ minRows: 4, maxRows: 4}"
                 type="textarea"
-                class="form-input"
-                placeholder="请输入"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="持仓逻辑">
-              <el-input
-                v-model="positionForm.holdReason"
-                :autosize="{ minRows: 4, maxRows: 4}"
-                type="textarea"
-                class="form-input"
+                class="form-textarea-middle"
                 placeholder="请输入"
               />
             </el-form-item>
@@ -185,7 +174,19 @@
               />
             </el-form-item>
           </el-col>
+          <el-col :span="18">
+            <el-form-item label="持仓逻辑">
+              <el-input
+                v-model="positionForm.holdReason"
+                :autosize="{ minRows: 4, maxRows: 4}"
+                type="textarea"
+                class="form-textarea-long"
+                placeholder="请输入"
+              />
+            </el-form-item>
+          </el-col>
         </el-row>
+
 
         <!-- 动态止盈start -->
         <!--    编辑状态-->
@@ -459,7 +460,7 @@ export default {
       // 持仓列表
       positionList: [],
       positionQueryForm: {
-        status: "all"
+        status: "holding"
       },
       // 分页对象
       listQuery: {
@@ -754,7 +755,12 @@ export default {
   .long-textarea {
     width: 350px;
   }
-
+  .form-textarea-middle{
+    width: 600px;
+  }
+  .form-textarea-long{
+    width: 1000px;
+  }
   .query-position-form {
     margin-bottom: 10px;
   }
