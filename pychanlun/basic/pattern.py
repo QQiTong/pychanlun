@@ -38,13 +38,13 @@ def DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_li
     # 当前级别的中枢
     ent = FindPrevEntanglement(entanglement_list, fire_time)
     # 中枢开始的段
-    if ent:
+    if ent and ent.direction == -1:
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
         # 段的开始如果在更大级别的中枢，就是双盘
         higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if higher_ent and duan_start > 0:
-                if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
+        if higher_ent and higher_ent.direction == -1 and duan_start > 0:
+                if ent.zg >= higher_ent.zd and duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                     if fire_price < (higher_ent.zg + higher_ent.zd)/2:
                         return True
     return False
@@ -57,13 +57,13 @@ def DualEntangleForSellShort(duan_series, entanglement_list, higher_entaglement_
     # 当前级别的中枢
     ent = FindPrevEntanglement(entanglement_list, fire_time)
     # 中枢开始的段
-    if ent:
+    if ent and ent.direction == 1:
         duan_start = FindPrevEq(duan_series, -1, ent.start)
         duan_end = FindNextEq(duan_series, 1, duan_start, len(duan_series))
         # 段的开始如果在更大级别的中枢，就是双盘
         higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if higher_ent and duan_start > 0:
-                if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
+        if higher_ent and higher_ent.direction == 1 and duan_start > 0:
+                if ent.zd <= higher_ent.zg and duan_start <= higher_ent.end and duan_start >= higher_ent.start:
                     if fire_price > (higher_ent.zg + higher_ent.zd)/2:
                         return True
     return False
