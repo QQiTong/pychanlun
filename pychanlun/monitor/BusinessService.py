@@ -118,7 +118,14 @@ class BusinessService:
     def getChangeList(self):
         symbolChangeMap = {}
         end = datetime.now() + timedelta(1)
-        start = datetime.now() + timedelta(-1)
+        # 周日weekday 6 取前2天 周一 weekday 0 取前3天 
+        weekday = datetime.now().weekday()
+        if weekday == 0:
+            start = datetime.now() + timedelta(-3)
+        elif weekday == 6:
+            start = datetime.now() + timedelta(-2)
+        else:
+            start = datetime.now() + timedelta(-1)
         for i in range(len(dominantSymbolList)):
             item = dominantSymbolList[i]
             # print(item)
@@ -132,10 +139,9 @@ class BusinessService:
                     preday = df1d.iloc[0, 3]
                     today = df1m.iloc[0, 0]
                     change = round(((today - preday) / preday), 4)
+                    # print(preday, today, change)
                 symbolChangeMap[item] = change
-                # print(preday,today,change)
         # print("涨跌幅信息", symbolChangeMap)
-
         return symbolChangeMap
 
     def getStockSignalList(self, page=1):
@@ -223,7 +229,7 @@ class BusinessService:
             'dynamicPositionList': position['dynamicPositionList']
         }})
 
-    def getStockPositionList(self,status,page,size):
+    def getStockPositionList(self, status, page, size):
         positionList = []
         collection = DBPyChanlun["stock_position_record"]
         # 查询总记录数
@@ -241,13 +247,13 @@ class BusinessService:
         }
         return positionListResult
 
-    def getStockPosition(self,symbol,period,status):
+    def getStockPosition(self, symbol, period, status):
         if period == 'all':
-            query = {'symbol':symbol,'status':status}
+            query = {'symbol': symbol, 'status': status}
         else:
-            query = {'symbol':symbol,'period':period,'status':status}
+            query = {'symbol': symbol, 'period': period, 'status': status}
         result = DBPyChanlun["stock_position_record"].find(query)
-        if result.count()>0:
+        if result.count() > 0:
             for x in result:
                 x['_id'] = str(x['_id'])
             return x
@@ -291,4 +297,3 @@ class BusinessService:
             'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
-

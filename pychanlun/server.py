@@ -17,7 +17,7 @@ app = Flask(__name__)
 businessService = BusinessService()
 
 # curl -X GET 'http://127.0.0.1:5000/api/stock_data?symbol=RB2005&period=5m'
-# 通用接口
+# -------------------------------通用接口-----------------------------------
 @app.route('/api/stock_data')
 def data():
     calc = Calc()
@@ -34,7 +34,7 @@ def save_stock_date():
     result = calc.calcData(period, symbol, True)
     return Response(json.dumps(result), mimetype='application/json')
 
-# 期货部分
+# --------------------------------期货部分------------------------------------
 # 获取主力合约
 # curl -X GET http://127.0.0.1:5000/api/dominant
 @app.route('/api/dominant')
@@ -86,10 +86,7 @@ def get_position_list():
     status = request.args.get("status")
     page = int(request.args.get("page") or "1")
     # 每页显示的条目
-    size = int(request.args.get("size") or "2")
-    print("status--->", status, page, size)
     size = int(request.args.get("size") or "10")
-    print("status--->", status, page,size)
     positionList = businessService.getPositionList(status, page,size)
     return Response(json.dumps(positionList), mimetype='application/json')
 
@@ -117,7 +114,7 @@ def get_stock_position_list():
     page = int(request.args.get("page") or "1")
     # 每页显示的条目
     size = int(request.args.get("size") or "10")
-    print("status--->", status, page, size)
+    # print("status--->", status, page, size)
     stockPositionList = businessService.getStockPositionList(status, page,size)
     return Response(json.dumps(stockPositionList), mimetype='application/json')
 # 查询单个股票持仓

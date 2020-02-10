@@ -94,9 +94,16 @@ def testChange():
     dominantSymbolList = ['RB2005', 'HC2005', 'RU2005', 'NI2004', 'FU2005', 'ZN2003', 'SP2005', 'BU2006', 'AU2006',
                           'AG2006', 'MA2005', 'TA2005', 'SR2005', 'OI2005', 'AP2005', 'CF2005', 'M2005', 'I2005',
                           'EG2005', 'J2005', 'JM2005', 'PP2005', 'P2005', 'RM2005', 'Y2005']
-
+    weekday = datetime.now().weekday()
+ 
     end = datetime.now() + timedelta(1)
-    start = datetime.now() + timedelta(-1)
+    # 周日weekday 6 取前2天 周一 weekday 0 取前3天 需要取
+    if weekday == 0:
+        start = datetime.now() + timedelta(-3)
+    elif weekday == 6:
+        start = datetime.now() + timedelta(-2)
+    else:
+        start = datetime.now() + timedelta(-1)
     for i in range(len(dominantSymbolList)):
         item = dominantSymbolList[i]
         # print(item)
@@ -104,13 +111,15 @@ def testChange():
             df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
                                 start_date=start, end_date=end)
             df1m = rq.current_minute(item)
+            print(df1d)
             if df1d is None or df1m is None:
                 change = "--"
             else:
                 preday = df1d.iloc[0, 3]
                 today = df1m.iloc[0, 0]
-                change = (today - preday) / preday
-            symbolChangeMap[item] = round(change, 4)
+                change = round((today - preday) / preday,4)
+            symbolChangeMap[item] = change
+
     elapsed = (time.process_time() - startTime)  # 结束计时
     print("程序执行的时间:" + str(elapsed) + "s")  # 印出时间
     return False
@@ -320,10 +329,10 @@ def app():
     # testBitmex()
     # testBeichiDb()
     # testHuila()
-    # testChange()
+    testChange()
     # testTQ()
     # testRQ()
-    testMonitor()
+    # testMonitor()
 
 
 if __name__ == '__main__':
