@@ -41,14 +41,12 @@
         <el-row>
           <el-col :span="6">
             <el-form-item label="品种" prop="symbol">
-<!--              <el-select v-model="positionForm.symbol" class="form-input" placeholder="请选择">-->
-<!--                <el-option-->
-<!--                  v-for="item in futureSymbolList"-->
-<!--                  :key="item.order_book_id"-->
-<!--                  :label="item.order_book_id"-->
-<!--                  :value="item.order_book_id"-->
-<!--                />-->
-<!--              </el-select>-->
+              <el-input
+                v-model.number="positionForm.symbol"
+                type="text"
+                placeholder="请输入"
+                class="form-input"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="6">
@@ -65,6 +63,7 @@
           </el-col>
           <el-col :span="6">
             <el-form-item label="方向" prop="direction">
+              <!-- <el-input v-model="positionForm.direction" class="form-input" disabled='true'/> -->
               <el-select v-model="positionForm.direction" class="form-input" placeholder="请选择">
                 <el-option
                   v-for="item in directionOptions"
@@ -185,11 +184,27 @@
               />
             </el-form-item>
           </el-col>
+          <el-col :span="6">
+            <el-form-item label="仓位" prop="positionPercent">
+              <el-select
+                v-model="positionForm.positionPercent"
+                class="form-input"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="item in positionPercentOptions"
+                  :key="item.key"
+                  :label="item.display_name"
+                  :value="item.key"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
 
         <!-- 动态止盈start -->
         <!--    编辑状态-->
-        <el-divider content-position="left">持仓过程记录（ 动态止盈 | 加仓 | 锁仓 | 止损 ）</el-divider>
+        <el-divider content-position="left">持仓过程记录（ 动态止盈 | 加仓 | 高抛低吸 | 止损 ）</el-divider>
         <el-row v-for="(dynamicPosition, index) in positionForm.dynamicPositionList">
           <el-col :span="5">
             <el-form-item label="时间">
@@ -328,8 +343,13 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="入场价格" prop="price" align="center" width="100" />
-      <el-table-column label="数量" prop="amount" align="center" width="100" />
+      <el-table-column label="入场价格" prop="price" align="center" width="80" />
+      <el-table-column label="数量" prop="amount" align="center" width="80" />
+      <el-table-column label="仓位" prop="positionPercent" align="center" width="50">
+        <template slot-scope="{row}">
+            <span>{{ row.positionPercent | positionPercentFilter }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="预期" prop="nestLevel" align="center" width="70" />
       <el-table-column label="危险系数" prop="important" align="center" width="100">
         <template slot-scope="{row}">
@@ -372,7 +392,13 @@
 <script>
 import CommonTool from "@/tool/CommonTool";
 import { stockApi } from "@/api/stockApi";
-
+//仓位控制
+const positionPercentOptions = [
+  { key: "10", display_name: "10%" },
+  { key: "20", display_name: "20%" },
+  { key: "30", display_name: "30%" },
+  { key: "40", display_name: "40%" }
+];
 const signalTypeOptions = [
   { key: "tupo", display_name: "突破" },
   { key: "lahui", display_name: "拉回" },
@@ -380,13 +406,12 @@ const signalTypeOptions = [
   { key: "vfan", display_name: "V反" }
 ];
 const directionOptions = [
-  { key: "long", display_name: "多" },
-  { key: "short", display_name: "空" }
+  { key: "long", display_name: "买" }
+  // { key: "short", display_name: "卖" }
 ];
 const dynamicDirectionOptions = [
-  { key: "long", display_name: "多" },
-  { key: "short", display_name: "空" },
-  { key: "close", display_name: "平" }
+  { key: "long", display_name: "买" },
+  { key: "short", display_name: "卖" }
 ];
 const statusOptions = [
   { key: "holding", display_name: "持仓中" },
@@ -414,6 +439,10 @@ const directionKeyValue = directionOptions.reduce((acc, cur) => {
   acc[cur.key] = cur.display_name;
   return acc;
 }, {});
+const positionPercentKeyValue = positionPercentOptions.reduce((acc, cur) => {
+  acc[cur.key] = cur.display_name;
+  return acc;
+}, {});
 export default {
   name: "PositionList",
   filters: {
@@ -437,6 +466,9 @@ export default {
     },
     signalTypeFilter(type) {
       return signalTypeKeyValue[type];
+    },
+    positionPercentFilter(type) {
+      return positionPercentKeyValue[type];
     },
     statusFilter(type) {
       return statusKeyValue[type];
@@ -476,7 +508,8 @@ export default {
         signal: "",
         status: "",
         //方向
-        direction: "",
+        direction: "long",
+        positionPercent: "",
         //价格
         price: "",
         //数量
@@ -518,6 +551,9 @@ export default {
         ],
         enterReason: [
           { required: true, message: "请输入入场逻辑", trigger: "blur" }
+        ],
+        positionPercent: [
+          { required: true, message: "请选择仓位", trigger: "change" }
         ]
       },
       dialogFormVisible: false,
@@ -532,7 +568,8 @@ export default {
       signalTypeOptions,
       periodOptions,
       directionOptions,
-      dynamicDirectionOptions
+      dynamicDirectionOptions,
+      positionPercentOptions
     };
   },
   mounted() {
@@ -616,7 +653,8 @@ export default {
         period: "",
         status: "",
         signal: "",
-        direction: "",
+        direction: "long",
+        positionPercent: "",
         price: "",
         amount: "",
         stopLosePrice: "",
@@ -725,7 +763,6 @@ export default {
       });
       this.positionList.splice(index, 1);
     }
-
   }
 };
 </script>

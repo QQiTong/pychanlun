@@ -234,11 +234,12 @@ class BusinessService:
         positionList = []
         collection = DBPyChanlun["stock_position_record"]
         # 查询总记录数
-        total = collection.count()
         if status == 'all':
             result = collection.find().skip((page - 1) * size).limit(size)
+            total = result.count()
         else:
-            result = collection.find({'status': status})
+            result = collection.find({'status': status}).skip((page - 1) * size).limit(size)
+            total = result.count()
         for x in result:
             x['_id'] = str(x['_id'])
             positionList.append(x)
@@ -270,6 +271,7 @@ class BusinessService:
             'signal': position['signal'],
             'status': position['status'],
             'direction': position['direction'],
+            'positionPercent': position['positionPercent'],
             'price': position['price'],
             'amount': position['amount'],
             'stopLosePrice': position['stopLosePrice'],
@@ -282,13 +284,15 @@ class BusinessService:
         return result.inserted_id
 
     def updateStockPosition(self, position):
-        DBPyChanlun['position_record'].update_one({'_id': ObjectId(position['_id'])}, {"$set": {
+        print("传给后端的positionPercent",position['positionPercent'])
+        DBPyChanlun['stock_position_record'].update_one({'_id': ObjectId(position['_id'])}, {"$set": {
             'enterTime': position['enterTime'],
             'symbol': position['symbol'],
             'period': position['period'],
             'signal': position['signal'],
             'status': position['status'],
             'direction': position['direction'],
+            'positionPercent': position['positionPercent'],
             'price': position['price'],
             'amount': position['amount'],
             'stopLosePrice': position['stopLosePrice'],
