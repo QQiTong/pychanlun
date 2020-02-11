@@ -58,7 +58,10 @@ def calculate(info):
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
     bars = list(bars)
-    if len(bars) < 13:
+    if len(bars) == 0:
+        DBPyChanlun['%s_%s' % (code, period)].drop()
+        return
+    elif len(bars) < 13:
         return
     raw_data = {}
     time_series = []

@@ -63,8 +63,8 @@ def parse_and_save_5m(info):
     save_data(info["code"], "15m", df15m)
     df30m = df.resample('30T', closed='right', label='right').agg(ohlc).dropna(how='any')
     save_data(info["code"], "30m", df30m)
-    df60m = df.resample('60T', closed='right', label='right').agg(ohlc).dropna(how='any')
-    save_data(info["code"], "60m", df60m)
+    # df60m = df.resample('1H', closed='right', label='right', base=30).agg(ohlc).dropna(how='any')
+    # save_data(info["code"], "60m", df60m)
     return True
 
 
