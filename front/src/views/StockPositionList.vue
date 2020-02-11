@@ -345,6 +345,7 @@
       </el-table-column>
       <el-table-column label="入场价格" prop="price" align="center" width="80" />
       <el-table-column label="数量" prop="amount" align="center" width="80" />
+      <el-table-column label="止损价格" prop="stopLosePrice" align="center" width="80" />
       <el-table-column label="仓位" prop="positionPercent" align="center" width="50">
         <template slot-scope="{row}">
             <span>{{ row.positionPercent | positionPercentFilter }}</span>
@@ -356,8 +357,8 @@
           <el-rate disabled v-model="row.importance" :colors="rateColors"></el-rate>
         </template>
       </el-table-column>
-      <el-table-column label="入场逻辑" prop="enterReason" align="center" width="300" />
-      <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300" />
+      <el-table-column label="入场逻辑" prop="enterReason" align="center" width="260" />
+      <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="260" />
       <el-table-column
         label="状态"
         width="100"
@@ -491,7 +492,7 @@ export default {
       // 持仓列表
       positionList: [],
       positionQueryForm: {
-        status: "all"
+        status: "holding"
       },
       // 分页对象
       listQuery: {

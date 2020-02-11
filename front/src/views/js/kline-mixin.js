@@ -1,5 +1,6 @@
 // import echarts from 'echarts'
-import {futureApi} from "@/api/futureApi";
+import { futureApi } from "@/api/futureApi";
+import { stockApi } from "@/api/stockApi";
 import CommonTool from "@/tool/CommonTool"
 // import 'echarts/lib/chart/candlestick'
 // import 'echarts/lib/chart/line'
@@ -12,7 +13,7 @@ import CommonTool from "@/tool/CommonTool"
 // import 'echarts/lib/component/markArea'
 // import 'echarts/lib/component/legend'
 // import 'echarts/lib/component/title'
-import {Button, Select} from 'element-ui';
+import { Button, Select } from 'element-ui';
 
 export default {
 
@@ -47,8 +48,8 @@ export default {
                 higherHigherUpColor: "pink",
                 higherHigherDownColor: "blue",
 
-                higherColor :'green',
-                higherHigherColor:'#14d0cd',
+                higherColor: 'green',
+                higherHigherColor: '#14d0cd',
                 // 多周期显示不下,需要配置
                 multiPeriodGrid: {
                     left: '0%',
@@ -152,22 +153,22 @@ export default {
                 underlying_order_book_id: "null",
                 underlying_symbol: "BTC_CQ",
             },
-                {
-                    contract_multiplier: 1,
-                    de_listed_date: "forever",
-                    exchange: "HUOBI",
-                    listed_date: "forever",
-                    margin_rate: 0.05,
-                    market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "ETH_CQ",
-                    round_lot: 1,
-                    symbol: "以太坊",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "ETH_CQ",
-                }],
+            {
+                contract_multiplier: 1,
+                de_listed_date: "forever",
+                exchange: "HUOBI",
+                listed_date: "forever",
+                margin_rate: 0.05,
+                market_tplus: 0,
+                maturity_date: "forever",
+                order_book_id: "ETH_CQ",
+                round_lot: 1,
+                symbol: "以太坊",
+                trading_hours: "7*24",
+                type: "Future",
+                underlying_order_book_id: "null",
+                underlying_symbol: "ETH_CQ",
+            }],
             // 选中的品种
             selectedSymbol: '',
             // 输入的交割过的期货品种 或者 股票品种
@@ -178,7 +179,7 @@ export default {
             // 当前品种持仓信息
             currentPosition: null,
             positionStatus: "holding",
-            dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'}
+            dynamicDirectionMap: { 'long': '多', 'short': '空', 'close': '平' }
         }
     },
 
@@ -189,8 +190,12 @@ export default {
         this.inputSymbol = JSON.parse(JSON.stringify(this.symbol))
         this.period = this.getParams('period')
         this.isPosition = this.getParams('isPosition')
-        if (this.isPosition ==='true') {
-            this.getPosition()
+        if (this.isPosition === 'true') {
+            if(this.symbol.indexOf('sz')!=-1 || this.symbol.indexOf('sh')!=-1){
+                this.getStockPosition()
+            }else{
+                this.getFutruePosition()
+            }
         }
 
         this.initEcharts()
@@ -215,12 +220,24 @@ export default {
         clearTimeout(this.timer)
     },
     methods: {
-        getPosition() {
+        getFutruePosition() {
             let period = 'all'
             // if (this.period !== "") {
             //     period = this.period
             // }
             futureApi.getPosition(this.symbol, period, this.positionStatus).then(res => {
+                this.currentPosition = res
+                console.log("获取当前品种持仓:", res);
+            }).catch(() => {
+                console.log("获取当前品种持仓失败:", error)
+            })
+        },
+        getStockPosition() {
+            let period = 'all'
+            // if (this.period !== "") {
+            //     period = this.period
+            // }
+            stockApi.getPosition(this.symbol, period, this.positionStatus).then(res => {
                 this.currentPosition = res
                 console.log("获取当前品种持仓:", res);
             }).catch(() => {
@@ -309,16 +326,16 @@ export default {
             return res
         },
         jumpToMultiPeriod() {
-            if(this.isPosition === 'true'){
+            if (this.isPosition === 'true') {
                 this.$router.push({
                     path: '/multi-period',
                     query: {
                         symbol: this.symbol,
-                        isPosition:'true',
+                        isPosition: 'true',
                         endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
                     }
                 })
-            }else{
+            } else {
                 this.$router.push({
                     path: '/multi-period',
                     query: {
@@ -330,17 +347,17 @@ export default {
         },
 
         jumpToKlineBig(period) {
-            if(this.isPosition === 'true'){
+            if (this.isPosition === 'true') {
                 this.$router.push({
                     path: '/kline-big',
                     query: {
                         symbol: this.symbol,
                         period: period,
-                        isPosition:'true',
+                        isPosition: 'true',
                         endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
                     }
                 })
-            }else{
+            } else {
                 this.$router.push({
                     path: '/kline-big',
                     query: {
@@ -481,9 +498,9 @@ export default {
             let that = this;
             var requestData
             if (that.endDate != null) {
-                requestData = {'symbol': symbol, 'period': period, 'endDate': that.endDate}
+                requestData = { 'symbol': symbol, 'period': period, 'endDate': that.endDate }
             } else {
-                requestData = {'symbol': symbol, 'period': period}
+                requestData = { 'symbol': symbol, 'period': period }
             }
             this.getStockData(requestData, update)
 
@@ -614,7 +631,7 @@ export default {
                         },
                     },
                     axisPointer: {
-                        link: {xAxisIndex: 'all'},
+                        link: { xAxisIndex: 'all' },
                     },
 
                     toolbox: {
@@ -786,11 +803,11 @@ export default {
                             data: resultData.date,
                             scale: true,
                             boundaryGap: false,
-                            splitLine: {show: false},
+                            splitLine: { show: false },
                             splitNumber: 20,
                             min: 'dataMin',
                             max: 'dataMax',
-                            axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
+                            axisLine: { onZero: true, lineStyle: { color: '#8392A5' } },
                             // axisPointer: {
                             //     label: {
                             //         formatter: function (params) {
@@ -856,7 +873,7 @@ export default {
                                     color: this.echartsConfig.bgColor
                                 }
                             },
-                            axisLine: {lineStyle: {color: this.echartsConfig.bgColor}},
+                            axisLine: { lineStyle: { color: this.echartsConfig.bgColor } },
                         },
 
                         // 成交量
@@ -1145,7 +1162,7 @@ export default {
                         symbolSize: 5,
                         symbol: 'circle',
                         itemStyle: {
-                            normal: {color: this.echartsConfig.downColor}
+                            normal: { color: this.echartsConfig.downColor }
                         },
                         label: {
                             position: 'inside',
@@ -1163,7 +1180,7 @@ export default {
                         symbolSize: 5,
                         symbol: 'circle',
                         itemStyle: {
-                            normal: {color: this.echartsConfig.upColor}
+                            normal: { color: this.echartsConfig.upColor }
                         },
                         label: {
                             position: 'inside',
@@ -1340,7 +1357,7 @@ export default {
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.upColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1363,7 +1380,7 @@ export default {
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.downColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1387,7 +1404,7 @@ export default {
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1410,7 +1427,7 @@ export default {
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1435,7 +1452,7 @@ export default {
                     symbolSize: 30,
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.upColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1460,7 +1477,7 @@ export default {
                     symbol: 'arrow',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.downColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1485,7 +1502,7 @@ export default {
                     symbol: 'arrow',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1509,7 +1526,7 @@ export default {
                     symbol: 'arrow',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1534,7 +1551,7 @@ export default {
                     symbolSize: 30,
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.upColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1559,7 +1576,7 @@ export default {
                     symbol: 'diamond',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.downColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1585,7 +1602,7 @@ export default {
                     symbolSize: 30,
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1610,7 +1627,7 @@ export default {
                     symbol: 'diamond',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1637,7 +1654,7 @@ export default {
                     symbolSize: 10,
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.upColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1662,7 +1679,7 @@ export default {
                     symbol: 'circle',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.downColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1687,7 +1704,7 @@ export default {
                     symbol: 'circle',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1711,7 +1728,7 @@ export default {
                     symbol: 'circle',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
+                        normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
                     },
                     label: {
                         //position: ['-50%','50%'],
@@ -1727,10 +1744,10 @@ export default {
                 huilaValues.push(value);
             }
             let markLineData
-            if(this.isPosition === 'true'){
-                 markLineData = this.getPositionMarklineData(jsonObj)
-            }else{
-                 markLineData = this.getMarklineData(jsonObj)
+            if (this.isPosition === 'true') {
+                markLineData = this.getPositionMarklineData(jsonObj)
+            } else {
+                markLineData = this.getMarklineData(jsonObj)
             }
             // console.log("markline", markLineData)
             return {
@@ -1879,7 +1896,7 @@ export default {
                         label: {
                             normal: {
                                 color: 'yellow',
-                                formatter: '最新价: ' + currentPrice.toFixed(2) + "\n盈利率: " + currentPercent + "% \n盈利额: " + currentProfit + " 万 \n盈亏比: 1 : "
+                                formatter: '新: ' + currentPrice.toFixed(2) + "\n率: " + currentPercent + "% \n额: " + currentProfit + " 万 \n比: 1 : "
                                     + (currentPercent / targetPercent).toFixed(1),
                             },
                         },
@@ -1904,7 +1921,7 @@ export default {
                         label: {
                             normal: {
                                 color: 'white',
-                                formatter: '开仓: ' + beichiPrice.toFixed(2) + "\n数量: " + this.maxOrderCount + ' 手',
+                                formatter: '开: ' + beichiPrice.toFixed(2) + " " + this.maxOrderCount + ' 手',
                             },
                         },
                     }
@@ -1928,65 +1945,24 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.upColor,
-                                formatter: '止损: ' + stopLosePrice.toFixed(2) + '\n盈利率: -' + targetPercent + '%',
+                                formatter: '损: ' + stopLosePrice.toFixed(2) + '\n率: -' + targetPercent + '%',
                             },
                         },
                     }
                     markLineData.push(markLineStop)
                 }
-
-                // 目标价位
-                if (targetPrice) {
-                    var markLineTarget = {
-                        yAxis: targetPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dashed',
-                                width: 1,
-                                color: this.echartsConfig.downColor
-                            },
-                        },
-                        label: {
-                            normal: {
-                                color: this.echartsConfig.downColor,
-                                formatter: '动态止盈: ' + targetPrice.toFixed(2) + '\n (' + targetPercent + '%)',
-                            }
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                    }
-                    markLineData.push(markLineTarget)
+                // 兼容股票
+                if(!jsonObj['fractal']){
+                    return markLineData
                 }
 
-                // if (stopWinPrice !== 0) {
-                //     markLineData.push(markLineStopWin)
-                // }
-
-            }
-            return markLineData
-        },
-        //持仓状态下的开平动止数据
-        /**
-         * @param jsonObj
-         */
-        getPositionMarklineData(jsonObj) {
-            var markLineData = [];
-
-            // 开仓价格
-            let openPrice = this.currentPosition.price
-            let openAmount = this.currentPosition.amount
-            let direction = this.currentPosition.direction
-            let higherBottomPrice = 0
-            let higherHigherBottomPrice = 0
-            let higherTopPrice = 0
-            let higherHigherTopPrice = 0
-            console.log("分型",direction==='long',jsonObj['fractal'][0]['direction'],jsonObj['fractal'][0]['top_fractal']['bottom']    )
-            //  多单查找顶分型 
-            if(direction==='long'){
-                if(jsonObj['fractal'][0]['direction'] == 1){
+                let higherBottomPrice = 0
+                let higherHigherBottomPrice = 0
+                let higherTopPrice = 0
+                let higherHigherTopPrice = 0    
+                if (jsonObj['fractal'][0]['direction'] == 1) {
                     higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
-                     // 高级别分型线
+                    // 高级别分型线
                     var markLineFractal = {
                         yAxis: higherBottomPrice,
                         lineStyle: {
@@ -2002,16 +1978,16 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherColor,
-                                formatter: '分: ' +jsonObj['fractal'][0]['period']+' '+higherBottomPrice ,
+                                formatter: '分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
                             },
                         },
                     }
                     markLineData.push(markLineFractal)
                 }
-                if(jsonObj['fractal'][1]['direction'] == 1){
-                    higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']  
-                     // 高高级别分型线
-                     var markLineFractal = {
+                if (jsonObj['fractal'][1]['direction'] == 1) {
+                    higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
+                    // 高高级别分型线
+                    var markLineFractal = {
                         yAxis: higherHigherBottomPrice,
                         lineStyle: {
                             normal: {
@@ -2026,15 +2002,15 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
-                                formatter: '分: ' +jsonObj['fractal'][1]['period']+' '+higherHigherBottomPrice ,
+                                formatter: '分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
                             },
                         },
                     }
-                    markLineData.push(markLineFractal)         
+                    markLineData.push(markLineFractal)
                 }
-            }else{
+
                 // 空单查找底分型
-                if(jsonObj['fractal'][0]['direction'] == -1){
+                if (jsonObj['fractal'][0]['direction'] == -1) {
                     higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
                     // 高级别分型线
                     var markLineFractal = {
@@ -2052,14 +2028,14 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherColor,
-                                formatter: '分: ' +jsonObj['fractal'][0]['period']+' '+higherTopPrice ,
+                                formatter: '分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
                             },
                         },
                     }
-                    markLineData.push(markLineFractal)           
+                    markLineData.push(markLineFractal)
                 }
-                if(jsonObj['fractal'][1]['direction'] == -1){
-                    higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']  
+                if (jsonObj['fractal'][1]['direction'] == -1) {
+                    higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
                     // 高高级别分型线
                     var markLineFractal = {
                         yAxis: higherHigherTopPrice,
@@ -2076,13 +2052,27 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
-                                formatter: '分: ' +jsonObj['fractal'][1]['period']+' '+higherHigherTopPrice ,
+                                formatter: '分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
                             },
                         },
                     }
-                    markLineData.push(markLineFractal)             
+                    markLineData.push(markLineFractal)
                 }
             }
+            return markLineData
+        },
+        //持仓状态下的开平动止数据
+        /**
+         * @param jsonObj
+         */
+        getPositionMarklineData(jsonObj) {
+            var markLineData = [];
+                
+            // 开仓价格
+            let openPrice = this.currentPosition.price
+            let openAmount = this.currentPosition.amount
+            let direction = this.currentPosition.direction
+            
             const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
             let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
             // 当前价格
@@ -2091,7 +2081,7 @@ export default {
             this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1;
             // 1手需要的保证金
             this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
-            
+
             // 止损价格
             let stopLosePrice = this.currentPosition.stopLosePrice
             // 当前盈利百分比
@@ -2122,7 +2112,7 @@ export default {
                         color: 'yellow',
                         // formatter: '最新: ' + currentPrice.toFixed(2) + "\n比率: " + currentPercent + "%\n盈亏: 1 : "
                         //     + (currentPercent / stopLosePercent).toFixed(1),
-                        formatter: '新: ' + currentPrice.toFixed(2) 
+                        formatter: '新: ' + currentPrice.toFixed(2)
                     },
                 },
             }
@@ -2144,7 +2134,7 @@ export default {
                 label: {
                     normal: {
                         color: 'white',
-                        formatter: '开: ' + openPrice.toFixed(2) +' '+this.dynamicDirectionMap[direction] +': '+ openAmount + ' 手',
+                        formatter: '开: ' + openPrice.toFixed(2) + ' ' + this.dynamicDirectionMap[direction] + ': ' + openAmount + ' 手',
                     },
                 },
             }
@@ -2166,12 +2156,12 @@ export default {
                 label: {
                     normal: {
                         color: this.echartsConfig.upColor,
-                        formatter: '止: ' + stopLosePrice.toFixed(2) + ' 比: -' + stopLosePercent + '%',
+                        formatter: '止: ' + stopLosePrice.toFixed(2) + ' 率: -' + stopLosePercent + '%',
                     },
                 },
             }
             markLineData.push(markLineStop)
-        
+
             // 动止记录
             for (let i = 0; i < this.currentPosition.dynamicPositionList.length; i++) {
                 // 数量
@@ -2192,13 +2182,125 @@ export default {
                     label: {
                         normal: {
                             color: this.echartsConfig.downColor,
-                            formatter: '动: '+ dynamicItem.price +' ' +direction+' ' + dynamicAmount + '手',
+                            formatter: '动: ' + dynamicItem.price + ' ' + direction + ' ' + dynamicAmount + '手',
                         }
                     },
                     symbol: 'circle',
                     symbolSize: 1
                 }
                 markLineData.push(markLineObj)
+            }
+
+
+            // 兼容股票
+            if(!jsonObj['fractal']){
+                return markLineData
+            }
+            let higherBottomPrice = 0
+            let higherHigherBottomPrice = 0
+            let higherTopPrice = 0
+            let higherHigherTopPrice = 0
+            console.log("分型", direction === 'long', jsonObj['fractal'][0]['direction'], jsonObj['fractal'][0]['top_fractal']['bottom'])
+            //  多单查找顶分型 
+            if (direction === 'long') {
+                if (jsonObj['fractal'][0]['direction'] == 1) {
+                    higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
+                    // 高级别分型线
+                    var markLineFractal = {
+                        yAxis: higherBottomPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: this.echartsConfig.higherColor
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: this.echartsConfig.higherColor,
+                                formatter: '分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
+                            },
+                        },
+                    }
+                    markLineData.push(markLineFractal)
+                }
+                if (jsonObj['fractal'][1]['direction'] == 1) {
+                    higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
+                    // 高高级别分型线
+                    var markLineFractal = {
+                        yAxis: higherHigherBottomPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: this.echartsConfig.higherHigherColor
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: this.echartsConfig.higherHigherColor,
+                                formatter: '分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
+                            },
+                        },
+                    }
+                    markLineData.push(markLineFractal)
+                }
+            } else {
+                // 空单查找底分型
+                if (jsonObj['fractal'][0]['direction'] == -1) {
+                    higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
+                    // 高级别分型线
+                    var markLineFractal = {
+                        yAxis: higherTopPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: this.echartsConfig.higherColor
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: this.echartsConfig.higherColor,
+                                formatter: '分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
+                            },
+                        },
+                    }
+                    markLineData.push(markLineFractal)
+                }
+                if (jsonObj['fractal'][1]['direction'] == -1) {
+                    higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
+                    // 高高级别分型线
+                    var markLineFractal = {
+                        yAxis: higherHigherTopPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: this.echartsConfig.higherHigherColor
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: this.echartsConfig.higherHigherColor,
+                                formatter: '分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
+                            },
+                        },
+                    }
+                    markLineData.push(markLineFractal)
+                }
             }
             return markLineData
         },

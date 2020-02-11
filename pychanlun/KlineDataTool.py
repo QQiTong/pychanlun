@@ -280,9 +280,10 @@ class KlineDataTool:
         #                fields=['open', 'high', 'low', 'close', 'volume'])
         # todo 米匡240m 数据有问题,比通达信和文化财经多一个时间,需要手动去除,但是手动去除也不准,需要等米匡修复
         # todo 米匡回复: 240m 是按照交易时间切分的, 一天固定3根k线,而文华财经和通达信是一天固定2根,后面自己处理吧
-        if period == '240m':
-            cols = [x for i, x in enumerate(df.index) if '15:00:00' in str(df.index[i])]
-            df = df.drop(cols)
+        # 还是不能这样处理,会导致很多高低点丢失,影响到30F的结构
+        # if period == '240m':
+        #     cols = [x for i, x in enumerate(df.index) if '15:00:00' in str(df.index[i])]
+        #     df = df.drop(cols)
         # if period == '240m':
         #     ohlc_dict = {
         #         'open': 'first',
