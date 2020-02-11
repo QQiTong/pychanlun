@@ -18,6 +18,7 @@ from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.pattern import PerfectForBuyLong, BuyPosition
 import talib as ta
 import numpy as np
+import pydash
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -55,6 +56,9 @@ def calculate(info):
         tz_aware=True, tzinfo=tz)).delete_many({
             "_id": {"$lte": cutoff_time}
         })
+
+    raising_limit(code) # 计算连扳
+
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
     bars = list(bars)
@@ -295,9 +299,32 @@ def export_to_tdx():
     if TDX_HOME is None:
         logger.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
-    signals = DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find({}).sort('fire_time', pymongo.DESCENDING).limit(20)
     seq = []
+    # 连扳票
+    raising_limit_stocks = DBPyChanlun['stock'].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).find({"raising_limit_count": {"$gte": 1}}).sort('raising_limit_count', pymongo.DESCENDING)
+    c = 0
+    raising_limit_count = 0
+    for signal in list(raising_limit_stocks):
+        if signal["raising_limit_count"] != raising_limit_count:
+            raising_limit_count = signal["raising_limit_count"]
+            c = c + 1
+        if c <= 3:
+            code = signal["_id"]
+            if code.startswith("sh"):
+                code = code.replace("sh", "1")
+            elif code.startswith("sz"):
+                code = code.replace("sz", "0")
+            else:
+                continue
+            seq.append(code + "\n")
+        else:
+            break
+
+    # 缠论票
+    signals = DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).find({"price": {"$lte": 20}}).sort('fire_time', pymongo.DESCENDING).limit(20)
+
     for signal in list(signals):
         code = signal["code"]
         if code.startswith("sh"):
@@ -307,5 +334,31 @@ def export_to_tdx():
         else:
             continue
         seq.append(code + "\n")
+    seq = pydash.uniq(seq)
     with open(os.path.join(TDX_HOME, "T0002\\blocknew\\CL%s.blk" % date.today().strftime("%d")), "w") as fo:
         fo.writelines(seq)
+
+
+def raising_limit(code):
+    bars = DBPyChanlun['%s_240m' % code].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(30)
+    bars = list(bars)
+    count = 0
+    yizi_count = 0
+    for idx in range(len(bars)-1):
+        if bars[idx]["close"] >= round(bars[idx+1]["close"]*1.1, 2):
+            count = count + 1
+            if bars[idx]["high"] == bars[idx]["low"]:
+                yizi_count = yizi_count + 1
+        else:
+            break
+    if yizi_count == count:
+        count = 0
+    DBPyChanlun["stock"].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).find_one_and_update({
+            "_id": code
+        }, {
+            "$set": {
+                "raising_limit_count": count
+            }
+        }, upsert=True)
