@@ -296,7 +296,7 @@ def export_to_tdx():
         logger.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
     signals = DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find({}).sort('fire_time', pymongo.DESCENDING).limit(100)
+        tz_aware=True, tzinfo=tz)).find({}).sort('fire_time', pymongo.DESCENDING).limit(20)
     seq = []
     for signal in list(signals):
         code = signal["code"]
