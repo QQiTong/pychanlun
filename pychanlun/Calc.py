@@ -69,7 +69,7 @@ class Calc:
             '5m': '30m',
             '30m': '240m',
             '240m': '1w',
-            # '1w': '1w'
+            '1w': '1w'
         }
 
         self.huobiPeriodMap = {
@@ -154,9 +154,16 @@ class Calc:
         else:
             if '_CQ' in symbol:
                 cat = "DIGIT_COIN"
-                klineData = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[period])
-                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, self.huobiPeriodMap[self.levelMap[period]])
-                klineDataBigLevel2 = []
+                # 转换后的本级别
+                currentPeriod = self.huobiPeriodMap[period]
+                # 转换后的高级别
+                bigLevelPeriod = self.huobiPeriodMap[self.levelMap[period]]
+                # 转换后的高高级别
+                bigLevelPeriod2 = self.huobiPeriodMap[self.levelMap[self.levelMap[period]]]
+                klineData = klineDataTool.getDigitCoinData(symbol,currentPeriod)
+                bigLevelPeriod = self.huobiPeriodMap[self.levelMap[period]]
+                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod)
+                klineDataBigLevel2 = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod2)
             else:
                 # 期货
                 cat = "FUTURE"
@@ -200,7 +207,7 @@ class Calc:
         closePriceListBigLevel = []
         timeListBigLevel = []
         timeIndexListBigLevel = []
-        if cat == "FUTURE":
+        if cat == "FUTURE" or cat == "DIGIT_COIN":
             for i in range(len(jsonObjBigLevel)):
                 item = jsonObjBigLevel[i]
                 localTime = time.localtime(item['time'])
@@ -219,7 +226,7 @@ class Calc:
         closePriceListBigLevel2 = []
         timeListBigLevel2 = []
         timeIndexListBigLevel2 = []
-        if cat == "FUTURE":
+        if cat == "FUTURE" or cat == "DIGIT_COIN":
             for i in range(len(jsonObjBigLevel2)):
                 item = jsonObjBigLevel2[i]
                 localTime = time.localtime(item['time'])
@@ -237,14 +244,14 @@ class Calc:
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList)
 
         # 高级别笔
-        if cat == "FUTURE":
+        if cat == "FUTURE" or cat == "DIGIT_COIN":
             biListBigLevel = [0 for i in range(len(timeListBigLevel))]
             CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
             fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
             fractialRegion["period"] = bigLevelPeriod
 
         # 高高级别笔
-        if cat == "FUTURE":
+        if cat == "FUTURE" or cat == "DIGIT_COIN":
             biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
             CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
             fractialRegion2 = FindLastFractalRegion(len(timeListBigLevel2), biListBigLevel2, timeListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
@@ -252,7 +259,7 @@ class Calc:
 
         # 本级别段处理
         duanList = [0 for i in range(count)]
-        if cat == "FUTURE":
+        if cat == "FUTURE" or cat == "DIGIT_COIN":
             CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod)
         else:
             CalcDuan(count, duanList, biList, highList, lowList)
@@ -433,7 +440,7 @@ class Calc:
         resJson['sell_duan_break'] = duan_pohuai['sell_duan_break']
         resJson['buy_duan_break_higher'] = duan_pohuai_higher['buy_duan_break']
         resJson['sell_duan_break_higher'] = duan_pohuai_higher['sell_duan_break']
-        if cat == "FUTURE":
+        if cat == "FUTURE" or cat == "DIGIT_COIN":
             resJson['fractal'] = [fractialRegion, fractialRegion2]
 
         resJsonStr = json.dumps(resJson)

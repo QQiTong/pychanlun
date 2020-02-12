@@ -118,7 +118,7 @@ class BusinessService:
     def getChangeList(self):
         symbolChangeMap = {}
         end = datetime.now() + timedelta(1)
-        # 周日weekday 6 取前2天 周一 weekday 0 取前3天 
+        # 周日weekday 6 取前2天 周一 weekday 0 取前3天
         weekday = datetime.now().weekday()
         if weekday == 0:
             start = datetime.now() + timedelta(-3)

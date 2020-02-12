@@ -155,7 +155,5 @@ def run(**kwargs):
 
 
 if __name__ == '__main__':
-    # 初始化合约列表
-    businessService.initDoinantSynmbol()
     # 开发模式运行，用内置服务器
     app.run()

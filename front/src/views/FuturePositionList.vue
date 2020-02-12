@@ -277,9 +277,9 @@
       :data="positionList"
       border
       fit
-      highlight-current-row
       style="width: 100%;"
       size="mini"
+      :row-class-name="tableRowClassName"
     >
       <el-table-column type="expand" label="展开">
         <template slot-scope="props">
@@ -544,6 +544,16 @@ export default {
     );
   },
   methods: {
+    tableRowClassName({row, rowIndex}) {
+      console.log(row.dynamicPositionList.length)
+      if (row.dynamicPositionList.length> 0) {
+        return 'success-row';
+      } 
+      // else {
+      //   return 'warning-row';
+      // }
+      return '';
+    },
     handleSizeChange(currentSize) {
       this.listQuery.size = currentSize;
       this.getPositionList(
@@ -763,6 +773,13 @@ export default {
   }
   .query-position-form {
     margin-bottom: 10px;
+  }
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
   }
 }
 </style>

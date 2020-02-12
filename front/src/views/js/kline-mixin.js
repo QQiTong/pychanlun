@@ -48,8 +48,9 @@ export default {
                 higherHigherUpColor: "pink",
                 higherHigherDownColor: "blue",
 
-                higherColor: 'green',
-                higherHigherColor: '#14d0cd',
+                higherColor: '#14d0cd',
+                higherHigherColor: 'green',
+                dynamicOpertionColor:'pink',
                 // 多周期显示不下,需要配置
                 multiPeriodGrid: {
                     left: '0%',
@@ -135,7 +136,7 @@ export default {
             dynamicWinCount: 0,
             //end仓位管理计算
             // 结束日期
-            endDate: null,
+            endDate: CommonTool.dateFormat("yyyy-MM-dd"),
 
             digitCoinsSymbolList: [{
                 contract_multiplier: 1,
@@ -190,6 +191,7 @@ export default {
         this.inputSymbol = JSON.parse(JSON.stringify(this.symbol))
         this.period = this.getParams('period')
         this.isPosition = this.getParams('isPosition')
+        this.endDate = this.getParams('endDate')
         if (this.isPosition === 'true') {
             if(this.symbol.indexOf('sz')!=-1 || this.symbol.indexOf('sh')!=-1){
                 this.getStockPosition()
@@ -247,7 +249,7 @@ export default {
         initEcharts() {
             //  大图只显示选中的k线图
             if (this.period !== "") {
-                this.endDate = this.getParams('endDate')
+                // this.endDate = this.getParams('endDate')
                 this.myChart = this.$echarts.init(document.getElementById('main'));
                 this.chartssize(document.getElementById("mainParent"),
                     document.getElementById('main'));
@@ -332,7 +334,7 @@ export default {
                     query: {
                         symbol: this.symbol,
                         isPosition: 'true',
-                        endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
+                        endDate: this.endDate 
                     }
                 })
             } else {
@@ -340,7 +342,7 @@ export default {
                     path: '/multi-period',
                     query: {
                         symbol: this.symbol,
-                        endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
+                        endDate: this.endDate 
                     }
                 })
             }
@@ -354,7 +356,7 @@ export default {
                         symbol: this.symbol,
                         period: period,
                         isPosition: 'true',
-                        endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
+                        endDate: this.endDate
                     }
                 })
             } else {
@@ -363,7 +365,7 @@ export default {
                     query: {
                         symbol: this.symbol,
                         period: period,
-                        endDate: this.endDate ? this.endDate : CommonTool.dateFormat("yyyy-MM-dd")
+                        endDate: this.endDate
                     }
                 })
             }
@@ -1978,7 +1980,7 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherColor,
-                                formatter: '分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
+                                formatter: '顶分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
                             },
                         },
                     }
@@ -2002,7 +2004,7 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
-                                formatter: '分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
+                                formatter: '顶分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
                             },
                         },
                     }
@@ -2028,7 +2030,7 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherColor,
-                                formatter: '分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
+                                formatter: '底分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
                             },
                         },
                     }
@@ -2052,7 +2054,7 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
-                                formatter: '分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
+                                formatter: '底分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
                             },
                         },
                     }
@@ -2176,12 +2178,12 @@ export default {
                             opacity: 1,
                             type: 'dashed',
                             width: 1,
-                            color: this.echartsConfig.downColor
+                            color: this.echartsConfig.dynamicOpertionColor
                         },
                     },
                     label: {
                         normal: {
-                            color: this.echartsConfig.downColor,
+                            color: this.echartsConfig.dynamicOpertionColor,
                             formatter: '动: ' + dynamicItem.price + ' ' + direction + ' ' + dynamicAmount + '手',
                         }
                     },
@@ -2221,7 +2223,7 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherColor,
-                                formatter: '分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
+                                formatter: '顶分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
                             },
                         },
                     }
@@ -2245,7 +2247,7 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
-                                formatter: '分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
+                                formatter: '顶分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
                             },
                         },
                     }
@@ -2271,7 +2273,7 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherColor,
-                                formatter: '分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
+                                formatter: '底分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
                             },
                         },
                     }
@@ -2295,7 +2297,7 @@ export default {
                         label: {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
-                                formatter: '分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
+                                formatter: '底分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
                             },
                         },
                     }
