@@ -3,7 +3,7 @@ const FileManagerPlugin = require('filemanager-webpack-plugin')
 const path = require('path')
 
 var FStream = require('fs')
-let dev = 'http://127.0.0.1:5000'
+let dev = 'http://127.0.0.1:18888'
 let sit = 'http://47.75.57.245'
 const os = require('os')
 // const UglifyJsParallelPlugin = require('webpack-uglify-parallel')

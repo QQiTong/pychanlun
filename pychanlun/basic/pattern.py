@@ -4,14 +4,14 @@ from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 """
 判断idx前面的形态是不是看多完备形态
 """
-def PerfectForBuyLong(signal_series, high_series, low_series, idx):
-    d1 = FindPrevEq(signal_series, -1, idx + 1)
-    g1 = FindPrevEq(signal_series, 1, d1)
-    d2 = FindPrevEq(signal_series, -1, g1)
-    g2 = FindPrevEq(signal_series, 1, d2)
-    d3 = FindPrevEq(signal_series, -1, g2)
-    if low_series[d2] > low_series[d3] and low_series[d1] > low_series[d3]:
-        if low_series[d1] < (high_series[g2]+low_series[d2])/2:
+def PerfectForBuyLong(signal_serial, high_serial, low_serial, idx):
+    d1 = FindPrevEq(signal_serial, -1, idx + 1)
+    g1 = FindPrevEq(signal_serial, 1, d1)
+    d2 = FindPrevEq(signal_serial, -1, g1)
+    g2 = FindPrevEq(signal_serial, 1, d2)
+    d3 = FindPrevEq(signal_serial, -1, g2)
+    if low_serial[d2] > low_serial[d3] and low_serial[d1] > low_serial[d3]:
+        if low_serial[d1] < low_serial[idx] < (high_serial[g2]+low_serial[d2])/2:
             return True
     return False
 
@@ -19,14 +19,14 @@ def PerfectForBuyLong(signal_series, high_series, low_series, idx):
 """
 判断idx前面的形态是不是看跌完备形态
 """
-def PerfectForSellShort(signal_series, high_series, low_series, idx):
-    g1 = FindPrevEq(signal_series, 1, idx + 1)
-    d1 = FindPrevEq(signal_series, -1, g1)
-    g2 = FindPrevEq(signal_series, 1, d1)
-    d2 = FindPrevEq(signal_series, -1, g2)
-    g3 = FindPrevEq(signal_series, -1, d2)
-    if high_series[g2] < high_series[g3] and high_series[g1] < high_series[g3]:
-        if high_series[g1] > (high_series[g2]+low_series[d2])/2:
+def PerfectForSellShort(signal_serial, high_serial, low_series, idx):
+    g1 = FindPrevEq(signal_serial, 1, idx + 1)
+    d1 = FindPrevEq(signal_serial, -1, g1)
+    g2 = FindPrevEq(signal_serial, 1, d1)
+    d2 = FindPrevEq(signal_serial, -1, g2)
+    g3 = FindPrevEq(signal_serial, -1, d2)
+    if high_serial[g2] < high_serial[g3] and high_serial[g1] < high_serial[g3]:
+        if high_serial[g1] > high_serial[idx] > (high_serial[g2]+low_series[d2])/2:
             return True
     return False
 
@@ -72,10 +72,10 @@ def DualEntangleForSellShort(duan_series, entanglement_list, higher_entaglement_
 """
 判断1,2,3买形态位置
 """
-def BuyPosition(e_list, duan_series, bi_series, high_series, low_series, idx):
-    d1 = FindPrevEq(duan_series, -1, idx+1)
-    g1 = FindPrevEq(duan_series, 1, idx+1)
-    d2 = FindPrevEq(duan_series, -1, g1)
+def BuyCategory(e_list, duan_serial, bi_serial, high_serial, low_serial, idx):
+    d1 = FindPrevEq(duan_serial, -1, idx+1)
+    g1 = FindPrevEq(duan_serial, 1, idx+1)
+    d2 = FindPrevEq(duan_serial, -1, g1)
     if g1 > d1:
         return 0
     e = None
@@ -91,9 +91,9 @@ def BuyPosition(e_list, duan_series, bi_series, high_series, low_series, idx):
             e = e_list[i]
             break
     if e:
-        if low_series[d1] > e.zg:
+        if low_serial[d1] > e.zg:
             return 3
-        elif low_series[d1] >= low_series[d2] or low_series[idx] >= low_series[d2]:
+        elif low_serial[d1] >= low_serial[d2] or low_serial[idx] >= low_serial[d2]:
             return 2
         else:
             return 1

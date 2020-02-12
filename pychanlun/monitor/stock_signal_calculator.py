@@ -15,7 +15,7 @@ from pychanlun import Duan
 from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.pattern import PerfectForBuyLong, BuyPosition
+from pychanlun.basic.pattern import DualEntangleForBuyLong, PerfectForBuyLong, BuyCategory
 import talib as ta
 import numpy as np
 import pydash
@@ -130,12 +130,9 @@ def calculate(info):
         # 中枢开始的段
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
-        # 段的开始如果在更大级别的中枢，就是双盘
-        higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if ent and higher_ent and ent.direction == higher_ent.direction == -1 and ent.zg >= higher_ent.zd and duan_start > 0:
-            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
-                if price < (higher_ent.zg + higher_ent.zd)/2:
-                    tags.append("双盘")
+
+        if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
+            tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
 
@@ -153,12 +150,9 @@ def calculate(info):
         # 中枢开始的段
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
-        # 段的开始如果在更大级别的中枢，就是双盘
-        higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if ent and higher_ent and ent.direction == higher_ent.direction == 1 and ent.zd <= higher_ent.zg and duan_start > 0:
-            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
-                if price < (higher_ent.zg + higher_ent.zd)/2:
-                    tags.append("双盘")
+
+        if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
+            tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         save_signal(code, period, '升破笔中枢预多',
@@ -175,12 +169,9 @@ def calculate(info):
         # 中枢开始的段
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
-        # 段的开始如果在更大级别的中枢，就是双盘
-        higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if ent and higher_ent and duan_start > 0:
-            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
-                if price < (higher_ent.zg + higher_ent.zd)/2:
-                    tags.append("双盘")
+
+        if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
+            tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         save_signal(code, period, '笔中枢三卖V', fire_time,
@@ -203,63 +194,66 @@ def calculate(info):
                     ['date'][i], higher_v_reverse['buy_v_reverse']['data'][i], higher_v_reverse['buy_v_reverse']['stop_lose_price'][i], 'BUY_LONG')
 
     # # 缠论一买，二买，三买计算
-    # count = len(time_series)
-    # diff, dea, macd = ta.MACD(np.array(
-    #     [float(x) for x in close_series]), fastperiod=12, slowperiod=26, signalperiod=9)
-    # for idx in range(count):
-    #     d1 = FindPrevEq(duan_series, -1, idx)
-    #     g1 = FindPrevEq(duan_series, 1, idx)
-    #     # 是下跌线段
-    #     if d1 > g1 > 0:
-    #         # 找下跌线段开始到目前最低的笔高
-    #         llvh = high_series[g1]
-    #         llvhIdx = g1
-    #         for x in range(g1+1, idx):
-    #             if bi_series[x] == 1 and high_series[x] < llvh:
-    #                 llvh = high_series[x]
-    #                 llvhIdx = x
-    #         # 前面一笔上是不是第一次突破llvh
-    #         bi_c = 0
-    #         bi_s = max(d1, FindNextEq(bi_series, -1, llvhIdx, idx))
-    #         while True:
-    #             bi_e = FindNextEq(bi_series, 1, bi_s, idx)
-    #             if bi_e == -1:
-    #                 # 没有向上笔了
-    #                 break
-    #             # 找到一个向上笔
-    #             if low_series[bi_s] <= llvh and high_series[bi_e] > llvh:
-    #                 bi_c = bi_c + 1
-    #             bi_s = FindNextEq(bi_series, -1, bi_e, idx)
-    #             if bi_s == -1:
-    #                 break
-    #         if bi_c == 1:
-    #             # 只有一次突破，现在是不是向下笔
-    #             bi_d1 = FindPrevEq(bi_series, -1, idx)
-    #             bi_g1 = FindPrevEq(bi_series, 1, idx)
-    #             if bi_d1 > bi_g1 > 0:
-    #                 if macd[idx-1] <= 0 and macd[idx] > 0:
-    #                     is_signal = True
-    #                     for y in range(bi_d1+1, idx):
-    #                         if macd[y-1] <= 0 and macd[y] > 0:
-    #                             # 前面出现过
-    #                             is_signal = False
-    #                             break
-    #                     # 成立
-    #                     if is_signal:
-    #                         p = BuyPosition(
-    #                             entanglement_list, duan_series, bi_series, high_series, low_series, idx)
-    #                         remark = "转折"
-    #                         if p == 1:
-    #                             remark = "一类"
-    #                         elif p == 2:
-    #                             remark = "二类"
-    #                         elif p == 3:
-    #                             remark = "三类"
-    #                         save_signal(
-    #                             code, period, remark, time_series[idx], close_series[idx], 'BUY_LONG')
+    count = len(time_series)
+    diff, dea, macd = ta.MACD(np.array(
+        [float(x) for x in close_series]), fastperiod=12, slowperiod=26, signalperiod=9)
+    for idx in range(count):
+        d1 = FindPrevEq(duan_series, -1, idx)
+        g1 = FindPrevEq(duan_series, 1, idx)
+        # 是下跌线段
+        if d1 > g1 > 0:
+            # 找下跌线段开始到目前最低的笔高
+            llvh = high_series[g1]
+            llvhIdx = g1
+            for x in range(g1+1, idx):
+                if bi_series[x] == 1 and high_series[x] < llvh:
+                    llvh = high_series[x]
+                    llvhIdx = x
+            # 前面一笔上是不是第一次突破llvh
+            bi_c = 0
+            bi_s = max(d1, FindNextEq(bi_series, -1, llvhIdx, idx))
+            while True:
+                bi_e = FindNextEq(bi_series, 1, bi_s, idx)
+                if bi_e == -1:
+                    # 没有向上笔了
+                    break
+                # 找到一个向上笔
+                if low_series[bi_s] <= llvh and high_series[bi_e] > llvh:
+                    bi_c = bi_c + 1
+                bi_s = FindNextEq(bi_series, -1, bi_e, idx)
+                if bi_s == -1:
+                    break
+            if bi_c == 1:
+                # 只有一次突破，现在是不是向下笔
+                bi_d1 = FindPrevEq(bi_series, -1, idx)
+                bi_g1 = FindPrevEq(bi_series, 1, idx)
+                if bi_d1 > bi_g1 > 0:
+                    if macd[idx-1] <= 0 and macd[idx] > 0:
+                        is_signal = True
+                        for y in range(bi_d1+1, idx):
+                            if macd[y-1] <= 0 and macd[y] > 0:
+                                # 前面出现过
+                                is_signal = False
+                                break
+                        # 成立
+                        if is_signal:
+                            fire_time = time_series[idx]
+                            price = close_series[idx]
+                            stop_lose_price = low_series[d1]
+                            p = BuyCategory(entanglement_list, duan_series, bi_series, high_series, low_series, idx)
+                            remark = "线段下结束预期"
+                            category = ""
+                            if p == 1:
+                                category = "一类"
+                            elif p == 2:
+                                category = "二类"
+                            elif p == 3:
+                                category = "三类"
+                            save_signal(
+                                code, period, remark, fire_time, price, stop_lose_price, 'BUY_LONG', [], category)
 
 
-def save_signal(code, period, remark, fire_time, price, stop_lose_price, position, tags=[]):
+def save_signal(code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
     logger = logging.getLogger()
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
@@ -275,8 +269,10 @@ def save_signal(code, period, remark, fire_time, price, stop_lose_price, positio
                     'remark': remark,
                     'fire_time': fire_time,
                     'price': price,
+                    'stop_lose_price': stop_lose_price,
                     'position': position,
-                    'tags': tags
+                    'tags': tags,
+                    'category': category
                 }
             }, upsert=True)
 
