@@ -15,7 +15,7 @@ from pychanlun import Duan
 from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.pattern import PerfectForBuyLong, BuyPosition
+from pychanlun.basic.pattern import DualEntangleForBuyLong, PerfectForBuyLong, BuyCategory
 import talib as ta
 import numpy as np
 import pydash
@@ -33,15 +33,25 @@ def run(**kwargs):
     codes = []
     collist = DBPyChanlun.list_collection_names()
     for code in collist:
-        match = re.match("((sh|sz)(\\d{6}))_(5m|15m|30m)", code, re.I)
+        # 只计算5分钟的就够了，只做这个级别
+        match = re.match("((sh|sz)(\\d{6}))_(5m)", code, re.I)
         if match is not None:
             code = match.group(1)
             period = match.group(4)
             codes.append({"code": code, "period": period})
+
+    # 计算执缠策略
     pool = Pool()
     pool.map(calculate, codes)
     pool.close()
     pool.join()
+
+    # 计算连板
+    pool = Pool()
+    pool.map(raising_limit, codes)
+    pool.close()
+    pool.join()
+
     # 最近的100条记录输出到通达信软件
     export_to_tdx()
 
@@ -56,8 +66,6 @@ def calculate(info):
         tz_aware=True, tzinfo=tz)).delete_many({
             "_id": {"$lte": cutoff_time}
         })
-
-    raising_limit(code) # 计算连扳
 
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
@@ -115,108 +123,77 @@ def calculate(info):
     for i in range(count):
         fire_time = zs_huila['buy_zs_huila']['date'][i]
         price = zs_huila['buy_zs_huila']['data'][i]
+        stop_lose_price = zs_huila['buy_zs_huila']['stop_lose_price'][i]
         tags = []
         # 当前级别的中枢
         ent = FindPrevEntanglement(entanglement_list, fire_time)
         # 中枢开始的段
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
-        # 段的开始如果在更大级别的中枢，就是双盘
-        higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if ent and higher_ent and ent.direction == higher_ent.direction == -1 and ent.zg >= higher_ent.zd and duan_start > 0:
-            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
-                if price < (higher_ent.zg + higher_ent.zd)/2:
-                    tags.append("双盘")
+
+        if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
+            tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        save_signal(code, period, '拉回笔中枢确认底背',
-                    fire_time, price, 'BUY_LONG', tags)
 
-    count = len(zs_huila['sell_zs_huila']['date'])
-    for i in range(count):
-        save_signal(code, period, '拉回笔中枢确认顶背', zs_huila['sell_zs_huila']
-                    ['date'][i], zs_huila['sell_zs_huila']['data'][i], 'SELL_SHORT')
+        save_signal(code, period, '拉回笔中枢确认底背',
+                    fire_time, price, stop_lose_price, 'BUY_LONG', tags)
 
     count = len(zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
         fire_time = zs_tupo['buy_zs_tupo']['date'][i]
         price = zs_tupo['buy_zs_tupo']['data'][i]
+        stop_lose_price = zs_tupo['buy_zs_tupo']['stop_lose_price'][i]
         tags = []
         # 当前级别的中枢
         ent = FindPrevEntanglement(entanglement_list, fire_time)
         # 中枢开始的段
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
-        # 段的开始如果在更大级别的中枢，就是双盘
-        higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if ent and higher_ent and ent.direction == higher_ent.direction == 1 and ent.zd <= higher_ent.zg and duan_start > 0:
-            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
-                if price < (higher_ent.zg + higher_ent.zd)/2:
-                    tags.append("双盘")
+
+        if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
+            tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         save_signal(code, period, '升破笔中枢预多',
-                    fire_time, price, 'BUY_LONG', tags)
-
-    count = len(zs_tupo['sell_zs_tupo']['date'])
-    for i in range(count):
-        save_signal(code, period, '跌破笔中枢预空', zs_tupo['sell_zs_tupo']
-                    ['date'][i], zs_tupo['sell_zs_tupo']['data'][i], 'SELL_SHORT')
+                    fire_time, price, stop_lose_price, 'BUY_LONG', tags)
 
     count = len(v_reverse['buy_v_reverse']['date'])
     for i in range(count):
         fire_time = v_reverse['buy_v_reverse']['date'][i]
         price = v_reverse['buy_v_reverse']['data'][i]
+        stop_lose_price = v_reverse['buy_v_reverse']['stop_lose_price'][i]
         tags = []
         # 当前级别的中枢
         ent = FindPrevEntanglement(entanglement_list, fire_time)
         # 中枢开始的段
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
-        # 段的开始如果在更大级别的中枢，就是双盘
-        higher_ent = FindPrevEntanglement(higher_entaglement_list, fire_time)
-        if ent and higher_ent and duan_start > 0:
-            if duan_start <= higher_ent.end and duan_start >= higher_ent.start:
-                if price < (higher_ent.zg + higher_ent.zd)/2:
-                    tags.append("双盘")
+
+        if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
+            tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        save_signal(code, period, '笔中枢三卖V', fire_time, price, 'BUY_LONG', tags)
-
-    count = len(v_reverse['sell_v_reverse']['date'])
-    for i in range(count):
-        save_signal(code, period, '笔中枢三买V', v_reverse['sell_v_reverse']
-                    ['date'][i], v_reverse['sell_v_reverse']['data'][i], 'SELL_SHORT')
+        save_signal(code, period, '笔中枢三卖V', fire_time,
+                    price, stop_lose_price, 'BUY_LONG', tags)
 
     # 段中枢信号的记录
     count = len(higher_zs_huila['buy_zs_huila']['date'])
     for i in range(count):
         save_signal(code, period, '拉回段中枢确认底背', higher_zs_huila['buy_zs_huila']
-                    ['date'][i], higher_zs_huila['buy_zs_huila']['data'][i], 'BUY_LONG')
-    count = len(higher_zs_huila['sell_zs_huila']['date'])
-    for i in range(count):
-        save_signal(code, period, '拉回段中枢确认顶背', higher_zs_huila['sell_zs_huila']
-                    ['date'][i], higher_zs_huila['sell_zs_huila']['data'][i], 'SELL_SHORT')
+                    ['date'][i], higher_zs_huila['buy_zs_huila']['data'][i], higher_zs_huila['buy_zs_huila']['stop_lose_price'][i], 'BUY_LONG')
 
     count = len(higher_zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
         save_signal(code, period, '升破段中枢预多', higher_zs_tupo['buy_zs_tupo']
-                    ['date'][i], higher_zs_tupo['buy_zs_tupo']['data'][i], 'BUY_LONG')
-    count = len(higher_zs_tupo['sell_zs_tupo']['date'])
-    for i in range(count):
-        save_signal(code, period, '跌破段中枢预空',
-                    higher_zs_tupo['sell_zs_tupo']['date'][i], higher_zs_tupo['sell_zs_tupo']['data'][i], 'SELL_SHORT')
+                    ['date'][i], higher_zs_tupo['buy_zs_tupo']['data'][i], higher_zs_tupo['buy_zs_tupo']['stop_lose_price'][i], 'BUY_LONG')
 
     count = len(higher_v_reverse['buy_v_reverse']['date'])
     for i in range(count):
         save_signal(code, period, '段中枢三卖V', higher_v_reverse['buy_v_reverse']
-                    ['date'][i], higher_v_reverse['buy_v_reverse']['data'][i], 'BUY_LONG')
-    count = len(higher_v_reverse['sell_v_reverse']['date'])
-    for i in range(count):
-        save_signal(code, period, '段中枢三买V', higher_v_reverse['sell_v_reverse']
-                    ['date'][i], higher_v_reverse['sell_v_reverse']['data'][i], 'SELL_SHORT')
+                    ['date'][i], higher_v_reverse['buy_v_reverse']['data'][i], higher_v_reverse['buy_v_reverse']['stop_lose_price'][i], 'BUY_LONG')
 
-    # 缠论一买，二买，三买计算
+    # # 缠论一买，二买，三买计算
     count = len(time_series)
     diff, dea, macd = ta.MACD(np.array(
         [float(x) for x in close_series]), fastperiod=12, slowperiod=26, signalperiod=9)
@@ -260,41 +237,48 @@ def calculate(info):
                                 break
                         # 成立
                         if is_signal:
-                            p = BuyPosition(
-                                entanglement_list, duan_series, bi_series, high_series, low_series, idx)
-                            remark = "转折"
+                            fire_time = time_series[idx]
+                            price = close_series[idx]
+                            stop_lose_price = low_series[d1]
+                            p = BuyCategory(entanglement_list, duan_series, bi_series, high_series, low_series, idx)
+                            remark = "线段下结束预期"
+                            category = ""
                             if p == 1:
-                                remark = "一类"
+                                category = "一类"
                             elif p == 2:
-                                remark = "二类"
+                                category = "二类"
                             elif p == 3:
-                                remark = "三类"
+                                category = "三类"
                             save_signal(
-                                code, period, remark, time_series[idx], close_series[idx], 'BUY_LONG')
+                                code, period, remark, fire_time, price, stop_lose_price, 'BUY_LONG', [], category)
 
 
-def save_signal(code, period, remark, fire_time, price, position, tags=[]):
+def save_signal(code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
     logger = logging.getLogger()
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
-        logger.info("%s %s %s %s %s %s" %
-                    (code, period, remark, tags, fire_time, price))
-        DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find_one_and_update({
-            "code": code, "period": period, "fire_time": fire_time, "position": position
-        }, {
-            '$set': {
-                'code': code,
-                'period': period,
-                'remark': remark,
-                'fire_time': fire_time,
-                'price': price,
-                'position': position,
-                'tags': tags
-            }
-        }, upsert=True)
+        if (stop_lose_price - price) / price > -0.05:
+            logger.info("%s %s %s %s %s %s" %
+                        (code, period, remark, tags, fire_time, price))
+            DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find_one_and_update({
+                "code": code, "period": period, "fire_time": fire_time, "position": position
+            }, {
+                '$set': {
+                    'code': code,
+                    'period': period,
+                    'remark': remark,
+                    'fire_time': fire_time,
+                    'price': price,
+                    'stop_lose_price': stop_lose_price,
+                    'position': position,
+                    'tags': tags,
+                    'category': category
+                }
+            }, upsert=True)
 
 
 def export_to_tdx():
+    logger = logging.getLogger()
     TDX_HOME = os.environ.get("TDX_HOME")
     if TDX_HOME is None:
         logger.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
@@ -323,7 +307,7 @@ def export_to_tdx():
 
     # 缠论票
     signals = DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find({"price": {"$lte": 20}}).sort('fire_time', pymongo.DESCENDING).limit(20)
+        tz_aware=True, tzinfo=tz)).find({}).sort('fire_time', pymongo.DESCENDING).limit(20)
 
     for signal in list(signals):
         code = signal["code"]
@@ -339,21 +323,25 @@ def export_to_tdx():
         fo.writelines(seq)
 
 
-def raising_limit(code):
+def raising_limit(info):
+    """
+    计算股票连扳的数量，忽略最后2个涨停是一字板的股票。
+    """
+    code = info["code"]
     bars = DBPyChanlun['%s_240m' % code].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(30)
     bars = list(bars)
     count = 0
-    yizi_count = 0
     for idx in range(len(bars)-1):
         if bars[idx]["close"] >= round(bars[idx+1]["close"]*1.1, 2):
             count = count + 1
-            if bars[idx]["high"] == bars[idx]["low"]:
-                yizi_count = yizi_count + 1
         else:
             break
-    if yizi_count == count:
-        count = 0
+    if count > 1:
+        bars = pydash.chain(bars).take(2).filter(lambda bar: bar["high"] != bar["low"]).value()
+        if  len(bars) == 0:
+            # 最后2个涨停板是一字板
+            count = 0
     DBPyChanlun["stock"].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find_one_and_update({
             "_id": code

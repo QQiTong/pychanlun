@@ -78,3 +78,9 @@ pychanlun monitor
 - back 后端代码
   - monitor 监控代码
 - vnpy-2.0.5 量化交易框架
+
+使用阿里源安装程序包
+
+```cmd
+pip install -U tqsdk -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host=mirrors.aliyun.com
+```

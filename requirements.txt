@@ -4,8 +4,6 @@ requests
 pydash
 apscheduler
 pymongo
-gunicorn
-gevent
 json-logging-py
 rx
 pytest
@@ -15,3 +13,4 @@ waitress
 tornado
 click
 pytdx
+tqsdk

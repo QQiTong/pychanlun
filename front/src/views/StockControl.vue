@@ -1,11 +1,11 @@
 <template>
     <div class="stock-control-main">
         <MyHeader></MyHeader>
-        <el-divider content-position="center">持仓列表</el-divider>
-        <StockPositionList/>
-        <el-divider content-position="center">信号列表 | 多空分布</el-divider>
-        <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true"
-                     :stroke-width="24"/>
+        <!-- <el-divider content-position="center">持仓列表</el-divider> -->
+        <!-- <StockPositionList/> -->
+        <!-- <el-divider content-position="center">信号列表 | 多空分布</el-divider> -->
+        <!-- <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true"
+                     :stroke-width="24"/> -->
         <el-table
             v-loading="loading"
             :data="signalList"
@@ -42,8 +42,16 @@
                 label="价格">
             </el-table-column>
             <el-table-column
+                prop="stop_lose_price"
+                label="止损价">
+            </el-table-column>
+            <el-table-column
                 prop="remark"
                 label="备注">
+            </el-table-column>
+            <el-table-column
+                prop="category"
+                label="分类">
             </el-table-column>
             <el-table-column
                 prop="tags"
