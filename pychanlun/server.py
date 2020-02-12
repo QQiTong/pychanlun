@@ -9,12 +9,11 @@ import json
 import numpy as np
 from rqdatac import *
 from pychanlun.Calc import Calc
-from pychanlun.monitor.BusinessService import BusinessService
 from pychanlun.config import config
 import rqdatac as rq
+from pychanlun.monitor.BusinessService import businessService
 
 app = Flask(__name__)
-businessService = BusinessService()
 
 # curl -X GET 'http://127.0.0.1:5000/api/stock_data?symbol=RB2005&period=5m'
 # -------------------------------通用接口-----------------------------------

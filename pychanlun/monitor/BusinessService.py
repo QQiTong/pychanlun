@@ -22,7 +22,6 @@ dominantSymbolList = []
 # 主力合约详细信息
 dominantSymbolInfoList = []
 
-
 class BusinessService:
     def __init__(self):
         print('初始化业务对象...')
@@ -302,3 +301,5 @@ class BusinessService:
             'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
+
+businessService = BusinessService()

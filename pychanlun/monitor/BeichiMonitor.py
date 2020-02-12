@@ -21,7 +21,7 @@ import os
 import json
 from pychanlun.db import DBPyChanlun
 from pychanlun.config import config
-from pychanlun.monitor.BusinessService import BusinessService
+from pychanlun.monitor.BusinessService import businessService
 
 '''
 背驰监控
@@ -58,8 +58,6 @@ account = 19
 maxAccountUseRate = 0.1
 stopRate = 0.01
 mail = Mail()
-# 初始化业务对象
-businessService = BusinessService()
 
 def saveBeichiLog(symbol, period, price, signal, remark):
     DBPyChanlun['beichi_log'].insert_one({
@@ -737,7 +735,7 @@ def monitorFractal(result, lastFractalTime, currentTime, timeScope, lastTimeFrac
     # 查询数据库该品种是否有持仓
     positionInfo = businessService.getPosition(symbol, period, 'holding')
     if positionInfo == -1:
-        return 
+        return
     # 持仓方向
     direction = positionInfo['direction']
     if direction == 'long':
@@ -750,7 +748,7 @@ def monitorFractal(result, lastFractalTime, currentTime, timeScope, lastTimeFrac
             higherDateStamp = int(time.mktime(time.strptime(higherDate, "%Y-%m-%d %H:%M")))
             higherPeriod = result['fractal'][0]['period']
             # 当前价格低于顶分型的底
-            if lastFractalTime != higherDateStamp and currentTime - higherDateStamp <= 60 * timeScope and closePrice <= bottomPrice: 
+            if lastFractalTime != higherDateStamp and currentTime - higherDateStamp <= 60 * timeScope and closePrice <= bottomPrice:
                 lastTimeFractalMap[symbol][period] = higherDateStamp
                 stopWinCount = calStopWinCount(symbol, period, positionInfo,closePrice)
                 msg = symbol, period, signal, stopWinCount, higherPeriod, higherDate, bottomPrice, time.strftime(
@@ -764,7 +762,7 @@ def monitorFractal(result, lastFractalTime, currentTime, timeScope, lastTimeFrac
             higherDateStamp = int(time.mktime(time.strptime(higherDate, "%Y-%m-%d %H:%M")))
             higherPeriod = result['fractal'][1]['period']
             # 当前价格低于顶分型的底
-            if lastFractalTime != higherDateStamp and currentTime - higherDateStamp <= 60 * timeScope and closePrice <= bottomPrice: 
+            if lastFractalTime != higherDateStamp and currentTime - higherDateStamp <= 60 * timeScope and closePrice <= bottomPrice:
                 lastTimeFractalMap[symbol][period] = higherDateStamp
                 stopWinCount = calStopWinCount(symbol, period, positionInfo,closePrice)
                 msg = symbol, period, signal, stopWinCount, higherPeriod, higherDate, bottomPrice, time.strftime(
