@@ -1,47 +1,31 @@
 # -*- coding: utf-8 -*-
-
 import logging
 import traceback
 from pychanlun.Calc import Calc
 from pychanlun.KlineDataTool import KlineDataTool
-import numpy as np
-import pandas as pd
-from numpy import array
-import talib as ta
 import rqdatac as rq
-from datetime import datetime
+from datetime import datetime, timedelta
 from rqdatac import *
 import time
 import threading
 from pychanlun.Mail import Mail
-import pydash
-from pychanlun.funcat.api import *
-from pychanlun.config import config
-import os
 import json
 from pychanlun.db import DBPyChanlun
 from pychanlun.config import config
 from pychanlun.monitor.BusinessService import BusinessService
+import pytz
 
+tz = pytz.timezone('Asia/Shanghai')
 '''
-背驰监控
+综合监控
 '''
 klineDataTool = KlineDataTool()
-# 米筐数据 主力连续合约 这个会比实时数据少一天
-# symbolList1 = ['RB88', 'HC88', 'RU88', 'NI88', 'FU88', 'ZN88',
-#                'SP88', 'MA88', 'SR88', 'AP88', 'CF88', 'J88', 'JM88',
-#                'PP88']
-# 米筐数据 主力具体合约 这个是实时数据
-
-
+# 米筐数据 主力连续合约RB88 这个会比实时数据少一天
 symbolListDigitCoin = ['BTC_CQ'
                        # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
                        ]
-#
-# periodList2 = ['3min', '5min', '15min', '30min', '60min', '4hour']
-periodList = ['3m', '5m', '15m', '30m', '60m']
 periodList1 = ['3m', '5m', '15m', '30m', '60m']
-periodList2 = ['3m', '5m', '15m', '30m', '60m', '240m']
+periodList2 = ['1m', '3m', '5m', '15m', '30m', '60m']
 # 高级别 高高级别映射
 # 暂时用3d 3d
 futureLevelMap = {
@@ -54,70 +38,92 @@ futureLevelMap = {
 }
 dominantSymbolInfoList = {}
 # 账户资金
-account = 19
+account = 0
+# 期货账户
+futuresAccount = 19
+# 数字货币手续费20倍杠杆
+digitCoinFee = 0.0006
+# 数字货币账户
+digitCoinAccount = 1
 maxAccountUseRate = 0.1
 stopRate = 0.01
 mail = Mail()
 # 初始化业务对象
 businessService = BusinessService()
 
-def saveBeichiLog(symbol, period, price, signal, remark):
-    DBPyChanlun['beichi_log'].insert_one({
-        'date_created': datetime.now().strftime("%m-%d %H:%M"),
+
+def sendEmail(msg):
+    print(msg)
+    mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
+    if not mailResult:
+        print("发送失败")
+    else:
+        print("发送成功")
+
+
+# price 信号触发的价格， close_price 提醒时的收盘价 direction 多B 空S amount 开仓数量
+def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, price, close_price, amount):
+    temp_fire_time = datetime.strptime(fire_time_str, "%Y-%m-%d %H:%M")
+    # 触发时间转换成UTC时间
+    fire_time = temp_fire_time - timedelta(hours=8)
+    last_fire = DBPyChanlun['future_signal'].find_one({
         'symbol': symbol,
         'period': period,
-        'price': round(price, 2),
-        'signal': signal,
-        'remark': remark
+        'fire_time': fire_time,
+        'direction': direction
     })
-    return
+    if last_fire is not None:
+        DBPyChanlun['future_signal'].find_one_and_update({
+            'symbol': symbol, 'period': period, 'fire_time': fire_time, 'direction': direction
+        }, {
+            '$set': {
+                'signal': signal,
+                'remark': remark,
+                'price': price,
+                'close_price': close_price,
+                'amount': amount,
+                'date_created': datetime.utcnow()
+            },
+            '$inc': {
+                'update_count': 1
+            }
+        }, upsert=True)
+    else:
+        date_created = datetime.utcnow()
+        DBPyChanlun['future_signal'].insert_one({
+            'symbol': symbol,
+            'period': period,
+            'signal': signal,
+            'amount': amount,
+            'remark': remark,
+            'fire_time': fire_time,  # 信号发生的时间
+            'price': price,
+            'date_created': date_created,  # 记录插入的时间
+            'close_price': close_price,  # 提醒时最新价格
+            'direction': direction,
+            'update_count': 1,  # 这条背驰记录的更新次数
+        })
+        if (date_created - fire_time).total_seconds() < 600:
+            # 在10分钟内的触发邮件通知
+            msg = {
+                "symbol": symbol,
+                "period": period,
+                "signal": signal,
+                "fire_time": fire_time.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S'),
+                "amount": amount,
+                "price": price,
+                "date_created": date_created.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S'),
+                "close_price": close_price,
+                "direction": direction,
+                "remark": remark,
+            }
+            sendEmail(msg)
 
-
-# def saveStrategy4Log(symbol, period, raw_data, signal, remark, fire_time, price, position):
-#     last_fire = DBPyChanlun['strategy4_log'].find_one({
-#         'symbol': symbol['code'],
-#         'peroid': period,
-#         'fire_time': fire_time,
-#         'position': position
-#     })
-#
-#     if last_fire is not None:
-#         DBPyChanlun['strategy4_log'].find_one_and_update({
-#             'symbol': symbol['code'], 'period': period, 'fire_time': fire_time, 'position': position
-#         }, {
-#             '$set': {
-#                 'remark': remark,
-#                 'price': price,
-#                 'date_created': datetime.utcnow()
-#             },
-#             '$inc': {
-#                 'update_count': 1
-#             }
-#         }, upsert=True)
-#     else:
-#         date_created = datetime.utcnow()
-#         DBPyChanlun['strategy4_log'].insert_one({
-#             'symbol': symbol['code'],
-#             'period': period,
-#             'raw_data': raw_data,
-#             'signal': True,
-#             'remark': remark,
-#             'date_created': date_created,#记录插入的时间
-#             'fire_time': fire_time, #背驰发生的时间
-#             'price': price,
-#             'position': position,
-#             'update_count': 1, # 这条背驰记录的更新次数
-#         })
-#         if (date_created - fire_time).total_seconds() < 600:
-#             # 在10分钟内的触发邮件通知
-#             mailResult = mail.send("%s %s %s %s" % (symbol['code'], fire_time, price, position))
-#             print(mailResult)
 
 def getDominantSymbol():
     symbolList = config['symbolList']
     # 主力合约列表
     dominantSymbolList = []
-
     for i in range(len(symbolList)):
         df = rq.futures.get_dominant(
             symbolList[i], start_date=None, end_date=None, rule=0)
@@ -133,15 +139,6 @@ def getDominantSymbol():
 def monitorFuturesAndDigitCoin(type):
     logger = logging.getLogger()
     # 扫一遍25个期货品种需要3.5分钟
-    timeScope = 4
-    lastTimeMap = {}
-    lastTimeHuilaMap = {}
-    lastTimeTupoMap = {}
-    lastTimeVreverseMap = {}
-    lastTimeDuanBreakMap = {}
-    lastTimeFractalMap = {}
-
-    symbolList = []
     if type == "1":
         # auth('13088887055', 'chanlun123456')
         # count = get_query_count()
@@ -153,34 +150,11 @@ def monitorFuturesAndDigitCoin(type):
         symbolList, dominantSymbolInfoList = getDominantSymbol()
         print("主力合约信息：", dominantSymbolInfoList)
         periodList = periodList1
+        account = futuresAccount
     else:
         symbolList = symbolListDigitCoin
-        periodList = periodList1
-
-    for i in range(len(symbolList)):
-        symbol = symbolList[i]
-        lastTimeMap[symbol] = {}
-        lastTimeHuilaMap[symbol] = {}
-        lastTimeTupoMap[symbol] = {}
-        lastTimeVreverseMap[symbol] = {}
-        lastTimeDuanBreakMap[symbol] = {}
-        lastTimeFractalMap[symbol] = {}
-
-        for j in range(len(periodList)):
-            period = periodList[j]
-            lastTimeMap[symbol][period] = 0
-            lastTimeHuilaMap[symbol][period] = 0
-            lastTimeTupoMap[symbol][period] = 0
-            lastTimeVreverseMap[symbol][period] = 0
-            lastTimeDuanBreakMap[symbol][period] = 0
-            lastTimeFractalMap[symbol][period] = 0
-    print(lastTimeMap)
-    print(lastTimeHuilaMap)
-    print(lastTimeTupoMap)
-    print(lastTimeVreverseMap)
-    print(lastTimeDuanBreakMap)
-    print(lastTimeFractalMap)
-    startTime = int(time.time())
+        periodList = periodList2
+        account = digitCoinAccount
 
     try:
         while True:
@@ -189,33 +163,14 @@ def monitorFuturesAndDigitCoin(type):
                     symbol = symbolList[i]
                     period = periodList[j]
                     calc = Calc()
-                    # 当前时间戳 秒为单位
-                    currentTime = int(time.time())
-                    lastTime = lastTimeMap[symbol][period]
-                    lastHuilaTime = lastTimeHuilaMap[symbol][period]
-                    lastTupoTime = lastTimeTupoMap[symbol][period]
-                    lastVreverseTime = lastTimeVreverseMap[symbol][period]
-                    lastDuanBreakTime = lastTimeDuanBreakMap[symbol][period]
-                    lastFractalTime = lastTimeFractalMap[symbol][period]
-
-                    diffTime = currentTime - lastTime
                     print("current:", symbol, period, datetime.now())
                     result = calc.calcData(period, symbol)
-                    closePrice = result['close'][-1]
-                    # 暂停macd背驰的监控，全部基于新战法
-                    # monitorBeichi(result, lastTime, currentTime, timeScope, lastTimeMap, symbol, period, closePrice)
-                    monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap, symbol, period,
-                                 closePrice)
-                    monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, symbol, period,
-                                closePrice)
-                    monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVreverseMap, symbol,
-                                    period,
-                                    closePrice)
-                    monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTimeDuanBreakMap,
-                                     symbol, period, closePrice)
-                    monitorFractal(result, lastFractalTime, currentTime, timeScope, lastTimeFractalMap, symbol, period,
-                                   closePrice)
-
+                    close_price = result['close'][-1]
+                    monitorHuila(result, symbol, period, close_price)
+                    monitorTupo(result, symbol, period, close_price)
+                    monitorVfan(result, symbol, period, close_price)
+                    monitorDuanBreak(result, symbol, period, close_price)
+                    monitorFractal(result, symbol, period, close_price)
             if type == "1":
                 time.sleep(0)
             else:
@@ -226,8 +181,8 @@ def monitorFuturesAndDigitCoin(type):
         if type == "1":
             print("期货出异常了", Exception)
 
-            threading.Thread(
-                target=monitorFuturesAndDigitCoin, args="1").start()
+            # threading.Thread(
+            #     target=monitorFuturesAndDigitCoin, args="1").start()
         else:
             print("火币出异常了", Exception)
             time.sleep(5)
@@ -236,181 +191,46 @@ def monitorFuturesAndDigitCoin(type):
 
 
 '''
-监控背驰
-'''
-
-
-def monitorBeichi(result, lastTime, currentTime, timeScope, lastTimeMap, symbol, period, closePrice):
-    # 监控背驰
-    if len(result['buyMACDBCData']['date']) > 0:
-        lastBuyDate = result['buyMACDBCData']['date'][-1]
-        lastBuyValue = result['buyMACDBCData']['value'][-1]
-        firstBi = result['buyMACDBCData']['stop_win_price'][-1]
-
-        notLower = result['notLower']
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeMap[symbol][period] = dateStamp
-            msg = symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-            sendEmail(msg)
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark=lastBuyValue)
-
-    if len(result['sellMACDBCData']['date']) > 0:
-        notHigher = result['notHigher']
-        lastSellDate = result['sellMACDBCData']['date'][-1]
-        lastSellValue = result['sellMACDBCData']['value'][-1]
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeMap[symbol][period] = dateStamp
-            msg = symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark=lastSellValue)
-            sendEmail(msg)
-
-    # 监控高级别背驰
-    if len(result['buyHigherMACDBCData']['date']) > 0:
-        lastBuyDate = result['buyHigherMACDBCData']['date'][-1]
-        lastBuyValue = result['buyHigherMACDBCData']['value'][-1]
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        notLower = result['notLower']
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastTime != dateStamp and notLower and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeMap[symbol][period] = dateStamp
-            msg = symbol, period, lastBuyDate, lastBuyValue, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notLower,
-                          remark=lastBuyValue)
-            sendEmail(msg)
-
-    if len(result['sellHigherMACDBCData']['date']) > 0:
-        lastSellDate = result['sellHigherMACDBCData']['date'][-1]
-        lastSellValue = result['sellHigherMACDBCData']['value'][-1]
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        notHigher = result['notHigher']
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastTime != dateStamp and notHigher and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeMap[symbol][period] = dateStamp
-            msg = symbol, period, lastSellDate, lastSellValue, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal=notHigher,
-                          remark=lastSellValue)
-            sendEmail(msg)
-
-
-'''
 监控回拉
 '''
 
 
-def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap, symbol, period, closePrice):
+def monitorHuila(result, symbol, period, closePrice):
+    signal = 'huila'
     # 监控回拉
     if len(result['buy_zs_huila']['date']) > 0:
-        lastBuyDate = result['buy_zs_huila']['date'][-1]
-        lastBuyData = result['buy_zs_huila']['data'][-1]
-        tag = result['buy_zs_huila']['tag'][-1]
+        fire_time = result['buy_zs_huila']['date'][-1]
+        price = result['buy_zs_huila']['data'][-1]
+        remark = result['buy_zs_huila']['tag'][-1]
         stop_lose_price = result['buy_zs_huila']['stop_lose_price'][-1]
-        notLower = result['notLower']
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeHuilaMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, tag, ' huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            if maxOrderCount >= 1:
-                sendEmail(msg)
-            # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="huila B" + tag,
-                          remark=notLower)
-
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        direction = 'B'
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     if len(result['sell_zs_huila']['date']) > 0:
-        notHigher = result['notHigher']
-        lastSellDate = result['sell_zs_huila']['date'][-1]
-        lastSellData = result['sell_zs_huila']['data'][-1]
-        tag = result['sell_zs_huila']['tag'][-1]
+        fire_time = result['sell_zs_huila']['date'][-1]
+        price = result['sell_zs_huila']['data'][-1]
+        remark = result['sell_zs_huila']['tag'][-1]
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeHuilaMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, tag, ' huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="huila S" + tag,
-                          remark=notHigher)
-            if maxOrderCount >= 1:
-                sendEmail(msg)
-
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        direction = 'S'
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     # 监控高级别回拉
-
     if len(result['buy_zs_huila_higher']['date']) > 0:
-        lastBuyDate = result['buy_zs_huila_higher']['date'][-1]
-        lastBuyData = result['buy_zs_huila_higher']['data'][-1]
-        tag = result['buy_zs_huila_higher']['tag'][-1]
+        fire_time = result['buy_zs_huila_higher']['date'][-1]
+        price = result['buy_zs_huila_higher']['data'][-1]
+        remark = result['buy_zs_huila_higher']['tag'][-1]
         stop_lose_price = result['buy_zs_huila_higher']['stop_lose_price'][-1]
-
-        notLower = result['notLower']
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeHuilaMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, tag, ' higher huila B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-            if maxOrderCount >= 1:
-                sendEmail(msg)
-            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
-            #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher huila B" + tag,
-                          remark=notLower)
-
+        direction = 'HB'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     if len(result['sell_zs_huila_higher']['date']) > 0:
-        notHigher = result['notHigher']
-        lastSellDate = result['sell_zs_huila_higher']['date'][-1]
-        lastSellData = result['sell_zs_huila_higher']['data'][-1]
-        tag = result['sell_zs_huila_higher']['tag'][-1]
-
+        fire_time = result['sell_zs_huila_higher']['date'][-1]
+        price = result['sell_zs_huila_higher']['data'][-1]
+        remark = result['sell_zs_huila_higher']['tag'][-1]
         stop_lose_price = result['sell_zs_huila_higher']['stop_lose_price'][-1]
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastHuilaTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeHuilaMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-
-            msg = symbol, period, tag, ' higher huila S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
-            #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher huila S" + tag,
-                          remark=notHigher)
-            if maxOrderCount >= 1:
-                sendEmail(msg)
+        direction = 'HS'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
 
 
 '''
@@ -418,91 +238,42 @@ def monitorHuila(result, lastHuilaTime, currentTime, timeScope, lastTimeHuilaMap
 '''
 
 
-def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, symbol, period, closePrice):
+def monitorTupo(result, symbol, period, closePrice):
+    signal = 'tupo'
     # 监控突破
     if len(result['buy_zs_tupo']['date']) > 0:
-        lastBuyDate = result['buy_zs_tupo']['date'][-1]
-        lastBuyData = result['buy_zs_tupo']['data'][-1]
+        fire_time = result['buy_zs_tupo']['date'][-1]
+        price = result['buy_zs_tupo']['data'][-1]
         stop_lose_price = result['buy_zs_tupo']['stop_lose_price'][-1]
-        notLower = result['notLower']
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastTupoTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeTupoMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'tupo B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            if maxOrderCount >= 1:
-                sendEmail(msg)
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="tupo B",
-                          remark=notLower)
-
+        remark = ''
+        direction = 'B'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     if len(result['sell_zs_tupo']['date']) > 0:
-        notHigher = result['notHigher']
-        lastSellDate = result['sell_zs_tupo']['date'][-1]
-        lastSellData = result['sell_zs_tupo']['data'][-1]
+        fire_time = result['sell_zs_tupo']['date'][-1]
+        price = result['sell_zs_tupo']['data'][-1]
         stop_lose_price = result['sell_zs_tupo']['stop_lose_price'][-1]
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastTupoTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeTupoMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'tupo S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="tupo S",
-                          remark=notHigher)
-            if maxOrderCount >= 1:
-                sendEmail(msg)
-
+        remark = ''
+        direction = 'S'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     # 监控高级别突破
-
     if len(result['buy_zs_tupo_higher']['date']) > 0:
-        lastBuyDate = result['buy_zs_tupo_higher']['date'][-1]
-        lastBuyData = result['buy_zs_tupo_higher']['data'][-1]
+        fire_time = result['buy_zs_tupo_higher']['date'][-1]
+        price = result['buy_zs_tupo_higher']['data'][-1]
         stop_lose_price = result['buy_zs_tupo_higher']['stop_lose_price'][-1]
-        notLower = result['notLower']
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastTupoTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeTupoMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-
-            msg = symbol, period, 'higher tupo B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            if maxOrderCount >= 1:
-                sendEmail(msg)
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher tupo B",
-                          remark=notLower)
-
+        remark = ''
+        direction = 'HB'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     if len(result['sell_zs_tupo_higher']['date']) > 0:
-        notHigher = result['notHigher']
-        lastSellDate = result['sell_zs_tupo_higher']['date'][-1]
-        lastSellData = result['sell_zs_tupo_higher']['data'][-1]
+        fire_time = result['sell_zs_tupo_higher']['date'][-1]
+        price = result['sell_zs_tupo_higher']['data'][-1]
         stop_lose_price = result['sell_zs_tupo_higher']['stop_lose_price'][-1]
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastTupoTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeTupoMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'higher tupo S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher tupo S",
-                          remark=notHigher)
-            if maxOrderCount >= 1:
-                sendEmail(msg)
+        remark = ''
+        direction = 'HS'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
 
 
 '''
@@ -510,93 +281,43 @@ def monitorTupo(result, lastTupoTime, currentTime, timeScope, lastTimeTupoMap, s
 '''
 
 
-def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVreverseMap, symbol, period,
-                    closePrice):
+def monitorVfan(result, symbol, period, closePrice):
+    signal = 'vfan'
     # 监控V反
     if len(result['buy_v_reverse']['date']) > 0:
-        lastBuyDate = result['buy_v_reverse']['date'][-1]
-        lastBuyData = result['buy_v_reverse']['data'][-1]
+        fire_time = result['buy_v_reverse']['date'][-1]
+        price = result['buy_v_reverse']['data'][-1]
         stop_lose_price = result['buy_v_reverse']['stop_lose_price'][-1]
-
-        notLower = result['notLower']
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 10:
-            lastTimeVreverseMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'Vreverse B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            sendEmail(msg)
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="Vreverse B",
-                          remark=notLower)
-
+        remark = ''
+        direction = 'B'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     if len(result['sell_v_reverse']['date']) > 0:
-        notHigher = result['notHigher']
-        lastSellDate = result['sell_v_reverse']['date'][-1]
-        lastSellData = result['sell_v_reverse']['data'][-1]
+        fire_time = result['sell_v_reverse']['date'][-1]
+        price = result['sell_v_reverse']['data'][-1]
         stop_lose_price = result['sell_v_reverse']['stop_lose_price'][-1]
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 10:
-            lastTimeVreverseMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-
-            msg = symbol, period, 'Vreverse S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="Vreverse S",
-                          remark=notHigher)
-            sendEmail(msg)
-
+        remark = ''
+        direction = 'S'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     # 监控高级别V反
-
     if len(result['buy_v_reverse_higher']['date']) > 0:
-        lastBuyDate = result['buy_v_reverse_higher']['date'][-1]
-        lastBuyData = result['buy_v_reverse_higher']['data'][-1]
+        fire_time = result['buy_v_reverse_higher']['date'][-1]
+        price = result['buy_v_reverse_higher']['data'][-1]
         stop_lose_price = result['buy_v_reverse_higher']['stop_lose_price'][-1]
-        notLower = result['notLower']
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
-            lastTimeVreverseMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-
-            msg = symbol, period, 'higher Vreverse B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-            sendEmail(msg)
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher Vreverse B",
-                          remark=notLower)
+        remark = ''
+        direction = 'HB'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
 
     if len(result['sell_v_reverse_higher']['date']) > 0:
-        notHigher = result['notHigher']
-        lastSellDate = result['sell_v_reverse_higher']['date'][-1]
-        lastSellData = result['sell_v_reverse_higher']['data'][-1]
+        fire_time = result['sell_v_reverse_higher']['date'][-1]
+        price = result['sell_v_reverse_higher']['data'][-1]
         stop_lose_price = result['sell_v_reverse_higher']['stop_lose_price'][-1]
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastVreverseTime != dateStamp and currentTime - dateStamp <= 60 * timeScope * 2:
-            lastTimeVreverseMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-
-            msg = symbol, period, 'higher Vreverse S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher Vreverse S",
-                          remark=notHigher)
-            sendEmail(msg)
+        remark = ''
+        direction = 'HS'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
 
 
 '''
@@ -604,234 +325,162 @@ def monitorVreverse(result, lastVreverseTime, currentTime, timeScope, lastTimeVr
 '''
 
 
-def monitorDuanBreak(result, lastDuanBreakTime, currentTime, timeScope, lastTimeDuanBreakMap, symbol, period,
-                     closePrice):
+def monitorDuanBreak(result, symbol, period, closePrice):
+    signal = 'break'
     # 监控线段破坏
     if len(result['buy_duan_break']['date']) > 0:
-        lastBuyDate = result['buy_duan_break']['date'][-1]
-        lastBuyData = result['buy_duan_break']['data'][-1]
+        fire_time = result['buy_duan_break']['date'][-1]
+        price = result['buy_duan_break']['data'][-1]
         stop_lose_price = result['buy_duan_break']['stop_lose_price'][-1]
-        notLower = result['notLower']
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeDuanBreakMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'break B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            if maxOrderCount >= 1:
-                sendEmail(msg)
-            # saveStrategy4Log(symbol,period,msg,True,'拉回中枢确认底背',lastBuyData,lastBuyDate,'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="break B",
-                          remark=notLower)
-
+        remark = ''
+        direction = 'B'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     if len(result['sell_duan_break']['date']) > 0:
-        notHigher = result['notHigher']
-        lastSellDate = result['sell_duan_break']['date'][-1]
-        lastSellData = result['sell_duan_break']['data'][-1]
+        fire_time = result['sell_duan_break']['date'][-1]
+        price = result['sell_duan_break']['data'][-1]
         stop_lose_price = result['sell_duan_break']['stop_lose_price'][-1]
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeDuanBreakMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'break S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认顶背', lastSellData, lastSellDate, 'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="break S",
-                          remark=notHigher)
-            if maxOrderCount >= 1:
-                sendEmail(msg)
-
+        remark = ''
+        direction = 'S'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
     # 监控高级别线段破坏
-
     if len(result['buy_duan_break_higher']['date']) > 0:
-        lastBuyDate = result['buy_duan_break_higher']['date'][-1]
-        lastBuyData = result['buy_duan_break_higher']['data'][-1]
+        fire_time = result['buy_duan_break_higher']['date'][-1]
+        price = result['buy_duan_break_higher']['data'][-1]
         stop_lose_price = result['buy_duan_break_higher']['stop_lose_price'][-1]
-
-        notLower = result['notLower']
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastBuyDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastBuyDate, notLower)
-        if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeDuanBreakMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-            msg = symbol, period, 'higher break B ', maxOrderCount, lastBuyDate, lastBuyData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-            if maxOrderCount >= 1:
-                sendEmail(msg)
-            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别底背', lastBuyData, lastBuyDate,
-            #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher break B",
-                          remark=notLower)
+        remark = ''
+        direction = 'HB'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
 
     if len(result['sell_duan_break_higher']['date']) > 0:
-        notHigher = result['notHigher']
-        lastSellDate = result['sell_duan_break_higher']['date'][-1]
-        lastSellData = result['sell_duan_break_higher']['data'][-1]
+        fire_time = result['sell_duan_break_higher']['date'][-1]
+        price = result['sell_duan_break_higher']['data'][-1]
         stop_lose_price = result['sell_duan_break_higher']['stop_lose_price'][-1]
-
-        dateStamp = int(time.mktime(
-            time.strptime(lastSellDate, "%Y-%m-%d %H:%M")))
-        # print("current judge:", symbol, period, lastSellDate, notHigher)
-        if lastDuanBreakTime != dateStamp and currentTime - dateStamp <= 60 * timeScope:
-            lastTimeDuanBreakMap[symbol][period] = dateStamp
-            maxOrderCount = calMaxOrderCount(
-                symbol, closePrice, stop_lose_price)
-
-            msg = symbol, period, 'higher break S ', maxOrderCount, lastSellDate, lastSellData, closePrice, time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            # saveStrategy4Log(symbol, period, msg, True, '拉回中枢确认大级别顶背', lastSellData, lastSellDate,
-            #                  'BuyLong')
-            saveBeichiLog(symbol=symbol, period=period, price=closePrice, signal="higher break S",
-                          remark=notHigher)
-            if maxOrderCount >= 1:
-                sendEmail(msg)
+        remark = ''
+        direction = 'HS'
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price,period)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount)
 
 
 '''
 监控 持仓品种的向上两个级别的顶底分型
-
 '''
 temp = {
-	"fractal": [{
-		"direction": 1,
-		"top_fractal": {
-			"date": "2020-02-07 15:00",
-			"top": 3340.0,
-			"bottom": 3312.0
-		},
-		"bottom_fractal": {
-			"date": "2020-02-04 09:15",
-			"top": 3258.0,
-			"bottom": 3207.0
-		},
-		"period": "15m"
-	}, {
-		"direction": 1,
-		"top_fractal": {
-			"date": "2020-02-07 15:00",
-			"top": 3340.0,
-			"bottom": 3306.0
-		},
-		"bottom_fractal": {
-			"date": "2020-02-04 10:00",
-			"top": 3500.0,
-			"bottom": 3207.0
-		},
-		"period": "60m"
-	}]
+    "fractal": [{
+        "direction": 1,
+        "top_fractal": {
+            "date": "2020-02-07 15:00",
+            "top": 3340.0,
+            "bottom": 3312.0
+        },
+        "bottom_fractal": {
+            "date": "2020-02-04 09:15",
+            "top": 3258.0,
+            "bottom": 3207.0
+        },
+        "period": "15m"
+    }, {
+        "direction": 1,
+        "top_fractal": {
+            "date": "2020-02-07 15:00",
+            "top": 3340.0,
+            "bottom": 3306.0
+        },
+        "bottom_fractal": {
+            "date": "2020-02-04 10:00",
+            "top": 3500.0,
+            "bottom": 3207.0
+        },
+        "period": "60m"
+    }]
 }
-def monitorFractal(result, lastFractalTime, currentTime, timeScope, lastTimeFractalMap, symbol, period,
-                   closePrice):
+
+
+def monitorFractal(result, symbol, period, closePrice):
+    signal = 'fractal'
     # 查询数据库该品种是否有持仓
     positionInfo = businessService.getPosition(symbol, period, 'holding')
     if positionInfo == -1:
-        return 
+        return
     # 持仓方向
     direction = positionInfo['direction']
     if direction == 'long':
         # 多单查找向上笔的顶分型
         # 高级别
-        signal = 'fractal S'
         if result['fractal'][0]['direction'] == 1:
-            higherDate = result['fractal'][0]['top_fractal']['date']
-            bottomPrice = result['fractal'][0]['top_fractal']['bottom']
-            higherDateStamp = int(time.mktime(time.strptime(higherDate, "%Y-%m-%d %H:%M")))
-            higherPeriod = result['fractal'][0]['period']
+            fire_time = result['fractal'][0]['top_fractal']['date']
+            price = result['fractal'][0]['top_fractal']['bottom']
+            remark = result['fractal'][0]['period']
+            direction = 'S'
             # 当前价格低于顶分型的底
-            if lastFractalTime != higherDateStamp and currentTime - higherDateStamp <= 60 * timeScope and closePrice <= bottomPrice: 
-                lastTimeFractalMap[symbol][period] = higherDateStamp
-                stopWinCount = calStopWinCount(symbol, period, positionInfo,closePrice)
-                msg = symbol, period, signal, stopWinCount, higherPeriod, higherDate, bottomPrice, time.strftime(
-                    '%Y-%m-%d %H:%M:%S', time.localtime(time.time())), closePrice
-                sendEmail(msg)
-                saveBeichiLog(symbol=symbol, period=period,price=closePrice, signal=signal, remark= higherPeriod)
+            if closePrice <= price:
+                stopWinCount = calStopWinCount(symbol, period, positionInfo, closePrice)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stopWinCount)
         # 高高级别
         if result['fractal'][1]['direction'] == 1:
-            higherDate = result['fractal'][1]['top_fractal']['date']
-            bottomPrice = result['fractal'][1]['top_fractal']['bottom']
-            higherDateStamp = int(time.mktime(time.strptime(higherDate, "%Y-%m-%d %H:%M")))
-            higherPeriod = result['fractal'][1]['period']
+            fire_time = result['fractal'][1]['top_fractal']['date']
+            price = result['fractal'][1]['top_fractal']['bottom']
+            remark = result['fractal'][1]['period']
+            direction = 'HS'
             # 当前价格低于顶分型的底
-            if lastFractalTime != higherDateStamp and currentTime - higherDateStamp <= 60 * timeScope and closePrice <= bottomPrice: 
-                lastTimeFractalMap[symbol][period] = higherDateStamp
-                stopWinCount = calStopWinCount(symbol, period, positionInfo,closePrice)
-                msg = symbol, period, signal, stopWinCount, higherPeriod, higherDate, bottomPrice, time.strftime(
-                    '%Y-%m-%d %H:%M:%S', time.localtime(time.time())), closePrice
-                sendEmail(msg)
-                saveBeichiLog(symbol=symbol, period=period,price=closePrice, signal=signal, remark= higherPeriod)
+            if closePrice <= price:
+                stopWinCount = calStopWinCount(symbol, period, positionInfo, closePrice)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stopWinCount)
     else:
         # 空单查找向下笔的底分型
         # 高级别
-        signal = 'fractal B'
         if result['fractal'][0]['direction'] == -1:
-            higherDate = result['fractal'][0]['bottom_fractal']['date']
-            topPrice = result['fractal'][0]['bottom_fractal']['top']
-            higherDateStamp = int(time.mktime(time.strptime(higherDate, "%Y-%m-%d %H:%M")))
-            higherPeriod = result['fractal'][0]['period']
+            fire_time = result['fractal'][0]['bottom_fractal']['date']
+            price = result['fractal'][0]['bottom_fractal']['top']
+            remark = result['fractal'][0]['period']
+            direction = 'B'
             # 当前价格高于底分型的顶
-            if lastFractalTime != higherDateStamp and currentTime - higherDateStamp <= 60 * timeScope and closePrice >= topPrice:
-                lastTimeFractalMap[symbol][period] = higherDateStamp
-                stopWinCount = calStopWinCount(symbol, period, positionInfo,closePrice)
-                msg = symbol, period, signal, stopWinCount, higherPeriod, higherDate, topPrice, time.strftime(
-                    '%Y-%m-%d %H:%M:%S', time.localtime(time.time())), closePrice
-                sendEmail(msg)
-                saveBeichiLog(symbol=symbol, period=period,price=closePrice, signal=signal, remark= higherPeriod)
+            if closePrice >= price:
+                stopWinCount = calStopWinCount(symbol, period, positionInfo, closePrice)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stopWinCount)
         # 高高级别
         if result['fractal'][1]['direction'] == -1:
-            higherDate = result['fractal'][1]['bottom_fractal']['date']
-            topPrice = result['fractal'][1]['bottom_fractal']['bottom']
-            higherDateStamp = int(time.mktime(time.strptime(higherDate, "%Y-%m-%d %H:%M")))
-            higherPeriod = result['fractal'][1]['period']
+            fire_time = result['fractal'][1]['bottom_fractal']['date']
+            price = result['fractal'][1]['bottom_fractal']['bottom']
+            remark = result['fractal'][1]['period']
+            direction = 'HB'
             # 当前价格高于底分型的顶
-            if lastFractalTime != higherDateStamp and currentTime - higherDateStamp <= 60 * timeScope and closePrice >= topPrice:
-                lastTimeFractalMap[symbol][period] = higherDateStamp
-                stopWinCount = calStopWinCount(symbol, period, positionInfo,closePrice)
-                msg = symbol, period, signal, stopWinCount, higherPeriod, higherDate, topPrice, time.strftime(
-                    '%Y-%m-%d %H:%M:%S', time.localtime(time.time())), closePrice
-                sendEmail(msg)
-                saveBeichiLog(symbol=symbol, period=period,price=closePrice, signal=signal, remark= higherPeriod)
-
-def sendEmail(msg):
-    print(msg)
-    mailResult = mail.send(str(msg))
-    if not mailResult:
-        print("发送失败")
-    else:
-        print("发送成功")
+            if closePrice >= price:
+                stopWinCount = calStopWinCount(symbol, period, positionInfo, closePrice)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stopWinCount)
 
 
 # 计算出开仓手数（止损系数，资金使用率双控）
-def calMaxOrderCount(dominantSymbol, openPrice, stopPrice):
-    margin_rate = dominantSymbolInfoList[dominantSymbol]['margin_rate']
-    contract_multiplier = dominantSymbolInfoList[dominantSymbol]['contract_multiplier']
-
+def calMaxOrderCount(dominantSymbol, openPrice, stopPrice,period):
+    # openPrice stopPrice等于历史行情某个stopPrice 会导致除0异常
+    if openPrice == stopPrice:
+        return -1
+    # 兼容数字货币
+    if '_CQ' in dominantSymbol:
+        perOrderMargin = 5
+        # 1手止损的比率
+        perOrderStopRate = (abs(openPrice - stopPrice) / openPrice + digitCoinFee) * 20
+        # 1手止损的金额
+        perOrderStopMoney = round((perOrderMargin * perOrderStopRate), 2)
+    # 期货
+    else:
+        margin_rate = dominantSymbolInfoList[dominantSymbol]['margin_rate']
+        contract_multiplier = dominantSymbolInfoList[dominantSymbol]['contract_multiplier']
+        # 计算1手需要的保证金
+        perOrderMargin = int(openPrice * contract_multiplier * margin_rate)
+        # 1手止损的金额
+        perOrderStopMoney = abs(openPrice - stopPrice) * contract_multiplier
+        # 1手止损的百分比
+        perOrderStopRate = round((perOrderStopMoney / perOrderMargin), 2)
     # 计算最大能使用的资金
     maxAccountUse = account * 10000 * maxAccountUseRate
     # 计算最大止损金额
     maxStopMoney = account * 10000 * stopRate
-    # 计算1手需要的保证金
-    perOrderMargin = int(openPrice * contract_multiplier * margin_rate)
-
-    # 1手止损的金额
-    perOrderStopMoney = abs(openPrice - stopPrice) * contract_multiplier
-    # 1手止损的百分比
-    perOrderStopRate = round((perOrderStopMoney / perOrderMargin), 2)
-
     # 根据止损算出的开仓手数(四舍五入)
+    # print("debug ",dominantSymbol,maxStopMoney,perOrderStopMoney,openPrice, stopPrice,period,contract_multiplier)
     maxOrderCount1 = round(maxStopMoney / perOrderStopMoney)
-
     # 根据最大资金使用率算出的开仓手数(四舍五入)
     maxOrderCount2 = round(maxAccountUse / perOrderMargin)
     maxOrderCount = maxOrderCount2 if maxOrderCount1 > maxOrderCount2 else maxOrderCount1
@@ -840,7 +489,9 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice):
 
 # 计算动止手数（盈亏比大于2.3：1 动止30%才能保证不亏）
 # 主力合约，开仓价格，开仓数量，止损价格，止盈价格    用最新价来算回更准确，因为触发价可能会有滑点
-def calStopWinCount(symbol, period, positionInfo,closePrice):
+def calStopWinCount(symbol, period, positionInfo, closePrice):
+    if '_CQ' in symbol:
+        return 0
     # 动止公式:  (1 - stopWinPosRate) / stopWinPosRate = winLoseRate
     # stopWinPosRate: 动态止盈多少仓位
     # winLoseRate: 当前的盈亏比
@@ -859,7 +510,7 @@ def calStopWinCount(symbol, period, positionInfo,closePrice):
         stopWinPosRate = 0.3
     stopWinCount = round(stopWinPosRate * open_pos_amount)
     print("当前盈亏比", winLoseRate, "当前动止仓位百分比",
-            stopWinPosRate, "动止手数", stopWinCount)
+          stopWinPosRate, "动止手数", stopWinCount)
     return stopWinCount
 
 

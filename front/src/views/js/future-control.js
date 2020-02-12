@@ -171,10 +171,10 @@ export default {
         }
     },
     mounted() {
-        this.getBeichiList()
+        this.getSignalList()
         this.getChangeiList()
         setInterval(() => {
-            this.getBeichiList()
+            this.getSignalList()
             this.getChangeiList()
         }, 20000)
 
@@ -200,8 +200,8 @@ export default {
                 this.firstRequestDominant = false
             })
         },
-        getBeichiList() {
-            futureApi.getBeichiList().then(res => {
+        getSignalList() {
+            futureApi.getSignalList().then(res => {
                 console.log("获取背驰列表:", res)
                 this.beichiList = res
                 if (this.firstRequestDominant) {

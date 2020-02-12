@@ -43,15 +43,15 @@ class BusinessService:
     def getDoinantSynmbol(self):
         return dominantSymbolInfoList
 
-    def getBeichiList(self, strategyType):
+    def getFutureSignalList(self, strategyType):
         if strategyType == "0":
-            return self.getNormalBeichiList()
+            return self.getNormalSignalList()
         elif strategyType == "3":
             return self.getStrategy3BeichiList()
         else:
             return self.getStrategy4BeichiList()
 
-    def getNormalBeichiList(self):
+    def getNormalSignalList(self):
         symbolList = dominantSymbolList
         #  把btc eth 加进去
         symbolList.append("BTC_CQ")
@@ -63,18 +63,23 @@ class BusinessService:
             for j in range(len(periodList)):
                 period = periodList[j]
                 symbolListMap[symbol][period] = ""
-        beichi_log_list = DBPyChanlun['beichi_log'].find()
-        for beichiItem in beichi_log_list:
-            msg = str(beichiItem['signal']) + " " + str(round(beichiItem['price'], 2)) + " " + str(
-                beichiItem['date_created']) + " " + str(
-                beichiItem['remark'])
-            if beichiItem['symbol'] in symbolListMap:
-                symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
-        # print("背驰列表", symbolListMap)
+        future_signal_list = DBPyChanlun['future_signal'].find().sort("fire_time", pymongo.ASCENDING)
+        for signalItem in future_signal_list:
+            # utc 转本地时间
+            date_created = signalItem['date_created'] + timedelta(hours=8)
+            date_created_str = date_created.strftime("%m-%d %H:%M")
+            fire_time = signalItem['fire_time'] + timedelta(hours=8)
+            fire_time_str = fire_time.strftime("%m-%d %H:%M")
+            # str(round(signalItem['price'], 2))
+            msg = "%s %s %s %s %s" % (str(signalItem['signal']),str(signalItem['direction']), fire_time_str,
+                                       date_created_str,str(signalItem['remark']))
+            if signalItem['symbol'] in symbolListMap:
+                symbolListMap[signalItem['symbol']][signalItem['period']] = msg
+        # print("期货信号列表", symbolListMap)
         return symbolListMap
 
     def getStrategy3BeichiList(self):
-        symbolList = self.getDominantSymbol()
+        symbolList = dominantSymbolList
         symbolList.append("BTC_CQ")
         symbolList.append("ETH_CQ")
         symbolListMap = {}
@@ -95,7 +100,7 @@ class BusinessService:
         return symbolListMap
 
     def getStrategy4BeichiList(self):
-        symbolList = self.getDominantSymbol()
+        symbolList = dominantSymbolList
         symbolList.append("BTC_CQ")
         symbolList.append("ETH_CQ")
         symbolListMap = {}

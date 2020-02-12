@@ -44,11 +44,11 @@ def dominant():
 
 
 # 获取所有背驰列表
-@app.route('/api/get_beichi_list')
-def get_beichi_list():
+@app.route('/api/get_future_signal_list')
+def get_future_signal_list():
     strategyType = request.args.get("strategyType") or "0"
-    beichiListResult = businessService.getBeichiList(strategyType)
-    return Response(json.dumps(beichiListResult), mimetype='application/json')
+    futureSignalList = businessService.getFutureSignalList(strategyType)
+    return Response(json.dumps(futureSignalList), mimetype='application/json')
 
 
 # 获取涨跌幅信息

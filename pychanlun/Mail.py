@@ -5,7 +5,7 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.utils import formataddr
-
+import json
 my_sender = 'java_boss@mail.zyaoxin.com'  # 发件人邮箱账号
 my_pass = 'LiangHua123456'  # 发件人邮箱密码
 my_user = ['236819579@qq.com', '1106628276@qq.com']  # 收件人邮箱账号，我这边发送给自己

@@ -84,13 +84,13 @@
                 >
                     <el-table-column
                         align="left"
-                        width="200">
+                        width="150">
                         <template slot="header" slot-scope="scope">
                             <el-input
                                 v-model="symbolSearch"
                                 size="mini"
                                 placeholder="搜索">
-                                <el-button type="primary" @click="switchStrategy('0')" size="mini" slot="append">刷新
+                                <el-button type="primary" @click="getSignalList" size="mini" slot="append">刷新
                                 </el-button>
                             </el-input>
                         </template>
@@ -102,7 +102,7 @@
                     </el-table-column>
                     <el-table-column
                         label="保证金比率"
-                        width="100"
+                        width="90"
                     >
                         <template slot-scope="scope">
                             <el-link @click="fillMarginRate(scope.row)" :underline="false">
@@ -113,7 +113,7 @@
 
                     <el-table-column
                         label="涨跌幅"
-                        width="100"
+                        width="90"
                     >
                         <template slot-scope="scope">
                             <el-tag effect="dark" :type="changeList[scope.row.order_book_id]|changeTagFilter">

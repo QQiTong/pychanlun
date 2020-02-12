@@ -38,9 +38,9 @@ export const futureApi = {
             method: 'get',
         })
     },
-    getBeichiList() {
+    getSignalList() {
         return axios({
-            url: `/api/get_beichi_list`,
+            url: `/api/get_future_signal_list`,
             method: 'get',
         })
     },
