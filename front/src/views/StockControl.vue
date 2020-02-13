@@ -1,18 +1,11 @@
 <template>
     <div class="stock-control-main">
         <MyHeader></MyHeader>
-        <!-- <el-divider content-position="center">持仓列表</el-divider> -->
-        <!-- <StockPositionList/> -->
-        <!-- <el-divider content-position="center">信号列表 | 多空分布</el-divider> -->
-        <!-- <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true"
-                     :stroke-width="24"/> -->
-        <el-table
-            v-loading="loading"
-            :data="signalList"
-            size="mini"
-            :stripe="true"
-            :border="true"
-        >
+        <el-divider content-position="center">持仓列表</el-divider>
+        <StockPositionList/>
+        <el-divider content-position="center">信号列表 | 多空分布</el-divider> -->
+        <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true" :stroke-width="24"/>
+        <el-table v-loading="loading" :data="signalList" size="mini" :stripe="true" :border="true">
             <el-table-column
                 prop="code"
                 label="代码"
@@ -45,6 +38,11 @@
                 prop="stop_lose_price"
                 label="止损价">
             </el-table-column>
+            <el-table-column prop="stop_lose_rate" label="止损价">
+                <template slot-scope="scope">
+                    <span nowrap>{{Math.round((scope.row.stop_lose_price-scope.row.price)/scope.row.price*10000)/100}}%</span>
+                </template>
+            </el-table-column>
             <el-table-column
                 prop="remark"
                 label="备注">
@@ -70,70 +68,69 @@
     import {stockApi} from '@/api/stockApi'
     // import {mapGetters, mapMutations} from 'vuex'
     // let moment = require('moment')
-    import echarts from 'echarts/lib/echarts'
-    import CommonTool from "@/tool/CommonTool";
-    import MyHeader from "./MyHeader";
-    import StockPositionList from "./StockPositionList";
+    // import echarts from 'echarts/lib/echarts'
+    import CommonTool from '@/tool/CommonTool'
+    import MyHeader from './MyHeader'
+    import StockPositionList from './StockPositionList'
 
     export default {
         name: 'stock-control',
         components: {
-            "MyHeader": MyHeader,
-            "StockPositionList": StockPositionList
+            'MyHeader': MyHeader,
+            'StockPositionList': StockPositionList
         },
-        data() {
+        data () {
             return {
                 loading: true,
                 signalList: [],
                 periodList: ['3m', '5m', '15m', '30m', '60m'],
                 beichiList: {},
-                //todo
                 percentage: 80,
             }
         },
-        mounted() {
-            const page = this.getParams('page') || '1';
+        mounted () {
+            const page = this.getParams('page') || '1'
             this.getSignalList(page)
         },
-        beforeDestroy() {
+        beforeDestroy () {
 
         },
         methods: {
-            jumpToControl(type) {
-                if (type === "futures") {
-                    this.$router.replace("/futures-control")
+            jumpToControl (type) {
+                if (type === 'futures') {
+                    this.$router.replace('/futures-control')
                 } else {
-                    this.$router.replace("/stock-control")
+                    this.$router.replace('/stock-control')
                 }
             },
-            filterTags(value, row) {
-                return row.tags === value;
+            filterTags (value, row) {
+                return row.tags === value
             },
-            filterPeriod(value, row) {
-                return row.period === value;
+            filterPeriod (value, row) {
+                return row.period === value
             },
-            getSignalList(page) {
+            getSignalList (page) {
                 stockApi.getStockSignalList(page).then(res => {
                     this.signalList = res
                     this.loading = false
                 }).catch((error) => {
                     this.loading = false
-                    console.log("获取股票信号列表失败:", error)
+                    console.log('获取股票信号列表失败:', error)
                 })
             },
-            jumpToKline(symbol, period) {
+            jumpToKline (symbol, period) {
                 // 总控页面不关闭，开启新页面
                 let routeUrl = this.$router.resolve({
                     path: '/kline-big',
                     query: {
                         symbol: symbol,
                         period: period,
-                        endDate: CommonTool.dateFormat("yyyy-MM-dd")
+                        endDate: CommonTool.dateFormat('yyyy-MM-dd')
                     }
-                });
-                window.open(routeUrl.href, '_blank');
+                })
+                window.open(routeUrl.href, '_blank')
             },
-            getParams(name) {
+            getParams (name) {
                 let res = ''
                 let categoryStr = window.location.href.split('?')[1] || ''
                 if (categoryStr.length > 1) {
@@ -152,11 +149,11 @@
                 }
                 return res
             },
-            customColorMethod(percentage) {
+            customColorMethod (percentage) {
                 if (percentage < 50) {
-                    return '#409EFF';
+                    return '#409EFF'
                 } else {
-                    return '#F56C6C';
+                    return '#F56C6C'
                 }
             },
         }
