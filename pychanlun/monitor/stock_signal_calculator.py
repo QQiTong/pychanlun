@@ -155,7 +155,7 @@ def calculate(info):
             tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        save_signal(code, period, '升破笔中枢预多',
+        save_signal(code, period, '升破笔中枢看多预期',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags)
 
     count = len(v_reverse['buy_v_reverse']['date'])
@@ -185,7 +185,7 @@ def calculate(info):
 
     count = len(higher_zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '升破段中枢预多', higher_zs_tupo['buy_zs_tupo']
+        save_signal(code, period, '升破段中枢看多预期', higher_zs_tupo['buy_zs_tupo']
                     ['date'][i], higher_zs_tupo['buy_zs_tupo']['data'][i], higher_zs_tupo['buy_zs_tupo']['stop_lose_price'][i], 'BUY_LONG')
 
     count = len(higher_v_reverse['buy_v_reverse']['date'])

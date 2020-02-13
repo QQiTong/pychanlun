@@ -160,7 +160,9 @@ class BusinessService:
             item['fire_time'] = row["fire_time"].strftime("%Y-%m-%d %H:%M")
             item['period'] = row["period"]
             item['price'] = row["price"]
+            item['stop_lose_price'] = row["stop_lose_price"]
             item['remark'] = row["remark"]
+            item['category'] = row["category"]
             item['tags'] = ", ".join(row["tags"])
             signalList.append(item)
         return signalList
