@@ -38,7 +38,7 @@ futureLevelMap = {
 }
 dominantSymbolInfoList = {}
 # 账户资金
-account = 0
+account = 19
 # 期货账户
 futuresAccount = 19
 # 数字货币手续费20倍杠杆
@@ -105,16 +105,19 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
         })
         if (date_created - fire_time).total_seconds() < 600:
             # 在10分钟内的触发邮件通知
+            # 把数据库的utc时间 转成本地时间
+            fire_time_str = (fire_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S'),
+            date_created_str = (date_created + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S'),
             msg = {
                 "symbol": symbol,
                 "period": period,
                 "signal": signal,
-                "fire_time": fire_time.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S'),
-                "amount": amount,
-                "price": price,
-                "date_created": date_created.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S'),
-                "close_price": close_price,
                 "direction": direction,
+                "amount": amount,
+                "fire_time": fire_time_str,
+                "price": price,
+                "date_created": date_created_str,
+                "close_price": close_price,
                 "remark": remark,
             }
             sendEmail(msg)
@@ -148,7 +151,7 @@ def monitorFuturesAndDigitCoin(type):
              ('rqdatad-pro.ricequant.com', 16011))
         # 主力合约，主力合约详细信息
         symbolList, dominantSymbolInfoList = getDominantSymbol()
-        print("主力合约信息：", dominantSymbolInfoList)
+        # print("主力合约信息：", dominantSymbolInfoList)
         periodList = periodList1
         account = futuresAccount
     else:

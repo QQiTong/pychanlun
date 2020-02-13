@@ -399,10 +399,6 @@ export default {
         requestSymbolData() {
             let that = this
             this.switchSymbol(this.symbol, 'reload')
-            // 如果是大图关闭轮询
-            // if (this.period !== "") {
-            //     return
-            // }
             // 开启轮询
             that.timer = setInterval(() => {
                 if (that.requestFlag) {
@@ -609,7 +605,7 @@ export default {
             // else if (period === '1d') {
             //     currentChart = myChart1d
             // }
-            var option;
+            let option;
             if (update === 'update') {
                 console.log('更新', period);
                 option = that.refreshOption(currentChart, resultData)
@@ -1101,18 +1097,17 @@ export default {
         refreshOption(chart, resultData) {
             var option = chart.getOption();
             option.series[0].data = resultData.values;
+            option.xAxis[0].data = resultData.date;
             option.series[0].markArea.data = resultData.zsvalues;
             option.series[0].markLine.data = resultData.markLineData;
             option.series[0].markPoint.data = resultData.huilaValues;
             option.series[1].data = resultData.biValues;
             option.series[2].data = resultData.duanValues;
             option.series[2].markPoint.data = resultData.duanPriceValues;
-
             option.series[3].data = resultData.higherDuanValues;
-            option.series[4].data = calculateMA(resultData, 5);
-            option.series[5].data = calculateMA(resultData, 10);
+            // option.series[4].data = this.calculateMA(resultData, 5);
+            // option.series[5].data = this.calculateMA(resultData, 10);
             // option.series[11].data = resultData.volume;
-            option.xAxis[0].data = resultData.time;
             return option
         },
         splitData(jsonObj, period) {
