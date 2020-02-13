@@ -33,8 +33,8 @@ def run(**kwargs):
     codes = []
     collist = DBPyChanlun.list_collection_names()
     for code in collist:
-        # 只计算5分钟的就够了，只做这个级别
-        match = re.match("((sh|sz)(\\d{6}))_(5m)", code, re.I)
+        # 只计算5分钟和15分钟的就够了，只做这个级别
+        match = re.match("((sh|sz)(\\d{6}))_(5m|15m)", code, re.I)
         if match is not None:
             code = match.group(1)
             period = match.group(4)
