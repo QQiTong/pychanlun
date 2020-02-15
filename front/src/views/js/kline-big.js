@@ -1,6 +1,6 @@
-import klineMixin from "./kline-mixin"
+import klineMixin from './kline-mixin'
 
 export default {
-    name:"kline-big",
+    name: 'kline-big',
     mixins: [klineMixin],
 }

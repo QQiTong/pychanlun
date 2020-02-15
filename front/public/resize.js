@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 function prepareResize () {
   // 重调尺寸
   this.onResize()
@@ -35,7 +36,7 @@ function onResize () {
     // const rem          = window_width * dpr / 10;
     const dpr = window.devicePixelRatio || 1
     const rem = __rootSize
-    console.log('dpr', dpr, 'rem', rem)
+    // console.log('dpr', dpr, 'rem', rem)
     // 给js调用的，某一dpr下rem和px之间的转换函数
     window.rem2px = function (v) {
       const _v = parseFloat(v)
@@ -52,7 +53,6 @@ function onResize () {
   // TIP——————————————————————————————正式开始——————————————————————————————————
 
   // rem布局自适应
-  console.log('onResize')
   const dSize = 750 // 设计宽度
   const docEl = document.documentElement
   // 获取浏览器支持的改变方向的函数，如果'orientationchange'存在，就使用这个

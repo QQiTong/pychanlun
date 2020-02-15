@@ -1,20 +1,21 @@
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+// const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const FileManagerPlugin = require('filemanager-webpack-plugin')
 const path = require('path')
 
 var FStream = require('fs')
 let dev = 'http://127.0.0.1:5000'
-let sit = 'http://47.75.57.245'
-const os = require('os')
+// let dev = 'http://127.0.0.1:18888'
+// let sit = 'http://47.75.57.245'
+// const os = require('os')
 // const UglifyJsParallelPlugin = require('webpack-uglify-parallel')
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-function resolve(dir) {
+function resolve (dir) {
   return path.join(__dirname, dir)
 }
 module.exports = {
   // 基本路径
   outputDir: 'web',
-  baseUrl: './',
+  publicPath: './',
   productionSourceMap: false,
   // filenameHashing:true,
 
@@ -60,8 +61,8 @@ module.exports = {
       // mutate for development...
     }
   },
-  chainWebpack:(config)=>{
-      config.resolve.alias.set('@',resolve('/src'))
+  chainWebpack: (config) => {
+      config.resolve.alias.set('@', resolve('/src'))
   },
   // 配置多页面入口
   pages: {

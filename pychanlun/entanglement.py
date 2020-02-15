@@ -6,6 +6,7 @@ from pychanlun.funcat.time_series import (fit_series)
 from pychanlun import series_tool
 from pychanlun.basic.comm import FindPrevEq
 from pychanlun.basic.pattern import PerfectForBuyLong, PerfectForSellShort
+import copy
 
 class Entanglement:
     def __init__(self):
@@ -29,6 +30,7 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
     e_list = []
     d1 = FindPrevEq(duan_serial, -1, count)
     g1 = FindPrevEq(duan_serial, 1, count)
+    duan_serial = copy.copy(duan_serial)
     if d1 > g1:
         duan_serial[d1] = 0
         duan_serial[count-1] = -1

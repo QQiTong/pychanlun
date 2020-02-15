@@ -17,8 +17,7 @@
             </el-date-picker>
             <el-input v-model="inputSymbol" placeholder="期货股票代码回车提交" size="mini" class="stock-input ml-5"
                       @change="submitSymbol"/>
-            <el-button v-for="period in periodList" size="mini" @click="switchPeriod(period)" class="ml-5">{{period}}
-            </el-button>
+            <el-button v-for="period in periodList" :key="period" size="mini" @click="switchPeriod(period)" class="ml-5">{{period}}</el-button>
         </div>
         <div class="echarts-item-big" id="mainParent">
             <div id="main">

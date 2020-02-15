@@ -1,7 +1,7 @@
 // import echarts from 'echarts'
-import { futureApi } from "@/api/futureApi";
-import { stockApi } from "@/api/stockApi";
-import CommonTool from "@/tool/CommonTool"
+import { futureApi } from '@/api/futureApi'
+import { stockApi } from '@/api/stockApi'
+import CommonTool from '@/tool/CommonTool'
 // import 'echarts/lib/chart/candlestick'
 // import 'echarts/lib/chart/line'
 // import 'echarts/lib/chart/bar'
@@ -13,11 +13,10 @@ import CommonTool from "@/tool/CommonTool"
 // import 'echarts/lib/component/markArea'
 // import 'echarts/lib/component/legend'
 // import 'echarts/lib/component/title'
-import { Button, Select } from 'element-ui';
+// import { Button, Select } from 'element-ui'
 
 export default {
-
-    data() {
+    data () {
         return {
             // 防重复请求
             requestFlag: true,
@@ -33,7 +32,6 @@ export default {
             myChart60: null,
             myChart240: null,
 
-
             echartsConfig: {
 
                 bgColor: '#202529',
@@ -42,15 +40,15 @@ export default {
                 downColor: '#14d0cd',
                 downBorderColor: '#14d0cd',
 
-                higherUpColor: "purple",
-                higherDownColor: "green",
+                higherUpColor: 'purple',
+                higherDownColor: 'green',
 
-                higherHigherUpColor: "pink",
-                higherHigherDownColor: "blue",
+                higherHigherUpColor: 'pink',
+                higherHigherDownColor: 'blue',
 
                 higherColor: '#14d0cd',
                 higherHigherColor: 'green',
-                dynamicOpertionColor:'pink',
+                dynamicOpertionColor: 'pink',
                 // 多周期显示不下,需要配置
                 multiPeriodGrid: {
                     left: '0%',
@@ -91,9 +89,9 @@ export default {
             timer: null,
             // 不同期货公司提高的点数不一样 ,华安是在基础上加1%
             marginLevelCompany: 0.01,
-            marginPrice: 0,//每手需要的保证金
+            marginPrice: 0, // 每手需要的保证金
 
-            //start用于仓位管理计算
+            // start用于仓位管理计算
             currentSymbol: null,
             currentMarginRate: null,
             // 合约乘数
@@ -104,19 +102,19 @@ export default {
             futuresAccount: 19,
             // 数字货币账户总额
             digitCoinAccount: 0.01,
-            //开仓价格
+            // 开仓价格
             openPrice: null,
-            //止损价格
+            // 止损价格
             stopPrice: null,
-            //开仓手数
+            // 开仓手数
             maxOrderCount: null,
-            //资金使用率
+            // 资金使用率
             accountUseRate: null,
-            //最大资金使用率
+            // 最大资金使用率
             maxAccountUseRate: 0.1,
-            //止损系数
+            // 止损系数
             stopRate: 0.01,
-            //数字货币手续费 20倍杠杆
+            // 数字货币手续费 20倍杠杆
             digitCoinFee: 0.0006,
 
             // 1手需要的保证金
@@ -134,9 +132,9 @@ export default {
             dynamicWinPrice: null,
             // 动态止盈手数
             dynamicWinCount: 0,
-            //end仓位管理计算
+            // end仓位管理计算
             // 结束日期
-            endDate: CommonTool.dateFormat("yyyy-MM-dd"),
+            endDate: CommonTool.dateFormat('yyyy-MM-dd'),
 
             digitCoinsSymbolList: [{
                 contract_multiplier: 1,
@@ -175,17 +173,16 @@ export default {
             // 输入的交割过的期货品种 或者 股票品种
             inputSymbol: '',
             periodList: ['3m', '5m', '15m', '30m', '60m', '240m'],
-            //是否指显示当前持仓的开平动止
+            // 是否指显示当前持仓的开平动止
             isPosition: false,
             // 当前品种持仓信息
             currentPosition: null,
-            positionStatus: "holding",
+            positionStatus: 'holding',
             dynamicDirectionMap: { 'long': '多', 'short': '空', 'close': '平' }
         }
     },
 
-    mounted() {
-        console.log("---", CommonTool.dateFormat("yyyy-MM-dd"))
+    mounted () {
         this.symbol = this.getParams('symbol')
         // 不共用symbol对象, symbol是双向绑定的
         this.inputSymbol = JSON.parse(JSON.stringify(this.symbol))
@@ -193,16 +190,15 @@ export default {
         this.isPosition = this.getParams('isPosition')
         this.endDate = this.getParams('endDate')
         if (this.isPosition === 'true') {
-            if(this.symbol.indexOf('sz')!=-1 || this.symbol.indexOf('sh')!=-1){
+            if (this.symbol.indexOf('sz') !== -1 || this.symbol.indexOf('sh') !== -1) {
                 this.getStockPosition()
-            }else{
+            } else {
                 this.getFutruePosition()
             }
         }
-
         this.initEcharts()
         // 取出本地缓存
-        let symbolList = window.localStorage.getItem("symbolList")
+        let symbolList = window.localStorage.getItem('symbolList')
         // 本地缓存有主力合约数据
         if (symbolList != null) {
             this.futureSymbolList = JSON.parse(symbolList)
@@ -217,8 +213,7 @@ export default {
             this.getDominantSymbol()
         }
     },
-    beforeDestroy() {
-        console.log("beforeDestroy,清除轮询")
+    beforeDestroy () {
         clearTimeout(this.timer)
     },
     methods: {
@@ -381,18 +376,17 @@ export default {
                 this.$router.replace("/stock-control")
             }
         },
-        submitSymbol() {
+        submitSymbol () {
             if (this.inputSymbol !== '') {
-                this.symbol = this.inputSymbol.indexOf("sz.") === -1 ? this.inputSymbol.toUpperCase() : this.inputSymbol
+                this.symbol = this.inputSymbol.indexOf('sz') === -1 && this.inputSymbol.indexOf('sh') ? this.inputSymbol.toUpperCase() : this.inputSymbol
             } else {
-                alert("请输入品种")
+                alert('请输入品种')
                 return
             }
             // 切换symbol 重置第一次请求标志
             // 一个大图+ 6个小图
             this.firstFlag = [true, true, true, true, true, true, true]
             this.switchSymbol(this.symbol, 'reload')
-
             // this.replaceParamVal("symbol",this.symbol)
         },
         // 请求数据
@@ -435,32 +429,29 @@ export default {
             this.period = period
             this.switchSymbol(this.symbol, 'reload')
         },
-
-        switchSymbol(symbol, update) {
+        switchSymbol (symbol, update) {
             this.symbol = symbol
-            let that = this;
-            if (this.period !== "") {
-                document.title = symbol + "-" + this.period
+            let that = this
+            if (this.period !== '') {
+                document.title = `${symbol}-{period}`
             } else {
                 document.title = symbol
             }
-
             if (that.timer) {
                 clearTimeout(that.timer)
                 that.timer = setInterval(() => {
-                    console.log("状态:", this.requestFlag)
                     if (this.requestFlag) {
                         that.switchSymbol(symbol, 'update')
                     } else {
-                        // console.log('wait...')
                     }
-                }, 10000);
+                }, 10000)
             }
-            console.log("切换币种:", symbol)
             // 如果是大图，只请求一个周期的数据
-            if (this.period !== "") {
+            if (this.period !== '') {
+                const { ...query } = that.$route.query
+                Object.assign(query, { symbol, period: this.period })
+                that.$router.push({ query })
                 that.sendRequest(symbol, this.period, update)
-
             } else {
                 for (var i = 0; i < 8; i++) {
                     switch (i) {
@@ -469,25 +460,25 @@ export default {
                         //     break;
                         case 1:
                             that.sendRequest(symbol, '3m', update)
-                            break;
+                            break
                         case 2:
                             that.sendRequest(symbol, '5m', update)
-                            break;
+                            break
                         case 3:
                             that.sendRequest(symbol, '15m', update)
-                            break;
+                            break
                         case 4:
                             that.sendRequest(symbol, '30m', update)
-                            break;
+                            break
                         case 5:
                             that.sendRequest(symbol, '60m', update)
-                            break;
+                            break
                         case 6:
                             that.sendRequest(symbol, '240m', update)
-                            break;
+                            break
                         // case 7:
                         //     that.sendRequest(symbol, '1d', update)
-                        //     break;
+                        //     break
                     }
                 }
             }
