@@ -23,36 +23,41 @@ class Entanglement:
         self.formal = False
 
 
-def CalcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
-    time_data, duan_data, bi_data, high_data, low_data = fit_series(time_data, duan_data, bi_data, high_data, low_data)
-    count = len(time_data)
+def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_serial):
+    time_serial, duan_serial, bi_serial, high_serial, low_serial = fit_series(time_serial, duan_serial, bi_serial, high_serial, low_serial)
+    count = len(time_serial)
     e_list = []
+    d1 = FindPrevEq(duan_serial, -1, count)
+    g1 = FindPrevEq(duan_serial, 1, count)
+    if d1 > g1:
+        duan_serial[d1] = 0
+        duan_serial[count-1] = -1
+    else:
+        duan_serial[g1] = 0
+        duan_serial[count-1] = 1
     for i in range(count):
-        if duan_data[i] == -1:
+        if duan_serial[i] == -1:
             # i是线段低点
-            j = 0
-            for j in range(i, 0, -1):
-                if duan_data[j] == 1:
-                    break
+            j = FindPrevEq(duan_serial, 1, i)
             if j >= 0 and j < i:
                 # j是线段高点
                 e_down_list = []
                 for x in range(j, i):
-                    if bi_data[x] == -1 and x < i:
+                    if bi_serial[x] == -1 and x < i:
                         e = Entanglement()
                         e.start = x
-                        e.startTime = time_data[x]
-                        e.bottom = low_data[x]
-                        e.zd = low_data[x]
-                        e.dd = low_data[x]
+                        e.startTime = time_serial[x]
+                        e.bottom = low_serial[x]
+                        e.zd = low_serial[x]
+                        e.dd = low_serial[x]
                         e.direction = -1
                         e_down_list.append(e)
-                    if bi_data[x] == 1 and len(e_down_list) > 0:
+                    if bi_serial[x] == 1 and len(e_down_list) > 0:
                         e_down_list[-1].end = x
-                        e_down_list[-1].endTime = time_data[x]
-                        e_down_list[-1].top = high_data[x]
-                        e_down_list[-1].zg = high_data[x]
-                        e_down_list[-1].gg = high_data[x]
+                        e_down_list[-1].endTime = time_serial[x]
+                        e_down_list[-1].top = high_serial[x]
+                        e_down_list[-1].zg = high_serial[x]
+                        e_down_list[-1].gg = high_serial[x]
                         if len(e_down_list) > 1:
                             # 看是否有重叠区间
                             if e_down_list[-1].top >= e_down_list[-2].bottom and e_down_list[-1].bottom <= e_down_list[-2].top:
@@ -65,42 +70,39 @@ def CalcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                                     e_down_list[-2].zd = max(e_down_list[-1].zd, e_down_list[-2].zd)
                                     e_down_list[-2].dd = min(e_down_list[-1].dd, e_down_list[-2].dd)
                                     e_down_list[-2].end = e_down_list[-1].end
-                                    e_down_list[-2].endTime = time_data[e_down_list[-2].end]
+                                    e_down_list[-2].endTime = time_serial[e_down_list[-2].end]
                                     e_down_list[-2].formal = True
                                 else:
                                     e_down_list[-2].gg = max(e_down_list[-1].gg, e_down_list[-2].gg)
                                     e_down_list[-2].dd = min(e_down_list[-1].dd, e_down_list[-2].dd)
                                     e_down_list[-2].end = e_down_list[-1].end
-                                    e_down_list[-2].endTime = time_data[e_down_list[-2].end]
+                                    e_down_list[-2].endTime = time_serial[e_down_list[-2].end]
                                 e_down_list.pop()
                 for r in range(len(e_down_list)):
                     if e_down_list[r].formal:
                         e_list.append(e_down_list[r])
-        if duan_data[i] == 1:
+        if duan_serial[i] == 1:
             # i是线段高点
-            j = 0
-            for j in range(i, 0, -1):
-                if duan_data[j] == -1:
-                    break
+            j = FindPrevEq(duan_serial, -1, i)
             if j >= 0 and j < i:
                 # j是线段低点
                 e_up_list = []
                 for x in range(j, i):
-                    if bi_data[x] == 1 and x < i:
+                    if bi_serial[x] == 1 and x < i:
                         e = Entanglement()
                         e.start = x
-                        e.startTime = time_data[x]
-                        e.top = high_data[x]
-                        e.zg = high_data[x]
-                        e.gg = high_data[x]
+                        e.startTime = time_serial[x]
+                        e.top = high_serial[x]
+                        e.zg = high_serial[x]
+                        e.gg = high_serial[x]
                         e.direction = 1
                         e_up_list.append(e)
-                    if bi_data[x] == -1 and len(e_up_list) > 0:
+                    if bi_serial[x] == -1 and len(e_up_list) > 0:
                         e_up_list[-1].end = x
-                        e_up_list[-1].endTime = time_data[x]
-                        e_up_list[-1].bottom = low_data[x]
-                        e_up_list[-1].zd = low_data[x]
-                        e_up_list[-1].dd = low_data[x]
+                        e_up_list[-1].endTime = time_serial[x]
+                        e_up_list[-1].bottom = low_serial[x]
+                        e_up_list[-1].zd = low_serial[x]
+                        e_up_list[-1].dd = low_serial[x]
                         if len(e_up_list) > 1:
                             # 看是否有重叠区间
                             if e_up_list[-1].bottom <= e_up_list[-2].top and e_up_list[-1].top >= e_up_list[-2].bottom:
@@ -113,13 +115,13 @@ def CalcEntanglements(time_data, duan_data, bi_data, high_data, low_data):
                                     e_up_list[-2].zd = max(e_up_list[-1].zd, e_up_list[-2].zd)
                                     e_up_list[-2].dd = min(e_up_list[-1].dd, e_up_list[-2].dd)
                                     e_up_list[-2].end = e_up_list[-1].end
-                                    e_up_list[-2].endTime = time_data[e_up_list[-2].end]
+                                    e_up_list[-2].endTime = time_serial[e_up_list[-2].end]
                                     e_up_list[-2].formal = True
                                 else:
                                     e_up_list[-2].gg = max(e_up_list[-1].gg, e_up_list[-2].gg)
                                     e_up_list[-2].dd = min(e_up_list[-1].dd, e_up_list[-2].dd)
                                     e_up_list[-2].end = e_up_list[-1].end
-                                    e_up_list[-2].endTime = time_data[e_up_list[-2].end]
+                                    e_up_list[-2].endTime = time_serial[e_up_list[-2].end]
                                 e_up_list.pop()
                 for r in range(len(e_up_list)):
                     if e_up_list[r].formal:

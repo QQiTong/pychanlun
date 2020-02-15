@@ -12,7 +12,7 @@ from pychanlun.Mail import Mail
 import json
 from pychanlun.db import DBPyChanlun
 from pychanlun.config import config
-from pychanlun.monitor.BusinessService import BusinessService
+from pychanlun.monitor.BusinessService import businessService
 import pytz
 
 tz = pytz.timezone('Asia/Shanghai')
@@ -49,7 +49,7 @@ maxAccountUseRate = 0.1
 stopRate = 0.01
 mail = Mail()
 # 初始化业务对象
-businessService = BusinessService()
+# businessService = BusinessService()
 
 
 def sendEmail(msg):
