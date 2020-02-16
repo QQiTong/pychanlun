@@ -11,8 +11,10 @@
                 value-format="yyyy-MM-dd"
                 size="mini"
                 @change="submitSymbol"
-                class="ml-5">
+                class="ml-5 mr-5">
             </el-date-picker>
+            <el-button @click="quickSwitchDay('pre')" size="mini">前一天</el-button>
+            <el-button @click="quickSwitchDay('next')" size="mini">后一天</el-button>
             <el-input v-model="inputSymbol" placeholder="请输入股票代码" size="mini" class="stock-input ml-5" @change="submitSymbol"/>
         </div>
 

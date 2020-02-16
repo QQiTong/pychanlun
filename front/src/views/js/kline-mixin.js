@@ -217,6 +217,18 @@ export default {
         clearTimeout(this.timer)
     },
     methods: {
+        quickSwitchDay(type){
+            let tempDate = this.endDate.replace(/-/g,"/");
+            let date = new Date(tempDate);
+            let preDay = date.getTime() - 3600 * 1000 * 24;
+            let nextDay = date.getTime() + 3600 * 1000 * 24;
+            if(type==='pre'){
+                this.endDate  = CommonTool.parseTime(preDay,'{y}-{m}-{d}')
+            }else{
+                this.endDate  = CommonTool.parseTime(nextDay,'{y}-{m}-{d}')
+            }
+            this.submitSymbol()
+        },
         getFutruePosition() {
             let period = 'all'
             // if (this.period !== "") {
