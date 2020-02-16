@@ -156,13 +156,12 @@ class Calc:
                 cat = "DIGIT_COIN"
                 # 转换后的本级别
                 currentPeriod = self.huobiPeriodMap[period]
+                klineData = klineDataTool.getDigitCoinData(symbol,currentPeriod)
                 # 转换后的高级别
                 bigLevelPeriod = self.huobiPeriodMap[self.levelMap[period]]
+                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod)
                 # 转换后的高高级别
                 bigLevelPeriod2 = self.huobiPeriodMap[self.levelMap[self.levelMap[period]]]
-                klineData = klineDataTool.getDigitCoinData(symbol,currentPeriod)
-                bigLevelPeriod = self.huobiPeriodMap[self.levelMap[period]]
-                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod)
                 klineDataBigLevel2 = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod2)
             else:
                 # 期货

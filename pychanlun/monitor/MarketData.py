@@ -46,28 +46,28 @@ def getMarketDataHUOBI(symbol):
         return
     saveData(symbol['code'], df1m, "1m")
     # 3m数据
-    df3m = df1m.resample('3T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
     saveData(symbol['code'], df3m, "3m")
     # 5m数据
-    df5m = df1m.resample('5T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    df5m = df1m.resample('5T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
     saveData(symbol['code'], df5m, "5m")
     # 15m数据
-    df15m = df1m.resample('15T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    df15m = df1m.resample('15T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
     saveData(symbol['code'], df15m, "15m")
     # 30m数据
-    df30m = df1m.resample('30T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    df30m = df1m.resample('30T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
     saveData(symbol['code'], df30m, "30m")
     # 1h数据
-    df1h = df1m.resample('60T', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    df1h = df1m.resample('60T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
     saveData(symbol['code'], df1h, "1h")
     # 4h数据
-    df4h = df1m.resample('4H', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    df4h = df1m.resample('4H', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
     saveData(symbol['code'], df4h, "240m")
     # 1d数据
     df1d = dataBackend.get_price(symbol['code'], 0, 500, '1day')
     saveData(symbol['code'], df1d, "1d")
     # 1w数
-    df1w = df1d.resample('W', closed='left', label='left').agg(ohlc_dict).dropna(how='any')
+    df1w = df1d.resample('W', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
     saveData(symbol['code'], df1w, "1w")
 
 def get_market_data_ricequant_incr(symbol, period, period_alias = None, is_debug = False):

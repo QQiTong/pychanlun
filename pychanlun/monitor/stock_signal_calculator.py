@@ -136,7 +136,7 @@ def calculate(info):
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
 
-        save_signal(code, period, '拉回笔中枢确认底背',
+        save_signal(code, period, '多-拉回笔中枢确认底背',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags)
 
     count = len(zs_tupo['buy_zs_tupo']['date'])
@@ -155,7 +155,7 @@ def calculate(info):
             tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        save_signal(code, period, '升破笔中枢看多预期',
+        save_signal(code, period, '多-升破笔中枢',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags)
 
     count = len(v_reverse['buy_v_reverse']['date'])
@@ -174,23 +174,23 @@ def calculate(info):
             tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        save_signal(code, period, '笔中枢三卖V', fire_time,
+        save_signal(code, period, '多-笔中枢三卖V', fire_time,
                     price, stop_lose_price, 'BUY_LONG', tags)
 
     # 段中枢信号的记录
     count = len(higher_zs_huila['buy_zs_huila']['date'])
     for i in range(count):
-        save_signal(code, period, '拉回段中枢确认底背', higher_zs_huila['buy_zs_huila']
+        save_signal(code, period, '多-拉回段中枢确认底背', higher_zs_huila['buy_zs_huila']
                     ['date'][i], higher_zs_huila['buy_zs_huila']['data'][i], higher_zs_huila['buy_zs_huila']['stop_lose_price'][i], 'BUY_LONG')
 
     count = len(higher_zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
-        save_signal(code, period, '升破段中枢看多预期', higher_zs_tupo['buy_zs_tupo']
+        save_signal(code, period, '多-升破段中枢看多预期', higher_zs_tupo['buy_zs_tupo']
                     ['date'][i], higher_zs_tupo['buy_zs_tupo']['data'][i], higher_zs_tupo['buy_zs_tupo']['stop_lose_price'][i], 'BUY_LONG')
 
     count = len(higher_v_reverse['buy_v_reverse']['date'])
     for i in range(count):
-        save_signal(code, period, '段中枢三卖V', higher_v_reverse['buy_v_reverse']
+        save_signal(code, period, '多-段中枢三卖V', higher_v_reverse['buy_v_reverse']
                     ['date'][i], higher_v_reverse['buy_v_reverse']['data'][i], higher_v_reverse['buy_v_reverse']['stop_lose_price'][i], 'BUY_LONG')
 
     # # 缠论一买，二买，三买计算
@@ -241,7 +241,7 @@ def calculate(info):
                             price = close_series[idx]
                             stop_lose_price = low_series[d1]
                             p = BuyCategory(entanglement_list, duan_series, bi_series, high_series, low_series, idx)
-                            remark = "线段下结束预期"
+                            remark = "多-线段反预期"
                             category = ""
                             if p == 1:
                                 category = "一类"

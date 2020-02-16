@@ -422,8 +422,7 @@ export default {
 
             })
         },
-        switchPeriod(period) {
-            console.log("切换周期", this.period, period)
+        switchPeriod (period) {
             // 重置加载
             this.firstFlag[0] = true
             this.period = period
@@ -433,7 +432,7 @@ export default {
             this.symbol = symbol
             let that = this
             if (this.period !== '') {
-                document.title = `${symbol}-{period}`
+                document.title = `${symbol}-${that.period}`
             } else {
                 document.title = symbol
             }

@@ -174,7 +174,7 @@ class KlineDataTool:
         }
 
         startTime = datetime.now()
-        r = requests.get(url, params=payload,  verify=False)
+        r = requests.get(url, params=payload, proxies=cfg.PROXIES, verify=False)
         endTime = datetime.now() - startTime
         klines = json.loads(r.text)['data']
         # print("火币接口花费时间:", endTime, datetime.now(), r)
@@ -223,8 +223,7 @@ class KlineDataTool:
             # df.index = pd.DatetimeIndex(df.index)
 
             # 聚合k线
-            resultDf = df.resample(targetStr, closed='left', label='left') \
-                .agg(ohlc_dict).dropna(how='any')
+            resultDf = df.resample(targetStr, closed='left', label='left').agg(ohlc_dict).dropna(how='any')
             # print(resultDf)
             # 把索引转成列
             resultDf.reset_index('time', inplace=True)

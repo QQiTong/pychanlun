@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from pychanlun.basic.comm import FindPrevEq, FindNextEq
+from datetime import datetime
+import pytz
+
+tz = pytz.timezone('Asia/Shanghai')
 
 def CalcDuan(count, duan, bi, high, low):
     firstBiD = FindNextEq(bi, -1, 0, count)
@@ -90,14 +94,17 @@ def CalcDuan(count, duan, bi, high, low):
 def CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod=""):
     idx = 0
     for i in range(len(biListBigLevel)):
-        bigT2 = timeIndexListBigLevel[i]
-        if bigLevelPeriod == "1d" or bigLevelPeriod == "3d":
-            bigT2 = bigT2 + 64800
+        if i < len(timeIndexListBigLevel) - 2:
+            bigT2 = timeIndexListBigLevel[i+1]
+        else:
+            bigT2 = datetime.now(tz=tz).timestamp()
+        # if bigLevelPeriod == "1d" or bigLevelPeriod == "3d":
+            # bigT2 = bigT2 + 64800
         if biListBigLevel[i] == 1:
             h = highList[idx]
             x = idx
             for x in range(idx, count):
-                if timeIndexList[x] <= bigT2:
+                if timeIndexList[x] < bigT2:
                     if highList[x] >= h:
                         h = highList[x]
                         idx = x
@@ -108,7 +115,7 @@ def CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeInde
             l = lowList[idx]
             x = idx
             for x in range(idx, count):
-                if timeIndexList[x] <= bigT2:
+                if timeIndexList[x] < bigT2:
                     if lowList[x] <= l:
                         l = lowList[x]
                         idx = x
