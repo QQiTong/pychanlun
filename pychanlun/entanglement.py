@@ -33,10 +33,12 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
     duan_serial = copy.copy(duan_serial)
     if d1 > g1:
         duan_serial[d1] = 0
-        duan_serial[count-1] = -1
+        x = FindPrevEq(bi_serial, -1, count)
+        duan_serial[x] = -1
     else:
         duan_serial[g1] = 0
-        duan_serial[count-1] = 1
+        x = FindPrevEq(bi_serial, 1, count)
+        duan_serial[x] = 1
     for i in range(count):
         if duan_serial[i] == -1:
             # i是线段低点
