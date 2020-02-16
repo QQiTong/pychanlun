@@ -155,10 +155,15 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
         e_next = e_list[i+1] if i+1 < len(e_list) else None
         if e.direction == 1:
             # 上涨中枢，找第一次的拉回
-            e_end = e.end
             # 离开中枢后的第一个笔结束
-            leave = series_tool.find_index(bi_series, lambda x: x == 1, e_end)
-            if leave >= 0:
+            leave = e.end
+            for x in range(e.end + 1, len(high_series)):
+                if high_series[x] > e.zg and bi_series[x] == 1:
+                    leave = x
+                    break
+                if duan_series[x] == -1:
+                    break
+            if leave > e.end:
                 r = -1
                 for x in range(leave + 1, len(close_series)):
                     if close_series[x] < e.top:
@@ -186,10 +191,14 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                         result['sell_zs_huila']['tag'].append('')
         if e.direction == -1:
             # 下跌中枢，找第一次的拉回
-            e_end = e.end
-            leave = pydash.index_of(bi_series, -1, e_end)
-            leave = series_tool.find_index(bi_series, lambda x: x == -1, e_end)
-            if leave >= 0:
+            leave = e.end
+            for x in range(e.end + 1, len(low_series)):
+                if low_series[x] < e.zd and bi_series[x] == -1:
+                    leave = x
+                    break
+                if duan_series[x] == 1:
+                    break
+            if leave > e.end:
                 r = -1
                 for x in range(leave + 1, len(close_series)):
                     if close_series[x] > e.bottom:
