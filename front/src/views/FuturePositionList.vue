@@ -366,7 +366,7 @@
       @current-change="handlePageChange"
       @size-change="handleSizeChange"
       class="mt-5"
-    ></el-pagination>
+    />
   </div>
 </template>
 
@@ -473,9 +473,9 @@ export default {
         importance: 3,
         enterTime: new Date(),
         symbol: "",
-        period: "",
+        period: "3m",
         signal: "",
-        status: "",
+        status: "prepare",
         //方向
         direction: "",
         //价格
@@ -484,7 +484,7 @@ export default {
         amount: "",
         stopLosePrice: "",
         //区间套级别
-        nestLevel: "",
+        nestLevel: "2级套",
         //介入逻辑
         enterReason: "",
         //持仓逻辑
@@ -548,7 +548,7 @@ export default {
       console.log(row.dynamicPositionList.length)
       if (row.dynamicPositionList.length> 0) {
         return 'success-row';
-      } 
+      }
       // else {
       //   return 'warning-row';
       // }
@@ -624,14 +624,14 @@ export default {
         importance: 1,
         enterTime: new Date(),
         symbol: "",
-        period: "",
-        status: "",
+        period: "3m",
+        status: "prepare",
         signal: "",
         direction: "",
         price: "",
         amount: "",
         stopLosePrice: "",
-        nestLevel: "",
+        nestLevel: "2级套",
         enterReason: "",
         holdReason: "",
         dynamicPositionList: []

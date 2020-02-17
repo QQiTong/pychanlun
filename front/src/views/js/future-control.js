@@ -65,8 +65,8 @@ export default {
             futureSymbolList: [],
             periodList: ['3m', '5m', '15m', '30m', '60m'],
             beichiList: {},
-            changeList: {},//涨跌幅
-            marginLevelCompany: 1.125,
+            changeList: null,//涨跌幅
+            marginLevelCompany: 0.01,
             firstRequestDominant: true,
 
             //start用于仓位管理计算
@@ -165,14 +165,16 @@ export default {
         changeTagFilter(change) {
             if (change > 0) {
                 return 'danger'
-            } else {
+            } else if(change<0) {
                 return 'primay'
+            } else{
+                return 'info'
             }
         }
     },
     mounted() {
-        this.getSignalList()
         this.getChangeiList()
+        this.getSignalList()
         setInterval(() => {
             this.getSignalList()
             this.getChangeiList()
@@ -212,7 +214,7 @@ export default {
                         this.beichiListLoading = false
                         this.futureSymbolList = JSON.parse(symbolList)
                         this.futureSymbolMap = {}
-                        console.log("111", this.futureSymbolList)
+                        // console.log("111", this.futureSymbolList)
                         for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
                             let symbolItem = this.futureSymbolList[i]
                             this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
@@ -232,14 +234,13 @@ export default {
                 let long = 0
                 let short = 0
                 for (let item in this.changeList) {
-                    if (this.changeList[item] > 0) {
+                    if (this.changeList[item]['change'] > 0) {
                         long = long + 1
                     } else {
                         short = short + 1
                     }
                 }
                 this.percentage = parseInt(long / (long + short) * 100)
-
                 console.log("获取涨跌幅列表 计算百分比", res, this.percentage)
             }).catch(() => {
                 console.log("获取涨跌幅失败:", error)
@@ -256,10 +257,11 @@ export default {
             });
             window.open(routeUrl.href, '_blank');
         },
-        fillMarginRate(symbolInfo) {
-            this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate * this.marginLevelCompany).toFixed(3))
+        fillMarginRate(symbolInfo,price) {
+            this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
             this.calcPosForm.contractMultiplier = symbolInfo.contract_multiplier
             this.calcPosForm.currentSymbol = symbolInfo.underlying_symbol
+            this.calcPosForm.openPrice = price
         },
         /**
          *  BTC期货属于币本位， 商品期货属于法币本位,他们的仓位管理计算不一样

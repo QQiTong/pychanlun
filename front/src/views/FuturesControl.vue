@@ -84,14 +84,14 @@
                 >
                     <el-table-column
                         align="left"
-                        width="150">
+                        width="80">
                         <template slot="header" slot-scope="scope">
                             <el-input
                                 v-model="symbolSearch"
                                 size="mini"
                                 placeholder="搜索">
-                                <el-button type="primary" @click="getSignalList" size="mini" slot="append">刷新
-                                </el-button>
+                                <!--                                <el-button type="primary" @click="getSignalList" size="mini" slot="append">刷新-->
+                                <!--                                </el-button>-->
                             </el-input>
                         </template>
                         <template slot-scope="scope">
@@ -101,31 +101,39 @@
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="保证金比率"
-                        width="90"
+                        label="保证金率"
+                        width="80"
                     >
                         <template slot-scope="scope">
-                            <el-link @click="fillMarginRate(scope.row)" :underline="false">
-                                {{ (scope.row.margin_rate *marginLevelCompany).toFixed(3)}}
+                            <el-link @click="fillMarginRate(scope.row,changeList && changeList[scope.row.order_book_id]?
+                                changeList[scope.row.order_book_id]['price'] : 0)" :underline="false">
+                                {{ (scope.row.margin_rate +marginLevelCompany).toFixed(3)}}
                             </el-link>
                         </template>
                     </el-table-column>
-
                     <el-table-column
                         label="涨跌幅"
-                        width="90"
-                    >
+                        width="90">
                         <template slot-scope="scope">
-                            <el-tag effect="dark" :type="changeList[scope.row.order_book_id]|changeTagFilter">
-                                {{ (changeList[scope.row.order_book_id] * (1 / scope.row.margin_rate
-                                *marginLevelCompany) *100).toFixed(1)}}%
+                            <el-tag effect="dark"
+                                    :type="changeList && changeList[scope.row.order_book_id]? changeList[scope.row.order_book_id]['change'] : 0|changeTagFilter">
+                                {{ ((changeList && changeList[scope.row.order_book_id]?
+                                changeList[scope.row.order_book_id]['change'] : 0) * (1 /( scope.row.margin_rate
+                                +marginLevelCompany)) *100).toFixed(1)}}%
                             </el-tag>
-
                         </template>
                     </el-table-column>
-
                     <el-table-column
-                        label="3m">
+                        label="最新价"
+                        width="70">
+                        <template slot-scope="scope">
+                            {{(changeList && changeList[scope.row.order_book_id]?
+                            changeList[scope.row.order_book_id]['price'] : 0)}}
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        label="3m"
+                        align="center">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['3m'].indexOf('B')!==-1?'danger':'primary'">
@@ -134,7 +142,8 @@
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="5m">
+                        label="5m"
+                        align="center">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['5m'].indexOf('B')!==-1?'danger':'primary'">
@@ -144,27 +153,28 @@
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="15m">
+                        label="15m"
+                        align="center">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['15m'].indexOf('B')!==-1?'danger':'primary'">
                                 {{ beichiList[scope.row.order_book_id]['15m'] }}
                             </el-tag>
-
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="30m">
+                        label="30m"
+                        align="center">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['30m'].indexOf('B')!==-1?'danger':'primary'">
                                 {{ beichiList[scope.row.order_book_id]['30m'] }}
                             </el-tag>
-
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="60m">
+                        label="60m"
+                        align="center">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['60m'].indexOf('B')!==-1?'danger':'primary'">

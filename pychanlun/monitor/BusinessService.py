@@ -137,14 +137,15 @@ class BusinessService:
                 df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
                                     start_date=start, end_date=end)
                 df1m = rq.current_minute(item)
+                preday = df1d.iloc[0, 3]
+                today = df1m.iloc[0, 0]
                 if df1d is None or df1m is None:
                     change = "--"
                 else:
-                    preday = df1d.iloc[0, 3]
-                    today = df1m.iloc[0, 0]
                     change = round(((today - preday) / preday), 4)
                     # print(preday, today, change)
-                symbolChangeMap[item] = change
+                resultItem = {'change': change, 'price': today}
+                symbolChangeMap[item] = resultItem
         # print("涨跌幅信息", symbolChangeMap)
         return symbolChangeMap
 

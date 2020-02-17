@@ -517,7 +517,7 @@ export default {
         amount: "",
         stopLosePrice: "",
         //区间套级别
-        nestLevel: "",
+        nestLevel: "2级套",
         //介入逻辑
         enterReason: "",
         //持仓逻辑
@@ -659,7 +659,7 @@ export default {
         price: "",
         amount: "",
         stopLosePrice: "",
-        nestLevel: "",
+        nestLevel: "2级套",
         enterReason: "",
         holdReason: "",
         dynamicPositionList: []
