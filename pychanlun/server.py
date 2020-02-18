@@ -98,6 +98,11 @@ def get_position():
     singlePosition = businessService.getPosition(symbol, period, status)
     return Response(json.dumps(singlePosition), mimetype='application/json')
 
+# 查询期货级别多空方向列表
+@app.route('/api/get_future_level_direction_list')
+def get_future_level_direction():
+    levelDirectionList = businessService.getLevelDirectionList()
+    return Response(json.dumps(levelDirectionList), mimetype='application/json')
 
 # --------------------股票部分----------------------------------------------
 # 获取股票信号列表

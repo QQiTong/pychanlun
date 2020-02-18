@@ -90,5 +90,13 @@ export const futureApi = {
             method: 'post',
             data: data
         })
-    }
+    },
+    // 获取级别多空方向 
+    getLevelDirectionList() {
+        let url = `/api/get_future_level_direction_list`
+        return axios({
+            url: url,
+            method: 'get'
+        })
+    },
 }

@@ -148,7 +148,8 @@ export default {
                 }],
             symbolSearch: '',
             percentage: 0,
-
+            //级别多空方向
+            levelDirectionList:[]
         }
     },
     computed: {
@@ -175,13 +176,22 @@ export default {
     mounted() {
         this.getChangeiList()
         this.getSignalList()
+        this.getLevelDirectionList()
         setInterval(() => {
             this.getSignalList()
             this.getChangeiList()
+            this.getLevelDirectionList()
         }, 20000)
-
     },
     methods: {
+        getLevelDirectionList(){
+            futureApi.getLevelDirectionList().then(res => {
+                console.log("获取多空方向列表:", res)
+                this.levelDirectionList = res;
+            }).catch((error) => {
+                console.log("获取多空方向列表:", error)
+            })
+        },
         jumpToControl(type) {
             if (type === "futures") {
                 this.$router.replace("/futures-control")

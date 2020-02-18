@@ -128,6 +128,33 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             msg = "%s %s %s %s %s %s %s %s %s %s %s" % (symbol,period,signal,direction,amount,stop_lose_price,fire_time_str,price,date_created_str,close_price,remark)
             sendEmail(msg)
 
+# 记录品种当前级别的方向
+def saveFutureDirection(symbol, period, direction):
+    last_fire = DBPyChanlun['future_direction'].find_one({
+        'symbol': symbol,
+        'period': period,
+    })
+    if last_fire is not None:
+        DBPyChanlun['future_direction'].find_one_and_update({
+            'symbol': symbol, 'period': period
+        }, {
+            '$set': {
+                'date_created': datetime.utcnow(),
+                'direction':direction
+            },
+            '$inc': {
+                'update_count': 1
+            }
+        }, upsert=True)
+    else:
+        date_created = datetime.utcnow()
+        DBPyChanlun['future_direction'].insert_one({
+            'symbol': symbol,
+            'period': period,
+            'date_created': date_created,  # 记录插入的时间
+            'direction': direction,
+            'update_count': 1,  
+        })
 
 def getDominantSymbol():
     symbolList = config['symbolList']
@@ -408,6 +435,13 @@ temp = {
 
 
 def monitorFractal(result, symbol, period, closePrice):
+    # 将当前级别的的方向插入到数据库，用于前端展示当前级别的状态
+    # 15m向上成笔，代表3F级别多， 15m向下成笔，代表3F级别空
+    levelDirection = result['fractal'][0]['direction']
+    if levelDirection == 1:
+        saveFutureDirection(symbol,period,'多')
+    else:
+        saveFutureDirection(symbol,period,'空')
     signal = 'fractal'
     # 查询数据库该品种是否有持仓
     positionInfo = businessService.getPosition(symbol, period, 'holding')

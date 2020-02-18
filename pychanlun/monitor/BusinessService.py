@@ -70,8 +70,8 @@ class BusinessService:
             fire_time = signalItem['fire_time'] + timedelta(hours=8)
             fire_time_str = fire_time.strftime("%m-%d %H:%M")
             # str(round(signalItem['price'], 2))
-            msg = "%s %s %s %s %s" % (str(signalItem['signal']),str(signalItem['direction']), fire_time_str,
-                                       date_created_str,str(signalItem['remark']))
+            msg = "%s %s %s %s" % (str(signalItem['signal']),str(signalItem['direction']), fire_time_str,
+                                      str(signalItem['remark']))
             if signalItem['symbol'] in symbolListMap:
                 symbolListMap[signalItem['symbol']][signalItem['period']] = msg
         # print("期货信号列表", symbolListMap)
@@ -148,6 +148,31 @@ class BusinessService:
                 symbolChangeMap[item] = resultItem
         # print("涨跌幅信息", symbolChangeMap)
         return symbolChangeMap
+
+
+    def getLevelDirectionList(self):
+        symbolList = dominantSymbolList
+        #  把btc eth 加进去
+        symbolList.append("BTC_CQ")
+        symbolList.append("ETH_CQ")
+        symbolListMap = {}
+        for i in range(len(symbolList)):
+            symbol = symbolList[i]
+            symbolListMap[symbol] = {}
+            for j in range(len(periodList)):
+                period = periodList[j]
+                symbolListMap[symbol][period] = ""
+        future_direction_list = DBPyChanlun['future_direction'].find()
+        for directionItem in future_direction_list:
+            # utc 转本地时间
+            # date_created = directionItem['date_created'] + timedelta(hours=8)
+            # date_created_str = date_created.strftime("%m-%d %H:%M")
+            if directionItem['symbol'] in symbolListMap:
+                symbolListMap[directionItem['symbol']][directionItem['period']] = directionItem['direction']
+        # print("级别多空列表", symbolListMap)
+        return symbolListMap
+
+# --------------------股票部分----------------------------------------------
 
     def getStockSignalList(self, page=1):
         data_list = DBPyChanlun["stock_signal"].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(

@@ -132,8 +132,19 @@
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="3m"
-                        align="center">
+                        label="3F级别"
+                        width="65">
+                        <template slot-scope="scope">
+                            <el-tag size="medium"
+                            :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
+                            levelDirectionList[scope.row.order_book_id]['3m']==='多'?'danger':'primary'
+                            :'info'">
+                                {{ levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['3m']:'' }}
+                            </el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        label="3m">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['3m'].indexOf('B')!==-1?'danger':'primary'">
@@ -141,20 +152,42 @@
                             </el-tag>
                         </template>
                     </el-table-column>
+
                     <el-table-column
-                        label="5m"
-                        align="center">
+                        label="5F级别"
+                        width="65">
+                        <template slot-scope="scope">
+                            <el-tag size="medium" class="mr-5"
+                            :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
+                            levelDirectionList[scope.row.order_book_id]['5m']==='多'?'danger':'primary'
+                            :'info'">
+                                 {{ levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['5m']:'' }}
+                            </el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        label="5m">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['5m'].indexOf('B')!==-1?'danger':'primary'">
                                 {{ beichiList[scope.row.order_book_id]['5m'] }}
                             </el-tag>
-
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="15m"
-                        align="center">
+                        label="15F级别"
+                        width="70">
+                        <template slot-scope="scope">
+                            <el-tag size="medium" class="mr-5"
+                            :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
+                            levelDirectionList[scope.row.order_book_id]['15m']==='多'?'danger':'primary'
+                            :'info'">
+                                 {{ levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['15m']:'' }}
+                            </el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        label="15m">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['15m'].indexOf('B')!==-1?'danger':'primary'">
@@ -163,8 +196,19 @@
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="30m"
-                        align="center">
+                        label="30F级别"
+                        width="70">
+                        <template slot-scope="scope">
+                            <el-tag size="medium" class="mr-5"
+                            :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
+                            levelDirectionList[scope.row.order_book_id]['30m']==='多'?'danger':'primary'
+                            :'info'">
+                                 {{ levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['30m']:'' }}
+                            </el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        label="30m">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['30m'].indexOf('B')!==-1?'danger':'primary'">
@@ -173,8 +217,19 @@
                         </template>
                     </el-table-column>
                     <el-table-column
-                        label="60m"
-                        align="center">
+                        label="60F级别"
+                        width="70">
+                        <template slot-scope="scope">
+                            <el-tag size="medium" class="mr-5"
+                            :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
+                            levelDirectionList[scope.row.order_book_id]['60m']==='多'?'danger':'primary'
+                            :'info'">
+                                 {{ levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['60m']:'' }}
+                            </el-tag>
+                        </template>
+                    </el-table-column>
+                     <el-table-column
+                        label="60m">
                         <template slot-scope="scope">
                             <el-tag size="medium"
                                     :type="beichiList[scope.row.order_book_id]['60m'].indexOf('B')!==-1?'danger':'primary'">

@@ -545,7 +545,6 @@ export default {
   },
   methods: {
     tableRowClassName({row, rowIndex}) {
-      console.log(row.dynamicPositionList.length)
       if (row.dynamicPositionList.length> 0) {
         return 'success-row';
       }
