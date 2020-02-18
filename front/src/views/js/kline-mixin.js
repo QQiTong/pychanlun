@@ -457,13 +457,15 @@ export default {
                     }
                 }, 10000)
             }
+            const { ...query } = that.$route.query
             // 如果是大图，只请求一个周期的数据
             if (this.period !== '') {
-                const { ...query } = that.$route.query
                 Object.assign(query, { symbol, period: this.period })
                 that.$router.push({ query })
                 that.sendRequest(symbol, this.period, update)
             } else {
+                Object.assign(query, { symbol})
+                that.$router.push({ query })
                 for (var i = 0; i < 8; i++) {
                     switch (i) {
                         // case 0:

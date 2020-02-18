@@ -272,6 +272,8 @@ class KlineDataTool:
             '3d': -31 * 30
         }
         start_date =  end + timedelta(timeDeltaMap[period])
+        if period == '240m':
+            period = '180m'
         df = rq.get_price(symbol, frequency=period,
                           fields=['open', 'high', 'low', 'close', 'volume'], start_date=start_date, end_date=end)
 
