@@ -104,8 +104,11 @@ def get_position():
 @app.route('/api/get_stock_signal_list')
 def get_stock_signal_list():
     page = int(request.args.get("page") or "1")
+    if page <= 0: page = 1
     stockSignalList = businessService.getStockSignalList(page)
     return Response(json.dumps(stockSignalList), mimetype='application/json')
+
+
 # 查询股票持仓列表
 @app.route('/api/get_stock_position_list')
 def get_stock_position_list():
@@ -116,6 +119,8 @@ def get_stock_position_list():
     # print("status--->", status, page, size)
     stockPositionList = businessService.getStockPositionList(status, page,size)
     return Response(json.dumps(stockPositionList), mimetype='application/json')
+
+
 # 查询单个股票持仓
 @app.route('/api/get_stock_position')
 def get_stock_position():
@@ -135,6 +140,7 @@ def create_stock_position():
     }
     return Response(json.dumps(res), mimetype='application/json')
 
+
 # 更新股票持仓信息
 @app.route('/api/update_stock_position', methods=["POST"])
 def update_stock_position():
@@ -144,6 +150,7 @@ def update_stock_position():
         "code": "ok"
     }
     return Response(json.dumps(res), mimetype='application/json')
+
 
 def run(**kwargs):
     port = kwargs.get("port", 5000)
