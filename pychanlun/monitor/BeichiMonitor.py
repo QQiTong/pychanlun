@@ -153,7 +153,7 @@ def saveFutureDirection(symbol, period, direction):
             'period': period,
             'date_created': date_created,  # 记录插入的时间
             'direction': direction,
-            'update_count': 1,  
+            'update_count': 1,
         })
 
 def getDominantSymbol():
@@ -172,18 +172,13 @@ def getDominantSymbol():
 
 # 监控期货
 # timeScope 监控距离现在多少分钟的
-def monitorFuturesAndDigitCoin(type):
+def monitorFuturesAndDigitCoin(type,symbolList):
     logger = logging.getLogger()
-    # 扫一遍25个期货品种需要3.5分钟
+    # 扫一遍24个期货品种需要3.5分钟
     if type == "1":
         # auth('13088887055', 'chanlun123456')
         # count = get_query_count()
         # print(count)
-        init('license',
-             'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
-             ('rqdatad-pro.ricequant.com', 16011))
-        # 主力合约，主力合约详细信息
-        symbolList, dominantSymbolInfoList = getDominantSymbol()
         # print("主力合约信息：", dominantSymbolInfoList)
         periodList = periodList1
         account = futuresAccount
@@ -562,5 +557,19 @@ def calStopWinCount(symbol, period, positionInfo, closePrice):
 
 
 def run(**kwargs):
-    threading.Thread(target=monitorFuturesAndDigitCoin, args="1").start()
+    init('license',
+             'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
+             ('rqdatad-pro.ricequant.com', 16011))
+    # 主力合约，主力合约详细信息
+    symbolList,dominantSymbolInfoList = getDominantSymbol()
+    # 24个品种 拆分成8份
+    symbolListSplit= [symbolList[i:i+3] for i in range(0, len(symbolList),3)]
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[0]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[1]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[2]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[3]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[4]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[5]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[6]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[7]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()

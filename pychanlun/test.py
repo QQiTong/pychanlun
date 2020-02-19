@@ -326,15 +326,20 @@ def testMonitor():
     BeichiMonitor.calStopWinCount("BU2006",'3m',3200)
     elapsed = (time.clock() - start)  # 结束计时
     print("程序执行的时间:" + str(elapsed) + "s")  # 印出时间
-
+def testThread():
+     symbolList = getDominantSymbol()
+     n = 3
+     c= [symbolList[i:i+n] for i in range(0, len(symbolList), n)]
+     print("--",c)
 def app():
     # testBitmex()
     # testBeichiDb()
     # testHuila()
-    testChange()
+    # testChange()
     # testTQ()
     # testRQ()
     # testMonitor()
+    testThread()
 
 
 if __name__ == '__main__':

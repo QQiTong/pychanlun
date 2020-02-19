@@ -38,7 +38,7 @@ config = {
         "NI",
         "FU",
         "ZN",
-        "SP",
+        # "SP",
         "BU",
         "AU",
         "AG",
