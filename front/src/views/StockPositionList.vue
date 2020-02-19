@@ -316,7 +316,7 @@
           </el-table>
         </template>
       </el-table-column>
-      <el-table-column label="品种" prop="symbol" align="center" width="80">
+      <el-table-column label="品种" prop="symbol" align="center" width="100">
         <template slot-scope="{row}">
           <el-link
             type="primary"
@@ -386,7 +386,7 @@
       @current-change="handlePageChange"
       @size-change="handleSizeChange"
       class="mt-5"
-    ></el-pagination>
+    />
   </div>
 </template>
 

@@ -152,7 +152,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="入场逻辑" prop="enterReason">
+            <el-form-item label="入场逻辑">
               <el-input
                 v-model="positionForm.enterReason"
                 :autosize="{ minRows: 4, maxRows: 4}"
@@ -475,7 +475,7 @@ export default {
         symbol: "",
         period: "3m",
         signal: "",
-        status: "prepare",
+        status: "holding",
         //方向
         direction: "",
         //价格
@@ -517,9 +517,9 @@ export default {
         nestLevel: [
           { required: true, message: "请选择预期级别", trigger: "change" }
         ],
-        enterReason: [
-          { required: true, message: "请输入入场逻辑", trigger: "blur" }
-        ]
+        // enterReason: [
+        //   { required: true, message: "请输入入场逻辑", trigger: "blur" }
+        // ]
       },
       dialogFormVisible: false,
       // 防止重复提交
@@ -624,7 +624,7 @@ export default {
         enterTime: new Date(),
         symbol: "",
         period: "3m",
-        status: "prepare",
+        status: "holding",
         signal: "",
         direction: "",
         price: "",

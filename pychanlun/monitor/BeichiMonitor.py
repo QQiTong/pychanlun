@@ -489,7 +489,7 @@ def monitorFractal(result, symbol, period, closePrice):
         # 高高级别
         if result['fractal'][1]['direction'] == -1:
             fire_time = result['fractal'][1]['bottom_fractal']['date']
-            price = result['fractal'][1]['bottom_fractal']['bottom']
+            price = result['fractal'][1]['bottom_fractal']['top']
             stop_lose_price = result['fractal'][1]['bottom_fractal']['bottom']
             remark = result['fractal'][1]['period']
             direction = 'HB'

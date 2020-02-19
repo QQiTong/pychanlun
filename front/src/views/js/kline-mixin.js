@@ -536,7 +536,11 @@ export default {
 
 
             futureApi.stockData(requestData).then(res => {
-
+                //如果之前请求的symbol 和当前的symbol不一致，直接过滤
+                if(res && res.symbol !==this.symbol){
+                    // console.log("symbol不一致")
+                    return
+                }
                 this.requestFlag = true
                 if (this.period !== "") {
                     this.myChart.hideLoading()

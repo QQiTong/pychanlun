@@ -439,6 +439,7 @@ class Calc:
         resJson['sell_duan_break'] = duan_pohuai['sell_duan_break']
         resJson['buy_duan_break_higher'] = duan_pohuai_higher['buy_duan_break']
         resJson['sell_duan_break_higher'] = duan_pohuai_higher['sell_duan_break']
+        resJson['symbol'] = symbol
         if cat == "FUTURE" or cat == "DIGIT_COIN":
             resJson['fractal'] = [fractialRegion, fractialRegion2]
 
