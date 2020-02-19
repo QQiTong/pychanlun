@@ -174,10 +174,11 @@ class BusinessService:
 
 # --------------------股票部分----------------------------------------------
 
+
     def getStockSignalList(self, page=1):
-        data_list = DBPyChanlun["stock_signal"].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
-            {
-            }).sort("fire_time", pymongo.DESCENDING).skip((page - 1) * 1000).limit(1000)
+        data_list = DBPyChanlun["stock_signal"].with_options(
+            codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({}).sort(
+                "fire_time", pymongo.DESCENDING).skip((page - 1) * 1000).limit(1000)
         df = pd.DataFrame(list(data_list))
         signalList = []
         for idx, row in df.iterrows():
