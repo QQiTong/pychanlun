@@ -28,17 +28,6 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
     time_serial, duan_serial, bi_serial, high_serial, low_serial = fit_series(time_serial, duan_serial, bi_serial, high_serial, low_serial)
     count = len(time_serial)
     e_list = []
-    d1 = FindPrevEq(duan_serial, -1, count)
-    g1 = FindPrevEq(duan_serial, 1, count)
-    duan_serial = copy.copy(duan_serial)
-    if d1 > g1:
-        duan_serial[d1] = 0
-        x = FindPrevEq(bi_serial, -1, count)
-        duan_serial[x] = -1
-    else:
-        duan_serial[g1] = 0
-        x = FindPrevEq(bi_serial, 1, count)
-        duan_serial[x] = 1
     for i in range(count):
         if duan_serial[i] == -1:
             # i是线段低点
