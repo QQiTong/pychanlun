@@ -19,6 +19,7 @@ from pychanlun.basic.pattern import DualEntangleForBuyLong, PerfectForBuyLong, B
 import talib as ta
 import numpy as np
 import pydash
+import pandas as pd
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -66,6 +67,17 @@ def calculate(info):
         tz_aware=True, tzinfo=tz)).delete_many({
             "_id": {"$lte": cutoff_time}
         })
+
+    # 日线均线计算，只计算34日均线上的股票
+    bars = DBPyChanlun['%s_%s' % (code, '240m')].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
+    bars = list(bars)
+    if len(bars) > 0:
+        df = pd.DataFrame(list(bars))
+        close = [float(x) for x in df.close]
+        ma34 = ta.MA(np.array(close), timeperiod=34)
+        if close[-1] < ma34[-1]:
+            return
 
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
