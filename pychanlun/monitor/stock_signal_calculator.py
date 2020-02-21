@@ -21,6 +21,7 @@ import numpy as np
 import pydash
 import pandas as pd
 
+
 tz = pytz.timezone('Asia/Shanghai')
 
 
@@ -34,7 +35,6 @@ def run(**kwargs):
     codes = []
     collist = DBPyChanlun.list_collection_names()
     for code in collist:
-        # 只计算5分钟和15分钟的就够了，只做这个级别
         match = re.match("((sh|sz)(\\d{6}))_(5m|15m|30m|240m)", code, re.I)
         if match is not None:
             code = match.group(1)
@@ -252,7 +252,7 @@ def calculate(info):
                             fire_time = time_series[idx]
                             price = close_series[idx]
                             stop_lose_price = low_series[d1]
-                            p = BuyCategory(entanglement_list, duan_series, bi_series, high_series, low_series, idx)
+                            p = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
                             remark = "多-线段反预期"
                             category = ""
                             if p == 1:
