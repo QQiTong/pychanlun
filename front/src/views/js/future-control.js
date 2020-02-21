@@ -63,6 +63,7 @@ export default {
             },
             keyword: '',
             futureSymbolList: [],
+            futureSymbolMap:{},
             periodList: ['3m', '5m', '15m', '30m', '60m'],
             beichiList: {},
             changeList: null,//涨跌幅

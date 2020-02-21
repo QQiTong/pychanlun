@@ -22,6 +22,7 @@ dominantSymbolList = []
 # 主力合约详细信息
 dominantSymbolInfoList = []
 
+
 class BusinessService:
     def __init__(self):
         print('初始化业务对象...')
@@ -62,7 +63,8 @@ class BusinessService:
             for j in range(len(periodList)):
                 period = periodList[j]
                 symbolListMap[symbol][period] = ""
-        future_signal_list = DBPyChanlun['future_signal'].find().sort("fire_time", pymongo.ASCENDING)
+        future_signal_list = DBPyChanlun['future_signal'].find().sort(
+            "fire_time", pymongo.ASCENDING)
         for signalItem in future_signal_list:
             # utc 转本地时间
             date_created = signalItem['date_created'] + timedelta(hours=8)
@@ -70,8 +72,8 @@ class BusinessService:
             fire_time = signalItem['fire_time'] + timedelta(hours=8)
             fire_time_str = fire_time.strftime("%m-%d %H:%M")
             # str(round(signalItem['price'], 2))
-            msg = "%s %s %s %s" % (str(signalItem['signal']),str(signalItem['direction']), fire_time_str,
-                                      str(signalItem['remark']))
+            msg = "%s %s %s %s" % (str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
+                                   str(signalItem['remark']))
             if signalItem['symbol'] in symbolListMap:
                 symbolListMap[signalItem['symbol']][signalItem['period']] = msg
         # print("期货信号列表", symbolListMap)
@@ -149,7 +151,6 @@ class BusinessService:
         # print("涨跌幅信息", symbolChangeMap)
         return symbolChangeMap
 
-
     def getLevelDirectionList(self):
         symbolList = dominantSymbolList
         #  把btc eth 加进去
@@ -168,38 +169,21 @@ class BusinessService:
             # date_created = directionItem['date_created'] + timedelta(hours=8)
             # date_created_str = date_created.strftime("%m-%d %H:%M")
             if directionItem['symbol'] in symbolListMap:
-                symbolListMap[directionItem['symbol']][directionItem['period']] = directionItem['direction']
+                symbolListMap[directionItem['symbol']
+                              ][directionItem['period']] = directionItem['direction']
         # print("级别多空列表", symbolListMap)
         return symbolListMap
 
-# --------------------股票部分----------------------------------------------
-
-
-    def getStockSignalList(self, page=1):
-        data_list = DBPyChanlun["stock_signal"].with_options(
-            codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({}).sort(
-                "fire_time", pymongo.DESCENDING).skip((page - 1) * 1000).limit(1000)
-        df = pd.DataFrame(list(data_list))
-        signalList = []
-        for idx, row in df.iterrows():
-            item = {}
-            item['code'] = row["code"]
-            item['fire_time'] = row["fire_time"].strftime("%Y-%m-%d %H:%M")
-            item['period'] = row["period"]
-            item['price'] = row["price"]
-            item['stop_lose_price'] = row["stop_lose_price"]
-            item['remark'] = row["remark"]
-            item['category'] = row["category"]
-            item['tags'] = ", ".join(row["tags"])
-            signalList.append(item)
-        return signalList
+# --------------------期货部份----------------------------------------------
 
     def getPosition(self, symbol, period, status):
         if period == 'all':
             query = {'symbol': symbol, 'status': status}
         else:
             query = {'symbol': symbol, 'period': period, 'status': status}
-        result = DBPyChanlun["position_record"].find(query)
+        # 当多空双开锁仓的时候，获取最新持仓的那个
+        result = DBPyChanlun["position_record"].find(
+            query).sort("enterTime", pymongo.ASCENDING)
         if result.count() > 0:
             for x in result:
                 x['_id'] = str(x['_id'])
@@ -212,10 +196,12 @@ class BusinessService:
         collection = DBPyChanlun["position_record"]
         # 查询总记录数
         if status == 'all':
-            result = collection.find().skip((page - 1) * size).limit(size)
+            result = collection.find().skip(
+                (page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
             total = result.count()
         else:
-            result = collection.find({'status': status}).skip((page - 1) * size).limit(size)
+            result = collection.find({'status': status}).skip(
+                (page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
             total = result.count()
         for x in result:
             x['_id'] = str(x['_id'])
@@ -237,10 +223,11 @@ class BusinessService:
             'price': position['price'],
             'amount': position['amount'],
             'stopLosePrice': position['stopLosePrice'],
-            'nestLevel': position['nestLevel'],
+            'margin_rate': position['margin_rate'],
+            # 'nestLevel': position['nestLevel'],
             'enterReason': position['enterReason'],
             'holdReason': position['holdReason'],
-            'importance': position['importance'],
+            # 'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList'],
         })
         return result.inserted_id
@@ -256,12 +243,40 @@ class BusinessService:
             'price': position['price'],
             'amount': position['amount'],
             'stopLosePrice': position['stopLosePrice'],
-            'nestLevel': position['nestLevel'],
+            'margin_rate': position['margin_rate'],
+            # 'nestLevel': position['nestLevel'],
             'enterReason': position['enterReason'],
             'holdReason': position['holdReason'],
-            'importance': position['importance'],
+            # 'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
+
+    def updatePositionStatus(self, id, status):
+        DBPyChanlun['position_record'].update_one({'_id': ObjectId(id)}, {"$set": {
+            'status': status,
+        }})
+
+
+# --------------------股票部份----------------------------------------------
+
+    def getStockSignalList(self, page=1):
+        data_list = DBPyChanlun["stock_signal"].with_options(
+            codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({}).sort(
+                "fire_time", pymongo.DESCENDING).skip((page - 1) * 1000).limit(1000)
+        df = pd.DataFrame(list(data_list))
+        signalList = []
+        for idx, row in df.iterrows():
+            item = {}
+            item['code'] = row["code"]
+            item['fire_time'] = row["fire_time"].strftime("%Y-%m-%d %H:%M")
+            item['period'] = row["period"]
+            item['price'] = row["price"]
+            item['stop_lose_price'] = row["stop_lose_price"]
+            item['remark'] = row["remark"]
+            item['category'] = row["category"]
+            item['tags'] = ", ".join(row["tags"])
+            signalList.append(item)
+        return signalList
 
     def getStockPositionList(self, status, page, size):
         positionList = []
@@ -271,7 +286,8 @@ class BusinessService:
             result = collection.find().skip((page - 1) * size).limit(size)
             total = result.count()
         else:
-            result = collection.find({'status': status}).skip((page - 1) * size).limit(size)
+            result = collection.find({'status': status}).skip(
+                (page - 1) * size).limit(size)
             total = result.count()
         for x in result:
             x['_id'] = str(x['_id'])
@@ -317,7 +333,7 @@ class BusinessService:
         return result.inserted_id
 
     def updateStockPosition(self, position):
-        print("传给后端的positionPercent",position['positionPercent'])
+        print("传给后端的positionPercent", position['positionPercent'])
         DBPyChanlun['stock_position_record'].update_one({'_id': ObjectId(position['_id'])}, {"$set": {
             'enterTime': position['enterTime'],
             'symbol': position['symbol'],
@@ -335,5 +351,6 @@ class BusinessService:
             'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
+
 
 businessService = BusinessService()

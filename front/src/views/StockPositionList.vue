@@ -362,7 +362,8 @@
       <el-table-column
         label="状态"
         width="100"
-        :filters="[{ text: '持仓中', value: 'holding' }, { text: '预埋单', value: 'prepare' },{ text: '结束', value: 'end' }]"
+        :filters="[{ text: '持仓中', value: 'holding' }, { text: '预埋单', value: 'prepare' },{ text: '止盈结束', value: 'winEnd' },
+        { text: '止损结束', value: 'loseEnd' }]"
         :filter-method="filterTags"
         filter-placement="bottom-end"
       >
@@ -611,7 +612,7 @@ export default {
       console.log(this.$parent);
       // this.$parent.jumpToKline(symbol)
       //结束状态 k线页面不获取持仓信息
-      if (row.status !== "end") {
+      if (row.status !== "winEnd" && row.status !=="loseEnd") {
         let routeUrl = this.$router.resolve({
           path: "/multi-period",
           query: {

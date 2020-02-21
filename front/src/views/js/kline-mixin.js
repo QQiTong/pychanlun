@@ -178,7 +178,8 @@ export default {
             // 当前品种持仓信息
             currentPosition: null,
             positionStatus: 'holding',
-            dynamicDirectionMap: { 'long': '多', 'short': '空', 'close': '平' }
+            dynamicDirectionMap: { 'long': '多', 'short': '空', 'close': '平' },
+            currentInfo:null
         }
     },
 
@@ -587,7 +588,8 @@ export default {
             let marginLevel = (1 / (margin_rate + this.marginLevelCompany)).toFixed(2)
             const trading_hours = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].trading_hours;
             const maturity_date = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].maturity_date;
-            var subText = "杠杆倍数: " + marginLevel + " 每手保证金: " + this.marginPrice + " 合约乘数: " + this.contractMultiplier + " 交易时间: " + trading_hours + " 交割时间: " + maturity_date;
+            var subText = "杠杆: " + marginLevel + " 保证金: " + this.marginPrice + " 乘数: " + this.contractMultiplier+
+                this.currentInfo
             var currentChart
             // if (period === '1m') {
             //     currentChart = myChart1
@@ -1884,31 +1886,9 @@ export default {
                 // console.log(beichiPrice, stopLosePrice, diffPrice, targetPrice)
                 // 单位是万
                 currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
-                // 当前最新价
-                if (currentPrice) {
-                    var markLineCurrent = {
-                        yAxis: currentPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dash',
-                                width: 1,
-                                color: 'yellow'
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: 'yellow',
-                                formatter: '新: ' + currentPrice.toFixed(2) + "\n率: " + currentPercent + "% \n额: " + currentProfit + " 万 \n比: 1 : "
-                                    + (currentPercent / targetPercent).toFixed(1),
-                            },
-                        },
-                    }
-                    markLineData.push(markLineCurrent)
-                }
-
+                // 跟据最新价格计算出来的信息
+                this.currentInfo =  " 率: " + currentPercent + "% 额: " + currentProfit + " 万,盈亏比: 1 : "
+                                + (currentPercent / targetPercent).toFixed(1)+' 新: ' + currentPrice.toFixed(2)
                 // 保本位
                 if (beichiPrice) {
                     var markLineBeichi = {
@@ -1965,7 +1945,7 @@ export default {
                 let higherHigherBottomPrice = 0
                 let higherTopPrice = 0
                 let higherHigherTopPrice = 0
-                if (jsonObj['fractal'][0]['direction'] == 1) {
+                if (jsonObj['fractal'][0]['direction'] === 1) {
                     higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
                     // 高级别分型线
                     var markLineFractal = {
@@ -1989,7 +1969,7 @@ export default {
                     }
                     markLineData.push(markLineFractal)
                 }
-                if (jsonObj['fractal'][1]['direction'] == 1) {
+                if (jsonObj['fractal'][1]['direction'] === 1) {
                     higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
                     // 高高级别分型线
                     var markLineFractal = {
@@ -2099,30 +2079,7 @@ export default {
             // 止损百分比
             let stopLosePercent = (Math.abs(openPrice - stopLosePrice) / stopLosePrice * 100 * marginLevel).toFixed(2)
             //如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
-            // 当前最新价
-            var markLineCurrent = {
-                yAxis: currentPrice,
-                lineStyle: {
-                    normal: {
-                        opacity: 1,
-                        type: 'dash',
-                        width: 1,
-                        color: 'yellow'
-                    },
-                },
-                symbol: 'circle',
-                symbolSize: 1,
-                label: {
-                    normal: {
-                        color: 'yellow',
-                        // formatter: '最新: ' + currentPrice.toFixed(2) + "\n比率: " + currentPercent + "%\n盈亏: 1 : "
-                        //     + (currentPercent / stopLosePercent).toFixed(1),
-                        formatter: '新: ' + currentPrice.toFixed(2)
-                    },
-                },
-            }
-            markLineData.push(markLineCurrent)
-
+            this.currentInfo = '新: ' + currentPrice.toFixed(2)
             // 开仓价
             var markLineOpen = {
                 yAxis: openPrice,

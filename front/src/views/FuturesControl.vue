@@ -68,7 +68,8 @@
         </el-row>
         <!--持仓区域-->
         <el-divider content-position="center">持仓列表</el-divider>
-        <FuturePositionList :futureSymbolList="futureSymbolList"/>
+        <FuturePositionList :futureSymbolList="futureSymbolList" :futureSymbolMap="futureSymbolMap" 
+        :changeList="changeList" :marginLevelCompany="marginLevelCompany"/>
         <el-divider content-position="center">信号列表 | 多空分布</el-divider>
         <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true"
                      :stroke-width="24"/>

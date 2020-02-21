@@ -307,7 +307,7 @@ def testRQ():
     # print(df.iloc[0, 3])
     end = datetime.now() + timedelta(1)
     start = datetime.now() + timedelta(-1)
-    df1d = rq.get_price('RB2005', frequency='15d', fields=['open', 'high', 'low', 'close', 'volume'],
+    df1d = rq.get_price('IH1508', frequency='30m', fields=['open', 'high', 'low', 'close', 'volume'],
                         )
     print(df1d)
     # print(df1d.iloc[0,0])
@@ -337,9 +337,9 @@ def app():
     # testHuila()
     # testChange()
     # testTQ()
-    # testRQ()
+    testRQ()
     # testMonitor()
-    testThread()
+    # testThread()
 
 
 if __name__ == '__main__':

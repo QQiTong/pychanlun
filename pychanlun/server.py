@@ -77,6 +77,16 @@ def update_position():
         "code": "ok"
     }
     return Response(json.dumps(res), mimetype='application/json')
+# 更新持仓状态
+@app.route('/api/update_position_status')
+def update_position_status():
+    id = request.args.get("id")
+    status = request.args.get("status")
+    businessService.updatePositionStatus(id,status)
+    res = {
+        "code": "ok"
+    }
+    return Response(json.dumps(res), mimetype='application/json')
 
 
 # 查询持仓列表

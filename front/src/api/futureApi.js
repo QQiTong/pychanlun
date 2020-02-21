@@ -91,7 +91,15 @@ export const futureApi = {
             data: data
         })
     },
-    // 获取级别多空方向 
+    // 更新持仓状态
+    updatePositionStatus(id,status) {
+        let url = `/api/update_position_status?id=${id}&status=${status}`
+        return axios({
+            url: url,
+            method: 'get'
+        })
+    },
+    // 获取级别多空方向
     getLevelDirectionList() {
         let url = `/api/get_future_level_direction_list`
         return axios({

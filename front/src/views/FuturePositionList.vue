@@ -41,7 +41,12 @@
         <el-row>
           <el-col :span="6">
             <el-form-item label="品种" prop="symbol">
-              <el-select v-model="positionForm.symbol" class="form-input" placeholder="请选择" filterable>
+              <el-select
+                v-model="positionForm.symbol"
+                class="form-input"
+                placeholder="请选择"
+                filterable
+              >
                 <el-option
                   v-for="item in futureSymbolList"
                   :key="item.order_book_id"
@@ -119,14 +124,6 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="6">
-            <el-form-item label="预期级别" prop="nestLevel">
-              <el-select v-model="positionForm.nestLevel" class="form-input" placeholder="请选择">
-                <el-option :key="2" label="2级套" value="2级套" />
-                <el-option :key="3" label="3级套" value="3级套" />
-              </el-select>
-            </el-form-item>
-          </el-col>
         </el-row>
         <el-row>
           <el-col :span="6">
@@ -164,16 +161,6 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="6">
-            <el-form-item label="危险系数">
-              <el-rate
-                v-model="positionForm.importance"
-                :colors="rateColors"
-                :max="3"
-                style="margin-top:8px;"
-              />
-            </el-form-item>
-          </el-col>
           <el-col :span="18">
             <el-form-item label="持仓逻辑">
               <el-input
@@ -187,11 +174,13 @@
           </el-col>
         </el-row>
 
-
         <!-- 动态止盈start -->
         <!--    编辑状态-->
         <el-divider content-position="left">持仓过程记录（ 动态止盈 | 加仓 | 锁仓 | 止损 ）</el-divider>
-        <el-row v-for="(dynamicPosition, index) in positionForm.dynamicPositionList">
+        <el-row
+          v-for="(dynamicPosition, index) in positionForm.dynamicPositionList"
+          :key="Math.random()"
+        >
           <el-col :span="5">
             <el-form-item label="时间">
               <el-date-picker
@@ -300,6 +289,7 @@
             <el-table-column label="动态操作数量" prop="amount" align="center" width="120" />
             <el-table-column label="动态操作原因" prop="reason" align="center" />
           </el-table>
+          <el-tag v-if="props.row.holdReason">{{props.row.holdReason}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="品种" prop="symbol" align="center" width="80">
@@ -329,30 +319,87 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="入场价格" prop="price" align="center" width="100" />
-      <el-table-column label="数量" prop="amount" align="center" width="100" />
-      <el-table-column label="预期" prop="nestLevel" align="center" width="70" />
-      <el-table-column label="危险系数" prop="important" align="center" width="100">
-        <template slot-scope="{row}">
-          <el-rate disabled v-model="row.importance" :colors="rateColors"></el-rate>
-        </template>
-      </el-table-column>
-      <el-table-column label="入场逻辑" prop="enterReason" align="center" width="300" />
-      <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300" />
+      <el-table-column label="成本价" prop="price" align="center" width="80" />
       <el-table-column
-        label="状态"
-        width="100"
-        :filters="[{ text: '持仓中', value: 'holding' }, { text: '预埋单', value: 'prepare' },{ text: '结束', value: 'end' }]"
-        :filter-method="filterTags"
-        filter-placement="bottom-end"
+        :key="Math.random()"
+        label="最新价"
+        width="80"
+        align="center"
+        v-if="positionQueryForm.status!=='winEnd' && positionQueryForm.status!=='loseEnd'"
       >
         <template slot-scope="{row}">
-          <el-tag :type="row.status | statusTagFilter">{{ row.status |statusFilter }}</el-tag>
+          {{
+          (changeList?changeList[row.symbol].price:'获取中')
+          }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        :key="Math.random()"
+        label="浮盈率"
+        width="100"
+        align="center"
+        v-if="positionQueryForm.status!=='winEnd' && positionQueryForm.status!=='loseEnd'"
+      >
+        <template slot-scope="{row}">
+          <el-tag :type="calcProfitRate(row) | percentTagFilter">{{calcProfitRate(row)}}%</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="止损价" width="80" align="center">
+        <template slot-scope="{row}">{{row.stopLosePrice}}</template>
+      </el-table-column>
+      <el-table-column label="止损率" width="80" align="center">
+        <template slot-scope="{row}">-{{calcStopLoseRate(row)}}%</template>
+      </el-table-column>
+      <el-table-column
+        :key="Math.random()"
+        label="盈亏比"
+        width="80"
+        align="center"
+        v-if="positionQueryForm.status!=='winEnd' && positionQueryForm.status!=='loseEnd'"
+      >
+        <template slot-scope="{row}">
+          <el-tag
+            :type="calcWinLoseRate(row) | winLoseRateTagFilter"
+            effect="dark"
+          >{{calcWinLoseRate(row)}}</el-tag>
+        </template>
+      </el-table-column>
+      <!-- 止盈结束的时候计算盈利率 -->
+      <el-table-column
+        :key="Math.random()"
+        label="盈利率"
+        width="100"
+        align="center"
+        v-if="positionQueryForm.status==='winEnd'"
+      >
+        <template slot-scope="{row}">
+          <el-tag :type="calcWinEndRate(row) | percentTagFilter">{{calcWinEndRate(row)}}%</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="数量" prop="amount" align="center" width="100" />
+      <el-table-column label="入场逻辑" prop="enterReason" align="center" width="300" />
+      <!-- <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300" /> -->
+      <el-table-column label="状态" width="130" align="center">
+        <template slot-scope="{row}">
+          <!--          <el-tag :type="row.status | statusTagFilter">{{ row.status |statusFilter }}</el-tag>-->
+          <el-select
+            v-model="row.status"
+            class="form-input-short"
+            size="mini"
+            @change="changeStatus(row._id,row.status)"
+          >
+            <el-option
+              v-for="item in statusOptions"
+              :key="item.key"
+              :label="item.display_name"
+              :value="item.key"
+            />
+          </el-select>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="{row,$index}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)" icon="el-icon-edit">编辑</el-button>
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -392,7 +439,8 @@ const dynamicDirectionOptions = [
 const statusOptions = [
   { key: "holding", display_name: "持仓中" },
   { key: "prepare", display_name: "预埋单" },
-  { key: "end", display_name: "结束" }
+  { key: "winEnd", display_name: "止盈结束" },
+  { key: "loseEnd", display_name: "止损结束" }
 ];
 const periodOptions = [
   { key: "3m", display_name: "3m" },
@@ -433,6 +481,22 @@ export default {
       };
       return directionMap[direction];
     },
+    percentTagFilter(percent) {
+      if (percent > 0) {
+        return "danger";
+      } else if (percent < 0) {
+        return "primay";
+      } else {
+        return "info";
+      }
+    },
+    winLoseRateTagFilter(rate) {
+      if (rate >= 1) {
+        return "success";
+      } else {
+        return "info";
+      }
+    },
     directionFilter(direction) {
       return directionKeyValue[direction];
     },
@@ -450,7 +514,16 @@ export default {
     futureSymbolList: {
       type: Array,
       default: []
-    }
+    },
+    futureSymbolMap: {
+      type: Object,
+      default: null
+    },
+    changeList: {
+      type: Object,
+      default: null
+    },
+    marginLevelCompany: 0
   },
   data() {
     return {
@@ -470,7 +543,7 @@ export default {
       },
       // 表单
       positionForm: {
-        importance: 3,
+        // importance: 3,
         enterTime: new Date(),
         symbol: "",
         period: "3m",
@@ -484,7 +557,7 @@ export default {
         amount: "",
         stopLosePrice: "",
         //区间套级别
-        nestLevel: "2级套",
+        // nestLevel: "2级套",
         //介入逻辑
         enterReason: "",
         //持仓逻辑
@@ -513,10 +586,10 @@ export default {
           { required: true, message: "请选择方向", trigger: "change" }
         ],
         price: [{ required: true, message: "请输入价格", trigger: "blur" }],
-        amount: [{ required: true, message: "请输入数量", trigger: "blur" }],
-        nestLevel: [
-          { required: true, message: "请选择预期级别", trigger: "change" }
-        ],
+        amount: [{ required: true, message: "请输入数量", trigger: "blur" }]
+        // nestLevel: [
+        //   { required: true, message: "请选择预期级别", trigger: "change" }
+        // ],
         // enterReason: [
         //   { required: true, message: "请输入入场逻辑", trigger: "blur" }
         // ]
@@ -544,14 +617,95 @@ export default {
     );
   },
   methods: {
-    tableRowClassName({row, rowIndex}) {
-      if (row.dynamicPositionList.length> 0) {
-        return 'success-row';
+    calcWinEndRate(row) {
+      // 获取动止列表中的最后一次平仓的价格
+      if (row.dynamicPositionList.length > 0) {
+        let winPrice =
+          row.dynamicPositionList[row.dynamicPositionList.length - 1].price;
+        let marginLevel = Number(
+          (1 / (row.margin_rate + this.marginLevelCompany)).toFixed(2)
+        );
+        return Math.abs(
+          ((winPrice - row.price) / row.price) * 100 * marginLevel
+        ).toFixed(2);
+      }
+    },
+    // 计算盈亏比
+    calcWinLoseRate(row) {
+      let profitRate = this.calcProfitRate(row);
+      let stopLoseRate = this.calcStopLoseRate(row);
+      if (profitRate === "获取中" || stopLoseRate === "获取中") {
+        return "获取中";
+      } else {
+        return (profitRate / stopLoseRate).toFixed(1);
+      }
+    },
+    // 计算止损率
+    calcStopLoseRate(row) {
+      if (this.changeList != null) {
+        // let futureInfo = this.futureSymbolMap[row.symbol];
+        let marginLevel = Number(
+          (1 / (row.margin_rate + this.marginLevelCompany)).toFixed(2)
+        );
+        return Math.abs(
+          ((row.stopLosePrice - row.price) / row.price) * 100 * marginLevel
+        ).toFixed(2);
+      } else {
+        return "获取中";
+      }
+    },
+    //  计算收益率
+    calcProfitRate(row) {
+      if (this.futureSymbolMap !== null && this.changeList != null) {
+        // let futureInfo = this.futureSymbolMap[row.symbol];
+        let marginLevel = Number(
+          (1 / (row.margin_rate + this.marginLevelCompany)).toFixed(2)
+        );
+        let currentPercent = 0;
+        if (row.direction === "long") {
+          currentPercent = (
+            ((this.changeList[row.symbol].price - row.price) / row.price) *
+            100 *
+            marginLevel
+          ).toFixed(2);
+        } else {
+          currentPercent = (
+            ((row.price - this.changeList[row.symbol].price) /
+              this.changeList[row.symbol].price) *
+            100 *
+            marginLevel
+          ).toFixed(2);
+        }
+        return currentPercent;
+      } else {
+        return "获取中";
+      }
+    },
+    changeStatus(id, status) {
+      console.log(id, status);
+      futureApi
+        .updatePositionStatus(id, status)
+        .then(res => {
+          if (res.code === "ok") {
+            this.getPositionList(
+              this.positionQueryForm.status,
+              this.listQuery.current,
+              this.listQuery.size
+            );
+          }
+        })
+        .catch(error => {
+          console.log("更新状态失败", error);
+        });
+    },
+    tableRowClassName({ row, rowIndex }) {
+      if (row.dynamicPositionList.length > 0) {
+        return "success-row";
       }
       // else {
       //   return 'warning-row';
       // }
-      return '';
+      return "";
     },
     handleSizeChange(currentSize) {
       this.listQuery.size = currentSize;
@@ -583,7 +737,7 @@ export default {
       console.log(this.$parent);
       // this.$parent.jumpToKline(symbol)
       //结束状态 k线页面不获取持仓信息
-      if (row.status !== "end") {
+      if (row.status !== "winEnd" && row.status !== "stopEnd") {
         let routeUrl = this.$router.resolve({
           path: "/multi-period",
           query: {
@@ -596,6 +750,7 @@ export default {
       }
     },
     getPositionList(status, page, size) {
+      this.positionList = [];
       this.listLoading = true;
       futureApi
         .getPositionList(status, page, size)
@@ -620,7 +775,7 @@ export default {
 
     resetForm() {
       this.positionForm = {
-        importance: 1,
+        // importance: 1,
         enterTime: new Date(),
         symbol: "",
         period: "3m",
@@ -630,7 +785,7 @@ export default {
         price: "",
         amount: "",
         stopLosePrice: "",
-        nestLevel: "2级套",
+        // nestLevel: "2级套",
         enterReason: "",
         holdReason: "",
         dynamicPositionList: []
@@ -660,6 +815,10 @@ export default {
       this.$refs["positionFormRef"].validate(valid => {
         if (valid) {
           this.submitBtnLoading = true;
+          // 保存当时的保证金比率，方便计算 交割后的老的合约盈利率
+          this.positionForm.margin_rate = this.futureSymbolMap[
+            this.positionForm.symbol
+          ].margin_rate;
           futureApi
             .createPosition(this.positionForm)
             .then(res => {
@@ -700,6 +859,9 @@ export default {
         if (valid) {
           this.submitBtnLoading = true;
           // const tempData = Object.assign({}, this.positionForm)
+          this.positionForm.margin_rate = this.futureSymbolMap[
+            this.positionForm.symbol
+          ].margin_rate;
           futureApi
             .updatePosition(this.positionForm)
             .then(res => {
@@ -764,15 +926,19 @@ export default {
   .long-textarea {
     width: 350px;
   }
-  .form-textarea-middle{
+
+  .form-textarea-middle {
     width: 600px;
   }
-  .form-textarea-long{
+
+  .form-textarea-long {
     width: 1000px;
   }
+
   .query-position-form {
     margin-bottom: 10px;
   }
+
   .el-table .warning-row {
     background: oldlace;
   }
