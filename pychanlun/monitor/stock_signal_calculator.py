@@ -19,6 +19,8 @@ from pychanlun.basic.pattern import DualEntangleForBuyLong, PerfectForBuyLong, B
 import talib as ta
 import numpy as np
 import pydash
+import pandas as pd
+
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -33,7 +35,6 @@ def run(**kwargs):
     codes = []
     collist = DBPyChanlun.list_collection_names()
     for code in collist:
-        # 只计算5分钟和15分钟的就够了，只做这个级别
         match = re.match("((sh|sz)(\\d{6}))_(5m|15m|30m|240m)", code, re.I)
         if match is not None:
             code = match.group(1)
@@ -66,6 +67,17 @@ def calculate(info):
         tz_aware=True, tzinfo=tz)).delete_many({
             "_id": {"$lte": cutoff_time}
         })
+
+    # 日线均线计算，只计算34日均线上的股票
+    bars = DBPyChanlun['%s_%s' % (code, '240m')].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
+    bars = list(bars)
+    if len(bars) > 0:
+        df = pd.DataFrame(list(bars))
+        close = [float(x) for x in df.close]
+        ma34 = ta.MA(np.array(close), timeperiod=34)
+        if close[-1] < ma34[-1]:
+            return
 
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
@@ -240,7 +252,7 @@ def calculate(info):
                             fire_time = time_series[idx]
                             price = close_series[idx]
                             stop_lose_price = low_series[d1]
-                            p = BuyCategory(entanglement_list, duan_series, bi_series, high_series, low_series, idx)
+                            p = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
                             remark = "多-线段反预期"
                             category = ""
                             if p == 1:

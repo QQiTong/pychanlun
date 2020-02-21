@@ -1,5 +1,6 @@
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-
+from pychanlun.basic.pivot import FindPivots
+import pydash
 
 """
 判断idx前面的形态是不是看多完备形态
@@ -70,31 +71,22 @@ def DualEntangleForSellShort(duan_series, entanglement_list, higher_entaglement_
 
 
 """
-判断1,2,3买形态位置
+判断1, 2, 3买形态位置
 """
-def BuyCategory(e_list, duan_serial, bi_serial, high_serial, low_serial, idx):
-    d1 = FindPrevEq(duan_serial, -1, idx+1)
-    g1 = FindPrevEq(duan_serial, 1, idx+1)
-    d2 = FindPrevEq(duan_serial, -1, g1)
-    if g1 > d1:
-        return 0
-    e = None
-    for i in range(len(e_list)-1, -1, -1):
-        if e_list[i].start > idx:
-            continue
-        elif e_list[i].start <= idx and e_list[i].end >= idx:
-            # 在中枢中
-            e = e_list[i]
-            break
-        elif e_list[i].end < idx:
-            # 找到前面的中枢
-            e = e_list[i]
-            break
-    if e:
-        if low_serial[d1] > e.zg:
-            return 3
-        elif low_serial[d1] >= low_serial[d2] or low_serial[idx] >= low_serial[d2]:
-            return 2
-        else:
-            return 1
-    return 0
+def BuyCategory(high_duan_serial, duan_serial, high_serial, low_serial, idx):
+    dd1 = FindPrevEq(high_duan_serial, -1, idx + 1)
+    gg1 = FindPrevEq(high_duan_serial, 1, idx + 1)
+    d1 = FindPrevEq(duan_serial, -1, idx + 1)
+    g1 = FindPrevEq(duan_serial, 1, idx + 1)
+    category = 0
+    if dd1 > gg1:
+        if d1 > g1:
+            category = 2
+        pivots = FindPivots(gg1, dd1, duan_serial, high_serial, low_serial, -1)
+        if len(pivots) > 0:
+            minZg = pydash.chain(pivots).map(lambda pivot: pivot['high']).min().value()
+            if low_serial[d1] > minZg:
+                category = 3
+    else:
+        pass
+    return category
