@@ -58,7 +58,7 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
     if len(candles) < 5:
         # 合并后K柱数量不够不成笔
         return False
-    if len(candles) >= 13:
+    if to_index - from_index + 1 >= 13:
         # 满足13K就不看是否重叠了
         return True
     # 查看顶底是否重叠
