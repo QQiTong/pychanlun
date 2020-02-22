@@ -381,7 +381,6 @@
       <!-- <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300" /> -->
       <el-table-column label="状态" width="130" align="center">
         <template slot-scope="{row}">
-          <!--          <el-tag :type="row.status | statusTagFilter">{{ row.status |statusFilter }}</el-tag>-->
           <el-select
             v-model="row.status"
             class="form-input-short"

@@ -283,11 +283,11 @@ class BusinessService:
         collection = DBPyChanlun["stock_position_record"]
         # 查询总记录数
         if status == 'all':
-            result = collection.find().skip((page - 1) * size).limit(size)
+            result = collection.find().skip((page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
             total = result.count()
         else:
             result = collection.find({'status': status}).skip(
-                (page - 1) * size).limit(size)
+                (page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
             total = result.count()
         for x in result:
             x['_id'] = str(x['_id'])
@@ -324,10 +324,10 @@ class BusinessService:
             'price': position['price'],
             'amount': position['amount'],
             'stopLosePrice': position['stopLosePrice'],
-            'nestLevel': position['nestLevel'],
+            # 'nestLevel': position['nestLevel'],
             'enterReason': position['enterReason'],
             'holdReason': position['holdReason'],
-            'importance': position['importance'],
+            # 'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList'],
         })
         return result.inserted_id
@@ -345,12 +345,16 @@ class BusinessService:
             'price': position['price'],
             'amount': position['amount'],
             'stopLosePrice': position['stopLosePrice'],
-            'nestLevel': position['nestLevel'],
+            # 'nestLevel': position['nestLevel'],
             'enterReason': position['enterReason'],
             'holdReason': position['holdReason'],
-            'importance': position['importance'],
+            # 'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
+    def updateStockPositionStatus(self, id, status):
+        DBPyChanlun['stock_position_record'].update_one({'_id': ObjectId(id)}, {"$set": {
+            'status': status,
+        }})    
 
 
 businessService = BusinessService()

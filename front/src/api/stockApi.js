@@ -65,5 +65,13 @@ export const stockApi = {
             method: 'post',
             data: data
         })
+    },
+    // 更新持仓状态
+    updatePositionStatus(id,status) {
+        let url = `/api/update_stock_position_status?id=${id}&status=${status}`
+        return axios({
+            url: url,
+            method: 'get'
+        })
     }
 }

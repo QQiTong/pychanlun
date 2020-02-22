@@ -166,6 +166,17 @@ def update_stock_position():
     }
     return Response(json.dumps(res), mimetype='application/json')
 
+# 更新股票持仓状态
+@app.route('/api/update_stock_position_status')
+def update_stock_position_status():
+    id = request.args.get("id")
+    status = request.args.get("status")
+    businessService.updateStockPositionStatus(id,status)
+    res = {
+        "code": "ok"
+    }
+    return Response(json.dumps(res), mimetype='application/json')
+
 
 def run(**kwargs):
     port = kwargs.get("port", 5000)

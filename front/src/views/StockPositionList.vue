@@ -118,11 +118,27 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="6">
+          <!-- <el-col :span="6">
             <el-form-item label="预期级别" prop="nestLevel">
               <el-select v-model="positionForm.nestLevel" class="form-input" placeholder="请选择">
                 <el-option :key="2" label="2级套" value="2级套" />
                 <el-option :key="3" label="3级套" value="3级套" />
+              </el-select>
+            </el-form-item>
+          </el-col> -->
+          <el-col :span="6">
+             <el-form-item label="仓位" prop="positionPercent">
+              <el-select
+                v-model="positionForm.positionPercent"
+                class="form-input"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="item in positionPercentOptions"
+                  :key="item.key"
+                  :label="item.display_name"
+                  :value="item.key"
+                />
               </el-select>
             </el-form-item>
           </el-col>
@@ -151,7 +167,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="入场逻辑" prop="enterReason">
+            <el-form-item label="入场逻辑">
               <el-input
                 v-model="positionForm.enterReason"
                 :autosize="{ minRows: 4, maxRows: 4}"
@@ -173,39 +189,11 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="6">
-            <el-form-item label="危险系数">
-              <el-rate
-                v-model="positionForm.importance"
-                :colors="rateColors"
-                :max="3"
-                style="margin-top:8px;"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="仓位" prop="positionPercent">
-              <el-select
-                v-model="positionForm.positionPercent"
-                class="form-input"
-                placeholder="请选择"
-              >
-                <el-option
-                  v-for="item in positionPercentOptions"
-                  :key="item.key"
-                  :label="item.display_name"
-                  :value="item.key"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
 
         <!-- 动态止盈start -->
         <!--    编辑状态-->
         <el-divider content-position="left">持仓过程记录（ 动态止盈 | 加仓 | 高抛低吸 | 止损 ）</el-divider>
-        <el-row v-for="(dynamicPosition, index) in positionForm.dynamicPositionList">
+        <el-row v-for="(dynamicPosition, index) in positionForm.dynamicPositionList" :key="Math.random()">
           <el-col :span="5">
             <el-form-item label="时间">
               <el-date-picker
@@ -346,29 +334,43 @@
       <el-table-column label="入场价格" prop="price" align="center" width="80" />
       <el-table-column label="数量" prop="amount" align="center" width="80" />
       <el-table-column label="止损价格" prop="stopLosePrice" align="center" width="80" />
+      <el-table-column label="止损率" align="center" width="80">
+         <template slot-scope="{row}">
+           {{Math.round((row.stopLosePrice-row.price)/row.price*10000)/100}}%
+         </template>
+      </el-table-column>
       <el-table-column label="仓位" prop="positionPercent" align="center" width="50">
         <template slot-scope="{row}">
             <span>{{ row.positionPercent | positionPercentFilter }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预期" prop="nestLevel" align="center" width="70" />
+      <!-- <el-table-column label="预期" prop="nestLevel" align="center" width="70" />
       <el-table-column label="危险系数" prop="important" align="center" width="100">
         <template slot-scope="{row}">
           <el-rate disabled v-model="row.importance" :colors="rateColors"></el-rate>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="入场逻辑" prop="enterReason" align="center" width="260" />
       <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="260" />
       <el-table-column
         label="状态"
-        width="100"
-        :filters="[{ text: '持仓中', value: 'holding' }, { text: '预埋单', value: 'prepare' },{ text: '止盈结束', value: 'winEnd' },
-        { text: '止损结束', value: 'loseEnd' }]"
-        :filter-method="filterTags"
-        filter-placement="bottom-end"
+        width="130"
+        align="center"
       >
-        <template slot-scope="{row}">
-          <el-tag :type="row.status | statusTagFilter">{{ row.status |statusFilter }}</el-tag>
+         <template slot-scope="{row}">
+          <el-select
+            v-model="row.status"
+            class="form-input-short"
+            size="mini"
+            @change="changeStatus(row._id,row.status)"
+          >
+            <el-option
+              v-for="item in statusOptions"
+              :key="item.key"
+              :label="item.display_name"
+              :value="item.key"
+            />
+          </el-select>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
@@ -418,7 +420,8 @@ const dynamicDirectionOptions = [
 const statusOptions = [
   { key: "holding", display_name: "持仓中" },
   { key: "prepare", display_name: "预埋单" },
-  { key: "end", display_name: "结束" }
+  { key: "winEnd", display_name: "止盈结束" },
+  { key: "loseEnd", display_name: "止损结束" },
 ];
 const periodOptions = [
   { key: "3m", display_name: "3m" },
@@ -503,12 +506,12 @@ export default {
       },
       // 表单
       positionForm: {
-        importance: 3,
+        // importance: 3,
         enterTime: new Date(),
         symbol: "",
         period: "",
         signal: "",
-        status: "",
+        status: "holding",
         //方向
         direction: "long",
         positionPercent: "",
@@ -518,7 +521,7 @@ export default {
         amount: "",
         stopLosePrice: "",
         //区间套级别
-        nestLevel: "2级套",
+        // nestLevel: "2级套",
         //介入逻辑
         enterReason: "",
         //持仓逻辑
@@ -548,12 +551,12 @@ export default {
         ],
         price: [{ required: true, message: "请输入价格", trigger: "blur" }],
         amount: [{ required: true, message: "请输入数量", trigger: "blur" }],
-        nestLevel: [
-          { required: true, message: "请选择预期级别", trigger: "change" }
-        ],
-        enterReason: [
-          { required: true, message: "请输入入场逻辑", trigger: "blur" }
-        ],
+        // nestLevel: [
+        //   { required: true, message: "请选择预期级别", trigger: "change" }
+        // ],
+        // enterReason: [
+        //   { required: true, message: "请输入入场逻辑", trigger: "blur" }
+        // ],
         positionPercent: [
           { required: true, message: "请选择仓位", trigger: "change" }
         ]
@@ -582,6 +585,23 @@ export default {
     );
   },
   methods: {
+    changeStatus(id, status) {
+      console.log(id, status);
+      stockApi
+        .updatePositionStatus(id, status)
+        .then(res => {
+          if (res.code === "ok") {
+            this.getPositionList(
+              this.positionQueryForm.status,
+              this.listQuery.current,
+              this.listQuery.size
+            );
+          }
+        })
+        .catch(error => {
+          console.log("更新状态失败", error);
+        });
+    },
     handleSizeChange(currentSize) {
       this.listQuery.size = currentSize;
       this.getPositionList(
@@ -649,18 +669,18 @@ export default {
 
     resetForm() {
       this.positionForm = {
-        importance: 1,
+        // importance: 1,
         enterTime: new Date(),
         symbol: "",
         period: "",
-        status: "",
+        status: "holding",
         signal: "",
         direction: "long",
         positionPercent: "",
         price: "",
         amount: "",
         stopLosePrice: "",
-        nestLevel: "2级套",
+        // nestLevel: "2级套",
         enterReason: "",
         holdReason: "",
         dynamicPositionList: []

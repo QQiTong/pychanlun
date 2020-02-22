@@ -461,11 +461,11 @@ export default {
             const { ...query } = that.$route.query
             // 如果是大图，只请求一个周期的数据
             if (this.period !== '') {
-                Object.assign(query, { symbol, period: this.period })
+                Object.assign(query, { symbol, period: this.period ,endDate:this.endDate})
                 that.$router.push({ query })
                 that.sendRequest(symbol, this.period, update)
             } else {
-                Object.assign(query, { symbol})
+                Object.assign(query, { symbol,endDate:this.endDate})
                 that.$router.push({ query })
                 for (var i = 0; i < 8; i++) {
                     switch (i) {
@@ -1887,7 +1887,7 @@ export default {
                 // 单位是万
                 currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
                 // 跟据最新价格计算出来的信息
-                this.currentInfo =  " 率: " + currentPercent + "% 额: " + currentProfit + " 万,盈亏比: 1 : "
+                this.currentInfo =  " 率: " + currentPercent + "% 额: " + currentProfit + " 万,盈亏比:"
                                 + (currentPercent / targetPercent).toFixed(1)+' 新: ' + currentPrice.toFixed(2)
                 // 保本位
                 if (beichiPrice) {
