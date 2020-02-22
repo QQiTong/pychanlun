@@ -50,6 +50,8 @@ pychanlun stock calculate
 @click.argument("command", default="download")
 @click.option('--source', type=str, default="tdxlocal")
 @click.option('--days', type=int, default=7)
+@click.option('--code', type=str)
+@click.option('--period', type=str)
 def stock(**kwargs):
     logger = logging.getLogger()
     command = kwargs.get("command")

@@ -11,7 +11,7 @@ def PerfectForBuyLong(signal_serial, high_serial, low_serial, idx):
     d2 = FindPrevEq(signal_serial, -1, g1)
     g2 = FindPrevEq(signal_serial, 1, d2)
     d3 = FindPrevEq(signal_serial, -1, g2)
-    if low_serial[d2] > low_serial[d3] and low_serial[d1] > low_serial[d3]:
+    if d3 >= 0 and low_serial[d2] > low_serial[d3] and low_serial[d1] > low_serial[d3]:
         if low_serial[d1] < low_serial[idx] < (high_serial[g2]+low_serial[d2])/2:
             return True
     return False
@@ -26,7 +26,7 @@ def PerfectForSellShort(signal_serial, high_serial, low_series, idx):
     g2 = FindPrevEq(signal_serial, 1, d1)
     d2 = FindPrevEq(signal_serial, -1, g2)
     g3 = FindPrevEq(signal_serial, -1, d2)
-    if high_serial[g2] < high_serial[g3] and high_serial[g1] < high_serial[g3]:
+    if g3 >= 0 and high_serial[g2] < high_serial[g3] and high_serial[g1] < high_serial[g3]:
         if high_serial[g1] > high_serial[idx] > (high_serial[g2]+low_series[d2])/2:
             return True
     return False
@@ -73,13 +73,13 @@ def DualEntangleForSellShort(duan_series, entanglement_list, higher_entaglement_
 """
 判断1, 2, 3买形态位置
 """
-def BuyCategory(high_duan_serial, duan_serial, high_serial, low_serial, idx):
-    dd1 = FindPrevEq(high_duan_serial, -1, idx + 1)
-    gg1 = FindPrevEq(high_duan_serial, 1, idx + 1)
+def BuyCategory(higher_duan_serial, duan_serial, high_serial, low_serial, idx):
+    dd1 = FindPrevEq(higher_duan_serial, -1, idx + 1)
+    gg1 = FindPrevEq(higher_duan_serial, 1, idx + 1)
     d1 = FindPrevEq(duan_serial, -1, idx + 1)
     g1 = FindPrevEq(duan_serial, 1, idx + 1)
     category = 0
-    if dd1 > gg1:
+    if d1 > dd1 > gg1:
         if d1 > g1:
             category = 2
         pivots = FindPivots(gg1, dd1, duan_serial, high_serial, low_serial, -1)

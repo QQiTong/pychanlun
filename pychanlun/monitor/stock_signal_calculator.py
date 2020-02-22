@@ -32,14 +32,23 @@ def run(**kwargs):
         tz_aware=True, tzinfo=tz)).delete_many({
             "fire_time": {"$lte": cutoff_time}
         })
+    code = kwargs.get('code')
+    period = kwargs.get('period')
     codes = []
-    collist = DBPyChanlun.list_collection_names()
-    for code in collist:
-        match = re.match("((sh|sz)(\\d{6}))_(5m|15m|30m|240m)", code, re.I)
-        if match is not None:
-            code = match.group(1)
-            period = match.group(4)
-            codes.append({"code": code, "period": period})
+    if code is None:
+        collist = DBPyChanlun.list_collection_names()
+        for code in collist:
+            match = re.match("((sh|sz)(\\d{6}))_(5m|15m|30m|60m|240m)", code, re.I)
+            if match is not None:
+                code = match.group(1)
+                period = match.group(4)
+                codes.append({"code": code, "period": period})
+    else:
+        if period is None:
+            for period in ['5m', '15m', '30m', '60m', '240m']:
+                codes.append({ 'code': code, 'period': period })
+        else:
+            codes.append({ 'code': code, 'period': period })
 
     # 计算执缠策略
     pool = Pool()
@@ -70,10 +79,11 @@ def calculate(info):
 
     # 日线均线计算，只计算34日均线上的股票
     bars = DBPyChanlun['%s_%s' % (code, '240m')].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
+        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(500)
     bars = list(bars)
+    bars.reverse()
     if len(bars) > 0:
-        df = pd.DataFrame(list(bars))
+        df = pd.DataFrame(bars)
         close = [float(x) for x in df.close]
         ma34 = ta.MA(np.array(close), timeperiod=34)
         if close[-1] < ma34[-1]:
@@ -82,24 +92,20 @@ def calculate(info):
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
     bars = list(bars)
+    bars.reverse()
     if len(bars) == 0:
         DBPyChanlun['%s_%s' % (code, period)].drop()
         return
     elif len(bars) < 13:
         return
-    raw_data = {}
-    time_series = []
-    high_series = []
-    low_series = []
-    open_series = []
-    close_series = []
     count = len(bars)
-    for i in range(count - 1, -1, -1):
-        time_series.append(bars[i]['_id'])
-        high_series.append(bars[i]['high'])
-        low_series.append(bars[i]['low'])
-        open_series.append(bars[i]['open'])
-        close_series.append(bars[i]['close'])
+    df = pd.DataFrame(bars)
+    time_series = df['_id']
+    high_series = df['high']
+    low_series = df['low']
+    open_series = df['open']
+    close_series = df['close']
+
     # 笔信号
     bi_series = [0 for i in range(count)]
     CalcBi(count, bi_series, high_series,
@@ -110,7 +116,6 @@ def calculate(info):
     higher_duan_series = [0 for i in range(count)]
     CalcDuan(count, higher_duan_series, duan_series, high_series, low_series)
 
-    # 笔中枢的回拉和突破
     entanglement_list = entanglement.CalcEntanglements(
         time_series, duan_series, bi_series, high_series, low_series)
     zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series,
@@ -120,15 +125,9 @@ def calculate(info):
     v_reverse = entanglement.v_reverse(entanglement_list, time_series, high_series,
                                        low_series, open_series, close_series, bi_series, duan_series)
 
-    # 段中枢的回拉和突破
+
     higher_entaglement_list = entanglement.CalcEntanglements(
         time_series, higher_duan_series, duan_series, high_series, low_series)
-    higher_zs_huila = entanglement.la_hui(higher_entaglement_list, time_series, high_series,
-                                          low_series, open_series, close_series, duan_series, higher_duan_series)
-    higher_zs_tupo = entanglement.tu_po(higher_entaglement_list, time_series, high_series,
-                                        low_series, open_series, close_series, duan_series, higher_duan_series)
-    higher_v_reverse = entanglement.v_reverse(higher_entaglement_list, time_series, high_series,
-                                              low_series, open_series, close_series, duan_series, higher_duan_series)
 
     # 笔中枢信号的记录
     count = len(zs_huila['buy_zs_huila']['date'])
@@ -147,9 +146,16 @@ def calculate(info):
             tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-
+        p = BuyCategory(higher_duan_series, duan_series, high_series, low_series, i)
+        category = ""
+        if p == 1:
+            category = "一类"
+        elif p == 2:
+            category = "二类"
+        elif p == 3:
+            category = "三类"
         save_signal(code, period, '多-拉回笔中枢确认底背',
-                    fire_time, price, stop_lose_price, 'BUY_LONG', tags)
+                    fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
     count = len(zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
@@ -167,8 +173,16 @@ def calculate(info):
             tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
+        p = BuyCategory(higher_duan_series, duan_series, high_series, low_series, i)
+        category = ""
+        if p == 1:
+            category = "一类"
+        elif p == 2:
+            category = "二类"
+        elif p == 3:
+            category = "三类"
         save_signal(code, period, '多-升破笔中枢',
-                    fire_time, price, stop_lose_price, 'BUY_LONG', tags)
+                    fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
     count = len(v_reverse['buy_v_reverse']['date'])
     for i in range(count):
@@ -186,83 +200,16 @@ def calculate(info):
             tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
+        p = BuyCategory(higher_duan_series, duan_series, high_series, low_series, i)
+        category = ""
+        if p == 1:
+            category = "一类"
+        elif p == 2:
+            category = "二类"
+        elif p == 3:
+            category = "三类"
         save_signal(code, period, '多-笔中枢三卖V', fire_time,
-                    price, stop_lose_price, 'BUY_LONG', tags)
-
-    # 段中枢信号的记录
-    count = len(higher_zs_huila['buy_zs_huila']['date'])
-    for i in range(count):
-        save_signal(code, period, '多-拉回段中枢确认底背', higher_zs_huila['buy_zs_huila']
-                    ['date'][i], higher_zs_huila['buy_zs_huila']['data'][i], higher_zs_huila['buy_zs_huila']['stop_lose_price'][i], 'BUY_LONG')
-
-    count = len(higher_zs_tupo['buy_zs_tupo']['date'])
-    for i in range(count):
-        save_signal(code, period, '多-升破段中枢看多预期', higher_zs_tupo['buy_zs_tupo']
-                    ['date'][i], higher_zs_tupo['buy_zs_tupo']['data'][i], higher_zs_tupo['buy_zs_tupo']['stop_lose_price'][i], 'BUY_LONG')
-
-    count = len(higher_v_reverse['buy_v_reverse']['date'])
-    for i in range(count):
-        save_signal(code, period, '多-段中枢三卖V', higher_v_reverse['buy_v_reverse']
-                    ['date'][i], higher_v_reverse['buy_v_reverse']['data'][i], higher_v_reverse['buy_v_reverse']['stop_lose_price'][i], 'BUY_LONG')
-
-    # # 缠论一买，二买，三买计算
-    count = len(time_series)
-    diff, dea, macd = ta.MACD(np.array(
-        [float(x) for x in close_series]), fastperiod=12, slowperiod=26, signalperiod=9)
-    for idx in range(count):
-        d1 = FindPrevEq(duan_series, -1, idx)
-        g1 = FindPrevEq(duan_series, 1, idx)
-        # 是下跌线段
-        if d1 > g1 > 0:
-            # 找下跌线段开始到目前最低的笔高
-            llvh = high_series[g1]
-            llvhIdx = g1
-            for x in range(g1+1, idx):
-                if bi_series[x] == 1 and high_series[x] < llvh:
-                    llvh = high_series[x]
-                    llvhIdx = x
-            # 前面一笔上是不是第一次突破llvh
-            bi_c = 0
-            bi_s = max(d1, FindNextEq(bi_series, -1, llvhIdx, idx))
-            while True:
-                bi_e = FindNextEq(bi_series, 1, bi_s, idx)
-                if bi_e == -1:
-                    # 没有向上笔了
-                    break
-                # 找到一个向上笔
-                if low_series[bi_s] <= llvh and high_series[bi_e] > llvh:
-                    bi_c = bi_c + 1
-                bi_s = FindNextEq(bi_series, -1, bi_e, idx)
-                if bi_s == -1:
-                    break
-            if bi_c == 1:
-                # 只有一次突破，现在是不是向下笔
-                bi_d1 = FindPrevEq(bi_series, -1, idx)
-                bi_g1 = FindPrevEq(bi_series, 1, idx)
-                if bi_d1 > bi_g1 > 0:
-                    if macd[idx-1] <= 0 and macd[idx] > 0:
-                        is_signal = True
-                        for y in range(bi_d1+1, idx):
-                            if macd[y-1] <= 0 and macd[y] > 0:
-                                # 前面出现过
-                                is_signal = False
-                                break
-                        # 成立
-                        if is_signal:
-                            fire_time = time_series[idx]
-                            price = close_series[idx]
-                            stop_lose_price = low_series[d1]
-                            p = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
-                            remark = "多-线段反预期"
-                            category = ""
-                            if p == 1:
-                                category = "一类"
-                            elif p == 2:
-                                category = "二类"
-                            elif p == 3:
-                                category = "三类"
-                            save_signal(
-                                code, period, remark, fire_time, price, stop_lose_price, 'BUY_LONG', [], category)
+                    price, stop_lose_price, 'BUY_LONG', tags, category)
 
 
 def save_signal(code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
