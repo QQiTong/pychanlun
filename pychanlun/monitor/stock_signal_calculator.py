@@ -38,14 +38,14 @@ def run(**kwargs):
     if code is None:
         collist = DBPyChanlun.list_collection_names()
         for code in collist:
-            match = re.match("((sh|sz)(\\d{6}))_(5m|15m|30m|60m|240m)", code, re.I)
+            match = re.match("((sh|sz)(\\d{6}))_(5m|15m|30m)", code, re.I)
             if match is not None:
                 code = match.group(1)
                 period = match.group(4)
                 codes.append({"code": code, "period": period})
     else:
         if period is None:
-            for period in ['5m', '15m', '30m', '60m', '240m']:
+            for period in ['5m', '15m', '30m']:
                 codes.append({ 'code': code, 'period': period })
         else:
             codes.append({ 'code': code, 'period': period })
@@ -124,6 +124,7 @@ def calculate(info):
                                  low_series, open_series, close_series, bi_series, duan_series)
     v_reverse = entanglement.v_reverse(entanglement_list, time_series, high_series,
                                        low_series, open_series, close_series, bi_series, duan_series)
+    duan_pohuai = entanglement.po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
 
 
     higher_entaglement_list = entanglement.CalcEntanglements(
@@ -132,6 +133,7 @@ def calculate(info):
     # 笔中枢信号的记录
     count = len(zs_huila['buy_zs_huila']['date'])
     for i in range(count):
+        idx = zs_huila['buy_zs_huila']['idx'][i]
         fire_time = zs_huila['buy_zs_huila']['date'][i]
         price = zs_huila['buy_zs_huila']['data'][i]
         stop_lose_price = zs_huila['buy_zs_huila']['stop_lose_price'][i]
@@ -146,19 +148,13 @@ def calculate(info):
             tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        p = BuyCategory(higher_duan_series, duan_series, high_series, low_series, i)
-        category = ""
-        if p == 1:
-            category = "一类"
-        elif p == 2:
-            category = "二类"
-        elif p == 3:
-            category = "三类"
+        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-拉回笔中枢确认底背',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
     count = len(zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
+        idx = zs_tupo['buy_zs_tupo']['idx'][i]
         fire_time = zs_tupo['buy_zs_tupo']['date'][i]
         price = zs_tupo['buy_zs_tupo']['data'][i]
         stop_lose_price = zs_tupo['buy_zs_tupo']['stop_lose_price'][i]
@@ -169,23 +165,15 @@ def calculate(info):
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
 
-        if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
-            tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        p = BuyCategory(higher_duan_series, duan_series, high_series, low_series, i)
-        category = ""
-        if p == 1:
-            category = "一类"
-        elif p == 2:
-            category = "二类"
-        elif p == 3:
-            category = "三类"
+        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-升破笔中枢',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
     count = len(v_reverse['buy_v_reverse']['date'])
     for i in range(count):
+        idx = v_reverse['buy_v_reverse']['idx'][i]
         fire_time = v_reverse['buy_v_reverse']['date'][i]
         price = v_reverse['buy_v_reverse']['data'][i]
         stop_lose_price = v_reverse['buy_v_reverse']['stop_lose_price'][i]
@@ -196,20 +184,22 @@ def calculate(info):
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
 
-        if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
-            tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        p = BuyCategory(higher_duan_series, duan_series, high_series, low_series, i)
-        category = ""
-        if p == 1:
-            category = "一类"
-        elif p == 2:
-            category = "二类"
-        elif p == 3:
-            category = "三类"
+        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-笔中枢三卖V', fire_time,
                     price, stop_lose_price, 'BUY_LONG', tags, category)
+
+
+    count = len(duan_pohuai['buy_duan_break']['date'])
+    for i in range(count):
+        idx = duan_pohuai['buy_duan_break']['idx'][i]
+        fire_time = duan_pohuai['buy_duan_break']['date'][i]
+        price = duan_pohuai['buy_duan_break']['data'][i]
+        stop_lose_price = duan_pohuai['buy_duan_break']['stop_lose_price'][i]
+        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
+        save_signal(code, period, '多-线段破坏', fire_time,
+                    price, stop_lose_price, 'BUY_LONG', [], category)
 
 
 def save_signal(code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
@@ -217,8 +207,8 @@ def save_signal(code, period, remark, fire_time, price, stop_lose_price, positio
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
         if (stop_lose_price - price) / price > -0.05:
-            logger.info("%s %s %s %s %s %s" %
-                        (code, period, remark, tags, fire_time, price))
+            logger.info("%s %s %s %s %s %s %s" %
+                        (code, period, remark, tags, category, fire_time, price))
             DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find_one_and_update({
                 "code": code, "period": period, "fire_time": fire_time, "position": position
             }, {

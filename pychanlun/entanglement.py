@@ -125,6 +125,7 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
 def la_hui(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
     result = {
         'buy_zs_huila': {
+            'idx': [],
             'date': [],
             'data': [],
             'stop_lose_price': [],
@@ -132,6 +133,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             'tag': []
         },
         'sell_zs_huila': {
+            'idx': [],
             'date': [],
             'data': [],
             'stop_lose_price': [],
@@ -163,6 +165,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     # if e_next is not None and x >= e_next.end:
                     #     break
                 if r >= 0:
+                    result['sell_zs_huila']['idx'].append(r)
                     result['sell_zs_huila']['date'].append(time_series[r])
                     result['sell_zs_huila']['data'].append(e.top)
                     top_index = pydash.find_last_index(duan_series[:r+1], lambda x: x == 1)
@@ -198,6 +201,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     # if e_next is not None and x >= e_next.end:
                     #     break
                 if r >= 0:
+                    result['buy_zs_huila']['idx'].append(r)
                     result['buy_zs_huila']['date'].append(time_series[r])
                     result['buy_zs_huila']['data'].append(e.bottom)
                     bottom_index = pydash.find_last_index(duan_series[:r+1], lambda x: x == -1)
@@ -219,6 +223,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
 def tu_po(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
     result = {
         'buy_zs_tupo': {
+            'idx': [],
             'date': [],
             'data': [],
             'stop_lose_price': [],
@@ -226,6 +231,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
             'tag': []
         },
         'sell_zs_tupo': {
+            'idx': [],
             'date': [],
             'data': [],
             'stop_lose_price': [],
@@ -245,6 +251,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 if duan_series[x] == 1:
                     break
             if r > 0:
+                result['buy_zs_tupo']['idx'].append(r)
                 result['buy_zs_tupo']['date'].append(time_series[r])
                 result['buy_zs_tupo']['data'].append(e.gg)
                 result['buy_zs_tupo']['stop_lose_price'].append(e.zg)
@@ -261,6 +268,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 if duan_series[x] == -1:
                     break
             if r > 0:
+                result['sell_zs_tupo']['idx'].append(r)
                 result['sell_zs_tupo']['date'].append(time_series[r])
                 result['sell_zs_tupo']['data'].append(e.dd)
                 result['sell_zs_tupo']['stop_lose_price'].append(e.zd)
@@ -273,6 +281,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
 def v_reverse(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
     result = {
         'buy_v_reverse': {
+            'idx': [],
             'date': [],
             'data': [],
             'stop_lose_price': [],
@@ -280,6 +289,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
             'tag': []
         },
         'sell_v_reverse': {
+            'idx': [],
             'date': [],
             'data': [],
             'stop_lose_price': [],
@@ -309,6 +319,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                             break
                         if close_series[k] < resist_price:
                             if pydash.find_last_index(result['sell_v_reverse']['date'], lambda x: x == time_series[k]) == -1:
+                                result['sell_v_reverse']['idx'].append(k)
                                 result['sell_v_reverse']['date'].append(time_series[k])
                                 result['sell_v_reverse']['data'].append(resist_price)
                                 result['sell_v_reverse']['stop_lose_price'].append(high_series[leave_end_index])
@@ -337,6 +348,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                             break
                         if close_series[k] > resist_price:
                             if pydash.find_last_index(result['buy_v_reverse']['date'], lambda x: x == time_series[k]) == -1:
+                                result['buy_v_reverse']['idx'].append(k)
                                 result['buy_v_reverse']['date'].append(time_series[k])
                                 result['buy_v_reverse']['data'].append(resist_price)
                                 result['buy_v_reverse']['stop_lose_price'].append(low_series[leave_end_index])
@@ -352,6 +364,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
 def po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
     result = {
         'buy_duan_break': {
+            'idx': [],
             'date': [],
             'data': [],
             'stop_lose_price': [],
@@ -359,6 +372,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
             'tag': []
         },
         'sell_duan_break': {
+            'idx': [],
             'date': [],
             'data': [],
             'stop_lose_price': [],
@@ -380,6 +394,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                     if duan_series[k] == -1:
                         break
                     if close_series[k] < low_series[anchor]:
+                        result['sell_duan_break']['idx'].append(k)
                         result['sell_duan_break']['date'].append(time_series[k])
                         result['sell_duan_break']['data'].append(low_series[anchor])
                         result['sell_duan_break']['stop_lose_price'].append(high_series[i])
@@ -401,6 +416,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                     if duan_series[k] == 1:
                         break
                     if close_series[k] > high_series[anchor]:
+                        result['buy_duan_break']['idx'].append(k)
                         result['buy_duan_break']['date'].append(time_series[k])
                         result['buy_duan_break']['data'].append(high_series[anchor])
                         result['buy_duan_break']['stop_lose_price'].append(low_series[i])
