@@ -193,7 +193,7 @@
         <!-- 动态止盈start -->
         <!--    编辑状态-->
         <el-divider content-position="left">持仓过程记录（ 动态止盈 | 加仓 | 高抛低吸 | 止损 ）</el-divider>
-        <el-row v-for="(dynamicPosition, index) in positionForm.dynamicPositionList" :key="Math.random()">
+        <el-row v-for="(dynamicPosition, index) in positionForm.dynamicPositionList" :key="index">
           <el-col :span="5">
             <el-form-item label="时间">
               <el-date-picker
@@ -738,7 +738,8 @@ export default {
       });
     },
     handleUpdate(row) {
-      this.positionForm = Object.assign({}, row); // copy obj
+      //this.positionForm = Object.assign({}, row); // copy obj
+      this.positionForm = JSON.parse(JSON.stringify(row));
       this.dialogStatus = "update";
       this.dialogFormVisible = true;
       this.$nextTick(() => {

@@ -172,7 +172,7 @@ export default {
             selectedSymbol: '',
             // 输入的交割过的期货品种 或者 股票品种
             inputSymbol: '',
-            periodList: ['3m', '5m', '15m', '30m', '60m', '240m'],
+            periodList: ['1m','3m', '5m', '15m', '30m', '60m', '240m'],
             // 是否指显示当前持仓的开平动止
             isPosition: false,
             // 当前品种持仓信息

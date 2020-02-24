@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 from tqsdk import tafunc
-
+import re
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
@@ -135,14 +135,17 @@ def testProxy():
 
 
 def testHuobi():
-    proxies = {'http': '127.0.0.1:10809', 'https': '127.0.0.1:10809'}
+    PROXIES = {
+        "http": "socks5://127.0.0.1:10808",
+        "https": "socks5://127.0.0.1:10808"
+    }
     hbdmUrl = "http://api.hbdm.com/market/history/kline"
     payload1 = {
         'symbol': 'BTC_CQ',  # 合约类型， 火币季度合约
         'period': '1min',
         'size': 2000
     }
-    r = requests.get(hbdmUrl, params=payload1, proxies=proxies, verify=False)
+    r = requests.get(hbdmUrl, params=payload1,  proxies=PROXIES)
     print(json.loads(r.text)['data'])
 
 
@@ -331,15 +334,47 @@ def testThread():
      n = 3
      c= [symbolList[i:i+n] for i in range(0, len(symbolList), n)]
      print("--",c)
+def testWaipan():
+    timeStamp = time.time()
+    url = "https://gu.sina.cn/ft/api/jsonp.php//GlobalService.getMink"
+    payload = {
+        "symbol": "CL",
+        "type":60
+    }
+    content = requests.get(url, params=payload).content
+    p1 = re.compile(r'[(](.*?)[)]', re.S) #最小匹配
+    result = re.findall(p1, content.decode('utf-8'))[0]
+    klines = json.loads(result)
+
+
+    originKlineList = []
+
+    for i in range(len(klines)):
+        newKline = {}
+        originKline = {}
+        originKline['open'] = klines[i]['o']
+        originKline['high'] = klines[i]['h']
+        originKline['low']  = klines[i]['l']
+        originKline['close'] = klines[i]['c']
+        originKline['time'] = klines[i]['d']
+
+        timeArray = time.strptime(klines[0]['d'], "%Y-%m-%d %H:%M:%S")
+        timeStamp = int(time.mktime(timeArray))
+        originKlineList.append(originKline)
+    print(timeStamp)
+    print(klines[0]['d'])
+
 def app():
     # testBitmex()
     # testBeichiDb()
     # testHuila()
     # testChange()
     # testTQ()
-    testRQ()
+    # testRQ()
     # testMonitor()
     # testThread()
+    # testHuobi()
+    testWaipan()
 
 
 if __name__ == '__main__':
