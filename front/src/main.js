@@ -8,10 +8,12 @@ import i18n from './lang/i18n'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import echarts from 'echarts'
+import global from "./global";
 Vue.config.productionTip = false
 Vue.prototype.axios = Vue.prototype.$axios = axios
 Vue.prototype.$echarts = echarts
 Vue.use(ElementUI)
+Vue.use(global);
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])
 })

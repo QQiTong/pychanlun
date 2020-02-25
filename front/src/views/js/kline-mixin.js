@@ -97,11 +97,11 @@ export default {
             // 合约乘数
             contractMultiplier: 1,
             // 账户总额
-            account: 19,
+            account: 0,
             // 期货账户总额
-            futuresAccount: 19,
+            futureAccount: this.$futureAccount,
             // 数字货币账户总额
-            digitCoinAccount: 0.01,
+            digitCoinAccount:this.$digitCoinAccount,
             // 开仓价格
             openPrice: null,
             // 止损价格
@@ -1889,6 +1889,26 @@ export default {
                 // 跟据最新价格计算出来的信息
                 this.currentInfo =  " 率: " + currentPercent + "% 额: " + currentProfit + " 万,盈亏比:"
                                 + (currentPercent / targetPercent).toFixed(1)+' 新: ' + currentPrice.toFixed(2)
+                let markLineCurrent = {
+                        yAxis: currentPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dash',
+                                width: 1,
+                                color: 'yellow'
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: 'yellow',
+                                formatter: '新: ' + currentPrice.toFixed(2)
+                            },
+                        },
+                    }
+                markLineData.push(markLineCurrent)
                 // 保本位
                 if (beichiPrice) {
                     var markLineBeichi = {
@@ -2080,6 +2100,26 @@ export default {
             let stopLosePercent = (Math.abs(openPrice - stopLosePrice) / stopLosePrice * 100 * marginLevel).toFixed(2)
             //如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
             this.currentInfo = '新: ' + currentPrice.toFixed(2)
+            let markLineCurrent = {
+                        yAxis: currentPrice,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dash',
+                                width: 1,
+                                color: 'yellow'
+                            },
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1,
+                        label: {
+                            normal: {
+                                color: 'yellow',
+                                formatter: '新: ' + currentPrice.toFixed(2)
+                            },
+                        },
+                    }
+            markLineData.push(markLineCurrent)
             // 开仓价
             var markLineOpen = {
                 yAxis: openPrice,
@@ -2273,7 +2313,7 @@ export default {
                 return
             }
             if (this.currentSymbol.indexOf("_CQ") === -1) {
-                this.account = this.futuresAccount
+                this.account = this.futureAccount
                 // 计算1手需要的保证金
                 this.perOrderMargin = Math.floor(this.openPrice * this.contractMultiplier * this.currentMarginRate)
                 this.perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier

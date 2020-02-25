@@ -23,12 +23,12 @@ export default {
                 // 合约乘数
                 contractMultiplier: null,
                 // 账户总额
-                account: 19,
+                account: 0,
 
                 // 期货账户总额
-                futuresAccount: 19,
+                futureAccount: this.$futureAccount,
                 // 数字货币账户总额
-                digitCoinAccount: 0.01,
+                digitCoinAccount: this.$digitCoinAccount,
                 //开仓价格
                 openPrice: null,
                 //止损价格
@@ -76,12 +76,12 @@ export default {
             // 合约乘数
             contractMultiplier: null,
             // 账户总额
-            account: 19,
+            account: 0,
 
             // 期货账户总额
-            futuresAccount: 19,
+            futureAccount: this.$futureAccount,
             // 数字货币账户总额
-            digitCoinAccount: 0.01,
+            digitCoinAccount:this.$digitCoinAccount,
             //开仓价格
             openPrice: null,
             //止损价格
@@ -283,7 +283,7 @@ export default {
                 return
             }
             if (this.calcPosForm.currentSymbol.indexOf("_CQ") === -1) {
-                this.calcPosForm.account = this.calcPosForm.futuresAccount
+                this.calcPosForm.account = this.calcPosForm.futureAccount
                 // 计算1手需要的保证金
                 this.calcPosForm.perOrderMargin = Math.floor(this.calcPosForm.openPrice * this.calcPosForm.contractMultiplier * this.calcPosForm.currentMarginRate)
                 this.calcPosForm.perOrderStopMoney = Math.abs(this.calcPosForm.openPrice - this.calcPosForm.stopPrice) * this.calcPosForm.contractMultiplier
