@@ -45,10 +45,14 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    pool = Pool()
-    pool.map(parse_and_save_1m, codes)
-    pool.close()
-    pool.join()
+    for idx in range(len(codes)):
+        info = codes[idx]
+        logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
+        parse_and_save_1m(info)
+    # pool = Pool()
+    # pool.map(parse_and_save_1m, codes)
+    # pool.close()
+    # pool.join()
 
     codes = []
     for subdir in ["sh", "sz"]:
@@ -67,10 +71,14 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    pool = Pool()
-    pool.map(parse_and_save_5m, codes)
-    pool.close()
-    pool.join()
+    for idx in range(len(codes)):
+        info = codes[idx]
+        logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
+        parse_and_save_5m(info)
+    # pool = Pool()
+    # pool.map(parse_and_save_5m, codes)
+    # pool.close()
+    # pool.join()
 
     codes = []
     for subdir in ["sh", "sz"]:
@@ -89,10 +97,14 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    pool = Pool()
-    pool.map(parse_and_save_day, codes)
-    pool.close()
-    pool.join()
+    for idx in range(len(codes)):
+        info = codes[idx]
+        logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
+        parse_and_save_day(info)
+    # pool = Pool()
+    # pool.map(parse_and_save_day, codes)
+    # pool.close()
+    # pool.join()
 
 
 def calc_60m(df):
@@ -125,8 +137,6 @@ def calc_60m(df):
     return df60m
 
 def parse_and_save_1m(info):
-    logger = logging.getLogger()
-    logger.info("code=%s filepath=%s", info["code"], info["filepath"])
     start_time = datetime.now() - timedelta(days=info["days"])
     reader = TdxLCMinBarReader()
     df = reader.get_df(info["filepath"])
@@ -142,8 +152,6 @@ def parse_and_save_1m(info):
     return True
 
 def parse_and_save_5m(info):
-    logger = logging.getLogger()
-    logger.info("code=%s filepath=%s", info["code"], info["filepath"])
     start_time = datetime.now() - timedelta(days=info["days"])
     reader = TdxLCMinBarReader()
     df = reader.get_df(info["filepath"])
@@ -166,7 +174,6 @@ def parse_and_save_5m(info):
 
 def parse_and_save_day(info):
     logger = logging.getLogger()
-    logger.info("code=%s filepath=%s", info["code"], info["filepath"])
     try:
         start_time = datetime.now() - timedelta(days=info["days"])
         reader = TdxDailyBarReader()
@@ -174,7 +181,7 @@ def parse_and_save_day(info):
         df = df[df.index >= start_time]
         save_data(info["code"], "240m", df)
     except BaseException as e:
-            logger.info("Error Occurred: {0}".format(traceback.format_exc()))
+        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
     return True
 
 
