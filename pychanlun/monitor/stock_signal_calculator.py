@@ -80,12 +80,6 @@ def calculate(info):
     logger = logging.getLogger()
     code = info["code"]
     period = info["period"]
-    # 清理掉1年以上的数据
-    cutoff_time = datetime.now(tz) - timedelta(days=360)
-    DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).delete_many({
-            "_id": {"$lte": cutoff_time}
-        })
 
     # 日线均线计算，只计算34日均线上的股票
     bars = DBPyChanlun['%s_%s' % (code, '240m')].with_options(codec_options=CodecOptions(
@@ -100,7 +94,7 @@ def calculate(info):
             return
 
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
+        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(10000)
     bars = list(bars)
     bars.reverse()
     if len(bars) == 0:
@@ -115,6 +109,13 @@ def calculate(info):
     low_series = df['low']
     open_series = df['open']
     close_series = df['close']
+
+    # 保留10000个样本数据，之前的就不要了。
+    cutoff_time = time_series[0]
+    DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).delete_many({
+            "_id": {"$lt": cutoff_time}
+        })
 
     # 笔信号
     bi_series = [0 for i in range(count)]
