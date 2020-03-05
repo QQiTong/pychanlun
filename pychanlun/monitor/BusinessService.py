@@ -21,7 +21,8 @@ periodList = ['3m', '5m', '15m', '30m', '60m']
 dominantSymbolList = []
 # 主力合约详细信息
 dominantSymbolInfoList = []
-
+# 美原油 美黄金 美白银 美粕 美棉 美豆 美豆油 伦镍 伦锌 马棕 日胶
+otherSymbol = ["BTC_CQ","ETH_CQ","us_sc","us_au","us_ag","us_m","us_cf","us_a","us_y","l_ni","l_zn","m_p","ja_ru"]
 
 class BusinessService:
     def __init__(self):
@@ -53,9 +54,9 @@ class BusinessService:
 
     def getNormalSignalList(self):
         symbolList = dominantSymbolList
-        #  把btc eth 加进去
-        symbolList.append("BTC_CQ")
-        symbolList.append("ETH_CQ")
+        #  把外盘加进去
+        
+        symbolList.extend(otherSymbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]
@@ -81,8 +82,8 @@ class BusinessService:
 
     def getStrategy3BeichiList(self):
         symbolList = dominantSymbolList
-        symbolList.append("BTC_CQ")
-        symbolList.append("ETH_CQ")
+        #  把外盘加进去
+        symbolList.extend(otherSymbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]
@@ -102,8 +103,8 @@ class BusinessService:
 
     def getStrategy4BeichiList(self):
         symbolList = dominantSymbolList
-        symbolList.append("BTC_CQ")
-        symbolList.append("ETH_CQ")
+        #  把外盘加进去
+        symbolList.extend(otherSymbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]
@@ -135,7 +136,7 @@ class BusinessService:
         for i in range(len(dominantSymbolList)):
             item = dominantSymbolList[i]
             # print(item)
-            if item is not 'BTC_CQ' and item is not 'ETH_CQ':
+            if item  not in otherSymbol:
                 df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
                                     start_date=start, end_date=end)
                 df1m = rq.current_minute(item)
@@ -153,9 +154,8 @@ class BusinessService:
 
     def getLevelDirectionList(self):
         symbolList = dominantSymbolList
-        #  把btc eth 加进去
-        symbolList.append("BTC_CQ")
-        symbolList.append("ETH_CQ")
+        #  把外盘加进去
+        symbolList.extend(otherSymbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]
@@ -256,6 +256,29 @@ class BusinessService:
             'status': status,
         }})
 
+     # 创建预判信息
+    def createFuturePrejudgeList(self,endDate,prejudgeList):
+        result = DBPyChanlun['prejudge_record'].insert_one({
+            'endDate': endDate,
+            'prejudgeList':prejudgeList
+        })
+        return result.inserted_id
+    
+     # 获取预判信息
+    def getFuturePrejudgeList(self,endDate):
+        result = DBPyChanlun['prejudge_record'].find({'endDate': endDate})
+        if result.count() != 0:
+            for x in result:
+                x['_id'] = str(x['_id'])
+            return x
+        else:
+            return -1
+    #  更新预判信息
+    def updateFuturePrejudgeList(self, id,prejudgeList):
+        print("更新预判参数",id,prejudgeList)
+        DBPyChanlun['prejudge_record'].update_one({'_id': ObjectId(id)}, {"$set": {
+            'prejudgeList':prejudgeList
+        }})
 
 # --------------------股票部份----------------------------------------------
 

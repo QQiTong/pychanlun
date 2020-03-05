@@ -147,10 +147,218 @@ export default {
                     underlying_order_book_id: "null",
                     underlying_symbol: "ETH_CQ",
                 }],
+                //外盘
+                outSideSymbolList: [{
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "NYMEX能源",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "us_sc",
+                    round_lot: 1,
+                    symbol: "us_sc",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "us_sc",
+                    feeRate: 0.012
+                },
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "纽约COMEX",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "us_au",
+                    round_lot: 1,
+                    symbol: "us_au",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "us_au",
+                    feeRate: 0.012
+                },
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "纽约COMEX",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "us_ag",
+                    round_lot: 1,
+                    symbol: "us_ag",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "us_ag",
+                    feeRate: 0.012
+                },
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "美国",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "us_m",
+                    round_lot: 1,
+                    symbol: "us_m",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "us_m",
+                    feeRate: 0.012
+                },
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "美国",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "us_cf",
+                    round_lot: 1,
+                    symbol: "us_cf",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "us_cf",
+                    feeRate: 0.012
+                },
+   // otherSymbol = ["BTC_CQ","ETH_CQ","us_sc","us_au","us_ag","us_m","us_cf","us_a","us_y","l_ni","l_zn","m_p","ja_ru"]
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "美国",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "us_a",
+                    round_lot: 1,
+                    symbol: "us_a",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "us_a",
+                    feeRate: 0.012
+                },
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "美国",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "us_y",
+                    round_lot: 1,
+                    symbol: "us_y",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "us_y",
+                    feeRate: 0.012
+                },
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "伦敦",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "l_ni",
+                    round_lot: 1,
+                    symbol: "l_ni",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "l_ni",
+                    feeRate: 0.012
+                },
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "伦敦",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "l_zn",
+                    round_lot: 1,
+                    symbol: "l_zn",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "l_zn",
+                    feeRate: 0.012
+                },
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "马来西亚",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "m_p",
+                    round_lot: 1,
+                    symbol: "m_p",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "m_p",
+                    feeRate: 0.012
+                },
+       
+                {
+                    contract_multiplier: 20,
+                    de_listed_date: "forever",
+                    exchange: "日本",
+                    listed_date: "forever",
+                    margin_rate: 1,
+                    market_tplus: 0,
+                    maturity_date: "forever",
+                    order_book_id: "ja_ru",
+                    round_lot: 1,
+                    symbol: "ja_ru",
+                    trading_hours: "7*24",
+                    type: "Future",
+                    underlying_order_book_id: "null",
+                    underlying_symbol: "ja_ru",
+                    feeRate: 0.012
+                },
+                
+            ],
             symbolSearch: '',
             percentage: 0,
             //级别多空方向
-            levelDirectionList:[]
+            levelDirectionList:[],
+            activeTab:"first",
+            // 结束日期
+            endDate: CommonTool.dateFormat('yyyy-MM-dd'),
+            prejudgeFormMap:"",
+            //保存新增预判数据
+            prejudgeFormList:[],
+            //保存历史预判数据
+            historyPrejudgeList:[],
+            historyPrejudgeMap:{},
+            // 显示更新还是新增按钮
+            prejudgeCreateFlag:true,
+            btnPrejudgeLoading:false,
+            // current  新增状态 获取的是主力合约 ,提交的时候触发新增
+            // history 历史状态 获取的不一定是主力合约 ，提交表格触发更新
+            prejudgeTableStatus:'current',
+            prejudgeTableId:"",
         }
     },
     computed: {
@@ -178,6 +386,7 @@ export default {
         this.getChangeiList()
         this.getSignalList()
         this.getLevelDirectionList()
+        this.getPrejudgeList()
         setInterval(() => {
             this.getSignalList()
             this.getChangeiList()
@@ -205,6 +414,7 @@ export default {
                 console.log("获取主力合约:", res)
                 this.futureSymbolList = res;
                 this.futureSymbolList.push(...this.digitCoinsSymbolList)
+                this.futureSymbolList.push(...this.outSideSymbolList)
                 window.localStorage.setItem("symbolList", JSON.stringify(this.futureSymbolList))
                 this.firstRequestDominant = false
                 this.beichiListLoading = false
@@ -224,12 +434,20 @@ export default {
                     if (symbolList != null) {
                         this.beichiListLoading = false
                         this.futureSymbolList = JSON.parse(symbolList)
+                        this.prejudgeFormList= JSON.parse(symbolList)
                         this.futureSymbolMap = {}
+                        this.prejudgeFormMap = {}
+
+                        this.prejudgeFormList.push(...this.outSideSymbolList)
+                        this.futureSymbolList.push(...this.outSideSymbolList)
                         // console.log("111", this.futureSymbolList)
                         for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
                             let symbolItem = this.futureSymbolList[i]
                             this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
+                            this.prejudgeFormMap[symbolItem.order_book_id] = ""
                         }
+                        // 创建预判表单对象
+                        
                     }
                     // 静默更新主力合约
                     this.getDominantSymbol()
@@ -337,6 +555,79 @@ export default {
                 return '#F56C6C';
             }
         },
-    }
+        handleChangeTab(tab, event){
+            console.log(tab, event);
+        },
 
+        changePrejudgeDate(){
+            this.getPrejudgeList()
+        },
+
+        createOrUpdatePrejudgeList(type){
+            let data = {
+                endDate:this.endDate,
+                prejudgeList:type==='create'?this.prejudgeFormMap:this.historyPrejudgeMap
+            }
+            this.btnPrejudgeLoading = true
+            if(type==="create"){
+                futureApi.createPrejudgeList(data).then(res => {
+                    console.log("创建预判成功:", res)
+                    this.btnPrejudgeLoading = false
+                    this.$notify({
+                        title: "Success",
+                        message: "创建预判成功",
+                        type: "success",
+                        duration: 2000
+                      });
+                    this.getPrejudgeList()
+                }).catch(() => {
+                    this.btnPrejudgeLoading = false
+                    console.log("创建失败:", error)
+                })    
+            }else{
+                data.id= this.prejudgeTableId
+                futureApi.updatePrejudgeList(data).then(res => {
+                    console.log("更新预判成功:", res)
+                    this.btnPrejudgeLoading = false
+                    this.$notify({
+                        title: "Success",
+                        message: "更新预判成功",
+                        type: "success",
+                        duration: 2000
+                      });
+                    this.getPrejudgeList()
+                }).catch(() => {
+                    this.btnPrejudgeLoading = false
+                    console.log("更新失败:", error)
+                })    
+            }
+        },
+        getPrejudgeList(){
+            // 如果这个日期是有数据的，就显示更新按钮，否则显示新增按钮
+            futureApi.getPrejudgeList(this.endDate).then(res => {
+                if(res == -1){
+                    // this.prejudgeCreateFlag = true  
+                    this.prejudgeTableStatus = 'current'
+                }else{
+                    // this.prejudgeCreateFlag = false
+
+                    this.prejudgeTableStatus = 'history'
+                    this.historyPrejudgeMap = res.prejudgeList
+                    this.prejudgeTableId = res._id
+                    this.historyPrejudgeList = []
+                    for(let x in res.prejudgeList){
+                        this.historyPrejudgeList.push(x)
+                    }
+                    console.log("获取预判成功:", res)    
+                }
+            }).catch(() => {
+                console.log("获取预判失败:", error)
+            })    
+           
+        },
+        editPrejudgeList(){
+
+        }
+        
+    }
 }

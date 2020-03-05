@@ -107,4 +107,30 @@ export const futureApi = {
             method: 'get'
         })
     },
+    // 创建预判
+    createPrejudgeList(data){
+        let url = `/api/create_future_prejudge_list`
+        return axios({
+            url: url,
+            method: 'post',
+            data: data
+        })  
+    },
+    // 获取预判
+    getPrejudgeList(endDate){
+        let url = `/api/get_future_prejudge_list?endDate=${endDate}`
+        return axios({
+            url: url,
+            method: 'get'
+        })  
+    },
+    // 更新预判
+    updatePrejudgeList(data){
+        let url = `/api/update_future_prejudge_list`
+        return axios({
+            url: url,
+            method: 'post',
+            data: data
+        })  
+    },
 }

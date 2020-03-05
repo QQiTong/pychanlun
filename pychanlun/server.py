@@ -114,6 +114,36 @@ def get_future_level_direction():
     levelDirectionList = businessService.getLevelDirectionList()
     return Response(json.dumps(levelDirectionList), mimetype='application/json')
 
+
+# 新增预判信息
+@app.route('/api/create_future_prejudge_list', methods=["POST"])
+def create_prejudge_list():
+    futurePrejudgeData = request.get_json()
+    inserted_id = businessService.createFuturePrejudgeList(futurePrejudgeData['endDate'],futurePrejudgeData['prejudgeList'])
+    res = {
+        "id": str(inserted_id)
+    }
+    return Response(json.dumps(res), mimetype='application/json')
+
+# 获取预判信息列表
+@app.route('/api/get_future_prejudge_list')
+def get_future_prejudge_list():
+    endDate = request.args.get("endDate")
+    futurePrejudgeList = businessService.getFuturePrejudgeList(endDate)
+    return Response(json.dumps(futurePrejudgeList), mimetype='application/json')
+
+# 更新预判信息列表
+@app.route('/api/update_future_prejudge_list', methods=["POST"])
+def update_future_prejudge_list():
+    futurePrejudgeData = request.get_json()
+    businessService.updateFuturePrejudgeList(futurePrejudgeData['id'],futurePrejudgeData['prejudgeList'])
+    res = {
+        "code": "ok"
+    }
+    return Response(json.dumps(res), mimetype='application/json')
+
+
+
 # --------------------股票部分----------------------------------------------
 # 获取股票信号列表
 @app.route('/api/get_stock_signal_list')

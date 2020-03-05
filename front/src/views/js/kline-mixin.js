@@ -498,13 +498,7 @@ export default {
             }
         },
         sendRequest(symbol, period, update) {
-            let that = this;
-            var requestData
-            if (that.endDate != null) {
-                requestData = { 'symbol': symbol, 'period': period, 'endDate': that.endDate }
-            } else {
-                requestData = { 'symbol': symbol, 'period': period }
-            }
+            var requestData = { 'symbol': symbol, 'period': period, 'endDate': this.endDate }
             this.getStockData(requestData, update)
 
         },
@@ -538,8 +532,8 @@ export default {
 
             futureApi.stockData(requestData).then(res => {
                 //如果之前请求的symbol 和当前的symbol不一致，直接过滤
-                if(res && res.symbol !==this.symbol){
-                    // console.log("symbol不一致")
+                if(res && res.symbol !==this.symbol && res.endDate !== this.endDate){
+                    // console.log("symbol或结束日期不一致，过滤掉之前的请求")
                     return
                 }
                 this.requestFlag = true

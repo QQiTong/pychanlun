@@ -38,11 +38,11 @@ futureLevelMap = {
 }
 dominantSymbolInfoList = {}
 # 账户资金
-account = 20
+account = 24
 # 期货公司在原有保证金基础上1%
 marginLevelCompany = 0.01
 # 期货账户
-futuresAccount = 20
+futuresAccount = 24
 # 数字货币手续费20倍杠杆
 digitCoinFee = 0.0006
 # 数字货币账户
@@ -217,8 +217,7 @@ def monitorFuturesAndDigitCoin(type,symbolList):
         else:
             print("火币出异常了", Exception)
             time.sleep(5)
-            threading.Thread(
-                target=monitorFuturesAndDigitCoin, args="2").start()
+            threading.Thread(target=monitorFuturesAndDigitCoin, args=["2",symbolListDigitCoin]).start()
 
 
 '''
@@ -572,4 +571,4 @@ def run(**kwargs):
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[5]]).start()
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[6]]).start()
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolListSplit[7]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args="2").start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=["2",symbolListDigitCoin]).start()

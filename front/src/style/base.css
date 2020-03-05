@@ -109,7 +109,10 @@ html {
 .ml-5{
     margin-left: 5px;
 }
-.mt-t{
+.mt-5{
+    margin-top: 5px;
+}
+.mb-5{
     margin-top: 5px;
 }
 .mr-5{
