@@ -26,6 +26,7 @@ tz = pytz.timezone('Asia/Shanghai')
 
 
 def run(**kwargs):
+    logger = logging.getLogger()
     # 清理掉1年以上的数据
     cutoff_time = datetime.now(tz) - timedelta(days=360)
     DBPyChanlun["stock_signal"].with_options(codec_options=CodecOptions(
@@ -38,29 +39,38 @@ def run(**kwargs):
     if code is None:
         collist = DBPyChanlun.list_collection_names()
         for code in collist:
-            match = re.match("((sh|sz)(\\d{6}))_(5m|15m|30m)", code, re.I)
+            match = re.match("((sh|sz)(\\d{6}))_(30m|60m|240m)", code, re.I)
             if match is not None:
                 code = match.group(1)
                 period = match.group(4)
                 codes.append({"code": code, "period": period})
     else:
         if period is None:
-            for period in ['5m', '15m', '30m']:
+            for period in ['30m', '60m', '240m']:
                 codes.append({ 'code': code, 'period': period })
         else:
             codes.append({ 'code': code, 'period': period })
 
     # 计算执缠策略
-    pool = Pool()
-    pool.map(calculate, codes)
-    pool.close()
-    pool.join()
+    for idx in range(len(codes)):
+        info = codes[idx]
+        logger.info("%s/%s code=%s period=%s", idx+1, len(codes), info["code"], info["period"])
+        calculate(info)
+    # pool = Pool()
+    # pool.map(calculate, codes)
+    # pool.close()
+    # pool.join()
 
     # 计算连板
-    pool = Pool()
-    pool.map(raising_limit, codes)
-    pool.close()
-    pool.join()
+    # pool = Pool()
+    # pool.map(raising_limit, codes)
+    # pool.close()
+    # pool.join()
+    codes = pydash.chain(codes).map(lambda x: x['code']).uniq().value()
+    for idx in range(len(codes)):
+        code = codes[idx]
+        logger.info("%s/%s code=%s", idx+1, len(codes), code)
+        raising_limit(code)
 
     # 最近的100条记录输出到通达信软件
     export_to_tdx()
@@ -70,12 +80,6 @@ def calculate(info):
     logger = logging.getLogger()
     code = info["code"]
     period = info["period"]
-    # 清理掉1年以上的数据
-    cutoff_time = datetime.now(tz) - timedelta(days=360)
-    DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).delete_many({
-            "_id": {"$lte": cutoff_time}
-        })
 
     # 日线均线计算，只计算34日均线上的股票
     bars = DBPyChanlun['%s_%s' % (code, '240m')].with_options(codec_options=CodecOptions(
@@ -90,7 +94,7 @@ def calculate(info):
             return
 
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(5000)
+        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(10000)
     bars = list(bars)
     bars.reverse()
     if len(bars) == 0:
@@ -105,6 +109,13 @@ def calculate(info):
     low_series = df['low']
     open_series = df['open']
     close_series = df['close']
+
+    # 保留10000个样本数据，之前的就不要了。
+    cutoff_time = time_series[0]
+    DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
+        tz_aware=True, tzinfo=tz)).delete_many({
+            "_id": {"$lt": cutoff_time}
+        })
 
     # 笔信号
     bi_series = [0 for i in range(count)]
@@ -235,14 +246,14 @@ def export_to_tdx():
     seq = []
     # 连扳票
     raising_limit_stocks = DBPyChanlun['stock'].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find({"raising_limit_count": {"$gte": 1}}).sort('raising_limit_count', pymongo.DESCENDING)
+        tz_aware=True, tzinfo=tz)).find({"raising_limit_count": {"$gte": 2}}).sort('raising_limit_count', pymongo.DESCENDING)
     c = 0
     raising_limit_count = 0
     for signal in list(raising_limit_stocks):
         if signal["raising_limit_count"] != raising_limit_count:
             raising_limit_count = signal["raising_limit_count"]
             c = c + 1
-        if c <= 3:
+        if c <= 5:
             code = signal["_id"]
             if code.startswith("sh"):
                 code = code.replace("sh", "1")
@@ -272,11 +283,10 @@ def export_to_tdx():
         fo.writelines(seq)
 
 
-def raising_limit(info):
+def raising_limit(code):
     """
-    计算股票连扳的数量，忽略最后2个涨停是一字板的股票。
+    广义的股票连扳数量，忽略最后2个涨停是一字板的股票，N天N-1或者N-2板有时候也算连板。
     """
-    code = info["code"]
     bars = DBPyChanlun['%s_240m' % code].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(30)
     bars = list(bars)
@@ -286,11 +296,31 @@ def raising_limit(info):
             count = count + 1
         else:
             break
+    if len(bars) >= 5:
+        xbars = bars[0:5]
+        if xbars[0]['close'] >= round(xbars[1]['close']*1.1, 2) and xbars[3]['close'] >= round(xbars[4]['close']*1.1, 2):
+            count = 4
+            for idx in range(4, len(bars)-1):
+                if bars[idx]["close"] >= round(bars[idx+1]["close"]*1.1, 2):
+                    count = count + 1
+                else:
+                    break
+        elif xbars[0]['close'] >= round(xbars[1]['close']*1.1, 2) and xbars[2]['close'] >= round(xbars[3]['close']*1.1, 2):
+            count = 3
+            for idx in range(3, len(bars)-1):
+                if bars[idx]["close"] >= round(bars[idx+1]["close"]*1.1, 2):
+                    count = count + 1
+                else:
+                    break
+
     if count > 1:
-        bars = pydash.chain(bars).take(2).filter(lambda bar: bar["high"] != bar["low"]).value()
-        if  len(bars) == 0:
-            # 最后2个涨停板是一字板
+        if  len(pydash.chain(bars).take(2).filter(lambda bar: bar["high"] != bar["low"]).value()) == 0:
+            # 最后2个涨停板是一字板的不要
             count = 0
+        elif len(pydash.chain(bars[1:count]).filter(lambda bar: bar["high"] != bar["low"]).value()) == 0:
+            # 连续一字板首次开板的不要
+            count = 0
+
     DBPyChanlun["stock"].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find_one_and_update({
             "_id": code
