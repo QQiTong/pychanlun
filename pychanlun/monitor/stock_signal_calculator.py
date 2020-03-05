@@ -246,14 +246,14 @@ def export_to_tdx():
     seq = []
     # 连扳票
     raising_limit_stocks = DBPyChanlun['stock'].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find({"raising_limit_count": {"$gte": 1}}).sort('raising_limit_count', pymongo.DESCENDING)
+        tz_aware=True, tzinfo=tz)).find({"raising_limit_count": {"$gte": 2}}).sort('raising_limit_count', pymongo.DESCENDING)
     c = 0
     raising_limit_count = 0
     for signal in list(raising_limit_stocks):
         if signal["raising_limit_count"] != raising_limit_count:
             raising_limit_count = signal["raising_limit_count"]
             c = c + 1
-        if c <= 3:
+        if c <= 5:
             code = signal["_id"]
             if code.startswith("sh"):
                 code = code.replace("sh", "1")
@@ -285,7 +285,7 @@ def export_to_tdx():
 
 def raising_limit(code):
     """
-    计算股票连扳的数量，忽略最后2个涨停是一字板的股票。
+    广义的股票连扳数量，忽略最后2个涨停是一字板的股票，N天N-1或者N-2板有时候也算连板。
     """
     bars = DBPyChanlun['%s_240m' % code].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(30)
@@ -296,11 +296,31 @@ def raising_limit(code):
             count = count + 1
         else:
             break
+    if len(bars) >= 5:
+        xbars = bars[0:5]
+        if xbars[0]['close'] >= round(xbars[1]['close']*1.1, 2) and xbars[3]['close'] >= round(xbars[4]['close']*1.1, 2):
+            count = 4
+            for idx in range(4, len(bars)-1):
+                if bars[idx]["close"] >= round(bars[idx+1]["close"]*1.1, 2):
+                    count = count + 1
+                else:
+                    break
+        elif xbars[0]['close'] >= round(xbars[1]['close']*1.1, 2) and xbars[2]['close'] >= round(xbars[3]['close']*1.1, 2):
+            count = 3
+            for idx in range(3, len(bars)-1):
+                if bars[idx]["close"] >= round(bars[idx+1]["close"]*1.1, 2):
+                    count = count + 1
+                else:
+                    break
+
     if count > 1:
-        bars = pydash.chain(bars).take(2).filter(lambda bar: bar["high"] != bar["low"]).value()
-        if  len(bars) == 0:
-            # 最后2个涨停板是一字板
+        if  len(pydash.chain(bars).take(2).filter(lambda bar: bar["high"] != bar["low"]).value()) == 0:
+            # 最后2个涨停板是一字板的不要
             count = 0
+        elif len(pydash.chain(bars[1:count]).filter(lambda bar: bar["high"] != bar["low"]).value()) == 0:
+            # 连续一字板首次开板的不要
+            count = 0
+
     DBPyChanlun["stock"].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find_one_and_update({
             "_id": code

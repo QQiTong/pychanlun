@@ -132,9 +132,12 @@ def calc_60m(df):
             bar = {"date": index, "open": rows[0]["open"], "close": rows[-1]["close"], "high": g.high.max(), "low": g.low.min(), "volume": g.volume.sum(), "amount":g.amount.sum()}
             bars.append(bar)
             rows = []
-    df60m = pd.DataFrame(bars)
-    df60m.set_index("date", inplace=True)
-    return df60m
+    if len(bars) > 0:
+        df60m = pd.DataFrame(bars)
+        df60m.set_index("date", inplace=True)
+        return df60m
+    else:
+        return None
 
 def parse_and_save_1m(info):
     start_time = datetime.now() - timedelta(days=info["days"])
@@ -168,7 +171,8 @@ def parse_and_save_5m(info):
         ohlc).dropna(how='any')
     save_data(info["code"], "30m", df30m)
     df60m = calc_60m(df30m)
-    save_data(info["code"], "60m", df60m)
+    if df60m is not None:
+        save_data(info["code"], "60m", df60m)
     return True
 
 
