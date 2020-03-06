@@ -38,11 +38,11 @@ futureLevelMap = {
 }
 dominantSymbolInfoList = {}
 # 账户资金
-account = 24
+account = 25
 # 期货公司在原有保证金基础上1%
 marginLevelCompany = 0.01
 # 期货账户
-futuresAccount = 24
+futuresAccount = 25
 # 数字货币手续费20倍杠杆
 digitCoinFee = 0.0006
 # 数字货币账户

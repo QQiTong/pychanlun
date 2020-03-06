@@ -532,8 +532,8 @@ export default {
 
             futureApi.stockData(requestData).then(res => {
                 //如果之前请求的symbol 和当前的symbol不一致，直接过滤
-                if(res && res.symbol !==this.symbol && res.endDate !== this.endDate){
-                    // console.log("symbol或结束日期不一致，过滤掉之前的请求")
+                if(res && (res.symbol !==this.symbol || res.endDate !== this.endDate)){
+                    console.log("symbol或结束日期不一致，过滤掉之前的请求")
                     return
                 }
                 this.requestFlag = true

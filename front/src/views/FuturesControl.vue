@@ -252,14 +252,14 @@
               type="primary"
               size="mini"
               v-if="prejudgeTableStatus ==='current'"
-              v-loading="btnPrejudgeLoading"
+              :loading="btnPrejudgeLoading"
             >新增</el-button>
             <el-button
               @click="createOrUpdatePrejudgeList('update')"
               type="danger"
               size="mini"
               v-if="prejudgeTableStatus ==='history'"
-              v-loading="btnPrejudgeLoading"
+              :loading="btnPrejudgeLoading"
             >更新</el-button>
           </div>
 
