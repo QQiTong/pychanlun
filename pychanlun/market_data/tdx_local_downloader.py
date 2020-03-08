@@ -204,7 +204,7 @@ def save_data(code, period, df):
                 "amount": round(row["amount"], 2)
             }
         }, upsert=True))
-        if len(batch) >= 1000:
+        if len(batch) >= 100:
             DBPyChanlun["%s_%s" % (code, period)].bulk_write(batch)
             batch = []
     if len(batch) > 0:

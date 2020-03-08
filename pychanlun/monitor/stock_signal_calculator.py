@@ -290,6 +290,7 @@ def raising_limit(code):
     bars = DBPyChanlun['%s_240m' % code].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(30)
     bars = list(bars)
+    if len(bars) < 3: return
     count = 0
     for idx in range(len(bars)-1):
         if bars[idx]["close"] >= round(bars[idx+1]["close"]*1.1, 2):
@@ -311,6 +312,14 @@ def raising_limit(code):
                 if bars[idx]["close"] >= round(bars[idx+1]["close"]*1.1, 2):
                     count = count + 1
                 else:
+                    break
+    if len(bars) >= 10:
+        if bars[0]['close'] >= round(bars[1]['close']*1.1, 2):
+            x = -1
+            for x in range(4, 9):
+                if bars[x]['close'] >= round(bars[x+1]['close']*1.1, 2):
+                    if x > 0 and bars[0]['close'] > bars[x]['close']:
+                        count = x + 1
                     break
 
     if count > 1:
