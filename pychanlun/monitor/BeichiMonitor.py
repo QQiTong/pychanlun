@@ -14,6 +14,7 @@ from pychanlun.db import DBPyChanlun
 from pychanlun.config import config
 from pychanlun.monitor.BusinessService import businessService
 import pytz
+import requests
 
 tz = pytz.timezone('Asia/Shanghai')
 '''
@@ -57,9 +58,16 @@ mail = Mail()
 # businessService = BusinessService()
 
 
-def sendEmail(msg):
+def sendEmail(msg,symbol,period,signal,direction,amount,stop_lose_price, fire_time_str, price, date_created_str,
+            close_price, remark):
     print(msg)
     mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
+
+    url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s" \
+          "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s" \
+          % (signal, remark, symbol, direction, period, close_price, amount, date_created_str)
+    requests.post(url)
+
     if not mailResult:
         print("发送失败")
     else:
@@ -132,7 +140,8 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
             symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price, date_created_str,
             close_price, remark)
-            sendEmail(msg)
+            sendEmail(msg,symbol,period,signal,direction,amount,stop_lose_price, fire_time_str, price, date_created_str,
+            close_price, remark)
 
 
 # 记录品种当前级别的方向

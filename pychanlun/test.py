@@ -364,6 +364,26 @@ def testWaipan():
     print(timeStamp)
     print(klines[0]['d'])
 
+def testWechat():
+    # symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price, date_created_str,
+    # close_price, remark
+    symbol = 'RB2005'
+    period = '3m'
+    signal = 'huila'
+    direction = 'B'
+    amount = 3
+    stop_lose_price = 3376
+    fire_time_str = '202003090919'
+    price = 3387
+    date_created_str = '202003090919'
+    close_price = 3387
+    remark = '双盘'
+    url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s"\
+          "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s"\
+          % (signal,remark,symbol,  direction,period,close_price, amount,date_created_str)
+    requests.post(url)
+
+
 def app():
     # testBitmex()
     # testBeichiDb()
@@ -374,7 +394,8 @@ def app():
     # testMonitor()
     # testThread()
     # testHuobi()
-    testWaipan()
+    # testWaipan()
+    testWechat()
 
 
 if __name__ == '__main__':

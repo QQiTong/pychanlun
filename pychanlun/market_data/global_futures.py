@@ -42,12 +42,12 @@ def fetch_global_futures_mink():
                 df = pd.DataFrame(json.loads(content))
                 df['d'] = df['d'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
                 save_data(symbol, '%sm' % minute, df)
-                time.sleep(1)
+                time.sleep(5)
                 if not is_run:
                     break
             if not is_run:
-                        break
-        time.sleep(3)
+                    break
+        time.sleep(5)
     logging.info("外盘分钟数据抓取程序已停止。")
 
 
