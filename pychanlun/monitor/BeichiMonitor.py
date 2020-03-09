@@ -65,7 +65,9 @@ def sendEmail(msg,symbol,period,signal,direction,amount,stop_lose_price, fire_ti
 
     url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s" \
           "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s" \
-          % (signal, remark, symbol, direction, period, close_price, amount, date_created_str)
+          % (signal, remark, symbol + '_' + period, signal, direction,
+             '开:' + str(close_price) + ' 止:' + str(stop_lose_price) + ' 触:' + str(price), amount,
+             '开:' + fire_time_str + ' 触:' + date_created_str)
     requests.post(url)
 
     if not mailResult:
