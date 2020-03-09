@@ -69,7 +69,10 @@ config = {
         '240m',
         '1d',
         '1w'
-    ]
+    ],
+    # 外盘期货品种
+    # CL:原油; GC:黄金;SI:白银; CT:棉花;S:大豆;SM:豆粕; BO:豆油;NID:伦镍; ZSD:伦锌;
+    'globalFutureSymbol': ['CL', 'GC', 'SI', 'CT', 'S', 'SM', 'BO', 'NID', 'ZSD']
 }
 
 cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]

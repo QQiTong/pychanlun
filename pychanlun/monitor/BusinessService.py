@@ -21,8 +21,10 @@ periodList = ['3m', '5m', '15m', '30m', '60m']
 dominantSymbolList = []
 # 主力合约详细信息
 dominantSymbolInfoList = []
-# 美原油 美黄金 美白银 美粕 美棉 美豆 美豆油 伦镍 伦锌 马棕 日胶
-otherSymbol = ["BTC_CQ","ETH_CQ","us_sc","us_au","us_ag","us_m","us_cf","us_a","us_y","l_ni","l_zn","m_p","ja_ru"]
+# CL:原油; GC:黄金;SI:白银; CT:棉花;S:大豆;SM：豆粕; BO:豆油;NID:伦镍; ZSD:伦锌;
+# 马棕 日胶
+otherSymbol = ["BTC_CQ", "ETH_CQ", "CL", "GC", "SI", "CT","S", "SM", "BO", "NID", "ZSD"]
+
 
 class BusinessService:
     def __init__(self):
@@ -55,7 +57,7 @@ class BusinessService:
     def getNormalSignalList(self):
         symbolList = dominantSymbolList
         #  把外盘加进去
-        
+
         symbolList.extend(otherSymbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
@@ -136,7 +138,7 @@ class BusinessService:
         for i in range(len(dominantSymbolList)):
             item = dominantSymbolList[i]
             # print(item)
-            if item  not in otherSymbol:
+            if item not in otherSymbol:
                 df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
                                     start_date=start, end_date=end)
                 df1m = rq.current_minute(item)
@@ -170,11 +172,11 @@ class BusinessService:
             # date_created_str = date_created.strftime("%m-%d %H:%M")
             if directionItem['symbol'] in symbolListMap:
                 symbolListMap[directionItem['symbol']
-                              ][directionItem['period']] = directionItem['direction']
+                ][directionItem['period']] = directionItem['direction']
         # print("级别多空列表", symbolListMap)
         return symbolListMap
 
-# --------------------期货部份----------------------------------------------
+    # --------------------期货部份----------------------------------------------
 
     def getPosition(self, symbol, period, status):
         if period == 'all':
@@ -256,16 +258,16 @@ class BusinessService:
             'status': status,
         }})
 
-     # 创建预判信息
-    def createFuturePrejudgeList(self,endDate,prejudgeList):
+    # 创建预判信息
+    def createFuturePrejudgeList(self, endDate, prejudgeList):
         result = DBPyChanlun['prejudge_record'].insert_one({
             'endDate': endDate,
-            'prejudgeList':prejudgeList
+            'prejudgeList': prejudgeList
         })
         return result.inserted_id
-    
-     # 获取预判信息
-    def getFuturePrejudgeList(self,endDate):
+
+    # 获取预判信息
+    def getFuturePrejudgeList(self, endDate):
         result = DBPyChanlun['prejudge_record'].find({'endDate': endDate})
         if result.count() != 0:
             for x in result:
@@ -273,19 +275,20 @@ class BusinessService:
             return x
         else:
             return -1
+
     #  更新预判信息
-    def updateFuturePrejudgeList(self, id,prejudgeList):
-        print("更新预判参数",id,prejudgeList)
+    def updateFuturePrejudgeList(self, id, prejudgeList):
+        print("更新预判参数", id, prejudgeList)
         DBPyChanlun['prejudge_record'].update_one({'_id': ObjectId(id)}, {"$set": {
-            'prejudgeList':prejudgeList
+            'prejudgeList': prejudgeList
         }})
 
-# --------------------股票部份----------------------------------------------
+    # --------------------股票部份----------------------------------------------
 
     def getStockSignalList(self, page=1):
         data_list = DBPyChanlun["stock_signal"].with_options(
             codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({}).sort(
-                "fire_time", pymongo.DESCENDING).skip((page - 1) * 1000).limit(1000)
+            "fire_time", pymongo.DESCENDING).skip((page - 1) * 1000).limit(1000)
         df = pd.DataFrame(list(data_list))
         signalList = []
         for idx, row in df.iterrows():
@@ -374,10 +377,11 @@ class BusinessService:
             # 'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
+
     def updateStockPositionStatus(self, id, status):
         DBPyChanlun['stock_position_record'].update_one({'_id': ObjectId(id)}, {"$set": {
             'status': status,
-        }})    
+        }})
 
 
 businessService = BusinessService()

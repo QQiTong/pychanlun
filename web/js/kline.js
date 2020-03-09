@@ -304,7 +304,7 @@ var app = new Vue({
         draw(stockJsonData, update, period) {
             var that = this;
             var zoomStart = 55
-            const resultData = this.splitData(stockJsonData, period);
+            const resultData = this.splitData( stockJsonData, period);
 
             dataTitle = that.symbol + "  " + period
             const margin_rate = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].margin_rate || 1;

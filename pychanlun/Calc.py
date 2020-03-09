@@ -23,6 +23,7 @@ import pychanlun.divergence as divergence
 import pychanlun.entanglement as entanglement
 from pychanlun.basic.pattern import DualEntangleForBuyLong, DualEntangleForSellShort
 import re
+from pychanlun.config import config
 
 # 币安的数据结构
 # [
@@ -150,6 +151,12 @@ class Calc:
             klineData = klineDataTool.getStockData(symbol, period, endDate)
             bigLevelPeriod = self.futureLevelMap[period]
             klineDataBigLevel = klineDataTool.getStockData(symbol, bigLevelPeriod, endDate)
+            klineDataBigLevel2 = []
+        elif symbol in config['globalFutureSymbol']:
+            cat = "GLOBAL_FUTURE"
+            klineData = klineDataTool.getGlobalFutureData(symbol, period, endDate)
+            bigLevelPeriod = self.futureLevelMap[period]
+            klineDataBigLevel = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod, endDate)
             klineDataBigLevel2 = []
         else:
             if '_CQ' in symbol:

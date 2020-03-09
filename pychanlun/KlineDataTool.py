@@ -360,3 +360,40 @@ class KlineDataTool:
             item['volume'] = 0 if pd.isna(row["volume"]) else row["volume"]
             klineList.append(item)
         return klineList
+    # 获取外盘期货数据
+    def getGlobalFutureData(self, symbol, period, endDate):
+        startTime = datetime.now()
+        if endDate is None or endDate == "":
+            end = datetime.now() + timedelta(1)
+        else:
+            end = datetime.strptime(endDate, "%Y-%m-%d")
+        end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+        timeDeltaMap = {
+            '1m': -7*3,
+            '3m': -31*3,
+            '5m': -31*3,
+            '15m': -31 * 3,
+            '30m': -31 * 8,
+            '60m': -31 * 8,
+            '240m': -31 * 8,
+            '1d': -31 * 10,
+            '3d': -31 * 30
+        }
+        start_date =  end + timedelta(timeDeltaMap[period])
+        code = "%s_%s" % (symbol, period)
+        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "_id": { "$gte": start_date, "$lte": end }
+        }).sort("_id", pymongo.ASCENDING)
+        df = pd.DataFrame(list(data_list))
+
+        klineList = []
+        for idx, row in df.iterrows():
+            item = {}
+            item['time'] = int(time.mktime(row["_id"].timetuple()))
+            item['open'] = 0 if pd.isna(row["open"]) else row["open"]
+            item['high'] = 0 if pd.isna(row["high"]) else row["high"]
+            item['low'] = 0 if pd.isna(row["low"]) else row["low"]
+            item['close'] = 0 if pd.isna(row["close"]) else row["close"]
+            item['volume'] = 0 if pd.isna(row["volume"]) else row["volume"]
+            klineList.append(item)
+        return klineList

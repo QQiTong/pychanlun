@@ -13,7 +13,7 @@ import pandas as pd
 from pymongo import UpdateOne
 import pytz
 import signal
-
+from pychanlun.config import config
 tz = pytz.timezone('Asia/Shanghai')
 
 """
@@ -24,8 +24,7 @@ URL15M = "https://gu.sina.cn/ft/api/jsonp.php/var _%s_15_%s=/GlobalService.getMi
 URL30M = "https://gu.sina.cn/ft/api/jsonp.php/var _%s_30_%s=/GlobalService.getMink?symbol=%s&type=30"
 URL60M = "https://gu.sina.cn/ft/api/jsonp.php/var _%s_60_%s=/GlobalService.getMink?symbol=%s&type=60"
 URL1D = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var _%s=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=%s&_=%s&source=web"
-
-symbol_list = ['CL', 'GC', 'SI', 'NID', 'ZSD']
+symbol_list = config['globalFutureSymbol']
 min_list = ['5', '15', '15', '30', '60']
 
 is_run = True
