@@ -21,7 +21,7 @@ python pychanlun\market_data\global_futures.py
 """
 
 symbol_list = config['globalFutureSymbol']
-min_list = ['5', '15', '15', '30', '60']
+min_list = ['5', '15', '30', '60']
 
 is_run = True
 
@@ -40,7 +40,12 @@ def fetch_global_futures_mink():
                 df = pd.DataFrame(json.loads(content))
                 df['d'] = df['d'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
                 save_data_m(symbol, '%sm' % minute, df)
-                time.sleep(60)
+                # 合成210F数据
+                # if minute == '30':
+                #     ohlc_dict = { 'o': 'first', 'h': 'max', 'l': 'min', 'c': 'last', 'v': 'sum' }
+                #     df210m = df.resample('210T', closed='right', label='right').agg({}).dropna(how='any')
+                #     save_data_m(symbol, '210m', df210m)
+                time.sleep(15)
                 if not is_run:
                     break
             if not is_run:
@@ -59,7 +64,7 @@ def fetch_global_futures_mink():
                 df = pd.DataFrame(json.loads(content))
                 df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d'))
                 save_data_d(symbol, '1d', df)
-                time.sleep(60)
+                time.sleep(15)
                 if not is_run:
                     break
         time.sleep(5)
