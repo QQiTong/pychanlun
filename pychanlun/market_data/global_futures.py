@@ -20,10 +20,6 @@ tz = pytz.timezone('Asia/Shanghai')
 python pychanlun\market_data\global_futures.py
 """
 
-URL15M = "https://gu.sina.cn/ft/api/jsonp.php/var _%s_15_%s=/GlobalService.getMink?symbol=%s&type=15"
-URL30M = "https://gu.sina.cn/ft/api/jsonp.php/var _%s_30_%s=/GlobalService.getMink?symbol=%s&type=30"
-URL60M = "https://gu.sina.cn/ft/api/jsonp.php/var _%s_60_%s=/GlobalService.getMink?symbol=%s&type=60"
-URL1D = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var _%s=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=%s&_=%s&source=web"
 symbol_list = config['globalFutureSymbol']
 min_list = ['5', '15', '15', '30', '60']
 
@@ -32,26 +28,45 @@ is_run = True
 def fetch_global_futures_mink():
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0"}
     while is_run:
+        # 取分钟数据
         for minute in min_list:
             for symbol in symbol_list:
                 var = "_%s_%s_%s" % (symbol, minute, datetime.datetime.now().timestamp())
-                response = requests.get("https://gu.sina.cn/ft/api/jsonp.php/var %s=/GlobalService.getMink?symbol=%s&type=%s" % (var, symbol, minute), headers = headers)
+                url = "https://gu.sina.cn/ft/api/jsonp.php/var %s=/GlobalService.getMink?symbol=%s&type=%s" % (var, symbol, minute)
+                response = requests.get(url, headers = headers)
                 response_text = response.text
                 m = re.search(r'\((.*)\)', response.text)
                 content = m.group(1)
                 df = pd.DataFrame(json.loads(content))
                 df['d'] = df['d'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
-                save_data(symbol, '%sm' % minute, df)
-                time.sleep(5)
+                save_data_m(symbol, '%sm' % minute, df)
+                time.sleep(60)
                 if not is_run:
                     break
             if not is_run:
+                    break
+        # 取日线数据
+        if is_run:
+            for symbol in symbol_list:
+                d = datetime.datetime.now().strftime('%Y_%m_%d')
+                var = "_%s_%s" % (symbol, d)
+                url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var %s=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=%s&_=%s&source=web" % (var, symbol, d)
+                print(url)
+                response = requests.get(url, headers = headers)
+                response_text = response.text
+                m = re.search(r'\((.*)\)', response_text)
+                content = m.group(1)
+                df = pd.DataFrame(json.loads(content))
+                df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d'))
+                save_data_d(symbol, '1d', df)
+                time.sleep(60)
+                if not is_run:
                     break
         time.sleep(5)
     logging.info("外盘分钟数据抓取程序已停止。")
 
 
-def save_data(code, period, df):
+def save_data_m(code, period, df):
     if not df.empty:
         logging.info("保存 %s %s %s" % (code, period, df['d'].iloc[-1]))
     batch = []
@@ -65,6 +80,30 @@ def save_data(code, period, df):
                 "high": float(row['h']),
                 "low": float(row['l']),
                 "volume": float(row['v'])
+            }
+        }, upsert=True))
+        if len(batch) >= 100:
+            DBPyChanlun["%s_%s" % (code, period)].bulk_write(batch)
+            batch = []
+    if len(batch) > 0:
+        DBPyChanlun["%s_%s" % (code, period)].bulk_write(batch)
+        batch = []
+
+
+def save_data_d(code, period, df):
+    if not df.empty:
+        logging.info("保存 %s %s %s" % (code, period, df['date'].iloc[-1]))
+    batch = []
+    for _, row in df.iterrows():
+        batch.append(UpdateOne({
+            "_id": row['date'].replace(tzinfo=tz)
+        }, {
+            "$set": {
+                "open": float(row['open']),
+                "close": float(row['close']),
+                "high": float(row['high']),
+                "low": float(row['low']),
+                "volume": float(row['volume'])
             }
         }, upsert=True))
         if len(batch) >= 100:

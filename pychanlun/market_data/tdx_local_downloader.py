@@ -35,13 +35,19 @@ def run(**kwargs):
         for filename in files:
             code = None
             if subdir == "sh":
-                match = re.match("(sh)6(\\d{5})", filename, re.I)
+                match = re.match("(sh)(\\d{6})", filename, re.I)
                 if match is not None:
                     code = match.group()
+                    code_head = code[2:4]
+                    if code_head not in ["60", "68", "50", "51", "01", "10", "11", "12", "13", "14", "20"]:
+                        continue
             elif subdir == "sz":
-                match = re.match("(sz)(00|30)(\\d{4})", filename, re.I)
+                match = re.match("(sz)(\\d{6})", filename, re.I)
                 if match is not None:
                     code = match.group()
+                    code_head = code[2:4]
+                    if code_head not in ["00", "30", "15", "16", "10", "11", "12", "13", "14"]:
+                        continue
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
@@ -61,13 +67,19 @@ def run(**kwargs):
         for filename in files:
             code = None
             if subdir == "sh":
-                match = re.match("(sh)6(\\d{5})", filename, re.I)
+                match = re.match("(sh)(\\d{6})", filename, re.I)
                 if match is not None:
                     code = match.group()
+                    code_head = code[2:4]
+                    if code_head not in ["60", "68", "50", "51", "01", "10", "11", "12", "13", "14", "20"]:
+                        continue
             elif subdir == "sz":
-                match = re.match("(sz)(00|30)(\\d{4})", filename, re.I)
+                match = re.match("(sz)(\\d{6})", filename, re.I)
                 if match is not None:
                     code = match.group()
+                    code_head = code[2:4]
+                    if code_head not in ["00", "30", "15", "16", "10", "11", "12", "13", "14"]:
+                        continue
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
@@ -87,13 +99,19 @@ def run(**kwargs):
         for filename in files:
             code = None
             if subdir == "sh":
-                match = re.match("(sh)6(\\d{5})", filename, re.I)
+                match = re.match("(sh)(\\d{6})", filename, re.I)
                 if match is not None:
                     code = match.group()
+                    code_head = code[2:4]
+                    if code_head not in ["60", "68", "50", "51", "01", "10", "11", "12", "13", "14", "20"]:
+                        continue
             elif subdir == "sz":
-                match = re.match("(sz)(00|30)(\\d{4})", filename, re.I)
+                match = re.match("(sz)(\\d{6})", filename, re.I)
                 if match is not None:
                     code = match.group()
+                    code_head = code[2:4]
+                    if code_head not in ["00", "30", "15", "16", "10", "11", "12", "13", "14"]:
+                        continue
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
@@ -139,6 +157,7 @@ def calc_60m(df):
     else:
         return None
 
+
 def parse_and_save_1m(info):
     start_time = datetime.now() - timedelta(days=info["days"])
     reader = TdxLCMinBarReader()
@@ -153,6 +172,7 @@ def parse_and_save_1m(info):
         ohlc).dropna(how='any')
     save_data(info["code"], "3m", df3m)
     return True
+
 
 def parse_and_save_5m(info):
     start_time = datetime.now() - timedelta(days=info["days"])
