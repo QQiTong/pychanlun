@@ -624,5 +624,5 @@ def run(**kwargs):
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=["2",symbolListDigitCoin]).start()
 
 
-
-
+if __name__ == '__main__':
+    run()
