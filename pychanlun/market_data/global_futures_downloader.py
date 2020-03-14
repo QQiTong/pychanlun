@@ -43,7 +43,7 @@ def fetch_global_futures_mink():
                 df['d'] = df['d'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
                 df.set_index("d", inplace=True)
                 save_data_m(symbol, '%sm' % minute, df)
-                # 合成210F数据
+                # 合成240F数据
                 if minute == '30':
                     ohlc_dict = { 'o': 'first', 'h': 'max', 'l': 'min', 'c': 'last', 'v': 'sum' }
                     df240m = df.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
