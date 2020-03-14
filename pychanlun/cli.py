@@ -6,7 +6,7 @@ import logging
 import click
 from pychanlun import server as apiserver
 from pychanlun.monitor import BeichiMonitor, stock_signal_calculator
-from pychanlun.market_data import tdx_local_downloader
+from pychanlun.market_data import tdx_local_downloader, global_futures_downloader
 
 
 @click.group()
@@ -38,6 +38,18 @@ def monitor(**kwargs):
     name = kwargs.get("name")
     if name == "beichi":
         BeichiMonitor.run(**kwargs)
+
+
+"""
+下载外盘数据
+pychanlun global-futures download
+"""
+@run.command()
+@click.argument("name", default="download")
+def global_futures(**kwargs):
+    name = kwargs.get("name")
+    if name == "download":
+        global_futures_downloader.run(**kwargs)
 
 
 """
