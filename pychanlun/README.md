@@ -30,12 +30,26 @@ scoop install nssm
 
 MongoDB也要先安装成Windows服务模式，参考MongoDB文档。
 
+（管理员命令行模式）
+
 ```cmd
 nssm install pychanlun-api-service "C:/Users/Administrator/scoop/shims/python.exe"
 nssm set pychanlun-api-service AppDirectory "D:/development/pychanlun"
 nssm set pychanlun-api-service AppParameters "pychanlun/cli.py server run --port 18888"
 nssm set pychanlun-api-service DependOnService MongoDB
 nssm start pychanlun-api-service
+```
+
+使用nssm部署外盘数据下载程序
+
+（管理员命令行模式）
+
+```cmd
+nssm install global-futures-downloader "C:/Users/Administrator/scoop/shims/python.exe"
+nssm set global-futures-downloader AppDirectory "D:/development/pychanlun"
+nssm set global-futures-downloader AppParameters "pychanlun/cli.py global-futures download"
+nssm set global-futures-downloader DependOnService MongoDB
+nssm start global-futures-downloader
 ```
 
 使用nssm部署NGINX服务。
