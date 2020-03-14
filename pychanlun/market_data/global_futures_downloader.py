@@ -67,6 +67,10 @@ def fetch_global_futures_mink():
                 df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d'))
                 df.set_index('date', inplace=True)
                 save_data_d(symbol, '1d', df)
+                # 合成3d数据
+                ohlc_dict = { 'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum' }
+                df3d = df.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                save_data_d(symbol, '3d', df3d)
                 time.sleep(15)
                 if not is_run:
                     break
