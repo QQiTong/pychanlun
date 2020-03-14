@@ -49,19 +49,41 @@ export default {
                 higherColor: '#14d0cd',
                 higherHigherColor: 'green',
                 dynamicOpertionColor: 'pink',
+                macdUpLastValue: Number.MIN_SAFE_INTEGER,
+                macdDownLastValue: Number.MAX_SAFE_INTEGER,
+                macdUpDarkColor: '#EF5350',
+                macdUpLightColor: '#FFCDD2',
+                macdDownDarkColor: '#26A69A',
+                macdDownLightColor: '#B2DFDB',
+
                 // 多周期显示不下,需要配置
-                multiPeriodGrid: {
+                multiPeriodGrid: [{
                     left: '0%',
-                    right: '18%',
+                    right: '10%',
                     height: '75%',
                     top: 50
                 },
-                klineBigGrid: {
+                 {
+                    top: '82%',
+                    height: '20%',
                     left: '0%',
                     right: '10%',
-                    height: '85%',
+                 },
+
+                ],
+                klineBigGrid: [{
+                    left: '0%',
+                    right: '10%',
+                    height: '70%',
                     top: 50
                 },
+                 {
+                    top: '75%',
+                    height: '20%',
+                    left: '0%',
+                    right: '10%',
+                 },
+                ],
             },
             // 品种
             symbol: 'RB2005',
@@ -101,7 +123,7 @@ export default {
             // 期货账户总额
             futureAccount: this.$futureAccount,
             // 数字货币账户总额
-            digitCoinAccount:this.$digitCoinAccount,
+            digitCoinAccount: this.$digitCoinAccount,
             // 开仓价格
             openPrice: null,
             // 止损价格
@@ -138,48 +160,48 @@ export default {
 
             digitCoinsSymbolList: [{
                 contract_multiplier: 1,
-                de_listed_date: "forever",
-                exchange: "HUOBI",
-                listed_date: "forever",
+                de_listed_date: 'forever',
+                exchange: 'HUOBI',
+                listed_date: 'forever',
                 margin_rate: 0.05,
                 market_tplus: 0,
-                maturity_date: "forever",
-                order_book_id: "BTC_CQ",
+                maturity_date: 'forever',
+                order_book_id: 'BTC_CQ',
                 round_lot: 1,
-                symbol: "比特币",
-                trading_hours: "7*24",
-                type: "Future",
-                underlying_order_book_id: "null",
-                underlying_symbol: "BTC_CQ",
+                symbol: '比特币',
+                trading_hours: '7*24',
+                type: 'Future',
+                underlying_order_book_id: 'null',
+                underlying_symbol: 'BTC_CQ',
             },
             {
                 contract_multiplier: 1,
-                de_listed_date: "forever",
-                exchange: "HUOBI",
-                listed_date: "forever",
+                de_listed_date: 'forever',
+                exchange: 'HUOBI',
+                listed_date: 'forever',
                 margin_rate: 0.05,
                 market_tplus: 0,
-                maturity_date: "forever",
-                order_book_id: "ETH_CQ",
+                maturity_date: 'forever',
+                order_book_id: 'ETH_CQ',
                 round_lot: 1,
-                symbol: "以太坊",
-                trading_hours: "7*24",
-                type: "Future",
-                underlying_order_book_id: "null",
-                underlying_symbol: "ETH_CQ",
+                symbol: '以太坊',
+                trading_hours: '7*24',
+                type: 'Future',
+                underlying_order_book_id: 'null',
+                underlying_symbol: 'ETH_CQ',
             }],
             // 选中的品种
             selectedSymbol: '',
             // 输入的交割过的期货品种 或者 股票品种
             inputSymbol: '',
-            periodList: ['1m','3m', '5m', '15m', '30m', '60m', '240m'],
+            periodList: ['1m', '3m', '5m', '15m', '30m', '60m', '240m'],
             // 是否指显示当前持仓的开平动止
             isPosition: false,
             // 当前品种持仓信息
             currentPosition: null,
             positionStatus: 'holding',
             dynamicDirectionMap: { 'long': '多', 'short': '空', 'close': '平' },
-            currentInfo:null
+            currentInfo: null
         }
     },
 
@@ -218,67 +240,67 @@ export default {
         clearTimeout(this.timer)
     },
     methods: {
-        quickSwitchDay(type){
-            let tempDate = this.endDate.replace(/-/g,"/");
-            let date = new Date(tempDate);
-            let preDay = date.getTime() - 3600 * 1000 * 24;
-            let nextDay = date.getTime() + 3600 * 1000 * 24;
-            if(type==='pre'){
-                this.endDate  = CommonTool.parseTime(preDay,'{y}-{m}-{d}')
-            }else{
-                this.endDate  = CommonTool.parseTime(nextDay,'{y}-{m}-{d}')
+        quickSwitchDay (type) {
+            let tempDate = this.endDate.replace(/-/g, '/')
+            let date = new Date(tempDate)
+            let preDay = date.getTime() - 3600 * 1000 * 24
+            let nextDay = date.getTime() + 3600 * 1000 * 24
+            if (type === 'pre') {
+                this.endDate = CommonTool.parseTime(preDay, '{y}-{m}-{d}')
+            } else {
+                this.endDate = CommonTool.parseTime(nextDay, '{y}-{m}-{d}')
             }
             this.submitSymbol()
         },
-        getFutruePosition() {
+        getFutruePosition () {
             let period = 'all'
             // if (this.period !== "") {
             //     period = this.period
             // }
             futureApi.getPosition(this.symbol, period, this.positionStatus).then(res => {
                 this.currentPosition = res
-                console.log("获取当前品种持仓:", res);
-            }).catch(() => {
-                console.log("获取当前品种持仓失败:", error)
+                console.log('获取当前品种持仓:', res)
+            }).catch((error) => {
+                console.log('获取当前品种持仓失败:', error)
             })
         },
-        getStockPosition() {
+        getStockPosition () {
             let period = 'all'
             // if (this.period !== "") {
             //     period = this.period
             // }
             stockApi.getPosition(this.symbol, period, this.positionStatus).then(res => {
                 this.currentPosition = res
-                console.log("获取当前品种持仓:", res);
+                console.log('获取当前品种持仓:', res)
             }).catch(() => {
-                console.log("获取当前品种持仓失败:", error)
+                console.log('获取当前品种持仓失败:', error)
             })
         },
-        initEcharts() {
+        initEcharts () {
             //  大图只显示选中的k线图
-            if (this.period !== "") {
+            if (this.period !== '') {
                 // this.endDate = this.getParams('endDate')
-                this.myChart = this.$echarts.init(document.getElementById('main'));
-                this.chartssize(document.getElementById("mainParent"),
-                    document.getElementById('main'));
+                this.myChart = this.$echarts.init(document.getElementById('main'))
+                this.chartssize(document.getElementById('mainParent'),
+                    document.getElementById('main'))
                 this.myChart.resize()
                 window.addEventListener('resize', () => {
                     this.myChart.resize()
                 })
             } else {
-                this.myChart3 = this.$echarts.init(document.getElementById('main3'));
-                this.myChart5 = this.$echarts.init(document.getElementById('main5'));
-                this.myChart15 = this.$echarts.init(document.getElementById('main15'));
-                this.myChart30 = this.$echarts.init(document.getElementById('main30'));
-                this.myChart60 = this.$echarts.init(document.getElementById('main60'));
-                this.myChart240 = this.$echarts.init(document.getElementById('main240'));
+                this.myChart3 = this.$echarts.init(document.getElementById('main3'))
+                this.myChart5 = this.$echarts.init(document.getElementById('main5'))
+                this.myChart15 = this.$echarts.init(document.getElementById('main15'))
+                this.myChart30 = this.$echarts.init(document.getElementById('main30'))
+                this.myChart60 = this.$echarts.init(document.getElementById('main60'))
+                this.myChart240 = this.$echarts.init(document.getElementById('main240'))
 
-                this.chartssize(document.getElementById("main3Parent"), document.getElementById('main3'));
-                this.chartssize(document.getElementById("main15Parent"), document.getElementById('main15'));
-                this.chartssize(document.getElementById("main60Parent"), document.getElementById('main60'));
-                this.chartssize(document.getElementById("main5Parent"), document.getElementById('main5'));
-                this.chartssize(document.getElementById("main30Parent"), document.getElementById('main30'));
-                this.chartssize(document.getElementById("main240Parent"), document.getElementById('main240'));
+                this.chartssize(document.getElementById('main3Parent'), document.getElementById('main3'))
+                this.chartssize(document.getElementById('main15Parent'), document.getElementById('main15'))
+                this.chartssize(document.getElementById('main60Parent'), document.getElementById('main60'))
+                this.chartssize(document.getElementById('main5Parent'), document.getElementById('main5'))
+                this.chartssize(document.getElementById('main30Parent'), document.getElementById('main30'))
+                this.chartssize(document.getElementById('main240Parent'), document.getElementById('main240'))
                 this.myChart3.resize()
                 this.myChart5.resize()
                 this.myChart15.resize()
@@ -292,31 +314,31 @@ export default {
                     this.myChart30.resize()
                     this.myChart60.resize()
                     this.myChart240.resize()
-                });
+                })
             }
         },
-        //计算echarts 高度
-        chartssize(container, charts) {
-            function getStyle(el, name) {
+        // 计算echarts 高度
+        chartssize (container, charts) {
+            function getStyle (el, name) {
                 if (window.getComputedStyle) {
-                    return window.getComputedStyle(el, null);
+                    return window.getComputedStyle(el, null)
                 } else {
-                    return el.currentStyle;
+                    return el.currentStyle
                 }
             }
 
-            let wi = getStyle(container, 'width').width;
-            let hi = getStyle(container, 'height').height;
+            let wi = getStyle(container, 'width').width
+            let hi = getStyle(container, 'height').height
             charts.style.height = hi
         },
-        replaceParamVal(paramName, replaceWith) {
-            var oUrl = window.location.href.toString();
-            var re = eval('/(' + paramName + '=)([^&]*)/gi');
-            var nUrl = oUrl.replace(re, paramName + '=' + replaceWith);
-            this.location = nUrl;
+        replaceParamVal (paramName, replaceWith) {
+            var oUrl = window.location.href.toString()
+            var re = eval('/(' + paramName + '=)([^&]*)/gi')
+            var nUrl = oUrl.replace(re, paramName + '=' + replaceWith)
+            this.location = nUrl
             // window.location.href = nUrl
         },
-        getParams(name) {
+        getParams (name) {
             let res = ''
             let categoryStr = window.location.href.split('?')[1] || ''
             if (categoryStr.length > 1) {
@@ -335,7 +357,7 @@ export default {
             }
             return res
         },
-        jumpToMultiPeriod() {
+        jumpToMultiPeriod () {
             if (this.isPosition === 'true') {
                 this.$router.push({
                     path: '/multi-period',
@@ -356,7 +378,7 @@ export default {
             }
         },
 
-        jumpToKlineBig(period) {
+        jumpToKlineBig (period) {
             if (this.isPosition === 'true') {
                 this.$router.push({
                     path: '/kline-big',
@@ -377,16 +399,14 @@ export default {
                     }
                 })
             }
-
-
         },
 
-        jumpToControl(type) {
-            console.log("type", type)
-            if (type === "futures") {
-                this.$router.replace("/futures-control")
+        jumpToControl (type) {
+            console.log('type', type)
+            if (type === 'futures') {
+                this.$router.replace('/futures-control')
             } else {
-                this.$router.replace("/stock-control")
+                this.$router.replace('/stock-control')
             }
         },
         submitSymbol () {
@@ -403,7 +423,7 @@ export default {
             // this.replaceParamVal("symbol",this.symbol)
         },
         // 请求数据
-        requestSymbolData() {
+        requestSymbolData () {
             let that = this
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
@@ -413,26 +433,25 @@ export default {
                 } else {
                     // console.log('wait...')
                 }
-            }, 10000);
+            }, 10000)
         },
-        getDominantSymbol() {
-            let that = this;
+        getDominantSymbol () {
+            let that = this
 
             futureApi.dominant().then(res => {
-                console.log("获取主力合约:", res);
-                that.futureSymbolList = res;
+                console.log('获取主力合约:', res)
+                that.futureSymbolList = res
                 that.futureSymbolList.push(...that.digitCoinsSymbolList)
                 that.futureSymbolMap = {}
                 for (let i = 0; i < that.futureSymbolList.length - 1; i++) {
                     let symbolItem = that.futureSymbolList[i]
                     that.futureSymbolMap[symbolItem.order_book_id] = symbolItem
                 }
-                window.localStorage.setItem("symbolList", JSON.stringify(that.futureSymbolList))
+                window.localStorage.setItem('symbolList', JSON.stringify(that.futureSymbolList))
                 that.requestSymbolData()
             }).catch(() => {
-                this.requestFlag = true;
-                console.log("获取主力合约失败:", error)
-
+                this.requestFlag = true
+                console.log('获取主力合约失败:', error)
             })
         },
         switchPeriod (period) {
@@ -461,11 +480,11 @@ export default {
             const { ...query } = that.$route.query
             // 如果是大图，只请求一个周期的数据
             if (this.period !== '') {
-                Object.assign(query, { symbol, period: this.period ,endDate:this.endDate})
+                Object.assign(query, { symbol, period: this.period, endDate: this.endDate})
                 that.$router.push({ query })
                 that.sendRequest(symbol, this.period, update)
             } else {
-                Object.assign(query, { symbol,endDate:this.endDate})
+                Object.assign(query, { symbol, endDate: this.endDate})
                 that.$router.push({ query })
                 for (var i = 0; i < 8; i++) {
                     switch (i) {
@@ -497,14 +516,13 @@ export default {
                 }
             }
         },
-        sendRequest(symbol, period, update) {
+        sendRequest (symbol, period, update) {
             var requestData = { 'symbol': symbol, 'period': period, 'endDate': this.endDate }
             this.getStockData(requestData, update)
-
         },
-        getStockData(requestData, update) {
+        getStockData (requestData, update) {
             this.requestFlag = false
-            if (this.period !== "") {
+            if (this.period !== '') {
                 if (this.firstFlag[0] === true) {
                     this.myChart.showLoading()
                 }
@@ -529,15 +547,14 @@ export default {
                 }
             }
 
-
             futureApi.stockData(requestData).then(res => {
-                //如果之前请求的symbol 和当前的symbol不一致，直接过滤
-                if(res && (res.symbol !==this.symbol || res.endDate !== this.endDate)){
-                    console.log("symbol或结束日期不一致，过滤掉之前的请求")
+                // 如果之前请求的symbol 和当前的symbol不一致，直接过滤
+                if (res && (res.symbol !== this.symbol || res.endDate !== this.endDate)) {
+                    console.log('symbol或结束日期不一致，过滤掉之前的请求')
                     return
                 }
                 this.requestFlag = true
-                if (this.period !== "") {
+                if (this.period !== '') {
                     this.myChart.hideLoading()
                     this.firstFlag[0] = false
                 } else {
@@ -567,29 +584,29 @@ export default {
                     }
                 }
                 // console.log("结果", res)
-                this.draw(res, update, requestData.period);
+                this.draw(res, update, requestData.period)
             }).catch(() => {
-                this.requestFlag = true;
+                this.requestFlag = true
             })
         },
 
-        draw(stockJsonData, update, period) {
-            var that = this;
+        draw (stockJsonData, update, period) {
+            var that = this
             var zoomStart = 55
-            const resultData = this.splitData(stockJsonData, period);
-            var dataTitle = that.symbol + "  " + period
-            const margin_rate = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].margin_rate || 1;
+            const resultData = this.splitData(stockJsonData, period)
+            var dataTitle = that.symbol + '  ' + period
+            const margin_rate = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].margin_rate || 1
             let marginLevel = (1 / (margin_rate + this.marginLevelCompany)).toFixed(2)
-            const trading_hours = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].trading_hours;
-            const maturity_date = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].maturity_date;
-            var subText = "杠杆: " + marginLevel + " 保证金: " + this.marginPrice + " 乘数: " + this.contractMultiplier+
+            const trading_hours = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].trading_hours
+            const maturity_date = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].maturity_date
+            var subText = '杠杆: ' + marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
                 this.currentInfo
             var currentChart
             // if (period === '1m') {
             //     currentChart = myChart1
             // } else
             //
-            if (this.period !== "") {
+            if (this.period !== '') {
                 currentChart = this.myChart
             } else {
                 if (period === '3m') {
@@ -609,12 +626,12 @@ export default {
             // else if (period === '1d') {
             //     currentChart = myChart1d
             // }
-            let option;
+            let option
             if (update === 'update') {
-                console.log('更新', period);
+                console.log('更新', period)
                 option = that.refreshOption(currentChart, resultData)
             } else {
-                console.log('重载', period);
+                console.log('重载', period)
                 option = {
                     animation: false,
                     backgroundColor: this.echartsConfig.bgColor,
@@ -626,10 +643,10 @@ export default {
                             color: 'white'
                         }
                     },
-                    tooltip: { //提示框
-                        trigger: 'axis', //触发类型：axis坐标轴触发,item
-                        axisPointer: { //坐标轴指示器配置项
-                            type: 'cross' //指示器类型，十字准星
+                    tooltip: { // 提示框
+                        trigger: 'axis', // 触发类型：axis坐标轴触发,item
+                        axisPointer: { // 坐标轴指示器配置项
+                            type: 'cross' // 指示器类型，十字准星
                         },
                     },
                     axisPointer: {
@@ -754,17 +771,17 @@ export default {
                         },
                     },
 
-                    color: ['yellow', 'green', 'blue', 'white', 'white', 'red' /*'white', 'white', 'white'*/],
+                    color: ['yellow', 'green', 'blue', 'white', 'white', 'red' /* 'white', 'white', 'white' */],
                     legend: {
-                        data: ['笔', '段', '高级别段', 'MA5', 'MA10', 'MA60' /*'布林上轨', '布林中轨', '布林下轨'*/],
+                        data: ['笔', '段', '高级别段', 'MA5', /* 'MA10', 'MA60','布林上轨', '布林中轨', '布林下轨' */],
 
                         selected: {
                             '笔': true,
                             '段': true,
                             '高级别段': true,
-                            'MA5': false,
-                            'MA10': false,
-                            'MA60': false,
+                            // 'MA5': false,
+                            // 'MA10': false,
+                            // 'MA60': false,
                             // 'markline': true
                         },
                         top: 10,
@@ -773,19 +790,18 @@ export default {
                         }
                     },
                     grid: [
-                        {//直角坐标系
+                        {// 直角坐标系
                             left: '0%',
                             right: '18%',
                             height: '75%',
                             top: 50,
                         },
-                        // {
-
-                        //     top: '65%',
-                        //     height: '20%',
-                        //     left: '0%',
-                        //     right: '10%',
-                        // },
+                        {
+                            top: '65%',
+                            height: '20%',
+                            left: '0%',
+                            right: '10%',
+                        },
                         // {
                         //     top: '80%',
                         //     height: '15%',
@@ -809,34 +825,41 @@ export default {
                             splitNumber: 20,
                             min: 'dataMin',
                             max: 'dataMax',
+                            axisLabel: {
+                                show: true
+                            },
                             axisLine: { onZero: true, lineStyle: { color: '#8392A5' } },
-                            // axisPointer: {
-                            //     label: {
-                            //         formatter: function (params) {
-                            //             var seriesValue = (params.seriesData[0] || {}).value;
-                            //             return params.value
-                            //                 + (seriesValue != null
-                            //                         ? '\n' + echarts.format.addCommas(seriesValue)
-                            //                         : ''
-                            //                 );
-                            //         }
-                            //     }
-                            // }
+                            axisPointer: {
+                                label: {
+                                    // formatter: function (params) {
+                                    //     var seriesValue = (params.seriesData[0] || {}).value;
+                                    //     return params.value
+                                    //         + (seriesValue != null
+                                    //                 ? '\n' + echarts.format.addCommas(seriesValue)
+                                    //                 : ''
+                                    //         );
+                                    // }
+                                    show: false
+                                }
+                            }
                         },
-                        // {
-                        //     type: 'category',
-                        //     gridIndex: 1,
-                        //     data: resultData.date,
-                        //     axisTick: {
-                        //         show: false
-                        //     },
-                        //     axisLabel: {
-                        //         show: true
-                        //     },
-                        //     axisLine: {lineStyle: {color: '#8392A5'}}
-                        //
-                        //
-                        // },
+                        {
+                            type: 'category',
+                            gridIndex: 1,
+                            data: resultData.date,
+                            axisTick: {
+                                show: false
+                            },
+                            axisLabel: {
+                                show: true
+                            },
+                            axisLine: {lineStyle: {color: '#8392A5'}},
+                            axisPointer: {
+                                label: {
+                                    show: false
+                                }
+                            }
+                        },
                         // {
                         //     type: 'category',
                         //     gridIndex: 2,
@@ -877,7 +900,20 @@ export default {
                             },
                             axisLine: { lineStyle: { color: this.echartsConfig.bgColor } },
                         },
-
+                        {
+                            gridIndex: 1,
+                            splitNumber: 2,
+                            axisTick: {
+                                show: false
+                            },
+                            splitLine: {
+                                show: false
+                            },
+                            axisLabel: {
+                                show: true
+                            },
+                            axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
+                        },
                         // 成交量
                         // {
                         //     gridIndex: 3,
@@ -906,13 +942,13 @@ export default {
                             end: 100,
                             minSpan: 10,
                         },
-                        // {
-                        //     type: 'inside',
-                        //     xAxisIndex: [0, 1],
-                        //     start: zoomStart,
-                        //     end: 100,
-                        //     minSpan: 10,
-                        // },
+                        {
+                            type: 'inside',
+                            xAxisIndex: [0, 1],
+                            start: 55,
+                            end: 100,
+                            minSpan: 10,
+                        },
                         // {
                         //     type: 'inside',
                         //     xAxisIndex: [0, 1],
@@ -950,7 +986,7 @@ export default {
                         // }
                     ],
                     series: [
-                        //index 0
+                        // index 0
                         {
                             name: 'K线图',
                             type: 'k',
@@ -979,7 +1015,7 @@ export default {
                                 symbolSize: 1,
                             }
                         },
-                        //index 1
+                        // index 1
                         {
                             name: '笔',
                             type: 'line',
@@ -996,7 +1032,7 @@ export default {
                             symbol: 'none',
                             animation: false
                         },
-                        //index 2
+                        // index 2
                         {
                             name: '段',
                             type: 'line',
@@ -1016,7 +1052,7 @@ export default {
                             symbol: 'none',
                             animation: false
                         },
-                        //index 3
+                        // index 3
                         {
                             name: '高级别段',
                             type: 'line',
@@ -1033,7 +1069,86 @@ export default {
                             symbol: 'none',
                             animation: false
                         },
-                        //index 4
+                         // index 5
+                        {
+                            name: 'MACD',
+                            type: 'bar',
+                            xAxisIndex: 1,
+                            yAxisIndex: 1,
+                            data: resultData.macd,
+                            barWidth: 2,
+                            itemStyle: {
+                                normal: {
+                                    color: function (params) {
+                                        console.log(that.echartsConfig)
+                                        var colorList
+                                        if (params.data >= 0) {
+                                            if (params.data >= that.echartsConfig.macdUpLastValue) {
+                                                colorList = that.echartsConfig.macdUpDarkColor
+                                            } else {
+                                                colorList = that.echartsConfig.macdUpLightColor
+                                            }
+                                            that.echartsConfig.macdUpLastValue = params.data
+                                        } else {
+                                            if (params.data <= that.echartsConfig.macdDownLastValue) {
+                                                colorList = that.echartsConfig.macdDownDarkColor
+                                            } else {
+                                                colorList = that.echartsConfig.macdDownLightColor
+                                            }
+                                            that.echartsConfig.macdDownLastValue = params.data
+                                        }
+                                        return colorList
+                                    },
+                                }
+                            }
+                        },
+                        // index 6
+
+                        {
+                            name: 'DIFF',
+                            type: 'line',
+                            xAxisIndex: 1,
+                            yAxisIndex: 1,
+                            data: resultData.diff,
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 1,
+                                    type: 'solid',
+                                    width: 1,
+                                    color: 'white'
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false,
+                            // markPoint: {
+                            //     data: resultData.bcMACDValues
+                            // },
+                        },
+                        // index 7
+
+                        {
+                            name: 'DEA',
+                            type: 'line',
+                            xAxisIndex: 1,
+                            yAxisIndex: 1,
+                            data: resultData.dea,
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 1,
+                                    type: 'solid',
+                                    width: 1,
+                                    color: 'yellow'
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false,
+                            // markPoint: {
+                            //     data: resultData.macdAreaValues
+                            // },
+                        },
+                        // index 4
                         // {
                         //     name: 'MA5',
                         //     type: 'line',
@@ -1085,74 +1200,76 @@ export default {
                         // }
                     ],
                     graphic: [],
-                };
+                }
             }
             // console.log("option", currentChart, option)
             //  大图隐藏放大按钮
-            if (this.period !== "") {
+            if (this.period !== '') {
                 option.toolbox.feature = {}
                 option.grid = this.echartsConfig.klineBigGrid
             } else {
                 option.grid = this.echartsConfig.multiPeriodGrid
-
             }
-            currentChart.setOption(option);
+            console.log('111111111111', option)
+            currentChart.setOption(option)
         },
-        refreshOption(chart, resultData) {
-            var option = chart.getOption();
-            option.series[0].data = resultData.values;
-            option.xAxis[0].data = resultData.date;
-            option.series[0].markArea.data = resultData.zsvalues;
-            option.series[0].markLine.data = resultData.markLineData;
-            option.series[0].markPoint.data = resultData.huilaValues;
-            option.series[1].data = resultData.biValues;
-            option.series[2].data = resultData.duanValues;
-            option.series[2].markPoint.data = resultData.duanPriceValues;
-            option.series[3].data = resultData.higherDuanValues;
+        refreshOption (chart, resultData) {
+            var option = chart.getOption()
+            option.series[0].data = resultData.values
+            option.xAxis[0].data = resultData.date
+            option.series[0].markArea.data = resultData.zsvalues
+            option.series[0].markLine.data = resultData.markLineData
+            option.series[0].markPoint.data = resultData.huilaValues
+            option.series[1].data = resultData.biValues
+            option.series[2].data = resultData.duanValues
+            option.series[2].markPoint.data = resultData.duanPriceValues
+            option.series[3].data = resultData.higherDuanValues
+            option.series[4].data = resultData.macd
+            option.series[5].data = resultData.diff
+            option.series[6].data = resultData.dea
             // option.series[4].data = this.calculateMA(resultData, 5);
             // option.series[5].data = this.calculateMA(resultData, 10);
             // option.series[11].data = resultData.volume;
             return option
         },
-        splitData(jsonObj, period) {
-            const stockDate = jsonObj.date;
-            const stockHigh = jsonObj.high;
-            const stockLow = jsonObj.low;
-            const stockOpen = jsonObj.open;
-            const stockClose = jsonObj.close;
-            const volumeData = jsonObj.volume;
+        splitData (jsonObj, period) {
+            const stockDate = jsonObj.date
+            const stockHigh = jsonObj.high
+            const stockLow = jsonObj.low
+            const stockOpen = jsonObj.open
+            const stockClose = jsonObj.close
+            const volumeData = jsonObj.volume
 
-            const bidata = jsonObj.bidata;
-            const duandata = jsonObj.duandata;
-            const higherDuanData = jsonObj.higherDuanData;
+            const bidata = jsonObj.bidata
+            const duandata = jsonObj.duandata
+            const higherDuanData = jsonObj.higherDuanData
 
             // console.log('bidata', bidata);
             // console.log('duandata', duandata);
 
-            const zsdata = jsonObj.zsdata;
-            const zsflag = jsonObj.zsflag;
+            const zsdata = jsonObj.zsdata
+            const zsflag = jsonObj.zsflag
 
-            const duan_zsdata = jsonObj.duan_zsdata;
-            const duan_zsflag = jsonObj.duan_zsflag;
+            const duan_zsdata = jsonObj.duan_zsdata
+            const duan_zsflag = jsonObj.duan_zsflag
 
-            const higher_duan_zsdata = jsonObj.higher_duan_zsdata;
-            const higher_duan_zsflag = jsonObj.higher_duan_zsflag;
+            const higher_duan_zsdata = jsonObj.higher_duan_zsdata
+            const higher_duan_zsflag = jsonObj.higher_duan_zsflag
 
-
-            var values = [];
+            var values = []
             for (var i = 0; i < stockDate.length; i++) {
-                values.push([stockOpen[i], stockClose[i], stockLow[i], stockHigh[i]]);
+                values.push([stockOpen[i], stockClose[i], stockLow[i], stockHigh[i]])
             }
 
-            var biValues = [];
+            var biValues = []
             for (var i = 0; i < bidata.date.length; i++) {
                 biValues.push([bidata.date[i], bidata.data[i]])
             }
-            var duanValues = [];
+            var duanValues = []
             for (var i = 0; i < duandata.date.length; i++) {
                 duanValues.push([duandata.date[i], duandata.data[i]])
             }
-            var duanPriceValues = [];
+            var duanPriceValues = []
             for (var i = 0; i < duandata.date.length; i++) {
                 var value = {}
                 if (i > 0 && duandata.data[i] > duandata.data[i - 1]) {
@@ -1190,21 +1307,20 @@ export default {
                             textBorderWidth: 2,
                             color: 'white',
                         },
-                    };
+                    }
                 }
 
-                duanPriceValues.push(value);
+                duanPriceValues.push(value)
             }
 
-            var higherDuanValues = [];
+            var higherDuanValues = []
             for (var i = 0; i < higherDuanData.date.length; i++) {
                 higherDuanValues.push([higherDuanData.date[i], higherDuanData.data[i]])
             }
 
-
-            var zsvalues = [];
+            var zsvalues = []
             for (var i = 0; i < zsdata.length; i++) {
-                var value;
+                var value
                 if (zsflag[i] > 0) {
                     value = [
                         {
@@ -1225,7 +1341,7 @@ export default {
                                 opacity: 0.2,
                             }
                         }
-                    ];
+                    ]
                 } else {
                     value = [
                         {
@@ -1246,13 +1362,13 @@ export default {
                                 opacity: 0.2,
                             }
                         }
-                    ];
+                    ]
                 }
-                zsvalues.push(value);
+                zsvalues.push(value)
             }
-            //段中枢
+            // 段中枢
             for (var i = 0; i < duan_zsdata.length; i++) {
-                var value;
+                var value
                 if (duan_zsflag[i] > 0) {
                     value = [
                         {
@@ -1273,7 +1389,7 @@ export default {
                                 opacity: 0.2,
                             }
                         }
-                    ];
+                    ]
                 } else {
                     value = [
                         {
@@ -1294,13 +1410,13 @@ export default {
                                 opacity: 0.2,
                             }
                         }
-                    ];
+                    ]
                 }
-                zsvalues.push(value);
+                zsvalues.push(value)
             }
-            //高级别段中枢
+            // 高级别段中枢
             for (var i = 0; i < higher_duan_zsdata.length; i++) {
-                var value;
+                var value
                 if (higher_duan_zsflag[i] > 0) {
                     value = [
                         {
@@ -1321,7 +1437,7 @@ export default {
                                 opacity: 0.1,
                             }
                         }
-                    ];
+                    ]
                 } else {
                     value = [
                         {
@@ -1342,14 +1458,13 @@ export default {
                                 opacity: 0.1,
                             }
                         }
-                    ];
+                    ]
                 }
-                zsvalues.push(value);
+                zsvalues.push(value)
             }
 
-
             // 中枢拉回
-            var huilaValues = [];
+            var huilaValues = []
             for (var i = 0; i < jsonObj.buy_zs_huila.date.length; i++) {
                 var value = {
                     coord: [jsonObj.buy_zs_huila.date[i], jsonObj.buy_zs_huila.data[i]],
@@ -1361,17 +1476,17 @@ export default {
                         normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [5, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
             for (var i = 0; i < jsonObj.sell_zs_huila.date.length; i++) {
                 var value = {
@@ -1384,17 +1499,17 @@ export default {
                         normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [-5, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
             // 大级别中枢拉回
             for (var i = 0; i < jsonObj.buy_zs_huila_higher.date.length; i++) {
@@ -1408,17 +1523,17 @@ export default {
                         normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [5, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
             for (var i = 0; i < jsonObj.sell_zs_huila_higher.date.length; i++) {
                 var value = {
@@ -1431,17 +1546,17 @@ export default {
                         normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [-5, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
             // 中枢突破
             for (var i = 0; i < jsonObj.buy_zs_tupo.date.length; i++) {
@@ -1456,17 +1571,17 @@ export default {
                         normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
 
             for (var i = 0; i < jsonObj.sell_zs_tupo.date.length; i++) {
@@ -1481,19 +1596,19 @@ export default {
                         normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
-            //大级别中枢突破
+            // 大级别中枢突破
             for (var i = 0; i < jsonObj.buy_zs_tupo_higher.date.length; i++) {
                 var value = {
                     coord: [jsonObj.buy_zs_tupo_higher.date[i], jsonObj.buy_zs_tupo_higher.data[i]],
@@ -1506,17 +1621,17 @@ export default {
                         normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
             for (var i = 0; i < jsonObj.sell_zs_tupo_higher.date.length; i++) {
                 var value = {
@@ -1530,17 +1645,17 @@ export default {
                         normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
             // 3买卖V反
             for (var i = 0; i < jsonObj.buy_v_reverse.date.length; i++) {
@@ -1555,17 +1670,17 @@ export default {
                         normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
 
             for (var i = 0; i < jsonObj.sell_v_reverse.date.length; i++) {
@@ -1580,17 +1695,17 @@ export default {
                         normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
 
             // 3买卖V反 大级别
@@ -1606,17 +1721,17 @@ export default {
                         normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
 
             for (var i = 0; i < jsonObj.sell_v_reverse_higher.date.length; i++) {
@@ -1631,19 +1746,18 @@ export default {
                         normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
-
 
             // 线段破坏
             for (var i = 0; i < jsonObj.buy_duan_break.date.length; i++) {
@@ -1658,17 +1772,17 @@ export default {
                         normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
 
             for (var i = 0; i < jsonObj.sell_duan_break.date.length; i++) {
@@ -1683,19 +1797,19 @@ export default {
                         normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
-            //大级别线段破坏
+            // 大级别线段破坏
             for (var i = 0; i < jsonObj.buy_duan_break_higher.date.length; i++) {
                 var value = {
                     coord: [jsonObj.buy_duan_break_higher.date[i], jsonObj.buy_duan_break_higher.data[i]],
@@ -1708,17 +1822,17 @@ export default {
                         normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
             for (var i = 0; i < jsonObj.sell_duan_break_higher.date.length; i++) {
                 var value = {
@@ -1732,17 +1846,17 @@ export default {
                         normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
                     },
                     label: {
-                        //position: ['-50%','50%'],
+                        // position: ['-50%','50%'],
                         position: 'inside',
                         offset: [0, 5],
                         textBorderColor: 'red',
                         textBorderWidth: 3,
                         color: 'white',
-                        //borderColor: 'blue',
-                        //borderWidth: 1,
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
                     },
-                };
-                huilaValues.push(value);
+                }
+                huilaValues.push(value)
             }
             let markLineData
             if (this.isPosition === 'true') {
@@ -1751,6 +1865,12 @@ export default {
                 markLineData = this.getMarklineData(jsonObj)
             }
             // console.log("markline", markLineData)
+            const macddata = jsonObj.macd
+            const diffdata = jsonObj.diff
+            const deadata = jsonObj.dea
+            // console.log('macd',macddata)
+            // console.log('diffdata',diffdata)
+            // console.log('deadata',deadata)
             return {
                 date: stockDate,
                 values: values,
@@ -1764,20 +1884,23 @@ export default {
                 close: stockClose,
                 markLineData: markLineData,
                 huilaValues: huilaValues,
+                macd: macddata,
+                diff: diffdata,
+                dea: deadata,
 
-            };
+            }
         },
-        //通用开平动止标注数据
-        getMarklineData(jsonObj) {
-            var markLineData = [];
+        // 通用开平动止标注数据
+        getMarklineData (jsonObj) {
+            var markLineData = []
             var lastBeichiType = this.getLastBeichiData(jsonObj)
             var lastBeichi = null
-            const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
+            const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
             let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
             // 当前价格
             var currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
-            this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1;
+            this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1
             // 1手需要的保证金
             this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
             // console.log("最后的背驰:", period, lastBeichiType)
@@ -1796,7 +1919,7 @@ export default {
                     case 4:
                         lastBeichi = jsonObj.sell_zs_huila_higher
                         break
-                    //线段破坏
+                    // 线段破坏
                     case 5:
                         lastBeichi = jsonObj.buy_duan_break
                         break
@@ -1809,7 +1932,7 @@ export default {
                     case 8:
                         lastBeichi = jsonObj.sell_duan_break_higher
                         break
-                    //突破
+                    // 突破
                     case 9:
                         lastBeichi = jsonObj.buy_zs_tupo
                         break
@@ -1835,7 +1958,6 @@ export default {
                     case 16:
                         lastBeichi = jsonObj.sell_v_reverse_higher
                         break
-
                 }
                 // 背驰时的价格
                 var beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
@@ -1843,16 +1965,16 @@ export default {
                 var stopLosePrice = lastBeichi['stop_lose_price'][lastBeichi['stop_lose_price'].length - 1]
                 // 第一次止盈价格
                 var stopWinPrice = lastBeichi['stop_win_price'][lastBeichi['stop_win_price'].length - 1]
-                //第一次止盈百分比
+                // 第一次止盈百分比
                 var stopWinPercent = 0
                 // 止盈价格
                 var targetPrice = 0
                 // 达到2.3倍盈亏比 才能保证动止30% 止损不亏
                 var diffPrice = Math.abs(beichiPrice - stopLosePrice) * 2.3
                 // 当前收益百分比
-                var currentPercent = ""
+                var currentPercent = ''
                 // 当前收益（单位万/元）
-                var currentProfit = ""
+                var currentProfit = ''
                 if (lastBeichiType === 1 || lastBeichiType === 2 || lastBeichiType === 5 || lastBeichiType === 6 ||
                     lastBeichiType === 9 || lastBeichiType === 10 || lastBeichiType === 13 || lastBeichiType === 14) {
                     targetPrice = beichiPrice + diffPrice
@@ -1869,20 +1991,20 @@ export default {
                 }
                 var targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                 // 准备参数
-                this.openPrice = beichiPrice;
-                this.stopPrice = stopLosePrice;
+                this.openPrice = beichiPrice
+                this.stopPrice = stopLosePrice
                 // 当前保证金比例
-                const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
+                const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
                 this.currentMarginRate = margin_rate + this.marginLevelCompany
-                this.currentSymbol = this.symbol;
+                this.currentSymbol = this.symbol
                 // 计算开仓手数
                 this.calcAccount()
                 // console.log(beichiPrice, stopLosePrice, diffPrice, targetPrice)
                 // 单位是万
                 currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
                 // 跟据最新价格计算出来的信息
-                this.currentInfo =  " 率: " + currentPercent + "% 额: " + currentProfit + " 万,盈亏比:"
-                                + (currentPercent / targetPercent).toFixed(1)+' 新: ' + currentPrice.toFixed(2)
+                this.currentInfo = ' 率: ' + currentPercent + '% 额: ' + currentProfit + ' 万,盈亏比:' +
+                                (currentPercent / targetPercent).toFixed(1) + ' 新: ' + currentPrice.toFixed(2)
                 let markLineCurrent = {
                         yAxis: currentPrice,
                         lineStyle: {
@@ -1920,14 +2042,14 @@ export default {
                         label: {
                             normal: {
                                 color: 'white',
-                                formatter: '开: ' + beichiPrice.toFixed(2) + " " + this.maxOrderCount + ' 手',
+                                formatter: '开: ' + beichiPrice.toFixed(2) + ' ' + this.maxOrderCount + ' 手',
                             },
                         },
                     }
                     markLineData.push(markLineBeichi)
                 }
 
-                //止损位
+                // 止损位
                 if (stopLosePrice) {
                     var markLineStop = {
                         yAxis: stopLosePrice,
@@ -1951,7 +2073,7 @@ export default {
                     markLineData.push(markLineStop)
                 }
                 // 兼容股票
-                if(!jsonObj['fractal']){
+                if (!jsonObj['fractal']) {
                     return markLineData
                 }
 
@@ -2060,24 +2182,24 @@ export default {
             }
             return markLineData
         },
-        //持仓状态下的开平动止数据
+        // 持仓状态下的开平动止数据
         /**
          * @param jsonObj
          */
-        getPositionMarklineData(jsonObj) {
-            var markLineData = [];
+        getPositionMarklineData (jsonObj) {
+            var markLineData = []
 
             // 开仓价格
             let openPrice = this.currentPosition.price
             let openAmount = this.currentPosition.amount
             let direction = this.currentPosition.direction
 
-            const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1;
+            const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
             let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
             // 当前价格
             var currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
-            this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1;
+            this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1
             // 1手需要的保证金
             this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
 
@@ -2092,7 +2214,7 @@ export default {
             }
             // 止损百分比
             let stopLosePercent = (Math.abs(openPrice - stopLosePrice) / stopLosePrice * 100 * marginLevel).toFixed(2)
-            //如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
+            // 如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
             this.currentInfo = '新: ' + currentPrice.toFixed(2)
             let markLineCurrent = {
                         yAxis: currentPrice,
@@ -2187,16 +2309,15 @@ export default {
                 markLineData.push(markLineObj)
             }
 
-
             // 兼容股票
-            if(!jsonObj['fractal']){
+            if (!jsonObj['fractal']) {
                 return markLineData
             }
             let higherBottomPrice = 0
             let higherHigherBottomPrice = 0
             let higherTopPrice = 0
             let higherHigherTopPrice = 0
-            console.log("分型", direction === 'long', jsonObj['fractal'][0]['direction'], jsonObj['fractal'][0]['top_fractal']['bottom'])
+            console.log('分型', direction === 'long', jsonObj['fractal'][0]['direction'], jsonObj['fractal'][0]['top_fractal']['bottom'])
             //  多单查找顶型
             if (direction === 'long') {
                 if (jsonObj['fractal'][0]['direction'] === 1) {
@@ -2300,13 +2421,13 @@ export default {
             }
             return markLineData
         },
-        //计算开仓手数
-        calcAccount() {
+        // 计算开仓手数
+        calcAccount () {
             if (this.currentMarginRate == null) {
-                alert("请选择保证金系数，开仓价，止损价")
+                alert('请选择保证金系数，开仓价，止损价')
                 return
             }
-            if (this.currentSymbol.indexOf("_CQ") === -1) {
+            if (this.currentSymbol.indexOf('_CQ') === -1) {
                 this.account = this.futureAccount
                 // 计算1手需要的保证金
                 this.perOrderMargin = Math.floor(this.openPrice * this.contractMultiplier * this.currentMarginRate)
@@ -2333,7 +2454,6 @@ export default {
             // 根据最大资金使用率算出的开仓手数(四舍五入)
             let maxOrderCount2 = Math.round(maxAccountUse / this.perOrderMargin)
 
-
             this.maxOrderCount = maxOrderCount1 > maxOrderCount2 ? maxOrderCount2 : maxOrderCount1
             // 总保证金
             this.totalOrderMargin = this.perOrderMargin * this.maxOrderCount
@@ -2355,7 +2475,7 @@ export default {
             //     this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
             //     " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate)
         },
-        calculateMA(resultData, dayCount) {
+        calculateMA (resultData, dayCount) {
             let result = []
             for (let i = 0, len = resultData.values.length; i < len; i++) {
                 if (i < dayCount) {
@@ -2379,7 +2499,7 @@ export default {
          * 9 本级别中枢突破买 10 高级别中枢突破买 11 本级别中枢突破卖 12 高级别中枢突破卖
          * 13 本级别三卖V买 14 高级别三卖V买 15 本级别三买V卖 16 高级别三买V卖
          */
-        getLastBeichiData(jsonObj) {
+        getLastBeichiData (jsonObj) {
             // 回拉
             var buy_zs_huila = jsonObj.buy_zs_huila
             var buy_zs_huila_higher = jsonObj.buy_zs_huila_higher
@@ -2402,7 +2522,6 @@ export default {
             var buy_v_reverse_higher = jsonObj.buy_v_reverse_higher
             var sell_v_reverse = jsonObj.sell_v_reverse
             var sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
-
 
             // 回拉
             var buy_zs_huila_stamp = 0
@@ -2499,7 +2618,6 @@ export default {
                 sell_v_reverse_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
             }
 
-
             // 当线段破坏和中枢突破时间相等的时候，使用中枢突破信号，因为中枢突破止损更小
             if (buy_zs_tupo_stamp === buy_duan_break_stamp) {
                 buy_duan_break_stamp = 0
@@ -2537,10 +2655,10 @@ export default {
                 return maxPos + 1
             }
         },
-        timeStrToStamp(timeStr) {
-            let date = timeStr.substring(0, 19);
-            date = timeStr.replace(/-/g, '/'); //必须把日期'-'转为'/'
-            return new Date(date).getTime();
+        timeStrToStamp (timeStr) {
+            let date = timeStr.substring(0, 19)
+            date = timeStr.replace(/-/g, '/') // 必须把日期'-'转为'/'
+            return new Date(date).getTime()
         }
 
     }

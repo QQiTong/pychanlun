@@ -40,11 +40,11 @@ futureLevelMap = {
 }
 dominantSymbolInfoList = {}
 # 账户资金
-account = 25
+account = 50
 # 期货公司在原有保证金基础上1%
 marginLevelCompany = 0.01
 # 期货账户
-futuresAccount = 25
+futuresAccount = 50
 # 数字货币手续费20倍杠杆
 digitCoinFee = 0.0006
 # 数字货币账户
@@ -121,11 +121,11 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             'stop_lose_price': stop_lose_price,  # 当前信号的止损价
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if (date_created - fire_time).total_seconds() < 300:
-            # 在10分钟内的触发邮件通知
+        if (date_created - fire_time).total_seconds() < 120:
+            # 在2分钟内的触发邮件通知  2分钟就能扫监控品种
             # 把数据库的utc时间 转成本地时间
-            fire_time_str = (fire_time + timedelta(hours=8)).strftime('%m-%d %H:%M:%S'),
-            date_created_str = (date_created + timedelta(hours=8)).strftime('%m-%d %H:%M:%S'),
+            fire_time_str = (fire_time + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
+            date_created_str = (date_created + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
             # msg = {
             #     "symbol": symbol,
             #     "period": period,
@@ -607,16 +607,22 @@ def run(**kwargs):
     # 主力合约，主力合约详细信息
     symbolList, dominantSymbolInfoList = getDominantSymbol()
     # 24个品种 拆分成8份
-    symbolListSplit = [symbolList[i:i + 3] for i in range(0, len(symbolList), 3)]
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[3]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[4]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[5]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[6]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[7]]).start()
+    # symbolListSplit = [symbolList[i:i + 3] for i in range(0, len(symbolList), 3)]
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[3]]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[4]]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[5]]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[6]]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[7]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
+
     # 外盘监控
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
 
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=["2",symbolListDigitCoin]).start()
+
+
+
+

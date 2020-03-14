@@ -356,9 +356,9 @@ class Calc:
         resJson['higherDuanData'] = getLineData(timeList, higherDuanList, highList, lowList)
         resJson['higherHigherDuanData'] = getLineData(timeList, higherHigherDuanList, highList, lowList)
 
-        # resJson['diff'] = getMacd(closePriceList)[0].tolist()
-        # resJson['dea'] = getMacd(closePriceList)[1].tolist()
-        # resJson['macd'] = getMacd(closePriceList)[2].tolist()
+        resJson['diff'] = getMacd(closePriceList)[0].tolist()
+        resJson['dea'] = getMacd(closePriceList)[1].tolist()
+        resJson['macd'] = getMacd(closePriceList)[2].tolist()
         # resJson['macdAreaData'] = calcArea(resJson['diff'], resJson['macd'], timeList)
         # resJson['boll_up'] = getBoll(closePriceList)[0].tolist()
         # resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
@@ -521,7 +521,7 @@ def getZhongShuData(entanglementList):
 def getMacd(closePriceList):
     close = array(closePriceList)
     macd = ta.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
-    result = np.nan_to_num(macd)
+    result = np.nan_to_num(macd).round(decimals=2)
     return result
 
 
