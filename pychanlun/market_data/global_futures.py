@@ -39,12 +39,13 @@ def fetch_global_futures_mink():
                 content = m.group(1)
                 df = pd.DataFrame(json.loads(content))
                 df['d'] = df['d'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
+                df.set_index("d", inplace=True)
                 save_data_m(symbol, '%sm' % minute, df)
                 # 合成210F数据
-                # if minute == '30':
-                #     ohlc_dict = { 'o': 'first', 'h': 'max', 'l': 'min', 'c': 'last', 'v': 'sum' }
-                #     df210m = df.resample('210T', closed='right', label='right').agg({}).dropna(how='any')
-                #     save_data_m(symbol, '210m', df210m)
+                if minute == '30':
+                    ohlc_dict = { 'o': 'first', 'h': 'max', 'l': 'min', 'c': 'last', 'v': 'sum' }
+                    df210m = df.resample('210T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                    save_data_m(symbol, '210m', df210m)
                 time.sleep(15)
                 if not is_run:
                     break
@@ -56,13 +57,13 @@ def fetch_global_futures_mink():
                 d = datetime.datetime.now().strftime('%Y_%m_%d')
                 var = "_%s_%s" % (symbol, d)
                 url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var %s=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=%s&_=%s&source=web" % (var, symbol, d)
-                print(url)
                 response = requests.get(url, headers = headers)
                 response_text = response.text
                 m = re.search(r'\((.*)\)', response_text)
                 content = m.group(1)
                 df = pd.DataFrame(json.loads(content))
                 df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d'))
+                df.set_index('date', inplace=True)
                 save_data_d(symbol, '1d', df)
                 time.sleep(15)
                 if not is_run:
@@ -73,11 +74,11 @@ def fetch_global_futures_mink():
 
 def save_data_m(code, period, df):
     if not df.empty:
-        logging.info("保存 %s %s %s" % (code, period, df['d'].iloc[-1]))
+        logging.info("保存 %s %s %s" % (code, period, df.index.values[-1]))
     batch = []
-    for _, row in df.iterrows():
+    for idx, row in df.iterrows():
         batch.append(UpdateOne({
-            "_id": row['d'].replace(tzinfo=tz)
+            "_id": idx.replace(tzinfo=tz)
         }, {
             "$set": {
                 "open": float(row['o']),
@@ -97,11 +98,11 @@ def save_data_m(code, period, df):
 
 def save_data_d(code, period, df):
     if not df.empty:
-        logging.info("保存 %s %s %s" % (code, period, df['date'].iloc[-1]))
+        logging.info("保存 %s %s %s" % (code, period, df.index.values[-1]))
     batch = []
-    for _, row in df.iterrows():
+    for idx, row in df.iterrows():
         batch.append(UpdateOne({
-            "_id": row['date'].replace(tzinfo=tz)
+            "_id": idx.replace(tzinfo=tz)
         }, {
             "$set": {
                 "open": float(row['open']),
