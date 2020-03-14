@@ -157,7 +157,10 @@ class Calc:
             klineData = klineDataTool.getGlobalFutureData(symbol, period, endDate)
             bigLevelPeriod = self.futureLevelMap[period]
             klineDataBigLevel = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod, endDate)
-            klineDataBigLevel2 = []
+
+            bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
+            klineDataBigLevel2 = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod2, endDate)
+
         else:
             if '_CQ' in symbol:
                 cat = "DIGIT_COIN"
@@ -213,7 +216,7 @@ class Calc:
         closePriceListBigLevel = []
         timeListBigLevel = []
         timeIndexListBigLevel = []
-        if cat == "FUTURE" or cat == "DIGIT_COIN":
+        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             for i in range(len(jsonObjBigLevel)):
                 item = jsonObjBigLevel[i]
                 localTime = time.localtime(item['time'])
@@ -232,7 +235,7 @@ class Calc:
         closePriceListBigLevel2 = []
         timeListBigLevel2 = []
         timeIndexListBigLevel2 = []
-        if cat == "FUTURE" or cat == "DIGIT_COIN":
+        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             for i in range(len(jsonObjBigLevel2)):
                 item = jsonObjBigLevel2[i]
                 localTime = time.localtime(item['time'])
@@ -250,14 +253,14 @@ class Calc:
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList)
 
         # 高级别笔
-        if cat == "FUTURE" or cat == "DIGIT_COIN":
+        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             biListBigLevel = [0 for i in range(len(timeListBigLevel))]
             CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
             fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
             fractialRegion["period"] = bigLevelPeriod
 
         # 高高级别笔
-        if cat == "FUTURE" or cat == "DIGIT_COIN":
+        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
             CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
             fractialRegion2 = FindLastFractalRegion(len(timeListBigLevel2), biListBigLevel2, timeListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
@@ -265,7 +268,7 @@ class Calc:
 
         # 本级别段处理
         duanList = [0 for i in range(count)]
-        if cat == "FUTURE" or cat == "DIGIT_COIN":
+        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod)
         else:
             CalcDuan(count, duanList, biList, highList, lowList)
@@ -449,7 +452,7 @@ class Calc:
         resJson['symbol'] = symbol
         resJson['endDate'] = endDate
 
-        if cat == "FUTURE" or cat == "DIGIT_COIN":
+        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             resJson['fractal'] = [fractialRegion, fractialRegion2]
 
         resJsonStr = json.dumps(resJson)

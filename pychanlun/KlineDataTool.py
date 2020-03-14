@@ -362,6 +362,8 @@ class KlineDataTool:
         return klineList
     # 获取外盘期货数据
     def getGlobalFutureData(self, symbol, period, endDate):
+        if period is '3m':
+            return []
         startTime = datetime.now()
         if endDate is None or endDate == "":
             end = datetime.now() + timedelta(1)
