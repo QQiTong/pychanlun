@@ -44,8 +44,8 @@ def fetch_global_futures_mink():
                 # 合成210F数据
                 if minute == '30':
                     ohlc_dict = { 'o': 'first', 'h': 'max', 'l': 'min', 'c': 'last', 'v': 'sum' }
-                    df210m = df.resample('210T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                    save_data_m(symbol, '210m', df210m)
+                    df240m = df.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                    save_data_m(symbol, '240m', df240m)
                 time.sleep(15)
                 if not is_run:
                     break
