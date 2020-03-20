@@ -48,7 +48,7 @@ def fetch_global_futures_mink():
                     ohlc_dict = { 'o': 'first', 'h': 'max', 'l': 'min', 'c': 'last', 'v': 'sum' }
                     df240m = df.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                     save_data_m(symbol, '240m', df240m)
-                time.sleep(15)
+                time.sleep(1)
                 if not is_run:
                     break
             if not is_run:
@@ -71,10 +71,10 @@ def fetch_global_futures_mink():
                 ohlc_dict = { 'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum' }
                 df3d = df.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 save_data_d(symbol, '3d', df3d)
-                time.sleep(15)
+                time.sleep(1)
                 if not is_run:
                     break
-        time.sleep(5)
+        time.sleep(200)
     logging.info("外盘分钟数据抓取程序已停止。")
 
 

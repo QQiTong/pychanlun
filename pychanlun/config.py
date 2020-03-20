@@ -46,7 +46,7 @@ config = {
         "TA",
         "SR",
         "OI",
-        "AP",
+        # "AP",
         "CF",
         "M",
         "I",

@@ -63,12 +63,12 @@ def sendEmail(msg,symbol,period,signal,direction,amount,stop_lose_price, fire_ti
     print(msg)
     mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
 
-    url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s" \
-          "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s" \
-          % (signal, remark, symbol + '_' + period, signal, direction,
-             '开:' + str(close_price) + ' 止:' + str(stop_lose_price) + ' 触:' + str(price), amount,
-             '开:' + fire_time_str + ' 触:' + date_created_str)
-    requests.post(url)
+    # url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s" \
+    #       "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s" \
+    #       % (signal, remark, symbol + '_' + period, signal, direction,
+    #          '开:' + str(close_price) + ' 止:' + str(stop_lose_price) + ' 触:' + str(price), amount,
+    #          '开:' + fire_time_str + ' 触:' + date_created_str)
+    # requests.post(url)
 
     if not mailResult:
         print("发送失败")
@@ -88,6 +88,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
         'fire_time': fire_time,
         'direction': direction
     })
+    date_created = datetime.utcnow()
     if last_fire is not None:
         DBPyChanlun['future_signal'].find_one_and_update({
             'symbol': symbol, 'period': period, 'fire_time': fire_time, 'direction': direction
@@ -106,7 +107,6 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             }
         }, upsert=True)
     else:
-        date_created = datetime.utcnow()
         DBPyChanlun['future_signal'].insert_one({
             'symbol': symbol,
             'period': period,
@@ -121,8 +121,8 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             'stop_lose_price': stop_lose_price,  # 当前信号的止损价
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if (date_created - fire_time).total_seconds() < 120:
-            # 在2分钟内的触发邮件通知  2分钟就能扫监控品种
+        if (date_created - fire_time).total_seconds() < 60*3:
+            # 在3分钟内的触发邮件通知  3分钟就能扫内盘+外盘
             # 把数据库的utc时间 转成本地时间
             fire_time_str = (fire_time + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
             date_created_str = (date_created + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
@@ -193,7 +193,6 @@ def getDominantSymbol():
 # timeScope 监控距离现在多少分钟的
 def monitorFuturesAndDigitCoin(type, symbolList):
     logger = logging.getLogger()
-    # 扫一遍24个期货品种需要3.5分钟
     if type == "1":
         # auth('13088887055', 'chanlun123456')
         # count = get_query_count()
@@ -233,11 +232,10 @@ def monitorFuturesAndDigitCoin(type, symbolList):
         print("Error Occurred: {0}".format(traceback.format_exc()))
         if type == "1":
             print("期货出异常了", Exception)
-
-            # threading.Thread(
-            #     target=monitorFuturesAndDigitCoin, args="1").start()
+            threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolList]).start()
         elif type == "3":
             print("外盘期货出异常了", Exception)
+            threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
         else:
             print("火币出异常了", Exception)
             time.sleep(5)

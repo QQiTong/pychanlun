@@ -135,6 +135,8 @@ def testProxy():
 
 
 def testHuobi():
+    startTime = int(round(time.time()*1000))
+
     PROXIES = {
         "http": "socks5://127.0.0.1:10808",
         "https": "socks5://127.0.0.1:10808"
@@ -146,9 +148,9 @@ def testHuobi():
         'size': 2000
     }
     r = requests.get(hbdmUrl, params=payload1,  proxies=PROXIES)
+    endTime = int(round(time.time()*1000)) -startTime
+    print("耗费时间：",endTime)
     print(json.loads(r.text)['data'])
-
-
 def testPydash():
     a = [1, 2, 1, 5]
     b = pydash.find_index(a, lambda x: x == 1)
@@ -156,6 +158,13 @@ def testPydash():
 
 
 def testTime():
+    import pytz
+    tz = pytz.timezone('Asia/Shanghai')
+    str = '2020-03-19T09:10:00.000Z'
+    result = datetime.strptime(str,"%Y-%m-%dT%H:%M:%S.%fZ")
+
+    print(result,result)
+
     stamp = 1568091600
     test = datetime.fromtimestamp(stamp)
     print(test)
@@ -389,13 +398,13 @@ def app():
     # testBeichiDb()
     # testHuila()
     # testChange()
-    # testTQ()
+    testTQ()
     # testRQ()
     # testMonitor()
     # testThread()
     # testHuobi()
     # testWaipan()
-    testWechat()
+    # testWechat()
 
 
 if __name__ == '__main__':

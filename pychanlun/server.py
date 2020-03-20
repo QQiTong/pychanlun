@@ -2,8 +2,11 @@
 
 import os
 import sys
+import time
 
+import geventwebsocket
 from flask import Flask, request, Response
+from gevent.pywsgi import WSGIServer
 from waitress import serve
 import json
 import numpy as np
@@ -12,10 +15,32 @@ from pychanlun.Calc import Calc
 from pychanlun.config import config
 import rqdatac as rq
 from pychanlun.monitor.BusinessService import businessService
+from flask_sockets import Sockets
+from geventwebsocket.handler import WebSocketHandler
 
 app = Flask(__name__)
-
+sockets = Sockets(app)
 # curl -X GET 'http://127.0.0.1:5000/api/stock_data?symbol=RB2005&period=5m'
+
+# socket 路由，访问url是： ws://localhost:5000/echo
+@sockets.route('/control')
+def echo_socket(ws):
+    while not ws.closed:
+        message = ws.receive()
+        clientEvent = json.loads(message)['event']
+        try:
+            if clientEvent == 'changeList':
+                while True:
+                    changeListResult = businessService.getChangeList()
+                    result = {
+                        'event': 'changeList',
+                        'data': changeListResult
+                    }
+                    # 每隔1秒更新价格信息
+                    ws.send(json.dumps(result))
+                    time.sleep(5)
+        except geventwebsocket.exceptions.WebSocketError as e:
+            pass
 # -------------------------------通用接口-----------------------------------
 @app.route('/api/stock_data')
 def data():
@@ -213,7 +238,9 @@ def run(**kwargs):
     # 程序启动初始化主力合约信息,不需要每次都请求
     businessService.initDoinantSynmbol()
     # 生产模式运行，用waitress服务器
-    serve(app, host='0.0.0.0', port=port)
+    # serve(app, host='0.0.0.0', port=port,handler_class=WebSocketHandler)
+    http_serv = WSGIServer(("0.0.0.0", 5000), app, handler_class=WebSocketHandler)
+    http_serv.serve_forever()
 
 
 if __name__ == '__main__':

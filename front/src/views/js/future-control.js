@@ -1,6 +1,6 @@
 // @ is an alias to /src
 import {futureApi} from '@/api/futureApi'
-import CommonTool from "@/tool/CommonTool";
+import CommonTool from '@/tool/CommonTool'
 // import {mapGetters, mapMutations} from 'vuex'
 // let moment = require('moment')
 // import echarts from 'echarts/lib/echarts'
@@ -10,14 +10,14 @@ import FuturePositionList from '../FuturePositionList'
 export default {
     name: 'futures-control',
     components: {
-        "MyHeader": MyHeader,
-        "FuturePositionList": FuturePositionList
+        'MyHeader': MyHeader,
+        'FuturePositionList': FuturePositionList
     },
     data() {
         return {
             beichiListLoading: true,
             calcPosForm: {
-                //start用于仓位管理计算
+                // start用于仓位管理计算
                 currentSymbol: null,
                 currentMarginRate: null,
                 // 合约乘数
@@ -29,19 +29,19 @@ export default {
                 futureAccount: this.$futureAccount,
                 // 数字货币账户总额
                 digitCoinAccount: this.$digitCoinAccount,
-                //开仓价格
+                // 开仓价格
                 openPrice: null,
-                //止损价格
+                // 止损价格
                 stopPrice: null,
-                //开仓手数
+                // 开仓手数
                 maxOrderCount: null,
-                //资金使用率
+                // 资金使用率
                 accountUseRate: null,
-                //最大资金使用率
+                // 最大资金使用率
                 maxAccountUseRate: 0.1,
-                //止损系数
+                // 止损系数
                 stopRate: 0.01,
-                //数字货币手续费 20倍杠杆
+                // 数字货币手续费 20倍杠杆
                 digitCoinFee: 0.0006,
 
                 // 1手需要的保证金
@@ -59,18 +59,18 @@ export default {
                 dynamicWinPrice: null,
                 // 动态止盈手数
                 dynamicWinCount: 0,
-                //end仓位管理计算
+                // end仓位管理计算
             },
             keyword: '',
             futureSymbolList: [],
             futureSymbolMap: {},
             periodList: ['3m', '5m', '15m', '30m', '60m'],
             beichiList: {},
-            changeList: null,//涨跌幅
+            changeList: null, // 涨跌幅
             marginLevelCompany: 0.01,
             firstRequestDominant: true,
 
-            //start用于仓位管理计算
+            // start用于仓位管理计算
             currentSymbol: null,
             currentMarginRate: null,
             // 合约乘数
@@ -82,19 +82,19 @@ export default {
             futureAccount: this.$futureAccount,
             // 数字货币账户总额
             digitCoinAccount: this.$digitCoinAccount,
-            //开仓价格
+            // 开仓价格
             openPrice: null,
-            //止损价格
+            // 止损价格
             stopPrice: null,
-            //开仓手数
+            // 开仓手数
             maxOrderCount: null,
-            //资金使用率
+            // 资金使用率
             accountUseRate: null,
-            //最大资金使用率
+            // 最大资金使用率
             maxAccountUseRate: 0.1,
-            //止损系数
+            // 止损系数
             stopRate: 0.01,
-            //数字货币手续费 20倍杠杆
+            // 数字货币手续费 20倍杠杆
             digitCoinFee: 0.0006,
 
             // 1手需要的保证金
@@ -112,195 +112,195 @@ export default {
             dynamicWinPrice: null,
             // 动态止盈手数
             dynamicWinCount: 0,
-            //end仓位管理计算
+            // end仓位管理计算
 
             digitCoinsSymbolList: [{
                 contract_multiplier: 20,
-                de_listed_date: "forever",
-                exchange: "HUOBI",
-                listed_date: "forever",
+                de_listed_date: 'forever',
+                exchange: 'HUOBI',
+                listed_date: 'forever',
                 margin_rate: 0.045,
                 market_tplus: 0,
-                maturity_date: "forever",
-                order_book_id: "BTC_CQ",
+                maturity_date: 'forever',
+                order_book_id: 'BTC_CQ',
                 round_lot: 1,
-                symbol: "比特币",
-                trading_hours: "7*24",
-                type: "Future",
-                underlying_order_book_id: "null",
-                underlying_symbol: "BTC_CQ",
+                symbol: '比特币',
+                trading_hours: '7*24',
+                type: 'Future',
+                underlying_order_book_id: 'null',
+                underlying_symbol: 'BTC_CQ',
                 feeRate: 0.012
             },
                 {
                     contract_multiplier: 20,
-                    de_listed_date: "forever",
-                    exchange: "HUOBI",
-                    listed_date: "forever",
+                    de_listed_date: 'forever',
+                    exchange: 'HUOBI',
+                    listed_date: 'forever',
                     margin_rate: 0.045,
                     market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "ETH_CQ",
+                    maturity_date: 'forever',
+                    order_book_id: 'ETH_CQ',
                     round_lot: 1,
-                    symbol: "以太坊",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "ETH_CQ",
+                    symbol: '以太坊',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'ETH_CQ',
                 }],
-            //外盘
+            // 外盘
             outSideSymbolList: [{
                 contract_multiplier: 20,
-                de_listed_date: "forever",
-                exchange: "NYMEX能源",
-                listed_date: "forever",
+                de_listed_date: 'forever',
+                exchange: 'NYMEX能源',
+                listed_date: 'forever',
                 margin_rate: 1,
                 market_tplus: 0,
-                maturity_date: "forever",
-                order_book_id: "CL",
+                maturity_date: 'forever',
+                order_book_id: 'CL',
                 round_lot: 1,
-                symbol: "CL",
-                trading_hours: "7*24",
-                type: "Future",
-                underlying_order_book_id: "null",
-                underlying_symbol: "CL",
+                symbol: 'CL',
+                trading_hours: '7*24',
+                type: 'Future',
+                underlying_order_book_id: 'null',
+                underlying_symbol: 'CL',
                 feeRate: 0.012
             },
                 {
                     contract_multiplier: 20,
-                    de_listed_date: "forever",
-                    exchange: "纽约COMEX",
-                    listed_date: "forever",
+                    de_listed_date: 'forever',
+                    exchange: '纽约COMEX',
+                    listed_date: 'forever',
                     margin_rate: 1,
                     market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "GC",
+                    maturity_date: 'forever',
+                    order_book_id: 'GC',
                     round_lot: 1,
-                    symbol: "GC",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "GC",
+                    symbol: 'GC',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'GC',
                     feeRate: 0.012
                 },
                 {
                     contract_multiplier: 20,
-                    de_listed_date: "forever",
-                    exchange: "纽约COMEX",
-                    listed_date: "forever",
+                    de_listed_date: 'forever',
+                    exchange: '纽约COMEX',
+                    listed_date: 'forever',
                     margin_rate: 1,
                     market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "SI",
+                    maturity_date: 'forever',
+                    order_book_id: 'SI',
                     round_lot: 1,
-                    symbol: "SI",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "SI",
+                    symbol: 'SI',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'SI',
                     feeRate: 0.012
                 },
 
                 {
                     contract_multiplier: 20,
-                    de_listed_date: "forever",
-                    exchange: "美国",
-                    listed_date: "forever",
+                    de_listed_date: 'forever',
+                    exchange: '美国',
+                    listed_date: 'forever',
                     margin_rate: 1,
                     market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "CT",
+                    maturity_date: 'forever',
+                    order_book_id: 'CT',
                     round_lot: 1,
-                    symbol: "CT",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "CT",
+                    symbol: 'CT',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'CT',
                     feeRate: 0.012
                 },
                 // otherSymbol = ["BTC_CQ","ETH_CQ","CL","GC","SI","S","CT","SM","BO","NID","ZSD"]
                 {
                     contract_multiplier: 20,
-                    de_listed_date: "forever",
-                    exchange: "美国",
-                    listed_date: "forever",
+                    de_listed_date: 'forever',
+                    exchange: '美国',
+                    listed_date: 'forever',
                     margin_rate: 1,
                     market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "S",
+                    maturity_date: 'forever',
+                    order_book_id: 'S',
                     round_lot: 1,
-                    symbol: "S",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "S",
+                    symbol: 'S',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'S',
                     feeRate: 0.012
                 },
                 {
                     contract_multiplier: 20,
-                    de_listed_date: "forever",
-                    exchange: "美国",
-                    listed_date: "forever",
+                    de_listed_date: 'forever',
+                    exchange: '美国',
+                    listed_date: 'forever',
                     margin_rate: 1,
                     market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "SM",
+                    maturity_date: 'forever',
+                    order_book_id: 'SM',
                     round_lot: 1,
-                    symbol: "SM",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "SM",
+                    symbol: 'SM',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'SM',
                     feeRate: 0.012
                 },
                 {
                     contract_multiplier: 20,
-                    de_listed_date: "forever",
-                    exchange: "美国",
-                    listed_date: "forever",
+                    de_listed_date: 'forever',
+                    exchange: '美国',
+                    listed_date: 'forever',
                     margin_rate: 1,
                     market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "BO",
+                    maturity_date: 'forever',
+                    order_book_id: 'BO',
                     round_lot: 1,
-                    symbol: "BO",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "BO",
+                    symbol: 'BO',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'BO',
                     feeRate: 0.012
                 },
                 {
                     contract_multiplier: 20,
-                    de_listed_date: "forever",
-                    exchange: "伦敦",
-                    listed_date: "forever",
+                    de_listed_date: 'forever',
+                    exchange: '伦敦',
+                    listed_date: 'forever',
                     margin_rate: 1,
                     market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "NID",
+                    maturity_date: 'forever',
+                    order_book_id: 'NID',
                     round_lot: 1,
-                    symbol: "NID",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "NID",
+                    symbol: 'NID',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'NID',
                     feeRate: 0.012
                 },
                 {
                     contract_multiplier: 20,
-                    de_listed_date: "forever",
-                    exchange: "伦敦",
-                    listed_date: "forever",
+                    de_listed_date: 'forever',
+                    exchange: '伦敦',
+                    listed_date: 'forever',
                     margin_rate: 1,
                     market_tplus: 0,
-                    maturity_date: "forever",
-                    order_book_id: "ZSD",
+                    maturity_date: 'forever',
+                    order_book_id: 'ZSD',
                     round_lot: 1,
-                    symbol: "ZSD",
-                    trading_hours: "7*24",
-                    type: "Future",
-                    underlying_order_book_id: "null",
-                    underlying_symbol: "ZSD",
+                    symbol: 'ZSD',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'ZSD',
                     feeRate: 0.012
                 },
                 // {
@@ -342,15 +342,15 @@ export default {
             ],
             symbolSearch: '',
             percentage: 0,
-            //级别多空方向
+            // 级别多空方向
             levelDirectionList: [],
-            activeTab: "first",
+            activeTab: 'first',
             // 结束日期
             endDate: CommonTool.dateFormat('yyyy-MM-dd'),
-            prejudgeFormMap: "",
-            //保存新增预判数据
+            prejudgeFormMap: '',
+            // 保存新增预判数据
             prejudgeFormList: [],
-            //保存历史预判数据
+            // 保存历史预判数据
             historyPrejudgeList: [],
             historyPrejudgeMap: {},
             // 显示更新还是新增按钮
@@ -359,16 +359,16 @@ export default {
             // current  新增状态 获取的是主力合约 ,提交的时候触发新增
             // history 历史状态 获取的不一定是主力合约 ，提交表格触发更新
             prejudgeTableStatus: 'current',
-            prejudgeTableId: "",
+            prejudgeTableId: '',
         }
     },
     computed: {
         value2Computed: {
             get: function () {
-                return this.keyword;
+                return this.keyword
             },
             set: function (val) {
-                this.keyword = val.toUpperCase();
+                this.keyword = val.toUpperCase()
             }
         }
     },
@@ -383,55 +383,93 @@ export default {
             }
         }
     },
+
     mounted() {
-        this.getChangeiList()
+        this.subscribeWS()
+        // this.getChangeiList()
         this.getSignalList()
         this.getLevelDirectionList()
         this.getPrejudgeList()
         setInterval(() => {
-            this.getSignalList()
-            this.getChangeiList()
-            this.getLevelDirectionList()
+            // this.getSignalList()
+            // this.getChangeiList()
+            // this.getLevelDirectionList()
         }, 20000)
     },
     methods: {
+        subscribeWS() {
+            let ws = new WebSocket('ws://localhost:5000/control')
+            ws.onopen = function (evt) {
+                console.log('Connection open ...')
+                let subChangeList = {'event': 'changeList'}
+                ws.send(JSON.stringify(subChangeList))
+            }
+            // ws.addEventListener('open', function (event) {
+            //    ws.send('Hello Server!');
+            // };
+            ws.onmessage = (event) => {
+                console.log('Received Message: ' + event.data)
+                let jsonObj = JSON.parse(event.data)
+                console.log(jsonObj)
+                if (jsonObj.event === 'changeList') {
+                    this.changeList = jsonObj.data
+                }
+            }
+            ws.onclose = function (evt) {
+                console.log('Connection closed.')
+            }
+        },
+        processChangeList() {
+            // 计算多空分布
+            let long = 0
+            let short = 0
+            for (let item in this.changeList) {
+                if (this.changeList[item]['change'] > 0) {
+                    long = long + 1
+                } else {
+                    short = short + 1
+                }
+            }
+            this.percentage = parseInt(long / (long + short) * 100)
+            console.log('获取涨跌幅列表 计算百分比', this.changeList, this.percentage)
+        },
         getLevelDirectionList() {
             futureApi.getLevelDirectionList().then(res => {
-                console.log("获取多空方向列表:", res)
-                this.levelDirectionList = res;
+                console.log('获取多空方向列表:', res)
+                this.levelDirectionList = res
             }).catch((error) => {
-                console.log("获取多空方向列表:", error)
+                console.log('获取多空方向列表:', error)
             })
         },
         jumpToControl(type) {
-            if (type === "futures") {
-                this.$router.replace("/futures-control")
+            if (type === 'futures') {
+                this.$router.replace('/futures-control')
             } else {
-                this.$router.replace("/stock-control")
+                this.$router.replace('/stock-control')
             }
         },
         getDominantSymbol() {
             futureApi.getDominant().then(res => {
-                console.log("获取主力合约:", res)
-                this.futureSymbolList = res;
+                console.log('获取主力合约:', res)
+                this.futureSymbolList = res
                 this.futureSymbolList.push(...this.digitCoinsSymbolList)
                 this.futureSymbolList.push(...this.outSideSymbolList)
-                window.localStorage.setItem("symbolList", JSON.stringify(this.futureSymbolList))
+                window.localStorage.setItem('symbolList', JSON.stringify(this.futureSymbolList))
                 this.firstRequestDominant = false
                 this.beichiListLoading = false
             }).catch((error) => {
-                console.log("获取主力合约失败:", error)
+                console.log('获取主力合约失败:', error)
                 this.firstRequestDominant = false
             })
         },
         getSignalList() {
             futureApi.getSignalList().then(res => {
-                console.log("获取背驰列表:", res)
+                console.log('获取背驰列表:', res)
                 this.beichiList = res
                 if (this.firstRequestDominant) {
                     // 主力合约后端需要2秒才能返回，前端不要每次都去请求
                     // 本地缓存有主力合约数据
-                    let symbolList = window.localStorage.getItem("symbolList")
+                    let symbolList = window.localStorage.getItem('symbolList')
                     if (symbolList != null) {
                         this.beichiListLoading = false
                         this.futureSymbolList = JSON.parse(symbolList)
@@ -445,47 +483,35 @@ export default {
                         for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
                             let symbolItem = this.futureSymbolList[i]
                             this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
-                            this.prejudgeFormMap[symbolItem.order_book_id] = ""
+                            this.prejudgeFormMap[symbolItem.order_book_id] = ''
                         }
                         // 创建预判表单对象
-
                     }
                     // 静默更新主力合约
                     this.getDominantSymbol()
                 }
             }).catch((error) => {
-                console.log("获取背驰列表失败:", error)
+                console.log('获取背驰列表失败:', error)
             })
         },
         getChangeiList() {
             futureApi.getChangeiList().then(res => {
                 this.changeList = res
-                // 计算多空分布
-                let long = 0
-                let short = 0
-                for (let item in this.changeList) {
-                    if (this.changeList[item]['change'] > 0) {
-                        long = long + 1
-                    } else {
-                        short = short + 1
-                    }
-                }
-                this.percentage = parseInt(long / (long + short) * 100)
-                console.log("获取涨跌幅列表 计算百分比", res, this.percentage)
-            }).catch(() => {
-                console.log("获取涨跌幅失败:", error)
+                this.processChangeList()
+            }).catch((error) => {
+                console.log('获取涨跌幅失败:', error)
             })
         },
         jumpToKline(symbol) {
             // 总控页面不关闭，开启新页面
             let routeUrl = this.$router.resolve({
-                path: "/multi-period",
+                path: '/multi-period',
                 query: {
                     symbol: symbol,
-                    endDate: CommonTool.dateFormat("yyyy-MM-dd")
+                    endDate: CommonTool.dateFormat('yyyy-MM-dd')
                 }
-            });
-            window.open(routeUrl.href, '_blank');
+            })
+            window.open(routeUrl.href, '_blank')
         },
         fillMarginRate(symbolInfo, price) {
             this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
@@ -498,10 +524,10 @@ export default {
          */
         calcAccount() {
             if (this.calcPosForm.currentMarginRate == null) {
-                alert("请填入保证金系数，开仓价，止损价")
+                alert('请填入保证金系数，开仓价，止损价')
                 return
             }
-            if (this.calcPosForm.currentSymbol.indexOf("_CQ") === -1) {
+            if (this.calcPosForm.currentSymbol.indexOf('_CQ') === -1) {
                 this.calcPosForm.account = this.calcPosForm.futureAccount
                 // 计算1手需要的保证金
                 this.calcPosForm.perOrderMargin = Math.floor(this.calcPosForm.openPrice * this.calcPosForm.contractMultiplier * this.calcPosForm.currentMarginRate)
@@ -527,7 +553,6 @@ export default {
             // 根据最大资金使用率算出的开仓手数(四舍五入)
             let maxOrderCount2 = Math.round(maxAccountUse / this.calcPosForm.perOrderMargin)
 
-
             this.calcPosForm.maxOrderCount = maxOrderCount1 > maxOrderCount2 ? maxOrderCount2 : maxOrderCount1
             // 总保证金
             this.calcPosForm.totalOrderMargin = this.calcPosForm.perOrderMargin * this.calcPosForm.maxOrderCount
@@ -545,19 +570,19 @@ export default {
             if (this.calcPosForm.dynamicWinPrice != null) {
                 this.calcPosForm.dynamicWinCount = Math.round(this.calcPosForm.maxOrderCount * this.calcPosForm.perOrderStopMoney / ((this.calcPosForm.dynamicWinPrice - this.calcPosForm.openPrice) * this.calcPosForm.contractMultiplier + this.calcPosForm.perOrderStopMoney))
             }
-            console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " perOrderMargin:",
-                this.calcPosForm.perOrderMargin, " maxOrderCount:", this.calcPosForm.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.calcPosForm.perOrderStopMoney,
-                " accountUseRate:", this.calcPosForm.accountUseRate, " perOrderStopRate:", this.calcPosForm.perOrderStopRate)
+            console.log('maxAccountUse:', maxAccountUse, ' maxStopMoney :', maxStopMoney, ' perOrderMargin:',
+                this.calcPosForm.perOrderMargin, ' maxOrderCount:', this.calcPosForm.maxOrderCount, ' maxOrderCount2:', maxOrderCount2, ' perOrderStopMoney:', this.calcPosForm.perOrderStopMoney,
+                ' accountUseRate:', this.calcPosForm.accountUseRate, ' perOrderStopRate:', this.calcPosForm.perOrderStopRate)
         },
         customColorMethod(percentage) {
             if (percentage < 50) {
-                return '#409EFF';
+                return '#409EFF'
             } else {
-                return '#F56C6C';
+                return '#F56C6C'
             }
         },
         handleChangeTab(tab, event) {
-            console.log(tab, event);
+            console.log(tab, event)
         },
 
         changePrejudgeDate() {
@@ -570,36 +595,36 @@ export default {
                 prejudgeList: type === 'create' ? this.prejudgeFormMap : this.historyPrejudgeMap
             }
             this.btnPrejudgeLoading = true
-            if (type === "create") {
+            if (type === 'create') {
                 futureApi.createPrejudgeList(data).then(res => {
-                    console.log("创建预判成功:", res)
+                    console.log('创建预判成功:', res)
                     this.btnPrejudgeLoading = false
                     this.$notify({
-                        title: "Success",
-                        message: "创建预判成功",
-                        type: "success",
+                        title: 'Success',
+                        message: '创建预判成功',
+                        type: 'success',
                         duration: 2000
-                    });
+                    })
                     this.getPrejudgeList()
                 }).catch(() => {
                     this.btnPrejudgeLoading = false
-                    console.log("创建失败:", error)
+                    console.log('创建失败:', error)
                 })
             } else {
                 data.id = this.prejudgeTableId
                 futureApi.updatePrejudgeList(data).then(res => {
-                    console.log("更新预判成功:", res)
+                    console.log('更新预判成功:', res)
                     this.btnPrejudgeLoading = false
                     this.$notify({
-                        title: "Success",
-                        message: "更新预判成功",
-                        type: "success",
+                        title: 'Success',
+                        message: '更新预判成功',
+                        type: 'success',
                         duration: 2000
-                    });
+                    })
                     this.getPrejudgeList()
                 }).catch(() => {
                     this.btnPrejudgeLoading = false
-                    console.log("更新失败:", error)
+                    console.log('更新失败:', error)
                 })
             }
         },
@@ -607,7 +632,7 @@ export default {
             // 如果这个日期是有数据的，就显示更新按钮，否则显示新增按钮
             futureApi.getPrejudgeList(this.endDate).then(res => {
                 if (res == -1) {
-                    // this.prejudgeCreateFlag = true  
+                    // this.prejudgeCreateFlag = true
                     this.prejudgeTableStatus = 'current'
                 } else {
                     // this.prejudgeCreateFlag = false
@@ -619,12 +644,11 @@ export default {
                     for (let x in res.prejudgeList) {
                         this.historyPrejudgeList.push(x)
                     }
-                    console.log("获取预判成功:", res)
+                    console.log('获取预判成功:', res)
                 }
             }).catch(() => {
-                console.log("获取预判失败:", error)
+                console.log('获取预判失败:', error)
             })
-
         },
         editPrejudgeList() {
 

@@ -59,15 +59,15 @@ export default {
                 // 多周期显示不下,需要配置
                 multiPeriodGrid: [{
                     left: '0%',
-                    right: '10%',
+                    right: '18%',
                     height: '75%',
                     top: 50
                 },
                  {
+                    left: '0%',
+                    right: '18%',
                     top: '82%',
                     height: '20%',
-                    left: '0%',
-                    right: '10%',
                  },
 
                 ],
@@ -78,10 +78,10 @@ export default {
                     top: 50
                 },
                  {
-                    top: '75%',
-                    height: '20%',
                     left: '0%',
                     right: '10%',
+                    top: '75%',
+                    height: '20%',
                  },
                 ],
             },
@@ -482,10 +482,16 @@ export default {
             if (this.period !== '') {
                 Object.assign(query, { symbol, period: this.period, endDate: this.endDate})
                 that.$router.push({ query })
+                // this.$router.push(query).catch(err => {
+                //     console.log('捕获相同路由报错', err)
+                // })
                 that.sendRequest(symbol, this.period, update)
             } else {
                 Object.assign(query, { symbol, endDate: this.endDate})
                 that.$router.push({ query })
+                // this.$router.push(query).catch(err => {
+                //     console.log('捕获相同路由报错', err)
+                // })
                 for (var i = 0; i < 8; i++) {
                     switch (i) {
                         // case 0:
@@ -1080,7 +1086,6 @@ export default {
                             itemStyle: {
                                 normal: {
                                     color: function (params) {
-                                        console.log(that.echartsConfig)
                                         var colorList
                                         if (params.data >= 0) {
                                             if (params.data >= that.echartsConfig.macdUpLastValue) {
@@ -1210,13 +1215,13 @@ export default {
             } else {
                 option.grid = this.echartsConfig.multiPeriodGrid
             }
-            console.log('111111111111', option)
             currentChart.setOption(option)
         },
         refreshOption (chart, resultData) {
             var option = chart.getOption()
             option.series[0].data = resultData.values
             option.xAxis[0].data = resultData.date
+            option.xAxis[1].data = resultData.date
             option.series[0].markArea.data = resultData.zsvalues
             option.series[0].markLine.data = resultData.markLineData
             option.series[0].markPoint.data = resultData.huilaValues
@@ -1230,6 +1235,7 @@ export default {
             // option.series[4].data = this.calculateMA(resultData, 5);
             // option.series[5].data = this.calculateMA(resultData, 10);
             // option.series[11].data = resultData.volume;
+            console.log("更新的option",option)
             return option
         },
         splitData (jsonObj, period) {
@@ -1998,7 +2004,7 @@ export default {
                 this.currentMarginRate = margin_rate + this.marginLevelCompany
                 this.currentSymbol = this.symbol
                 // 计算开仓手数
-                this.calcAccount()
+                this.calcAccount(currentPrice)
                 // console.log(beichiPrice, stopLosePrice, diffPrice, targetPrice)
                 // 单位是万
                 currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
@@ -2422,7 +2428,7 @@ export default {
             return markLineData
         },
         // 计算开仓手数
-        calcAccount () {
+        calcAccount (currentPrice) {
             if (this.currentMarginRate == null) {
                 alert('请选择保证金系数，开仓价，止损价')
                 return
@@ -2437,7 +2443,9 @@ export default {
             } else {
                 this.account = this.digitCoinAccount
                 // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
-                this.perOrderMargin = 5
+                // OKEX 1张 = 0.01BTC  20倍杠杆， 1张就是 0.01* BTC的现价
+                // 单位usdt
+                this.perOrderMargin = 0.01 * currentPrice
                 this.perOrderStopRate = (Math.abs(this.openPrice - this.stopPrice) / this.openPrice + this.digitCoinFee) * 20
                 this.perOrderStopMoney = Number((this.perOrderMargin * this.perOrderStopRate).toFixed(2))
             }
