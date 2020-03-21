@@ -7,6 +7,7 @@ import json
 from pychanlun.funcat.time_series import (fit_series, NumericSeries)
 from pychanlun.funcat.api import *
 from pychanlun import Duan
+from pychanlun.basic.bi import CalcBiList
 
 
 '''
@@ -29,8 +30,9 @@ signalMap = {
 }
 
 
-def calc(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_list, bi_series, duan_series):
+def calc(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_series, duan_series):
     time_series, macd_series, diff_series, dea_series, bi_series, duan_series = fit_series(time_series, macd_series, diff_series, dea_series, bi_series, duan_series)
+    bi_list = CalcBiList(len(time_series), bi_series, high_series, low_series)
     # 底背驰信号
     divergence_down = np.zeros(len(time_series))
     # 顶背驰信号
@@ -123,6 +125,6 @@ def note(divergence_down, divergence_up, bi_series, duan_series, time_series, hi
     return data
 
 
-def calcAndNote(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_list, bi_series, duan_series, bigLevel = False):
-    divergence_down, divergence_up = calc(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_list, bi_series, duan_series)
+def calcAndNote(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_series, duan_series, bigLevel = False):
+    divergence_down, divergence_up = calc(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_series, duan_series)
     return note(divergence_down, divergence_up, bi_series, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel)

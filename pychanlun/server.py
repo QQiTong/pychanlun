@@ -7,7 +7,7 @@ import time
 import geventwebsocket
 from flask import Flask, request, Response
 from gevent.pywsgi import WSGIServer
-from waitress import serve
+
 import json
 import numpy as np
 from rqdatac import *
@@ -238,11 +238,10 @@ def run(**kwargs):
     # 程序启动初始化主力合约信息,不需要每次都请求
     businessService.initDoinantSynmbol()
     # 生产模式运行，用waitress服务器
-    # serve(app, host='0.0.0.0', port=port,handler_class=WebSocketHandler)
-    http_serv = WSGIServer(("0.0.0.0", 5000), app, handler_class=WebSocketHandler)
+    http_serv = WSGIServer(("0.0.0.0", port), app, handler_class=WebSocketHandler)
     http_serv.serve_forever()
 
 
 if __name__ == '__main__':
     # 开发模式运行，用内置服务器
-    app.run()
+    run()

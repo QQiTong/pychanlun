@@ -379,59 +379,63 @@ class Calc:
         resJson['higher_duan_zsflag'] = higher_duan_zsflag
 
         # 获取大级别macd
-        # resJson['diffBigLevel'] = getMacd(closeListBigLevel)[0].tolist()
-        # resJson['deaBigLevel'] = getMacd(closeListBigLevel)[1].tolist()
-        # resJson['macdBigLevel'] = getMacd(closeListBigLevel)[2].tolist()
-        # resJson['dateBigLevel'] = timeListBigLevel
+        resJson['diffBigLevel'] = getMacd(closePriceListBigLevel)[0].tolist()
+        resJson['deaBigLevel'] = getMacd(closePriceListBigLevel)[1].tolist()
+        resJson['macdBigLevel'] = getMacd(closePriceListBigLevel)[2].tolist()
+        resJson['dateBigLevel'] = timeListBigLevel
 
-        # diffList = resJson['diff']
-        # deaList = resJson['dea']
-        # macdList = resJson['macd']
+        diffList = resJson['diff']
+        deaList = resJson['dea']
+        macdList = resJson['macd']
 
         # 背驰计算
         time_array = np.array(timeList)
-        # macd_array = np.array(macdList)
-        # diff_array = np.array(diffList)
-        # dea_array = np.array(deaList)
-        # high_array = np.array(highList)
-        # low_array = np.array(lowList)
-        # open_array = np.array(openPriceList)
-        # close_array = np.array(closePriceList)
-        # beichiData = divergence.calcAndNote(time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array, biProcess.biList, biResult, duanResult)
-        # beichiData2 = divergence.calcAndNote(time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array, biProcess.biList, biResult, higherDuanResult, True)
-        # buyMACDBCData = beichiData['buyMACDBCData']
-        # sellMACDBCData = beichiData['sellMACDBCData']
-        # buyMACDBCData2 = beichiData2['buyMACDBCData']
-        # sellMACDBCData2 = beichiData2['sellMACDBCData']
+        macd_array = np.array(macdList)
+        diff_array = np.array(diffList)
+        dea_array = np.array(deaList)
+        high_array = np.array(highList)
+        low_array = np.array(lowList)
+        open_array = np.array(openPriceList)
+        close_array = np.array(closePriceList)
+        beichiData = divergence.calcAndNote(
+                time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array,
+                biList, duanList)
+        beichiData2 = divergence.calcAndNote(
+                time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array,
+                biList, higherDuanList, True)
+        buyMACDBCData = beichiData['buyMACDBCData']
+        sellMACDBCData = beichiData['sellMACDBCData']
+        buyMACDBCData2 = beichiData2['buyMACDBCData']
+        sellMACDBCData2 = beichiData2['sellMACDBCData']
 
-        # buyHigherMACDBCData = {}
-        # buyHigherMACDBCData['date'] = []
-        # buyHigherMACDBCData['data'] = []
-        # buyHigherMACDBCData['value'] = []
+        buyHigherMACDBCData = {}
+        buyHigherMACDBCData['date'] = []
+        buyHigherMACDBCData['data'] = []
+        buyHigherMACDBCData['value'] = []
         #
-        # sellHigherMACDBCData = {}
-        # sellHigherMACDBCData['date'] = []
-        # sellHigherMACDBCData['data'] = []
-        # sellHigherMACDBCData['value'] = []
+        sellHigherMACDBCData = {}
+        sellHigherMACDBCData['date'] = []
+        sellHigherMACDBCData['data'] = []
+        sellHigherMACDBCData['value'] = []
 
         # strategy3计算
         resJson['notLower'] = calcNotLower(duanList, lowList)
         resJson['notHigher'] = calcNotHigher(duanList, highList)
-        # for x in range(len(buyMACDBCData2['date'])):
-        #     if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
-        #         buyHigherMACDBCData['date'].append(buyMACDBCData2['date'][x])
-        #         buyHigherMACDBCData['data'].append(buyMACDBCData2['data'][x])
-        #         buyHigherMACDBCData['value'].append(buyMACDBCData2['value'][x])
-        # for x in range(len(sellMACDBCData2['date'])):
-        #     if pydash.find_index(sellMACDBCData['date'], lambda t: t == sellMACDBCData2['date'][x]) == -1:
-        #         sellHigherMACDBCData['date'].append(sellMACDBCData2['date'][x])
-        #         sellHigherMACDBCData['data'].append(sellMACDBCData2['data'][x])
-        #         sellHigherMACDBCData['value'].append(sellMACDBCData2['value'][x])
-        # resJson['buyMACDBCData'] = buyMACDBCData
-        # resJson['sellMACDBCData'] = sellMACDBCData
-        #
-        # resJson['buyHigherMACDBCData'] = buyMACDBCData2
-        # resJson['sellHigherMACDBCData'] = sellMACDBCData2
+        for x in range(len(buyMACDBCData2['date'])):
+            if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
+                buyHigherMACDBCData['date'].append(buyMACDBCData2['date'][x])
+                buyHigherMACDBCData['data'].append(buyMACDBCData2['data'][x])
+                buyHigherMACDBCData['value'].append(buyMACDBCData2['value'][x])
+        for x in range(len(sellMACDBCData2['date'])):
+            if pydash.find_index(sellMACDBCData['date'], lambda t: t == sellMACDBCData2['date'][x]) == -1:
+                sellHigherMACDBCData['date'].append(sellMACDBCData2['date'][x])
+                sellHigherMACDBCData['data'].append(sellMACDBCData2['data'][x])
+                sellHigherMACDBCData['value'].append(sellMACDBCData2['value'][x])
+        resJson['buyMACDBCData'] = buyMACDBCData
+        resJson['sellMACDBCData'] = sellMACDBCData
+
+        resJson['buyHigherMACDBCData'] = buyMACDBCData2
+        resJson['sellHigherMACDBCData'] = sellMACDBCData2
 
         resJson['buy_zs_huila'] = huila['buy_zs_huila']
         resJson['sell_zs_huila'] =huila['sell_zs_huila']

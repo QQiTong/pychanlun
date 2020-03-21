@@ -384,8 +384,8 @@ export default {
         }
     },
 
-    mounted() {
-        this.subscribeWS()
+    mounted () {
+        // this.subscribeWS()
         // this.getChangeiList()
         this.getSignalList()
         this.getLevelDirectionList()
@@ -397,7 +397,7 @@ export default {
         }, 20000)
     },
     methods: {
-        subscribeWS() {
+        subscribeWS () {
             let ws = new WebSocket('ws://localhost:5000/control')
             ws.onopen = function (evt) {
                 console.log('Connection open ...')
