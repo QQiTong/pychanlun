@@ -14,3 +14,5 @@ tornado
 click
 pytdx
 tqsdk
+gevent-websocket
+flask_sockets

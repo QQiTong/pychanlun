@@ -7,6 +7,7 @@ import click
 from pychanlun import server as apiserver
 from pychanlun.monitor import BeichiMonitor, stock_signal_calculator
 from pychanlun.market_data import tdx_local_downloader, global_futures_downloader
+from pychanlun.monitor import stock as stock_monitoring
 
 
 @click.group()
@@ -57,6 +58,8 @@ def global_futures(**kwargs):
 pychanlun stock download --source tdxlocal
 从下载好的数据计算笔、段、中枢和信号:
 pychanlun stock calculate
+监控通达信自选股中的股票
+pychanlun stock monitoring
 """
 @run.command()
 @click.argument("command", default="download")
@@ -77,6 +80,11 @@ def stock(**kwargs):
         logger.info("股票信号计算 开始")
         stock_signal_calculator.run(**kwargs)
         logger.info("股票信号计算 结束")
+    elif command == "monitoring":
+        logger.info("股票监控 开始")
+        stock_monitoring.run(**kwargs)
+        logger.info("股票监控 结束")
+
 
 if __name__ == '__main__':
     run()
