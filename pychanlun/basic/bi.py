@@ -228,7 +228,7 @@ def CalcBiList(count, bi, high, low):
             bi_item = { "start": i, "end": i, "direction": -1, "candleList": [ candle ] }
             biList.append(bi_item)
         elif bi[i] == -1:
-            biItem = { "start": i, "end": i, "direction": 1, "candleList": [ candle ] }
+            bi_item = { "start": i, "end": i, "direction": 1, "candleList": [ candle ] }
             biList.append(bi_item)
         else:
             if len(biList) > 0:
