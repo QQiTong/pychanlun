@@ -386,14 +386,14 @@ export default {
 
     mounted () {
         // this.subscribeWS()
-        // this.getChangeiList()
+        this.getChangeiList()
         this.getSignalList()
         this.getLevelDirectionList()
         this.getPrejudgeList()
         setInterval(() => {
-            // this.getSignalList()
-            // this.getChangeiList()
-            // this.getLevelDirectionList()
+            this.getSignalList()
+            this.getChangeiList()
+            this.getLevelDirectionList()
         }, 20000)
     },
     methods: {

@@ -12,8 +12,8 @@ from pychanlun.basic.bi import CalcBiList
 
 '''
      High 高级别 H
-     Top  顶 T
-     Bottom 底 B
+     Sell  顶 S
+     Buy   底 B
      Xian   黄白线 X
      Ji     面积 J
 '''
@@ -21,12 +21,12 @@ signalMap = {
     '高级别线底背': 'HXB',
     '线底背': 'XB',
     '高级别线顶背': 'HXT',
-    '线顶背': 'XT',
+    '线顶背': 'XS',
 
     '高级别积底背': 'HJB',
     '积底背': 'JB',
     '高级别积顶背': 'HJT',
-    '积顶背': 'JT',
+    '积顶背': 'JS',
 }
 
 

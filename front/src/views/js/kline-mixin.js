@@ -1126,9 +1126,9 @@ export default {
                             },
                             symbol: 'none',
                             animation: false,
-                            // markPoint: {
-                            //     data: resultData.bcMACDValues
-                            // },
+                            markPoint: {
+                                data: resultData.bcMACDValues
+                            },
                         },
                         // index 7
 
@@ -1871,6 +1871,41 @@ export default {
                 markLineData = this.getMarklineData(jsonObj)
             }
             // console.log("markline", markLineData)
+
+            let bcMACDValues = [];
+            for (let i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
+                let value = {
+                    coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
+                    value: jsonObj.buyMACDBCData.value[i],
+                    symbolRotate: -180,
+                    symbol: 'pin',
+                    itemStyle: {
+                        normal: {color: 'red'}
+                    },
+                    label: {
+                        position: 'inside',
+                        offset: [0, 10],
+                        textBorderColor: 'red',
+                        textBorderWidth: 2,
+                        color: 'white',
+                    },
+                };
+                bcMACDValues.push(value);
+            }
+            for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
+                let value = {
+                    coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
+                    value: jsonObj.sellMACDBCData.value[i],
+                    symbolRotate: 0,
+                    symbol: 'pin',
+                    itemStyle: {
+                        normal: {color: 'green'}
+                    }
+                };
+                bcMACDValues.push(value);
+            }
+
+
             const macddata = jsonObj.macd
             const diffdata = jsonObj.diff
             const deadata = jsonObj.dea
@@ -1893,18 +1928,19 @@ export default {
                 macd: macddata,
                 diff: diffdata,
                 dea: deadata,
+                bcMACDValues: bcMACDValues,
 
             }
         },
         // 通用开平动止标注数据
         getMarklineData (jsonObj) {
-            var markLineData = []
-            var lastBeichiType = this.getLastBeichiData(jsonObj)
-            var lastBeichi = null
+            let markLineData = []
+            let lastBeichiType = this.getLastBeichiData(jsonObj)
+            let lastBeichi = null
             const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
             let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
             // 当前价格
-            var currentPrice = jsonObj.close[jsonObj.close.length - 1]
+            let currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
             this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1
             // 1手需要的保证金
@@ -1966,21 +2002,21 @@ export default {
                         break
                 }
                 // 背驰时的价格
-                var beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
+                let beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
                 // 止损价格
-                var stopLosePrice = lastBeichi['stop_lose_price'][lastBeichi['stop_lose_price'].length - 1]
+                let stopLosePrice = lastBeichi['stop_lose_price'][lastBeichi['stop_lose_price'].length - 1]
                 // 第一次止盈价格
-                var stopWinPrice = lastBeichi['stop_win_price'][lastBeichi['stop_win_price'].length - 1]
+                let stopWinPrice = lastBeichi['stop_win_price'][lastBeichi['stop_win_price'].length - 1]
                 // 第一次止盈百分比
-                var stopWinPercent = 0
+                let stopWinPercent = 0
                 // 止盈价格
-                var targetPrice = 0
+                let targetPrice = 0
                 // 达到2.3倍盈亏比 才能保证动止30% 止损不亏
-                var diffPrice = Math.abs(beichiPrice - stopLosePrice) * 2.3
+                let diffPrice = Math.abs(beichiPrice - stopLosePrice) * 2.3
                 // 当前收益百分比
-                var currentPercent = ''
+                let currentPercent = ''
                 // 当前收益（单位万/元）
-                var currentProfit = ''
+                let currentProfit = ''
                 if (lastBeichiType === 1 || lastBeichiType === 2 || lastBeichiType === 5 || lastBeichiType === 6 ||
                     lastBeichiType === 9 || lastBeichiType === 10 || lastBeichiType === 13 || lastBeichiType === 14) {
                     targetPrice = beichiPrice + diffPrice
@@ -1995,7 +2031,7 @@ export default {
                         stopWinPercent = ((beichiPrice - stopWinPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                     }
                 }
-                var targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                let targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                 // 准备参数
                 this.openPrice = beichiPrice
                 this.stopPrice = stopLosePrice
@@ -2033,7 +2069,7 @@ export default {
                 markLineData.push(markLineCurrent)
                 // 保本位
                 if (beichiPrice) {
-                    var markLineBeichi = {
+                    let markLineBeichi = {
                         yAxis: beichiPrice,
                         lineStyle: {
                             normal: {
@@ -2057,7 +2093,7 @@ export default {
 
                 // 止损位
                 if (stopLosePrice) {
-                    var markLineStop = {
+                    let markLineStop = {
                         yAxis: stopLosePrice,
                         lineStyle: {
                             normal: {
@@ -2090,7 +2126,7 @@ export default {
                 if (jsonObj['fractal'][0]['direction'] === 1) {
                     higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
                     // 高级别分型线
-                    var markLineFractal = {
+                    let markLineFractal = {
                         yAxis: higherBottomPrice,
                         lineStyle: {
                             normal: {
@@ -2114,7 +2150,7 @@ export default {
                 if (jsonObj['fractal'][1]['direction'] === 1) {
                     higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
                     // 高高级别分型线
-                    var markLineFractal = {
+                    let markLineFractal = {
                         yAxis: higherHigherBottomPrice,
                         lineStyle: {
                             normal: {
@@ -2140,7 +2176,7 @@ export default {
                 if (jsonObj['fractal'][0]['direction'] === -1) {
                     higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
                     // 高级别分型线
-                    var markLineFractal = {
+                    let markLineFractal = {
                         yAxis: higherTopPrice,
                         lineStyle: {
                             normal: {
@@ -2164,7 +2200,7 @@ export default {
                 if (jsonObj['fractal'][1]['direction'] === -1) {
                     higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
                     // 高高级别分型线
-                    var markLineFractal = {
+                    let markLineFractal = {
                         yAxis: higherHigherTopPrice,
                         lineStyle: {
                             normal: {
@@ -2193,7 +2229,7 @@ export default {
          * @param jsonObj
          */
         getPositionMarklineData (jsonObj) {
-            var markLineData = []
+            let markLineData = []
 
             // 开仓价格
             let openPrice = this.currentPosition.price
@@ -2203,7 +2239,7 @@ export default {
             const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
             let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
             // 当前价格
-            var currentPrice = jsonObj.close[jsonObj.close.length - 1]
+            let currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
             this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1
             // 1手需要的保证金
@@ -2243,7 +2279,7 @@ export default {
                     }
             markLineData.push(markLineCurrent)
             // 开仓价
-            var markLineOpen = {
+            let markLineOpen = {
                 yAxis: openPrice,
                 lineStyle: {
                     normal: {
@@ -2265,7 +2301,7 @@ export default {
             markLineData.push(markLineOpen)
 
             // 止损线
-            var markLineStop = {
+            let markLineStop = {
                 yAxis: stopLosePrice,
                 lineStyle: {
                     normal: {
@@ -2329,7 +2365,7 @@ export default {
                 if (jsonObj['fractal'][0]['direction'] === 1) {
                     higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
                     // 高级别分型线
-                    var markLineFractal = {
+                    let markLineFractal = {
                         yAxis: higherBottomPrice,
                         lineStyle: {
                             normal: {
@@ -2353,7 +2389,7 @@ export default {
                 if (jsonObj['fractal'][1]['direction'] === 1) {
                     higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
                     // 高高级别分型线
-                    var markLineFractal = {
+                    let markLineFractal = {
                         yAxis: higherHigherBottomPrice,
                         lineStyle: {
                             normal: {
@@ -2379,7 +2415,7 @@ export default {
                 if (jsonObj['fractal'][0]['direction'] === -1) {
                     higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
                     // 高级别分型线
-                    var markLineFractal = {
+                    let markLineFractal = {
                         yAxis: higherTopPrice,
                         lineStyle: {
                             normal: {
@@ -2403,7 +2439,7 @@ export default {
                 if (jsonObj['fractal'][1]['direction'] === -1) {
                     higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
                     // 高高级别分型线
-                    var markLineFractal = {
+                    let markLineFractal = {
                         yAxis: higherHigherTopPrice,
                         lineStyle: {
                             normal: {
@@ -2509,53 +2545,53 @@ export default {
          */
         getLastBeichiData (jsonObj) {
             // 回拉
-            var buy_zs_huila = jsonObj.buy_zs_huila
-            var buy_zs_huila_higher = jsonObj.buy_zs_huila_higher
-            var sell_zs_huila = jsonObj.sell_zs_huila
-            var sell_zs_huila_higher = jsonObj.sell_zs_huila_higher
+            let buy_zs_huila = jsonObj.buy_zs_huila
+            let buy_zs_huila_higher = jsonObj.buy_zs_huila_higher
+            let sell_zs_huila = jsonObj.sell_zs_huila
+            let sell_zs_huila_higher = jsonObj.sell_zs_huila_higher
             // 线段破坏
-            var buy_duan_break = jsonObj.buy_duan_break
-            var buy_duan_break_higher = jsonObj.buy_duan_break_higher
-            var sell_duan_break = jsonObj.sell_duan_break
-            var sell_duan_break_higher = jsonObj.sell_duan_break_higher
+            let buy_duan_break = jsonObj.buy_duan_break
+            let buy_duan_break_higher = jsonObj.buy_duan_break_higher
+            let sell_duan_break = jsonObj.sell_duan_break
+            let sell_duan_break_higher = jsonObj.sell_duan_break_higher
 
             // 突破
-            var buy_zs_tupo = jsonObj.buy_zs_tupo
-            var buy_zs_tupo_higher = jsonObj.buy_zs_tupo_higher
-            var sell_zs_tupo = jsonObj.sell_zs_tupo
-            var sell_zs_tupo_higher = jsonObj.sell_zs_tupo_higher
+            let buy_zs_tupo = jsonObj.buy_zs_tupo
+            let buy_zs_tupo_higher = jsonObj.buy_zs_tupo_higher
+            let sell_zs_tupo = jsonObj.sell_zs_tupo
+            let sell_zs_tupo_higher = jsonObj.sell_zs_tupo_higher
 
             // V反
-            var buy_v_reverse = jsonObj.buy_v_reverse
-            var buy_v_reverse_higher = jsonObj.buy_v_reverse_higher
-            var sell_v_reverse = jsonObj.sell_v_reverse
-            var sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
+            let buy_v_reverse = jsonObj.buy_v_reverse
+            let buy_v_reverse_higher = jsonObj.buy_v_reverse_higher
+            let sell_v_reverse = jsonObj.sell_v_reverse
+            let sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
 
             // 回拉
-            var buy_zs_huila_stamp = 0
-            var buy_zs_huila_higher_stamp = 0
-            var sell_zs_huila_Stamp = 0
-            var sell_zs_huila_higher_stamp = 0
+            let buy_zs_huila_stamp = 0
+            let buy_zs_huila_higher_stamp = 0
+            let sell_zs_huila_Stamp = 0
+            let sell_zs_huila_higher_stamp = 0
             // 线段破坏
-            var buy_duan_break_stamp = 0
-            var buy_duan_break_higher_stamp = 0
-            var sell_duan_break_stamp = 0
-            var sell_duan_break_higher_stamp = 0
+            let buy_duan_break_stamp = 0
+            let buy_duan_break_higher_stamp = 0
+            let sell_duan_break_stamp = 0
+            let sell_duan_break_higher_stamp = 0
             // 突破
-            var buy_zs_tupo_stamp = 0
-            var buy_zs_tupo_higher_stamp = 0
-            var sell_zs_tupo_stamp = 0
-            var sell_zs_tupo_higher_stamp = 0
+            let buy_zs_tupo_stamp = 0
+            let buy_zs_tupo_higher_stamp = 0
+            let sell_zs_tupo_stamp = 0
+            let sell_zs_tupo_higher_stamp = 0
             // V反
-            var buy_v_reverse_stamp = 0
-            var buy_v_reverse_higher_stamp = 0
-            var sell_v_reverse_stamp = 0
-            var sell_v_reverse_higher_stamp = 0
+            let buy_v_reverse_stamp = 0
+            let buy_v_reverse_higher_stamp = 0
+            let sell_v_reverse_stamp = 0
+            let sell_v_reverse_higher_stamp = 0
 
-            var buyTimeStr
-            var higherBuyTimeStr
-            var sellTimeStr
-            var higherSellTimeStr
+            let buyTimeStr
+            let higherBuyTimeStr
+            let sellTimeStr
+            let higherSellTimeStr
             // 回拉
             if (buy_zs_huila.date.length > 0) {
                 buyTimeStr = buy_zs_huila.date[buy_zs_huila.date.length - 1]
@@ -2640,13 +2676,13 @@ export default {
                 sell_duan_break_higher_stamp = 0
             }
 
-            var timeArray = [buy_zs_huila_stamp, buy_zs_huila_higher_stamp, sell_zs_huila_Stamp, sell_zs_huila_higher_stamp,
+            let timeArray = [buy_zs_huila_stamp, buy_zs_huila_higher_stamp, sell_zs_huila_Stamp, sell_zs_huila_higher_stamp,
                 buy_duan_break_stamp, buy_duan_break_higher_stamp, sell_duan_break_stamp, sell_duan_break_higher_stamp,
                 buy_zs_tupo_stamp, buy_zs_tupo_higher_stamp, sell_zs_tupo_stamp, sell_zs_tupo_higher_stamp,
                 buy_v_reverse_stamp, buy_v_reverse_higher_stamp, sell_v_reverse_stamp, sell_v_reverse_higher_stamp]
-            var maxPos = 0
-            var maxTime = timeArray[0]
-            for (var i = 0; i < timeArray.length; i++) {
+            let maxPos = 0
+            let maxTime = timeArray[0]
+            for (let i = 0; i < timeArray.length; i++) {
                 if (timeArray[i] > maxTime) {
                     maxTime = timeArray[i]
                     maxPos = i

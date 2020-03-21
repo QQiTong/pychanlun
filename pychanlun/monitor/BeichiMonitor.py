@@ -26,8 +26,12 @@ symbolListDigitCoin = ['BTC_CQ'
                        # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
                        ]
 globalFutureSymbol = config['globalFutureSymbol']
+# 内盘期货
 periodList1 = ['3m', '5m', '15m', '30m', '60m']
-periodList2 = ['5m', '15m', '30m', '60m']
+# 数字货币
+periodList2 = ['1m','3m','5m', '15m', '30m', '60m']
+# 外盘期货
+periodList3 = ['5m', '15m', '30m', '60m']
 # 高级别 高高级别映射
 # 暂时用3d 3d
 futureLevelMap = {
@@ -206,7 +210,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
         account = digitCoinAccount
     else:
         symbolList = globalFutureSymbol
-        periodList = periodList2
+        periodList = periodList3
         account = digitCoinAccount
     try:
         while True:
@@ -614,12 +618,12 @@ def run(**kwargs):
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[5]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[6]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[7]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
 
     # 外盘监控
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
 
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=["2",symbolListDigitCoin]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=["2",symbolListDigitCoin]).start()
 
 
 if __name__ == '__main__':
