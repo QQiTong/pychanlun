@@ -247,33 +247,43 @@ class KlineDataTool:
     #         # print("处理结果:", processedKlineList)
     #         return processedKlineList
     # OKEX
-    def getDigitCoinData(self,symbol,period):
-    #     /api/swap/v3/instruments/BTC-USD-SWAP/candles?start=2019-03-24T02:31:00.000Z&end=2019-03-25T02:55:00.000Z&granularity=86400
-        url = okexUrl
-        payload = {
-            'granularity': period,
-        }
+    def getDigitCoinData(self,symbol,period,endDate):
         startTime = datetime.now()
-        r = requests.get(url, params=payload, proxies=cfg.PROXIES, verify=False)
-        endTime = datetime.now() - startTime
-        klines = json.loads(r.text)
-        print("okex接口花费时间:", endTime, datetime.now(), r)
-        print("获取的k线数据",period,klines)
-        originKlineList = []
-        for i in range(len(klines)):
-            originKline = {}
-            date = datetime.strptime(klines[i][0], "%Y-%m-%dT%H:%M:%S.%fZ")
-            originKline['open'] = klines[i][1]
-            originKline['high'] = klines[i][2]
-            originKline['low'] = klines[i][3]
-            originKline['close'] = klines[i][4]
-            originKline['volume'] = klines[i][5]
-            # dateArray = datetime.utcfromtimestamp(klines[i]['id'] + 8 * 3600)
-            # otherStyleTime = date.strftime("%Y-%m-%d %H:%M:%S")
-            originKline['time'] = int(time.mktime(date.timetuple()))
-            originKlineList.append(originKline)
-        # print("结果:", originKlineList)
-        return originKlineList
+        if endDate is None or endDate == "":
+            end = datetime.now() + timedelta(1)
+        else:
+            end = datetime.strptime(endDate, "%Y-%m-%d")
+        end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+        timeDeltaMap = {
+            '1m': -7*3,
+            '3m': -31*3,
+            '5m': -31*3,
+            '15m': -31 * 3,
+            '30m': -31 * 8,
+            '60m': -31 * 8,
+            '240m': -31 * 8,
+            '1d': -31 * 10,
+            '3d': -31 * 30,
+            '1w': -31* 30
+        }
+        start_date =  end + timedelta(timeDeltaMap[period])
+        code = "%s_%s" % (symbol, period)
+        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "_id": { "$gte": start_date, "$lte": end }
+        }).sort("_id", pymongo.ASCENDING)
+        df = pd.DataFrame(list(data_list))
+
+        klineList = []
+        for idx, row in df.iterrows():
+            item = {}
+            item['time'] = int(time.mktime(row["_id"].timetuple()))
+            item['open'] = 0 if pd.isna(row["open"]) else row["open"]
+            item['high'] = 0 if pd.isna(row["high"]) else row["high"]
+            item['low'] = 0 if pd.isna(row["low"]) else row["low"]
+            item['close'] = 0 if pd.isna(row["close"]) else row["close"]
+            item['volume'] = 0 if pd.isna(row["volume"]) else row["volume"]
+            klineList.append(item)
+        return klineList
 
     # endDate 查看主力合约历史k线
     def getFutureData(self, symbol, period, endDate):

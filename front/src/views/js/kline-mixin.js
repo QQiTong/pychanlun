@@ -446,13 +446,13 @@ export default {
             let that = this
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
-            // that.timer = setInterval(() => {
-            //     if (that.requestFlag) {
-            //         that.switchSymbol(that.symbol, 'update')
-            //     } else {
-            //         // console.log('wait...')
-            //     }
-            // }, 10000)
+            that.timer = setInterval(() => {
+                if (that.requestFlag) {
+                    that.switchSymbol(that.symbol, 'update')
+                } else {
+                    // console.log('wait...')
+                }
+            }, 10000)
         },
         getDominantSymbol() {
             let that = this

@@ -176,14 +176,14 @@ class Calc:
             if 'BTC' in symbol:
                 cat = "DIGIT_COIN"
                 # 转换后的本级别
-                currentPeriod = self.okexPeriodMap[period]
-                klineData = klineDataTool.getDigitCoinData(symbol,currentPeriod)
+                currentPeriod = period
+                klineData = klineDataTool.getDigitCoinData(symbol,currentPeriod,endDate)
                 # 转换后的高级别
-                bigLevelPeriod = self.okexPeriodMap[self.levelMap[period]]
-                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod)
+                bigLevelPeriod = self.levelMap[period]
+                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod,endDate)
                 # 转换后的高高级别
-                bigLevelPeriod2 = self.okexPeriodMap[self.levelMap[self.levelMap[period]]]
-                klineDataBigLevel2 = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod2)
+                bigLevelPeriod2 = self.levelMap[self.levelMap[period]]
+                klineDataBigLevel2 = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod2,endDate)
             else:
                 # 期货
                 cat = "FUTURE"
