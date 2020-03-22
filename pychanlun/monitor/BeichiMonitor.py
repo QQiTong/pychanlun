@@ -90,12 +90,13 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
         'symbol': symbol,
         'period': period,
         'fire_time': fire_time,
-        'direction': direction
+        'direction': direction,
+        'signal': signal,
     })
     date_created = datetime.utcnow()
     if last_fire is not None:
         DBPyChanlun['future_signal'].find_one_and_update({
-            'symbol': symbol, 'period': period, 'fire_time': fire_time, 'direction': direction
+            'symbol': symbol, 'period': period, 'fire_time': fire_time, 'direction': direction,'signal':signal
         }, {
             '$set': {
                 'signal': signal,
