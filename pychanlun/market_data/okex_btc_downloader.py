@@ -55,7 +55,7 @@ def fetch_global_futures_mink():
                 break
             if not is_run:
                 break
-        time.sleep(200)
+        # time.sleep(200)
     logging.info("OKEX数据抓取程序已停止。")
 
 def save_data_m(code, period, df):
