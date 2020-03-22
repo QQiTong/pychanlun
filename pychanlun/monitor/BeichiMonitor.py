@@ -125,7 +125,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             'stop_lose_price': stop_lose_price,  # 当前信号的止损价
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if (date_created - fire_time).total_seconds() < 60*3:
+        if (date_created - fire_time).total_seconds() < 60*4:
             # 在3分钟内的触发邮件通知  3分钟就能扫内盘+外盘
             # 把数据库的utc时间 转成本地时间
             fire_time_str = (fire_time + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
@@ -144,7 +144,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             # }
             # 简洁版
             msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
-            symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price, date_created_str,
+            symbol, period, signal, direction, amount, " [stop]: "+stop_lose_price, " [fire]: "+fire_time_str, " [price]: "+price,  " [create]: "+date_created_str,
             close_price, remark)
             sendEmail(msg,symbol,period,signal,direction,amount,stop_lose_price, fire_time_str, price, date_created_str,
             close_price, remark)
@@ -244,6 +244,51 @@ def monitorFuturesAndDigitCoin(type, symbolList):
             print("火币出异常了", Exception)
             time.sleep(5)
             threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
+'''
+监控背驰
+'''
+
+
+def monitorBeichi(result, symbol, period, closePrice):
+    signal = 'beichi'
+    # 监控背驰
+    if len(result['buyMACDBCData']['date']) > 0:
+        fire_time = result['buyMACDBCData']['date'][-1]
+        price = result['buyMACDBCData']['data'][-1]
+        remark = result['buyMACDBCData']['tag'][-1]
+        stop_lose_price = result['buy_zs_huila']['stop_lose_price'][-1]
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price, period)
+        direction = 'B'
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount,
+                         stop_lose_price)
+    if len(result['sellMACDBCData']['date']) > 0:
+        fire_time = result['sell_zs_huila']['date'][-1]
+        price = result['sellMACDBCData']['data'][-1]
+        remark = result['sellMACDBCData']['tag'][-1]
+        stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
+        maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price, period)
+        direction = 'S'
+        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount,
+                         stop_lose_price)
+    # 监控高级别背驰
+    # if len(result['buy_zs_huila_higher']['date']) > 0:
+    #     fire_time = result['buy_zs_huila_higher']['date'][-1]
+    #     price = result['buy_zs_huila_higher']['data'][-1]
+    #     remark = result['buy_zs_huila_higher']['tag'][-1]
+    #     stop_lose_price = result['buy_zs_huila_higher']['stop_lose_price'][-1]
+    #     direction = 'HB'
+    #     maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price, period)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount,
+    #                      stop_lose_price)
+    # if len(result['sell_zs_huila_higher']['date']) > 0:
+    #     fire_time = result['sell_zs_huila_higher']['date'][-1]
+    #     price = result['sell_zs_huila_higher']['data'][-1]
+    #     remark = result['sell_zs_huila_higher']['tag'][-1]
+    #     stop_lose_price = result['sell_zs_huila_higher']['stop_lose_price'][-1]
+    #     direction = 'HS'
+    #     maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price, period)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount,
+    #                      stop_lose_price)
 
 
 '''

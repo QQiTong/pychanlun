@@ -1,6 +1,6 @@
 // import echarts from 'echarts'
-import { futureApi } from '@/api/futureApi'
-import { stockApi } from '@/api/stockApi'
+import {futureApi} from '@/api/futureApi'
+import {stockApi} from '@/api/stockApi'
 import CommonTool from '@/tool/CommonTool'
 // import 'echarts/lib/chart/candlestick'
 // import 'echarts/lib/chart/line'
@@ -16,7 +16,7 @@ import CommonTool from '@/tool/CommonTool'
 // import { Button, Select } from 'element-ui'
 
 export default {
-    data () {
+    data() {
         return {
             // 防重复请求
             requestFlag: true,
@@ -25,6 +25,7 @@ export default {
             // 大图
             myChart: null,
             // 多周期图
+            myChart1: null,
             myChart3: null,
             myChart5: null,
             myChart15: null,
@@ -63,12 +64,12 @@ export default {
                     height: '75%',
                     top: 50
                 },
-                 {
-                    left: '0%',
-                    right: '18%',
-                    top: '82%',
-                    height: '20%',
-                 },
+                    {
+                        left: '0%',
+                        right: '18%',
+                        top: '82%',
+                        height: '20%',
+                    },
 
                 ],
                 klineBigGrid: [{
@@ -77,12 +78,12 @@ export default {
                     height: '70%',
                     top: 50
                 },
-                 {
-                    left: '0%',
-                    right: '10%',
-                    top: '75%',
-                    height: '20%',
-                 },
+                    {
+                        left: '0%',
+                        right: '10%',
+                        top: '75%',
+                        height: '20%',
+                    },
                 ],
             },
             // 品种
@@ -174,22 +175,22 @@ export default {
                 underlying_order_book_id: 'null',
                 underlying_symbol: 'BTC_CQ',
             },
-            {
-                contract_multiplier: 1,
-                de_listed_date: 'forever',
-                exchange: 'HUOBI',
-                listed_date: 'forever',
-                margin_rate: 0.05,
-                market_tplus: 0,
-                maturity_date: 'forever',
-                order_book_id: 'ETH_CQ',
-                round_lot: 1,
-                symbol: '以太坊',
-                trading_hours: '7*24',
-                type: 'Future',
-                underlying_order_book_id: 'null',
-                underlying_symbol: 'ETH_CQ',
-            }],
+                {
+                    contract_multiplier: 1,
+                    de_listed_date: 'forever',
+                    exchange: 'HUOBI',
+                    listed_date: 'forever',
+                    margin_rate: 0.05,
+                    market_tplus: 0,
+                    maturity_date: 'forever',
+                    order_book_id: 'ETH_CQ',
+                    round_lot: 1,
+                    symbol: '以太坊',
+                    trading_hours: '7*24',
+                    type: 'Future',
+                    underlying_order_book_id: 'null',
+                    underlying_symbol: 'ETH_CQ',
+                }],
             // 选中的品种
             selectedSymbol: '',
             // 输入的交割过的期货品种 或者 股票品种
@@ -200,13 +201,21 @@ export default {
             // 当前品种持仓信息
             currentPosition: null,
             positionStatus: 'holding',
-            dynamicDirectionMap: { 'long': '多', 'short': '空', 'close': '平' },
-            currentInfo: null
+            dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
+            currentInfo: null,
+            //数字货币讲240m 替换成1m
+            isDigitCoin: false
         }
     },
-
-    mounted () {
+    beforeMount() {
         this.symbol = this.getParams('symbol')
+        if (this.symbol.indexOf('BTC') !== -1) {
+            this.isDigitCoin = true
+        } else {
+            this.isDigitCoin = false
+        }
+    },
+    mounted() {
         // 不共用symbol对象, symbol是双向绑定的
         this.inputSymbol = JSON.parse(JSON.stringify(this.symbol))
         this.period = this.getParams('period')
@@ -236,11 +245,11 @@ export default {
             this.getDominantSymbol()
         }
     },
-    beforeDestroy () {
+    beforeDestroy() {
         clearTimeout(this.timer)
     },
     methods: {
-        quickSwitchDay (type) {
+        quickSwitchDay(type) {
             let tempDate = this.endDate.replace(/-/g, '/')
             let date = new Date(tempDate)
             let preDay = date.getTime() - 3600 * 1000 * 24
@@ -252,7 +261,7 @@ export default {
             }
             this.submitSymbol()
         },
-        getFutruePosition () {
+        getFutruePosition() {
             let period = 'all'
             // if (this.period !== "") {
             //     period = this.period
@@ -264,7 +273,7 @@ export default {
                 console.log('获取当前品种持仓失败:', error)
             })
         },
-        getStockPosition () {
+        getStockPosition() {
             let period = 'all'
             // if (this.period !== "") {
             //     period = this.period
@@ -276,7 +285,7 @@ export default {
                 console.log('获取当前品种持仓失败:', error)
             })
         },
-        initEcharts () {
+        initEcharts() {
             //  大图只显示选中的k线图
             if (this.period !== '') {
                 // this.endDate = this.getParams('endDate')
@@ -288,38 +297,48 @@ export default {
                     this.myChart.resize()
                 })
             } else {
+
                 this.myChart3 = this.$echarts.init(document.getElementById('main3'))
                 this.myChart5 = this.$echarts.init(document.getElementById('main5'))
                 this.myChart15 = this.$echarts.init(document.getElementById('main15'))
                 this.myChart30 = this.$echarts.init(document.getElementById('main30'))
                 this.myChart60 = this.$echarts.init(document.getElementById('main60'))
-                this.myChart240 = this.$echarts.init(document.getElementById('main240'))
-
+                if (this.isDigitCoin) {
+                    this.myChart1 = this.$echarts.init(document.getElementById('main1'))
+                    this.chartssize(document.getElementById('main1Parent'), document.getElementById('main1'))
+                    this.myChart1.resize()
+                } else {
+                    this.myChart240 = this.$echarts.init(document.getElementById('main240'))
+                    this.chartssize(document.getElementById('main240Parent'), document.getElementById('main240'))
+                    this.myChart240.resize()
+                }
                 this.chartssize(document.getElementById('main3Parent'), document.getElementById('main3'))
                 this.chartssize(document.getElementById('main15Parent'), document.getElementById('main15'))
                 this.chartssize(document.getElementById('main60Parent'), document.getElementById('main60'))
                 this.chartssize(document.getElementById('main5Parent'), document.getElementById('main5'))
                 this.chartssize(document.getElementById('main30Parent'), document.getElementById('main30'))
-                this.chartssize(document.getElementById('main240Parent'), document.getElementById('main240'))
                 this.myChart3.resize()
                 this.myChart5.resize()
                 this.myChart15.resize()
                 this.myChart30.resize()
                 this.myChart60.resize()
-                this.myChart240.resize()
                 window.addEventListener('resize', () => {
                     this.myChart3.resize()
                     this.myChart5.resize()
                     this.myChart15.resize()
                     this.myChart30.resize()
                     this.myChart60.resize()
-                    this.myChart240.resize()
+                    if (this.isDigitCoin) {
+                        this.myChart1.resize()
+                    } else {
+                        this.myChart240.resize()
+                    }
                 })
             }
         },
         // 计算echarts 高度
-        chartssize (container, charts) {
-            function getStyle (el, name) {
+        chartssize(container, charts) {
+            function getStyle(el, name) {
                 if (window.getComputedStyle) {
                     return window.getComputedStyle(el, null)
                 } else {
@@ -331,14 +350,14 @@ export default {
             let hi = getStyle(container, 'height').height
             charts.style.height = hi
         },
-        replaceParamVal (paramName, replaceWith) {
+        replaceParamVal(paramName, replaceWith) {
             var oUrl = window.location.href.toString()
             var re = eval('/(' + paramName + '=)([^&]*)/gi')
             var nUrl = oUrl.replace(re, paramName + '=' + replaceWith)
             this.location = nUrl
             // window.location.href = nUrl
         },
-        getParams (name) {
+        getParams(name) {
             let res = ''
             let categoryStr = window.location.href.split('?')[1] || ''
             if (categoryStr.length > 1) {
@@ -357,7 +376,7 @@ export default {
             }
             return res
         },
-        jumpToMultiPeriod () {
+        jumpToMultiPeriod() {
             if (this.isPosition === 'true') {
                 this.$router.push({
                     path: '/multi-period',
@@ -378,7 +397,7 @@ export default {
             }
         },
 
-        jumpToKlineBig (period) {
+        jumpToKlineBig(period) {
             if (this.isPosition === 'true') {
                 this.$router.push({
                     path: '/kline-big',
@@ -401,7 +420,7 @@ export default {
             }
         },
 
-        jumpToControl (type) {
+        jumpToControl(type) {
             console.log('type', type)
             if (type === 'futures') {
                 this.$router.replace('/futures-control')
@@ -409,7 +428,7 @@ export default {
                 this.$router.replace('/stock-control')
             }
         },
-        submitSymbol () {
+        submitSymbol() {
             if (this.inputSymbol !== '') {
                 this.symbol = this.inputSymbol.indexOf('sz') === -1 && this.inputSymbol.indexOf('sh') ? this.inputSymbol.toUpperCase() : this.inputSymbol
             } else {
@@ -423,7 +442,7 @@ export default {
             // this.replaceParamVal("symbol",this.symbol)
         },
         // 请求数据
-        requestSymbolData () {
+        requestSymbolData() {
             let that = this
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
@@ -435,7 +454,7 @@ export default {
                 }
             }, 10000)
         },
-        getDominantSymbol () {
+        getDominantSymbol() {
             let that = this
 
             futureApi.dominant().then(res => {
@@ -454,13 +473,13 @@ export default {
                 console.log('获取主力合约失败:', error)
             })
         },
-        switchPeriod (period) {
+        switchPeriod(period) {
             // 重置加载
             this.firstFlag[0] = true
             this.period = period
             this.switchSymbol(this.symbol, 'reload')
         },
-        switchSymbol (symbol, update) {
+        switchSymbol(symbol, update) {
             this.symbol = symbol
             let that = this
             if (this.period !== '') {
@@ -477,18 +496,18 @@ export default {
                     }
                 }, 10000)
             }
-            const { ...query } = that.$route.query
+            const {...query} = that.$route.query
             // 如果是大图，只请求一个周期的数据
             if (this.period !== '') {
-                Object.assign(query, { symbol, period: this.period, endDate: this.endDate})
-                that.$router.push({ query })
+                Object.assign(query, {symbol, period: this.period, endDate: this.endDate})
+                that.$router.push({query})
                 // this.$router.push(query).catch(err => {
                 //     console.log('捕获相同路由报错', err)
                 // })
                 that.sendRequest(symbol, this.period, update)
             } else {
-                Object.assign(query, { symbol, endDate: this.endDate})
-                that.$router.push({ query })
+                Object.assign(query, {symbol, endDate: this.endDate})
+                that.$router.push({query})
                 // this.$router.push(query).catch(err => {
                 //     console.log('捕获相同路由报错', err)
                 // })
@@ -513,7 +532,11 @@ export default {
                             that.sendRequest(symbol, '60m', update)
                             break
                         case 6:
-                            that.sendRequest(symbol, '240m', update)
+                            if (this.isDigitCoin) {
+                                that.sendRequest(symbol, '1m', update)
+                            } else {
+                                that.sendRequest(symbol, '240m', update)
+                            }
                             break
                         // case 7:
                         //     that.sendRequest(symbol, '1d', update)
@@ -522,11 +545,11 @@ export default {
                 }
             }
         },
-        sendRequest (symbol, period, update) {
-            var requestData = { 'symbol': symbol, 'period': period, 'endDate': this.endDate }
+        sendRequest(symbol, period, update) {
+            var requestData = {'symbol': symbol, 'period': period, 'endDate': this.endDate}
             this.getStockData(requestData, update)
         },
-        getStockData (requestData, update) {
+        getStockData(requestData, update) {
             this.requestFlag = false
             if (this.period !== '') {
                 if (this.firstFlag[0] === true) {
@@ -548,9 +571,16 @@ export default {
                 if (this.firstFlag[5] === true) {
                     this.myChart60.showLoading()
                 }
-                if (this.firstFlag[6] === true) {
-                    this.myChart240.showLoading()
+                if (this.isDigitCoin) {
+                    if (this.firstFlag[6] === true) {
+                        this.myChart1.showLoading()
+                    }
+                } else {
+                    if (this.firstFlag[6] === true) {
+                        this.myChart240.showLoading()
+                    }
                 }
+
             }
 
             futureApi.stockData(requestData).then(res => {
@@ -584,10 +614,18 @@ export default {
                         this.myChart60.hideLoading()
                         this.firstFlag[5] = false
                     }
-                    if (requestData.period === '240m') {
-                        this.myChart240.hideLoading()
-                        this.firstFlag[6] = false
+                    if (this.isDigitCoin) {
+                        if (requestData.period === '1m') {
+                            this.myChart1.hideLoading()
+                            this.firstFlag[6] = false
+                        }
+                    } else {
+                        if (requestData.period === '240m') {
+                            this.myChart240.hideLoading()
+                            this.firstFlag[6] = false
+                        }
                     }
+
                 }
                 // console.log("结果", res)
                 this.draw(res, update, requestData.period)
@@ -596,7 +634,7 @@ export default {
             })
         },
 
-        draw (stockJsonData, update, period) {
+        draw(stockJsonData, update, period) {
             var that = this
             var zoomStart = 55
             const resultData = this.splitData(stockJsonData, period)
@@ -625,8 +663,12 @@ export default {
                     currentChart = this.myChart30
                 } else if (period === '60m') {
                     currentChart = this.myChart60
-                } else if (period === '240m') {
-                    currentChart = this.myChart240
+                } else {
+                    if (period === '1m') {
+                        currentChart = this.myChart1
+                    } else {
+                        currentChart = this.myChart240
+                    }
                 }
             }
             // else if (period === '1d') {
@@ -656,7 +698,7 @@ export default {
                         },
                     },
                     axisPointer: {
-                        link: { xAxisIndex: 'all' },
+                        link: {xAxisIndex: 'all'},
                     },
 
                     toolbox: {
@@ -827,14 +869,14 @@ export default {
                             data: resultData.date,
                             scale: true,
                             boundaryGap: false,
-                            splitLine: { show: false },
+                            splitLine: {show: false},
                             splitNumber: 20,
                             min: 'dataMin',
                             max: 'dataMax',
                             axisLabel: {
                                 show: true
                             },
-                            axisLine: { onZero: true, lineStyle: { color: '#8392A5' } },
+                            axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
                             axisPointer: {
                                 label: {
                                     // formatter: function (params) {
@@ -904,7 +946,7 @@ export default {
                                     color: this.echartsConfig.bgColor
                                 }
                             },
-                            axisLine: { lineStyle: { color: this.echartsConfig.bgColor } },
+                            axisLine: {lineStyle: {color: this.echartsConfig.bgColor}},
                         },
                         {
                             gridIndex: 1,
@@ -1075,7 +1117,7 @@ export default {
                             symbol: 'none',
                             animation: false
                         },
-                         // index 5
+                        // index 5
                         {
                             name: 'MACD',
                             type: 'bar',
@@ -1217,7 +1259,7 @@ export default {
             }
             currentChart.setOption(option)
         },
-        refreshOption (chart, resultData) {
+        refreshOption(chart, resultData) {
             var option = chart.getOption()
             option.series[0].data = resultData.values
             option.xAxis[0].data = resultData.date
@@ -1235,10 +1277,10 @@ export default {
             // option.series[4].data = this.calculateMA(resultData, 5);
             // option.series[5].data = this.calculateMA(resultData, 10);
             // option.series[11].data = resultData.volume;
-            console.log("更新的option",option)
+            console.log("更新的option", option)
             return option
         },
-        splitData (jsonObj, period) {
+        splitData(jsonObj, period) {
             const stockDate = jsonObj.date
             const stockHigh = jsonObj.high
             const stockLow = jsonObj.low
@@ -1286,7 +1328,7 @@ export default {
                         symbolSize: 5,
                         symbol: 'circle',
                         itemStyle: {
-                            normal: { color: this.echartsConfig.downColor }
+                            normal: {color: this.echartsConfig.downColor}
                         },
                         label: {
                             position: 'inside',
@@ -1304,7 +1346,7 @@ export default {
                         symbolSize: 5,
                         symbol: 'circle',
                         itemStyle: {
-                            normal: { color: this.echartsConfig.upColor }
+                            normal: {color: this.echartsConfig.upColor}
                         },
                         label: {
                             position: 'inside',
@@ -1479,7 +1521,7 @@ export default {
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.upColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1502,7 +1544,7 @@ export default {
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.downColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1526,7 +1568,7 @@ export default {
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1549,7 +1591,7 @@ export default {
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1574,7 +1616,7 @@ export default {
                     symbolSize: 30,
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.upColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1599,7 +1641,7 @@ export default {
                     symbol: 'arrow',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.downColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1624,7 +1666,7 @@ export default {
                     symbol: 'arrow',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1648,7 +1690,7 @@ export default {
                     symbol: 'arrow',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1673,7 +1715,7 @@ export default {
                     symbolSize: 30,
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.upColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1698,7 +1740,7 @@ export default {
                     symbol: 'diamond',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.downColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1724,7 +1766,7 @@ export default {
                     symbolSize: 30,
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1749,7 +1791,7 @@ export default {
                     symbol: 'diamond',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1775,7 +1817,7 @@ export default {
                     symbolSize: 10,
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.upColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.upColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1800,7 +1842,7 @@ export default {
                     symbol: 'circle',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.downColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.downColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1825,7 +1867,7 @@ export default {
                     symbol: 'circle',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.higherUpColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1849,7 +1891,7 @@ export default {
                     symbol: 'circle',
                     symbolOffset: [0, '0%'],
                     itemStyle: {
-                        normal: { color: this.echartsConfig.higherDownColor, opacity: '0.9' }
+                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
                     },
                     label: {
                         // position: ['-50%','50%'],
@@ -1933,7 +1975,7 @@ export default {
             }
         },
         // 通用开平动止标注数据
-        getMarklineData (jsonObj) {
+        getMarklineData(jsonObj) {
             let markLineData = []
             let lastBeichiType = this.getLastBeichiData(jsonObj)
             let lastBeichi = null
@@ -2046,26 +2088,26 @@ export default {
                 currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
                 // 跟据最新价格计算出来的信息
                 this.currentInfo = ' 率: ' + currentPercent + '% 额: ' + currentProfit + ' 万,盈亏比:' +
-                                (currentPercent / targetPercent).toFixed(1) + ' 新: ' + currentPrice.toFixed(2)
+                    (currentPercent / targetPercent).toFixed(1) + ' 新: ' + currentPrice.toFixed(2)
                 let markLineCurrent = {
-                        yAxis: currentPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dash',
-                                width: 1,
-                                color: 'yellow'
-                            },
+                    yAxis: currentPrice,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'dash',
+                            width: 1,
+                            color: 'yellow'
                         },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: 'yellow',
-                                formatter: '新: ' + currentPrice.toFixed(2)
-                            },
+                    },
+                    symbol: 'circle',
+                    symbolSize: 1,
+                    label: {
+                        normal: {
+                            color: 'yellow',
+                            formatter: '新: ' + currentPrice.toFixed(2)
                         },
-                    }
+                    },
+                }
                 markLineData.push(markLineCurrent)
                 // 保本位
                 if (beichiPrice) {
@@ -2228,7 +2270,7 @@ export default {
         /**
          * @param jsonObj
          */
-        getPositionMarklineData (jsonObj) {
+        getPositionMarklineData(jsonObj) {
             let markLineData = []
 
             // 开仓价格
@@ -2259,24 +2301,24 @@ export default {
             // 如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
             this.currentInfo = '新: ' + currentPrice.toFixed(2)
             let markLineCurrent = {
-                        yAxis: currentPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dash',
-                                width: 1,
-                                color: 'yellow'
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: 'yellow',
-                                formatter: '新: ' + currentPrice.toFixed(2)
-                            },
-                        },
-                    }
+                yAxis: currentPrice,
+                lineStyle: {
+                    normal: {
+                        opacity: 1,
+                        type: 'dash',
+                        width: 1,
+                        color: 'yellow'
+                    },
+                },
+                symbol: 'circle',
+                symbolSize: 1,
+                label: {
+                    normal: {
+                        color: 'yellow',
+                        formatter: '新: ' + currentPrice.toFixed(2)
+                    },
+                },
+            }
             markLineData.push(markLineCurrent)
             // 开仓价
             let markLineOpen = {
@@ -2464,7 +2506,7 @@ export default {
             return markLineData
         },
         // 计算开仓手数
-        calcAccount (currentPrice) {
+        calcAccount(currentPrice) {
             if (this.currentMarginRate == null) {
                 alert('请选择保证金系数，开仓价，止损价')
                 return
@@ -2519,7 +2561,7 @@ export default {
             //     this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
             //     " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate)
         },
-        calculateMA (resultData, dayCount) {
+        calculateMA(resultData, dayCount) {
             let result = []
             for (let i = 0, len = resultData.values.length; i < len; i++) {
                 if (i < dayCount) {
@@ -2543,7 +2585,7 @@ export default {
          * 9 本级别中枢突破买 10 高级别中枢突破买 11 本级别中枢突破卖 12 高级别中枢突破卖
          * 13 本级别三卖V买 14 高级别三卖V买 15 本级别三买V卖 16 高级别三买V卖
          */
-        getLastBeichiData (jsonObj) {
+        getLastBeichiData(jsonObj) {
             // 回拉
             let buy_zs_huila = jsonObj.buy_zs_huila
             let buy_zs_huila_higher = jsonObj.buy_zs_huila_higher
@@ -2699,7 +2741,7 @@ export default {
                 return maxPos + 1
             }
         },
-        timeStrToStamp (timeStr) {
+        timeStrToStamp(timeStr) {
             let date = timeStr.substring(0, 19)
             date = timeStr.replace(/-/g, '/') // 必须把日期'-'转为'/'
             return new Date(date).getTime()

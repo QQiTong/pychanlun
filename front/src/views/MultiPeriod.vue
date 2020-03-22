@@ -40,17 +40,16 @@
                 <div id="main30" class="echarts">
                 </div>
             </div>
-            <div class="echarts-item" id="main240Parent">
+            <div class="echarts-item" id="main240Parent" v-if="!isDigitCoin">
                 <div id="main240" class="echarts">
                 </div>
             </div>
+            <div class="echarts-item" id="main1Parent" v-else>
+                   <div id="main1" class="echarts">
+                   </div>
+             </div>
             <!--   <div class="echarts-item">
                    <div id="main1d" class="echarts">
-                   </div>
-               </div>-->
-
-            <!--   <div class="echarts-item">
-                   <div id="main1" class="echarts">
                    </div>
                </div>-->
         </div>
