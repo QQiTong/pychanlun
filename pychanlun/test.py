@@ -107,7 +107,7 @@ def testChange():
     for i in range(len(dominantSymbolList)):
         item = dominantSymbolList[i]
         # print(item)
-        if item is not 'BTC_CQ' and item is not 'ETH_CQ':
+        if item is not 'BTC' and item is not 'ETH_CQ':
             df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
                                 start_date=start, end_date=end)
             df1m = rq.current_minute(item)
@@ -391,6 +391,81 @@ def testWechat():
           "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s"\
           % (signal,remark,symbol+'_'+period, signal, direction,'开:'+str(close_price)+' 止:'+str(stop_lose_price)+' 触:'+str(price), amount,'开:'+fire_time_str+' 触:'+date_created_str)
     requests.post(url)
+#
+def testOkex1():
+    startTime = int(round(time.time()*1000))
+
+    PROXIES = {
+        "http": "socks5://127.0.0.1:10808",
+        "https": "socks5://127.0.0.1:10808"
+    }
+    t = time.time()
+    timeStamp = int(round(t * 1000))
+    # 接口1
+    okexUrl = "https://www.okex.com/v2/perpetual/pc/public/instruments/BTC-USDT-SWAP/candles"
+    payload = {
+        'granularity': 300,
+        'size': 1000,
+        't': timeStamp
+    }
+
+    r = requests.get(okexUrl,params=payload,  proxies=PROXIES)
+    endTime = int(round(time.time()*1000)) -startTime
+    print("耗费时间：",endTime)
+    klines = json.loads(r.text)['data']
+    # print(klines)
+    originKlineList = []
+    for i in range(len(klines)):
+        originKline = {}
+        date = datetime.strptime(klines[i][0], "%Y-%m-%dT%H:%M:%S.%fZ")
+        originKline['open'] = klines[i][1]
+        originKline['high'] = klines[i][2]
+        originKline['low'] = klines[i][3]
+        originKline['close'] = klines[i][4]
+        originKline['volume'] = klines[i][5]
+        # dateArray = datetime.utcfromtimestamp(klines[i]['id'] + 8 * 3600)
+        otherStyleTime = date.strftime("%Y-%m-%d %H:%M:%S")
+        originKline['time'] = otherStyleTime
+        originKlineList.append(originKline)
+    print("结果:", len(originKlineList))
+
+def testOkex2():
+    startTime = int(round(time.time()*1000))
+
+    PROXIES = {
+        "http": "socks5://127.0.0.1:10808",
+        "https": "socks5://127.0.0.1:10808"
+    }
+    t = time.time()
+    timeStamp = int(round(t * 1000))
+
+    # 接口2
+    okexUrl = "https://www.okex.com/api/swap/v3/instruments/BTC-USD-SWAP/candles"
+    payload = {
+        'granularity': 300,
+        'start':'2020-03-16T02:31:00.000Z',
+        'end':'2020-03-22T18:41:00.000Z'
+    }
+
+    r = requests.get(okexUrl,params=payload,  proxies=PROXIES)
+    endTime = int(round(time.time()*1000)) -startTime
+    print("耗费时间：",endTime)
+    klines = json.loads(r.text)
+    print(klines)
+    originKlineList = []
+    for i in range(len(klines)):
+        originKline = {}
+        date = datetime.strptime(klines[i][0], "%Y-%m-%dT%H:%M:%S.%fZ")
+        originKline['open'] = klines[i][1]
+        originKline['high'] = klines[i][2]
+        originKline['low'] = klines[i][3]
+        originKline['close'] = klines[i][4]
+        originKline['volume'] = klines[i][5]
+        # dateArray = datetime.utcfromtimestamp(klines[i]['id'] + 8 * 3600)
+        otherStyleTime = date.strftime("%Y-%m-%d %H:%M:%S")
+        originKline['time'] = otherStyleTime
+        originKlineList.append(originKline)
+    print("结果:", len(originKlineList))
 
 
 def app():
@@ -398,14 +473,15 @@ def app():
     # testBeichiDb()
     # testHuila()
     # testChange()
-    testTQ()
+    # testTQ()
     # testRQ()
     # testMonitor()
     # testThread()
     # testHuobi()
     # testWaipan()
     # testWechat()
-
+    # testOkex1()
+    testOkex2()
 
 if __name__ == '__main__':
     app()

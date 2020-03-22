@@ -55,7 +55,7 @@ def data():
 def save_stock_date():
     calc = Calc()
     period = request.args.get("period") or "1min"
-    symbol = request.args.get("symbol") or "BTC_CQ"
+    symbol = request.args.get("symbol") or "BTC"
     result = calc.calcData(period, symbol, True)
     return Response(json.dumps(result), mimetype='application/json')
 

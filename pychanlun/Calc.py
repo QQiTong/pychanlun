@@ -86,6 +86,17 @@ class Calc:
             '1d': '1day',
             '1w': '1week'
         }
+        self.okexPeriodMap = {
+            '1m':'60',
+            '3m': '180',
+            '5m': '300',
+            '15m': '900',
+            '60m': '3600',
+            '30m': '1800',
+            '240m': '14400',
+            '1d': '86400',
+            '1w': '604800'
+        }
 
         # bitmex 小级别大级别映射
         # self.levelMap = {
@@ -162,16 +173,16 @@ class Calc:
             klineDataBigLevel2 = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod2, endDate)
 
         else:
-            if '_CQ' in symbol:
+            if 'BTC' in symbol:
                 cat = "DIGIT_COIN"
                 # 转换后的本级别
-                currentPeriod = self.huobiPeriodMap[period]
+                currentPeriod = self.okexPeriodMap[period]
                 klineData = klineDataTool.getDigitCoinData(symbol,currentPeriod)
                 # 转换后的高级别
-                bigLevelPeriod = self.huobiPeriodMap[self.levelMap[period]]
+                bigLevelPeriod = self.okexPeriodMap[self.levelMap[period]]
                 klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod)
                 # 转换后的高高级别
-                bigLevelPeriod2 = self.huobiPeriodMap[self.levelMap[self.levelMap[period]]]
+                bigLevelPeriod2 = self.okexPeriodMap[self.levelMap[self.levelMap[period]]]
                 klineDataBigLevel2 = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod2)
             else:
                 # 期货

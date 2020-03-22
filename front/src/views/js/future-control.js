@@ -117,36 +117,20 @@ export default {
             digitCoinsSymbolList: [{
                 contract_multiplier: 20,
                 de_listed_date: 'forever',
-                exchange: 'HUOBI',
+                exchange: 'OKEX',
                 listed_date: 'forever',
-                margin_rate: 0.045,
+                margin_rate: 0.05,
                 market_tplus: 0,
                 maturity_date: 'forever',
-                order_book_id: 'BTC_CQ',
+                order_book_id: 'BTC',
                 round_lot: 1,
                 symbol: '比特币',
                 trading_hours: '7*24',
                 type: 'Future',
                 underlying_order_book_id: 'null',
-                underlying_symbol: 'BTC_CQ',
+                underlying_symbol: 'BTC',
                 feeRate: 0.012
-            },
-                {
-                    contract_multiplier: 20,
-                    de_listed_date: 'forever',
-                    exchange: 'HUOBI',
-                    listed_date: 'forever',
-                    margin_rate: 0.045,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'ETH_CQ',
-                    round_lot: 1,
-                    symbol: '以太坊',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'ETH_CQ',
-                }],
+            }],
             // 外盘
             outSideSymbolList: [{
                 contract_multiplier: 20,
@@ -527,7 +511,7 @@ export default {
                 alert('请填入保证金系数，开仓价，止损价')
                 return
             }
-            if (this.calcPosForm.currentSymbol.indexOf('_CQ') === -1) {
+            if (this.calcPosForm.currentSymbol.indexOf('BTC') === -1) {
                 this.calcPosForm.account = this.calcPosForm.futureAccount
                 // 计算1手需要的保证金
                 this.calcPosForm.perOrderMargin = Math.floor(this.calcPosForm.openPrice * this.calcPosForm.contractMultiplier * this.calcPosForm.currentMarginRate)

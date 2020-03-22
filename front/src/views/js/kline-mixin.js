@@ -167,13 +167,13 @@ export default {
                 margin_rate: 0.05,
                 market_tplus: 0,
                 maturity_date: 'forever',
-                order_book_id: 'BTC_CQ',
+                order_book_id: 'BTC',
                 round_lot: 1,
                 symbol: '比特币',
                 trading_hours: '7*24',
                 type: 'Future',
                 underlying_order_book_id: 'null',
-                underlying_symbol: 'BTC_CQ',
+                underlying_symbol: 'BTC',
             },
                 {
                     contract_multiplier: 1,
@@ -446,13 +446,13 @@ export default {
             let that = this
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
-            that.timer = setInterval(() => {
-                if (that.requestFlag) {
-                    that.switchSymbol(that.symbol, 'update')
-                } else {
-                    // console.log('wait...')
-                }
-            }, 10000)
+            // that.timer = setInterval(() => {
+            //     if (that.requestFlag) {
+            //         that.switchSymbol(that.symbol, 'update')
+            //     } else {
+            //         // console.log('wait...')
+            //     }
+            // }, 10000)
         },
         getDominantSymbol() {
             let that = this
@@ -2511,7 +2511,7 @@ export default {
                 alert('请选择保证金系数，开仓价，止损价')
                 return
             }
-            if (this.currentSymbol.indexOf('_CQ') === -1) {
+            if (this.currentSymbol.indexOf('BTC') === -1) {
                 this.account = this.futureAccount
                 // 计算1手需要的保证金
                 this.perOrderMargin = Math.floor(this.openPrice * this.contractMultiplier * this.currentMarginRate)

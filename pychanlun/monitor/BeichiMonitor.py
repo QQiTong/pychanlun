@@ -22,7 +22,7 @@ tz = pytz.timezone('Asia/Shanghai')
 '''
 klineDataTool = KlineDataTool()
 # 米筐数据 主力连续合约RB88 这个会比实时数据少一天
-symbolListDigitCoin = ['BTC_CQ'
+symbolListDigitCoin = ['BTC'
                        # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
                        ]
 globalFutureSymbol = config['globalFutureSymbol']
@@ -145,8 +145,8 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             # }
             # 简洁版
             msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
-            symbol, period, signal, direction, amount, " [stop]: "+stop_lose_price, " [fire]: "+fire_time_str, " [price]: "+price,  " [create]: "+date_created_str,
-            close_price, remark)
+            symbol, period, signal, direction+' ', " [amount]: "+str(amount), " [stop]: "+str(stop_lose_price), " [fire]: "+fire_time_str, " [price]: "+str(price),  " [create]: "+date_created_str,
+            str(close_price), remark)
             sendEmail(msg,symbol,period,signal,direction,amount,stop_lose_price, fire_time_str, price, date_created_str,
             close_price, remark)
 
@@ -591,7 +591,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
     if openPrice == stopPrice:
         return -1
     # 兼容数字货币
-    if '_CQ' in dominantSymbol or dominantSymbol in config['globalFutureSymbol']:
+    if 'BTC' in dominantSymbol or dominantSymbol in config['globalFutureSymbol']:
         perOrderMargin = 5
         # 1手止损的比率
         perOrderStopRate = (abs(openPrice - stopPrice) / openPrice + digitCoinFee) * 20
@@ -624,7 +624,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
 # 主力合约，开仓价格，开仓数量，止损价格，止盈价格    用最新价来算回更准确，因为触发价可能会有滑点
 def calStopWinCount(symbol, period, positionInfo, closePrice):
     # 兼容数字货币和外盘期货
-    if '_CQ' in symbol or symbol in config['globalFutureSymbol']:
+    if 'BTC' in symbol or symbol in config['globalFutureSymbol']:
         return 0
     # 动止公式:  (1 - stopWinPosRate) / stopWinPosRate = winLoseRate
     # stopWinPosRate: 动态止盈多少仓位

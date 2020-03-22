@@ -23,7 +23,7 @@ dominantSymbolList = []
 dominantSymbolInfoList = []
 # CL:原油; GC:黄金;SI:白银; CT:棉花;S:大豆;SM：豆粕; BO:豆油;NID:伦镍; ZSD:伦锌;
 # 马棕 日胶
-otherSymbol = ["BTC_CQ", "ETH_CQ", "CL", "GC", "SI", "CT","S", "SM", "BO", "NID", "ZSD"]
+otherSymbol = ["BTC", "CL", "GC", "SI", "CT","S", "SM", "BO", "NID", "ZSD"]
 
 
 class BusinessService:

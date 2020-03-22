@@ -71,7 +71,7 @@ def on_close(ws):
 def on_open(ws):
     print('haha')
     # 订阅1根k线 推送
-    ws.send('{ "sub": "market.BTC_CQ.kline.1min", "id": "id1" }')
+    ws.send('{ "sub": "market.BTC.kline.1min", "id": "id1" }')
     # 订阅1根k线 推送
 
 

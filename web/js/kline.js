@@ -2173,7 +2173,7 @@ var app = new Vue({
                 alert("请选择保证金系数，开仓价，止损价")
                 return
             }
-            if (this.currentSymbol.indexOf("_CQ") === -1) {
+            if (this.currentSymbol.indexOf("BTC") === -1) {
                 this.account = this.futuresAccount
                 // 计算1手需要的保证金
                 this.perOrderMargin = Math.floor(this.openPrice * this.contractMultiplier * this.currentMarginRate)
