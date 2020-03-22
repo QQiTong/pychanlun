@@ -110,8 +110,24 @@ def calculate(info):
     open_series = df['open']
     close_series = df['close']
 
-    # 保留10000个样本数据，之前的就不要了。
-    cutoff_time = time_series[0]
+    # 清理一些历史数据节省空间
+    if period == '240m':
+        cutoff_time = datetime.now(tz=tz) - timedelta(days=10000)
+    elif period == '60m':
+        cutoff_time = datetime.now(tz=tz) - timedelta(hours=10000)
+    elif period == '30m':
+        cutoff_time = datetime.now(tz=tz) - timedelta(hours=5000)
+    elif period == '15m':
+        cutoff_time = datetime.now(tz=tz) - timedelta(hours=2500)
+    elif period == '5m':
+        cutoff_time = datetime.now(tz=tz) - timedelta(minutes=50000)
+    elif period == '3m':
+        cutoff_time = datetime.now(tz=tz) - timedelta(minutes=30000)
+    elif period == '1m':
+        cutoff_time = datetime.now(tz=tz) - timedelta(minutes=10000)
+    else:
+        cutoff_time = datetime.now(tz=tz) - timedelta(days=10000)
+
     DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
         tz_aware=True, tzinfo=tz)).delete_many({
             "_id": {"$lt": cutoff_time}
@@ -267,7 +283,7 @@ def export_to_tdx():
 
     # 缠论票
     signals = DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find({}).sort('fire_time', pymongo.DESCENDING).limit(20)
+        tz_aware=True, tzinfo=tz)).find({'period':{'$in':['30m','60m','240m']}}).sort('fire_time', pymongo.DESCENDING).limit(20)
 
     for signal in list(signals):
         code = signal["code"]

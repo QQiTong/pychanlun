@@ -32,7 +32,7 @@ import traceback
 tz = pytz.timezone('Asia/Shanghai')
 
 is_run = True
-period_map = { '5m': 0, '15m': 1 }
+period_map = { '1m': 7, '5m': 0, '15m': 1 }
 
 def monitoring_stock():
     TDX_HOME = os.environ.get("TDX_HOME")
@@ -50,10 +50,25 @@ def monitoring_stock():
             for stock in stocks:
                 market = int(stock[0:1])
                 code = stock[1:]
+                if market == 0:
+                    symbol = 'sz%s' % code
+                elif market == 1:
+                    symbol = 'sh%s' % code
                 for period in period_map:
                     bars = api.get_security_bars(period_map[period], market, code, 0, 200)
-                    save_bars(code, period, bars) # 保存数据
-                    calculate_and_notify(code, period) # 计算信号和通知
+                    save_bars(symbol, period, bars) # 保存数据
+                    if period == '1m':
+                        # 合成3m数据
+                        ohlc = {'open': 'first', 'high': 'max', 'low': 'min',
+                                'close': 'last', 'vol': 'sum', 'amount': 'sum'}
+                        df = api.to_df(bars)
+                        df['datetime'] = df['datetime'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H:%M'))
+                        df.set_index('datetime', inplace=True)
+                        df3m = df.resample('3T', closed='right', label='right').agg(
+                                ohlc).dropna(how='any')
+                        calculate_and_notify(symbol, '3m') # 计算信号和通知
+                    else:
+                        calculate_and_notify(symbol, period) # 计算信号和通知
                     if not is_run:
                         break
                 if not is_run:
@@ -216,7 +231,7 @@ def save_signal(code, period, remark, fire_time, price, stop_lose_price, positio
                 'category': category
             }
         }, upsert=True)
-        if x is None:
+        if x is None and fire_time > datetime.datetime.now(tz=tz) - datetime.timedelta(hours=1):
             # 首次信号，做通知
             do_notify(code, '买入', period, remark, fire_time, price, 100, stop_lose_price, position, tags, category)
 
