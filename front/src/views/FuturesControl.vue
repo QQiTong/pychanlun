@@ -113,7 +113,11 @@
                   <el-link
                     @click="fillMarginRate(scope.row,changeList && changeList[scope.row.order_book_id]?
                                 changeList[scope.row.order_book_id]['price'] : 0)"
-                    :underline="false"
+                    :underline="false" v-if="scope.row.order_book_id.indexOf('BTC')===-1"
+                  >{{ (scope.row.margin_rate +marginLevelCompany).toFixed(3)}}</el-link>
+                  <el-link
+                    @click="fillMarginRate(scope.row,okexTicker.last)"
+                    :underline="false" v-else
                   >{{ (scope.row.margin_rate +marginLevelCompany).toFixed(3)}}</el-link>
                 </template>
               </el-table-column>
@@ -131,8 +135,13 @@
               </el-table-column>
               <el-table-column label="最新价" width="70">
                 <template slot-scope="scope">
-                  {{(changeList && changeList[scope.row.order_book_id]?
-                  changeList[scope.row.order_book_id]['price'] : 0)}}
+                    <span v-if="scope.row.order_book_id.indexOf('BTC')===-1">
+                        {{(changeList && changeList[scope.row.order_book_id]?
+                        changeList[scope.row.order_book_id]['price'] : 0)}}
+                    </span>
+                    <span v-else>
+                        {{okexTicker.last}}
+                    </span>
                 </template>
               </el-table-column>
               <el-table-column label="3F级别" width="65">

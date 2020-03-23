@@ -4,7 +4,7 @@ export const futureApi = {
     /**
      * 获取K线数据
      */
-    stockData(data) {
+    stockData (data) {
         let url
         if (!data.endDate) {
             url = `/api/stock_data?period=${data.period}&symbol=${data.symbol}`
@@ -16,15 +16,15 @@ export const futureApi = {
             method: 'get',
         })
     },
-    //获取主力合约
-    dominant() {
+    // 获取主力合约
+    dominant () {
         let url = `/api/dominant`
         return axios({
             url: url,
             method: 'get',
         })
     },
-    saveStockData(data) {
+    saveStockData (data) {
         let url = `/api/save_stock_data?period=${data.period}&symbol=${data.symbol}`
         return axios({
             url: url,
@@ -32,33 +32,33 @@ export const futureApi = {
             data: data
         })
     },
-    getStockSignalList(page) {
+    getStockSignalList (page) {
         return axios({
             url: `/api/get_stock_signal_list?page=${page}`,
             method: 'get',
         })
     },
-    getSignalList() {
+    getSignalList () {
         return axios({
             url: `/api/get_future_signal_list`,
             method: 'get',
         })
     },
-    getChangeiList() {
+    getChangeiList () {
         return axios({
             url: `/api/get_change_list`,
             method: 'get',
         })
     },
-    getDominant() {
+    getDominant () {
         return axios({
             url: `/api/dominant`,
             method: 'get',
         })
     },
-    //持仓操作
+    // 持仓操作
     // 新增一个持仓
-    createPosition(data) {
+    createPosition (data) {
         let url = `/api/create_position`
         return axios({
             url: url,
@@ -67,7 +67,7 @@ export const futureApi = {
         })
     },
     // 查询单个持仓
-    getPosition(symbol, period,status) {
+    getPosition (symbol, period, status) {
         let url = `/api/get_position?symbol=${symbol}&period=${period}&status=${status}`
         return axios({
             url: url,
@@ -75,7 +75,7 @@ export const futureApi = {
         })
     },
     // 查询持仓列表
-    getPositionList(status, page, size) {
+    getPositionList (status, page, size) {
         let url = `/api/get_position_list?status=${status}&page=${page}&size=${size}`
         return axios({
             url: url,
@@ -83,7 +83,7 @@ export const futureApi = {
         })
     },
     // 更新持仓
-    updatePosition(data) {
+    updatePosition (data) {
         let url = `/api/update_position`
         return axios({
             url: url,
@@ -92,7 +92,7 @@ export const futureApi = {
         })
     },
     // 更新持仓状态
-    updatePositionStatus(id,status) {
+    updatePositionStatus (id, status) {
         let url = `/api/update_position_status?id=${id}&status=${status}`
         return axios({
             url: url,
@@ -100,7 +100,7 @@ export const futureApi = {
         })
     },
     // 获取级别多空方向
-    getLevelDirectionList() {
+    getLevelDirectionList () {
         let url = `/api/get_future_level_direction_list`
         return axios({
             url: url,
@@ -108,29 +108,37 @@ export const futureApi = {
         })
     },
     // 创建预判
-    createPrejudgeList(data){
+    createPrejudgeList (data) {
         let url = `/api/create_future_prejudge_list`
         return axios({
             url: url,
             method: 'post',
             data: data
-        })  
+        })
     },
     // 获取预判
-    getPrejudgeList(endDate){
+    getPrejudgeList (endDate) {
         let url = `/api/get_future_prejudge_list?endDate=${endDate}`
         return axios({
             url: url,
             method: 'get'
-        })  
+        })
     },
     // 更新预判
-    updatePrejudgeList(data){
+    updatePrejudgeList (data) {
         let url = `/api/update_future_prejudge_list`
         return axios({
             url: url,
             method: 'post',
             data: data
-        })  
+        })
+    },
+    // 获取okex btc ticker 这个接口单独获取不能阻塞掉商品期货
+    getOkexBTCTicker () {
+        let url = '/api/get_btc_ticker'
+        return axios({
+            url: url,
+            method: 'get',
+        })
     },
 }

@@ -49,9 +49,9 @@ def fetch_global_futures_mink():
                 df = pd.DataFrame(json.loads(response_text))
                 # [['2020-03-22T02:31:00.000Z','12','32','54','34'],['2020-03-22T02:31:00.000Z','12','32','54','34']]
                 df = df.iloc[::-1]
+                save_data_m(symbol, '%s' % minute, df)
             except Exception:
                 print("okex采集出错", Exception)
-            save_data_m(symbol, '%s' % minute, df)
             time.sleep(1)
             if not is_run:
                 break

@@ -137,9 +137,10 @@ export default {
             maxAccountUseRate: 0.1,
             // 止损系数
             stopRate: 0.01,
-            // 数字货币手续费 20倍杠杆
-            digitCoinFee: 0.0006,
-
+            // 数字货币手续费 20倍杠杆 双向 0.05%*2
+            digitCoinFee: 0.001,
+            // okex 开仓起始杠杆
+            digitCoinLevel: this.$digitCoinLevel,
             // 1手需要的保证金
             perOrderMargin: 0,
             // 1手止损金额
@@ -203,7 +204,7 @@ export default {
             positionStatus: 'holding',
             dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
             currentInfo: null,
-            //数字货币讲240m 替换成1m
+            // 数字货币讲240m 替换成1m
             isDigitCoin: false
         }
     },
@@ -297,7 +298,6 @@ export default {
                     this.myChart.resize()
                 })
             } else {
-
                 this.myChart3 = this.$echarts.init(document.getElementById('main3'))
                 this.myChart5 = this.$echarts.init(document.getElementById('main5'))
                 this.myChart15 = this.$echarts.init(document.getElementById('main15'))
@@ -580,7 +580,6 @@ export default {
                         this.myChart240.showLoading()
                     }
                 }
-
             }
 
             futureApi.stockData(requestData).then(res => {
@@ -625,7 +624,6 @@ export default {
                             this.firstFlag[6] = false
                         }
                     }
-
                 }
                 // console.log("结果", res)
                 this.draw(res, update, requestData.period)
@@ -640,7 +638,13 @@ export default {
             const resultData = this.splitData(stockJsonData, period)
             var dataTitle = that.symbol + '  ' + period
             const margin_rate = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].margin_rate || 1
-            let marginLevel = (1 / (margin_rate + this.marginLevelCompany)).toFixed(2)
+            let marginLevel
+            if (this.symbol.indexOf('BTC') === -1) {
+                marginLevel = (1 / (margin_rate + this.marginLevelCompany)).toFixed(2)
+            } else {
+                marginLevel = this.digitCoinLevel
+            }
+
             const trading_hours = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].trading_hours
             const maturity_date = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].maturity_date
             var subText = '杠杆: ' + marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
@@ -1277,7 +1281,7 @@ export default {
             // option.series[4].data = this.calculateMA(resultData, 5);
             // option.series[5].data = this.calculateMA(resultData, 10);
             // option.series[11].data = resultData.volume;
-            console.log("更新的option", option)
+            console.log('更新的option', option)
             return option
         },
         splitData(jsonObj, period) {
@@ -1914,7 +1918,7 @@ export default {
             }
             // console.log("markline", markLineData)
 
-            let bcMACDValues = [];
+            let bcMACDValues = []
             for (let i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
@@ -1931,8 +1935,8 @@ export default {
                         textBorderWidth: 2,
                         color: 'white',
                     },
-                };
-                bcMACDValues.push(value);
+                }
+                bcMACDValues.push(value)
             }
             for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
                 let value = {
@@ -1943,10 +1947,9 @@ export default {
                     itemStyle: {
                         normal: {color: 'green'}
                     }
-                };
-                bcMACDValues.push(value);
+                }
+                bcMACDValues.push(value)
             }
-
 
             const macddata = jsonObj.macd
             const diffdata = jsonObj.diff
@@ -1980,13 +1983,23 @@ export default {
             let lastBeichiType = this.getLastBeichiData(jsonObj)
             let lastBeichi = null
             const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
-            let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
+            let marginLevel
+            if (this.symbol.indexOf('BTC') === -1) {
+                marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
+            } else {
+                marginLevel = this.digitCoinLevel
+            }
             // 当前价格
             let currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
             this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1
             // 1手需要的保证金
-            this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
+            if (this.symbol.indexOf('BTC') === -1) {
+                this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
+            } else {
+                this.marginPrice = (0.01 * currentPrice).toFixed(2)
+            }
+
             // console.log("最后的背驰:", period, lastBeichiType)
             if (lastBeichiType !== 0) {
                 switch (lastBeichiType) {
@@ -2277,16 +2290,24 @@ export default {
             let openPrice = this.currentPosition.price
             let openAmount = this.currentPosition.amount
             let direction = this.currentPosition.direction
-
             const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
-            let marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
+            let marginLevel
+            if (this.symbol.indexOf('BTC') === -1) {
+                marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
+            } else {
+                marginLevel = this.digitCoinLevel
+            }
+
             // 当前价格
             let currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
             this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1
             // 1手需要的保证金
-            this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
-
+            if (this.symbol.indexOf('BTC') === -1) {
+                this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
+            } else {
+                this.marginPrice = 0.01 * currentPrice
+            }
             // 止损价格
             let stopLosePrice = this.currentPosition.stopLosePrice
             // 当前盈利百分比
@@ -2525,6 +2546,7 @@ export default {
                 // 单位usdt
                 this.perOrderMargin = 0.01 * currentPrice
                 this.perOrderStopRate = (Math.abs(this.openPrice - this.stopPrice) / this.openPrice + this.digitCoinFee) * 20
+                // 1手止损的百分比 需要加上手续费  0.05%  okex双向taker 就是 2%
                 this.perOrderStopMoney = Number((this.perOrderMargin * this.perOrderStopRate).toFixed(2))
             }
 

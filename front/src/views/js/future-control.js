@@ -15,6 +15,7 @@ export default {
     },
     data() {
         return {
+            okexTicker: "",
             beichiListLoading: true,
             calcPosForm: {
                 // start用于仓位管理计算
@@ -41,8 +42,8 @@ export default {
                 maxAccountUseRate: 0.1,
                 // 止损系数
                 stopRate: 0.01,
-                // 数字货币手续费 20倍杠杆
-                digitCoinFee: 0.0006,
+                // okex 手续费 0.05% 开仓加平仓就是0.1%
+                digitCoinFee: 0.001,
 
                 // 1手需要的保证金
                 perOrderMargin: 0,
@@ -73,8 +74,7 @@ export default {
             // start用于仓位管理计算
             currentSymbol: null,
             currentMarginRate: null,
-            // 合约乘数
-            contractMultiplier: null,
+
             // 账户总额
             account: 0,
 
@@ -94,8 +94,6 @@ export default {
             maxAccountUseRate: 0.1,
             // 止损系数
             stopRate: 0.01,
-            // 数字货币手续费 20倍杠杆
-            digitCoinFee: 0.0006,
 
             // 1手需要的保证金
             perOrderMargin: 0,
@@ -115,7 +113,7 @@ export default {
             // end仓位管理计算
 
             digitCoinsSymbolList: [{
-                contract_multiplier: 20,
+                contract_multiplier: 1,
                 de_listed_date: 'forever',
                 exchange: 'OKEX',
                 listed_date: 'forever',
@@ -368,20 +366,23 @@ export default {
         }
     },
 
-    mounted () {
+    mounted() {
         // this.subscribeWS()
+        this.getOkexBTCTicker()
         this.getChangeiList()
         this.getSignalList()
         this.getLevelDirectionList()
         this.getPrejudgeList()
+        this.getOkexBTCTicker()
         setInterval(() => {
             this.getSignalList()
             this.getChangeiList()
             this.getLevelDirectionList()
+            this.getOkexBTCTicker()
         }, 20000)
     },
     methods: {
-        subscribeWS () {
+        subscribeWS() {
             let ws = new WebSocket('ws://localhost:5000/control')
             ws.onopen = function (evt) {
                 console.log('Connection open ...')
@@ -402,6 +403,14 @@ export default {
             ws.onclose = function (evt) {
                 console.log('Connection closed.')
             }
+        },
+        getOkexBTCTicker() {
+            futureApi.getOkexBTCTicker().then(res => {
+                this.okexTicker = res
+                console.log('获取okexTiker', this.okexTicker)
+            }).catch((error) => {
+                console.log('获取okexTiker失败:', error)
+            })
         },
         processChangeList() {
             // 计算多空分布
@@ -498,13 +507,19 @@ export default {
             window.open(routeUrl.href, '_blank')
         },
         fillMarginRate(symbolInfo, price) {
+            if (symbolInfo.order_book_id.indexOf('BTC') === -1) {
+                this.calcPosForm.account = this.calcPosForm.futureAccount
+            } else {
+                this.calcPosForm.account = this.calcPosForm.digitCoinAccount
+            }
             this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
             this.calcPosForm.contractMultiplier = symbolInfo.contract_multiplier
             this.calcPosForm.currentSymbol = symbolInfo.underlying_symbol
             this.calcPosForm.openPrice = price
         },
         /**
-         *  BTC期货属于币本位， 商品期货属于法币本位,他们的仓位管理计算不一样
+         *  火币BTC期货属于币本位，OKEX 期货属于金本位
+         *  商品期货属于法币本位,他们的仓位管理计算不一样
          */
         calcAccount() {
             if (this.calcPosForm.currentMarginRate == null) {
@@ -521,7 +536,12 @@ export default {
             } else {
                 this.calcPosForm.account = this.calcPosForm.digitCoinAccount
                 // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
-                this.calcPosForm.perOrderMargin = 5
+                // OKEX 1张 = 0.01BTC  20倍杠杆， 1张就是 0.01* BTC的现价
+                if (this.okexTicker === '') {
+                    alert('请先获取btc最新价格')
+                    return
+                }
+                this.calcPosForm.perOrderMargin = (0.01 * Number(this.okexTicker.last)).toFixed(2)
                 this.calcPosForm.perOrderStopRate = ((Math.abs(this.calcPosForm.openPrice - this.calcPosForm.stopPrice) / this.calcPosForm.openPrice + this.calcPosForm.digitCoinFee) * 20).toFixed(2)
                 this.calcPosForm.perOrderStopMoney = Number((this.calcPosForm.perOrderMargin * this.calcPosForm.perOrderStopRate).toFixed(2))
             }

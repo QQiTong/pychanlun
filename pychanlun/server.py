@@ -59,6 +59,14 @@ def save_stock_date():
     result = calc.calcData(period, symbol, True)
     return Response(json.dumps(result), mimetype='application/json')
 
+# --------------------------------数字货币部分------------------------------------
+
+@app.route('/api/get_btc_ticker')
+def get_btc_ticker():
+    btcTicker = businessService.getBTCTicker()
+    return Response(json.dumps(btcTicker), mimetype='application/json')
+
+
 # --------------------------------期货部分------------------------------------
 # 获取主力合约
 # curl -X GET http://127.0.0.1:5000/api/dominant

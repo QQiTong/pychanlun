@@ -49,10 +49,10 @@ account = 50
 marginLevelCompany = 0.01
 # 期货账户
 futuresAccount = 50
-# 数字货币手续费20倍杠杆
-digitCoinFee = 0.0006
+# 数字货币手续费0.05% 开平仓0.1%
+digitCoinFee = 0.001
 # 数字货币账户
-digitCoinAccount = 1
+digitCoinAccount = 0.1
 maxAccountUseRate = 0.1
 stopRate = 0.01
 mail = Mail()
@@ -223,6 +223,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                     print("current:", symbol, period, datetime.now())
                     result = calc.calcData(period, symbol)
                     close_price = result['close'][-1]
+                    monitorBeichi(result, symbol, period, close_price)
                     monitorHuila(result, symbol, period, close_price)
                     monitorTupo(result, symbol, period, close_price)
                     monitorVfan(result, symbol, period, close_price)
@@ -592,7 +593,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
         return -1
     # 兼容数字货币
     if 'BTC' in dominantSymbol or dominantSymbol in config['globalFutureSymbol']:
-        perOrderMargin = 5
+        perOrderMargin = 0.01 * openPrice
         # 1手止损的比率
         perOrderStopRate = (abs(openPrice - stopPrice) / openPrice + digitCoinFee) * 20
         # 1手止损的金额
@@ -664,10 +665,10 @@ def run(**kwargs):
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[5]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[6]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[7]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
 
     # 外盘监控
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
 
     threading.Thread(target=monitorFuturesAndDigitCoin, args=["2",symbolListDigitCoin]).start()
 

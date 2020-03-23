@@ -3,7 +3,7 @@
 import rqdatac as rq
 import os
 import json
-from pychanlun.config import config
+from pychanlun.config import config,cfg
 from datetime import datetime, timedelta
 from pychanlun.db import DBPyChanlun
 from bson.codec_options import CodecOptions
@@ -12,6 +12,8 @@ import pymongo
 import pandas as pd
 from bson import ObjectId
 import time
+import requests
+
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -29,6 +31,13 @@ otherSymbol = ["BTC", "CL", "GC", "SI", "CT","S", "SM", "BO", "NID", "ZSD"]
 class BusinessService:
     def __init__(self):
         print('初始化业务对象...')
+    # 数字货币部分
+    def getBTCTicker(self):
+        okexUrl = "https://www.okex.com/api/swap/v3/instruments/BTC-USD-SWAP/ticker"
+        r = requests.get(okexUrl,proxies=cfg.PROXIES)
+        ticker = json.loads(r.text)
+        print("BTC实时价格",ticker)
+        return ticker
 
     def initDoinantSynmbol(self):
         symbolList = config['symbolList']

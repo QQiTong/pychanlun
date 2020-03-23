@@ -467,6 +467,19 @@ def testOkex2():
         originKlineList.append(originKline)
     print("结果:", len(originKlineList))
 
+def testOkexTiker():
+    startTime = int(round(time.time()*1000))
+
+    PROXIES = {
+        "http": "socks5://127.0.0.1:10808",
+        "https": "socks5://127.0.0.1:10808"
+    }
+    okexUrl = "https://www.okex.com/api/swap/v3/instruments/BTC-USD-SWAP/ticker"
+    r = requests.get(okexUrl, proxies=PROXIES)
+    endTime = int(round(time.time() * 1000)) - startTime
+    print("耗费时间：", endTime)
+    tiker = json.loads(r.text)
+    print(tiker)
 
 def app():
     # testBitmex()
@@ -481,7 +494,8 @@ def app():
     # testWaipan()
     # testWechat()
     # testOkex1()
-    testOkex2()
+    # testOkex2()
+    testOkexTiker()
 
 if __name__ == '__main__':
     app()
