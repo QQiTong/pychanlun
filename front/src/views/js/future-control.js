@@ -559,10 +559,10 @@ export default {
 
             this.calcPosForm.maxOrderCount = maxOrderCount1 > maxOrderCount2 ? maxOrderCount2 : maxOrderCount1
             // 总保证金
-            this.calcPosForm.totalOrderMargin = this.calcPosForm.perOrderMargin * this.calcPosForm.maxOrderCount
+            this.calcPosForm.totalOrderMargin = (this.calcPosForm.perOrderMargin * this.calcPosForm.maxOrderCount).toFixed(2)
 
             // 总止损额
-            this.calcPosForm.totalOrderStopMoney = this.calcPosForm.perOrderStopMoney * this.calcPosForm.maxOrderCount
+            this.calcPosForm.totalOrderStopMoney = (this.calcPosForm.perOrderStopMoney * this.calcPosForm.maxOrderCount).toFixed(2)
 
             // 计算当前资金使用率
             this.calcPosForm.accountUseRate = ((this.calcPosForm.maxOrderCount * this.calcPosForm.perOrderMargin) / this.calcPosForm.account / 10000).toFixed(2)

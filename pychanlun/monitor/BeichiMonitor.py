@@ -243,7 +243,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
             print("外盘期货出异常了", Exception)
             threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
         else:
-            print("火币出异常了", Exception)
+            print("OKEX出异常了", Exception)
             time.sleep(5)
             threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
 '''
@@ -257,16 +257,18 @@ def monitorBeichi(result, symbol, period, closePrice):
     if len(result['buyMACDBCData']['date']) > 0:
         fire_time = result['buyMACDBCData']['date'][-1]
         price = result['buyMACDBCData']['data'][-1]
-        remark = result['buyMACDBCData']['tag'][-1]
-        stop_lose_price = result['buy_zs_huila']['stop_lose_price'][-1]
+        # remark = result['buyMACDBCData']['tag'][-1]
+        remark = ""
+        stop_lose_price = result['buyMACDBCData']['stop_lose_price'][-1]
         maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price, period)
         direction = 'B'
         saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount,
                          stop_lose_price)
     if len(result['sellMACDBCData']['date']) > 0:
-        fire_time = result['sell_zs_huila']['date'][-1]
+        fire_time = result['sellMACDBCData']['date'][-1]
         price = result['sellMACDBCData']['data'][-1]
-        remark = result['sellMACDBCData']['tag'][-1]
+        # remark = result['sellMACDBCData']['tag'][-1]
+        remark = ""
         stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
         maxOrderCount = calMaxOrderCount(symbol, closePrice, stop_lose_price, period)
         direction = 'S'
