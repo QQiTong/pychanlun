@@ -1278,6 +1278,7 @@ export default {
             option.series[4].data = resultData.macd
             option.series[5].data = resultData.diff
             option.series[6].data = resultData.dea
+            option.series[6].markPoint.data = resultData.bcMACDValues
             // option.series[4].data = this.calculateMA(resultData, 5);
             // option.series[5].data = this.calculateMA(resultData, 10);
             // option.series[11].data = resultData.volume;

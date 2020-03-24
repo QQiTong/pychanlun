@@ -21,7 +21,7 @@ tz = pytz.timezone('Asia/Shanghai')
 python pychanlun\market_data\global_futures.py
 """
 
-
+# OKEX 限速规则：20次/2s
 min_list = ['1m','3m','5m','15m','30m','60m','240m','1d','1w']
 
 okexPeriodMap = {
@@ -52,7 +52,7 @@ def fetch_global_futures_mink():
                 save_data_m(symbol, '%s' % minute, df)
             except Exception:
                 print("okex采集出错", Exception)
-            time.sleep(1)
+            time.sleep(0.1)
             if not is_run:
                 break
             if not is_run:
