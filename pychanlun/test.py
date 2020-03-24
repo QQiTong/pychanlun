@@ -432,22 +432,23 @@ def testOkex1():
 def testOkex2():
     startTime = int(round(time.time()*1000))
 
-    PROXIES = {
-        "http": "socks5://127.0.0.1:10808",
-        "https": "socks5://127.0.0.1:10808"
-    }
+    # PROXIES = {
+    #     "http": "socks5://127.0.0.1:10808",
+    #     "https": "socks5://127.0.0.1:10808"
+    # }
     t = time.time()
     timeStamp = int(round(t * 1000))
 
     # 接口2
-    okexUrl = "https://www.okex.com/api/swap/v3/instruments/BTC-USDT-SWAP/candles"
+    # okexUrl = "https://www.okex.com/api/swap/v3/instruments/BTC-USDT-SWAP/candles"
+    okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/candles"
     payload = {
         'granularity': 300,
-        'start':'2020-03-22T02:31:00.000Z',
-        'end':'2020-03-22T18:55:00.000Z',
+        # 'start':'2020-03-22T02:31:00.000Z',
+        # 'end':'2020-03-22T18:55:00.000Z',
     }
 
-    r = requests.get(okexUrl,params=payload,  proxies=PROXIES)
+    r = requests.get(okexUrl,params=payload)
     endTime = int(round(time.time()*1000)) -startTime
     print("耗费时间：",endTime)
     klines = json.loads(r.text)
@@ -494,8 +495,8 @@ def app():
     # testWaipan()
     # testWechat()
     # testOkex1()
-    # testOkex2()
-    testOkexTiker()
+    testOkex2()
+    # testOkexTiker()
 
 if __name__ == '__main__':
     app()

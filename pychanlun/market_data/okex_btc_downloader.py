@@ -43,8 +43,11 @@ def fetch_global_futures_mink():
         # 取分钟数据
         for minute in min_list:
             try:
-                url = "http://www.okex.com/api/swap/v3/instruments/BTC-USDT-SWAP/candles?granularity=%s"   % (okexPeriodMap[minute])
-                response = requests.get(url,proxies=cfg.PROXIES)
+                # url = "http://www.okex.com/api/swap/v3/instruments/BTC-USDT-SWAP/candles?granularity=%s"   % (okexPeriodMap[minute])
+                url = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/candles?granularity=%s"   % (okexPeriodMap[minute])
+                # response = requests.get(url,proxies=cfg.PROXIES)
+                # okex.me这个域名不用翻墙
+                response = requests.get(url)
                 response_text = response.text
                 df = pd.DataFrame(json.loads(response_text))
                 # [['2020-03-22T02:31:00.000Z','12','32','54','34'],['2020-03-22T02:31:00.000Z','12','32','54','34']]
@@ -52,12 +55,10 @@ def fetch_global_futures_mink():
                 save_data_m(symbol, '%s' % minute, df)
             except Exception:
                 print("okex采集出错", Exception)
-            time.sleep(0.1)
+            time.sleep(1)
             if not is_run:
                 break
-            if not is_run:
-                break
-        # time.sleep(200)
+        # time.sleep(100)
     logging.info("OKEX数据抓取程序已停止。")
 
 def save_data_m(code, period, df):
