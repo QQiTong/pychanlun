@@ -8,13 +8,18 @@ from email.utils import formataddr
 import json
 my_sender = 'java_boss@mail.zyaoxin.com'  # 发件人邮箱账号
 my_pass = 'LiangHua123456'  # 发件人邮箱密码
-my_user = ['236819579@qq.com', '1106628276@qq.com']  # 收件人邮箱账号，我这边发送给自己
+my_user1 = ['236819579@qq.com']  # 收件人邮箱账号，我这边发送给自己
+my_user2 = ['236819579@qq.com', '1106628276@qq.com']  # 收件人邮箱账号，我这边发送给自己
 
 
 class Mail:
     def send(self, content):
         ret = True
         try:
+            if 'BTC' in content:
+                my_user = my_user2
+            else:
+                my_user = my_user1
             msg = MIMEText(content, 'plain', 'utf-8')
             msg['From'] = formataddr(["reminder", my_sender])  # 括号里的对应发件人邮箱昵称、发件人邮箱账号
             # msg['To'] = my_user  # 括号里的对应收件人邮箱昵称、收件人邮箱账号
