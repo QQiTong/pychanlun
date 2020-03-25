@@ -541,7 +541,7 @@ export default {
                     alert('请先获取btc最新价格')
                     return
                 }
-                this.calcPosForm.perOrderMargin = (0.01 * Number(this.okexTicker.last)).toFixed(2)
+                this.calcPosForm.perOrderMargin = (0.01 * Number(this.okexTicker.price)).toFixed(2)
                 this.calcPosForm.perOrderStopRate = ((Math.abs(this.calcPosForm.openPrice - this.calcPosForm.stopPrice) / this.calcPosForm.openPrice + this.calcPosForm.digitCoinFee) * 20).toFixed(2)
                 this.calcPosForm.perOrderStopMoney = Number((this.calcPosForm.perOrderMargin * this.calcPosForm.perOrderStopRate).toFixed(2))
             }

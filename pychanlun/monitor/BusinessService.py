@@ -33,11 +33,20 @@ class BusinessService:
         print('初始化业务对象...')
     # 数字货币部分
     def getBTCTicker(self):
-        okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USD-SWAP/ticker"
+        okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/ticker"
         r = requests.get(okexUrl)
         ticker = json.loads(r.text)
-        print("BTC实时价格",ticker)
-        return ticker
+        # print("BTC实时价格",ticker)
+        code = "%s_%s" % ('BTC', '1d')
+        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+        ).sort("_id", pymongo.DESCENDING)
+        dayOpenPrice = data_list[0]['open']
+        change = round((float(ticker['last']) - dayOpenPrice) / dayOpenPrice,4)
+        changeAndPrice = {
+            'change':change,
+            'price':ticker['last']
+        }
+        return changeAndPrice
 
     def initDoinantSynmbol(self):
         symbolList = config['symbolList']
