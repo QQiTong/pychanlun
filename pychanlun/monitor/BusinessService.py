@@ -33,8 +33,8 @@ class BusinessService:
         print('初始化业务对象...')
     # 数字货币部分
     def getBTCTicker(self):
-        okexUrl = "https://www.okex.com/api/swap/v3/instruments/BTC-USD-SWAP/ticker"
-        r = requests.get(okexUrl,proxies=cfg.PROXIES)
+        okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USD-SWAP/ticker"
+        r = requests.get(okexUrl)
         ticker = json.loads(r.text)
         print("BTC实时价格",ticker)
         return ticker

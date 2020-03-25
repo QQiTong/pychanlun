@@ -51,6 +51,18 @@ nssm set global-futures-downloader AppParameters "pychanlun/cli.py global-future
 nssm set global-futures-downloader DependOnService MongoDB
 nssm start global-futures-downloader
 ```
+使用nssm部署okex数据下载程序
+
+（管理员命令行模式）
+
+```cmd
+nssm install global-futures-downloader "C:/Users/23681/scoop/shims/python.exe"
+nssm set global-futures-downloader AppDirectory "D:/development/pychanlun"
+nssm set global-futures-downloader AppParameters "pychanlun/cli.py global-futures download"
+nssm set global-futures-downloader DependOnService MongoDB
+nssm start global-futures-downloader
+```
+
 
 使用nssm部署NGINX服务。
 
