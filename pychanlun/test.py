@@ -482,6 +482,14 @@ def testOkexTiker():
     tiker = json.loads(r.text)
     print(tiker)
 
+def testChaji():
+    a = ['RB2005', 'HC2005']
+    b = ['RB2005', 'HC2010','RU2005']
+    ret = []
+    for i in a:
+        if i not in b:
+            ret.append(i)
+    print(ret)
 def app():
     # testBitmex()
     # testBeichiDb()
@@ -495,8 +503,9 @@ def app():
     # testWaipan()
     # testWechat()
     # testOkex1()
-    testOkex2()
+    # testOkex2()
     # testOkexTiker()
+    testChaji()
 
 if __name__ == '__main__':
     app()

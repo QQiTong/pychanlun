@@ -144,8 +144,17 @@ class BusinessService:
             start = datetime.now() + timedelta(-2)
         else:
             start = datetime.now() + timedelta(-1)
-        for i in range(len(dominantSymbolList)):
-            item = dominantSymbolList[i]
+        #     找出持仓列表中的老合约 和 主力合约 求集合的差
+        positionList= self.getPositionList('holding',1,10)['records']
+        # 找出持仓列表中的老合约
+        diff = []
+        for i in range(len(positionList)):
+            item = positionList[i]
+            if item not in dominantSymbolList:
+                diff.append(item['symbol'])
+        union = list(set(dominantSymbolList) | set(diff))
+        for i in range(len(union)):
+            item = union[i]
             # print(item)
             if item not in otherSymbol:
                 df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
