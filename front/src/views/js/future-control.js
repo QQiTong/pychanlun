@@ -68,6 +68,7 @@ export default {
             periodList: ['3m', '5m', '15m', '30m', '60m'],
             beichiList: {},
             changeList: null, // 涨跌幅
+            globalFutureChangeList:null,
             marginLevelCompany: 0.01,
             firstRequestDominant: true,
 
@@ -323,7 +324,10 @@ export default {
 
             ],
             symbolSearch: '',
+            // 内盘涨跌幅百分比
             percentage: 0,
+            // 外盘盘涨跌幅百分比
+            globalFuturePercentage:0,
             // 级别多空方向
             levelDirectionList: [],
             activeTab: 'first',
@@ -374,6 +378,7 @@ export default {
         this.getLevelDirectionList()
         this.getPrejudgeList()
         this.getOkexBTCTicker()
+        this.getGlobalFutureChangeList()
         setInterval(() => {
             this.getSignalList()
             this.getChangeiList()
@@ -425,6 +430,20 @@ export default {
             }
             this.percentage = parseInt(long / (long + short) * 100)
             console.log('获取涨跌幅列表 计算百分比', this.changeList, this.percentage)
+        },
+        processGlobalFutureChangeList() {
+            // 计算多空分布
+            let long = 0
+            let short = 0
+            for (let item in this.globalFutureChangeList) {
+                if (this.globalFutureChangeList[item]['change'] > 0) {
+                    long = long + 1
+                } else {
+                    short = short + 1
+                }
+            }
+            this.globalFuturePercentage = parseInt(long / (long + short) * 100)
+            console.log('获取外盘涨跌幅列表 计算百分比', this.globalFutureChangeList, this.globalFuturePercentage)
         },
         getLevelDirectionList() {
             futureApi.getLevelDirectionList().then(res => {
@@ -491,6 +510,14 @@ export default {
             futureApi.getChangeiList().then(res => {
                 this.changeList = res
                 this.processChangeList()
+            }).catch((error) => {
+                console.log('获取涨跌幅失败:', error)
+            })
+        },
+        getGlobalFutureChangeList() {
+            futureApi.getGlobalFutureChangeList().then(res => {
+                this.globalFutureChangeList = res
+                this.processGlobalFutureChangeList()
             }).catch((error) => {
                 console.log('获取涨跌幅失败:', error)
             })

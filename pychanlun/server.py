@@ -68,6 +68,13 @@ def get_btc_ticker():
 
 
 # --------------------------------期货部分------------------------------------
+
+# 获取外盘涨跌幅列表
+@app.route('/api/get_global_future_change_list')
+def get_global_future_change_list():
+    globalFutureChangeList = businessService.getGlobalFutureChangeList()
+    return Response(json.dumps(globalFutureChangeList), mimetype='application/json')
+
 # 获取主力合约
 # curl -X GET http://127.0.0.1:5000/api/dominant
 @app.route('/api/dominant')

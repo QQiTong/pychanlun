@@ -6,13 +6,13 @@
     <el-row>
       <el-form :inline="true" size="mini" :model="calcPosForm" class="demo-form-inline">
         <el-form-item label="资产总额">
-          <el-input v-model="calcPosForm.account" class="form-input" />
+          <el-input v-model="calcPosForm.account" class="form-input " />
         </el-form-item>
         <el-form-item label="保证金系数">
-          <el-input v-model="calcPosForm.currentMarginRate" class="form-input" disabled />
+          <el-input v-model="calcPosForm.currentMarginRate" class="form-input " disabled />
         </el-form-item>
         <el-form-item label="合约乘数">
-          <el-input v-model="calcPosForm.contractMultiplier" class="form-input" disabled />
+          <el-input v-model="calcPosForm.contractMultiplier" class="form-input " disabled />
         </el-form-item>
         <el-form-item label="开仓价格">
           <el-input v-model="calcPosForm.openPrice" class="form-input" />
@@ -41,19 +41,19 @@
           <el-button type="primary" @click="calcAccount">查询</el-button>
         </el-form-item>
         <el-form-item label="开仓手数">
-          <el-input v-model="calcPosForm.maxOrderCount" class="form-input" disabled />
+          <el-input v-model="calcPosForm.maxOrderCount" class="form-input " disabled />
         </el-form-item>
         <el-form-item label="资金使用率">
-          <el-input v-model="calcPosForm.accountUseRate" class="form-input" disabled />
+          <el-input v-model="calcPosForm.accountUseRate" class="form-input " disabled />
         </el-form-item>
         <el-form-item label="1手保证金">
-          <el-input v-model="calcPosForm.perOrderMargin" class="form-input" disabled />
+          <el-input v-model="calcPosForm.perOrderMargin" class="form-input " disabled />
         </el-form-item>
         <el-form-item label="1手止损的金额">
-          <el-input v-model="calcPosForm.perOrderStopMoney" class="form-input" disabled />
+          <el-input v-model="calcPosForm.perOrderStopMoney" class="form-input " disabled />
         </el-form-item>
         <el-form-item label="止损百分比">
-          <el-input v-model="calcPosForm.perOrderStopRate" class="form-input" disabled />
+          <el-input v-model="calcPosForm.perOrderStopRate" class="form-input " disabled />
         </el-form-item>
         <el-form-item label="总保证金">
           <el-input v-model="calcPosForm.totalOrderMargin" class="form-input" disabled />
@@ -74,14 +74,20 @@
       :changeList="changeList"
       :marginLevelCompany="marginLevelCompany"
     />
-    <el-divider content-position="center">信号列表 | 多空分布</el-divider>
+    <el-divider content-position="center">信号列表 | 多空分布 | 内盘 | 外盘</el-divider>
     <el-progress
       :percentage="percentage"
       :color="customColorMethod"
       :text-inside="true"
       :stroke-width="24"
     />
-
+    <el-progress
+      :percentage="globalFuturePercentage"
+      :color="customColorMethod"
+      :text-inside="true"
+      :stroke-width="24"
+      class="mt-5"
+    />
     <el-tabs v-model="activeTab" type="card" @tab-click="handleChangeTab" class="mt-5">
       <el-tab-pane label="最新行情" name="first">
         <el-row>
@@ -323,6 +329,6 @@
 
 <script src="./js/future-control.js"></script>
 
-<style lang="stylus" scoped>
+<style lang="stylus" >
 @import '../style/futures-control.styl';
 </style>

@@ -50,6 +50,12 @@ export const futureApi = {
             method: 'get',
         })
     },
+    getGlobalFutureChangeList () {
+        return axios({
+            url: `/api/get_global_future_change_list`,
+            method: 'get',
+        })
+    },
     getDominant () {
         return axios({
             url: `/api/dominant`,

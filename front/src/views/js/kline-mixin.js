@@ -825,15 +825,15 @@ export default {
 
                     color: ['yellow', 'green', 'blue', 'white', 'white', 'red' /* 'white', 'white', 'white' */],
                     legend: {
-                        data: ['笔', '段', '高级别段', 'MA5', /* 'MA10', 'MA60','布林上轨', '布林中轨', '布林下轨' */],
+                        data: ['笔', '段', '高级别段', 'MA5', 'MA10', 'MA60',/*'布林上轨', '布林中轨', '布林下轨' */],
 
                         selected: {
                             '笔': true,
                             '段': true,
                             '高级别段': true,
-                            // 'MA5': false,
-                            // 'MA10': false,
-                            // 'MA60': false,
+                            'MA5': true,
+                            'MA10': true,
+                            'MA60': true,
                             // 'markline': true
                         },
                         top: 10,
@@ -1199,56 +1199,56 @@ export default {
                             //     data: resultData.macdAreaValues
                             // },
                         },
-                        // index 4
-                        // {
-                        //     name: 'MA5',
-                        //     type: 'line',
-                        //     data: calculateMA(resultData, 5),
-                        //     smooth: true,
-                        //     lineStyle: {
-                        //         normal: {
-                        //             opacity: 0.9,
-                        //             type: 'solid',
-                        //             width: 1,
-                        //             color: "white"
-                        //         },
-                        //     },
-                        //     symbol: 'none',
-                        //     animation: false
-                        // },
-                        // //index 5
-                        // {
-                        //     name: 'MA10',
-                        //     type: 'line',
-                        //     data: calculateMA(resultData, 10),
-                        //     smooth: true,
-                        //     lineStyle: {
-                        //         normal: {
-                        //             opacity: 0.9,
-                        //             type: 'solid',
-                        //             width: 1,
-                        //             color: "yellow"
-                        //         },
-                        //     },
-                        //     symbol: 'none',
-                        //     animation: false
-                        // },
-                        // {
-                        //     name: 'MA60',
-                        //     type: 'line',
-                        //     data: calculateMA(resultData, 60),
-                        //     smooth: true,
-                        //     lineStyle: {
-                        //         normal: {
-                        //             opacity: 1,
-                        //             type: 'solid',
-                        //             width: 2,
-                        //             color: "red"
-                        //         },
-                        //     },
-                        //     symbol: 'none',
-                        //     animation: false
-                        // }
+                        // index 8
+                        {
+                            name: 'MA5',
+                            type: 'line',
+                            data: that.calculateMA(resultData, 5),
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 0.9,
+                                    type: 'solid',
+                                    width: 1,
+                                    color: "white"
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false
+                        },
+                        // //index 9
+                        {
+                            name: 'MA10',
+                            type: 'line',
+                            data: that.calculateMA(resultData, 10),
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 0.9,
+                                    type: 'solid',
+                                    width: 1,
+                                    color: "yellow"
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false
+                        },
+                        {
+                            name: 'MA60',
+                            type: 'line',
+                            data: that.calculateMA(resultData, 60),
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 1,
+                                    type: 'solid',
+                                    width: 2,
+                                    color: "purple"
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false
+                        }
                     ],
                     graphic: [],
                 }
@@ -1280,8 +1280,9 @@ export default {
             option.series[6].data = resultData.dea
             option.series[5].markPoint.data = resultData.bcMACDValues
             // option.series[6].markPoint.data = resultData.bcMACDValues
-            // option.series[4].data = this.calculateMA(resultData, 5);
-            // option.series[5].data = this.calculateMA(resultData, 10);
+            option.series[8].data = this.calculateMA(resultData, 5);
+            option.series[9].data = this.calculateMA(resultData, 10);
+            option.series[10].data = this.calculateMA(resultData, 60);
             // option.series[11].data = resultData.volume;
             console.log('更新的option', option)
             return option

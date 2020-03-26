@@ -9,7 +9,7 @@ from vnpy.gateway.bitmex import BitmexGateway
 # from vnpy.gateway.futu import FutuGateway
 # from vnpy.gateway.ib import IbGateway
 # from vnpy.gateway.ctp import CtpGateway
-# from vnpy.gateway.ctptest import CtptestGateway
+from vnpy.gateway.ctptest import CtptestGateway
 # from vnpy.gateway.mini import MiniGateway
 # from vnpy.gateway.sopt import SoptGateway
 # from vnpy.gateway.minitest import MinitestGateway
@@ -61,7 +61,7 @@ def main():
 
     # main_engine.add_gateway(BinanceGateway)
     # main_engine.add_gateway(CtpGateway)
-    # main_engine.add_gateway(CtptestGateway)
+    main_engine.add_gateway(CtptestGateway)
     # main_engine.add_gateway(MiniGateway)
     # main_engine.add_gateway(SoptGateway)
     # main_engine.add_gateway(MinitestGateway)
@@ -69,7 +69,7 @@ def main():
     # main_engine.add_gateway(UftGateway)
     # main_engine.add_gateway(IbGateway)
     # main_engine.add_gateway(FutuGateway)
-    main_engine.add_gateway(BitmexGateway)
+    # main_engine.add_gateway(BitmexGateway)
     # main_engine.add_gateway(TigerGateway)
     # main_engine.add_gateway(OesGateway)
     # main_engine.add_gateway(OkexGateway)
@@ -82,7 +82,7 @@ def main():
     # main_engine.add_gateway(TapGateway)
     # main_engine.add_gateway(ToraGateway)
     # main_engine.add_gateway(AlpacaGateway)
-    main_engine.add_gateway(OkexsGateway)
+    # main_engine.add_gateway(OkexsGateway)
     # main_engine.add_gateway(DaGateway)
     # main_engine.add_gateway(CoinbaseGateway)
     # main_engine.add_gateway(BitstampGateway)

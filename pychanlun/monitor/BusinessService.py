@@ -48,6 +48,33 @@ class BusinessService:
         }
         return changeAndPrice
 
+    def getGlobalFutureChangeList(self):
+        globalFutureSymbol = ["CL", "GC", "SI", "CT", "S", "SM", "BO", "NID", "ZSD"]
+        changeList = {}
+        for i in range(len(globalFutureSymbol)):
+            item = globalFutureSymbol[i]
+            # 查日线开盘价
+            code = "%s_%s" % (item, '1d')
+            data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+            ).sort("_id", pymongo.DESCENDING)
+            dayOpenPrice = data_list[0]['open']
+            code = "%s_%s" % (item, '5m')
+
+            # 差5分钟收盘价
+            data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+            ).sort("_id", pymongo.DESCENDING)
+            minClosePrice = data_list[0]['open']
+
+            change = round((minClosePrice - dayOpenPrice) / dayOpenPrice, 4)
+            changeItem = {
+                'change': change,
+                'price': minClosePrice
+            }
+            print(item, '-> ', dayOpenPrice, ' -> ', minClosePrice)
+            changeList[item] = changeItem
+        return changeList
+
+
     def initDoinantSynmbol(self):
         symbolList = config['symbolList']
         # 主力合约详细信息
@@ -179,7 +206,11 @@ class BusinessService:
                 resultItem = {'change': change, 'price': today}
                 symbolChangeMap[item] = resultItem
         # print("涨跌幅信息", symbolChangeMap)
-        return symbolChangeMap
+        globalChangeList= self.getGlobalFutureChangeList()
+
+        conbineChangeList = dict(symbolChangeMap,**globalChangeList)
+
+        return conbineChangeList
 
     def getLevelDirectionList(self):
         symbolList = dominantSymbolList

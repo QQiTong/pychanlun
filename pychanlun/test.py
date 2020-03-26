@@ -6,6 +6,8 @@ import time
 import pydash
 from datetime import datetime, timedelta
 
+from bson import CodecOptions
+
 from pychanlun.Calc import Calc
 from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.funcat.api import *
@@ -25,6 +27,11 @@ import numpy as np
 import pandas as pd
 from tqsdk import tafunc
 import re
+import pytz
+
+tz = pytz.timezone('Asia/Shanghai')
+
+
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
 
@@ -490,6 +497,37 @@ def testChaji():
         if i not in b:
             ret.append(i)
     print(ret)
+def testGlobalChangeList():
+    globalFutureSymbol = ["CL", "GC", "SI", "CT", "S", "SM", "BO", "NID", "ZSD"]
+    #
+    changeList= {'RB2005':{'price':11,'change':0.23}}
+    globalChangeList = {}
+    for i in range(len(globalFutureSymbol)):
+        item = globalFutureSymbol[i]
+        # 查日线开盘价
+        code = "%s_%s" % (item, '1d')
+        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+        ).sort("_id", pymongo.DESCENDING)
+        dayOpenPrice = data_list[0]['open']
+        code = "%s_%s" % (item, '5m')
+
+        # 差5分钟收盘价
+        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+        ).sort("_id", pymongo.DESCENDING)
+        minClosePrice = data_list[0]['open']
+
+        change = round((minClosePrice - dayOpenPrice) / dayOpenPrice, 4)
+        changeItem = {
+            'change':change,
+            'price':minClosePrice
+        }
+        print(item,'-> ',dayOpenPrice,' -> ',minClosePrice)
+        globalChangeList[item] = changeItem
+
+        conbineChangeList = dict(changeList,**globalChangeList)
+
+
+    print("外盘涨跌幅列表",conbineChangeList)
 def app():
     # testBitmex()
     # testBeichiDb()
@@ -505,7 +543,8 @@ def app():
     # testOkex1()
     # testOkex2()
     # testOkexTiker()
-    testChaji()
+    # testChaji()
+    testGlobalChangeList()
 
 if __name__ == '__main__':
     app()
