@@ -134,11 +134,10 @@
                   </el-tag>
                     <el-tag
                     effect="dark"
-                    :type="changeList && changeList[scope.row.order_book_id]? changeList[scope.row.order_book_id]['change'] : 0|changeTagFilter"
+                    :type="okexTicker.change|changeTagFilter"
                     v-else
                   >
-                    {{ ((okexTicker.change?okexTicker.change:0) * (1 /( scope.row.margin_rate
-                    +marginLevelCompany))  *100).toFixed(1)}}%
+                    {{ ((okexTicker.change?okexTicker.change:0) * (1 /scope.row.margin_rate)  *100).toFixed(1)}}%
                   </el-tag>
                 </template>
               </el-table-column>
