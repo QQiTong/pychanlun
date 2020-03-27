@@ -140,7 +140,7 @@ export const futureApi = {
         })
     },
     // 获取okex btc ticker 这个接口单独获取不能阻塞掉商品期货
-    getOkexBTCTicker () {
+    getBTCTicker () {
         let url = '/api/get_btc_ticker'
         return axios({
             url: url,

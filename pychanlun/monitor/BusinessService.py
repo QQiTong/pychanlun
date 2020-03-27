@@ -26,25 +26,49 @@ dominantSymbolInfoList = []
 # CL:原油; GC:黄金;SI:白银; CT:棉花;S:大豆;SM：豆粕; BO:豆油;NID:伦镍; ZSD:伦锌;
 # 马棕 日胶
 otherSymbol = ["BTC", "CL", "GC", "SI", "CT","S", "SM", "BO", "NID", "ZSD"]
+hbSwapUrl = "http://api.btcgateway.pro/swap-ex/market/history/kline?contract_code=BTC-USD"
+hbSwapTickUrl = "http://api.btcgateway.pro/swap-ex/market/trade?contract_code=BTC-USD"
 
 
 class BusinessService:
     def __init__(self):
         print('初始化业务对象...')
-    # 数字货币部分
+    # okex数字货币部分涨跌幅
+    # def getBTCTicker(self):
+    #     okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/ticker"
+    #     r = requests.get(okexUrl)
+    #     ticker = json.loads(r.text)
+    #     # print("BTC实时价格",ticker)
+    #     code = "%s_%s" % ('BTC', '1d')
+    #     data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+    #     ).sort("_id", pymongo.DESCENDING)
+    #     dayOpenPrice = data_list[0]['open']
+    #     change = round((float(ticker['last']) - dayOpenPrice) / dayOpenPrice,4)
+    #     changeAndPrice = {
+    #         'change':change,
+    #         'price':ticker['last']
+    #     }
+    #     return changeAndPrice
+    # okex数字货币部分涨跌幅
     def getBTCTicker(self):
-        okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/ticker"
-        r = requests.get(okexUrl)
-        ticker = json.loads(r.text)
-        # print("BTC实时价格",ticker)
-        code = "%s_%s" % ('BTC', '1d')
-        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
-        ).sort("_id", pymongo.DESCENDING)
-        dayOpenPrice = data_list[0]['open']
-        change = round((float(ticker['last']) - dayOpenPrice) / dayOpenPrice,4)
+        dayParam = {
+            'symbol': 'BTC-USD',  # 合约类型， 火币季度合约
+            'period': '1day',
+            'size': 1
+        }
+
+        r = requests.get(hbSwapUrl,params=dayParam)
+        daykline = json.loads(r.text)
+
+        dayOpenPrice = daykline['data'][-1]['open']
+
+        r = requests.get(hbSwapTickUrl)
+        minKline = json.loads(r.text)
+        minClosePrice = minKline['tick']['data'][-1]['price']
+        change = round((float(minClosePrice) - dayOpenPrice) / dayOpenPrice,4)
         changeAndPrice = {
             'change':change,
-            'price':ticker['last']
+            'price':minClosePrice
         }
         return changeAndPrice
 

@@ -15,7 +15,7 @@ export default {
     },
     data() {
         return {
-            okexTicker: "",
+            btcTicker: "",
             beichiListLoading: true,
             calcPosForm: {
                 // start用于仓位管理计算
@@ -372,18 +372,17 @@ export default {
 
     mounted() {
         // this.subscribeWS()
-        this.getOkexBTCTicker()
         this.getChangeiList()
         this.getSignalList()
         this.getLevelDirectionList()
         this.getPrejudgeList()
-        this.getOkexBTCTicker()
+        this.getBTCTicker()
         this.getGlobalFutureChangeList()
         setInterval(() => {
             this.getSignalList()
             this.getChangeiList()
             this.getLevelDirectionList()
-            this.getOkexBTCTicker()
+            this.getBTCTicker()
         }, 20000)
     },
     methods: {
@@ -409,10 +408,10 @@ export default {
                 console.log('Connection closed.')
             }
         },
-        getOkexBTCTicker() {
-            futureApi.getOkexBTCTicker().then(res => {
-                this.okexTicker = res
-                console.log('获取okexTiker', this.okexTicker)
+        getBTCTicker() {
+            futureApi.getBTCTicker().then(res => {
+                this.btcTicker = res
+                console.log('获取okexTiker', this.btcTicker)
             }).catch((error) => {
                 console.log('获取okexTiker失败:', error)
             })
@@ -564,11 +563,11 @@ export default {
                 this.calcPosForm.account = this.calcPosForm.digitCoinAccount
                 // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
                 // OKEX 1张 = 0.01BTC  20倍杠杆， 1张就是 0.01* BTC的现价
-                if (this.okexTicker === '') {
+                if (this.btcTicker === '') {
                     alert('请先获取btc最新价格')
                     return
                 }
-                this.calcPosForm.perOrderMargin = (0.01 * Number(this.okexTicker.price)).toFixed(2)
+                this.calcPosForm.perOrderMargin = (0.01 * Number(this.btcTicker.price)).toFixed(2)
                 this.calcPosForm.perOrderStopRate = ((Math.abs(this.calcPosForm.openPrice - this.calcPosForm.stopPrice) / this.calcPosForm.openPrice + this.calcPosForm.digitCoinFee) * 20).toFixed(2)
                 this.calcPosForm.perOrderStopMoney = Number((this.calcPosForm.perOrderMargin * this.calcPosForm.perOrderStopRate).toFixed(2))
             }

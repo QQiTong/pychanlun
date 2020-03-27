@@ -1121,7 +1121,7 @@ export default {
                             symbol: 'none',
                             animation: false
                         },
-                        // index 5
+                        // index 4
                         {
                             name: 'MACD',
                             type: 'bar',
@@ -1153,7 +1153,7 @@ export default {
                                 }
                             }
                         },
-                        // index 6
+                        // index 5
 
                         {
                             name: 'DIFF',
@@ -1176,7 +1176,7 @@ export default {
                                 data: resultData.bcMACDValues
                             },
                         },
-                        // index 7
+                        // index 6
 
                         {
                             name: 'DEA',
@@ -1199,7 +1199,7 @@ export default {
                             //     data: resultData.macdAreaValues
                             // },
                         },
-                        // index 8
+                        // index 7
                         {
                             name: 'MA5',
                             type: 'line',
@@ -1216,7 +1216,7 @@ export default {
                             symbol: 'none',
                             animation: false
                         },
-                        // //index 9
+                        // //index 8
                         {
                             name: 'MA10',
                             type: 'line',
@@ -1233,6 +1233,7 @@ export default {
                             symbol: 'none',
                             animation: false
                         },
+                        // index 9
                         {
                             name: 'MA60',
                             type: 'line',
@@ -1277,12 +1278,13 @@ export default {
             option.series[3].data = resultData.higherDuanValues
             option.series[4].data = resultData.macd
             option.series[5].data = resultData.diff
-            option.series[6].data = resultData.dea
             option.series[5].markPoint.data = resultData.bcMACDValues
+
+            option.series[6].data = resultData.dea
             // option.series[6].markPoint.data = resultData.bcMACDValues
-            option.series[8].data = this.calculateMA(resultData, 5);
-            option.series[9].data = this.calculateMA(resultData, 10);
-            option.series[10].data = this.calculateMA(resultData, 60);
+            option.series[7].data = this.calculateMA(resultData, 5);
+            option.series[8].data = this.calculateMA(resultData, 10);
+            option.series[9].data = this.calculateMA(resultData, 60);
             // option.series[11].data = resultData.volume;
             console.log('更新的option', option)
             return option

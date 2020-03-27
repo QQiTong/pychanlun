@@ -122,7 +122,7 @@
                     :underline="false" v-if="scope.row.order_book_id.indexOf('BTC')===-1"
                   >{{ (scope.row.margin_rate +marginLevelCompany).toFixed(3)}}</el-link>
                   <el-link
-                    @click="fillMarginRate(scope.row,okexTicker.price)"
+                    @click="fillMarginRate(scope.row,btcTicker.price)"
                     :underline="false" v-else
                   >{{ (scope.row.margin_rate +marginLevelCompany).toFixed(3)}}</el-link>
                 </template>
@@ -140,10 +140,10 @@
                   </el-tag>
                     <el-tag
                     effect="dark"
-                    :type="okexTicker.change|changeTagFilter"
+                    :type="btcTicker.change|changeTagFilter"
                     v-else
                   >
-                    {{ ((okexTicker.change?okexTicker.change:0) * (1 /scope.row.margin_rate)  *100).toFixed(1)}}%
+                    {{ ((btcTicker.change?btcTicker.change:0) * (1 /scope.row.margin_rate)  *100).toFixed(1)}}%
                   </el-tag>
                 </template>
               </el-table-column>
@@ -154,7 +154,7 @@
                         changeList[scope.row.order_book_id]['price'] : 0)}}
                     </span>
                     <span v-else>
-                        {{okexTicker.price}}
+                        {{btcTicker.price}}
                     </span>
                 </template>
               </el-table-column>
