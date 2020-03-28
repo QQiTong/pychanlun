@@ -236,7 +236,7 @@ export default {
         if (symbolList != null) {
             this.futureSymbolList = JSON.parse(symbolList)
             this.futureSymbolMap = {}
-            for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
+            for (let i = 0; i < this.futureSymbolList.length - 1; i++) {
                 let symbolItem = this.futureSymbolList[i]
                 this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
             }
@@ -351,9 +351,10 @@ export default {
             charts.style.height = hi
         },
         replaceParamVal(paramName, replaceWith) {
-            var oUrl = window.location.href.toString()
-            var re = eval('/(' + paramName + '=)([^&]*)/gi')
-            var nUrl = oUrl.replace(re, paramName + '=' + replaceWith)
+            let oUrl = window.location.href.toString()
+            // eslint-disable-next-line no-eval
+            let re = eval('/(' + paramName + '=)([^&]*)/gi')
+            let nUrl = oUrl.replace(re, paramName + '=' + replaceWith)
             this.location = nUrl
             // window.location.href = nUrl
         },
@@ -511,7 +512,7 @@ export default {
                 // this.$router.push(query).catch(err => {
                 //     console.log('捕获相同路由报错', err)
                 // })
-                for (var i = 0; i < 8; i++) {
+                for (let i = 0; i < 8; i++) {
                     switch (i) {
                         // case 0:
                         //     that.sendRequest(symbol, '1m', update)
@@ -546,7 +547,7 @@ export default {
             }
         },
         sendRequest(symbol, period, update) {
-            var requestData = {'symbol': symbol, 'period': period, 'endDate': this.endDate}
+            let requestData = {'symbol': symbol, 'period': period, 'endDate': this.endDate}
             this.getStockData(requestData, update)
         },
         getStockData(requestData, update) {
@@ -633,10 +634,10 @@ export default {
         },
 
         draw(stockJsonData, update, period) {
-            var that = this
-            var zoomStart = 55
+            let that = this
+            let zoomStart = 55
             const resultData = this.splitData(stockJsonData, period)
-            var dataTitle = that.symbol + '  ' + period
+            let dataTitle = that.symbol + '  ' + period
             const margin_rate = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].margin_rate || 1
             let marginLevel
             if (this.symbol.indexOf('BTC') === -1) {
@@ -647,9 +648,9 @@ export default {
 
             const trading_hours = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].trading_hours
             const maturity_date = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].maturity_date
-            var subText = '杠杆: ' + marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
+            let subText = '杠杆: ' + marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
                 this.currentInfo
-            var currentChart
+            let currentChart
             // if (period === '1m') {
             //     currentChart = myChart1
             // } else
@@ -822,10 +823,9 @@ export default {
                             //         // },
                         },
                     },
-
                     color: ['yellow', 'green', 'blue', 'white', 'white', 'red' /* 'white', 'white', 'white' */],
                     legend: {
-                        data: ['笔', '段', '高级别段', 'MA5', 'MA10', 'MA60',/*'布林上轨', '布林中轨', '布林下轨' */],
+                        data: ['笔', '段', '高级别段', 'MA5', 'MA10', 'MA60', /* '布林上轨', '布林中轨', '布林下轨' */],
 
                         selected: {
                             '笔': true,
@@ -884,7 +884,7 @@ export default {
                             axisPointer: {
                                 label: {
                                     // formatter: function (params) {
-                                    //     var seriesValue = (params.seriesData[0] || {}).value;
+                                    //     let seriesValue = (params.seriesData[0] || {}).value;
                                     //     return params.value
                                     //         + (seriesValue != null
                                     //                 ? '\n' + echarts.format.addCommas(seriesValue)
@@ -1132,7 +1132,7 @@ export default {
                             itemStyle: {
                                 normal: {
                                     color: function (params) {
-                                        var colorList
+                                        let colorList
                                         if (params.data >= 0) {
                                             if (params.data >= that.echartsConfig.macdUpLastValue) {
                                                 colorList = that.echartsConfig.macdUpDarkColor
@@ -1265,7 +1265,7 @@ export default {
             currentChart.setOption(option)
         },
         refreshOption(chart, resultData) {
-            var option = chart.getOption()
+            let option = chart.getOption()
             option.series[0].data = resultData.values
             option.xAxis[0].data = resultData.date
             option.xAxis[1].data = resultData.date
@@ -1313,22 +1313,22 @@ export default {
             const higher_duan_zsdata = jsonObj.higher_duan_zsdata
             const higher_duan_zsflag = jsonObj.higher_duan_zsflag
 
-            var values = []
-            for (var i = 0; i < stockDate.length; i++) {
+            let values = []
+            for (let i = 0; i < stockDate.length; i++) {
                 values.push([stockOpen[i], stockClose[i], stockLow[i], stockHigh[i]])
             }
 
-            var biValues = []
-            for (var i = 0; i < bidata.date.length; i++) {
+            let biValues = []
+            for (let i = 0; i < bidata.date.length; i++) {
                 biValues.push([bidata.date[i], bidata.data[i]])
             }
-            var duanValues = []
-            for (var i = 0; i < duandata.date.length; i++) {
+            let duanValues = []
+            for (let i = 0; i < duandata.date.length; i++) {
                 duanValues.push([duandata.date[i], duandata.data[i]])
             }
-            var duanPriceValues = []
-            for (var i = 0; i < duandata.date.length; i++) {
-                var value = {}
+            let duanPriceValues = []
+            for (let i = 0; i < duandata.date.length; i++) {
+                let value = {}
                 if (i > 0 && duandata.data[i] > duandata.data[i - 1]) {
                     value = {
                         coord: [duandata.date[i], duandata.data[i]],
@@ -1370,14 +1370,14 @@ export default {
                 duanPriceValues.push(value)
             }
 
-            var higherDuanValues = []
-            for (var i = 0; i < higherDuanData.date.length; i++) {
+            let higherDuanValues = []
+            for (let i = 0; i < higherDuanData.date.length; i++) {
                 higherDuanValues.push([higherDuanData.date[i], higherDuanData.data[i]])
             }
 
-            var zsvalues = []
-            for (var i = 0; i < zsdata.length; i++) {
-                var value
+            let zsvalues = []
+            for (let i = 0; i < zsdata.length; i++) {
+                let value
                 if (zsflag[i] > 0) {
                     value = [
                         {
@@ -1424,8 +1424,8 @@ export default {
                 zsvalues.push(value)
             }
             // 段中枢
-            for (var i = 0; i < duan_zsdata.length; i++) {
-                var value
+            for (let i = 0; i < duan_zsdata.length; i++) {
+                let value
                 if (duan_zsflag[i] > 0) {
                     value = [
                         {
@@ -1472,8 +1472,8 @@ export default {
                 zsvalues.push(value)
             }
             // 高级别段中枢
-            for (var i = 0; i < higher_duan_zsdata.length; i++) {
-                var value
+            for (let i = 0; i < higher_duan_zsdata.length; i++) {
+                let value
                 if (higher_duan_zsflag[i] > 0) {
                     value = [
                         {
@@ -1521,9 +1521,9 @@ export default {
             }
 
             // 中枢拉回
-            var huilaValues = []
-            for (var i = 0; i < jsonObj.buy_zs_huila.date.length; i++) {
-                var value = {
+            let huilaValues = []
+            for (let i = 0; i < jsonObj.buy_zs_huila.date.length; i++) {
+                let value = {
                     coord: [jsonObj.buy_zs_huila.date[i], jsonObj.buy_zs_huila.data[i]],
                     value: jsonObj.buy_zs_huila.data[i] + jsonObj.buy_zs_huila.tag[i],
                     symbolRotate: -90,
@@ -1545,8 +1545,8 @@ export default {
                 }
                 huilaValues.push(value)
             }
-            for (var i = 0; i < jsonObj.sell_zs_huila.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.sell_zs_huila.date.length; i++) {
+                let value = {
                     coord: [jsonObj.sell_zs_huila.date[i], jsonObj.sell_zs_huila.data[i]],
                     value: jsonObj.sell_zs_huila.data[i] + jsonObj.sell_zs_huila.tag[i],
                     symbolRotate: 90,
@@ -1569,8 +1569,8 @@ export default {
                 huilaValues.push(value)
             }
             // 大级别中枢拉回
-            for (var i = 0; i < jsonObj.buy_zs_huila_higher.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.buy_zs_huila_higher.date.length; i++) {
+                let value = {
                     coord: [jsonObj.buy_zs_huila_higher.date[i], jsonObj.buy_zs_huila_higher.data[i]],
                     value: jsonObj.buy_zs_huila_higher.data[i] + jsonObj.buy_zs_huila_higher.tag[i],
                     symbolRotate: -90,
@@ -1592,8 +1592,8 @@ export default {
                 }
                 huilaValues.push(value)
             }
-            for (var i = 0; i < jsonObj.sell_zs_huila_higher.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.sell_zs_huila_higher.date.length; i++) {
+                let value = {
                     coord: [jsonObj.sell_zs_huila_higher.date[i], jsonObj.sell_zs_huila_higher.data[i]],
                     value: jsonObj.sell_zs_huila_higher.data[i] + jsonObj.sell_zs_huila_higher.tag[i],
                     symbolRotate: 90,
@@ -1616,8 +1616,8 @@ export default {
                 huilaValues.push(value)
             }
             // 中枢突破
-            for (var i = 0; i < jsonObj.buy_zs_tupo.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.buy_zs_tupo.date.length; i++) {
+                let value = {
                     coord: [jsonObj.buy_zs_tupo.date[i], jsonObj.buy_zs_tupo.data[i]],
                     value: jsonObj.buy_zs_tupo.data[i],
                     symbolRotate: 0,
@@ -1641,8 +1641,8 @@ export default {
                 huilaValues.push(value)
             }
 
-            for (var i = 0; i < jsonObj.sell_zs_tupo.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.sell_zs_tupo.date.length; i++) {
+                let value = {
                     coord: [jsonObj.sell_zs_tupo.date[i], jsonObj.sell_zs_tupo.data[i]],
                     value: jsonObj.sell_zs_tupo.data[i],
                     symbolRotate: 180,
@@ -1666,8 +1666,8 @@ export default {
                 huilaValues.push(value)
             }
             // 大级别中枢突破
-            for (var i = 0; i < jsonObj.buy_zs_tupo_higher.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.buy_zs_tupo_higher.date.length; i++) {
+                let value = {
                     coord: [jsonObj.buy_zs_tupo_higher.date[i], jsonObj.buy_zs_tupo_higher.data[i]],
                     value: jsonObj.buy_zs_tupo_higher.data[i],
                     symbolRotate: 0,
@@ -1690,8 +1690,8 @@ export default {
                 }
                 huilaValues.push(value)
             }
-            for (var i = 0; i < jsonObj.sell_zs_tupo_higher.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.sell_zs_tupo_higher.date.length; i++) {
+                let value = {
                     coord: [jsonObj.sell_zs_tupo_higher.date[i], jsonObj.sell_zs_tupo_higher.data[i]],
                     value: jsonObj.sell_zs_tupo_higher.data[i],
                     symbolRotate: 180,
@@ -1715,8 +1715,8 @@ export default {
                 huilaValues.push(value)
             }
             // 3买卖V反
-            for (var i = 0; i < jsonObj.buy_v_reverse.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.buy_v_reverse.date.length; i++) {
+                let value = {
                     coord: [jsonObj.buy_v_reverse.date[i], jsonObj.buy_v_reverse.data[i]],
                     value: jsonObj.buy_v_reverse.data[i],
                     symbolRotate: 0,
@@ -1740,8 +1740,8 @@ export default {
                 huilaValues.push(value)
             }
 
-            for (var i = 0; i < jsonObj.sell_v_reverse.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.sell_v_reverse.date.length; i++) {
+                let value = {
                     coord: [jsonObj.sell_v_reverse.date[i], jsonObj.sell_v_reverse.data[i]],
                     value: jsonObj.sell_v_reverse.data[i],
                     symbolRotate: 180,
@@ -1766,8 +1766,8 @@ export default {
             }
 
             // 3买卖V反 大级别
-            for (var i = 0; i < jsonObj.buy_v_reverse_higher.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.buy_v_reverse_higher.date.length; i++) {
+                let value = {
                     coord: [jsonObj.buy_v_reverse_higher.date[i], jsonObj.buy_v_reverse_higher.data[i]],
                     value: jsonObj.buy_v_reverse_higher.data[i],
                     symbolRotate: 0,
@@ -1791,8 +1791,8 @@ export default {
                 huilaValues.push(value)
             }
 
-            for (var i = 0; i < jsonObj.sell_v_reverse_higher.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.sell_v_reverse_higher.date.length; i++) {
+                let value = {
                     coord: [jsonObj.sell_v_reverse_higher.date[i], jsonObj.sell_v_reverse_higher.data[i]],
                     value: jsonObj.sell_v_reverse_higher.data[i],
                     symbolRotate: 180,
@@ -1817,8 +1817,8 @@ export default {
             }
 
             // 线段破坏
-            for (var i = 0; i < jsonObj.buy_duan_break.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.buy_duan_break.date.length; i++) {
+                let value = {
                     coord: [jsonObj.buy_duan_break.date[i], jsonObj.buy_duan_break.data[i]],
                     value: jsonObj.buy_duan_break.data[i],
                     symbolRotate: 0,
@@ -1842,8 +1842,8 @@ export default {
                 huilaValues.push(value)
             }
 
-            for (var i = 0; i < jsonObj.sell_duan_break.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.sell_duan_break.date.length; i++) {
+                let value = {
                     coord: [jsonObj.sell_duan_break.date[i], jsonObj.sell_duan_break.data[i]],
                     value: jsonObj.sell_duan_break.data[i],
                     symbolRotate: 180,
@@ -1867,8 +1867,8 @@ export default {
                 huilaValues.push(value)
             }
             // 大级别线段破坏
-            for (var i = 0; i < jsonObj.buy_duan_break_higher.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.buy_duan_break_higher.date.length; i++) {
+                let value = {
                     coord: [jsonObj.buy_duan_break_higher.date[i], jsonObj.buy_duan_break_higher.data[i]],
                     value: jsonObj.buy_duan_break_higher.data[i],
                     symbolRotate: 0,
@@ -1891,8 +1891,8 @@ export default {
                 }
                 huilaValues.push(value)
             }
-            for (var i = 0; i < jsonObj.sell_duan_break_higher.date.length; i++) {
-                var value = {
+            for (let i = 0; i < jsonObj.sell_duan_break_higher.date.length; i++) {
+                let value = {
                     coord: [jsonObj.sell_duan_break_higher.date[i], jsonObj.sell_duan_break_higher.data[i]],
                     value: jsonObj.sell_duan_break_higher.data[i],
                     symbolRotate: 180,
