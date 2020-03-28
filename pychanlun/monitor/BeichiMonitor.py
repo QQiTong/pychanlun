@@ -129,7 +129,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             'stop_lose_price': stop_lose_price,  # 当前信号的止损价
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if (date_created - fire_time).total_seconds() < 60 * 60 *4:
+        if (date_created - fire_time).total_seconds() < 60 *4:
             # 新增
             saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                                    stop_lose_price,futureCalcObj, True)
