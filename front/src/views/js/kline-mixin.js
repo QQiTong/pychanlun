@@ -831,9 +831,9 @@ export default {
                             '笔': true,
                             '段': true,
                             '高级别段': true,
-                            'MA5': true,
-                            'MA10': true,
-                            'MA60': true,
+                            'MA5': false,
+                            'MA10': false,
+                            'MA60': false,
                             // 'markline': true
                         },
                         top: 10,
