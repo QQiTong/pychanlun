@@ -154,7 +154,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     break
                 if duan_series[x] == -1:
                     break
-            if leave > e.end:
+            if leave - e.end >= 5:
                 r = -1
                 for x in range(leave + 1, len(close_series)):
                     if close_series[x] < e.top:
@@ -190,7 +190,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     break
                 if duan_series[x] == 1:
                     break
-            if leave > e.end:
+            if leave - e.end >= 5:
                 r = -1
                 for x in range(leave + 1, len(close_series)):
                     if close_series[x] > e.bottom:

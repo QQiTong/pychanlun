@@ -297,7 +297,6 @@ class Calc:
         higherHigherDuanList = [0 for i in range(count)]
         CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
 
-        # print("段结果:", len(biResult), len(duanResult))
         entanglementList = entanglement.CalcEntanglements(timeList, duanList, biList, highList, lowList)
         huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
         tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
@@ -358,7 +357,6 @@ class Calc:
         zsdata, zsflag = getZhongShuData(entanglementList)
         duan_zsdata, duan_zsflag = getZhongShuData(entanglementHigherList)
         higher_duan_zsdata, higher_duan_zsflag = getZhongShuData(entanglementHigherHigherList)
-        # print("中枢数据:", zsdata, zsflag)
 
         # 拼接json数据
         resJson = {}
@@ -476,7 +474,6 @@ class Calc:
             resJson['fractal'] = [fractialRegion, fractialRegion2]
 
         resJsonStr = json.dumps(resJson)
-        # print(resJsonStr)
 
         elapsed = (time.clock() - start)  # 结束计时
         print("程序执行的时间:" + str(round(elapsed,2)) + "s")  # 印出时间
