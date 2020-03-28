@@ -176,6 +176,12 @@ def testTime():
     test = datetime.fromtimestamp(stamp)
     print(test)
 
+def testTime2():
+
+    str = '2019-12-30 09:00'
+    date = time.strptime(str,"%Y-%m-%d %H:%M")
+    print(time.mktime(date))
+
 
 def getBtcData(period):
     url = "https://www.bitmex.com/api/udf/history"
@@ -545,11 +551,12 @@ def app():
     # testHuobi()
     # testWaipan()
     # testWechat()
-    testOkex1()
+    # testOkex1()
     # testOkex2()
     # testOkexTiker()
     # testChaji()
     # testGlobalChangeList()
+    testTime2()
 
 if __name__ == '__main__':
     app()

@@ -15,7 +15,7 @@ import talib
 
 from .object import BarData, TickData
 from .constant import Exchange, Interval
-
+import time
 
 log_formatter = logging.Formatter('[%(asctime)s] %(message)s')
 
@@ -315,8 +315,9 @@ class ArrayManager(object):
         self.close_array: np.ndarray = np.zeros(size)
         self.volume_array: np.ndarray = np.zeros(size)
         self.open_interest_array: np.ndarray = np.zeros(size)
-        # added
+        # I added
         self.time_array = ['' for i in range(size)]
+        self.time_index_array = ['' for i in range(size)]
 
     def update_bar(self, bar: BarData) -> None:
         """
@@ -332,8 +333,9 @@ class ArrayManager(object):
         self.close_array[:-1] = self.close_array[1:]
         self.volume_array[:-1] = self.volume_array[1:]
         self.open_interest_array[:-1] = self.open_interest_array[1:]
-        # added
+        # I added
         self.time_array[:-1] = self.time_array[1:]
+        self.time_index_array[:-1] = self.time_index_array[1:]
 
         self.open_array[-1] = bar.open_price
         self.high_array[-1] = bar.high_price
@@ -341,8 +343,11 @@ class ArrayManager(object):
         self.close_array[-1] = bar.close_price
         self.volume_array[-1] = bar.volume
         self.open_interest_array[-1] = bar.open_interest
-        # added
+        # I added
         self.time_array[-1] = bar.datetime.strftime("%Y-%m-%d %H:%M")
+        date = time.strptime(self.time_array[-1], "%Y-%m-%d %H:%M")
+        self.time_index_array[-1] = time.mktime(date)
+
 
     @property
     def open(self) -> np.ndarray:
