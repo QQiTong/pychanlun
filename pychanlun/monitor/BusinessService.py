@@ -94,7 +94,7 @@ class BusinessService:
                 'change': change,
                 'price': minClosePrice
             }
-            print(item, '-> ', dayOpenPrice, ' -> ', minClosePrice)
+            # print(item, '-> ', dayOpenPrice, ' -> ', minClosePrice)
             changeList[item] = changeItem
         return changeList
 

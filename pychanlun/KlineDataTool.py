@@ -314,6 +314,7 @@ class KlineDataTool:
         for idx, row in df.iterrows():
             item = {}
             date = datetime.strptime(row[0], "%Y-%m-%dT%H:%M:%S.%fZ")
+            date = date + timedelta(hours=8)
             item['time'] = int(time.mktime(date.timetuple()))
             item['open'] = 0 if pd.isna(row[1]) else row[1]
             item['high'] = 0 if pd.isna(row[2]) else row[2]
