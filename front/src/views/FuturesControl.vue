@@ -126,7 +126,7 @@
                                     <el-link
                                         @click="fillMarginRate(scope.row,btcTicker.price)"
                                         :underline="false" v-else
-                                    >{{ (scope.row.margin_rate +marginLevelCompany).toFixed(3)}}
+                                    >{{ (scope.row.margin_rate).toFixed(3)}}
                                     </el-link>
                                 </template>
                             </el-table-column>

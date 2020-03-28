@@ -405,7 +405,7 @@ const positionPercentOptions = [
 ];
 const signalTypeOptions = [
   { key: "tupo", display_name: "突破" },
-  { key: "lahui", display_name: "拉回" },
+  { key: "huila", display_name: "拉回" },
   { key: "break", display_name: "破坏" },
   { key: "vfan", display_name: "V反" }
 ];

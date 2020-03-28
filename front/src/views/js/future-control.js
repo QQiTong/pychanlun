@@ -68,7 +68,7 @@ export default {
             periodList: ['3m', '5m', '15m', '30m', '60m'],
             beichiList: {},
             changeList: null, // 涨跌幅
-            globalFutureChangeList:null,
+            globalFutureChangeList: null,
             marginLevelCompany: 0.01,
             firstRequestDominant: true,
 
@@ -327,7 +327,7 @@ export default {
             // 内盘涨跌幅百分比
             percentage: 0,
             // 外盘盘涨跌幅百分比
-            globalFuturePercentage:0,
+            globalFuturePercentage: 0,
             // 级别多空方向
             levelDirectionList: [],
             activeTab: 'first',
@@ -534,11 +534,16 @@ export default {
         },
         fillMarginRate(symbolInfo, price) {
             if (symbolInfo.order_book_id.indexOf('BTC') === -1) {
+                this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
                 this.calcPosForm.account = this.calcPosForm.futureAccount
+                this.calcPosForm.maxAccountUseRate = 0.1
+                this.calcPosForm.stopRate = 0.01
             } else {
                 this.calcPosForm.account = this.calcPosForm.digitCoinAccount
+                this.calcPosForm.maxAccountUseRate = 0.4
+                this.calcPosForm.stopRate = 0.1
+                this.calcPosForm.currentMarginRate = symbolInfo.margin_rate
             }
-            this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
             this.calcPosForm.contractMultiplier = symbolInfo.contract_multiplier
             this.calcPosForm.currentSymbol = symbolInfo.underlying_symbol
             this.calcPosForm.openPrice = price
@@ -567,7 +572,7 @@ export default {
                     alert('请先获取btc最新价格')
                     return
                 }
-                this.calcPosForm.perOrderMargin = (0.01 * Number(this.btcTicker.price)).toFixed(2)
+                this.calcPosForm.perOrderMargin = (0.01 * Number(this.btcTicker.price) / 20).toFixed(2)
                 this.calcPosForm.perOrderStopRate = ((Math.abs(this.calcPosForm.openPrice - this.calcPosForm.stopPrice) / this.calcPosForm.openPrice + this.calcPosForm.digitCoinFee) * 20).toFixed(2)
                 this.calcPosForm.perOrderStopMoney = Number((this.calcPosForm.perOrderMargin * this.calcPosForm.perOrderStopRate).toFixed(2))
             }

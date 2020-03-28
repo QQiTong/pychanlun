@@ -3,7 +3,7 @@
 import rqdatac as rq
 import os
 import json
-from pychanlun.config import config,cfg
+from pychanlun.config import config, cfg
 from datetime import datetime, timedelta
 from pychanlun.db import DBPyChanlun
 from bson.codec_options import CodecOptions
@@ -13,7 +13,6 @@ import pandas as pd
 from bson import ObjectId
 import time
 import requests
-
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -25,7 +24,7 @@ dominantSymbolList = []
 dominantSymbolInfoList = []
 # CL:原油; GC:黄金;SI:白银; CT:棉花;S:大豆;SM：豆粕; BO:豆油;NID:伦镍; ZSD:伦锌;
 # 马棕 日胶
-otherSymbol = ["BTC", "CL", "GC", "SI", "CT","S", "SM", "BO", "NID", "ZSD"]
+otherSymbol = ["BTC", "CL", "GC", "SI", "CT", "S", "SM", "BO", "NID", "ZSD"]
 hbSwapUrl = "http://api.btcgateway.pro/swap-ex/market/history/kline?contract_code=BTC-USD"
 hbSwapTickUrl = "http://api.btcgateway.pro/swap-ex/market/trade?contract_code=BTC-USD"
 
@@ -33,6 +32,7 @@ hbSwapTickUrl = "http://api.btcgateway.pro/swap-ex/market/trade?contract_code=BT
 class BusinessService:
     def __init__(self):
         print('初始化业务对象...')
+
     # okex数字货币部分涨跌幅
     def getBTCTicker(self):
         okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/ticker"
@@ -43,12 +43,13 @@ class BusinessService:
         r = requests.get(okexUrl2)
         data_list = json.loads(r.text)
         dayOpenPrice = data_list[0][1]
-        change = round((float(ticker['last']) - float(dayOpenPrice)) / float(dayOpenPrice),4)
+        change = round((float(ticker['last']) - float(dayOpenPrice)) / float(dayOpenPrice), 4)
         changeAndPrice = {
-            'change':change,
-            'price':ticker['last']
+            'change': change,
+            'price': ticker['last']
         }
         return changeAndPrice
+
     # okex数字货币部分涨跌幅
     # def getBTCTicker(self):
     #     dayParam = {
@@ -97,7 +98,6 @@ class BusinessService:
             # print(item, '-> ', dayOpenPrice, ' -> ', minClosePrice)
             changeList[item] = changeItem
         return changeList
-
 
     def initDoinantSynmbol(self):
         symbolList = config['symbolList']
@@ -205,7 +205,7 @@ class BusinessService:
         else:
             start = datetime.now() + timedelta(-1)
         #     找出持仓列表中的老合约 和 主力合约 求集合的差
-        positionList= self.getPositionList('holding',1,10)['records']
+        positionList = self.getPositionList('holding', 1, 10)['records']
         # 找出持仓列表中的老合约
         diff = []
         for i in range(len(positionList)):
@@ -230,9 +230,9 @@ class BusinessService:
                 resultItem = {'change': change, 'price': today}
                 symbolChangeMap[item] = resultItem
         # print("涨跌幅信息", symbolChangeMap)
-        globalChangeList= self.getGlobalFutureChangeList()
+        globalChangeList = self.getGlobalFutureChangeList()
 
-        conbineChangeList = dict(symbolChangeMap,**globalChangeList)
+        conbineChangeList = dict(symbolChangeMap, **globalChangeList)
 
         return conbineChangeList
 
@@ -275,20 +275,61 @@ class BusinessService:
         else:
             return -1
 
+    # 持仓列表改成自动录入
     def getPositionList(self, status, page, size):
+        # positionList = []
+        # collection = DBPyChanlun["position_record"]
+        # # 查询总记录数
+        # if status == 'all':
+        #     result = collection.find().skip(
+        #         (page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
+        #     total = result.count()
+        # else:
+        #     result = collection.find({'status': status}).skip(
+        #         (page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
+        #     total = result.count()
+        # for x in result:
+        #     x['_id'] = str(x['_id'])
+        #     positionList.append(x)
+        # positionListResult = {
+        #     'records': positionList,
+        #     'total': total
+        # }
+        # return positionListResult
         positionList = []
-        collection = DBPyChanlun["position_record"]
+        collection = DBPyChanlun["future_auto_position"]
         # 查询总记录数
         if status == 'all':
             result = collection.find().skip(
-                (page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
+                (page - 1) * size).limit(size).sort("fire_time", pymongo.DESCENDING)
             total = result.count()
         else:
             result = collection.find({'status': status}).skip(
-                (page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
+                (page - 1) * size).limit(size).sort("fire_time", pymongo.DESCENDING)
             total = result.count()
         for x in result:
             x['_id'] = str(x['_id'])
+            fire_time_localTime = time.localtime(int(time.mktime(x['fire_time'].timetuple()) + 8 * 3600))
+            fire_time_strTime = time.strftime("%Y-%m-%d %H:%M:%S", fire_time_localTime)
+            date_created_localTime = time.localtime(int(time.mktime(x['date_created'].timetuple()) + 8 * 3600))
+            date_created_strTime = time.strftime("%Y-%m-%d %H:%M:%S", date_created_localTime)
+            x['fire_time'] = fire_time_strTime
+            x['date_created'] = date_created_strTime
+            x['total_stop_money'] = -round(x['per_order_stop_money'] * x['amount'], 2)
+            #
+            if x['symbol'] is 'BTC':
+                marginLevel = 1 / (x['margin_rate'] )
+            else:
+                marginLevel = 1 / (x['margin_rate'] + 0.01)
+
+            currentPercent = 0
+            if x['direction'] == "long":
+                currentPercent = round(((x['close_price'] - x['price']) / x['price']) * marginLevel , 2)
+                print("long",currentPercent)
+            else:
+                currentPercent = round(((x['price'] - x['close_price']) / x['close_price'])* marginLevel, 2)
+                print("short",currentPercent)
+            x['total_profit'] = round(x['per_order_margin'] * x['amount'] * currentPercent,2)
             positionList.append(x)
         positionListResult = {
             'records': positionList,

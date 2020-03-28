@@ -2544,15 +2544,19 @@ export default {
                 this.perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier
                 // 1手止损的百分比
                 this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
+                this.maxAccountUseRate = 0.1
+                this.stopRate = 0.01
             } else {
                 this.account = this.digitCoinAccount
                 // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
                 // OKEX 1张 = 0.01BTC  20倍杠杆， 1张就是 0.01* BTC的现价
                 // 单位usdt
-                this.perOrderMargin = 0.01 * currentPrice
+                this.perOrderMargin = 0.01 * currentPrice / 20
                 this.perOrderStopRate = (Math.abs(this.openPrice - this.stopPrice) / this.openPrice + this.digitCoinFee) * 20
                 // 1手止损的百分比 需要加上手续费  0.05%  okex双向taker 就是 2%
                 this.perOrderStopMoney = Number((this.perOrderMargin * this.perOrderStopRate).toFixed(2))
+                this.maxAccountUseRate = 0.4
+                this.stopRate = 0.1
             }
 
             // 计算最大能使用的资金
