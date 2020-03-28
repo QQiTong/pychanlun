@@ -406,17 +406,22 @@ def testOkex1():
         "http": "socks5://127.0.0.1:10808",
         "https": "socks5://127.0.0.1:10808"
     }
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
+               "Accept":"application/json",
+               "App-Type":"web",
+               "Referer":"https://www.okex.me/derivatives/swap/full/usdt-btc"}
+
     t = time.time()
     timeStamp = int(round(t * 1000))
     # 接口1
-    okexUrl = "https://www.okex.com/v2/perpetual/pc/public/instruments/BTC-USDT-SWAP/candles"
+    okexUrl = "https://www.okex.me/v2/perpetual/pc/public/instruments/BTC-USDT-SWAP/candles"
     payload = {
         'granularity': 300,
         'size': 1000,
         't': timeStamp
     }
 
-    r = requests.get(okexUrl,params=payload,  proxies=PROXIES)
+    r = requests.get(okexUrl,params=payload,headers = headers)
     endTime = int(round(time.time()*1000)) -startTime
     print("耗费时间：",endTime)
     klines = json.loads(r.text)['data']
@@ -540,11 +545,11 @@ def app():
     # testHuobi()
     # testWaipan()
     # testWechat()
-    # testOkex1()
+    testOkex1()
     # testOkex2()
     # testOkexTiker()
     # testChaji()
-    testGlobalChangeList()
+    # testGlobalChangeList()
 
 if __name__ == '__main__':
     app()

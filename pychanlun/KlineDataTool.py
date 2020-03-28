@@ -25,8 +25,8 @@ from pychanlun.ComposeKline import ComposeKline
 import re
 
 hbdmUrl = "http://api.hbdm.com/market/history/kline"
-# okexUrl = "http://www.okex.com/v2/perpetual/pc/public/instruments/BTC-USDT-SWAP/candles"
-okexUrl = "https://www.okex.com/api/swap/v3/instruments/BTC-USDT-SWAP/candles"
+# okexUrl = "https://www.okex.com/api/swap/v3/instruments/BTC-USDT-SWAP/candles"
+okexUrl = "https://www.okex.me/v2/perpetual/pc/public/instruments/BTC-USDT-SWAP/candles"
 # 火币永续合约免翻墙
 hbSwapUrl = "http://api.btcgateway.pro/swap-ex/market/history/kline?contract_code=BTC-USD"
 '''
@@ -251,42 +251,75 @@ class KlineDataTool:
     #         # print("处理结果:", processedKlineList)
     #         return processedKlineList
 
-    # OKEX 永续合约 usdt金本位
+    # OKEX 永续合约 usdt金本位 从数据库中获取
+    # def getDigitCoinData(self,symbol,period,endDate):
+    #     startTime = datetime.now()
+    #     if endDate is None or endDate == "":
+    #         end = datetime.now() + timedelta(1)
+    #     else:
+    #         end = datetime.strptime(endDate, "%Y-%m-%d")
+    #     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+    #     timeDeltaMap = {
+    #         '1m': -7*3,
+    #         '3m': -31*3,
+    #         '5m': -31*3,
+    #         '15m': -31 * 3,
+    #         '30m': -31 * 8,
+    #         '60m': -31 * 8,
+    #         '240m': -31 * 8,
+    #         '1d': -31 * 10,
+    #         '3d': -31 * 30,
+    #         '1w': -31* 30
+    #     }
+    #     start_date =  end + timedelta(timeDeltaMap[period])
+    #     code = "%s_%s" % (symbol, period)
+    #     data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+    #         "_id": { "$gte": start_date, "$lte": end }
+    #     }).sort("_id", pymongo.ASCENDING)
+    #     df = pd.DataFrame(list(data_list))
+    #
+    #     klineList = []
+    #     for idx, row in df.iterrows():
+    #         item = {}
+    #         item['time'] = int(time.mktime(row["_id"].timetuple()))
+    #         item['open'] = 0 if pd.isna(row["open"]) else row["open"]
+    #         item['high'] = 0 if pd.isna(row["high"]) else row["high"]
+    #         item['low'] = 0 if pd.isna(row["low"]) else row["low"]
+    #         item['close'] = 0 if pd.isna(row["close"]) else row["close"]
+    #         item['volume'] = 0 if pd.isna(row["volume"]) else row["volume"]
+    #         klineList.append(item)
+    #     return klineList
+
+    # OKEX 永续合约 usdt金本位 抓包找到的另外一个接口 直接从网络获取但是只能获取1000条
     def getDigitCoinData(self,symbol,period,endDate):
-        startTime = datetime.now()
-        if endDate is None or endDate == "":
-            end = datetime.now() + timedelta(1)
-        else:
-            end = datetime.strptime(endDate, "%Y-%m-%d")
-        end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-        timeDeltaMap = {
-            '1m': -7*3,
-            '3m': -31*3,
-            '5m': -31*3,
-            '15m': -31 * 3,
-            '30m': -31 * 8,
-            '60m': -31 * 8,
-            '240m': -31 * 8,
-            '1d': -31 * 10,
-            '3d': -31 * 30,
-            '1w': -31* 30
+        t = time.time()
+        timeStamp = int(round(t * 1000))
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
+            "Accept": "application/json",
+            "App-Type": "web",
+            "Referer": "https://www.okex.me/derivatives/swap/full/usdt-btc"}
+
+        payload = {
+            'granularity': period,
+            'size': 1000,
+            't': timeStamp
         }
-        start_date =  end + timedelta(timeDeltaMap[period])
-        code = "%s_%s" % (symbol, period)
-        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-            "_id": { "$gte": start_date, "$lte": end }
-        }).sort("_id", pymongo.ASCENDING)
+        r = requests.get(okexUrl, params=payload,headers=headers)
+        data_list = json.loads(r.text)['data']
+
         df = pd.DataFrame(list(data_list))
 
         klineList = []
         for idx, row in df.iterrows():
             item = {}
-            item['time'] = int(time.mktime(row["_id"].timetuple()))
-            item['open'] = 0 if pd.isna(row["open"]) else row["open"]
-            item['high'] = 0 if pd.isna(row["high"]) else row["high"]
-            item['low'] = 0 if pd.isna(row["low"]) else row["low"]
-            item['close'] = 0 if pd.isna(row["close"]) else row["close"]
-            item['volume'] = 0 if pd.isna(row["volume"]) else row["volume"]
+            date = datetime.strptime(row[0], "%Y-%m-%dT%H:%M:%S.%fZ")
+            item['time'] = int(time.mktime(date.timetuple()))
+            item['open'] = 0 if pd.isna(row[1]) else row[1]
+            item['high'] = 0 if pd.isna(row[2]) else row[2]
+            item['low'] = 0 if pd.isna(row[3]) else row[3]
+            item['close'] = 0 if pd.isna(row[4]) else row[4]
+            item['volume'] = 0 if pd.isna(row[5]) else row[5]
             klineList.append(item)
         return klineList
 

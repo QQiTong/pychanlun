@@ -39,11 +39,11 @@ class BusinessService:
         r = requests.get(okexUrl)
         ticker = json.loads(r.text)
         # print("BTC实时价格",ticker)
-        code = "%s_%s" % ('BTC', '1d')
-        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
-        ).sort("_id", pymongo.DESCENDING)
-        dayOpenPrice = data_list[0]['open']
-        change = round((float(ticker['last']) - dayOpenPrice) / dayOpenPrice,4)
+        okexUrl2 = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/candles?granularity=86400"
+        r = requests.get(okexUrl2)
+        data_list = json.loads(r.text)
+        dayOpenPrice = data_list[0][1]
+        change = round((float(ticker['last']) - float(dayOpenPrice)) / float(dayOpenPrice),4)
         changeAndPrice = {
             'change':change,
             'price':ticker['last']
