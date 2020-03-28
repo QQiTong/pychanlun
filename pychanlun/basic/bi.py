@@ -231,9 +231,13 @@ def CalcBiList(count, bi, high, low):
     for i in range(count):
         candle = { "high": high[i], "low": low[i] }
         if bi[i] == 1:
+            if len(biList) > 0:
+                biList[-1]["end"] = i
             bi_item = { "start": i, "end": i, "direction": -1, "candleList": [ candle ] }
             biList.append(bi_item)
         elif bi[i] == -1:
+            if len(biList) > 0:
+                biList[-1]["end"] = i
             bi_item = { "start": i, "end": i, "direction": 1, "candleList": [ candle ] }
             biList.append(bi_item)
         else:

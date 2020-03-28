@@ -47,9 +47,8 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
                     duan_start = info['duan_start']
                     duan_end = info['duan_end']
                     down_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == -1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
-                    if len(down_bi_list) > 2:
-                        down_bi_list = down_bi_list[-2:]
                     if len(down_bi_list) > 1:
+                        down_bi_list = down_bi_list[-2:]
                         min_diffs = pydash.map_(down_bi_list, lambda bi: np.amin(diff_series[bi['start']:bi['end'] + 1]))
                         if len(min_diffs) > 1 and min_diffs[-1] > np.amin(min_diffs[:-1]):
                             # 前面是向下段，才是背驰点
@@ -66,9 +65,8 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
                     duan_start = info['duan_start']
                     duan_end = info['duan_end']
                     up_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == 1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
-                    if len(up_bi_list) > 2:
-                        up_bi_list = up_bi_list[-2:]
                     if len(up_bi_list) > 1:
+                        up_bi_list = up_bi_list[-2:]
                         max_diffs = pydash.map_(up_bi_list, lambda bi: np.amax(diff_series[bi['start']:bi['end'] + 1]))
                         if len(max_diffs) > 1 and max_diffs[-1] < np.amax(max_diffs[:-1]):
                             # 前面是向上段，才是背驰点
