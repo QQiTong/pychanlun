@@ -246,8 +246,9 @@ def do_notify(code, order_direction, period, remark, fire_time, price, volume, s
           "&realaccount=zero&code=%s&order_direction=%s&price=%s&volume=%s&order_time=%s" \
           % (code, order_direction, price, volume, datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
     requests.post(url)
-    title = "%s预警: 代码%s 价格%s 数量%s" % (order_direction, code, price, volume)
-    content = "%s预警: 代码%s 价格%s 数量%s 触发时间%s 止损%s %s %s %s %s" % (order_direction, code, price, volume, fire_time, stop_lose_price, remark, position, tags, category)
+    title = "%s预警: 代码%s 价格%s 数量%s 周期%s" % (order_direction, code, price, volume, period)
+    content = "%s预警: 代码%s 价格%s 数量%s 周期%s \n触发时间%s 止损%s %s %s %s %s" % (
+            order_direction, code, price, volume, period, fire_time, stop_lose_price, remark, position, tags, category)
     try:
         msg = MIMEText(content, 'plain', 'utf-8')
         msg['From'] = formataddr(["Reminder", my_sender])  # 括号里的对应发件人邮箱昵称、发件人邮箱账号

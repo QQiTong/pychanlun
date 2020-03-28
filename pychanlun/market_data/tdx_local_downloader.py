@@ -45,8 +45,11 @@ def run(**kwargs):
                 match = re.match("(sz)(\\d{6})", filename, re.I)
                 if match is not None:
                     code = match.group()
-                    code_head = code[2:4]
-                    if code_head not in ["00", "30", "15", "16", "10", "11", "12", "13", "14"]:
+                    code_head2 = code[2:4]
+                    code_head4 = code[2:5]
+                    if code_head2 not in ["00", "30", "15", "16", "10", "11", "12", "13", "14"]:
+                        continue
+                    if code_head4 in ['1318']:
                         continue
             filepath = os.path.join(path, filename)
             if code is not None:
@@ -77,8 +80,11 @@ def run(**kwargs):
                 match = re.match("(sz)(\\d{6})", filename, re.I)
                 if match is not None:
                     code = match.group()
-                    code_head = code[2:4]
-                    if code_head not in ["00", "30", "15", "16", "10", "11", "12", "13", "14"]:
+                    code_head2 = code[2:4]
+                    code_head4 = code[2:4]
+                    if code_head2 not in ["00", "30", "15", "16", "10", "11", "12", "13", "14"]:
+                        continue
+                    if code_head4 in ['1318']:
                         continue
             filepath = os.path.join(path, filename)
             if code is not None:
@@ -109,8 +115,11 @@ def run(**kwargs):
                 match = re.match("(sz)(\\d{6})", filename, re.I)
                 if match is not None:
                     code = match.group()
-                    code_head = code[2:4]
-                    if code_head not in ["00", "30", "15", "16", "10", "11", "12", "13", "14"]:
+                    code_head2 = code[2:4]
+                    code_head4 = code[2:5]
+                    if code_head2 not in ["00", "30", "15", "16", "10", "11", "12", "13", "14"]:
+                        continue
+                    if code_head4 in ['1318']:
                         continue
             filepath = os.path.join(path, filename)
             if code is not None:
