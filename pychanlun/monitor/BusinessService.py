@@ -34,43 +34,43 @@ class BusinessService:
     def __init__(self):
         print('初始化业务对象...')
     # okex数字货币部分涨跌幅
-    # def getBTCTicker(self):
-    #     okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/ticker"
-    #     r = requests.get(okexUrl)
-    #     ticker = json.loads(r.text)
-    #     # print("BTC实时价格",ticker)
-    #     code = "%s_%s" % ('BTC', '1d')
-    #     data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
-    #     ).sort("_id", pymongo.DESCENDING)
-    #     dayOpenPrice = data_list[0]['open']
-    #     change = round((float(ticker['last']) - dayOpenPrice) / dayOpenPrice,4)
-    #     changeAndPrice = {
-    #         'change':change,
-    #         'price':ticker['last']
-    #     }
-    #     return changeAndPrice
-    # okex数字货币部分涨跌幅
     def getBTCTicker(self):
-        dayParam = {
-            'symbol': 'BTC-USD',  # 合约类型， 火币季度合约
-            'period': '1day',
-            'size': 1
-        }
-
-        r = requests.get(hbSwapUrl,params=dayParam)
-        daykline = json.loads(r.text)
-
-        dayOpenPrice = daykline['data'][-1]['open']
-
-        r = requests.get(hbSwapTickUrl)
-        minKline = json.loads(r.text)
-        minClosePrice = minKline['tick']['data'][-1]['price']
-        change = round((float(minClosePrice) - dayOpenPrice) / dayOpenPrice,4)
+        okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/ticker"
+        r = requests.get(okexUrl)
+        ticker = json.loads(r.text)
+        # print("BTC实时价格",ticker)
+        code = "%s_%s" % ('BTC', '1d')
+        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+        ).sort("_id", pymongo.DESCENDING)
+        dayOpenPrice = data_list[0]['open']
+        change = round((float(ticker['last']) - dayOpenPrice) / dayOpenPrice,4)
         changeAndPrice = {
             'change':change,
-            'price':minClosePrice
+            'price':ticker['last']
         }
         return changeAndPrice
+    # okex数字货币部分涨跌幅
+    # def getBTCTicker(self):
+    #     dayParam = {
+    #         'symbol': 'BTC-USD',  # 合约类型， 火币季度合约
+    #         'period': '1day',
+    #         'size': 1
+    #     }
+    #
+    #     r = requests.get(hbSwapUrl,params=dayParam)
+    #     daykline = json.loads(r.text)
+    #
+    #     dayOpenPrice = daykline['data'][-1]['open']
+    #
+    #     r = requests.get(hbSwapTickUrl)
+    #     minKline = json.loads(r.text)
+    #     minClosePrice = minKline['tick']['data'][-1]['price']
+    #     change = round((float(minClosePrice) - dayOpenPrice) / dayOpenPrice,4)
+    #     changeAndPrice = {
+    #         'change':change,
+    #         'price':minClosePrice
+    #     }
+    #     return changeAndPrice
 
     def getGlobalFutureChangeList(self):
         globalFutureSymbol = ["CL", "GC", "SI", "CT", "S", "SM", "BO", "NID", "ZSD"]
