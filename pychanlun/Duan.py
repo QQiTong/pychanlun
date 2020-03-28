@@ -33,7 +33,7 @@ def inspect(duan_series, high_series, low_series, close_series, diff_series, dea
     """
     i1 = pydash.find_last_index(duan_series[:(inspect_index+1)], lambda x: x == -1)
     i2 = pydash.find_last_index(duan_series[:(inspect_index+1)], lambda x: x == 1)
-    if (i1 < 0 or i2 < 0):
+    if i1 < 0 or i2 < 0:
         return None
     duan_low = low_series[i1]
     duan_high = high_series[i2]

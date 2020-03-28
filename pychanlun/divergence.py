@@ -40,7 +40,7 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
     gold_cross = CROSS(diff_series, dea_series)
     dead_cross = CROSS(dea_series, diff_series)
     for i in range(len(gold_cross.series)):
-        if gold_cross.series[i]:
+        if gold_cross.series[i] and diff_series[i] < 0:
             info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
             if info is not None:
                 if info['duan_type'] == -1:
@@ -58,7 +58,7 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
                             elif len(pydash.filter_(gold_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
                                 divergence_down[i] = 1
     for i in range(len(dead_cross.series)):
-        if dead_cross.series[i]:
+        if dead_cross.series[i] and diff_series[i] > 0:
             info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
             if info is not None:
                 if info['duan_type'] == 1:
