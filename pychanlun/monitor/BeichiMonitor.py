@@ -365,7 +365,7 @@ def monitorBeichi(result, symbol, period, closePrice):
     # 监控背驰
     if len(result['buyMACDBCData']['date']) > 0:
         fire_time = result['buyMACDBCData']['date'][-1]
-        price = result['buyMACDBCData']['beichi_price'][-1]
+        price = result['buyMACDBCData']['data'][-1]
         # remark = result['buyMACDBCData']['tag'][-1]
         remark = ""
         stop_lose_price = result['buyMACDBCData']['stop_lose_price'][-1]
@@ -374,7 +374,7 @@ def monitorBeichi(result, symbol, period, closePrice):
         saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sellMACDBCData']['date']) > 0:
         fire_time = result['sellMACDBCData']['date'][-1]
-        price = result['sellMACDBCData']['beichi_price'][-1]
+        price = result['sellMACDBCData']['data'][-1]
         # remark = result['sellMACDBCData']['tag'][-1]
         remark = ""
         stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
