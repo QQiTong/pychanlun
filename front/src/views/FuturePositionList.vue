@@ -264,7 +264,6 @@
         <!--        持仓列表-->
         <el-table
             :key="tableKey"
-            v-loading="listLoading"
             :data="positionList"
             border
             fit
@@ -272,8 +271,9 @@
             size="mini"
             show-summary
             :summary-method="getSummaries"
+            :row-class-name="tableRowClassName"
         >
-            <!--        :row-class-name="tableRowClassName"-->
+            <!--        -->
             <!--      <el-table-column type="expand" label="展开">-->
             <!--        <template slot-scope="props">-->
             <!--          <el-table-->
@@ -312,11 +312,13 @@
                     <span>{{ row.date_created}}</span>
                 </template>
             </el-table-column>
+
             <el-table-column label="信号" align="center" width="50">
                 <template slot-scope="{row}">
                     <span>{{ row.signal| signalTypeFilter }}</span>
                 </template>
             </el-table-column>
+
             <el-table-column label="方向" prop="direction" align="center" width="55">
                 <template slot-scope="{row}">
                     <el-tag :type="row.direction | directionTagFilter">
@@ -327,22 +329,18 @@
             <el-table-column label="成本价" prop="price" align="center" width="80"/>
             <el-table-column label="数量" prop="amount" align="center" width="100"/>
             <el-table-column
-                :key="Math.random()"
                 label="最新价"
                 width="80"
                 align="center"
-                v-if="positionQueryForm.status!=='winEnd' && positionQueryForm.status!=='loseEnd'"
             >
                 <template slot-scope="{row}">
                     {{Number(row.close_price)}}
                 </template>
             </el-table-column>
             <el-table-column
-                :key="Math.random()"
                 label="浮盈率"
                 width="100"
                 align="center"
-                v-if="positionQueryForm.status!=='winEnd' && positionQueryForm.status!=='loseEnd'"
             >
                 <template slot-scope="{row}">
                     <el-tag :type="calcProfitRate(row) | percentTagFilter">{{calcProfitRate(row)}}%</el-tag>
@@ -350,12 +348,10 @@
             </el-table-column>
 
             <el-table-column
-                :key="Math.random()"
                 label="浮盈额"
                 width="100"
                 align="center"
                 prop="current_profit"
-                v-if="positionQueryForm.status!=='winEnd' && positionQueryForm.status!=='loseEnd'"
             >
                 <!--                <template slot-scope="{row}">-->
                 <!--                    <el-tag :type="row.total_profit | percentTagFilter">{{row.total_profit}}</el-tag>-->
@@ -372,20 +368,34 @@
             </el-table-column>
             <el-table-column label="已止损额" width="110" align="center">
                 <template slot-scope="{row}">
-                    {{row.status ==='loseEnd'?row.lose_end_money:0}}
+                    <el-tag :type="row.lose_end_money|percentTagFilter">
+                        {{row.status ==='loseEnd'?row.lose_end_money:0}}
+                    </el-tag>
+
                 </template>
             </el-table-column>
+            <el-table-column label="已止损比率" prop="lose_end_rate" width="110" align="center">
+                <template slot-scope="{row}">
+                    {{row.status==='loseEnd'?row.lose_end_rate * 100+'%':0}}
+                </template>
+            </el-table-column>
+
             <el-table-column label="已盈利额" width="110" align="center">
                 <template slot-scope="{row}">
+                    <el-tag :type="row.win_end_money|percentTagFilter">
                     {{row.status ==='winEnd'?row.win_end_money:0}}
+                    </el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column label="已盈利比率" prop="win_end_rate" width="110" align="center">
+                <template slot-scope="{row}">
+                    {{row.status==='winEnd'?row.win_end_rate * 100+'%':0}}
                 </template>
             </el-table-column>
             <el-table-column
-                :key="Math.random()"
                 label="盈亏比"
                 width="80"
                 align="center"
-                v-if="positionQueryForm.status!=='winEnd' && positionQueryForm.status!=='loseEnd'"
             >
                 <template slot-scope="{row}">
                     <el-tag
@@ -396,21 +406,22 @@
                 </template>
             </el-table-column>
             <!-- 止盈结束的时候计算盈利率 -->
-            <el-table-column
-                :key="Math.random()"
-                label="盈利率"
-                width="100"
-                align="center"
-                v-if="positionQueryForm.status==='winEnd'"
-            >
-                <template slot-scope="{row}">
-                    <!--          <el-tag :type="calcWinEndRate(row) | percentTagFilter">{{calcWinEndRate(row)}}%</el-tag>-->
-                </template>
-            </el-table-column>
+            <!--            <el-table-column-->
+            <!--                label="盈利率"-->
+            <!--                width="100"-->
+            <!--                align="center"-->
+            <!--            >-->
+            <!--&lt;!&ndash;                <template slot-scope="{row}">&ndash;&gt;-->
+            <!--&lt;!&ndash;                    <el-tag :type="calcWinEndRate(row) | percentTagFilter">{{calcWinEndRate(row)}}%</el-tag>&ndash;&gt;-->
+            <!--&lt;!&ndash;                </template>&ndash;&gt;-->
+            <!--            </el-table-column>-->
 
             <!--      <el-table-column label="入场逻辑" prop="enterReason" align="center" width="300" />-->
             <!-- <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300" /> -->
-            <el-table-column label="状态" width="130" align="center">
+            <el-table-column label="最后更新时间" prop="last_update_time" align="center" width="150"/>
+            <el-table-column label="最后更新信号" prop="last_update_signal" align="center" width="100"/>
+            <el-table-column label="最后更新周期" prop="last_update_period" align="center" width="100"/>
+             <el-table-column label="操作状态"  align="center">
                 <template slot-scope="{row}">
                     <el-select
                         v-model="row.status"
@@ -427,11 +438,11 @@
                     </el-select>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" align="center">
-                <template slot-scope="{row,$index}">
-                    <!--          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>-->
-                </template>
-            </el-table-column>
+<!--            <el-table-column label="操作" align="center">-->
+<!--                <template slot-scope="{row,$index}">-->
+<!--                    &lt;!&ndash;          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>&ndash;&gt;-->
+<!--                </template>-->
+<!--            </el-table-column>-->
         </el-table>
         <el-pagination
             background
@@ -655,19 +666,19 @@
             }, 20000)
         },
         methods: {
-            calcWinEndRate(row) {
-                // 获取动止列表中的最后一次平仓的价格
-                if (row.dynamicPositionList.length > 0) {
-                    let winPrice =
-                        row.dynamicPositionList[row.dynamicPositionList.length - 1].price;
-                    let marginLevel = Number(
-                        (1 / (row.margin_rate + this.marginLevelCompany)).toFixed(2)
-                    );
-                    return Math.abs(
-                        ((winPrice - row.price) / row.price) * 100 * marginLevel
-                    ).toFixed(2);
-                }
-            },
+            // calcWinEndRate(row) {
+            //     // 获取动止列表中的最后一次平仓的价格
+            //     if (row.dynamicPositionList.length > 0) {
+            //         let winPrice =
+            //             row.dynamicPositionList[row.dynamicPositionList.length - 1].price;
+            //         let marginLevel = Number(
+            //             (1 / (row.margin_rate + this.marginLevelCompany)).toFixed(2)
+            //         );
+            //         return Math.abs(
+            //             ((winPrice - row.price) / row.price) * 100 * marginLevel
+            //         ).toFixed(2);
+            //     }
+            // },
             // 计算盈亏比
             calcWinLoseRate(row) {
                 let profitRate = this.calcProfitRate(row);
@@ -738,8 +749,8 @@
                     });
             },
             tableRowClassName({row, rowIndex}) {
-                if (row.dynamicPositionList.length > 0) {
-                    return "success-row";
+                if (row.status !== 'holding') {
+                    return "warning-row";
                 }
                 // else {
                 //   return 'warning-row';
@@ -789,8 +800,8 @@
                 }
             },
             getPositionList(status, page, size) {
-                this.positionList = [];
-                this.listLoading = true;
+                // this.positionList = [];
+                // this.listLoading = true;
                 futureApi
                     .getPositionList(status, page, size)
                     .then(res => {
@@ -800,7 +811,7 @@
                         console.log("后端返回的持仓列表", res);
                     })
                     .catch(error => {
-                        this.listLoading = false;
+                        // this.listLoading = false;
                         console.log("获取持仓列表失败", error);
                     });
             },
@@ -969,18 +980,21 @@
                             }
                         })
                         sums[13] = loseEndSum.toFixed(2)
-                    } else if (index === 14) {
+                    } else if (index === 15) {
                         // 累加已盈利
                         data.forEach((item) => {
                             if (item.status === 'winEnd') {
                                 winEndSum += item.win_end_money
                             }
                         })
-                        sums[14] = winEndSum.toFixed(2)
+                        sums[15] = winEndSum.toFixed(2)
                     } else if (index === 9) {
                         // 累加当前盈利
                         data.forEach((item) => {
-                            currentProfitSum += item.current_profit
+                            // 只累加还在持仓中的
+                            if (item.status === 'holding') {
+                                currentProfitSum += item.current_profit
+                            }
                         })
                         sums[9] = currentProfitSum.toFixed(2)
                     } else {

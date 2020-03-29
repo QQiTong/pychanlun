@@ -341,8 +341,11 @@ class BusinessService:
             x['current_profit'] = round(x['per_order_margin'] * x['amount'] * currentPercent,2)
             # 止盈已实现盈亏
             x['win_end_money'] = round(x['per_order_margin'] * x['amount'] * winEndPercent,2)
+            # 止盈比率
+            x['win_end_rate'] = round(winEndPercent, 2)
             # 止损已实现盈亏
             x['lose_end_money'] = round(x['per_order_margin'] * x['amount'] * loseEndPercent,2)
+            x['lose_end_rate'] = round(loseEndPercent, 2)
             positionList.append(x)
         positionListResult = {
             'records': positionList,
