@@ -240,22 +240,38 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
             'status': status
         })
         #  如果当前价格已经触及到止损价，那么就讲状态设置为loseEnd
+        print("最后一个",last_fire)
         if last_fire is not None:
-            if (direction == 'long' and close_price <= last_fire['stop_lose_price']) or (direction == 'short' and close_price >= last_fire['stop_lose_price']):
-                status = 'loseEnd'
-            else:
-                status = 'holding'
-            DBPyChanlun['future_auto_position'].find_one_and_update({
-                'symbol': symbol, 'direction': direction, 'status': status
-            }, {
-                '$set': {
-                    'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
-                    'status': status
-                },
-                '$inc': {
-                    'update_count': 1
-                }
-            }, upsert=True)
+            # 之后价格再涨上来，status又会变成holding ,因此已经被止损的持仓不要再更新状态了
+            if last_fire['status'] != 'loseEnd':
+                if (direction == 'long' and close_price <= last_fire['stop_lose_price']) or (direction == 'short' and close_price >= last_fire['stop_lose_price']):
+                    # print("止损了",direction,close_price,last_fire['stop_lose_price'])
+                    DBPyChanlun['future_auto_position'].find_one_and_update({
+                        '_id':last_fire['_id'],'symbol': symbol, 'direction': direction, 'status': 'holding'
+                    }, {
+                        '$set': {
+                            'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                            'status': 'loseEnd',
+                            'lose_end_price':close_price  # 止损了需要将止损结束的价格插入到数据库中
+                        },
+                        '$inc': {
+                            'update_count': 1
+                        }
+                    }, upsert=True)
+                else:
+                    # print("持有中", direction, close_price, last_fire['stop_lose_price'])
+                    status = 'holding'
+                    DBPyChanlun['future_auto_position'].find_one_and_update({
+                        'symbol': symbol, 'direction': direction, 'status': status
+                    }, {
+                        '$set': {
+                            'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                            'status': status
+                        },
+                        '$inc': {
+                            'update_count': 1
+                        }
+                    }, upsert=True)
 
 
 # 记录品种当前级别的方向
