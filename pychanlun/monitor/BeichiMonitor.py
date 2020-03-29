@@ -60,11 +60,11 @@ mail = Mail()
 # 初始化业务对象
 # businessService = BusinessService()
 
-
+# 改成钉钉发送
 def sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price, date_created_str,
               close_price, remark):
     print(msg)
-    mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
+    # mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
 
     # url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s" \
     #       "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s" \
@@ -73,10 +73,17 @@ def sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, f
     #          '开:' + fire_time_str + ' 触:' + date_created_str)
     # requests.post(url)
 
-    if not mailResult:
-        print("发送失败")
-    else:
-        print("发送成功")
+    url = 'https://oapi.dingtalk.com/robot/send?access_token=39474549996bad7e584523a02236d69b68be8963e2937274e4e0c57fbb629477'
+    program = {
+        "msgtype": "text",
+        "text": {"content": json.dumps(msg,ensure_ascii=False, indent=4)},
+    }
+    headers = {'Content-Type': 'application/json'}
+    f = requests.post(url, data=json.dumps(program), headers=headers)
+    # if not mailResult:
+    #     print("发送失败")
+    # else:
+    #     print("发送成功")
 
 
 # price 信号触发的价格， close_price 提醒时的收盘价 direction 多B 空S amount 开仓数量
@@ -138,24 +145,25 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             # 把数据库的utc时间 转成本地时间
             fire_time_str = (fire_time + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
             date_created_str = (date_created + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
-            # msg = {
-            #     "symbol": symbol,
-            #     "period": period,
-            #     "signal": signal,
-            #     "direction": direction,
-            #     "amount": amount,
-            #     "fire_time": fire_time_str,
-            #     "price": price,
-            #     "date_created": date_created_str,
-            #     "close_price": close_price,
-            #     "remark": remark,
-            # }
+            msg = {
+                "symbol": symbol,
+                "period": period,
+                "signal": signal,
+                "direction": direction,
+                "amount": amount,
+                "fire_time": fire_time_str,
+                "price": price,
+                "date_created": date_created_str,
+                "close_price": close_price,
+                "remark": remark,
+                "remind":'Ding'
+            }
             # 简洁版
-            msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
-                symbol, period, signal, direction + ' ', " [amount]: " + str(amount),
-                " [stop]: " + str(stop_lose_price), " [fire]: " + fire_time_str, " [price]: " + str(price),
-                " [create]: " + date_created_str,
-                str(close_price), remark)
+            # msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
+            #     symbol, period, signal, direction + ' ', " [amount]: " + str(amount),
+            #     " [stop]: " + str(stop_lose_price), " [fire]: " + fire_time_str, " [price]: " + str(price),
+            #     " [create]: " + date_created_str,
+            #     str(close_price), remark)
             sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price,
                       date_created_str,
                       close_price, remark)

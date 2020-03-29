@@ -303,7 +303,7 @@
                         :underline="false"
                     >{{ row.symbol }}
                     </el-link>
-<!-- todo                      @click="handleJumpToKline(row)"-->
+                    <!-- todo                      @click="handleJumpToKline(row)"-->
                 </template>
             </el-table-column>
             <el-table-column label="周期" prop="period" align="center" width="50"/>
@@ -646,6 +646,13 @@
                 this.listQuery.current,
                 this.listQuery.size
             );
+            setInterval(() => {
+                this.getPositionList(
+                    this.positionQueryForm.status,
+                    this.listQuery.current,
+                    this.listQuery.size
+                );
+            }, 20000)
         },
         methods: {
             calcWinEndRate(row) {

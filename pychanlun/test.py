@@ -10,6 +10,7 @@ from bson import CodecOptions
 
 from pychanlun.Calc import Calc
 from pychanlun.KlineDataTool import KlineDataTool
+from pychanlun.Mail import Mail
 from pychanlun.funcat.api import *
 from pychanlun.monitor import BeichiMonitor
 import sys
@@ -539,6 +540,48 @@ def testGlobalChangeList():
 
 
     print("外盘涨跌幅列表",conbineChangeList)
+def testDingDing():
+    import requests
+    import json
+    url = 'https://oapi.dingtalk.com/robot/send?access_token=39474549996bad7e584523a02236d69b68be8963e2937274e4e0c57fbb629477'
+    msg = {
+        "symbol": 'test',
+        "period": 'test',
+        "signal": 'test',
+        "direction": 'test',
+        "amount": 'test',
+        "fire_time": 'test',
+        "price": 'test',
+        "date_created": 'test',
+        "close_price": 'test',
+        "remark": 'test',
+        "remind": 'Ding'
+    }
+    program = {
+        "msgtype": "text",
+        "text": {"content": json.dumps(msg, ensure_ascii=False, indent=4)},
+    }
+    headers = {'Content-Type': 'application/json'}
+    f = requests.post(url, data=json.dumps(program), headers=headers)
+    print(f)
+def testMail():
+    mail = Mail()
+    msg = {
+        "symbol": 'test',
+        "period": 'test',
+        "signal": 'test',
+        "direction": 'test',
+        "amount": 'test',
+        "fire_time": 'test',
+        "price": 'test',
+        "date_created": 'test',
+        "close_price": 'test',
+        "remark": 'test',
+        "remind": 'Ding'
+    }
+    mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
+    if not mailResult:
+        print("发送失败")
 def app():
     # testBitmex()
     # testBeichiDb()
@@ -556,7 +599,9 @@ def app():
     # testOkexTiker()
     # testChaji()
     # testGlobalChangeList()
-    testTime2()
+    # testTime2()
+    # testMail()
+    testDingDing()
 
 if __name__ == '__main__':
     app()
