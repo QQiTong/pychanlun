@@ -935,11 +935,15 @@
                     }
                     console.log("--", data, index)
                     if (index === 12) {
-                        stopSum += data[0].total_stop_money
-                        sums[12] = stopSum
+                        data.forEach((item) => {
+                            stopSum += item.total_stop_money
+                        })
+                        sums[12] = stopSum.toFixed(2)
                     } else if (index === 9) {
-                        profitSum += data[0].total_profit
-                        sums[9] = profitSum
+                        data.forEach((item) => {
+                            profitSum += item.total_profit
+                        })
+                        sums[9] = profitSum.toFixed(2)
                     } else {
                         sums[index] = ''
                     }
