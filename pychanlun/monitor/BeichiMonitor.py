@@ -240,10 +240,10 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
             'status': status
         })
         #  如果当前价格已经触及到止损价，那么就讲状态设置为loseEnd
-        print("最后一个",last_fire)
+        # print("最后一个",last_fire)
         if last_fire is not None:
             # 之后价格再涨上来，status又会变成holding ,因此已经被止损的持仓不要再更新状态了
-            if last_fire['status'] != 'loseEnd':
+            if last_fire['status'] == 'holding':
                 if (direction == 'long' and close_price <= last_fire['stop_lose_price']) or (direction == 'short' and close_price >= last_fire['stop_lose_price']):
                     # print("止损了",direction,close_price,last_fire['stop_lose_price'])
                     DBPyChanlun['future_auto_position'].find_one_and_update({
