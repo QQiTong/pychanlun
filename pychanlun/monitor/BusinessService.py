@@ -274,6 +274,10 @@ class BusinessService:
             return x
         else:
             return -1
+    def formatTime(self,localTime):
+        localTimeStamp = time.localtime(int(time.mktime(localTime.timetuple()) + 8 * 3600))
+        localTimeStampStr = time.strftime("%Y-%m-%d %H:%M:%S", localTimeStamp)
+        return localTimeStampStr
 
     # 持仓列表改成自动录入
     def getPositionList(self, status, page, size):
@@ -309,12 +313,12 @@ class BusinessService:
             total = result.count()
         for x in result:
             x['_id'] = str(x['_id'])
-            fire_time_localTime = time.localtime(int(time.mktime(x['fire_time'].timetuple()) + 8 * 3600))
-            fire_time_strTime = time.strftime("%Y-%m-%d %H:%M:%S", fire_time_localTime)
-            date_created_localTime = time.localtime(int(time.mktime(x['date_created'].timetuple()) + 8 * 3600))
-            date_created_strTime = time.strftime("%Y-%m-%d %H:%M:%S", date_created_localTime)
-            x['fire_time'] = fire_time_strTime
-            x['date_created'] = date_created_strTime
+            x['fire_time'] = self.formatTime(x['fire_time'])
+            x['date_created'] = self.formatTime(x['date_created'])
+            if hasattr(x,'last_update_time'):
+                x['last_update_time'] = self.formatTime(x['last_update_time'])
+            else:
+                x['last_update_time'] = ''
             #
             if x['symbol'] is 'BTC':
                 marginLevel = 1 / (x['margin_rate'] )
