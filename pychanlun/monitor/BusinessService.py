@@ -315,7 +315,7 @@ class BusinessService:
             x['_id'] = str(x['_id'])
             x['fire_time'] = self.formatTime(x['fire_time'])
             x['date_created'] = self.formatTime(x['date_created'])
-            if hasattr(x,'last_update_time'):
+            if ('last_update_time' in x):
                 x['last_update_time'] = self.formatTime(x['last_update_time'])
             else:
                 x['last_update_time'] = ''
