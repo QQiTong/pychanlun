@@ -215,7 +215,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                 'per_order_stop_money':futureCalcObj['perOrderStopMoney'],
                 'per_order_stop_rate':round(futureCalcObj['perOrderStopRate'],2),
                 'per_order_margin': round(futureCalcObj['perOrderMargin'],2),
-                'total_stop_money':round(futureCalcObj['perOrderStopMoney']*futureCalcObj['maxOrderCount'],2),
+                'predict_stop_money':-round(futureCalcObj['perOrderStopMoney']*futureCalcObj['maxOrderCount'],2),
                 'margin_rate':futureCalcObj['marginRate']
             })
     else:
@@ -224,12 +224,18 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
             'direction': direction,
             'status': status
         })
+        #  如果当前价格已经触及到止损价，那么就讲状态设置为loseEnd
         if last_fire is not None:
+            if (direction == 'long' and close_price <= last_fire['stop_lose_price']) or (direction == 'short' and close_price >= last_fire['stop_lose_price']):
+                status = 'loseEnd'
+            else:
+                status = 'holding'
             DBPyChanlun['future_auto_position'].find_one_and_update({
                 'symbol': symbol, 'direction': direction, 'status': status
             }, {
                 '$set': {
                     'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                    'status':status
                 },
                 '$inc': {
                     'update_count': 1

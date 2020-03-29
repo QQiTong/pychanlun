@@ -315,21 +315,34 @@ class BusinessService:
             date_created_strTime = time.strftime("%Y-%m-%d %H:%M:%S", date_created_localTime)
             x['fire_time'] = fire_time_strTime
             x['date_created'] = date_created_strTime
-            x['total_stop_money'] = -round(x['per_order_stop_money'] * x['amount'], 2)
             #
             if x['symbol'] is 'BTC':
                 marginLevel = 1 / (x['margin_rate'] )
             else:
                 marginLevel = 1 / (x['margin_rate'] + 0.01)
-
             currentPercent = 0
+            winEndPercent = 0
+            loseEndPercent = 0
             if x['direction'] == "long":
                 currentPercent = round(((x['close_price'] - x['price']) / x['price']) * marginLevel , 2)
-                print("long",currentPercent)
+                if x['status'] == 'winEnd':
+                    winEndPercent = round(((x['win_end_price'] - x['price']) / x['price']) * marginLevel , 2)
+                elif x['status'] == 'loseEnd':
+                    loseEndPercent = round(((x['lose_end_price'] - x['price']) / x['price']) * marginLevel , 2)
+                # print("long",currentPercent)
             else:
                 currentPercent = round(((x['price'] - x['close_price']) / x['close_price'])* marginLevel, 2)
-                print("short",currentPercent)
-            x['total_profit'] = round(x['per_order_margin'] * x['amount'] * currentPercent,2)
+                if x['status'] == 'winEnd':
+                    winEndPercent = round(((x['price'] - x['win_end_price']) / x['win_end_price']) * marginLevel, 2)
+                elif x['status'] == 'loseEnd':
+                    loseEndPercent = round(((x['price']-x['lose_end_price']) / x['price']) * marginLevel , 2)
+                # print("short",currentPercent)
+            # 未实现盈亏
+            x['current_profit'] = round(x['per_order_margin'] * x['amount'] * currentPercent,2)
+            # 止盈已实现盈亏
+            x['win_end_money'] = round(x['per_order_margin'] * x['amount'] * winEndPercent,2)
+            # 止损已实现盈亏
+            x['lose_end_money'] = round(x['per_order_margin'] * x['amount'] * loseEndPercent,2)
             positionList.append(x)
         positionListResult = {
             'records': positionList,
@@ -375,12 +388,22 @@ class BusinessService:
             # 'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
-
-    def updatePositionStatus(self, id, status):
-        DBPyChanlun['position_record'].update_one({'_id': ObjectId(id)}, {"$set": {
-            'status': status,
-        }})
-
+    # close_price 最新收盘价
+    def updatePositionStatus(self, id, status,close_price):
+        if status == 'winEnd':
+            DBPyChanlun['future_auto_position'].update_one({'_id': ObjectId(id)}, {"$set": {
+                'status': status,
+                'win_end_price': float(close_price),
+            }})
+        elif status == 'loseEnd':
+            DBPyChanlun['future_auto_position'].update_one({'_id': ObjectId(id)}, {"$set": {
+                'status': status,
+                'lose_end_price': float(close_price)
+            }})
+        else:
+            DBPyChanlun['future_auto_position'].update_one({'_id': ObjectId(id)}, {"$set": {
+                'status': status,
+            }})
     # 创建预判信息
     def createFuturePrejudgeList(self, endDate, prejudgeList):
         result = DBPyChanlun['prejudge_record'].insert_one({

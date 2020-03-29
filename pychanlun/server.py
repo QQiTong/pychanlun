@@ -123,7 +123,8 @@ def update_position():
 def update_position_status():
     id = request.args.get("id")
     status = request.args.get("status")
-    businessService.updatePositionStatus(id,status)
+    close_price = request.args.get("close_price")
+    businessService.updatePositionStatus(id,status,close_price)
     res = {
         "code": "ok"
     }

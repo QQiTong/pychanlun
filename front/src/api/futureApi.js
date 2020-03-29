@@ -98,8 +98,16 @@ export const futureApi = {
         })
     },
     // 更新持仓状态
-    updatePositionStatus (id, status) {
-        let url = `/api/update_position_status?id=${id}&status=${status}`
+    // updatePositionStatus (id, status) {
+    //     let url = `/api/update_position_status?id=${id}&status=${status}`
+    //     return axios({
+    //         url: url,
+    //         method: 'get'
+    //     })
+    // },
+    // 更新自动录入的持仓列表
+    updatePositionStatus (id, status,close_price) {
+        let url = `/api/update_position_status?id=${id}&status=${status}&close_price=${close_price}`
         return axios({
             url: url,
             method: 'get'

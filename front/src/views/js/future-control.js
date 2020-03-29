@@ -378,12 +378,12 @@ export default {
         this.getPrejudgeList()
         this.getBTCTicker()
         this.getGlobalFutureChangeList()
-        setInterval(() => {
-            this.getSignalList()
-            this.getChangeiList()
-            this.getLevelDirectionList()
-            this.getBTCTicker()
-        }, 20000)
+        // setInterval(() => {
+        //     this.getSignalList()
+        //     this.getChangeiList()
+        //     this.getLevelDirectionList()
+        //     this.getBTCTicker()
+        // }, 20000)
     },
     methods: {
         subscribeWS() {

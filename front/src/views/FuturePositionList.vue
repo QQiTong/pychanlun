@@ -301,9 +301,9 @@
                     <el-link
                         type="primary"
                         :underline="false"
-                        @click="handleJumpToKline(row)"
                     >{{ row.symbol }}
                     </el-link>
+<!-- todo                      @click="handleJumpToKline(row)"-->
                 </template>
             </el-table-column>
             <el-table-column label="周期" prop="period" align="center" width="50"/>
@@ -354,7 +354,7 @@
                 label="浮盈额"
                 width="100"
                 align="center"
-                prop="total_profit"
+                prop="current_profit"
                 v-if="positionQueryForm.status!=='winEnd' && positionQueryForm.status!=='loseEnd'"
             >
                 <!--                <template slot-scope="{row}">-->
@@ -368,7 +368,17 @@
             <el-table-column label="止损率" width="80" align="center">
                 <template slot-scope="{row}">-{{calcStopLoseRate(row).toFixed(2)}}%</template>
             </el-table-column>
-            <el-table-column label="止损额" prop="total_stop_money" width="110" align="center">
+            <el-table-column label="预计止损额" prop="predict_stop_money" width="110" align="center">
+            </el-table-column>
+            <el-table-column label="已止损额" width="110" align="center">
+                <template slot-scope="{row}">
+                    {{row.status ==='loseEnd'?row.lose_end_money:0}}
+                </template>
+            </el-table-column>
+            <el-table-column label="已盈利额" width="110" align="center">
+                <template slot-scope="{row}">
+                    {{row.status ==='winEnd'?row.win_end_money:0}}
+                </template>
             </el-table-column>
             <el-table-column
                 :key="Math.random()"
@@ -406,7 +416,7 @@
                         v-model="row.status"
                         class="form-input-short"
                         size="mini"
-                        @change="changeStatus(row._id,row.status)"
+                        @change="changeStatus(row._id,row.status,row.close_price)"
                     >
                         <el-option
                             v-for="item in statusOptions"
@@ -459,7 +469,7 @@
     ];
     const statusOptions = [
         {key: "holding", display_name: "持仓中"},
-        {key: "prepare", display_name: "预埋单"},
+        // {key: "prepare", display_name: "预埋单"},
         {key: "winEnd", display_name: "止盈结束"},
         {key: "loseEnd", display_name: "止损结束"}
     ];
@@ -570,20 +580,20 @@
                     period: "3m",
                     signal: "",
                     status: "holding",
-                    //方向
+                    // 方向
                     direction: "",
-                    //价格
+                    // 价格
                     price: "",
-                    //数量
+                    // 数量
                     amount: "",
                     stopLosePrice: "",
-                    //区间套级别
+                    // 区间套级别
                     // nestLevel: "2级套",
-                    //介入逻辑
+                    // 介入逻辑
                     enterReason: "",
-                    //持仓逻辑
+                    // 持仓逻辑
                     holdReason: "",
-                    //动态止盈,加仓，止损，锁仓列表
+                    // 动态止盈,加仓，止损，锁仓列表
                     dynamicPositionList: []
                 },
                 rules: {
@@ -703,10 +713,10 @@
                     return "获取中";
                 }
             },
-            changeStatus(id, status) {
+            changeStatus(id, status, close_price) {
                 console.log(id, status);
                 futureApi
-                    .updatePositionStatus(id, status)
+                    .updatePositionStatus(id, status, close_price)
                     .then(res => {
                         if (res.code === "ok") {
                             this.getPositionList(
@@ -758,8 +768,8 @@
             handleJumpToKline(row) {
                 console.log(this.$parent);
                 // this.$parent.jumpToKline(symbol)
-                //结束状态 k线页面不获取持仓信息
-                if (row.status !== "winEnd" && row.status !== "stopEnd") {
+                // 结束状态 k线页面不获取持仓信息
+                if (row.status !== "winEnd" && row.status !== "loseEnd") {
                     let routeUrl = this.$router.resolve({
                         path: "/multi-period",
                         query: {
@@ -853,7 +863,7 @@
                                     type: "success",
                                     duration: 2000
                                 });
-                                //拉取后端接口获取最新持仓列表
+                                // 拉取后端接口获取最新持仓列表
                                 this.getPositionList(
                                     this.positionQueryForm.status,
                                     this.listQuery.current,
@@ -869,7 +879,7 @@
                 });
             },
             handleUpdate(row) {
-                //this.positionForm = Object.assign({}, row); // copy obj
+                // this.positionForm = Object.assign({}, row); // copy obj
                 this.positionForm = JSON.parse(JSON.stringify(row));
                 this.dialogStatus = "update";
                 this.dialogFormVisible = true;
@@ -897,7 +907,7 @@
                                     type: "success",
                                     duration: 2000
                                 });
-                                //拉取后端接口获取最新持仓列表
+                                // 拉取后端接口获取最新持仓列表
                                 this.getPositionList(
                                     this.positionQueryForm.status,
                                     this.listQuery.current,
@@ -924,7 +934,11 @@
                 const {columns, data} = param;
                 const sums = [];
                 let stopSum = 0
-                let profitSum = 0
+                let currentProfitSum = 0
+                // 已止损
+                let loseEndSum = 0
+                // 已盈利
+                let winEndSum = 0
                 if (data.length === 0) {
                     return sums
                 }
@@ -933,17 +947,35 @@
                         sums[index] = '合计';
                         return;
                     }
-                    console.log("--", data, index)
+                    // console.log("--", data, index)
+                    // 累加 预计止损
                     if (index === 12) {
                         data.forEach((item) => {
-                            stopSum += item.total_stop_money
+                            stopSum += item.predict_stop_money
                         })
                         sums[12] = stopSum.toFixed(2)
-                    } else if (index === 9) {
+                    } else if (index === 13) {
+                        // 累加已止损
                         data.forEach((item) => {
-                            profitSum += item.total_profit
+                            if (item.status === 'loseEnd') {
+                                loseEndSum += item.lose_end_money
+                            }
                         })
-                        sums[9] = profitSum.toFixed(2)
+                        sums[13] = loseEndSum.toFixed(2)
+                    } else if (index === 14) {
+                        // 累加已盈利
+                        data.forEach((item) => {
+                            if (item.status === 'winEnd') {
+                                winEndSum += item.win_end_money
+                            }
+                        })
+                        sums[14] = winEndSum.toFixed(2)
+                    } else if (index === 9) {
+                        // 累加当前盈利
+                        data.forEach((item) => {
+                            currentProfitSum += item.current_profit
+                        })
+                        sums[9] = currentProfitSum.toFixed(2)
                     } else {
                         sums[index] = ''
                     }
