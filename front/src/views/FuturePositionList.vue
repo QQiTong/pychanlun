@@ -366,7 +366,7 @@
                 <template slot-scope="{row}">{{row.stop_lose_price}}</template>
             </el-table-column>
             <el-table-column label="止损率" width="80" align="center">
-                <template slot-scope="{row}">-{{calcStopLoseRate(row)}}%</template>
+                <template slot-scope="{row}">-{{calcStopLoseRate(row).toFixed(2)}}%</template>
             </el-table-column>
             <el-table-column label="止损额" prop="total_stop_money" width="110" align="center">
             </el-table-column>
