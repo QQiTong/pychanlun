@@ -252,48 +252,49 @@ def FindLastFractalRegion(count, bi_series, time_series, high_series, low_series
     bottom_fractal = None
     g1 = FindPrevEq(bi_series, 1, count)
     d1 = FindPrevEq(bi_series, -1, count)
-    if g1 > d1: # 最后是向上笔
+    if g1 > d1 > 0: # 最后是向上笔
         g2 = FindPrevEq(bi_series, 1, d1)
-        candles = MergeCandles(high_series, low_series, open_series, close_series, d1, g1, 1)
-        sticks = candles[-2]["sticks"]
-        dt = time_series[g1]
-        top = high_series[g1]
-        bottom = sticks[0]["l"]
-        for idx in range(len(sticks)):
-            if sticks[idx]["l"] < bottom:
-                bottom = sticks[idx]["l"]
-        top_fractal = { "date": dt, "top": top, "bottom": bottom }
-
-        candles = MergeCandles(high_series, low_series, open_series, close_series, g2, d1, -1)
-        sticks = candles[-2]["sticks"]
-        dt = time_series[d1]
-        bottom = low_series[d1]
-        top = sticks[0]["h"]
-        for idx in range(len(sticks)):
-            if sticks[idx]["h"] > top:
-                top = sticks[idx]["h"]
-        bottom_fractal = { "date": dt, "top": top, "bottom": bottom }
-        return { "direction": 1, "top_fractal": top_fractal, "bottom_fractal": bottom_fractal }
-    else: # 最后是向下笔
+        if g2 > 0:
+            candles = MergeCandles(high_series, low_series, open_series, close_series, d1, g1, 1)
+            sticks = candles[-2]["sticks"]
+            dt = time_series[g1]
+            top = high_series[g1]
+            bottom = sticks[0]["l"]
+            for idx in range(len(sticks)):
+                if sticks[idx]["l"] < bottom:
+                    bottom = sticks[idx]["l"]
+            top_fractal = { "date": dt, "top": top, "bottom": bottom }
+            candles = MergeCandles(high_series, low_series, open_series, close_series, g2, d1, -1)
+            sticks = candles[-2]["sticks"]
+            dt = time_series[d1]
+            bottom = low_series[d1]
+            top = sticks[0]["h"]
+            for idx in range(len(sticks)):
+                if sticks[idx]["h"] > top:
+                    top = sticks[idx]["h"]
+            bottom_fractal = { "date": dt, "top": top, "bottom": bottom }
+            return { "direction": 1, "top_fractal": top_fractal, "bottom_fractal": bottom_fractal }
+    elif d1 > g1 > 0: # 最后是向下笔
         d2 = FindPrevEq(bi_series, -1, g1)
-        candles = MergeCandles(high_series, low_series, open_series, close_series, g1, d1, -1)
-        sticks = candles[-2]["sticks"]
-        dt = time_series[d1]
-        bottom = low_series[d1]
-        top = sticks[0]["h"]
-        for idx in range(len(sticks)):
-            if sticks[idx]["h"] > top:
-                top = sticks[idx]["h"]
-        bottom_fractal = { "date": dt, "top": top, "bottom": bottom }
+        if d2 > 0:
+            candles = MergeCandles(high_series, low_series, open_series, close_series, g1, d1, -1)
+            sticks = candles[-2]["sticks"]
+            dt = time_series[d1]
+            bottom = low_series[d1]
+            top = sticks[0]["h"]
+            for idx in range(len(sticks)):
+                if sticks[idx]["h"] > top:
+                    top = sticks[idx]["h"]
+            bottom_fractal = { "date": dt, "top": top, "bottom": bottom }
 
-        candles = MergeCandles(high_series, low_series, open_series, close_series, d2, g1, 1)
-        sticks = candles[-2]["sticks"]
+            candles = MergeCandles(high_series, low_series, open_series, close_series, d2, g1, 1)
+            sticks = candles[-2]["sticks"]
 
-        dt = time_series[g1]
-        top = high_series[g1]
-        bottom = sticks[0]["l"]
-        for idx in range(len(sticks)):
-            if sticks[idx]["l"] < bottom:
-                bottom = sticks[idx]["l"]
-        top_fractal = { "date": dt, "top": top, "bottom": bottom }
-        return { "direction": -1, "top_fractal": top_fractal, "bottom_fractal": bottom_fractal }
+            dt = time_series[g1]
+            top = high_series[g1]
+            bottom = sticks[0]["l"]
+            for idx in range(len(sticks)):
+                if sticks[idx]["l"] < bottom:
+                    bottom = sticks[idx]["l"]
+            top_fractal = { "date": dt, "top": top, "bottom": bottom }
+            return { "direction": -1, "top_fractal": top_fractal, "bottom_fractal": bottom_fractal }
