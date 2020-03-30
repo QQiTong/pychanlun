@@ -473,6 +473,8 @@ class Calc:
         resJson['endDate'] = endDate
 
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
+            fractialRegion = {} if fractialRegion is None else fractialRegion
+            fractialRegion2 = {} if fractialRegion2 is None else fractialRegion2
             resJson['fractal'] = [fractialRegion, fractialRegion2]
 
         resJsonStr = json.dumps(resJson)
