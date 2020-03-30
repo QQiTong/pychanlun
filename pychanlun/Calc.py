@@ -432,8 +432,8 @@ class Calc:
         sellHigherMACDBCData['value'] = []
 
         # strategy3计算
-        # resJson['notLower'] = calcNotLower(duanList, lowList)
-        # resJson['notHigher'] = calcNotHigher(duanList, highList)
+        resJson['notLower'] = calcNotLower(duanList, lowList)
+        resJson['notHigher'] = calcNotHigher(duanList, highList)
         # for x in range(len(buyMACDBCData2['date'])):
         #     if pydash.find_index(buyMACDBCData['date'], lambda t: t == buyMACDBCData2['date'][x]) == -1:
         #         buyHigherMACDBCData['date'].append(buyMACDBCData2['date'][x])

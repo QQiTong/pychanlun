@@ -1926,7 +1926,7 @@ export default {
             let bcMACDValues = []
             for (let i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
                 let value = {
-                    coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.data[i]],
+                    coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.diff[i]],
                     value: jsonObj.buyMACDBCData.value[i],
                     symbolRotate: -180,
                     symbol: 'pin',
@@ -1945,7 +1945,7 @@ export default {
             }
             for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
                 let value = {
-                    coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.data[i]],
+                    coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.diff[i]],
                     value: jsonObj.sellMACDBCData.value[i],
                     symbolRotate: 0,
                     symbol: 'pin',
@@ -2060,6 +2060,13 @@ export default {
                     case 16:
                         lastBeichi = jsonObj.sell_v_reverse_higher
                         break
+                    //背驰
+                    case 17:
+                        lastBeichi = jsonObj.buyMACDBCData
+                        break
+                    case 18:
+                        lastBeichi = jsonObj.sellMACDBCData
+                        break
                 }
                 // 背驰时的价格
                 let beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
@@ -2078,7 +2085,7 @@ export default {
                 // 当前收益（单位万/元）
                 let currentProfit = ''
                 if (lastBeichiType === 1 || lastBeichiType === 2 || lastBeichiType === 5 || lastBeichiType === 6 ||
-                    lastBeichiType === 9 || lastBeichiType === 10 || lastBeichiType === 13 || lastBeichiType === 14) {
+                    lastBeichiType === 9 || lastBeichiType === 10 || lastBeichiType === 13 || lastBeichiType === 14 || lastBeichiType === 17) {
                     targetPrice = beichiPrice + diffPrice
                     currentPercent = ((currentPrice - beichiPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
@@ -2615,6 +2622,7 @@ export default {
          * 5 本级别线段破坏买 6 高级别线段破坏买  7 本级别线段破坏卖 8 高级别线段破坏卖
          * 9 本级别中枢突破买 10 高级别中枢突破买 11 本级别中枢突破卖 12 高级别中枢突破卖
          * 13 本级别三卖V买 14 高级别三卖V买 15 本级别三买V卖 16 高级别三买V卖
+         * 17 本级别底背驰买    18 本级别顶背驰卖
          */
         getLastBeichiData(jsonObj) {
             // 回拉
@@ -2640,6 +2648,10 @@ export default {
             let sell_v_reverse = jsonObj.sell_v_reverse
             let sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
 
+            // 背驰
+            let buyMACDBCData = jsonObj.buyMACDBCData
+            let sellMACDBCData = jsonObj.sellMACDBCData
+
             // 回拉
             let buy_zs_huila_stamp = 0
             let buy_zs_huila_higher_stamp = 0
@@ -2660,6 +2672,10 @@ export default {
             let buy_v_reverse_higher_stamp = 0
             let sell_v_reverse_stamp = 0
             let sell_v_reverse_higher_stamp = 0
+
+            // 背驰
+            let buy_beichi_stamp = 0
+            let sell_beichi_stamp = 0
 
             let buyTimeStr
             let higherBuyTimeStr
@@ -2734,6 +2750,15 @@ export default {
                 higherSellTimeStr = sell_v_reverse_higher.date[sell_v_reverse_higher.date.length - 1]
                 sell_v_reverse_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
             }
+            // 背驰
+            if (buyMACDBCData.date.length > 0) {
+                buyTimeStr = buyMACDBCData.date[buyMACDBCData.date.length - 1]
+                buy_beichi_stamp = this.timeStrToStamp(buyTimeStr)
+            }
+            if (sellMACDBCData.date.length > 0) {
+                sellTimeStr = sellMACDBCData.date[sellMACDBCData.date.length - 1]
+                sell_beichi_stamp = this.timeStrToStamp(sellTimeStr)
+            }
 
             // 当线段破坏和中枢突破时间相等的时候，使用中枢突破信号，因为中枢突破止损更小
             if (buy_zs_tupo_stamp === buy_duan_break_stamp) {
@@ -2752,7 +2777,7 @@ export default {
             let timeArray = [buy_zs_huila_stamp, buy_zs_huila_higher_stamp, sell_zs_huila_Stamp, sell_zs_huila_higher_stamp,
                 buy_duan_break_stamp, buy_duan_break_higher_stamp, sell_duan_break_stamp, sell_duan_break_higher_stamp,
                 buy_zs_tupo_stamp, buy_zs_tupo_higher_stamp, sell_zs_tupo_stamp, sell_zs_tupo_higher_stamp,
-                buy_v_reverse_stamp, buy_v_reverse_higher_stamp, sell_v_reverse_stamp, sell_v_reverse_higher_stamp]
+                buy_v_reverse_stamp, buy_v_reverse_higher_stamp, sell_v_reverse_stamp, sell_v_reverse_higher_stamp, buy_beichi_stamp, sell_beichi_stamp]
             let maxPos = 0
             let maxTime = timeArray[0]
             for (let i = 0; i < timeArray.length; i++) {
@@ -2765,7 +2790,8 @@ export default {
             if (buy_zs_huila_stamp === 0 && buy_zs_huila_higher_stamp === 0 && sell_zs_huila_Stamp === 0 && sell_zs_huila_higher_stamp === 0 &&
                 buy_duan_break_stamp === 0 && buy_duan_break_higher_stamp === 0 && sell_duan_break_stamp === 0 && sell_duan_break_higher_stamp === 0 &&
                 buy_zs_tupo_stamp === 0 && buy_zs_tupo_higher_stamp === 0 && sell_zs_tupo_stamp === 0 && sell_zs_tupo_higher_stamp === 0 &&
-                buy_v_reverse_stamp === 0 && buy_v_reverse_higher_stamp === 0 && sell_v_reverse_stamp === 0 && sell_v_reverse_higher_stamp
+                buy_v_reverse_stamp === 0 && buy_v_reverse_higher_stamp === 0 && sell_v_reverse_stamp === 0 && sell_v_reverse_higher_stamp &&
+                buy_beichi_stamp === 0 && sell_beichi_stamp === 0
             ) {
                 return 0
             } else {

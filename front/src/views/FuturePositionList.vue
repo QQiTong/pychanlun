@@ -663,7 +663,7 @@
                     this.listQuery.current,
                     this.listQuery.size
                 );
-            }, 20000)
+            }, 5000)
         },
         methods: {
             // calcWinEndRate(row) {

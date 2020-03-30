@@ -151,6 +151,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
                 "signal": signal,
                 "direction": direction,
                 "amount": amount,
+                "stop":stop_lose_price,
                 "fire_time": fire_time_str,
                 "price": price,
                 "date_created": date_created_str,
@@ -240,22 +241,38 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
             'status': status
         })
         #  如果当前价格已经触及到止损价，那么就讲状态设置为loseEnd
+        # print("最后一个",last_fire)
         if last_fire is not None:
-            if (direction == 'long' and close_price <= last_fire['stop_lose_price']) or (direction == 'short' and close_price >= last_fire['stop_lose_price']):
-                status = 'loseEnd'
-            else:
-                status = 'holding'
-            DBPyChanlun['future_auto_position'].find_one_and_update({
-                'symbol': symbol, 'direction': direction, 'status': status
-            }, {
-                '$set': {
-                    'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
-                    'status': status
-                },
-                '$inc': {
-                    'update_count': 1
-                }
-            }, upsert=True)
+            # 之后价格再涨上来，status又会变成holding ,因此已经被止损的持仓不要再更新状态了
+            if last_fire['status'] == 'holding':
+                if (direction == 'long' and close_price <= last_fire['stop_lose_price']) or (direction == 'short' and close_price >= last_fire['stop_lose_price']):
+                    # print("止损了",direction,close_price,last_fire['stop_lose_price'])
+                    DBPyChanlun['future_auto_position'].find_one_and_update({
+                        '_id':last_fire['_id'],'symbol': symbol, 'direction': direction, 'status': 'holding'
+                    }, {
+                        '$set': {
+                            'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                            'status': 'loseEnd',
+                            'lose_end_price':close_price  # 止损了需要将止损结束的价格插入到数据库中
+                        },
+                        '$inc': {
+                            'update_count': 1
+                        }
+                    }, upsert=True)
+                else:
+                    # print("持有中", direction, close_price, last_fire['stop_lose_price'])
+                    status = 'holding'
+                    DBPyChanlun['future_auto_position'].find_one_and_update({
+                        'symbol': symbol, 'direction': direction, 'status': status
+                    }, {
+                        '$set': {
+                            'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                            'status': status
+                        },
+                        '$inc': {
+                            'update_count': 1
+                        }
+                    }, upsert=True)
 
 
 # 记录品种当前级别的方向
@@ -314,7 +331,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
 
     elif type == "2":
         symbolList = symbolListDigitCoin
-        periodList = periodList2
+        periodList = periodList1
 
     else:
         symbolList = globalFutureSymbol
@@ -362,10 +379,14 @@ def monitorFuturesAndDigitCoin(type, symbolList):
 
 def monitorBeichi(result, symbol, period, closePrice):
     signal = 'beichi'
+    notLower = result['notLower']
+    notHigher = result['notHigher']
     # 监控背驰
     if len(result['buyMACDBCData']['date']) > 0:
+        if not notLower:
+           return
         fire_time = result['buyMACDBCData']['date'][-1]
-        price = result['buyMACDBCData']['beichi_price'][-1]
+        price = result['buyMACDBCData']['data'][-1]
         # remark = result['buyMACDBCData']['tag'][-1]
         remark = ""
         stop_lose_price = result['buyMACDBCData']['stop_lose_price'][-1]
@@ -373,8 +394,10 @@ def monitorBeichi(result, symbol, period, closePrice):
         direction = 'B'
         saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sellMACDBCData']['date']) > 0:
+        if not notHigher:
+           return
         fire_time = result['sellMACDBCData']['date'][-1]
-        price = result['sellMACDBCData']['beichi_price'][-1]
+        price = result['sellMACDBCData']['data'][-1]
         # remark = result['sellMACDBCData']['tag'][-1]
         remark = ""
         stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
@@ -637,8 +660,15 @@ def monitorFractal(result, symbol, period, closePrice):
             # 当前价格低于顶分型的底
             if closePrice <= price:
                 stopWinCount = calStopWinCount(symbol, period, positionInfo, closePrice)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stopWinCount,
-                                 stop_lose_price)
+                futureCalcObj = {
+                    'maxOrderCount': stopWinCount,
+                    # 'perOrderStopMoney': perOrderStopMoney,
+                    # 'perOrderStopRate': perOrderStopRate,
+                    # 'perOrderMargin': perOrderMargin,
+                    # 'marginRate': margin_rate
+                }
+                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
+                                 stop_lose_price,futureCalcObj)
         # 高高级别
         if result['fractal'][1]['direction'] == 1:
             fire_time = result['fractal'][1]['top_fractal']['date']
@@ -649,8 +679,15 @@ def monitorFractal(result, symbol, period, closePrice):
             # 当前价格低于顶分型的底
             if closePrice <= price:
                 stopWinCount = calStopWinCount(symbol, period, positionInfo, closePrice)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stopWinCount,
-                                 stop_lose_price)
+                futureCalcObj = {
+                    'maxOrderCount': stopWinCount,
+                    # 'perOrderStopMoney': perOrderStopMoney,
+                    # 'perOrderStopRate': perOrderStopRate,
+                    # 'perOrderMargin': perOrderMargin,
+                    # 'marginRate': margin_rate
+                }
+                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
+                                 stop_lose_price, futureCalcObj)
     else:
         # 空单查找向下笔的底分型
         # 高级别
@@ -663,8 +700,15 @@ def monitorFractal(result, symbol, period, closePrice):
             # 当前价格高于底分型的顶
             if closePrice >= price:
                 stopWinCount = calStopWinCount(symbol, period, positionInfo, closePrice)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stopWinCount,
-                                 stop_lose_price)
+                futureCalcObj = {
+                    'maxOrderCount': stopWinCount,
+                    # 'perOrderStopMoney': perOrderStopMoney,
+                    # 'perOrderStopRate': perOrderStopRate,
+                    # 'perOrderMargin': perOrderMargin,
+                    # 'marginRate': margin_rate
+                }
+                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
+                                 stop_lose_price, futureCalcObj)
         # 高高级别
         if result['fractal'][1]['direction'] == -1:
             fire_time = result['fractal'][1]['bottom_fractal']['date']
@@ -675,8 +719,15 @@ def monitorFractal(result, symbol, period, closePrice):
             # 当前价格高于底分型的顶
             if closePrice >= price:
                 stopWinCount = calStopWinCount(symbol, period, positionInfo, closePrice)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stopWinCount,
-                                 stop_lose_price)
+                futureCalcObj = {
+                    'maxOrderCount': stopWinCount,
+                    # 'perOrderStopMoney': perOrderStopMoney,
+                    # 'perOrderStopRate': perOrderStopRate,
+                    # 'perOrderMargin': perOrderMargin,
+                    # 'marginRate': margin_rate
+                }
+                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
+                                 stop_lose_price, futureCalcObj)
 
 
 # 计算出开仓手数（止损系数，资金使用率双控）
@@ -694,7 +745,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
         # 1手止损的比率
         perOrderStopRate = (abs(openPrice - stopPrice) / openPrice + digitCoinFee) * 20
         # 1手止损的金额
-        perOrderStopMoney = round((perOrderMargin * perOrderStopRate), 2)
+        perOrderStopMoney = round((perOrderMargin * perOrderStopRate),4)
         maxAccountUse = account * 10000 * 0.4
         maxStopMoney = account * 10000 * 0.1
     # 期货
@@ -774,12 +825,12 @@ def run(**kwargs):
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[5]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[6]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[7]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
 
     # 外盘监控
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
 
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
 
 
 if __name__ == '__main__':

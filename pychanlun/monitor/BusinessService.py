@@ -266,8 +266,8 @@ class BusinessService:
         else:
             query = {'symbol': symbol, 'period': period, 'status': status}
         # 当多空双开锁仓的时候，获取最新持仓的那个
-        result = DBPyChanlun["position_record"].find(
-            query).sort("enterTime", pymongo.ASCENDING)
+        result = DBPyChanlun["future_auto_position"].find(
+            query).sort("fire_time", pymongo.ASCENDING)
         if result.count() > 0:
             for x in result:
                 x['_id'] = str(x['_id'])
@@ -315,7 +315,7 @@ class BusinessService:
             x['_id'] = str(x['_id'])
             x['fire_time'] = self.formatTime(x['fire_time'])
             x['date_created'] = self.formatTime(x['date_created'])
-            if hasattr(x,'last_update_time'):
+            if ('last_update_time' in x and x['last_update_time'] != ''):
                 x['last_update_time'] = self.formatTime(x['last_update_time'])
             else:
                 x['last_update_time'] = ''

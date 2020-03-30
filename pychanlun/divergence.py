@@ -79,13 +79,14 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
 
 def note(divergence_down, divergence_up, bi_series, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel = False):
     data = {
-        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': [], 'stop_win_price': []},
-        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'beichi_price': [], 'stop_win_price': []},
+        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': []},
+        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': []},
     }
     for i in range(len(divergence_down)):
         if divergence_down[i] == 1:
             data['buyMACDBCData']['date'].append(time_series[i])
-            data['buyMACDBCData']['data'].append(diff_series[i])
+            # data属性保持和其他信号统一使用触发背驰的价格 便于前端统一标出开仓横线
+            data['buyMACDBCData']['data'].append(open_series[i])
             if bigLevel:
                 data['buyMACDBCData']['value'].append(signalMap['高级别线底背'])
             else:
@@ -95,7 +96,7 @@ def note(divergence_down, divergence_up, bi_series, duan_series, time_series, hi
                 data['buyMACDBCData']['stop_lose_price'].append(low_series[bottom_index])
             else:
                data['buyMACDBCData']['stop_lose_price'].append(0)
-            data['buyMACDBCData']['beichi_price'].append(open_series[i])
+            data['buyMACDBCData']['diff'].append(diff_series[i])
 
             # 底背驰，往后找第一次成笔的位置
             bi_index = pydash.find_index(bi_series[i:], lambda x: x == 1)
@@ -106,7 +107,7 @@ def note(divergence_down, divergence_up, bi_series, duan_series, time_series, hi
     for i in range(len(divergence_up)):
         if divergence_up[i] == 1:
             data['sellMACDBCData']['date'].append(time_series[i])
-            data['sellMACDBCData']['data'].append(diff_series[i])
+            data['sellMACDBCData']['data'].append(open_series[i])
             if bigLevel:
                 data['sellMACDBCData']['value'].append(signalMap['高级别线顶背'])
             else:
@@ -116,7 +117,7 @@ def note(divergence_down, divergence_up, bi_series, duan_series, time_series, hi
                 data['sellMACDBCData']['stop_lose_price'].append(high_series[top_index])
             else:
                data['sellMACDBCData']['stop_lose_price'].append(0)
-            data['sellMACDBCData']['beichi_price'].append(open_series[i])
+            data['sellMACDBCData']['diff'].append(diff_series[i])
 
             # 顶背驰，往后找第一次成笔的位置
             bi_index = pydash.find_index(bi_series[i:], lambda x: x == -1)
