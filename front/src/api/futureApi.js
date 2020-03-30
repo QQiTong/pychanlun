@@ -16,6 +16,15 @@ export const futureApi = {
             method: 'get',
         })
     },
+
+    // 获取期货合约配置
+    getFutureConfig () {
+        let url = `/api/get_future_config`
+        return axios({
+            url: url,
+            method: 'get',
+        })
+    },
     // 获取主力合约
     dominant () {
         let url = `/api/dominant`

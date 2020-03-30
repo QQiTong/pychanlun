@@ -259,6 +259,10 @@ class BusinessService:
         return symbolListMap
 
     # --------------------期货部份----------------------------------------------
+    # 为了兼容老合约 保证金率不再从主力合约中取了， 直接拿配置信息
+    def getFutureConfig(self):
+        return config['futureConfig']
+
 
     def getPosition(self, symbol, period, status):
         if period == 'all':
@@ -271,6 +275,13 @@ class BusinessService:
         if result.count() > 0:
             for x in result:
                 x['_id'] = str(x['_id'])
+                x['fire_time'] = self.formatTime(x['fire_time'])
+                x['date_created'] = self.formatTime(x['date_created'])
+                if ('last_update_time' in x and x['last_update_time'] != ''):
+                    x['last_update_time'] = self.formatTime(x['last_update_time'])
+                else:
+                    x['last_update_time'] = ''
+                x['stop_lose_price'] = x['stop_lose_price']
             return x
         else:
             return -1
@@ -350,6 +361,8 @@ class BusinessService:
             # 止损已实现盈亏
             x['lose_end_money'] = round(x['per_order_margin'] * x['amount'] * loseEndPercent,2)
             x['lose_end_rate'] = round(loseEndPercent, 2)
+            # 占用保证金
+            x['total_margin'] = round(x['per_order_margin'] * x['amount'],2)
             positionList.append(x)
         positionListResult = {
             'records': positionList,

@@ -89,6 +89,9 @@ def sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, f
 # price 信号触发的价格， close_price 提醒时的收盘价 direction 多B 空S amount 开仓数量
 def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                      stop_lose_price, futureCalcObj):
+    #  后面的存储的数据依赖 futureCalcObj
+    if futureCalcObj == -1:
+        return
     # 更新,实时更新持仓品种的价格
     saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                            stop_lose_price, futureCalcObj, False)
@@ -331,7 +334,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
 
     elif type == "2":
         symbolList = symbolListDigitCoin
-        periodList = periodList1
+        periodList = periodList2
 
     else:
         symbolList = globalFutureSymbol
@@ -347,7 +350,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                     print("current:", symbol, period, datetime.now())
                     result = calc.calcData(period, symbol)
                     close_price = result['close'][-1]
-                    monitorBeichi(result, symbol, period, close_price)
+                    # monitorBeichi(result, symbol, period, close_price)
                     monitorHuila(result, symbol, period, close_price)
                     monitorTupo(result, symbol, period, close_price)
                     monitorVfan(result, symbol, period, close_price)
@@ -636,11 +639,12 @@ temp = {
 def monitorFractal(result, symbol, period, closePrice):
     # 将当前级别的的方向插入到数据库，用于前端展示当前级别的状态
     # 15m向上成笔，代表3F级别多， 15m向下成笔，代表3F级别空
-    levelDirection = result['fractal'][0]['direction']
-    if levelDirection == 1:
-        saveFutureDirection(symbol, period, '多')
-    else:
-        saveFutureDirection(symbol, period, '空')
+    if result['fractal'][0]!={} :
+        levelDirection = result['fractal'][0]['direction']
+        if levelDirection == 1:
+            saveFutureDirection(symbol, period, '多')
+        else:
+            saveFutureDirection(symbol, period, '空')
     signal = 'fractal'
     # 查询数据库该品种是否有持仓
     positionInfo = businessService.getPosition(symbol, period, 'holding')
@@ -651,7 +655,7 @@ def monitorFractal(result, symbol, period, closePrice):
     if direction == 'long':
         # 多单查找向上笔的顶分型
         # 高级别
-        if result['fractal'][0]['direction'] == 1:
+        if result['fractal'][0]!={} and result['fractal'][0]['direction'] == 1:
             fire_time = result['fractal'][0]['top_fractal']['date']
             price = result['fractal'][0]['top_fractal']['bottom']
             stop_lose_price = result['fractal'][0]['top_fractal']['top']
@@ -670,7 +674,7 @@ def monitorFractal(result, symbol, period, closePrice):
                 saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
                                  stop_lose_price,futureCalcObj)
         # 高高级别
-        if result['fractal'][1]['direction'] == 1:
+        if result['fractal'][1]!={} and result['fractal'][1]['direction'] == 1:
             fire_time = result['fractal'][1]['top_fractal']['date']
             price = result['fractal'][1]['top_fractal']['bottom']
             stop_lose_price = result['fractal'][1]['top_fractal']['top']
@@ -691,7 +695,7 @@ def monitorFractal(result, symbol, period, closePrice):
     else:
         # 空单查找向下笔的底分型
         # 高级别
-        if result['fractal'][0]['direction'] == -1:
+        if result['fractal'][0]!={} and result['fractal'][0]['direction'] == -1:
             fire_time = result['fractal'][0]['bottom_fractal']['date']
             price = result['fractal'][0]['bottom_fractal']['top']
             stop_lose_price = result['fractal'][0]['bottom_fractal']['bottom']
@@ -710,7 +714,7 @@ def monitorFractal(result, symbol, period, closePrice):
                 saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
                                  stop_lose_price, futureCalcObj)
         # 高高级别
-        if result['fractal'][1]['direction'] == -1:
+        if result['fractal'][1]!={} and result['fractal'][1]['direction'] == -1:
             fire_time = result['fractal'][1]['bottom_fractal']['date']
             price = result['fractal'][1]['bottom_fractal']['top']
             stop_lose_price = result['fractal'][1]['bottom_fractal']['bottom']
@@ -794,7 +798,7 @@ def calStopWinCount(symbol, period, positionInfo, closePrice):
     # 该品种有持仓
     open_pos_price = positionInfo['price']
     open_pos_amount = positionInfo['amount']
-    stop_lose_price = positionInfo['stopLosePrice']
+    stop_lose_price = positionInfo['stop_lose_price']
     stop_win_price = closePrice
     winLoseRate = round(abs(stop_win_price - open_pos_price) /
                         abs(open_pos_price - stop_lose_price), 2)
@@ -830,7 +834,7 @@ def run(**kwargs):
     # 外盘监控
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
 
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
 
 
 if __name__ == '__main__':

@@ -301,6 +301,7 @@
                     <el-link
                         type="primary"
                         :underline="false"
+                        @click="handleJumpToKline(row)"
                     >{{ row.symbol }}
                     </el-link>
                     <!-- todo                      @click="handleJumpToKline(row)"-->
@@ -357,7 +358,9 @@
                 <!--                    <el-tag :type="row.total_profit | percentTagFilter">{{row.total_profit}}</el-tag>-->
                 <!--                </template>-->
             </el-table-column>
-
+            <el-table-column label="保证金" width="80" align="center">
+                <template slot-scope="{row}">{{row.total_margin}}</template>
+            </el-table-column>
             <el-table-column label="止损价" width="80" align="center">
                 <template slot-scope="{row}">{{row.stop_lose_price}}</template>
             </el-table-column>
@@ -376,20 +379,20 @@
             </el-table-column>
             <el-table-column label="已止损比率" prop="lose_end_rate" width="110" align="center">
                 <template slot-scope="{row}">
-                    {{row.status==='loseEnd'?row.lose_end_rate * 100+'%':0}}
+                    {{row.status==='loseEnd'?(row.lose_end_rate * 100).toFixed(0)+'%':0}}
                 </template>
             </el-table-column>
 
             <el-table-column label="已盈利额" width="110" align="center">
                 <template slot-scope="{row}">
                     <el-tag :type="row.win_end_money|percentTagFilter">
-                    {{row.status ==='winEnd'?row.win_end_money:0}}
+                        {{row.status ==='winEnd'?row.win_end_money:0}}
                     </el-tag>
                 </template>
             </el-table-column>
             <el-table-column label="已盈利比率" prop="win_end_rate" width="110" align="center">
                 <template slot-scope="{row}">
-                    {{row.status==='winEnd'?row.win_end_rate * 100+'%':0}}
+                    {{row.status==='winEnd'?(row.win_end_rate * 100).toFixed(0)+'%':0}}
                 </template>
             </el-table-column>
             <el-table-column
@@ -421,7 +424,7 @@
             <el-table-column label="最后更新时间" prop="last_update_time" align="center" width="150"/>
             <el-table-column label="最后更新信号" prop="last_update_signal" align="center" width="100"/>
             <el-table-column label="最后更新周期" prop="last_update_period" align="center" width="100"/>
-             <el-table-column label="操作状态"  align="center">
+            <el-table-column label="操作状态" align="center">
                 <template slot-scope="{row}">
                     <el-select
                         v-model="row.status"
@@ -438,11 +441,11 @@
                     </el-select>
                 </template>
             </el-table-column>
-<!--            <el-table-column label="操作" align="center">-->
-<!--                <template slot-scope="{row,$index}">-->
-<!--                    &lt;!&ndash;          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>&ndash;&gt;-->
-<!--                </template>-->
-<!--            </el-table-column>-->
+            <!--            <el-table-column label="操作" align="center">-->
+            <!--                <template slot-scope="{row,$index}">-->
+            <!--                    &lt;!&ndash;          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>&ndash;&gt;-->
+            <!--                </template>-->
+            <!--            </el-table-column>-->
         </el-table>
         <el-pagination
             background
@@ -569,6 +572,7 @@
         },
         data() {
             return {
+                futureConfig: {},
                 rateColors: ["#99A9BF", "#F7BA2A", "#FF9900"],
                 tableKey: 0,
                 listLoading: false,
@@ -579,7 +583,7 @@
                 },
                 // 分页对象
                 listQuery: {
-                    size: 10,
+                    size: 50,
                     total: 0,
                     current: 1
                 },
@@ -652,18 +656,17 @@
             };
         },
         mounted() {
-            this.getPositionList(
-                this.positionQueryForm.status,
-                this.listQuery.current,
-                this.listQuery.size
-            );
-            setInterval(() => {
+            let symbolConfig = window.localStorage.getItem('symbolConfig')
+            if (symbolConfig !== null) {
+                this.futureConfig = JSON.parse(symbolConfig)
                 this.getPositionList(
                     this.positionQueryForm.status,
                     this.listQuery.current,
                     this.listQuery.size
                 );
-            }, 5000)
+            }
+            // 静默更新合约配置
+            this.getFutureConfig()
         },
         methods: {
             // calcWinEndRate(row) {
@@ -679,6 +682,23 @@
             //         ).toFixed(2);
             //     }
             // },
+            getFutureConfig() {
+                futureApi.getFutureConfig().then(res => {
+                    console.log('合约配置信息:', res)
+                    this.futureConfig = res
+                    window.localStorage.setItem('symbolConfig', JSON.stringify(this.futureConfig))
+                    setInterval(() => {
+                        this.getPositionList(
+                            this.positionQueryForm.status,
+                            this.listQuery.current,
+                            this.listQuery.size
+                        );
+                    }, 5000)
+
+                }).catch((error) => {
+                    console.log('获取合约配置失败:', error)
+                })
+            },
             // 计算盈亏比
             calcWinLoseRate(row) {
                 let profitRate = this.calcProfitRate(row);
@@ -692,44 +712,38 @@
             // 计算止损率
             calcStopLoseRate(row) {
                 return row.per_order_stop_rate * 100
-                // if (this.changeList != null) {
-                //   // let futureInfo = this.futureSymbolMap[row.symbol];
-                //   let marginLevel = Number(
-                //     (1 / (row.margin_rate + this.marginLevelCompany)).toFixed(2)
-                //   );
-                //   return Math.abs(
-                //     ((row.stopLosePrice - row.price) / row.price) * 100 * marginLevel
-                //   ).toFixed(2);
-                // } else {
-                //   return "获取中";
-                // }
             },
             //  计算收益率
             calcProfitRate(row) {
-                if (this.futureSymbolMap && this.futureSymbolMap[row.symbol]) {
-                    // let futureInfo = this.futureSymbolMap[row.symbol];
-                    let marginLevel = Number(
-                        (1 / (this.futureSymbolMap[row.symbol].margin_rate + this.marginLevelCompany)).toFixed(2)
-                    );
-                    let currentPercent = 0;
-                    if (row.direction === "long") {
-                        currentPercent = (
-                            ((row.close_price - row.price) / row.price) *
-                            100 *
-                            marginLevel
-                        ).toFixed(2);
-                    } else {
-                        currentPercent = (
-                            ((row.price - row.close_price) /
-                                row.close_price) *
-                            100 *
-                            marginLevel
-                        ).toFixed(2);
-                    }
-                    return currentPercent;
+                let marginLevel = 1
+                if (row.symbol === 'BTC') {
+                    // BTC
+                    marginLevel = 1 / this.futureConfig[row.symbol].margin_rate
+                } else if (row.symbol.indexOf('sz') !== -1 || row.symbol.indexOf('sh') !== -1) {
+                    marginLevel = 1
                 } else {
-                    return "获取中";
+                    // 期货简单代码   RB
+                    let simpleSymbol = row.symbol.replace(/[0-9]/g, '')
+                    const margin_rate = this.futureConfig[simpleSymbol].margin_rate
+                    let currentMarginRate = margin_rate + this.marginLevelCompany
+                    marginLevel = Number((1 / (currentMarginRate)).toFixed(2))
                 }
+                let currentPercent = 0;
+                if (row.direction === "long") {
+                    currentPercent = (
+                        ((row.close_price - row.price) / row.price) *
+                        100 *
+                        marginLevel
+                    ).toFixed(2);
+                } else {
+                    currentPercent = (
+                        ((row.price - row.close_price) /
+                            row.close_price) *
+                        100 *
+                        marginLevel
+                    ).toFixed(2);
+                }
+                return currentPercent;
             },
             changeStatus(id, status, close_price) {
                 console.log(id, status);
@@ -749,12 +763,11 @@
                     });
             },
             tableRowClassName({row, rowIndex}) {
-                if (row.status !== 'holding') {
+                if (row.status === 'loseEnd') {
                     return "warning-row";
+                } else if (row.status === 'winEnd') {
+                    return 'success-row';
                 }
-                // else {
-                //   return 'warning-row';
-                // }
                 return "";
             },
             handleSizeChange(currentSize) {
@@ -787,17 +800,20 @@
                 console.log(this.$parent);
                 // this.$parent.jumpToKline(symbol)
                 // 结束状态 k线页面不获取持仓信息
-                if (row.status !== "winEnd" && row.status !== "loseEnd") {
-                    let routeUrl = this.$router.resolve({
-                        path: "/multi-period",
-                        query: {
-                            symbol: row.symbol,
-                            isPosition: true,
-                            endDate: CommonTool.dateFormat("yyyy-MM-dd")
-                        }
-                    });
-                    window.open(routeUrl.href, "_blank");
-                }
+                // if (row.status !== "winEnd" && row.status !== "loseEnd") {
+                let routeUrl = this.$router.resolve({
+                    path: "/multi-period",
+                    query: {
+                        symbol: row.symbol,
+                        isPosition: true,           //是否持过仓
+                        positionPeriod: row.period, // 开仓周期
+                        positionDirection: row.direction,// 持仓方向
+                        positionStatus: row.status,  // 当前状态
+                        endDate: CommonTool.dateFormat("yyyy-MM-dd")
+                    }
+                });
+                window.open(routeUrl.href, "_blank");
+                // }
             },
             getPositionList(status, page, size) {
                 // this.positionList = [];
@@ -953,6 +969,8 @@
                 const sums = [];
                 let stopSum = 0
                 let currentProfitSum = 0
+                //占用保证金
+                let totalMargin = 0
                 // 已止损
                 let loseEndSum = 0
                 // 已盈利
@@ -967,27 +985,27 @@
                     }
                     // console.log("--", data, index)
                     // 累加 预计止损
-                    if (index === 12) {
+                    if (index === 13) {
                         data.forEach((item) => {
                             stopSum += item.predict_stop_money
                         })
-                        sums[12] = stopSum.toFixed(2)
-                    } else if (index === 13) {
+                        sums[13] = stopSum.toFixed(2)
+                    } else if (index === 14) {
                         // 累加已止损
                         data.forEach((item) => {
                             if (item.status === 'loseEnd') {
                                 loseEndSum += item.lose_end_money
                             }
                         })
-                        sums[13] = loseEndSum.toFixed(2)
-                    } else if (index === 15) {
+                        sums[14] = loseEndSum.toFixed(2)
+                    } else if (index === 16) {
                         // 累加已盈利
                         data.forEach((item) => {
                             if (item.status === 'winEnd') {
                                 winEndSum += item.win_end_money
                             }
                         })
-                        sums[15] = winEndSum.toFixed(2)
+                        sums[16] = winEndSum.toFixed(2)
                     } else if (index === 9) {
                         // 累加当前盈利
                         data.forEach((item) => {
@@ -997,6 +1015,15 @@
                             }
                         })
                         sums[9] = currentProfitSum.toFixed(2)
+                    } else if (index === 10) {
+                        // 累加当前盈利
+                        data.forEach((item) => {
+                            // 只累加还在持仓中的
+                            if (item.status === 'holding') {
+                                totalMargin += item.total_margin
+                            }
+                        })
+                        sums[10] = totalMargin.toFixed(2)
                     } else {
                         sums[index] = ''
                     }

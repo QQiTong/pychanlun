@@ -117,6 +117,7 @@ export default {
             // start用于仓位管理计算
             currentSymbol: null,
             currentMarginRate: null,
+            marginLevel: 1,
             // 合约乘数
             contractMultiplier: 1,
             // 账户总额
@@ -205,7 +206,9 @@ export default {
             dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
             currentInfo: null,
             // 数字货币讲240m 替换成1m
-            isDigitCoin: false
+            isDigitCoin: false,
+            futureConfig: {},
+
         }
     },
     beforeMount() {
@@ -222,7 +225,11 @@ export default {
         this.period = this.getParams('period')
         this.isPosition = this.getParams('isPosition')
         this.endDate = this.getParams('endDate')
+
         if (this.isPosition === 'true') {
+            this.positionPeriod = this.getParams('positionPeriod')
+            this.positionDirection = this.getParams('positionDirection')
+            this.positionStatus = this.getParams('positionStatus')
             if (this.symbol.indexOf('sz') !== -1 || this.symbol.indexOf('sh') !== -1) {
                 this.getStockPosition()
             } else {
@@ -231,20 +238,17 @@ export default {
         }
         this.initEcharts()
         // 取出本地缓存
-        let symbolList = window.localStorage.getItem('symbolList')
-        // 本地缓存有主力合约数据
-        if (symbolList != null) {
-            this.futureSymbolList = JSON.parse(symbolList)
-            this.futureSymbolMap = {}
-            for (let i = 0; i < this.futureSymbolList.length - 1; i++) {
-                let symbolItem = this.futureSymbolList[i]
-                this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
-            }
+        let futureConfig = window.localStorage.getItem('futureConfig')
+        // 本地缓存有合约配置数据
+        if (futureConfig != null) {
+            this.futureConfig = JSON.parse(futureConfig)
             this.requestSymbolData()
         } else {
-            // 新设备 直接进入大图页面 先获取主力合约数据
-            this.getDominantSymbol()
+            // 新设备 直接进入大图页面 先获取合约配置数据
+
+            this.getFutureConfig()
         }
+
     },
     beforeDestroy() {
         clearTimeout(this.timer)
@@ -263,11 +267,11 @@ export default {
             this.submitSymbol()
         },
         getFutruePosition() {
-            let period = 'all'
+            // let period = 'all'
             // if (this.period !== "") {
             //     period = this.period
             // }
-            futureApi.getPosition(this.symbol, period, this.positionStatus).then(res => {
+            futureApi.getPosition(this.symbol, this.positionPeriod, this.positionStatus).then(res => {
                 this.currentPosition = res
                 console.log('获取当前品种持仓:', res)
             }).catch((error) => {
@@ -406,7 +410,10 @@ export default {
                         symbol: this.symbol,
                         period: period,
                         isPosition: 'true',
-                        endDate: this.endDate
+                        endDate: this.endDate,
+                        positionPeriod: this.positionPeriod,
+                        positionDirection: this.positionDirection,
+                        positionStatus: this.positionStatus,
                     }
                 })
             } else {
@@ -454,6 +461,37 @@ export default {
                     // console.log('wait...')
                 }
             }, 10000)
+        },
+        getFutureConfig() {
+            futureApi.getFutureConfig().then(res => {
+                console.log('合约配置信息:', res)
+                this.futureConfig = res
+                // 获取当前品种的合约 保证金率
+                if (this.symbol === 'BTC') {
+                    // BTC
+                    this.symbolInfo = this.futureConfig[this.symbol]
+                    this.currentMarginRate = this.symbolInfo.margin_rate
+                    this.marginLevel = 1 / this.currentMarginRate
+                    this.contractMultiplier = 1
+                } else if (this.symbol.indexOf('sz') !== -1 || this.symbol.indexOf('sh') !== -1) {
+                    this.currentMarginRate = 1
+                    this.marginLevel = 1
+                    this.contractMultiplier = 1
+                } else {
+                    // 期货简单代码   RB
+                    let simpleSymbol = this.symbol.replace(/[0-9]/g, '')
+                    this.symbolInfo = this.futureConfig[simpleSymbol]
+                    const margin_rate = this.symbolInfo.margin_rate
+                    this.currentMarginRate = margin_rate + this.marginLevelCompany
+                    this.marginLevel = Number((1 / this.currentMarginRate).toFixed(2))
+                    this.contractMultiplier = this.symbolInfo.contract_multiplier
+                }
+                window.localStorage.setItem('symbolConfig', JSON.stringify(this.futureConfig))
+                this.requestSymbolData()
+            }).catch((error) => {
+                this.requestFlag = true
+                console.log('获取合约配置失败:', error)
+            })
         },
         getDominantSymbol() {
             let that = this
@@ -585,8 +623,8 @@ export default {
 
             futureApi.stockData(requestData).then(res => {
                 // 如果之前请求的symbol 和当前的symbol不一致，直接过滤
-                if (res && (res.symbol !== this.symbol || res.endDate !== this.endDate)) {
-                    console.log('symbol或结束日期不一致，过滤掉之前的请求')
+                if (res && (res.symbol !== this.symbol || res.endDate !== this.endDate || res.period !== requestData.period)) {
+                    console.log('symbol或period结束日期不一致，过滤掉之前的请求')
                     return
                 }
                 this.requestFlag = true
@@ -638,17 +676,7 @@ export default {
             let zoomStart = 55
             const resultData = this.splitData(stockJsonData, period)
             let dataTitle = that.symbol + '  ' + period
-            const margin_rate = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].margin_rate || 1
-            let marginLevel
-            if (this.symbol.indexOf('BTC') === -1) {
-                marginLevel = (1 / (margin_rate + this.marginLevelCompany)).toFixed(2)
-            } else {
-                marginLevel = this.digitCoinLevel
-            }
-
-            const trading_hours = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].trading_hours
-            const maturity_date = that.futureSymbolMap[that.symbol] && that.futureSymbolMap[that.symbol].maturity_date
-            let subText = '杠杆: ' + marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
+            let subText = '杠杆: ' + this.marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
                 this.currentInfo
             let currentChart
             // if (period === '1m') {
@@ -1987,20 +2015,11 @@ export default {
             let markLineData = []
             let lastBeichiType = this.getLastBeichiData(jsonObj)
             let lastBeichi = null
-            const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
-            let marginLevel
-            if (this.symbol.indexOf('BTC') === -1) {
-                marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
-            } else {
-                marginLevel = this.digitCoinLevel
-            }
             // 当前价格
             let currentPrice = jsonObj.close[jsonObj.close.length - 1]
-            // 合约乘数
-            this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1
             // 1手需要的保证金
             if (this.symbol.indexOf('BTC') === -1) {
-                this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
+                this.marginPrice = (this.contractMultiplier * currentPrice / this.marginLevel).toFixed(2)
             } else {
                 this.marginPrice = (0.01 * currentPrice).toFixed(2)
             }
@@ -2087,24 +2106,22 @@ export default {
                 if (lastBeichiType === 1 || lastBeichiType === 2 || lastBeichiType === 5 || lastBeichiType === 6 ||
                     lastBeichiType === 9 || lastBeichiType === 10 || lastBeichiType === 13 || lastBeichiType === 14 || lastBeichiType === 17) {
                     targetPrice = beichiPrice + diffPrice
-                    currentPercent = ((currentPrice - beichiPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                    currentPercent = ((currentPrice - beichiPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
-                        stopWinPercent = ((stopWinPrice - beichiPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                        stopWinPercent = ((stopWinPrice - beichiPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                     }
                 } else {
                     targetPrice = beichiPrice - diffPrice
-                    currentPercent = ((beichiPrice - currentPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                    currentPercent = ((beichiPrice - currentPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
-                        stopWinPercent = ((beichiPrice - stopWinPrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                        stopWinPercent = ((beichiPrice - stopWinPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                     }
                 }
-                let targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * marginLevel).toFixed(2)
+                let targetPercent = (Math.abs(beichiPrice - stopLosePrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                 // 准备参数
                 this.openPrice = beichiPrice
                 this.stopPrice = stopLosePrice
                 // 当前保证金比例
-                const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
-                this.currentMarginRate = margin_rate + this.marginLevelCompany
                 this.currentSymbol = this.symbol
                 // 计算开仓手数
                 this.calcAccount(currentPrice)
@@ -2190,7 +2207,7 @@ export default {
                 let higherHigherBottomPrice = 0
                 let higherTopPrice = 0
                 let higherHigherTopPrice = 0
-                if (jsonObj['fractal'][0]['direction'] === 1) {
+                if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === 1) {
                     higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
                     // 高级别分型线
                     let markLineFractal = {
@@ -2214,7 +2231,7 @@ export default {
                     }
                     markLineData.push(markLineFractal)
                 }
-                if (jsonObj['fractal'][1]['direction'] === 1) {
+                if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === 1) {
                     higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
                     // 高高级别分型线
                     let markLineFractal = {
@@ -2240,7 +2257,7 @@ export default {
                 }
 
                 // 空单查找底分型
-                if (jsonObj['fractal'][0]['direction'] === -1) {
+                if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === -1) {
                     higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
                     // 高级别分型线
                     let markLineFractal = {
@@ -2264,7 +2281,7 @@ export default {
                     }
                     markLineData.push(markLineFractal)
                 }
-                if (jsonObj['fractal'][1]['direction'] === -1) {
+                if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === -1) {
                     higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
                     // 高高级别分型线
                     let markLineFractal = {
@@ -2297,40 +2314,31 @@ export default {
          */
         getPositionMarklineData(jsonObj) {
             let markLineData = []
-
             // 开仓价格
             let openPrice = this.currentPosition.price
             let openAmount = this.currentPosition.amount
             let direction = this.currentPosition.direction
-            const margin_rate = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].margin_rate || 1
-            let marginLevel
-            if (this.symbol.indexOf('BTC') === -1) {
-                marginLevel = Number((1 / (margin_rate + this.marginLevelCompany)).toFixed(2))
-            } else {
-                marginLevel = this.digitCoinLevel
-            }
-
             // 当前价格
             let currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
-            this.contractMultiplier = this.futureSymbolMap[this.symbol] && this.futureSymbolMap[this.symbol].contract_multiplier || 1
+
             // 1手需要的保证金
             if (this.symbol.indexOf('BTC') === -1) {
-                this.marginPrice = (this.contractMultiplier * currentPrice / marginLevel).toFixed(0)
+                this.marginPrice = (this.contractMultiplier * currentPrice / this.marginLevel).toFixed(2)
             } else {
                 this.marginPrice = 0.01 * currentPrice
             }
             // 止损价格
-            let stopLosePrice = this.currentPosition.stopLosePrice
+            let stopLosePrice = this.currentPosition.stop_lose_price
             // 当前盈利百分比
             let currentPercent = ''
             if (direction === 'long') {
-                currentPercent = ((currentPrice - openPrice) / openPrice * 100 * marginLevel).toFixed(2)
+                currentPercent = ((currentPrice - openPrice) / openPrice * 100 * this.marginLevel).toFixed(2)
             } else {
-                currentPercent = ((openPrice - currentPrice) / openPrice * 100 * marginLevel).toFixed(2)
+                currentPercent = ((openPrice - currentPrice) / openPrice * 100 * this.marginLevel).toFixed(2)
             }
             // 止损百分比
-            let stopLosePercent = (Math.abs(openPrice - stopLosePrice) / stopLosePrice * 100 * marginLevel).toFixed(2)
+            let stopLosePercent = (Math.abs(openPrice - stopLosePrice) / stopLosePrice * 100 * this.marginLevel).toFixed(2)
             // 如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
             this.currentInfo = '新: ' + currentPrice.toFixed(2)
             let markLineCurrent = {
@@ -2398,35 +2406,35 @@ export default {
             markLineData.push(markLineStop)
 
             // 动止记录
-            for (let i = 0; i < this.currentPosition.dynamicPositionList.length; i++) {
-                // 数量
-                let dynamicItem = this.currentPosition.dynamicPositionList[i]
-                // let dynamicPercent = (Math.abs(dynamicItem.price - openPrice) / openPrice * 100 * marginLevel).toFixed(2)
-                let dynamicAmount = dynamicItem.amount
-                let direction = this.dynamicDirectionMap[dynamicItem.direction]
-                let markLineObj = {
-                    yAxis: dynamicItem.price,
-                    lineStyle: {
-                        normal: {
-                            opacity: 1,
-                            type: 'dashed',
-                            width: 1,
-                            color: this.echartsConfig.dynamicOpertionColor
-                        },
-                    },
-                    label: {
-                        normal: {
-                            color: this.echartsConfig.dynamicOpertionColor,
-                            formatter: '动: ' + dynamicItem.price + ' ' + direction + ' ' + dynamicAmount + '手',
-                        }
-                    },
-                    symbol: 'circle',
-                    symbolSize: 1
-                }
-                markLineData.push(markLineObj)
-            }
+            // for (let i = 0; i < this.currentPosition.dynamicPositionList.length; i++) {
+            //     // 数量
+            //     let dynamicItem = this.currentPosition.dynamicPositionList[i]
+            //     // let dynamicPercent = (Math.abs(dynamicItem.price - openPrice) / openPrice * 100 * marginLevel).toFixed(2)
+            //     let dynamicAmount = dynamicItem.amount
+            //     let direction = this.dynamicDirectionMap[dynamicItem.direction]
+            //     let markLineObj = {
+            //         yAxis: dynamicItem.price,
+            //         lineStyle: {
+            //             normal: {
+            //                 opacity: 1,
+            //                 type: 'dashed',
+            //                 width: 1,
+            //                 color: this.echartsConfig.dynamicOpertionColor
+            //             },
+            //         },
+            //         label: {
+            //             normal: {
+            //                 color: this.echartsConfig.dynamicOpertionColor,
+            //                 formatter: '动: ' + dynamicItem.price + ' ' + direction + ' ' + dynamicAmount + '手',
+            //             }
+            //         },
+            //         symbol: 'circle',
+            //         symbolSize: 1
+            //     }
+            //     markLineData.push(markLineObj)
+            // }
 
-            // 兼容股票
+            // 兼容股票  111
             if (!jsonObj['fractal']) {
                 return markLineData
             }
@@ -2434,10 +2442,9 @@ export default {
             let higherHigherBottomPrice = 0
             let higherTopPrice = 0
             let higherHigherTopPrice = 0
-            console.log('分型', direction === 'long', jsonObj['fractal'][0]['direction'], jsonObj['fractal'][0]['top_fractal']['bottom'])
             //  多单查找顶型
             if (direction === 'long') {
-                if (jsonObj['fractal'][0]['direction'] === 1) {
+                if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === 1) {
                     higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
                     // 高级别分型线
                     let markLineFractal = {
@@ -2461,7 +2468,7 @@ export default {
                     }
                     markLineData.push(markLineFractal)
                 }
-                if (jsonObj['fractal'][1]['direction'] === 1) {
+                if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === 1) {
                     higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
                     // 高高级别分型线
                     let markLineFractal = {
@@ -2487,7 +2494,7 @@ export default {
                 }
             } else {
                 // 空单查找底分型
-                if (jsonObj['fractal'][0]['direction'] === -1) {
+                if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === -1) {
                     higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
                     // 高级别分型线
                     let markLineFractal = {
@@ -2511,7 +2518,7 @@ export default {
                     }
                     markLineData.push(markLineFractal)
                 }
-                if (jsonObj['fractal'][1]['direction'] === -1) {
+                if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === -1) {
                     higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
                     // 高高级别分型线
                     let markLineFractal = {

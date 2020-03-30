@@ -112,7 +112,6 @@ export default {
             // 动态止盈手数
             dynamicWinCount: 0,
             // end仓位管理计算
-
             digitCoinsSymbolList: [{
                 contract_multiplier: 1,
                 de_listed_date: 'forever',
