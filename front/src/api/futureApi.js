@@ -90,8 +90,8 @@ export const futureApi = {
         })
     },
     // 查询持仓列表
-    getPositionList (status, page, size) {
-        let url = `/api/get_position_list?status=${status}&page=${page}&size=${size}`
+    getPositionList (status, page, size,endDate) {
+        let url = `/api/get_position_list?status=${status}&page=${page}&size=${size}&endDate=${endDate}`
         return axios({
             url: url,
             method: 'get'

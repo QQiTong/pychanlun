@@ -17,6 +17,18 @@
                         :value="item.key"
                     />
                 </el-select>
+                <el-date-picker
+                    v-model="endDate"
+                    type="date"
+                    placeholder="选择日期"
+                    format="yyyy 年 MM 月 dd 日"
+                    value-format="yyyy-MM-dd"
+                    size="mini"
+                    @change="getPositionList()"
+                    class="ml-5 mr-5">
+                </el-date-picker>
+                <el-button @click="quickSwitchDay('pre')" size="mini">前一天</el-button>
+                <el-button @click="quickSwitchDay('next')" size="mini">后一天</el-button>
             </el-form-item>
             <!--      <el-form-item>-->
             <!--        <el-button-->
@@ -362,7 +374,11 @@
                 <template slot-scope="{row}">{{row.total_margin}}</template>
             </el-table-column>
             <el-table-column label="止损价" width="80" align="center">
-                <template slot-scope="{row}">{{row.stop_lose_price}}</template>
+                <template slot-scope="{row}">
+                    <el-tag type="warning">
+                        {{row.stop_lose_price}}
+                    </el-tag>
+                </template>
             </el-table-column>
             <el-table-column label="止损率" width="80" align="center">
                 <template slot-scope="{row}">-{{calcStopLoseRate(row).toFixed(2)}}%</template>
@@ -564,14 +580,11 @@
                 type: Object,
                 default: null
             },
-            changeList: {
-                type: Object,
-                default: null
-            },
             marginLevelCompany: 0
         },
         data() {
             return {
+                endDate: CommonTool.dateFormat('yyyy-MM-dd'),
                 futureConfig: {},
                 rateColors: ["#99A9BF", "#F7BA2A", "#FF9900"],
                 tableKey: 0,
@@ -659,11 +672,7 @@
             let symbolConfig = window.localStorage.getItem('symbolConfig')
             if (symbolConfig !== null) {
                 this.futureConfig = JSON.parse(symbolConfig)
-                this.getPositionList(
-                    this.positionQueryForm.status,
-                    this.listQuery.current,
-                    this.listQuery.size
-                );
+                this.getPositionList();
             }
             // 静默更新合约配置
             this.getFutureConfig()
@@ -682,17 +691,25 @@
             //         ).toFixed(2);
             //     }
             // },
+            quickSwitchDay(type) {
+                let tempDate = this.endDate.replace(/-/g, '/')
+                let date = new Date(tempDate)
+                let preDay = date.getTime() - 3600 * 1000 * 24
+                let nextDay = date.getTime() + 3600 * 1000 * 24
+                if (type === 'pre') {
+                    this.endDate = CommonTool.parseTime(preDay, '{y}-{m}-{d}')
+                } else {
+                    this.endDate = CommonTool.parseTime(nextDay, '{y}-{m}-{d}')
+                }
+                this.getPositionList();
+            },
             getFutureConfig() {
                 futureApi.getFutureConfig().then(res => {
                     console.log('合约配置信息:', res)
                     this.futureConfig = res
                     window.localStorage.setItem('symbolConfig', JSON.stringify(this.futureConfig))
                     setInterval(() => {
-                        this.getPositionList(
-                            this.positionQueryForm.status,
-                            this.listQuery.current,
-                            this.listQuery.size
-                        );
+                        this.getPositionList();
                     }, 5000)
 
                 }).catch((error) => {
@@ -751,11 +768,7 @@
                     .updatePositionStatus(id, status, close_price)
                     .then(res => {
                         if (res.code === "ok") {
-                            this.getPositionList(
-                                this.positionQueryForm.status,
-                                this.listQuery.current,
-                                this.listQuery.size
-                            );
+                            this.getPositionList();
                         }
                     })
                     .catch(error => {
@@ -772,26 +785,14 @@
             },
             handleSizeChange(currentSize) {
                 this.listQuery.size = currentSize;
-                this.getPositionList(
-                    this.positionQueryForm.status,
-                    this.listQuery.current,
-                    this.listQuery.size
-                );
+                this.getPositionList();
             },
             handlePageChange(currentPage) {
                 this.listQuery.current = currentPage;
-                this.getPositionList(
-                    this.positionQueryForm.status,
-                    this.listQuery.current,
-                    this.listQuery.size
-                );
+                this.getPositionList();
             },
             handleQueryStatusChange() {
-                this.getPositionList(
-                    this.positionQueryForm.status,
-                    this.listQuery.current,
-                    this.listQuery.size
-                );
+                this.getPositionList();
             },
             filterTags(value, row) {
                 return row.status === value;
@@ -815,11 +816,13 @@
                 window.open(routeUrl.href, "_blank");
                 // }
             },
-            getPositionList(status, page, size) {
+            getPositionList() {
                 // this.positionList = [];
                 // this.listLoading = true;
                 futureApi
-                    .getPositionList(status, page, size)
+                    .getPositionList(this.positionQueryForm.status,
+                        this.listQuery.current,
+                        this.listQuery.size, this.endDate)
                     .then(res => {
                         this.listLoading = false;
                         this.listQuery.total = res.total;
@@ -898,11 +901,7 @@
                                     duration: 2000
                                 });
                                 // 拉取后端接口获取最新持仓列表
-                                this.getPositionList(
-                                    this.positionQueryForm.status,
-                                    this.listQuery.current,
-                                    this.listQuery.size
-                                );
+                                this.getPositionList();
                             })
                             .catch(error => {
                                 this.submitBtnLoading = false;
@@ -942,11 +941,7 @@
                                     duration: 2000
                                 });
                                 // 拉取后端接口获取最新持仓列表
-                                this.getPositionList(
-                                    this.positionQueryForm.status,
-                                    this.listQuery.current,
-                                    this.listQuery.size
-                                );
+                                this.getPositionList();
                             })
                             .catch(error => {
                                 this.submitBtnLoading = false;

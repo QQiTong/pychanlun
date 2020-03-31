@@ -57,7 +57,8 @@ config = {
         # "L",
         "P",
         "RM",
-        "Y"
+        "Y",
+        "JD"
     ],
     # 商品期货保证金率一般固定，只有过节会变下。因为换合约期间需要拿到老合约保证金率，因此保存起来
     'futureConfig': {
@@ -84,6 +85,8 @@ config = {
         'P': {'margin_rate': 0.07, 'contract_multiplier': 10},
         'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'Y': {'margin_rate': 0.06, 'contract_multiplier': 10},
+        'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'CL': {'margin_rate': 1, 'contract_multiplier': 1},
         'GC': {'margin_rate': 1, 'contract_multiplier': 1},

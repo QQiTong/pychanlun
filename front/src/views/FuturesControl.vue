@@ -71,7 +71,6 @@
         <FuturePositionList
             :futureSymbolList="futureSymbolList"
             :futureSymbolMap="futureSymbolMap"
-            :changeList="changeList"
             :marginLevelCompany="marginLevelCompany"
         />
         <el-divider content-position="center">信号列表 | 多空分布 | 内盘 | 外盘</el-divider>

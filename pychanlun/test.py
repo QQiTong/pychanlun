@@ -179,9 +179,11 @@ def testTime():
 
 def testTime2():
 
-    str = '2019-12-30 09:00'
-    date = time.strptime(str,"%Y-%m-%d %H:%M")
-    print(time.mktime(date))
+    # str = '2019-12-30 09:00'
+    # date = time.strptime(str,"%Y-%m-%d %H:%M")
+    # print(time.mktime(date))
+    timeStr = datetime.strftime(datetime.now(),'%Y-%m-%d')
+    print(timeStr)
 
 
 def getBtcData(period):
@@ -599,9 +601,9 @@ def app():
     # testOkexTiker()
     # testChaji()
     # testGlobalChangeList()
-    # testTime2()
+    testTime2()
     # testMail()
-    testDingDing()
+    # testDingDing()
 
 if __name__ == '__main__':
     app()

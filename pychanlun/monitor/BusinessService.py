@@ -13,6 +13,7 @@ import pandas as pd
 from bson import ObjectId
 import time
 import requests
+import copy
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -124,9 +125,8 @@ class BusinessService:
             return self.getStrategy4BeichiList()
 
     def getNormalSignalList(self):
-        symbolList = dominantSymbolList
+        symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
-
         symbolList.extend(otherSymbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
@@ -152,7 +152,8 @@ class BusinessService:
         return symbolListMap
 
     def getStrategy3BeichiList(self):
-        symbolList = dominantSymbolList
+        symbolList = copy.deepcopy(dominantSymbolList)
+
         #  把外盘加进去
         symbolList.extend(otherSymbol)
         symbolListMap = {}
@@ -173,7 +174,7 @@ class BusinessService:
         return symbolListMap
 
     def getStrategy4BeichiList(self):
-        symbolList = dominantSymbolList
+        symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
         symbolList.extend(otherSymbol)
         symbolListMap = {}
@@ -204,40 +205,28 @@ class BusinessService:
             start = datetime.now() + timedelta(-2)
         else:
             start = datetime.now() + timedelta(-1)
-        #     找出持仓列表中的老合约 和 主力合约 求集合的差
-        positionList = self.getPositionList('holding', 1, 10)['records']
-        # 找出持仓列表中的老合约
-        diff = []
-        for i in range(len(positionList)):
-            item = positionList[i]
-            if item not in dominantSymbolList:
-                diff.append(item['symbol'])
-        union = list(set(dominantSymbolList) | set(diff))
-        for i in range(len(union)):
-            item = union[i]
+        for i in range(len(dominantSymbolList)):
+            item = dominantSymbolList[i]
             # print(item)
-            if item not in otherSymbol:
-                df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-                                    start_date=start, end_date=end)
-                df1m = rq.current_minute(item)
-                preday = df1d.iloc[0, 3]
-                today = df1m.iloc[0, 0]
-                if df1d is None or df1m is None:
-                    change = "--"
-                else:
-                    change = round(((today - preday) / preday), 4)
-                    # print(preday, today, change)
-                resultItem = {'change': change, 'price': today}
-                symbolChangeMap[item] = resultItem
+            df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+                                start_date=start, end_date=end)
+            df1m = rq.current_minute(item)
+            preday = df1d.iloc[0, 3]
+            today = df1m.iloc[0, 0]
+            if df1d is None or df1m is None:
+                change = "--"
+            else:
+                change = round(((today - preday) / preday), 4)
+                # print(preday, today, change)
+            resultItem = {'change': change, 'price': today}
+            symbolChangeMap[item] = resultItem
         # print("涨跌幅信息", symbolChangeMap)
         globalChangeList = self.getGlobalFutureChangeList()
-
         conbineChangeList = dict(symbolChangeMap, **globalChangeList)
-
         return conbineChangeList
 
     def getLevelDirectionList(self):
-        symbolList = dominantSymbolList
+        symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
         symbolList.extend(otherSymbol)
         symbolListMap = {}
@@ -263,7 +252,6 @@ class BusinessService:
     def getFutureConfig(self):
         return config['futureConfig']
 
-
     def getPosition(self, symbol, period, status):
         if period == 'all':
             query = {'symbol': symbol, 'status': status}
@@ -285,41 +273,26 @@ class BusinessService:
             return x
         else:
             return -1
-    def formatTime(self,localTime):
+
+    def formatTime(self, localTime):
         localTimeStamp = time.localtime(int(time.mktime(localTime.timetuple()) + 8 * 3600))
         localTimeStampStr = time.strftime("%Y-%m-%d %H:%M:%S", localTimeStamp)
         return localTimeStampStr
 
     # 持仓列表改成自动录入
-    def getPositionList(self, status, page, size):
-        # positionList = []
-        # collection = DBPyChanlun["position_record"]
-        # # 查询总记录数
-        # if status == 'all':
-        #     result = collection.find().skip(
-        #         (page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
-        #     total = result.count()
-        # else:
-        #     result = collection.find({'status': status}).skip(
-        #         (page - 1) * size).limit(size).sort("enterTime", pymongo.DESCENDING)
-        #     total = result.count()
-        # for x in result:
-        #     x['_id'] = str(x['_id'])
-        #     positionList.append(x)
-        # positionListResult = {
-        #     'records': positionList,
-        #     'total': total
-        # }
-        # return positionListResult
+    def getPositionList(self, status, page, size, endDate):
+        end = datetime.strptime(endDate, "%Y-%m-%d")
+        end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+        start_date = end + timedelta(-1)
         positionList = []
         collection = DBPyChanlun["future_auto_position"]
         # 查询总记录数
         if status == 'all':
-            result = collection.find().skip(
+            result = collection.find({'date_created': {"$gte": start_date, "$lte": end}}).skip(
                 (page - 1) * size).limit(size).sort("fire_time", pymongo.DESCENDING)
             total = result.count()
         else:
-            result = collection.find({'status': status}).skip(
+            result = collection.find({'status': status, 'date_created': {"$gte": start_date, "$lte": end}}).skip(
                 (page - 1) * size).limit(size).sort("fire_time", pymongo.DESCENDING)
             total = result.count()
         for x in result:
@@ -332,37 +305,37 @@ class BusinessService:
                 x['last_update_time'] = ''
             #
             if x['symbol'] is 'BTC':
-                marginLevel = 1 / (x['margin_rate'] )
+                marginLevel = 1 / (x['margin_rate'])
             else:
                 marginLevel = 1 / (x['margin_rate'] + 0.01)
             currentPercent = 0
             winEndPercent = 0
             loseEndPercent = 0
             if x['direction'] == "long":
-                currentPercent = round(((x['close_price'] - x['price']) / x['price']) * marginLevel , 2)
+                currentPercent = round(((x['close_price'] - x['price']) / x['price']) * marginLevel, 2)
                 if x['status'] == 'winEnd':
-                    winEndPercent = round(((x['win_end_price'] - x['price']) / x['price']) * marginLevel , 2)
+                    winEndPercent = round(((x['win_end_price'] - x['price']) / x['price']) * marginLevel, 2)
                 elif x['status'] == 'loseEnd':
-                    loseEndPercent = round(((x['lose_end_price'] - x['price']) / x['price']) * marginLevel , 2)
+                    loseEndPercent = round(((x['lose_end_price'] - x['price']) / x['price']) * marginLevel, 2)
                 # print("long",currentPercent)
             else:
-                currentPercent = round(((x['price'] - x['close_price']) / x['close_price'])* marginLevel, 2)
+                currentPercent = round(((x['price'] - x['close_price']) / x['close_price']) * marginLevel, 2)
                 if x['status'] == 'winEnd':
                     winEndPercent = round(((x['price'] - x['win_end_price']) / x['win_end_price']) * marginLevel, 2)
                 elif x['status'] == 'loseEnd':
-                    loseEndPercent = round(((x['price']-x['lose_end_price']) / x['price']) * marginLevel , 2)
+                    loseEndPercent = round(((x['price'] - x['lose_end_price']) / x['price']) * marginLevel, 2)
                 # print("short",currentPercent)
             # 未实现盈亏
-            x['current_profit'] = round(x['per_order_margin'] * x['amount'] * currentPercent,2)
+            x['current_profit'] = round(x['per_order_margin'] * x['amount'] * currentPercent, 2)
             # 止盈已实现盈亏
-            x['win_end_money'] = round(x['per_order_margin'] * x['amount'] * winEndPercent,2)
+            x['win_end_money'] = round(x['per_order_margin'] * x['amount'] * winEndPercent, 2)
             # 止盈比率
             x['win_end_rate'] = round(winEndPercent, 2)
             # 止损已实现盈亏
-            x['lose_end_money'] = round(x['per_order_margin'] * x['amount'] * loseEndPercent,2)
+            x['lose_end_money'] = round(x['per_order_margin'] * x['amount'] * loseEndPercent, 2)
             x['lose_end_rate'] = round(loseEndPercent, 2)
             # 占用保证金
-            x['total_margin'] = round(x['per_order_margin'] * x['amount'],2)
+            x['total_margin'] = round(x['per_order_margin'] * x['amount'], 2)
             positionList.append(x)
         positionListResult = {
             'records': positionList,
@@ -408,8 +381,9 @@ class BusinessService:
             # 'importance': position['importance'],
             'dynamicPositionList': position['dynamicPositionList']
         }})
+
     # close_price 最新收盘价
-    def updatePositionStatus(self, id, status,close_price):
+    def updatePositionStatus(self, id, status, close_price):
         if status == 'winEnd':
             DBPyChanlun['future_auto_position'].update_one({'_id': ObjectId(id)}, {"$set": {
                 'status': status,
@@ -424,6 +398,7 @@ class BusinessService:
             DBPyChanlun['future_auto_position'].update_one({'_id': ObjectId(id)}, {"$set": {
                 'status': status,
             }})
+
     # 创建预判信息
     def createFuturePrejudgeList(self, endDate, prejudgeList):
         result = DBPyChanlun['prejudge_record'].insert_one({

@@ -145,7 +145,9 @@ def get_position_list():
     page = int(request.args.get("page") or "1")
     # 每页显示的条目
     size = int(request.args.get("size") or "10")
-    positionList = businessService.getPositionList(status, page,size)
+    endDate = request.args.get("endDate")
+
+    positionList = businessService.getPositionList(status, page,size,endDate)
     return Response(json.dumps(positionList), mimetype='application/json')
 
 # 跟据单个持仓
