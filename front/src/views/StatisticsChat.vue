@@ -37,12 +37,14 @@
 </template>
 <script>
     import CommonTool from "../tool/CommonTool";
+    import {futureApi} from "../api/futureApi";
 
     require('echarts/theme/macarons') // echarts theme
 
     export default {
         data() {
             return {
+                statisticList: null,
                 dateRange: [],
                 profitChart: null,
                 winPiechart: null,
@@ -84,6 +86,7 @@
             const end = CommonTool.dateFormat('yyyy-MM-dd')
 
             this.dateRange = [start, end]
+            this.getStatisticList()
         },
         beforeDestroy() {
             if (!this.profitChart || !this.winPiechart || !this.losePieChart) {
@@ -99,37 +102,19 @@
         },
         methods: {
             getStatisticList() {
-                console.log(this.dateRange)
-            },
-            initChart() {
-                this.profitChart = this.$echarts.init(document.getElementById('profit-chart'))
-                this.winPiechart = this.$echarts.init(document.getElementById('win-pie-chart'), 'macarons')
-                this.losePieChart = this.$echarts.init(document.getElementById('lose-pie-chart'), 'macarons')
+                futureApi.getStatisticList(this.dateRange).then(res => {
+                    console.log('统计图表:', res)
+                    this.statisticList = res
 
-                this.chartssize(document.getElementById('profit-chart-parent'),
-                    document.getElementById('profit-chart'));
-                this.chartssize(document.getElementById('win-pie-chart-parent'),
-                    document.getElementById('win-pie-chart'));
-                this.chartssize(document.getElementById('lose-pie-chart-parent'),
-                    document.getElementById('lose-pie-chart'));
-                this.profitChart.resize()
-                this.winPiechart.resize()
-                this.losePieChart.resize()
+                    this.processData()
 
-                window.addEventListener('resize', () => {
-                    this.profitChart.resize()
-                    this.winPiechart.resize()
-                    this.losePieChart.resize()
+
+                }).catch((error) => {
+                    console.log('获取统计图表失败:', error)
                 })
-
-
-                const xData = (function () {
-                    const data = []
-                    for (let i = 1; i < 13; i++) {
-                        data.push(i + 'day')
-                    }
-                    return data
-                }())
+            },
+            processData(){
+              // 盈利列表
                 this.profitChart.setOption({
                     backgroundColor: '#344b58',
                     title: {
@@ -192,7 +177,7 @@
                             interval: 0
 
                         },
-                        data: xData
+                        data: this.statisticList.date
                     }],
                     yAxis: [{
                         type: 'value',
@@ -262,20 +247,7 @@
                                 }
                             }
                         },
-                        data: [
-                            709,
-                            1917,
-                            2455,
-                            2610,
-                            1719,
-                            1433,
-                            1544,
-                            3285,
-                            5208,
-                            3372,
-                            2484,
-                            4078
-                        ]
+                        data: this.statisticList.win_end_list
                     },
 
                         {
@@ -295,22 +267,9 @@
                                     }
                                 }
                             },
-                            data: [
-                                327,
-                                1776,
-                                507,
-                                1200,
-                                800,
-                                482,
-                                204,
-                                1390,
-                                1001,
-                                951,
-                                381,
-                                220
-                            ]
+                            data: this.statisticList.lose_end_list
                         }, {
-                            name: 'average',
+                            name: '净盈利',
                             type: 'line',
                             stack: 'total',
                             symbolSize: 10,
@@ -328,23 +287,34 @@
                                     }
                                 }
                             },
-                            data: [
-                                1036,
-                                3693,
-                                2962,
-                                3810,
-                                2519,
-                                1915,
-                                1748,
-                                4675,
-                                6209,
-                                4323,
-                                2865,
-                                4298
-                            ]
+                            data: this.statisticList.net_profit_list
                         }
                     ]
                 })
+            },
+            initChart() {
+                this.profitChart = this.$echarts.init(document.getElementById('profit-chart'))
+                this.winPiechart = this.$echarts.init(document.getElementById('win-pie-chart'), 'macarons')
+                this.losePieChart = this.$echarts.init(document.getElementById('lose-pie-chart'), 'macarons')
+
+                this.chartssize(document.getElementById('profit-chart-parent'),
+                    document.getElementById('profit-chart'));
+                this.chartssize(document.getElementById('win-pie-chart-parent'),
+                    document.getElementById('win-pie-chart'));
+                this.chartssize(document.getElementById('lose-pie-chart-parent'),
+                    document.getElementById('lose-pie-chart'));
+                this.profitChart.resize()
+                this.winPiechart.resize()
+                this.losePieChart.resize()
+
+                window.addEventListener('resize', () => {
+                    this.profitChart.resize()
+                    this.winPiechart.resize()
+                    this.losePieChart.resize()
+                })
+
+
+                // 盈利品种列表
                 this.winPiechart.setOption({
                     title: {
                         text: '盈利占比',
@@ -381,6 +351,7 @@
                         }
                     ]
                 })
+                // 亏损品种列表
                 this.losePieChart.setOption({
                     title: {
                         text: '亏损占比',
@@ -458,6 +429,7 @@
         justify-content: space-between;
         height: 100%
         width: 100%
+        margin-top 10px;
 
         .profit-chart {
             height: 500px

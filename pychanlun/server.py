@@ -70,6 +70,13 @@ def get_btc_ticker():
 # --------------------------------期货部分------------------------------------
 
 
+# 获取期货统计信息
+@app.route('/api/get_statistic_list')
+def get_statistic_list():
+    dateRange = request.args.get("dateRange")
+    getStatisticList = businessService.getStatisticList(dateRange)
+    return Response(json.dumps(getStatisticList), mimetype='application/json')
+
 # 获取外盘涨跌幅列表
 @app.route('/api/get_global_future_change_list')
 def get_global_future_change_list():

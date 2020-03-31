@@ -584,6 +584,55 @@ def testMail():
     mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
     if not mailResult:
         print("发送失败")
+
+def testGroupBy():
+    startDate = '2020-03-29'
+    endDate = '2020-03-31'
+    end = datetime.strptime(endDate, "%Y-%m-%d")
+    end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+    start = datetime.strptime(startDate, "%Y-%m-%d")
+    start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+    data_list = DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}
+    }).sort("_id", pymongo.ASCENDING)
+    df = pd.DataFrame(list(data_list))
+    for idx, row in df.iterrows():
+        date_created = df.loc[idx, 'date_created']
+        date_created_str = formatTime(date_created)
+        df.loc[idx, 'new_date_created'] = date_created_str
+    win_end_group = df['win_end_money'].groupby(df['new_date_created'])
+    lose_end_group = df['lose_end_money'].groupby(df['new_date_created'])
+    print(win_end_group.sum())
+    print(lose_end_group.sum())
+    # 日期列表
+    dateList = []
+    # 当日盈利累加
+    win_end_list = []
+    # 每天亏损累加
+    lose_end_list = []
+    # 净盈亏
+    net_profit = []
+
+    # 把日期保存起来
+    for name, group in win_end_group:
+        dateList.append(name)
+    for i in range(len(win_end_group.sum())):
+        win_end_list.append(int(win_end_group.sum()[i]))
+        lose_end_list.append(int(lose_end_group.sum()[i]))
+        net_profit.append(int(win_end_group.sum()[i]) + int(lose_end_group.sum()[i]))
+
+    print(dateList)
+    print(win_end_list)
+    print(lose_end_list)
+    print(net_profit)
+
+
+def formatTime(localTime):
+    date_created_stamp = int(time.mktime(localTime.timetuple()))
+    timeArray = time.localtime(date_created_stamp)
+    return time.strftime("%Y-%m-%d", timeArray)
+
+
 def app():
     # testBitmex()
     # testBeichiDb()
@@ -601,9 +650,10 @@ def app():
     # testOkexTiker()
     # testChaji()
     # testGlobalChangeList()
-    testTime2()
+    # testTime2()
     # testMail()
     # testDingDing()
+    testGroupBy()
 
 if __name__ == '__main__':
     app()

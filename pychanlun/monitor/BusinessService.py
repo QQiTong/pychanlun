@@ -51,6 +51,59 @@ class BusinessService:
         }
         return changeAndPrice
 
+    def getStatisticList(self, dateRange):
+        statisticList = {}
+        split = dateRange.split(",")
+        startDate = split[0]
+        endDate = split[1]
+        print("dateRange", split)
+        # test
+        # startDate = '2020-03-29'
+        # endDate = '2020-03-31'
+        end = datetime.strptime(endDate, "%Y-%m-%d")
+        end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+        start = datetime.strptime(startDate, "%Y-%m-%d")
+        start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+        data_list = DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}
+        }).sort("_id", pymongo.ASCENDING)
+        df = pd.DataFrame(list(data_list))
+        for idx, row in df.iterrows():
+            date_created = df.loc[idx, 'date_created']
+            date_created_str = self.formatTime2(date_created)
+            df.loc[idx, 'new_date_created'] = date_created_str
+        win_end_group = df['win_end_money'].groupby(df['new_date_created'])
+        lose_end_group = df['lose_end_money'].groupby(df['new_date_created'])
+        print(win_end_group.sum())
+        print(lose_end_group.sum())
+        # 日期列表
+        dateList = []
+        # 当日盈利累加
+        win_end_list = []
+        # 每天亏损累加
+        lose_end_list = []
+        # 净利润
+        net_profit_list = []
+        # 把日期保存起来
+        for name, group in win_end_group:
+            dateList.append(name)
+        for i in range(len(win_end_group.sum())):
+            win_end_list.append(int(win_end_group.sum()[i]))
+            lose_end_list.append(int(lose_end_group.sum()[i]))
+            net_profit_list.append(int(win_end_group.sum()[i]) + int(lose_end_group.sum()[i]))
+
+        # print(dateList)
+        # print(win_end_list)
+        # print(lose_end_list)
+        # print(net_profit)
+        statisticList = {
+            'date':dateList,
+            'win_end_list':win_end_list,
+            'lose_end_list':lose_end_list,
+            'net_profit_list':net_profit_list
+        }
+        return statisticList
+
     # okex数字货币部分涨跌幅
     # def getBTCTicker(self):
     #     dayParam = {
@@ -279,6 +332,11 @@ class BusinessService:
         localTimeStampStr = time.strftime("%Y-%m-%d %H:%M:%S", localTimeStamp)
         return localTimeStampStr
 
+    def formatTime2(self,localTime):
+        date_created_stamp = int(time.mktime(localTime.timetuple()))
+        timeArray = time.localtime(date_created_stamp)
+        return time.strftime("%Y-%m-%d", timeArray)
+
     # 持仓列表改成自动录入
     def getPositionList(self, status, page, size, endDate):
         end = datetime.strptime(endDate, "%Y-%m-%d")
@@ -307,30 +365,22 @@ class BusinessService:
             if x['symbol'] is 'BTC':
                 marginLevel = 1 / (x['margin_rate'])
             else:
-                marginLevel = 1 / (x['margin_rate'] + 0.01)
+                marginLevel = 1 / (x['margin_rate'] + config['margin_rate_company'])
             currentPercent = 0
-            winEndPercent = 0
+            # 止盈数据在手动更新状态时已经计算过了
             loseEndPercent = 0
             if x['direction'] == "long":
                 currentPercent = round(((x['close_price'] - x['price']) / x['price']) * marginLevel, 2)
-                if x['status'] == 'winEnd':
-                    winEndPercent = round(((x['win_end_price'] - x['price']) / x['price']) * marginLevel, 2)
-                elif x['status'] == 'loseEnd':
+                if x['status'] == 'loseEnd':
                     loseEndPercent = round(((x['lose_end_price'] - x['price']) / x['price']) * marginLevel, 2)
                 # print("long",currentPercent)
             else:
-                currentPercent = round(((x['price'] - x['close_price']) / x['close_price']) * marginLevel, 2)
-                if x['status'] == 'winEnd':
-                    winEndPercent = round(((x['price'] - x['win_end_price']) / x['win_end_price']) * marginLevel, 2)
-                elif x['status'] == 'loseEnd':
+                currentPercent = round(((x['price'] - x['close_price']) / x['price']) * marginLevel, 2)
+                if x['status'] == 'loseEnd':
                     loseEndPercent = round(((x['price'] - x['lose_end_price']) / x['price']) * marginLevel, 2)
                 # print("short",currentPercent)
             # 未实现盈亏
             x['current_profit'] = round(x['per_order_margin'] * x['amount'] * currentPercent, 2)
-            # 止盈已实现盈亏
-            x['win_end_money'] = round(x['per_order_margin'] * x['amount'] * winEndPercent, 2)
-            # 止盈比率
-            x['win_end_rate'] = round(winEndPercent, 2)
             # 止损已实现盈亏
             x['lose_end_money'] = round(x['per_order_margin'] * x['amount'] * loseEndPercent, 2)
             x['lose_end_rate'] = round(loseEndPercent, 2)
@@ -382,17 +432,35 @@ class BusinessService:
             'dynamicPositionList': position['dynamicPositionList']
         }})
 
-    # close_price 最新收盘价
+    # close_price 最新收盘价 手动进行止盈止损操作
     def updatePositionStatus(self, id, status, close_price):
+        item = DBPyChanlun['future_auto_position'].find_one({'_id': ObjectId(id)})
+        if item['symbol'] is 'BTC':
+            marginLevel = 1 / (item['margin_rate'])
+        else:
+            marginLevel = 1 / (item['margin_rate'] + config['margin_rate_company'])
         if status == 'winEnd':
+            winEndPercent = round(((float(close_price) - item['price']) / item['price']) * marginLevel, 2)
+            # 止盈已实现盈亏
+            win_end_money = round(item['per_order_margin'] * item['amount'] * winEndPercent, 2)
+            # 止盈比率
+            win_end_rate = round(winEndPercent, 2)
             DBPyChanlun['future_auto_position'].update_one({'_id': ObjectId(id)}, {"$set": {
                 'status': status,
                 'win_end_price': float(close_price),
+                'win_end_money': abs(win_end_money),
+                'win_end_rate': abs(win_end_rate),
             }})
         elif status == 'loseEnd':
+            loseEndPercent = round(((float(close_price) - item['price']) / item['price']) * marginLevel, 2)
+            # 止损已实现盈亏
+            lose_end_money = round(item['per_order_margin'] * item['amount'] * loseEndPercent, 2)
+            lose_end_rate = round(loseEndPercent, 2)
             DBPyChanlun['future_auto_position'].update_one({'_id': ObjectId(id)}, {"$set": {
                 'status': status,
-                'lose_end_price': float(close_price)
+                'lose_end_price': float(close_price),
+                'lose_end_money': -abs(lose_end_money),
+                'lose_end_rate': -abs(lose_end_rate),
             }})
         else:
             DBPyChanlun['future_auto_position'].update_one({'_id': ObjectId(id)}, {"$set": {

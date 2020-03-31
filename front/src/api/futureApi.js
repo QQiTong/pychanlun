@@ -17,6 +17,14 @@ export const futureApi = {
         })
     },
 
+    // 获取期货统计列表
+    getStatisticList (dateRange) {
+        let url = `/api/get_statistic_list?dateRange=${dateRange}`
+        return axios({
+            url: url,
+            method: 'get',
+        })
+    },
     // 获取期货合约配置
     getFutureConfig () {
         let url = `/api/get_future_config`

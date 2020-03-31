@@ -60,6 +60,8 @@ config = {
         "Y",
         "JD"
     ],
+    # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整
+    'margin_rate_company':0.01,
     # 商品期货保证金率一般固定，只有过节会变下。因为换合约期间需要拿到老合约保证金率，因此保存起来
     'futureConfig': {
         'RB': {'margin_rate': 0.09, 'contract_multiplier': 10},
