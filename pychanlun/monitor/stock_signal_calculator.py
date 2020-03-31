@@ -94,7 +94,7 @@ def calculate(info):
             return
 
     bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(2000)
+        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(1000)
     bars = list(bars)
     bars.reverse()
     if len(bars) == 0:

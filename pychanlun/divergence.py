@@ -49,8 +49,13 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
                     down_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == -1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
                     if len(down_bi_list) > 1:
                         down_bi_list = down_bi_list[-2:]
-                        min_diffs = pydash.map_(down_bi_list, lambda bi: np.amin(diff_series[bi['start']:bi['end'] + 1]))
-                        if len(min_diffs) > 1 and min_diffs[-1] > np.amin(min_diffs[:-1]):
+                        diff1 = np.amin(diff_series[down_bi_list[-1]['start']:i+1])
+                        x = down_bi_list[-2]['end']
+                        for y in range(down_bi_list[-2]['end'], down_bi_list[-1]['start']):
+                            if gold_cross.series[y]:
+                                x = y
+                        diff2 = np.amin(diff_series[down_bi_list[-2]['start']:x+1])
+                        if diff1 > diff2:
                             # 前面是向下段，才是背驰点
                             # 要向下段后的第一次金叉
                             if info['duan_end'] == i:
@@ -67,8 +72,13 @@ def calc(time_series, high_series, low_series, open_series, close_series, macd_s
                     up_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == 1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
                     if len(up_bi_list) > 1:
                         up_bi_list = up_bi_list[-2:]
-                        max_diffs = pydash.map_(up_bi_list, lambda bi: np.amax(diff_series[bi['start']:bi['end'] + 1]))
-                        if len(max_diffs) > 1 and max_diffs[-1] < np.amax(max_diffs[:-1]):
+                        diff1 = np.amax(diff_series[up_bi_list[-1]['start']:i+1])
+                        x = up_bi_list[-2]['end']
+                        for y in range(up_bi_list[-2]['end'], up_bi_list[-1]['start']):
+                            if dead_cross.series[y]:
+                                x = y
+                        diff2 = np.amax(diff_series[up_bi_list[-2]['start']:x+1])
+                        if diff1 < diff2:
                             # 前面是向上段，才是背驰点
                             # 要向上段后的第一次死叉
                             if info['duan_end'] == i:
