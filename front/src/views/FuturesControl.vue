@@ -386,6 +386,9 @@
                     </div>
                 </el-row>
             </el-tab-pane>
+            <el-tab-pane label="统计数据" name="third">
+            <StatisticsChat></StatisticsChat>
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>

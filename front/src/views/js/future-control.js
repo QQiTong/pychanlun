@@ -6,12 +6,16 @@ import CommonTool from '@/tool/CommonTool'
 // import echarts from 'echarts/lib/echarts'
 import MyHeader from '../MyHeader'
 import FuturePositionList from '../FuturePositionList'
+import StatisticsChat from "../StatisticsChat";
+import PieChart from "../PieChart";
 
 export default {
     name: 'futures-control',
     components: {
         'MyHeader': MyHeader,
-        'FuturePositionList': FuturePositionList
+        'FuturePositionList': FuturePositionList,
+        'StatisticsChat': StatisticsChat,
+        'PieChart': PieChart,
     },
     data() {
         return {
@@ -616,7 +620,7 @@ export default {
             }
         },
         handleChangeTab(tab, event) {
-            console.log(tab, event)
+            // console.log(tab, event)
         },
 
         changePrejudgeDate() {
