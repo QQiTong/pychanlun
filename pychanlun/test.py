@@ -335,7 +335,7 @@ def testRQ():
     # print(df.iloc[0, 3])
     end = datetime.now() + timedelta(1)
     start = datetime.now() + timedelta(-1)
-    df1d = rq.get_price('IH1508', frequency='30m', fields=['open', 'high', 'low', 'close', 'volume'],
+    df1d = rq.get_price('SR2009', frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
                         )
     print(df1d)
     # print(df1d.iloc[0,0])
@@ -356,7 +356,7 @@ def testMonitor():
     print("程序执行的时间:" + str(elapsed) + "s")  # 印出时间
 def testThread():
      symbolList = getDominantSymbol()
-     n = 3
+     n = 12
      c= [symbolList[i:i+n] for i in range(0, len(symbolList), n)]
      print("--",c)
 def testWaipan():
@@ -587,7 +587,7 @@ def testMail():
 
 def testGroupBy():
     startDate = '2020-03-29'
-    endDate = '2020-03-31'
+    endDate = '2020-04-01'
     end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     start = datetime.strptime(startDate, "%Y-%m-%d")
@@ -641,7 +641,7 @@ def app():
     # testTQ()
     # testRQ()
     # testMonitor()
-    # testThread()
+    testThread()
     # testHuobi()
     # testWaipan()
     # testWechat()
@@ -653,7 +653,7 @@ def app():
     # testTime2()
     # testMail()
     # testDingDing()
-    testGroupBy()
+    # testGroupBy()
 
 if __name__ == '__main__':
     app()

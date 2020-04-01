@@ -341,12 +341,14 @@
             </el-table-column>
             <el-table-column label="成本价" prop="price" align="center" width="80"/>
             <el-table-column label="数量" prop="amount" align="center" width="100"/>
+            <!--            后台只更新持仓单的最新价，浮盈率，浮盈额. 老合约没必要继续更新最新价，因此这几个字段都不显示，但是列不能删除
+                            删除了会导致表格求和位置要修改-->
             <el-table-column
                 label="最新价"
                 width="80"
                 align="center"
             >
-                <template slot-scope="{row}">
+                <template slot-scope="{row}" v-if="positionQueryForm.status==='holding'">
                     {{Number(row.close_price)}}
                 </template>
             </el-table-column>
@@ -354,9 +356,10 @@
                 label="浮盈率"
                 width="100"
                 align="center"
+                prop="current_profit_rate"
             >
-                <template slot-scope="{row}">
-                    <el-tag :type="calcProfitRate(row) | percentTagFilter">{{calcProfitRate(row)}}%</el-tag>
+                <template slot-scope="{row}" v-if="positionQueryForm.status==='holding'">
+                    <el-tag :type="row.current_profit_rate| percentTagFilter">{{row.current_profit_rate*100}}%</el-tag>
                 </template>
             </el-table-column>
 
@@ -366,9 +369,9 @@
                 align="center"
                 prop="current_profit"
             >
-                <!--                <template slot-scope="{row}">-->
-                <!--                    <el-tag :type="row.total_profit | percentTagFilter">{{row.total_profit}}</el-tag>-->
-                <!--                </template>-->
+                <template slot-scope="{row}" v-if="positionQueryForm.status==='holding'">
+                    <el-tag :type="row.current_profit| percentTagFilter">{{row.current_profit}}</el-tag>
+                </template>
             </el-table-column>
             <el-table-column label="保证金" width="80" align="center">
                 <template slot-scope="{row}">{{row.total_margin}}</template>
@@ -385,30 +388,43 @@
             </el-table-column>
             <el-table-column label="预计止损额" prop="predict_stop_money" width="110" align="center">
             </el-table-column>
-            <el-table-column label="已止损额" width="110" align="center">
-                <template slot-scope="{row}">
+            <el-table-column label="实际亏损价" prop="lose_end_price" width="110" align="center">
+                <template slot-scope="{row}" v-if="row.status==='loseEnd'">
+                    {{row.status ==='loseEnd'?row.lose_end_price:0}}
+                </template>
+            </el-table-column>
+            <el-table-column label="亏损额" width="110" align="center">
+                <template slot-scope="{row}" v-if="row.status==='loseEnd'">
                     <el-tag :type="row.lose_end_money|percentTagFilter">
                         {{row.status ==='loseEnd'?row.lose_end_money:0}}
                     </el-tag>
-
                 </template>
             </el-table-column>
-            <el-table-column label="已止损比率" prop="lose_end_rate" width="110" align="center">
-                <template slot-scope="{row}">
+            <el-table-column label="亏损额比率" prop="lose_end_rate" width="110" align="center">
+                <template slot-scope="{row}" v-if="row.status==='loseEnd'">
                     {{row.status==='loseEnd'?(row.lose_end_rate * 100).toFixed(0)+'%':0}}
                 </template>
             </el-table-column>
 
+
+            <el-table-column label="止盈价" width="110" align="center">
+                <template slot-scope="{row}" v-if="row.status==='winEnd'">
+                    {{row.status ==='winEnd'?row.win_end_price:0}}
+                </template>
+            </el-table-column>
+
             <el-table-column label="已盈利额" width="110" align="center">
-                <template slot-scope="{row}">
-                    <el-tag :type="row.win_end_money|percentTagFilter">
+                <template slot-scope="{row}" v-if="row.status==='winEnd'">
+                    <el-tag type="danger">
                         {{row.status ==='winEnd'?row.win_end_money:0}}
                     </el-tag>
                 </template>
             </el-table-column>
             <el-table-column label="已盈利比率" prop="win_end_rate" width="110" align="center">
-                <template slot-scope="{row}">
-                    {{row.status==='winEnd'?(row.win_end_rate * 100).toFixed(0)+'%':0}}
+                <template slot-scope="{row}" v-if="row.status==='winEnd'">
+                    <el-tag type="danger">
+                        {{row.status==='winEnd'?(row.win_end_rate * 100).toFixed(0)+'%':0}}
+                    </el-tag>
                 </template>
             </el-table-column>
             <el-table-column
@@ -993,14 +1009,14 @@
                             }
                         })
                         sums[14] = loseEndSum.toFixed(2)
-                    } else if (index === 16) {
+                    } else if (index === 18) {
                         // 累加已盈利
                         data.forEach((item) => {
                             if (item.status === 'winEnd') {
                                 winEndSum += item.win_end_money
                             }
                         })
-                        sums[16] = winEndSum.toFixed(2)
+                        sums[18] = winEndSum.toFixed(2)
                     } else if (index === 9) {
                         // 累加当前盈利
                         data.forEach((item) => {
@@ -1015,7 +1031,10 @@
                         data.forEach((item) => {
                             // 只累加还在持仓中的
                             if (item.status === 'holding') {
-                                totalMargin += item.total_margin
+                                // 兼容老数据
+                                if (item.total_margin) {
+                                    totalMargin += item.total_margin
+                                }
                             }
                         })
                         sums[10] = totalMargin.toFixed(2)

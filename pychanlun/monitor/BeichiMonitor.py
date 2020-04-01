@@ -139,7 +139,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             'stop_lose_price': stop_lose_price,  # 当前信号的止损价
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if (date_created - fire_time).total_seconds() < 60 * 4:
+        if (date_created - fire_time).total_seconds() < 60 * 3:
             # 新增
             saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                                    stop_lose_price, futureCalcObj, True)
@@ -191,6 +191,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
     else:
         direction = 'long'
     if insert is True:
+        # 同品种 但是不同周期 的更新也记录下来
         last_fire = DBPyChanlun['future_auto_position'].find_one({
             'symbol': symbol,
             'direction': direction,
@@ -202,7 +203,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
             }, {
                 '$set': {
                     'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
-                    'last_update_time': date_created,  # 最后更新时间
+                    'last_update_time': date_created,  # 最后信号更新时间
                     'last_update_signal': signal,  # 最后更新的信号
                     'last_update_period': period  # 最后更新的周期
                 },
@@ -224,14 +225,13 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                 'direction': direction,
                 'stop_lose_price': stop_lose_price,  # 当前信号的止损价
                 'update_count': 1,  # 这条背驰记录的更新次数
-                'profit': 0,  # 盈利
-                'profit_rate': 0,  # 盈利率
                 'status': status,
                 'per_order_stop_money': futureCalcObj['perOrderStopMoney'],
                 'per_order_stop_rate': round(futureCalcObj['perOrderStopRate'], 2),
                 'per_order_margin': round(futureCalcObj['perOrderMargin'], 2),
                 'predict_stop_money': -round(futureCalcObj['perOrderStopMoney'] * futureCalcObj['maxOrderCount'], 2),
                 'margin_rate': futureCalcObj['marginRate'],
+                'total_margin':round(futureCalcObj['perOrderStopMoney'] * futureCalcObj['maxOrderCount'], 2),
                 'last_update_time': '',
                 'last_update_signal': '',
                 'last_update_period': '',
@@ -246,23 +246,45 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
         #  如果当前价格已经触及到止损价，那么就讲状态设置为loseEnd
         # print("最后一个",last_fire)
         if last_fire is not None:
+            if last_fire['symbol'] is 'BTC':
+                marginLevel = 1 / (last_fire['margin_rate'])
+            else:
+                marginLevel = 1 / (last_fire['margin_rate'] + config['margin_rate_company'])
             # 之后价格再涨上来，status又会变成holding ,因此已经被止损的持仓不要再更新状态了
             if last_fire['status'] == 'holding':
                 if (direction == 'long' and close_price <= last_fire['stop_lose_price']) or (direction == 'short' and close_price >= last_fire['stop_lose_price']):
                     # print("止损了",direction,close_price,last_fire['stop_lose_price'])
+                    # 为了方便后面统计，在这里计算止损总额，如果性能降低就移出去
+
+                    # 计算止损率
+                    lose_end_rate = -abs(((close_price - last_fire['price']) / last_fire['price']) * marginLevel)
+                    lose_end_money = round(last_fire['per_order_margin'] * last_fire['amount'] * lose_end_rate, 2)
+                    lose_end_rate = round(lose_end_rate, 2)
                     DBPyChanlun['future_auto_position'].find_one_and_update({
                         '_id':last_fire['_id'],'symbol': symbol, 'direction': direction, 'status': 'holding'
                     }, {
                         '$set': {
                             'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
                             'status': 'loseEnd',
-                            'lose_end_price':close_price  # 止损了需要将止损结束的价格插入到数据库中
+                            'lose_end_price':close_price,  # 止损了需要将止损结束的价格插入到数据库中
+                            'lose_end_time':date_created,     # 把止损触发时间保存起来
+                            'lose_end_money':lose_end_money,
+                            'lose_end_rate':lose_end_rate
                         },
                         '$inc': {
                             'update_count': 1
                         }
                     }, upsert=True)
                 else:
+                    # 更新最新盈利率
+                    if last_fire['direction'] == "long":
+                        current_profit_rate = round(((close_price - last_fire['price']) / last_fire['price']) * marginLevel, 2)
+                        # print("long",current_profit_rate)
+                    else:
+                        current_profit_rate = round(((last_fire['price'] - close_price) / last_fire['price']) * marginLevel, 2)
+                        # print("short",current_profit_rate)
+                        # 未实现盈亏
+                    current_profit = round(last_fire['per_order_margin'] * last_fire['amount'] * current_profit_rate, 2)
                     # print("持有中", direction, close_price, last_fire['stop_lose_price'])
                     status = 'holding'
                     DBPyChanlun['future_auto_position'].find_one_and_update({
@@ -270,7 +292,9 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                     }, {
                         '$set': {
                             'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
-                            'status': status
+                            'status': status,
+                            'current_profit_rate':current_profit_rate, #当前浮盈比例
+                            'current_profit':current_profit  # 当前浮盈额
                         },
                         '$inc': {
                             'update_count': 1
@@ -821,15 +845,17 @@ def run(**kwargs):
     symbolList, dominantSymbolInfoList = getDominantSymbol()
     # 24个品种 拆分成8份
     # symbolListSplit = [symbolList[i:i + 3] for i in range(0, len(symbolList), 3)]
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
+    # 24个品种 拆分2份
+    symbolListSplit = [symbolList[i:i +12] for i in range(0, len(symbolList), 12)]
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[3]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[4]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[5]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[6]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[7]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
 
     # 外盘监控
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()

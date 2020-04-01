@@ -361,31 +361,18 @@ class BusinessService:
                 x['last_update_time'] = self.formatTime(x['last_update_time'])
             else:
                 x['last_update_time'] = ''
-            #
-            if x['symbol'] is 'BTC':
-                marginLevel = 1 / (x['margin_rate'])
+            if ('lose_end_time' in x and x['lose_end_time']!=''):
+                x['lose_end_time'] = self.formatTime(x['lose_end_time'])
             else:
-                marginLevel = 1 / (x['margin_rate'] + config['margin_rate_company'])
-            currentPercent = 0
-            # 止盈数据在手动更新状态时已经计算过了
-            loseEndPercent = 0
-            if x['direction'] == "long":
-                currentPercent = round(((x['close_price'] - x['price']) / x['price']) * marginLevel, 2)
-                if x['status'] == 'loseEnd':
-                    loseEndPercent = round(((x['lose_end_price'] - x['price']) / x['price']) * marginLevel, 2)
-                # print("long",currentPercent)
+                x['lose_end_time'] = ''
+            if ('win_end_time' in x and x['win_end_time']!=''):
+                x['win_end_time'] = self.formatTime(x['win_end_time'])
             else:
-                currentPercent = round(((x['price'] - x['close_price']) / x['price']) * marginLevel, 2)
-                if x['status'] == 'loseEnd':
-                    loseEndPercent = round(((x['price'] - x['lose_end_price']) / x['price']) * marginLevel, 2)
-                # print("short",currentPercent)
-            # 未实现盈亏
-            x['current_profit'] = round(x['per_order_margin'] * x['amount'] * currentPercent, 2)
-            # 止损已实现盈亏
-            x['lose_end_money'] = round(x['per_order_margin'] * x['amount'] * loseEndPercent, 2)
-            x['lose_end_rate'] = round(loseEndPercent, 2)
+                x['win_end_time'] = ''
+            # 兼容老数据
+            if ('total_margin' not in x or x['total_margin'] != ''):
+                x['total_margin'] = round(x['per_order_margin'] * x['amount'], 2)
             # 占用保证金
-            x['total_margin'] = round(x['per_order_margin'] * x['amount'], 2)
             positionList.append(x)
         positionListResult = {
             'records': positionList,
@@ -434,6 +421,7 @@ class BusinessService:
 
     # close_price 最新收盘价 手动进行止盈止损操作
     def updatePositionStatus(self, id, status, close_price):
+        date_created = datetime.utcnow()
         item = DBPyChanlun['future_auto_position'].find_one({'_id': ObjectId(id)})
         if item['symbol'] is 'BTC':
             marginLevel = 1 / (item['margin_rate'])
@@ -450,6 +438,7 @@ class BusinessService:
                 'win_end_price': float(close_price),
                 'win_end_money': abs(win_end_money),
                 'win_end_rate': abs(win_end_rate),
+                'win_end_time': date_created
             }})
         elif status == 'loseEnd':
             loseEndPercent = round(((float(close_price) - item['price']) / item['price']) * marginLevel, 2)
@@ -461,6 +450,7 @@ class BusinessService:
                 'lose_end_price': float(close_price),
                 'lose_end_money': -abs(lose_end_money),
                 'lose_end_rate': -abs(lose_end_rate),
+                'lose_end_time': date_created
             }})
         else:
             DBPyChanlun['future_auto_position'].update_one({'_id': ObjectId(id)}, {"$set": {
