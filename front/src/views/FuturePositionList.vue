@@ -440,6 +440,21 @@
                     </el-tag>
                 </template>
             </el-table-column>
+            <el-table-column label="动止数" prop="stop_win_count" width="90" align="center">
+                <template slot-scope="{row}" v-if="row.status==='holding'">
+                    {{row.stop_win_count}}
+                </template>
+            </el-table-column>
+            <el-table-column label="动止价" prop="stop_win_count" width="90" align="center">
+                <template slot-scope="{row}" v-if="row.status==='holding'">
+                    {{row.stop_win_price}}
+                </template>
+            </el-table-column>
+            <el-table-column label="动止收益" prop="stop_win_money" width="90" align="center">
+                <template slot-scope="{row}" v-if="row.status==='holding'">
+                    {{row.stop_win_money}}
+                </template>
+            </el-table-column>
             <!-- 止盈结束的时候计算盈利率 -->
             <!--            <el-table-column-->
             <!--                label="盈利率"-->
@@ -454,8 +469,8 @@
             <!--      <el-table-column label="入场逻辑" prop="enterReason" align="center" width="300" />-->
             <!-- <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300" /> -->
             <el-table-column label="最后更新时间" prop="last_update_time" align="center" width="150"/>
-            <el-table-column label="最后更新信号" prop="last_update_signal" align="center" width="100"/>
-            <el-table-column label="最后更新周期" prop="last_update_period" align="center" width="100"/>
+            <el-table-column label="最后信号" prop="last_update_signal" align="center" width="80"/>
+            <el-table-column label="最后周期" prop="last_update_period" align="center" width="80"/>
             <el-table-column label="操作状态" align="center">
                 <template slot-scope="{row}">
                     <el-select
@@ -980,7 +995,7 @@
                 const sums = [];
                 let stopSum = 0
                 let currentProfitSum = 0
-                //占用保证金
+                // 占用保证金
                 let totalMargin = 0
                 // 已止损
                 let loseEndSum = 0
@@ -994,21 +1009,21 @@
                         sums[index] = '合计';
                         return;
                     }
-                    // console.log("--", data, index)
                     // 累加 预计止损
                     if (index === 13) {
                         data.forEach((item) => {
                             stopSum += item.predict_stop_money
                         })
                         sums[13] = stopSum.toFixed(2)
-                    } else if (index === 14) {
+                    } else if (index === 15) {
+
                         // 累加已止损
                         data.forEach((item) => {
                             if (item.status === 'loseEnd') {
                                 loseEndSum += item.lose_end_money
                             }
                         })
-                        sums[14] = loseEndSum.toFixed(2)
+                        sums[15] = loseEndSum.toFixed(2)
                     } else if (index === 18) {
                         // 累加已盈利
                         data.forEach((item) => {
@@ -1018,6 +1033,7 @@
                         })
                         sums[18] = winEndSum.toFixed(2)
                     } else if (index === 9) {
+
                         // 累加当前盈利
                         data.forEach((item) => {
                             // 只累加还在持仓中的
@@ -1027,6 +1043,7 @@
                         })
                         sums[9] = currentProfitSum.toFixed(2)
                     } else if (index === 10) {
+
                         // 累加当前盈利
                         data.forEach((item) => {
                             // 只累加还在持仓中的

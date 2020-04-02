@@ -4,7 +4,7 @@ let futureAccount = 50
 // 股票账户
 let stockAccount = 3
 // 数字货币账户
-let digitCoinAccount = 0.1
+let digitCoinAccount = 60.3 / 10000
 // 数字货币 杠杆倍数
 let digitCoinLevel = 20
 

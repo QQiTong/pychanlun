@@ -32,38 +32,42 @@ config = {
     'default': DevelopmentConfig,
     'production': ProductionConfig,
     'symbolList': [
+        # 上期所
         "RB",
         "HC",
         "RU",
-        "NI",
         "FU",
-        "ZN",
-        # "SP",
         "BU",
         "AU",
         "AG",
+        "NI",
+        "ZN",
+        # "SP",
+        # 郑商所
         "MA",
         "TA",
+        "CF",
         "SR",
         "OI",
         "AP",
-        "CF",
-        "M",
-        "I",
-        "EG",
+        # 大商所
         "J",
         "JM",
-        "PP",
-        # "L",
-        "P",
+        "I",
         "RM",
+        "M",
+        "EG",
+        "PP",
+        "P",
         "Y",
+        # "L",
         # "JD"
     ],
     # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整
     'margin_rate_company':0.01,
     # 商品期货保证金率一般固定，只有过节会变下。因为换合约期间需要拿到老合约保证金率，因此保存起来
     'futureConfig': {
+        # 上期所
         'RB': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'HC': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'RU': {'margin_rate': 0.11, 'contract_multiplier': 10},
@@ -71,23 +75,25 @@ config = {
         'BU': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'AU': {'margin_rate': 0.08, 'contract_multiplier': 1000},
         'AG': {'margin_rate': 0.12, 'contract_multiplier': 15},
-        'ZN': {'margin_rate': 0.1, 'contract_multiplier': 5},
         'NI': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'ZN': {'margin_rate': 0.1, 'contract_multiplier': 5},
+        # 郑商所
         'MA': {'margin_rate': 0.07, 'contract_multiplier': 10},
         'TA': {'margin_rate': 0.06, 'contract_multiplier': 5},
+        'CF': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'SR': {'margin_rate': 0.05, 'contract_multiplier': 10},
         'OI': {'margin_rate': 0.05, 'contract_multiplier': 10},
-        'CF': {'margin_rate': 0.07, 'contract_multiplier': 5},
-        'M': {'margin_rate': 0.06, 'contract_multiplier': 10},
-        'I': {'margin_rate': 0.08, 'contract_multiplier': 100},
-        'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
+        'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        # 大商所
         'J': {'margin_rate': 0.08, 'contract_multiplier': 100},
         'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
+        'I': {'margin_rate': 0.08, 'contract_multiplier': 100},
+        'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
+        'M': {'margin_rate': 0.06, 'contract_multiplier': 10},
+        'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'PP': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'P': {'margin_rate': 0.07, 'contract_multiplier': 10},
-        'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'Y': {'margin_rate': 0.06, 'contract_multiplier': 10},
-        'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
         # 'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'CL': {'margin_rate': 1, 'contract_multiplier': 1},
@@ -115,5 +121,7 @@ config = {
     # CL:原油; GC:黄金;SI:白银; CT:棉花;S:大豆;SM:豆粕; BO:豆油;NID:伦镍; ZSD:伦锌;
     'globalFutureSymbol': ['CL', 'GC', 'SI', 'CT', 'S', 'SM', 'BO', 'NID', 'ZSD']
 }
+
+
 
 cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
