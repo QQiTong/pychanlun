@@ -587,7 +587,7 @@ def testMail():
 
 def testGroupBy():
     startDate = '2020-03-29'
-    endDate = '2020-04-01'
+    endDate = '2020-04-02'
     end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     start = datetime.strptime(startDate, "%Y-%m-%d")
@@ -641,7 +641,7 @@ def app():
     # testTQ()
     # testRQ()
     # testMonitor()
-    testThread()
+    # testThread()
     # testHuobi()
     # testWaipan()
     # testWechat()
@@ -653,7 +653,7 @@ def app():
     # testTime2()
     # testMail()
     # testDingDing()
-    # testGroupBy()
+    testGroupBy()
 
 if __name__ == '__main__':
     app()

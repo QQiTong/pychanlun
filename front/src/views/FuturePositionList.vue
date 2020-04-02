@@ -359,7 +359,7 @@
                 prop="current_profit_rate"
             >
                 <template slot-scope="{row}" v-if="positionQueryForm.status==='holding'">
-                    <el-tag :type="row.current_profit_rate| percentTagFilter">{{row.current_profit_rate*100}}%</el-tag>
+                    <el-tag :type="row.current_profit_rate| percentTagFilter">{{(row.current_profit_rate*100).toFixed(2)}}%</el-tag>
                 </template>
             </el-table-column>
 

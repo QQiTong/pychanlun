@@ -322,7 +322,14 @@ class BusinessService:
                     x['last_update_time'] = self.formatTime(x['last_update_time'])
                 else:
                     x['last_update_time'] = ''
-                x['stop_lose_price'] = x['stop_lose_price']
+                if ('win_end_time' in x and x['win_end_time'] != ''):
+                    x['win_end_time'] = self.formatTime(x['win_end_time'])
+                else:
+                    x['win_end_time'] = ''
+                if ('lose_end_time' in x and x['lose_end_time'] != ''):
+                    x['lose_end_time'] = self.formatTime(x['lose_end_time'])
+                else:
+                    x['lose_end_time'] = ''
             return x
         else:
             return -1
