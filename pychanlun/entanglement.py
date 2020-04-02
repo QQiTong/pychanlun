@@ -154,7 +154,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     break
                 if duan_series[x] == -1:
                     break
-            if leave - e.end >= 5 and len(pydash.chain(low_series[e.end:leave+1]).filter_(lambda x: x > e.top).value()) > 2:
+            if leave - e.end >= 5 and len(pydash.chain(low_series[e.end:leave+1]).filter_(lambda x: x > e.top).value()) > 0:
                 r = -1
                 k = len(low_series)
                 if i < len(e_list) - 1:
@@ -193,7 +193,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     break
                 if duan_series[x] == 1:
                     break
-            if leave - e.end >= 5 and len(pydash.chain(high_series[e.end:leave+1]).filter_(lambda x: x < e.bottom).value()) > 2:
+            if leave - e.end >= 5 and len(pydash.chain(high_series[e.end:leave+1]).filter_(lambda x: x < e.bottom).value()) > 0:
                 r = -1
                 k = len(high_series)
                 if i < len(e_list) - 1:
