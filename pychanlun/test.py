@@ -30,8 +30,8 @@ from tqsdk import tafunc
 import re
 import pytz
 import string
-tz = pytz.timezone('Asia/Shanghai')
 
+tz = pytz.timezone('Asia/Shanghai')
 
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
 
@@ -126,7 +126,7 @@ def testChange():
                 change = "--"
             else:
                 print(today)
-                change = round((today - preday) / preday,4)
+                change = round((today - preday) / preday, 4)
             resultItem = {'change': change, 'price': today}
             symbolChangeMap[item] = resultItem
     print(symbolChangeMap)
@@ -143,7 +143,7 @@ def testProxy():
 
 
 def testHuobi():
-    startTime = int(round(time.time()*1000))
+    startTime = int(round(time.time() * 1000))
 
     PROXIES = {
         "http": "socks5://127.0.0.1:10808",
@@ -155,10 +155,12 @@ def testHuobi():
         'period': '1min',
         'size': 2000
     }
-    r = requests.get(hbdmUrl, params=payload1,  proxies=PROXIES)
-    endTime = int(round(time.time()*1000)) -startTime
-    print("耗费时间：",endTime)
+    r = requests.get(hbdmUrl, params=payload1, proxies=PROXIES)
+    endTime = int(round(time.time() * 1000)) - startTime
+    print("耗费时间：", endTime)
     print(json.loads(r.text)['data'])
+
+
 def testPydash():
     a = [1, 2, 1, 5]
     b = pydash.find_index(a, lambda x: x == 1)
@@ -169,20 +171,20 @@ def testTime():
     import pytz
     tz = pytz.timezone('Asia/Shanghai')
     str = '2020-03-19T09:10:00.000Z'
-    result = datetime.strptime(str,"%Y-%m-%dT%H:%M:%S.%fZ")
+    result = datetime.strptime(str, "%Y-%m-%dT%H:%M:%S.%fZ")
 
-    print(result,result)
+    print(result, result)
 
     stamp = 1568091600
     test = datetime.fromtimestamp(stamp)
     print(test)
 
-def testTime2():
 
+def testTime2():
     # str = '2019-12-30 09:00'
     # date = time.strptime(str,"%Y-%m-%d %H:%M")
     # print(time.mktime(date))
-    timeStr = datetime.strftime(datetime.now(),'%Y-%m-%d')
+    timeStr = datetime.strftime(datetime.now(), '%Y-%m-%d')
     print(timeStr)
 
 
@@ -351,26 +353,29 @@ def testMonitor():
     # 15F,60F  [3585,3537]
     #  26  7
     start = time.clock()
-    BeichiMonitor.calStopWinCount("BU2006",'3m',3200)
+    BeichiMonitor.calStopWinCount("BU2006", '3m', 3200)
     elapsed = (time.clock() - start)  # 结束计时
     print("程序执行的时间:" + str(elapsed) + "s")  # 印出时间
+
+
 def testThread():
-     symbolList = getDominantSymbol()
-     n = 12
-     c= [symbolList[i:i+n] for i in range(0, len(symbolList), n)]
-     print("--",c)
+    symbolList = getDominantSymbol()
+    n = 12
+    c = [symbolList[i:i + n] for i in range(0, len(symbolList), n)]
+    print("--", c)
+
+
 def testWaipan():
     timeStamp = time.time()
     url = "https://gu.sina.cn/ft/api/jsonp.php//GlobalService.getMink"
     payload = {
         "symbol": "CL",
-        "type":60
+        "type": 60
     }
     content = requests.get(url, params=payload).content
-    p1 = re.compile(r'[(](.*?)[)]', re.S) #最小匹配
+    p1 = re.compile(r'[(](.*?)[)]', re.S)  # 最小匹配
     result = re.findall(p1, content.decode('utf-8'))[0]
     klines = json.loads(result)
-
 
     originKlineList = []
 
@@ -379,7 +384,7 @@ def testWaipan():
         originKline = {}
         originKline['open'] = klines[i]['o']
         originKline['high'] = klines[i]['h']
-        originKline['low']  = klines[i]['l']
+        originKline['low'] = klines[i]['l']
         originKline['close'] = klines[i]['c']
         originKline['time'] = klines[i]['d']
 
@@ -388,6 +393,7 @@ def testWaipan():
         originKlineList.append(originKline)
     print(timeStamp)
     print(klines[0]['d'])
+
 
 def testWechat():
     # symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price, date_created_str,
@@ -403,22 +409,25 @@ def testWechat():
     date_created_str = '202003090919'
     close_price = 3387
     remark = '双盘'
-    url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s"\
-          "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s"\
-          % (signal,remark,symbol+'_'+period, signal, direction,'开:'+str(close_price)+' 止:'+str(stop_lose_price)+' 触:'+str(price), amount,'开:'+fire_time_str+' 触:'+date_created_str)
+    url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s" \
+          "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s" \
+          % (signal, remark, symbol + '_' + period, signal, direction, '开:' + str(close_price) + ' 止:' + str(stop_lose_price) + ' 触:' + str(price), amount,
+             '开:' + fire_time_str + ' 触:' + date_created_str)
     requests.post(url)
+
+
 #
 def testOkex1():
-    startTime = int(round(time.time()*1000))
+    startTime = int(round(time.time() * 1000))
 
     PROXIES = {
         "http": "socks5://127.0.0.1:10808",
         "https": "socks5://127.0.0.1:10808"
     }
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
-               "Accept":"application/json",
-               "App-Type":"web",
-               "Referer":"https://www.okex.me/derivatives/swap/full/usdt-btc"}
+               "Accept": "application/json",
+               "App-Type": "web",
+               "Referer": "https://www.okex.me/derivatives/swap/full/usdt-btc"}
 
     t = time.time()
     timeStamp = int(round(t * 1000))
@@ -430,9 +439,9 @@ def testOkex1():
         't': timeStamp
     }
 
-    r = requests.get(okexUrl,params=payload,headers = headers)
-    endTime = int(round(time.time()*1000)) -startTime
-    print("耗费时间：",endTime)
+    r = requests.get(okexUrl, params=payload, headers=headers)
+    endTime = int(round(time.time() * 1000)) - startTime
+    print("耗费时间：", endTime)
     klines = json.loads(r.text)['data']
     # print(klines)
     originKlineList = []
@@ -450,8 +459,9 @@ def testOkex1():
         originKlineList.append(originKline)
     print("结果:", len(originKlineList))
 
+
 def testOkex2():
-    startTime = int(round(time.time()*1000))
+    startTime = int(round(time.time() * 1000))
 
     # PROXIES = {
     #     "http": "socks5://127.0.0.1:10808",
@@ -469,9 +479,9 @@ def testOkex2():
         # 'end':'2020-03-22T18:55:00.000Z',
     }
 
-    r = requests.get(okexUrl,params=payload)
-    endTime = int(round(time.time()*1000)) -startTime
-    print("耗费时间：",endTime)
+    r = requests.get(okexUrl, params=payload)
+    endTime = int(round(time.time() * 1000)) - startTime
+    print("耗费时间：", endTime)
     klines = json.loads(r.text)
     print(klines)
     originKlineList = []
@@ -489,8 +499,9 @@ def testOkex2():
         originKlineList.append(originKline)
     print("结果:", len(originKlineList))
 
+
 def testOkexTiker():
-    startTime = int(round(time.time()*1000))
+    startTime = int(round(time.time() * 1000))
 
     PROXIES = {
         "http": "socks5://127.0.0.1:10808",
@@ -503,18 +514,21 @@ def testOkexTiker():
     tiker = json.loads(r.text)
     print(tiker)
 
+
 def testChaji():
     a = ['RB2005', 'HC2005']
-    b = ['RB2005', 'HC2010','RU2005']
+    b = ['RB2005', 'HC2010', 'RU2005']
     ret = []
     for i in a:
         if i not in b:
             ret.append(i)
     print(ret)
+
+
 def testGlobalChangeList():
     globalFutureSymbol = ["CL", "GC", "SI", "CT", "S", "SM", "BO", "NID", "ZSD"]
     #
-    changeList= {'RB2005':{'price':11,'change':0.23}}
+    changeList = {'RB2005': {'price': 11, 'change': 0.23}}
     globalChangeList = {}
     for i in range(len(globalFutureSymbol)):
         item = globalFutureSymbol[i]
@@ -532,16 +546,17 @@ def testGlobalChangeList():
 
         change = round((minClosePrice - dayOpenPrice) / dayOpenPrice, 4)
         changeItem = {
-            'change':change,
-            'price':minClosePrice
+            'change': change,
+            'price': minClosePrice
         }
-        print(item,'-> ',dayOpenPrice,' -> ',minClosePrice)
+        print(item, '-> ', dayOpenPrice, ' -> ', minClosePrice)
         globalChangeList[item] = changeItem
 
-        conbineChangeList = dict(changeList,**globalChangeList)
+        conbineChangeList = dict(changeList, **globalChangeList)
+
+    print("外盘涨跌幅列表", conbineChangeList)
 
 
-    print("外盘涨跌幅列表",conbineChangeList)
 def testDingDing():
     import requests
     import json
@@ -566,6 +581,8 @@ def testDingDing():
     headers = {'Content-Type': 'application/json'}
     f = requests.post(url, data=json.dumps(program), headers=headers)
     print(f)
+
+
 def testMail():
     mail = Mail()
     msg = {
@@ -584,6 +601,7 @@ def testMail():
     mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
     if not mailResult:
         print("发送失败")
+
 
 def testGroupBy():
     startDate = '2020-03-29'
@@ -624,11 +642,7 @@ def testGroupBy():
     # 每天亏损累加
     lose_end_list = []
     # 净盈亏
-    net_profit = []
-    #
-    win_end_list_by_symbol = []
-    lose_end_list_by_symbol = []
-    simple_symbol_list = []
+    net_profit_list = []
     # 保存日期
     for name, group in win_end_group_by_date:
         dateList.append(name)
@@ -637,30 +651,24 @@ def testGroupBy():
     for i in range(len(win_end_group_by_date.sum())):
         win_end_list.append(int(win_end_group_by_date.sum()[i]))
         lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
-        net_profit.append(int(win_end_group_by_date.sum()[i]) + int(lose_end_group_by_date.sum()[i]))
+        net_profit_list.append(int(win_end_group_by_date.sum()[i]) + int(lose_end_group_by_date.sum()[i]))
 
-    for name, group in win_end_group_by_symbol:
-        item = {}
-        simple_symbol_list.append(name)
-        # win_end_map[name] = int(win_end_group_by_symbol.sum()[name])
-        item['name'] = name
-        item['value'] = int(win_end_group_by_symbol.sum()[name])
-        print(item)
-        win_end_list_by_symbol.append(item)
-    for name, group in lose_end_group_by_symbol:
-        item = {}
-        # lose_end_map[name] = int(lose_end_group_by_symbol.sum()[name])
-        item['name'] = name
-        item['value'] = int(win_end_group_by_symbol.sum()[name])
-        lose_end_list_by_symbol.append(item)
+    sorted_win_money_list = win_end_group_by_symbol.mean().sort_values(ascending=False)
+    sorted_lose_money_list = lose_end_group_by_symbol.mean().sort_values(ascending=True)
 
-    # print(dateList)
-    # print(win_end_list)
-    # print(lose_end_list)
-    # print(net_profit)
-    print(win_end_list_by_symbol)
-    print(lose_end_list_by_symbol)
-    print(simple_symbol_list)
+    win_symbol_list = list(sorted_win_money_list.index)
+    lose_symbol_list = list(sorted_lose_money_list.index)
+
+    # 取整数
+    win_money_list = list(sorted_win_money_list.dropna(axis=0))
+    lose_money_list = list(sorted_lose_money_list.dropna(axis=0))
+    for i in range(len(win_money_list)):
+        win_money_list[i] = int(win_money_list[i])
+    for i in range(len(lose_money_list)):
+        lose_money_list[i] = int(lose_money_list[i])
+
+    print(win_symbol_list, win_money_list)
+    print(lose_symbol_list, lose_money_list)
 
 
 def formatTime(localTime):
@@ -690,7 +698,6 @@ def app():
     # testMail()
     # testDingDing()
     testGroupBy()
-
 
 
 if __name__ == '__main__':

@@ -98,49 +98,42 @@ class BusinessService:
         lose_end_list = []
         # 净盈亏
         net_profit_list = []
-        #
-        win_end_list_by_symbol = []
-        lose_end_list_by_symbol = []
-        win_symbol_list = []
-        lose_symbol_list = []
-
-        # 把日期保存起来
+        # 保存日期
         for name, group in win_end_group_by_date:
             dateList.append(name)
+        # 保存品种简称
+
         for i in range(len(win_end_group_by_date.sum())):
             win_end_list.append(int(win_end_group_by_date.sum()[i]))
             lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
             net_profit_list.append(int(win_end_group_by_date.sum()[i]) + int(lose_end_group_by_date.sum()[i]))
 
-        for name, group in win_end_group_by_symbol:
-            item = {}
-            # win_end_map[name] = int(win_end_group_by_symbol.sum()[name])
-            win_symbol_list.append(name)
-            item['name'] = name
-            item['value'] = int(win_end_group_by_symbol.sum()[name])
-            print(item)
-            win_end_list_by_symbol.append(item)
-        for name, group in lose_end_group_by_symbol:
-            item = {}
-            lose_symbol_list.append(name)
-            # lose_end_map[name] = int(lose_end_group_by_symbol.sum()[name])
-            item['name'] = name
-            item['value'] = int(lose_end_group_by_symbol.sum()[name])
-            lose_end_list_by_symbol.append(item)
+        sorted_win_money_list = win_end_group_by_symbol.mean().sort_values(ascending=False)
+        sorted_lose_money_list = lose_end_group_by_symbol.mean().sort_values(ascending=True)
 
-        # print(dateList)
-        # print(win_end_list)
-        # print(lose_end_list)
-        # print(net_profit_list)
-        print(win_end_list_by_symbol)
-        print(lose_end_list_by_symbol)
+        win_symbol_list = list(sorted_win_money_list.index)
+        lose_symbol_list = list(sorted_lose_money_list.index)
+
+        # 取整数
+        win_money_list = list(sorted_win_money_list.dropna(axis=0))
+        lose_money_list = list(sorted_lose_money_list.dropna(axis=0))
+        for i in range(len(win_money_list)):
+            win_money_list[i] = int(win_money_list[i])
+        for i in range(len(lose_money_list)):
+            lose_money_list[i] = int(lose_money_list[i])
+
+        # print(win_symbol_list, win_money_list)
+        # print(lose_symbol_list, lose_money_list)
+
+        # print(win_symbol_list, win_money_list)
+        # print(lose_symbol_list, lose_money_list)
         statisticList = {
             'date': dateList,
             'win_end_list': win_end_list,
             'lose_end_list': lose_end_list,
             'net_profit_list': net_profit_list,
-            'win_end_list_by_symbol': win_end_list_by_symbol,
-            'lose_end_list_by_symbol': lose_end_list_by_symbol,
+            'win_money_list': win_money_list,
+            'lose_money_list': lose_money_list,
             'win_symbol_list': win_symbol_list,
             'lose_symbol_list': lose_symbol_list
         }

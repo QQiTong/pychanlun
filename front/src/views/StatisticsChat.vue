@@ -107,16 +107,13 @@
                 futureApi.getStatisticList(this.dateRange).then(res => {
                     console.log('统计图表:', res)
                     this.statisticList = res
-
                     this.processData()
-
-
                 }).catch((error) => {
                     console.log('获取统计图表失败:', error)
                 })
             },
-            processData(){
-              // 盈利列表
+            processData() {
+                // 盈利列表
                 this.profitChart.setOption({
                     backgroundColor: '#344b58',
                     title: {
@@ -294,41 +291,53 @@
                     ]
                 })
 
-                 // 盈利品种列表
+                // 盈利品种列表
                 this.winPiechart.setOption({
                     title: {
-                        text: '盈利占比',
+                        text: '平均盈利排行',
                         top: '2%',
                         textStyle: {
                             color: 'black'
                         }
                     },
+                    xAxis: {
+                        type: 'category',
+                        data: this.statisticList.win_symbol_list
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
                     tooltip: {
                         trigger: 'item',
-                        formatter: '{a} <br/>{b} : {c} ({d}%)'
+                        formatter: '{a} <br/>{b} : {c}'
                     },
                     legend: {
                         left: 'center',
                         bottom: '10',
                         data: this.statisticList.win_symbol_list
                     },
+
                     series: [
                         {
-                            name: '盈利占比',
-                            type: 'pie',
-                            roseType: 'radius',
-                            radius: [15, 95],
-                            center: ['50%', '38%'],
-                            data: this.statisticList.win_end_list_by_symbol,
+                            name: '盈利排行',
+                            type: 'bar',
+                            data: this.statisticList.win_money_list,
                             animationEasing: 'cubicInOut',
-                            animationDuration: 2600
+                            animationDuration: 2600,
+                            itemStyle: {
+                                normal: {
+                                    color: function (params) {
+                                        return '#EF5350'
+                                    }
+                                }
+                            },
                         }
                     ]
                 })
                 // 亏损品种列表
                 this.losePieChart.setOption({
                     title: {
-                        text: '亏损占比',
+                        text: '平均亏损排行',
                         top: '2%',
                         textStyle: {
                             color: 'black'
@@ -336,31 +345,43 @@
                     },
                     tooltip: {
                         trigger: 'item',
-                        formatter: '{a} <br/>{b} : {c} ({d}%)'
+                        formatter: '{a} <br/>{b} : {c}'
                     },
                     legend: {
                         left: 'center',
                         bottom: '10',
                         data: this.statisticList.lose_symbol_list
                     },
+
+                    xAxis: {
+                        type: 'category',
+                        data: this.statisticList.lose_symbol_list,
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
                     series: [
                         {
                             name: '亏损占比',
-                            type: 'pie',
-                            roseType: 'radius',
-                            radius: [15, 95],
-                            center: ['50%', '38%'],
-                            data: this.statisticList.lose_end_list_by_symbol,
+                            type: 'bar',
+                            data: this.statisticList.lose_money_list,
                             animationEasing: 'cubicInOut',
-                            animationDuration: 2600
+                            animationDuration: 2600,
+                            itemStyle: {
+                                normal: {
+                                    color: function (params) {
+                                        return '#26A69A'
+                                    }
+                                }
+                            },
                         }
                     ]
                 })
             },
             initChart() {
                 this.profitChart = this.$echarts.init(document.getElementById('profit-chart'))
-                this.winPiechart = this.$echarts.init(document.getElementById('win-pie-chart'), 'macarons')
-                this.losePieChart = this.$echarts.init(document.getElementById('lose-pie-chart'), 'macarons')
+                this.winPiechart = this.$echarts.init(document.getElementById('win-pie-chart'))
+                this.losePieChart = this.$echarts.init(document.getElementById('lose-pie-chart'))
 
                 this.chartssize(document.getElementById('profit-chart-parent'),
                     document.getElementById('profit-chart'));
@@ -377,7 +398,6 @@
                     this.winPiechart.resize()
                     this.losePieChart.resize()
                 })
-
 
 
             },
@@ -429,15 +449,15 @@
         }
 
         .pie-chart-list {
-            padding-top 100px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
+            flex-direction column
             height: 100%;
 
-            .pie-chart-item {
+            .pie-chart {
                 flex: 1
-                width: 200px;
+                width: 1200px;
                 height: 300px;
             }
         }
