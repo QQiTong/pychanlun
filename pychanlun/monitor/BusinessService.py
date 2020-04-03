@@ -125,7 +125,7 @@ class BusinessService:
             lose_symbol_list.append(name)
             # lose_end_map[name] = int(lose_end_group_by_symbol.sum()[name])
             item['name'] = name
-            item['value'] = int(win_end_group_by_symbol.sum()[name])
+            item['value'] = int(lose_end_group_by_symbol.sum()[name])
             lose_end_list_by_symbol.append(item)
 
         # print(dateList)

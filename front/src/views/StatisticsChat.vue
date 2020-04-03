@@ -345,7 +345,7 @@
                     },
                     series: [
                         {
-                            name: '盈利占比',
+                            name: '亏损占比',
                             type: 'pie',
                             roseType: 'radius',
                             radius: [15, 95],
