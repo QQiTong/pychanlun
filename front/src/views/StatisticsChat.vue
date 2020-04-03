@@ -17,6 +17,7 @@
                 size="mini"
                 :picker-options="pickerOptions">
             </el-date-picker>
+            <el-button @click="getStatisticList()" type="primary" size="mini" class="ml-5">刷新</el-button>
             <div class="statistic-echarts-list">
                 <div class="profit-chart" id="profit-chart-parent">
                     <div id="profit-chart"/>
@@ -31,6 +32,7 @@
                 </div>
 
             </div>
+
         </div>
     </div>
 
@@ -291,6 +293,69 @@
                         }
                     ]
                 })
+
+                 // 盈利品种列表
+                this.winPiechart.setOption({
+                    title: {
+                        text: '盈利占比',
+                        top: '2%',
+                        textStyle: {
+                            color: 'black'
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b} : {c} ({d}%)'
+                    },
+                    legend: {
+                        left: 'center',
+                        bottom: '10',
+                        data: this.statisticList.win_symbol_list
+                    },
+                    series: [
+                        {
+                            name: '盈利占比',
+                            type: 'pie',
+                            roseType: 'radius',
+                            radius: [15, 95],
+                            center: ['50%', '38%'],
+                            data: this.statisticList.win_end_list_by_symbol,
+                            animationEasing: 'cubicInOut',
+                            animationDuration: 2600
+                        }
+                    ]
+                })
+                // 亏损品种列表
+                this.losePieChart.setOption({
+                    title: {
+                        text: '亏损占比',
+                        top: '2%',
+                        textStyle: {
+                            color: 'black'
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b} : {c} ({d}%)'
+                    },
+                    legend: {
+                        left: 'center',
+                        bottom: '10',
+                        data: this.statisticList.lose_symbol_list
+                    },
+                    series: [
+                        {
+                            name: '盈利占比',
+                            type: 'pie',
+                            roseType: 'radius',
+                            radius: [15, 95],
+                            center: ['50%', '38%'],
+                            data: this.statisticList.lose_end_list_by_symbol,
+                            animationEasing: 'cubicInOut',
+                            animationDuration: 2600
+                        }
+                    ]
+                })
             },
             initChart() {
                 this.profitChart = this.$echarts.init(document.getElementById('profit-chart'))
@@ -314,80 +379,7 @@
                 })
 
 
-                // 盈利品种列表
-                this.winPiechart.setOption({
-                    title: {
-                        text: '盈利占比',
-                        top: '2%',
-                        textStyle: {
-                            color: 'black'
-                        }
-                    },
-                    tooltip: {
-                        trigger: 'item',
-                        formatter: '{a} <br/>{b} : {c} ({d}%)'
-                    },
-                    legend: {
-                        left: 'center',
-                        bottom: '10',
-                        data: ['螺纹', '橡胶', '豆粕', '沪镍', '黄金']
-                    },
-                    series: [
-                        {
-                            name: '盈利占比',
-                            type: 'pie',
-                            roseType: 'radius',
-                            radius: [15, 95],
-                            center: ['50%', '38%'],
-                            data: [
-                                {value: 320, name: '螺纹'},
-                                {value: 240, name: '橡胶'},
-                                {value: 149, name: '豆粕'},
-                                {value: 100, name: '沪镍'},
-                                {value: 59, name: '黄金'}
-                            ],
-                            animationEasing: 'cubicInOut',
-                            animationDuration: 2600
-                        }
-                    ]
-                })
-                // 亏损品种列表
-                this.losePieChart.setOption({
-                    title: {
-                        text: '亏损占比',
-                        top: '2%',
-                        textStyle: {
-                            color: 'black'
-                        }
-                    },
-                    tooltip: {
-                        trigger: 'item',
-                        formatter: '{a} <br/>{b} : {c} ({d}%)'
-                    },
-                    legend: {
-                        left: 'center',
-                        bottom: '10',
-                        data: ['白银', '燃油', '棕榈', '沥青', '聚丙烯']
-                    },
-                    series: [
-                        {
-                            name: '盈利占比',
-                            type: 'pie',
-                            roseType: 'radius',
-                            radius: [15, 95],
-                            center: ['50%', '38%'],
-                            data: [
-                                {value: 320, name: '白银'},
-                                {value: 240, name: '燃油'},
-                                {value: 149, name: '棕榈'},
-                                {value: 100, name: '沥青'},
-                                {value: 59, name: '聚丙烯'}
-                            ],
-                            animationEasing: 'cubicInOut',
-                            animationDuration: 2600
-                        }
-                    ]
-                })
+
             },
             // 计算echarts 高度
             chartssize(container, charts) {

@@ -29,7 +29,7 @@ import pandas as pd
 from tqsdk import tafunc
 import re
 import pytz
-
+import string
 tz = pytz.timezone('Asia/Shanghai')
 
 
@@ -596,14 +596,27 @@ def testGroupBy():
         "date_created": {"$gte": start, "$lte": end}
     }).sort("_id", pymongo.ASCENDING)
     df = pd.DataFrame(list(data_list))
+
     for idx, row in df.iterrows():
+        # 根据日期分组
         date_created = df.loc[idx, 'date_created']
         date_created_str = formatTime(date_created)
         df.loc[idx, 'new_date_created'] = date_created_str
-    win_end_group = df['win_end_money'].groupby(df['new_date_created'])
-    lose_end_group = df['lose_end_money'].groupby(df['new_date_created'])
-    print(win_end_group.sum())
-    print(lose_end_group.sum())
+        # 根据symbol分组 查询盈利品种排行和亏损品种排行
+        symbol = df.loc[idx, 'symbol']
+        # RB2010 -> RB
+        simple_symbol = symbol.rstrip(string.digits)
+        df.loc[idx, 'simple_symbol'] = simple_symbol
+
+    win_end_group_by_date = df['win_end_money'].groupby(df['new_date_created'])
+    lose_end_group_by_date = df['lose_end_money'].groupby(df['new_date_created'])
+    win_end_group_by_symbol = df['win_end_money'].groupby(df['simple_symbol'])
+    lose_end_group_by_symbol = df['lose_end_money'].groupby(df['simple_symbol'])
+    # print(win_end_group_by_symbol.sum())
+    # print(lose_end_group_by_symbol.sum())
+
+    # print(win_end_group_by_date.sum())
+    # print(lose_end_group_by_date.sum())
     # 日期列表
     dateList = []
     # 当日盈利累加
@@ -612,19 +625,42 @@ def testGroupBy():
     lose_end_list = []
     # 净盈亏
     net_profit = []
-
-    # 把日期保存起来
-    for name, group in win_end_group:
+    #
+    win_end_list_by_symbol = []
+    lose_end_list_by_symbol = []
+    simple_symbol_list = []
+    # 保存日期
+    for name, group in win_end_group_by_date:
         dateList.append(name)
-    for i in range(len(win_end_group.sum())):
-        win_end_list.append(int(win_end_group.sum()[i]))
-        lose_end_list.append(int(lose_end_group.sum()[i]))
-        net_profit.append(int(win_end_group.sum()[i]) + int(lose_end_group.sum()[i]))
+    # 保存品种简称
 
-    print(dateList)
-    print(win_end_list)
-    print(lose_end_list)
-    print(net_profit)
+    for i in range(len(win_end_group_by_date.sum())):
+        win_end_list.append(int(win_end_group_by_date.sum()[i]))
+        lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
+        net_profit.append(int(win_end_group_by_date.sum()[i]) + int(lose_end_group_by_date.sum()[i]))
+
+    for name, group in win_end_group_by_symbol:
+        item = {}
+        simple_symbol_list.append(name)
+        # win_end_map[name] = int(win_end_group_by_symbol.sum()[name])
+        item['name'] = name
+        item['value'] = int(win_end_group_by_symbol.sum()[name])
+        print(item)
+        win_end_list_by_symbol.append(item)
+    for name, group in lose_end_group_by_symbol:
+        item = {}
+        # lose_end_map[name] = int(lose_end_group_by_symbol.sum()[name])
+        item['name'] = name
+        item['value'] = int(win_end_group_by_symbol.sum()[name])
+        lose_end_list_by_symbol.append(item)
+
+    # print(dateList)
+    # print(win_end_list)
+    # print(lose_end_list)
+    # print(net_profit)
+    print(win_end_list_by_symbol)
+    print(lose_end_list_by_symbol)
+    print(simple_symbol_list)
 
 
 def formatTime(localTime):
@@ -654,6 +690,8 @@ def app():
     # testMail()
     # testDingDing()
     testGroupBy()
+
+
 
 if __name__ == '__main__':
     app()

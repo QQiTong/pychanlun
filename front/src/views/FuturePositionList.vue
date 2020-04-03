@@ -441,17 +441,17 @@
                 </template>
             </el-table-column>
             <el-table-column label="动止数" prop="stop_win_count" width="90" align="center">
-                <template slot-scope="{row}" v-if="row.status==='holding'">
+                <template slot-scope="{row}" >
                     {{row.stop_win_count}}
                 </template>
             </el-table-column>
             <el-table-column label="动止价" prop="stop_win_count" width="90" align="center">
-                <template slot-scope="{row}" v-if="row.status==='holding'">
+                <template slot-scope="{row}" >
                     {{row.stop_win_price}}
                 </template>
             </el-table-column>
             <el-table-column label="动止收益" prop="stop_win_money" width="90" align="center">
-                <template slot-scope="{row}" v-if="row.status==='holding'">
+                <template slot-scope="{row}" >
                     {{row.stop_win_money}}
                 </template>
             </el-table-column>

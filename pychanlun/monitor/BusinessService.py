@@ -14,6 +14,7 @@ from bson import ObjectId
 import time
 import requests
 import copy
+import string
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -68,39 +69,80 @@ class BusinessService:
             "date_created": {"$gte": start, "$lte": end}
         }).sort("_id", pymongo.ASCENDING)
         df = pd.DataFrame(list(data_list))
+
         for idx, row in df.iterrows():
+            # 根据日期分组
             date_created = df.loc[idx, 'date_created']
             date_created_str = self.formatTime2(date_created)
             df.loc[idx, 'new_date_created'] = date_created_str
-        win_end_group = df['win_end_money'].groupby(df['new_date_created'])
-        lose_end_group = df['lose_end_money'].groupby(df['new_date_created'])
-        print(win_end_group.sum())
-        print(lose_end_group.sum())
+            # 根据symbol分组 查询盈利品种排行和亏损品种排行
+            symbol = df.loc[idx, 'symbol']
+            # RB2010 -> RB
+            simple_symbol = symbol.rstrip(string.digits)
+            df.loc[idx, 'simple_symbol'] = simple_symbol
+
+        win_end_group_by_date = df['win_end_money'].groupby(df['new_date_created'])
+        lose_end_group_by_date = df['lose_end_money'].groupby(df['new_date_created'])
+        win_end_group_by_symbol = df['win_end_money'].groupby(df['simple_symbol'])
+        lose_end_group_by_symbol = df['lose_end_money'].groupby(df['simple_symbol'])
+        # print(win_end_group_by_symbol.sum())
+        # print(lose_end_group_by_symbol.sum())
+
+        # print(win_end_group_by_date.sum())
+        # print(lose_end_group_by_date.sum())
         # 日期列表
         dateList = []
         # 当日盈利累加
         win_end_list = []
         # 每天亏损累加
         lose_end_list = []
-        # 净利润
+        # 净盈亏
         net_profit_list = []
+        #
+        win_end_list_by_symbol = []
+        lose_end_list_by_symbol = []
+        win_symbol_list = []
+        lose_symbol_list = []
+
         # 把日期保存起来
-        for name, group in win_end_group:
+        for name, group in win_end_group_by_date:
             dateList.append(name)
-        for i in range(len(win_end_group.sum())):
-            win_end_list.append(int(win_end_group.sum()[i]))
-            lose_end_list.append(int(lose_end_group.sum()[i]))
-            net_profit_list.append(int(win_end_group.sum()[i]) + int(lose_end_group.sum()[i]))
+        for i in range(len(win_end_group_by_date.sum())):
+            win_end_list.append(int(win_end_group_by_date.sum()[i]))
+            lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
+            net_profit_list.append(int(win_end_group_by_date.sum()[i]) + int(lose_end_group_by_date.sum()[i]))
+
+        for name, group in win_end_group_by_symbol:
+            item = {}
+            # win_end_map[name] = int(win_end_group_by_symbol.sum()[name])
+            win_symbol_list.append(name)
+            item['name'] = name
+            item['value'] = int(win_end_group_by_symbol.sum()[name])
+            print(item)
+            win_end_list_by_symbol.append(item)
+        for name, group in lose_end_group_by_symbol:
+            item = {}
+            lose_symbol_list.append(name)
+            # lose_end_map[name] = int(lose_end_group_by_symbol.sum()[name])
+            item['name'] = name
+            item['value'] = int(win_end_group_by_symbol.sum()[name])
+            lose_end_list_by_symbol.append(item)
 
         # print(dateList)
         # print(win_end_list)
         # print(lose_end_list)
-        # print(net_profit)
+        # print(net_profit_list)
+        print(win_end_list_by_symbol)
+        print(lose_end_list_by_symbol)
         statisticList = {
-            'date':dateList,
-            'win_end_list':win_end_list,
-            'lose_end_list':lose_end_list,
-            'net_profit_list':net_profit_list
+            'date': dateList,
+            'win_end_list': win_end_list,
+            'lose_end_list': lose_end_list,
+            'net_profit_list': net_profit_list,
+            'win_end_list_by_symbol': win_end_list_by_symbol,
+            'lose_end_list_by_symbol': lose_end_list_by_symbol,
+            'win_symbol_list': win_symbol_list,
+            'lose_symbol_list': lose_symbol_list
         }
         return statisticList
 
@@ -339,7 +381,7 @@ class BusinessService:
         localTimeStampStr = time.strftime("%Y-%m-%d %H:%M:%S", localTimeStamp)
         return localTimeStampStr
 
-    def formatTime2(self,localTime):
+    def formatTime2(self, localTime):
         date_created_stamp = int(time.mktime(localTime.timetuple()))
         timeArray = time.localtime(date_created_stamp)
         return time.strftime("%Y-%m-%d", timeArray)
@@ -368,11 +410,11 @@ class BusinessService:
                 x['last_update_time'] = self.formatTime(x['last_update_time'])
             else:
                 x['last_update_time'] = ''
-            if ('lose_end_time' in x and x['lose_end_time']!=''):
+            if ('lose_end_time' in x and x['lose_end_time'] != ''):
                 x['lose_end_time'] = self.formatTime(x['lose_end_time'])
             else:
                 x['lose_end_time'] = ''
-            if ('win_end_time' in x and x['win_end_time']!=''):
+            if ('win_end_time' in x and x['win_end_time'] != ''):
                 x['win_end_time'] = self.formatTime(x['win_end_time'])
             else:
                 x['win_end_time'] = ''

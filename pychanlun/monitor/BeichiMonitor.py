@@ -340,7 +340,10 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                                 'status': status,
                                 'current_profit_rate':current_profit_rate, #当前浮盈比例
                                 'current_profit':current_profit,  # 当前浮盈额
-                                'stop_win_money': stop_win_money  # 动止的收益
+                                'stop_win_money': stop_win_money,  # 动止的收益
+                                'stop_win_count':stop_win_count,   # 动止数量
+                                'stop_win_price':stop_win_price,   # 动止价格
+
                             },
                             '$inc': {
                                 'update_count': 1
