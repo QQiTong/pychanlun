@@ -149,18 +149,20 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 离开中枢后的第一个笔结束
             leave = e.end
             for x in range(e.end + 1, len(high_series)):
-                if low_series[x] > e.zg:
+                if high_series[x] > e.zg and bi_series[x] == 1:
                     leave = x
                     break
                 if duan_series[x] == -1:
                     break
-            if leave - e.end >= 5 :
+            if leave - e.end >= 5:
                 r = -1
                 k = len(low_series)
                 if i < len(e_list) - 1:
                     k = e_list[i+1].start
                 for x in range(leave + 1, k):
-                    if low_series[x] < e.top:
+                    if low_series[x] < e.top and (
+                            len(pydash.chain(low_series[e.end+1:x]).filter_(lambda x: x > e.top).value()) > 0 or
+                            len(pydash.chain(high_series[e.end+1:x]).filter_(lambda x: x > e.gg).value()) > 0):
                         r = x
                         break
                     if duan_series[x] == -1:
@@ -188,7 +190,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 下跌中枢，找第一次的拉回
             leave = e.end
             for x in range(e.end + 1, len(low_series)):
-                if high_series[x] < e.zd:
+                if low_series[x] < e.zd and bi_series[x] == -1:
                     leave = x
                     break
                 if duan_series[x] == 1:
@@ -199,7 +201,9 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                 if i < len(e_list) - 1:
                     k = e_list[i+1].start
                 for x in range(leave + 1, len(high_series)):
-                    if high_series[x] > e.bottom:
+                    if high_series[x] > e.bottom and (
+                            len(pydash.chain(high_series[e.end+1:x]).filter_(lambda x: x < e.bottom).value()) > 0 or
+                            len(pydash.chain(low_series[e.end+1:x]).filter_(lambda x: x < e.dd).value()) > 0):
                         r = x
                         break
                     if duan_series[x] == -1:
