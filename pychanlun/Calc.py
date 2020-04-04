@@ -375,9 +375,11 @@ class Calc:
         resJson['higherDuanData'] = getLineData(timeList, higherDuanList, highList, lowList)
         resJson['higherHigherDuanData'] = getLineData(timeList, higherHigherDuanList, highList, lowList)
 
-        resJson['diff'] = getMacd(closePriceList)[0].tolist()
-        resJson['dea'] = getMacd(closePriceList)[1].tolist()
-        resJson['macd'] = getMacd(closePriceList)[2].tolist()
+        # 当前级别MACD
+        diff_array, dea_array, macd_array = calc_macd(closePriceList)
+        resJson['diff'] = diff_array.tolist()
+        resJson['dea'] = dea_array.tolist()
+        resJson['macd'] = macd_array.tolist()
         # resJson['macdAreaData'] = calcArea(resJson['diff'], resJson['macd'], timeList)
         # resJson['boll_up'] = getBoll(closePriceList)[0].tolist()
         # resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
@@ -391,21 +393,15 @@ class Calc:
         resJson['higher_duan_zsdata'] = higher_duan_zsdata
         resJson['higher_duan_zsflag'] = higher_duan_zsflag
 
-        # 获取大级别macd
-        # resJson['diffBigLevel'] = getMacd(closePriceListBigLevel)[0].tolist()
-        # resJson['deaBigLevel'] = getMacd(closePriceListBigLevel)[1].tolist()
-        # resJson['macdBigLevel'] = getMacd(closePriceListBigLevel)[2].tolist()
-        # resJson['dateBigLevel'] = timeListBigLevel
+        # 大级别MACD
+        big_diff_array, big_dea_array, big_macd_array = calc_macd(closePriceListBigLevel)
+        resJson['diffBigLevel'] = big_diff_array.tolist()
+        resJson['deaBigLevel'] = big_dea_array.tolist()
+        resJson['macdBigLevel'] = big_macd_array.tolist()
 
-        diffList = resJson['diff']
-        deaList = resJson['dea']
-        macdList = resJson['macd']
 
         # 背驰计算
         time_array = np.array(timeList)
-        macd_array = np.array(macdList)
-        diff_array = np.array(diffList)
-        dea_array = np.array(deaList)
         high_array = np.array(highList)
         low_array = np.array(lowList)
         open_array = np.array(openPriceList)
@@ -543,9 +539,8 @@ def getZhongShuData(entanglementList):
 #     return zsdata, zsflag
 
 
-def getMacd(closePriceList):
-    close = array(closePriceList)
-    macd = ta.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
+def calc_macd(close_list):
+    macd = ta.MACD(np.array(close_list), fastperiod=12, slowperiod=26, signalperiod=9)
     result = np.nan_to_num(macd).round(decimals=2)
     return result
 
