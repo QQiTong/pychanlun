@@ -152,6 +152,9 @@ class Calc:
         start = time.clock()  # 开始计时
         # 统计程序执行时间
 
+        x_data = pd.DataFrame()
+        xx_data = pd.DataFrame()
+
         cat = None
         bigLevelPeriod = None
 
@@ -221,6 +224,11 @@ class Calc:
             timeList.append(strTime)
             volumeList.append(round(float(item['volume']), 2))
             timeIndexList.append(time.mktime(localTime))
+        x_data['timestamp'] = timeIndexList
+        x_data['open'] = openPriceList
+        x_data['close'] = closePriceList
+        x_data['high'] = highList
+        x_data['low'] = lowList
 
         # 高级别数据
         openPriceListBigLevel = []
@@ -240,6 +248,11 @@ class Calc:
                 openPriceListBigLevel.append(round(float(item['open']), 2))
                 closePriceListBigLevel.append(round(float(item['close']), 2))
                 timeIndexListBigLevel.append(time.mktime(localTime))
+        xx_data['timestamp'] = timeIndexListBigLevel
+        xx_data['open'] = openPriceListBigLevel
+        xx_data['close'] = closePriceListBigLevel
+        xx_data['high'] = highListBigLevel
+        xx_data['low'] = lowListBigLevel
 
         # 高高级别数据
         openPriceListBigLevel2 = []
@@ -264,6 +277,7 @@ class Calc:
         # 本级别笔
         biList = [0 for i in range(count)]
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList)
+        x_data['bi'] = biList
 
         # 高级别笔
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
@@ -272,6 +286,7 @@ class Calc:
             fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
             if fractialRegion is not None:
                 fractialRegion["period"] = bigLevelPeriod
+            xx_data['bi'] = biListBigLevel
 
         # 高高级别笔
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
@@ -290,6 +305,7 @@ class Calc:
                 CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod)
         else:
             CalcDuan(count, duanList, biList, highList, lowList)
+        x_data['duan'] = duanList
 
         # 高一级别段处理
         higherDuanList = [0 for i in range(count)]
@@ -377,6 +393,9 @@ class Calc:
 
         # 当前级别MACD
         diff_array, dea_array, macd_array = calc_macd(closePriceList)
+        x_data['diff'] = diff_array
+        x_data['dea'] = dea_array
+        x_data['macd'] = macd_array
         resJson['diff'] = diff_array.tolist()
         resJson['dea'] = dea_array.tolist()
         resJson['macd'] = macd_array.tolist()
@@ -395,10 +414,12 @@ class Calc:
 
         # 大级别MACD
         big_diff_array, big_dea_array, big_macd_array = calc_macd(closePriceListBigLevel)
+        xx_data['diff'] = big_diff_array
+        xx_data['dea'] = big_dea_array
+        xx_data['macd'] = big_macd_array
         resJson['diffBigLevel'] = big_diff_array.tolist()
         resJson['deaBigLevel'] = big_dea_array.tolist()
         resJson['macdBigLevel'] = big_macd_array.tolist()
-
 
         # 背驰计算
         time_array = np.array(timeList)
@@ -406,14 +427,24 @@ class Calc:
         low_array = np.array(lowList)
         open_array = np.array(openPriceList)
         close_array = np.array(closePriceList)
-        beichiData = divergence.calcAndNote(
-                time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array,
-                biList, duanList)
+
+        buyMACDBCData = {}
+        buyMACDBCData['date'] = []
+        buyMACDBCData['data'] = []
+        buyMACDBCData['value'] = []
+        sellMACDBCData = {}
+        sellMACDBCData['date'] = []
+        sellMACDBCData['data'] = []
+        sellMACDBCData['value'] = []
+
+        beichiData = divergence.calc_beichi_data(x_data, xx_data)
+        buyMACDBCData = beichiData['buyMACDBCData']
+        sellMACDBCData = beichiData['sellMACDBCData']
+
         # beichiData2 = divergence.calcAndNote(
         #         time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array,
         #         biList, higherDuanList, True)
-        buyMACDBCData = beichiData['buyMACDBCData']
-        sellMACDBCData = beichiData['sellMACDBCData']
+
         # buyMACDBCData2 = beichiData2['buyMACDBCData']
         # sellMACDBCData2 = beichiData2['sellMACDBCData']
 
@@ -477,7 +508,7 @@ class Calc:
         resJsonStr = json.dumps(resJson)
 
         elapsed = (time.clock() - start)  # 结束计时
-        print("程序执行的时间:" + str(round(elapsed,2)) + "s")  # 印出时间
+        print("程序执行的时间:" + str(round(elapsed,2)) + "s", symbol, period)  # 印出时间
         return resJson
 
 

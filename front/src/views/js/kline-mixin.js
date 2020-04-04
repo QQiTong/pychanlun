@@ -539,7 +539,7 @@ export default {
             // 如果是大图，只请求一个周期的数据
             if (this.period !== '') {
                 Object.assign(query, {symbol, period: this.period, endDate: this.endDate})
-                that.$router.push({query})
+                // that.$router.push({query})
                 // this.$router.push(query).catch(err => {
                 //     console.log('捕获相同路由报错', err)
                 // })
