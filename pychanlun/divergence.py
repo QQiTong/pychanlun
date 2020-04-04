@@ -8,6 +8,7 @@ from pychanlun.funcat.time_series import (fit_series, NumericSeries)
 from pychanlun.funcat.api import *
 from pychanlun import Duan
 from pychanlun.basic.bi import CalcBiList
+import datetime
 
 
 '''
@@ -168,7 +169,7 @@ def note(divergence_down, divergence_up, bi_series, duan_series, time_series, hi
     }
     for i in range(len(divergence_down)):
         if divergence_down[i] == 1:
-            data['buyMACDBCData']['date'].append(time_series[i])
+            data['buyMACDBCData']['date'].append(datetime.datetime.fromtimestamp(time_series[i]).strftime('%Y-%m-%d %H:%M'))
             # data属性保持和其他信号统一使用触发背驰的价格 便于前端统一标出开仓横线
             data['buyMACDBCData']['data'].append(open_series[i])
             if bigLevel:
@@ -190,7 +191,7 @@ def note(divergence_down, divergence_up, bi_series, duan_series, time_series, hi
                 data['buyMACDBCData']['stop_win_price'].append(0)
     for i in range(len(divergence_up)):
         if divergence_up[i] == 1:
-            data['sellMACDBCData']['date'].append(time_series[i])
+            data['sellMACDBCData']['date'].append(datetime.datetime.fromtimestamp(time_series[i]).strftime('%Y-%m-%d %H:%M'))
             data['sellMACDBCData']['data'].append(open_series[i])
             if bigLevel:
                 data['sellMACDBCData']['value'].append(signalMap['高级别线顶背'])
