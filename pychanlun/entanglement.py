@@ -160,6 +160,8 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                 if i < len(e_list) - 1:
                     k = e_list[i+1].start
                 for x in range(leave + 1, k):
+                    if e_next is not None and x >= e_next.start:
+                        break
                     if low_series[x] < e.top and (
                             len(pydash.chain(low_series[e.end+1:x]).filter_(lambda x: x > e.top).value()) > 0 or
                             len(pydash.chain(high_series[e.end+1:x]).filter_(lambda x: x > e.gg).value()) > 0):
@@ -167,8 +169,6 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                         break
                     if duan_series[x] == -1:
                         break
-                    # if e_next is not None and x >= e_next.end:
-                    #     break
                 if r >= 0:
                     result['sell_zs_huila']['idx'].append(r)
                     result['sell_zs_huila']['date'].append(time_series[r])
@@ -201,6 +201,8 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                 if i < len(e_list) - 1:
                     k = e_list[i+1].start
                 for x in range(leave + 1, len(high_series)):
+                    if e_next is not None and x >= e_next.start:
+                        break
                     if high_series[x] > e.bottom and (
                             len(pydash.chain(high_series[e.end+1:x]).filter_(lambda x: x < e.bottom).value()) > 0 or
                             len(pydash.chain(low_series[e.end+1:x]).filter_(lambda x: x < e.dd).value()) > 0):
@@ -208,8 +210,6 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                         break
                     if duan_series[x] == -1:
                         break
-                    # if e_next is not None and x >= e_next.end:
-                    #     break
                 if r >= 0:
                     result['buy_zs_huila']['idx'].append(r)
                     result['buy_zs_huila']['date'].append(time_series[r])
