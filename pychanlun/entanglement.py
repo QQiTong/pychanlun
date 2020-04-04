@@ -149,7 +149,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 离开中枢后的第一个笔结束
             leave = e.end
             for x in range(e.end + 1, len(high_series)):
-                if high_series[x] > e.zg and bi_series[x] == 1:
+                if low_series[x] > e.zg:
                     leave = x
                     break
                 if duan_series[x] == -1:
@@ -188,7 +188,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 下跌中枢，找第一次的拉回
             leave = e.end
             for x in range(e.end + 1, len(low_series)):
-                if low_series[x] < e.zd and bi_series[x] == -1:
+                if high_series[x] < e.zd:
                     leave = x
                     break
                 if duan_series[x] == 1:
