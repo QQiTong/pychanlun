@@ -225,6 +225,10 @@ export default {
         this.period = this.getParams('period')
         this.isPosition = this.getParams('isPosition')
         this.endDate = this.getParams('endDate')
+        if (!this.endDate) {
+            const today = new Date();
+            this.endDate = CommonTool.parseTime(today.getTime(), '{y}-{m}-{d}')
+        }
 
         if (this.isPosition === 'true') {
             this.positionPeriod = this.getParams('positionPeriod')
@@ -539,17 +543,11 @@ export default {
             // 如果是大图，只请求一个周期的数据
             if (this.period !== '') {
                 Object.assign(query, {symbol, period: this.period, endDate: this.endDate})
-                // that.$router.push({query})
-                // this.$router.push(query).catch(err => {
-                //     console.log('捕获相同路由报错', err)
-                // })
+                this.$router.push(query).catch(err => err)
                 that.sendRequest(symbol, this.period, update)
             } else {
                 Object.assign(query, {symbol, endDate: this.endDate})
-                that.$router.push({query})
-                // this.$router.push(query).catch(err => {
-                //     console.log('捕获相同路由报错', err)
-                // })
+                this.$router.push(query).catch(err => err)
                 for (let i = 0; i < 8; i++) {
                     switch (i) {
                         // case 0:
