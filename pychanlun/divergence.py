@@ -121,6 +121,7 @@ def calc_divergence(x_data, xx_data):
                     duan_start = info['duan_start']
                     duan_end = info['duan_end']
                     up_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == 1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
+                    target_bi_list = []
                     for k in range(len(up_bi_list)):
                         if len(target_bi_list) == 0:
                             target_bi_list.append(up_bi_list[k])
