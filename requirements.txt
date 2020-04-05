@@ -17,3 +17,4 @@ tqsdk
 gevent-websocket
 flask_sockets
 pysocks
+ccxt

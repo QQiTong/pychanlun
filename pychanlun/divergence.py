@@ -74,6 +74,14 @@ def calc_divergence(x_data, xx_data):
                     duan_start = info['duan_start']
                     duan_end = info['duan_end']
                     down_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == -1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
+                    # 要创新低的向下笔
+                    target_bi_list = []
+                    for k in range(len(down_bi_list)):
+                        if len(target_bi_list) == 0:
+                            target_bi_list.append(down_bi_list[k])
+                        elif low_series[down_bi_list[k]['end']] < low_series[target_bi_list[-1]['end']]:
+                            target_bi_list.append(down_bi_list[k])
+                    down_bi_list = target_bi_list
                     if len(down_bi_list) > 1:
                         if big_direction == 1:
                             # 大级别在0轴上，2笔就可以
@@ -113,6 +121,12 @@ def calc_divergence(x_data, xx_data):
                     duan_start = info['duan_start']
                     duan_end = info['duan_end']
                     up_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == 1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
+                    for k in range(len(up_bi_list)):
+                        if len(target_bi_list) == 0:
+                            target_bi_list.append(up_bi_list[k])
+                        elif high_series[up_bi_list[k]['end']] > high_series[target_bi_list[-1]['end']]:
+                            target_bi_list.append(up_bi_list[k])
+                    up_bi_list = target_bi_list
                     if len(up_bi_list) > 1:
                         if big_direction == -1:
                             # 大级别在0轴下，2笔就可以
