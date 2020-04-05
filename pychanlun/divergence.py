@@ -51,13 +51,22 @@ def calc_divergence(x_data, xx_data):
     divergence_up = np.zeros(length)
     gold_cross = CROSS(x_data['diff'], x_data['dea'])
     dead_cross = CROSS(x_data['dea'], x_data['diff'])
+    time_series = x_data['timestamp']
     diff_series = x_data['diff']
     dea_series = x_data['dea']
     duan_series = x_data['duan']
     high_series = x_data['high']
     low_series = x_data['low']
     close_series = x_data['close']
+    big_idx = 0
     for i in range(len(gold_cross.series)):
+        big_idx = pydash.find_index(xx_data['timestamp'][big_idx:], lambda x : x >= time_series[i])
+        big_direction = 0
+        if big_idx > 0 and xx_data['diff'][big_idx] < 0 and xx_data['dea'][big_idx] < 0:
+            big_direction = -1
+        else:
+            big_direction = 1
+
         if gold_cross.series[i] and diff_series[i] < 0:
             info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
             if info is not None:
@@ -66,7 +75,16 @@ def calc_divergence(x_data, xx_data):
                     duan_end = info['duan_end']
                     down_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == -1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
                     if len(down_bi_list) > 1:
-                        down_bi_list = down_bi_list[-2:]
+                        if big_direction == 1:
+                            # 大级别在0轴上，2笔就可以
+                            if len(down_bi_list) < 2:
+                                continue
+                            down_bi_list = down_bi_list[-2:]
+                        else:
+                            # 大级别在0轴下，要3笔
+                            if len(down_bi_list) < 3:
+                                continue
+                            down_bi_list = down_bi_list[-3:]
                         diff1 = np.amin(diff_series[down_bi_list[-1]['start']:i+1])
                         x = down_bi_list[-2]['end']
                         for y in range(down_bi_list[-2]['end'], down_bi_list[-1]['start']):
@@ -80,7 +98,14 @@ def calc_divergence(x_data, xx_data):
                                 divergence_down[i] = 1
                             elif len(pydash.filter_(gold_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
                                 divergence_down[i] = 1
+    big_idx = 0
     for i in range(len(dead_cross.series)):
+        big_idx = pydash.find_index(xx_data['timestamp'][big_idx:], lambda x : x >= time_series[i])
+        big_direction = 0
+        if big_idx > 0 and xx_data['diff'][big_idx] < 0 and xx_data['dea'][big_idx] < 0:
+            big_direction = -1
+        else:
+            big_direction = 1
         if dead_cross.series[i] and diff_series[i] > 0:
             info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
             if info is not None:
@@ -89,7 +114,16 @@ def calc_divergence(x_data, xx_data):
                     duan_end = info['duan_end']
                     up_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == 1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
                     if len(up_bi_list) > 1:
-                        up_bi_list = up_bi_list[-2:]
+                        if big_direction == -1:
+                            # 大级别在0轴下，2笔就可以
+                            if len(up_bi_list) < 2:
+                                continue
+                            up_bi_list = up_bi_list[-2:]
+                        else:
+                            # 大级别在0轴上，要3笔
+                            if len(up_bi_list) < 3:
+                                continue
+                            up_bi_list = up_bi_list[-3:]
                         diff1 = np.amax(diff_series[up_bi_list[-1]['start']:i+1])
                         x = up_bi_list[-2]['end']
                         for y in range(up_bi_list[-2]['end'], up_bi_list[-1]['start']):
@@ -105,62 +139,6 @@ def calc_divergence(x_data, xx_data):
                                 divergence_up[i] = 1
     return divergence_down, divergence_up
 
-def calc(time_series, high_series, low_series, open_series, close_series, macd_series, diff_series, dea_series, bi_series, duan_series):
-    time_series, macd_series, diff_series, dea_series, bi_series, duan_series = fit_series(time_series, macd_series, diff_series, dea_series, bi_series, duan_series)
-    bi_list = CalcBiList(len(time_series), bi_series, high_series, low_series)
-    # 底背驰信号
-    divergence_down = np.zeros(len(time_series))
-    # 顶背驰信号
-    divergence_up = np.zeros(len(time_series))
-    gold_cross = CROSS(diff_series, dea_series)
-    dead_cross = CROSS(dea_series, diff_series)
-    for i in range(len(gold_cross.series)):
-        if gold_cross.series[i] and diff_series[i] < 0:
-            info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
-            if info is not None:
-                if info['duan_type'] == -1:
-                    duan_start = info['duan_start']
-                    duan_end = info['duan_end']
-                    down_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == -1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
-                    if len(down_bi_list) > 1:
-                        down_bi_list = down_bi_list[-2:]
-                        diff1 = np.amin(diff_series[down_bi_list[-1]['start']:i+1])
-                        x = down_bi_list[-2]['end']
-                        for y in range(down_bi_list[-2]['end'], down_bi_list[-1]['start']):
-                            if gold_cross.series[y]:
-                                x = y
-                        diff2 = np.amin(diff_series[down_bi_list[-2]['start']:x+1])
-                        if diff1 > diff2:
-                            # 前面是向下段，才是背驰点
-                            # 要向下段后的第一次金叉
-                            if info['duan_end'] == i:
-                                divergence_down[i] = 1
-                            elif len(pydash.filter_(gold_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
-                                divergence_down[i] = 1
-    for i in range(len(dead_cross.series)):
-        if dead_cross.series[i] and diff_series[i] > 0:
-            info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
-            if info is not None:
-                if info['duan_type'] == 1:
-                    duan_start = info['duan_start']
-                    duan_end = info['duan_end']
-                    up_bi_list = pydash.filter_(bi_list, lambda bi: bi["direction"] == 1 and bi["start"] <= duan_end and bi["end"] >= duan_start)
-                    if len(up_bi_list) > 1:
-                        up_bi_list = up_bi_list[-2:]
-                        diff1 = np.amax(diff_series[up_bi_list[-1]['start']:i+1])
-                        x = up_bi_list[-2]['end']
-                        for y in range(up_bi_list[-2]['end'], up_bi_list[-1]['start']):
-                            if dead_cross.series[y]:
-                                x = y
-                        diff2 = np.amax(diff_series[up_bi_list[-2]['start']:x+1])
-                        if diff1 < diff2:
-                            # 前面是向上段，才是背驰点
-                            # 要向上段后的第一次死叉
-                            if info['duan_end'] == i:
-                                divergence_up[i] = 1
-                            elif len(pydash.filter_(dead_cross.series[info['duan_end']:i], lambda x: x == 1)) == 0:
-                                divergence_up[i] = 1
-    return divergence_down, divergence_up
 
 def note(divergence_down, divergence_up, bi_series, duan_series, time_series, high_series, low_series, open_series, close_series, diff_series, bigLevel = False):
     data = {

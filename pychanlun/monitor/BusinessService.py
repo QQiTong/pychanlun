@@ -70,6 +70,18 @@ class BusinessService:
         }).sort("_id", pymongo.ASCENDING)
         df = pd.DataFrame(list(data_list))
 
+        if len(df) == 0:
+            return {
+                'date': [],
+                'win_end_list': [],
+                'lose_end_list': [],
+                'net_profit_list': [],
+                'win_money_list': [],
+                'lose_money_list': [],
+                'win_symbol_list': [],
+                'lose_symbol_list': []
+        }
+
         for idx, row in df.iterrows():
             # 根据日期分组
             date_created = df.loc[idx, 'date_created']
