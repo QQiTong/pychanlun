@@ -543,11 +543,11 @@ export default {
             // 如果是大图，只请求一个周期的数据
             if (this.period !== '') {
                 Object.assign(query, {symbol, period: this.period, endDate: this.endDate})
-                this.$router.push(query).catch(err => err)
+                that.$router.push({query})
                 that.sendRequest(symbol, this.period, update)
             } else {
                 Object.assign(query, {symbol, endDate: this.endDate})
-                this.$router.push(query).catch(err => err)
+                that.$router.push({query})
                 for (let i = 0; i < 8; i++) {
                     switch (i) {
                         // case 0:
