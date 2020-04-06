@@ -438,8 +438,8 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                     result = calc.calcData(period, symbol)
                     close_price = result['close'][-1]
                     # 大级别macd 背驰成功率较高
-                    if period != '1m' and period != '3m' and period != '5m':
-                        monitorBeichi(result, symbol, period, close_price)
+                    # if period != '1m' and period != '3m' and period != '5m':
+                    #     monitorBeichi(result, symbol, period, close_price)
                     monitorHuila(result, symbol, period, close_price)
                     monitorTupo(result, symbol, period, close_price)
                     monitorVfan(result, symbol, period, close_price)

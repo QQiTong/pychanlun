@@ -96,15 +96,15 @@ config = {
         'Y': {'margin_rate': 0.06, 'contract_multiplier': 10},
         # 'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
-        'CL': {'margin_rate': 1, 'contract_multiplier': 1},
-        'GC': {'margin_rate': 1, 'contract_multiplier': 1},
-        'SI': {'margin_rate': 1, 'contract_multiplier': 1},
-        'CT': {'margin_rate': 1, 'contract_multiplier': 1},
-        'S': {'margin_rate': 1, 'contract_multiplier': 1},
-        'SM': {'margin_rate': 1, 'contract_multiplier': 1},
-        'BO': {'margin_rate': 1, 'contract_multiplier': 1},
-        'NID': {'margin_rate': 1, 'contract_multiplier': 1},
-        'ZSD': {'margin_rate': 1, 'contract_multiplier': 1}
+        'CL': {'margin_rate': 0.1, 'contract_multiplier': 1000}, # 8:30 -14:00 0.1      其它时间 0.15
+        'GC': {'margin_rate': 0.02, 'contract_multiplier': 100},   # 8:30 -14:00 0.02   其它时间 0.03
+        'SI': {'margin_rate': 0.04, 'contract_multiplier': 5000}, # 18:30 -14:00 0.04   其它时间 0.06
+        'CT': {'margin_rate': 0.05, 'contract_multiplier': 1},
+        'S': {'margin_rate': 0.05, 'contract_multiplier': 1},
+        'SM': {'margin_rate': 0.062, 'contract_multiplier': 1},
+        'BO': {'margin_rate': 0.05, 'contract_multiplier': 1},
+        'NID': {'margin_rate': 0.05, 'contract_multiplier': 1},
+        'ZSD': {'margin_rate': 0.05, 'contract_multiplier': 1}
     },
     'periodList': [
         '1m',
