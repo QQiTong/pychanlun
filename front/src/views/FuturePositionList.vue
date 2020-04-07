@@ -532,7 +532,8 @@
         {key: "holding", display_name: "持仓中"},
         // {key: "prepare", display_name: "预埋单"},
         {key: "winEnd", display_name: "止盈结束"},
-        {key: "loseEnd", display_name: "止损结束"}
+        {key: "loseEnd", display_name: "止损结束"},
+        {key: "exception", display_name: "异常单"}
     ];
     const periodOptions = [
         {key: "3m", display_name: "3m"},

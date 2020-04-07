@@ -474,6 +474,13 @@ class BusinessService:
         }})
 
     # close_price 最新收盘价 手动进行止盈止损操作
+    '''
+     status :
+      holding 持仓中
+      loseEnd 止损结束
+      winEnd  止盈结束
+      exception 异常单
+    '''
     def updatePositionStatus(self, id, status, close_price):
         date_created = datetime.utcnow()
         item = DBPyChanlun['future_auto_position'].find_one({'_id': ObjectId(id)})
