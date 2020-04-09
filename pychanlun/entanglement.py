@@ -163,8 +163,8 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     if e_next is not None and x >= e_next.start:
                         break
                     if low_series[x] < e.top and (
-                            len(pydash.chain(low_series[e.end+1:x]).filter_(lambda x: x > e.top).value()) > 0 or
-                            len(pydash.chain(high_series[e.end+1:x]).filter_(lambda x: x > e.gg).value()) > 0):
+                            len(pydash.chain(low_series[e.end+1:x]).filter_(lambda a: a > e.top).value()) > 0 or
+                            len(pydash.chain(high_series[e.end+1:x]).filter_(lambda a: a > e.gg).value()) > 0):
                         r = x
                         break
                     if duan_series[x] == -1:
@@ -173,7 +173,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     result['sell_zs_huila']['idx'].append(r)
                     result['sell_zs_huila']['date'].append(time_series[r])
                     result['sell_zs_huila']['data'].append(e.top)
-                    top_index = pydash.find_last_index(duan_series[:r+1], lambda x: x == 1)
+                    top_index = pydash.find_last_index(duan_series[:r+1], lambda a: a == 1)
                     if top_index > -1:
                         result['sell_zs_huila']['stop_lose_price'].append(high_series[top_index])
                         stop_win_price = e.top - (high_series[top_index] - e.top)
@@ -197,24 +197,21 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     break
             if leave - e.end >= 5 :
                 r = -1
-                k = len(high_series)
-                if i < len(e_list) - 1:
-                    k = e_list[i+1].start
                 for x in range(leave + 1, len(high_series)):
                     if e_next is not None and x >= e_next.start:
                         break
                     if high_series[x] > e.bottom and (
-                            len(pydash.chain(high_series[e.end+1:x]).filter_(lambda x: x < e.bottom).value()) > 0 or
-                            len(pydash.chain(low_series[e.end+1:x]).filter_(lambda x: x < e.dd).value()) > 0):
+                            len(pydash.chain(high_series[e.end+1:x]).filter_(lambda a: a < e.bottom).value()) > 0 or
+                            len(pydash.chain(low_series[e.end+1:x]).filter_(lambda a: a < e.dd).value()) > 0):
                         r = x
                         break
-                    if duan_series[x] == -1:
+                    if duan_series[x] == 1:
                         break
                 if r >= 0:
                     result['buy_zs_huila']['idx'].append(r)
                     result['buy_zs_huila']['date'].append(time_series[r])
                     result['buy_zs_huila']['data'].append(e.bottom)
-                    bottom_index = pydash.find_last_index(duan_series[:r+1], lambda x: x == -1)
+                    bottom_index = pydash.find_last_index(duan_series[:r+1], lambda a: a == -1)
                     if bottom_index > -1:
                         result['buy_zs_huila']['stop_lose_price'].append(low_series[bottom_index])
                         stop_win_price = e.bottom + (e.bottom - low_series[bottom_index])
