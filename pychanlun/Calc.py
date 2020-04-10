@@ -392,13 +392,13 @@ class Calc:
         resJson['higherHigherDuanData'] = getLineData(timeList, higherHigherDuanList, highList, lowList)
 
         # 当前级别MACD
-        diff_array, dea_array, macd_array = calc_macd(closePriceList)
-        x_data['diff'] = diff_array
-        x_data['dea'] = dea_array
-        x_data['macd'] = macd_array
-        resJson['diff'] = diff_array.tolist()
-        resJson['dea'] = dea_array.tolist()
-        resJson['macd'] = macd_array.tolist()
+        # diff_array, dea_array, macd_array = calc_macd(closePriceList)
+        # x_data['diff'] = diff_array
+        # x_data['dea'] = dea_array
+        # x_data['macd'] = macd_array
+        # resJson['diff'] = diff_array.tolist()
+        # resJson['dea'] = dea_array.tolist()
+        # resJson['macd'] = macd_array.tolist()
         # resJson['macdAreaData'] = calcArea(resJson['diff'], resJson['macd'], timeList)
         # resJson['boll_up'] = getBoll(closePriceList)[0].tolist()
         # resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
@@ -413,13 +413,13 @@ class Calc:
         resJson['higher_duan_zsflag'] = higher_duan_zsflag
 
         # 大级别MACD
-        big_diff_array, big_dea_array, big_macd_array = calc_macd(closePriceListBigLevel)
-        xx_data['diff'] = big_diff_array
-        xx_data['dea'] = big_dea_array
-        xx_data['macd'] = big_macd_array
-        resJson['diffBigLevel'] = big_diff_array.tolist()
-        resJson['deaBigLevel'] = big_dea_array.tolist()
-        resJson['macdBigLevel'] = big_macd_array.tolist()
+        # big_diff_array, big_dea_array, big_macd_array = calc_macd(closePriceListBigLevel)
+        # xx_data['diff'] = big_diff_array
+        # xx_data['dea'] = big_dea_array
+        # xx_data['macd'] = big_macd_array
+        # resJson['diffBigLevel'] = big_diff_array.tolist()
+        # resJson['deaBigLevel'] = big_dea_array.tolist()
+        # resJson['macdBigLevel'] = big_macd_array.tolist()
 
         # 背驰计算
         time_array = np.array(timeList)
@@ -437,9 +437,9 @@ class Calc:
         sellMACDBCData['data'] = []
         sellMACDBCData['value'] = []
 
-        beichiData = divergence.calc_beichi_data(x_data, xx_data)
-        buyMACDBCData = beichiData['buyMACDBCData']
-        sellMACDBCData = beichiData['sellMACDBCData']
+        # beichiData = divergence.calc_beichi_data(x_data, xx_data)
+        # buyMACDBCData = beichiData['buyMACDBCData']
+        # sellMACDBCData = beichiData['sellMACDBCData']
 
         # beichiData2 = divergence.calcAndNote(
         #         time_array, high_array, low_array, open_array, close_array, macd_array, diff_array, dea_array,

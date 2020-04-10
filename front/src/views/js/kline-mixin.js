@@ -61,7 +61,7 @@ export default {
                 multiPeriodGrid: [{
                     left: '0%',
                     right: '18%',
-                    height: '75%',
+                    height: '85%',
                     top: 50
                 },
                     {
@@ -74,14 +74,14 @@ export default {
                 ],
                 klineBigGrid: [{
                     left: '0%',
-                    right: '10%',
-                    height: '70%',
+                    right: '5%',
+                    height: '90%',
                     top: 50
                 },
                     {
                         left: '0%',
-                        right: '10%',
-                        top: '75%',
+                        right: '5%',
+                        top: '85%',
                         height: '20%',
                     },
                 ],
@@ -1294,7 +1294,7 @@ export default {
             let option = chart.getOption()
             option.series[0].data = resultData.values
             option.xAxis[0].data = resultData.date
-            option.xAxis[1].data = resultData.date
+            // option.xAxis[1].data = resultData.date
             option.series[0].markArea.data = resultData.zsvalues
             option.series[0].markLine.data = resultData.markLineData
             option.series[0].markPoint.data = resultData.huilaValues
@@ -1949,42 +1949,42 @@ export default {
             }
             // console.log("markline", markLineData)
 
-            let bcMACDValues = []
-            for (let i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.diff[i]],
-                    value: jsonObj.buyMACDBCData.value[i],
-                    symbolRotate: -180,
-                    symbol: 'pin',
-                    itemStyle: {
-                        normal: {color: 'red'}
-                    },
-                    label: {
-                        position: 'inside',
-                        offset: [0, 10],
-                        textBorderColor: 'red',
-                        textBorderWidth: 2,
-                        color: 'white',
-                    },
-                }
-                bcMACDValues.push(value)
-            }
-            for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.diff[i]],
-                    value: jsonObj.sellMACDBCData.value[i],
-                    symbolRotate: 0,
-                    symbol: 'pin',
-                    itemStyle: {
-                        normal: {color: 'green'}
-                    }
-                }
-                bcMACDValues.push(value)
-            }
-
-            const macddata = jsonObj.macd
-            const diffdata = jsonObj.diff
-            const deadata = jsonObj.dea
+            // let bcMACDValues = []
+            // for (let i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.diff[i]],
+            //         value: jsonObj.buyMACDBCData.value[i],
+            //         symbolRotate: -180,
+            //         symbol: 'pin',
+            //         itemStyle: {
+            //             normal: {color: 'red'}
+            //         },
+            //         label: {
+            //             position: 'inside',
+            //             offset: [0, 10],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 2,
+            //             color: 'white',
+            //         },
+            //     }
+            //     bcMACDValues.push(value)
+            // }
+            // for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.diff[i]],
+            //         value: jsonObj.sellMACDBCData.value[i],
+            //         symbolRotate: 0,
+            //         symbol: 'pin',
+            //         itemStyle: {
+            //             normal: {color: 'green'}
+            //         }
+            //     }
+            //     bcMACDValues.push(value)
+            // }
+            //
+            // const macddata = jsonObj.macd
+            // const diffdata = jsonObj.diff
+            // const deadata = jsonObj.dea
             // console.log('macd',macddata)
             // console.log('diffdata',diffdata)
             // console.log('deadata',deadata)
@@ -2001,10 +2001,10 @@ export default {
                 close: stockClose,
                 markLineData: markLineData,
                 huilaValues: huilaValues,
-                macd: macddata,
-                diff: diffdata,
-                dea: deadata,
-                bcMACDValues: bcMACDValues,
+                // macd: macddata,
+                // diff: diffdata,
+                // dea: deadata,
+                // bcMACDValues: bcMACDValues,
 
             }
         },
