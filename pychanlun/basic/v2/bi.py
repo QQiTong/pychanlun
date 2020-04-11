@@ -141,7 +141,7 @@ def adjust_bi(klines, index):
                     # 两笔找全，看看是不是可以合并
                     if klines.loc[g1, 'high'] >= klines.loc[g2, 'high'] and klines.loc[d1, 'low'] >= klines.loc[d2, 'low']:
                         for j in range(d2 + 1, g1):
-                            bi[j] = 0
+                            klines.loc[j, 'bi'] = 0
     elif klines.loc[index, 'bi'] == -1:
         i = pydash.find_last_index(klines.loc[:index-1, 'bi'], lambda x: x == 1)
         if i > 0:
@@ -159,7 +159,7 @@ def adjust_bi(klines, index):
                     # 两笔找全，看看是不是可以合并
                     if klines.loc[d1, 'low'] <= klines.loc[d2, 'low'] and klines.loc[g1, 'high'] <= klines.loc[g2, 'high']:
                         for j in range(g2 + 1, d1):
-                            bi[j] = 0
+                            klines.loc[j, 'bi'] = 0
 
 
 def calculate_bi(klines):
@@ -187,12 +187,12 @@ def calculate_bi(klines):
         if (b1 and b2):
             # 既是新高又是新低
             for idx in range(i-1, -1, -1):
-                if bi[idx] == 1 and klines.loc[idx, 'high'] > klines.loc[i, 'high']:
+                if klines.loc[idx, 'bi'] == 1 and klines.loc[idx, 'high'] > klines.loc[i, 'high']:
                     klines.loc[i, 'bi'] = -1
                     for k in range(idx + 1, i):
                         klines.loc[k, 'bi'] = 0
                     break
-                elif bi[idx] == -1 and klines.loc[idx, 'low'] < klines.loc[i, 'low']:
+                elif klines.loc[idx, 'bi'] == -1 and klines.loc[idx, 'low'] < klines.loc[i, 'low']:
                     klines.loc[i, 'bi'] = 1
                     for k in range(idx + 1, i):
                         klines.loc[k, 'bi'] = 0
