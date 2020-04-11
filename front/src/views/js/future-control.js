@@ -116,216 +116,6 @@ export default {
             // 动态止盈手数
             dynamicWinCount: 0,
             // end仓位管理计算
-            digitCoinsSymbolList: [{
-                contract_multiplier: 1,
-                de_listed_date: 'forever',
-                exchange: 'OKEX',
-                listed_date: 'forever',
-                margin_rate: 0.05,
-                market_tplus: 0,
-                maturity_date: 'forever',
-                order_book_id: 'BTC',
-                round_lot: 1,
-                symbol: '比特币',
-                trading_hours: '7*24',
-                type: 'Future',
-                underlying_order_book_id: 'null',
-                underlying_symbol: 'BTC',
-                feeRate: 0.012
-            }],
-            // 外盘
-            outSideSymbolList: [{
-                contract_multiplier: 20,
-                de_listed_date: 'forever',
-                exchange: 'NYMEX能源',
-                listed_date: 'forever',
-                margin_rate: 1,
-                market_tplus: 0,
-                maturity_date: 'forever',
-                order_book_id: 'CL',
-                round_lot: 1,
-                symbol: 'CL',
-                trading_hours: '7*24',
-                type: 'Future',
-                underlying_order_book_id: 'null',
-                underlying_symbol: 'CL',
-                feeRate: 0.012
-            },
-                {
-                    contract_multiplier: 20,
-                    de_listed_date: 'forever',
-                    exchange: '纽约COMEX',
-                    listed_date: 'forever',
-                    margin_rate: 1,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'GC',
-                    round_lot: 1,
-                    symbol: 'GC',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'GC',
-                    feeRate: 0.012
-                },
-                {
-                    contract_multiplier: 20,
-                    de_listed_date: 'forever',
-                    exchange: '纽约COMEX',
-                    listed_date: 'forever',
-                    margin_rate: 1,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'SI',
-                    round_lot: 1,
-                    symbol: 'SI',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'SI',
-                    feeRate: 0.012
-                },
-
-                {
-                    contract_multiplier: 20,
-                    de_listed_date: 'forever',
-                    exchange: '美国',
-                    listed_date: 'forever',
-                    margin_rate: 1,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'CT',
-                    round_lot: 1,
-                    symbol: 'CT',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'CT',
-                    feeRate: 0.012
-                },
-                // otherSymbol = ["BTC_CQ","ETH_CQ","CL","GC","SI","S","CT","SM","BO","NID","ZSD"]
-                {
-                    contract_multiplier: 20,
-                    de_listed_date: 'forever',
-                    exchange: '美国',
-                    listed_date: 'forever',
-                    margin_rate: 1,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'S',
-                    round_lot: 1,
-                    symbol: 'S',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'S',
-                    feeRate: 0.012
-                },
-                {
-                    contract_multiplier: 20,
-                    de_listed_date: 'forever',
-                    exchange: '美国',
-                    listed_date: 'forever',
-                    margin_rate: 1,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'SM',
-                    round_lot: 1,
-                    symbol: 'SM',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'SM',
-                    feeRate: 0.012
-                },
-                {
-                    contract_multiplier: 20,
-                    de_listed_date: 'forever',
-                    exchange: '美国',
-                    listed_date: 'forever',
-                    margin_rate: 1,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'BO',
-                    round_lot: 1,
-                    symbol: 'BO',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'BO',
-                    feeRate: 0.012
-                },
-                {
-                    contract_multiplier: 20,
-                    de_listed_date: 'forever',
-                    exchange: '伦敦',
-                    listed_date: 'forever',
-                    margin_rate: 1,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'NID',
-                    round_lot: 1,
-                    symbol: 'NID',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'NID',
-                    feeRate: 0.012
-                },
-                {
-                    contract_multiplier: 20,
-                    de_listed_date: 'forever',
-                    exchange: '伦敦',
-                    listed_date: 'forever',
-                    margin_rate: 1,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'ZSD',
-                    round_lot: 1,
-                    symbol: 'ZSD',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'ZSD',
-                    feeRate: 0.012
-                },
-                // {
-                //     contract_multiplier: 20,
-                //     de_listed_date: "forever",
-                //     exchange: "马来西亚",
-                //     listed_date: "forever",
-                //     margin_rate: 1,
-                //     market_tplus: 0,
-                //     maturity_date: "forever",
-                //     order_book_id: "m_p",
-                //     round_lot: 1,
-                //     symbol: "m_p",
-                //     trading_hours: "7*24",
-                //     type: "Future",
-                //     underlying_order_book_id: "null",
-                //     underlying_symbol: "m_p",
-                //     feeRate: 0.012
-                // },
-                //
-                // {
-                //     contract_multiplier: 20,
-                //     de_listed_date: "forever",
-                //     exchange: "日本",
-                //     listed_date: "forever",
-                //     margin_rate: 1,
-                //     market_tplus: 0,
-                //     maturity_date: "forever",
-                //     order_book_id: "ja_ru",
-                //     round_lot: 1,
-                //     symbol: "ja_ru",
-                //     trading_hours: "7*24",
-                //     type: "Future",
-                //     underlying_order_book_id: "null",
-                //     underlying_symbol: "ja_ru",
-                //     feeRate: 0.012
-                // },
-
-            ],
             symbolSearch: '',
             // 内盘涨跌幅百分比
             percentage: 0,
@@ -381,12 +171,12 @@ export default {
         this.getPrejudgeList()
         this.getBTCTicker()
         this.getGlobalFutureChangeList()
-        setInterval(() => {
-            this.getSignalList()
-            this.getChangeiList()
-            this.getLevelDirectionList()
-            this.getBTCTicker()
-        }, 20000)
+        // setInterval(() => {
+        //     this.getSignalList()
+        //     this.getChangeiList()
+        //     this.getLevelDirectionList()
+        //     this.getBTCTicker()
+        // }, 20000)
     },
     methods: {
         subscribeWS() {
@@ -466,8 +256,6 @@ export default {
             futureApi.getDominant().then(res => {
                 console.log('获取主力合约:', res)
                 this.futureSymbolList = res
-                this.futureSymbolList.push(...this.digitCoinsSymbolList)
-                this.futureSymbolList.push(...this.outSideSymbolList)
                 window.localStorage.setItem('symbolList', JSON.stringify(this.futureSymbolList))
                 this.firstRequestDominant = false
                 this.beichiListLoading = false
@@ -490,14 +278,11 @@ export default {
                         this.prejudgeFormList = JSON.parse(symbolList)
                         this.futureSymbolMap = {}
                         this.prejudgeFormMap = {}
-
-                        this.prejudgeFormList.push(...this.outSideSymbolList)
-                        this.futureSymbolList.push(...this.outSideSymbolList)
                         // console.log("111", this.futureSymbolList)
                         for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
                             let symbolItem = this.futureSymbolList[i]
                             this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
-                            this.prejudgeFormMap[symbolItem.order_book_id] = ''
+                            // this.prejudgeFormMap[symbolItem.order_book_id] = ''
                         }
                         // 创建预判表单对象
                     }

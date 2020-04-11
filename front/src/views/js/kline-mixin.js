@@ -160,39 +160,6 @@ export default {
             // end仓位管理计算
             // 结束日期
             endDate: CommonTool.dateFormat('yyyy-MM-dd'),
-
-            digitCoinsSymbolList: [{
-                contract_multiplier: 1,
-                de_listed_date: 'forever',
-                exchange: 'HUOBI',
-                listed_date: 'forever',
-                margin_rate: 0.05,
-                market_tplus: 0,
-                maturity_date: 'forever',
-                order_book_id: 'BTC',
-                round_lot: 1,
-                symbol: '比特币',
-                trading_hours: '7*24',
-                type: 'Future',
-                underlying_order_book_id: 'null',
-                underlying_symbol: 'BTC',
-            },
-                {
-                    contract_multiplier: 1,
-                    de_listed_date: 'forever',
-                    exchange: 'HUOBI',
-                    listed_date: 'forever',
-                    margin_rate: 0.05,
-                    market_tplus: 0,
-                    maturity_date: 'forever',
-                    order_book_id: 'ETH_CQ',
-                    round_lot: 1,
-                    symbol: '以太坊',
-                    trading_hours: '7*24',
-                    type: 'Future',
-                    underlying_order_book_id: 'null',
-                    underlying_symbol: 'ETH_CQ',
-                }],
             // 选中的品种
             selectedSymbol: '',
             // 输入的交割过的期货品种 或者 股票品种
@@ -495,25 +462,6 @@ export default {
             }).catch((error) => {
                 this.requestFlag = true
                 console.log('获取合约配置失败:', error)
-            })
-        },
-        getDominantSymbol() {
-            let that = this
-
-            futureApi.dominant().then(res => {
-                console.log('获取主力合约:', res)
-                that.futureSymbolList = res
-                that.futureSymbolList.push(...that.digitCoinsSymbolList)
-                that.futureSymbolMap = {}
-                for (let i = 0; i < that.futureSymbolList.length - 1; i++) {
-                    let symbolItem = that.futureSymbolList[i]
-                    that.futureSymbolMap[symbolItem.order_book_id] = symbolItem
-                }
-                window.localStorage.setItem('symbolList', JSON.stringify(that.futureSymbolList))
-                that.requestSymbolData()
-            }).catch(() => {
-                this.requestFlag = true
-                console.log('获取主力合约失败:', error)
             })
         },
         switchPeriod(period) {
