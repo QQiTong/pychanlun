@@ -244,13 +244,18 @@ class BusinessService:
         future_signal_list = DBPyChanlun['future_signal'].find().sort(
             "fire_time", pymongo.ASCENDING)
         for signalItem in future_signal_list:
+            # print("信号item:", signalItem)
             # utc 转本地时间
             date_created = signalItem['date_created'] + timedelta(hours=8)
             date_created_str = date_created.strftime("%m-%d %H:%M")
             fire_time = signalItem['fire_time'] + timedelta(hours=8)
             fire_time_str = fire_time.strftime("%m-%d %H:%M")
             # str(round(signalItem['price'], 2))
-            msg = "%s %s %s %s" % (str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
+            if 'level_direction' in signalItem:
+                level_direction = signalItem['level_direction']
+            else:
+                level_direction = ""
+            msg = "%s %s %s %s %s" % (level_direction,str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
                                    str(signalItem['remark']))
             if signalItem['symbol'] in symbolListMap:
                 symbolListMap[signalItem['symbol']][signalItem['period']] = msg

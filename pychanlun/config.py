@@ -34,7 +34,7 @@ config = {
     'symbolList': [
         # 上期所
         "RB",
-        # "HC",
+        "HC",
         "RU",
         "FU",
         "BU",
@@ -69,32 +69,32 @@ config = {
     'futureConfig': {
         # 上期所
         'RB': {'margin_rate': 0.09, 'contract_multiplier': 10},
-        # 'HC': {'margin_rate': 0.09, 'contract_multiplier': 10},
+        'HC': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'RU': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'FU': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'BU': {'margin_rate': 0.11, 'contract_multiplier': 10},
-        # 'AU': {'margin_rate': 0.08, 'contract_multiplier': 1000},
-        # 'AG': {'margin_rate': 0.12, 'contract_multiplier': 15},
+        'AU': {'margin_rate': 0.08, 'contract_multiplier': 1000},
+        'AG': {'margin_rate': 0.12, 'contract_multiplier': 15},
         'NI': {'margin_rate': 0.1, 'contract_multiplier': 1},
-        # 'ZN': {'margin_rate': 0.1, 'contract_multiplier': 5},
+        'ZN': {'margin_rate': 0.1, 'contract_multiplier': 5},
         # 郑商所
         'MA': {'margin_rate': 0.07, 'contract_multiplier': 10},
         'TA': {'margin_rate': 0.06, 'contract_multiplier': 5},
         'CF': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'SR': {'margin_rate': 0.05, 'contract_multiplier': 10},
         'OI': {'margin_rate': 0.05, 'contract_multiplier': 10},
-        # 'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
         # 大商所
         'J': {'margin_rate': 0.08, 'contract_multiplier': 100},
         'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
         'I': {'margin_rate': 0.08, 'contract_multiplier': 100},
         'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'M': {'margin_rate': 0.06, 'contract_multiplier': 10},
-        # 'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
+        'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'PP': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'P': {'margin_rate': 0.07, 'contract_multiplier': 10},
         'Y': {'margin_rate': 0.06, 'contract_multiplier': 10},
-        # 'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
+        'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'CL': {'margin_rate': 0.1, 'contract_multiplier': 1000},  # 8:30 -14:00 0.1      其它时间 0.15
         'GC': {'margin_rate': 0.02, 'contract_multiplier': 100},  # 8:30 -14:00 0.02   其它时间 0.03
@@ -104,7 +104,7 @@ config = {
         'SM': {'margin_rate': 0.062, 'contract_multiplier': 1},
         'BO': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'NID': {'margin_rate': 0.05, 'contract_multiplier': 1},
-        # 'ZSD': {'margin_rate': 0.05, 'contract_multiplier': 1}
+        'ZSD': {'margin_rate': 0.05, 'contract_multiplier': 1}
     },
     'periodList': [
         '1m',

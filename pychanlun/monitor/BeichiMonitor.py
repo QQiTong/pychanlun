@@ -15,6 +15,7 @@ from pychanlun.config import config
 from pychanlun.monitor.BusinessService import businessService
 import pytz
 import requests
+import pymongo
 
 tz = pytz.timezone('Asia/Shanghai')
 '''
@@ -154,7 +155,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
                 "signal": signal,
                 "direction": direction,
                 "amount": amount,
-                "stop":stop_lose_price,
+                "stop": stop_lose_price,
                 "fire_time": fire_time_str,
                 "price": price,
                 "date_created": date_created_str,
@@ -191,7 +192,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
     else:
         direction = 'long'
 
-    #如果是分型动止，方向需要反过来
+    # 如果是分型动止，方向需要反过来
     if signal == 'fractal':
         direction = 'long' if direction == 'short' else 'long'
     if insert is True:
@@ -215,8 +216,8 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                         'last_update_time': date_created,  # 最后信号更新时间
                         'last_update_signal': signal,  # 最后更新的信号
                         'last_update_period': period,  # 最后更新的周期
-                        'stop_win_count':stop_win_count, # 保存动止的数量
-                        'stop_win_price':stop_win_price, # 动止时的价格
+                        'stop_win_count': stop_win_count,  # 保存动止的数量
+                        'stop_win_price': stop_win_price,  # 动止时的价格
 
                         # 'amount':last_fire['amount'] - stop_win_count # 持仓的数量减去动止的数量
                     },
@@ -260,7 +261,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                     'per_order_margin': round(futureCalcObj['perOrderMargin'], 2),
                     'predict_stop_money': -round(futureCalcObj['perOrderStopMoney'] * futureCalcObj['maxOrderCount'], 2),
                     'margin_rate': futureCalcObj['marginRate'],
-                    'total_margin':round(futureCalcObj['perOrderStopMoney'] * futureCalcObj['maxOrderCount'], 2),
+                    'total_margin': round(futureCalcObj['perOrderStopMoney'] * futureCalcObj['maxOrderCount'], 2),
                     'last_update_time': '',
                     'last_update_signal': '',
                     'last_update_period': '',
@@ -290,15 +291,15 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                     lose_end_money = round(last_fire['per_order_margin'] * last_fire['amount'] * lose_end_rate, 2)
                     lose_end_rate = round(lose_end_rate, 2)
                     DBPyChanlun['future_auto_position'].find_one_and_update({
-                        '_id':last_fire['_id'],'symbol': symbol, 'direction': direction, 'status': 'holding'
+                        '_id': last_fire['_id'], 'symbol': symbol, 'direction': direction, 'status': 'holding'
                     }, {
                         '$set': {
                             'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
                             'status': 'loseEnd',
-                            'lose_end_price':close_price,  # 止损了需要将止损结束的价格插入到数据库中
-                            'lose_end_time':date_created,     # 把止损触发时间保存起来
-                            'lose_end_money':lose_end_money,
-                            'lose_end_rate':lose_end_rate
+                            'lose_end_price': close_price,  # 止损了需要将止损结束的价格插入到数据库中
+                            'lose_end_time': date_created,  # 把止损触发时间保存起来
+                            'lose_end_money': lose_end_money,
+                            'lose_end_rate': lose_end_rate
                         },
                         '$inc': {
                             'update_count': 1
@@ -338,11 +339,11 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                             '$set': {
                                 'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
                                 'status': status,
-                                'current_profit_rate':current_profit_rate, #当前浮盈比例
-                                'current_profit':current_profit,  # 当前浮盈额
+                                'current_profit_rate': current_profit_rate,  # 当前浮盈比例
+                                'current_profit': current_profit,  # 当前浮盈额
                                 'stop_win_money': stop_win_money,  # 动止的收益
-                                'stop_win_count':stop_win_count,   # 动止数量
-                                'stop_win_price':stop_win_price,   # 动止价格
+                                'stop_win_count': stop_win_count,  # 动止数量
+                                'stop_win_price': stop_win_price,  # 动止价格
 
                             },
                             '$inc': {
@@ -365,34 +366,18 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                             }
                         }, upsert=True)
 
+
 # 记录品种当前级别的方向
 def saveFutureDirection(symbol, period, direction):
-    last_fire = DBPyChanlun['future_direction'].find_one({
-        'symbol': symbol,
-        'period': period,
-    })
-    if last_fire is not None:
-        DBPyChanlun['future_direction'].find_one_and_update({
-            'symbol': symbol, 'period': period
-        }, {
-            '$set': {
-                'date_created': datetime.utcnow(),
-                'direction': direction
-            },
-            '$inc': {
-                'update_count': 1
-            }
-        }, upsert=True)
-    else:
-        date_created = datetime.utcnow()
-        DBPyChanlun['future_direction'].insert_one({
-            'symbol': symbol,
-            'period': period,
-            'date_created': date_created,  # 记录插入的时间
-            'direction': direction,
-            'update_count': 1,
-        })
-
+    DBPyChanlun['future_signal'].find_one_and_update({
+        'symbol': symbol, 'period': period
+    }, {
+        '$set': {
+            'level_direction': direction
+        },
+    },sort=
+        [('fire_time', pymongo.ASCENDING)]
+    )
 
 def getDominantSymbol():
     symbolList = config['symbolList']
@@ -421,7 +406,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
 
     elif type == "2":
         symbolList = symbolListDigitCoin
-        periodList = periodList2
+        periodList = periodList1
 
     else:
         symbolList = globalFutureSymbol
@@ -728,7 +713,7 @@ temp = {
 def monitorFractal(result, symbol, period, closePrice):
     # 将当前级别的的方向插入到数据库，用于前端展示当前级别的状态
     # 15m向上成笔，代表3F级别多， 15m向下成笔，代表3F级别空
-    if result['fractal'][0]!={} :
+    if result['fractal'][0] != {}:
         levelDirection = result['fractal'][0]['direction']
         if levelDirection == 1:
             saveFutureDirection(symbol, period, '多')
@@ -738,7 +723,7 @@ def monitorFractal(result, symbol, period, closePrice):
     # 查询数据库该品种是否有持仓
     positionInfo = businessService.getPosition(symbol, period, 'holding')
     if positionInfo == -1:
-        print("没有持仓",period)
+        # print("没有持仓", period)
         return
     # 持仓方向
     direction = positionInfo['direction']
@@ -747,7 +732,7 @@ def monitorFractal(result, symbol, period, closePrice):
     if direction == 'long':
         # 多单查找向上笔的顶分型
         # 高级别
-        if result['fractal'][0]!={} and result['fractal'][0]['direction'] == 1:
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
             fire_time = result['fractal'][0]['top_fractal']['date']
             price = result['fractal'][0]['top_fractal']['bottom']
             stop_lose_price = result['fractal'][0]['top_fractal']['top']
@@ -762,9 +747,9 @@ def monitorFractal(result, symbol, period, closePrice):
                 futureCalcObj['stop_win_price'] = closePrice
 
                 saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
-                                 stop_lose_price,futureCalcObj)
+                                 stop_lose_price, futureCalcObj)
         # 高高级别
-        if result['fractal'][1]!={} and result['fractal'][1]['direction'] == 1:
+        if result['fractal'][1] != {} and result['fractal'][1]['direction'] == 1:
             fire_time = result['fractal'][1]['top_fractal']['date']
             price = result['fractal'][1]['top_fractal']['bottom']
             stop_lose_price = result['fractal'][1]['top_fractal']['top']
@@ -782,7 +767,7 @@ def monitorFractal(result, symbol, period, closePrice):
     else:
         # 空单查找向下笔的底分型
         # 高级别
-        if result['fractal'][0]!={} and result['fractal'][0]['direction'] == -1:
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
             fire_time = result['fractal'][0]['bottom_fractal']['date']
             price = result['fractal'][0]['bottom_fractal']['top']
             stop_lose_price = result['fractal'][0]['bottom_fractal']['bottom']
@@ -798,7 +783,7 @@ def monitorFractal(result, symbol, period, closePrice):
                 saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
                                  stop_lose_price, futureCalcObj)
         # 高高级别
-        if result['fractal'][1]!={} and result['fractal'][1]['direction'] == -1:
+        if result['fractal'][1] != {} and result['fractal'][1]['direction'] == -1:
             fire_time = result['fractal'][1]['bottom_fractal']['date']
             price = result['fractal'][1]['bottom_fractal']['top']
             stop_lose_price = result['fractal'][1]['bottom_fractal']['bottom']
@@ -830,7 +815,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
         # 1手止损的比率
         perOrderStopRate = (abs(openPrice - stopPrice) / openPrice + digitCoinFee) * 20
         # 1手止损的金额
-        perOrderStopMoney = round((perOrderMargin * perOrderStopRate),4)
+        perOrderStopMoney = round((perOrderMargin * perOrderStopRate), 4)
         maxAccountUse = account * 10000 * 0.4
         maxStopMoney = account * 10000 * 0.1
     # 期货
@@ -903,7 +888,7 @@ def run(**kwargs):
     # 24个品种 拆分成8份
     # symbolListSplit = [symbolList[i:i + 3] for i in range(0, len(symbolList), 3)]
     # 24个品种 拆分2份
-    symbolListSplit = [symbolList[i:i +12] for i in range(0, len(symbolList), 12)]
+    symbolListSplit = [symbolList[i:i + 12] for i in range(0, len(symbolList), 12)]
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()

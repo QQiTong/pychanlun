@@ -161,17 +161,24 @@
                     </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="3F级别" width="65">
+                            <el-table-column label="多空走势" width="100">
                                 <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
-                            levelDirectionList[scope.row.order_book_id]['3m']==='多'?'danger':'primary'
-                            :'info'"
-                                    >{{
-                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['3m']:''
-                                        }}
-                                    </el-tag>
+                                    <!--                                    <el-tag-->
+                                    <!--                                        size="medium"-->
+                                    <!--                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?-->
+                                    <!--                            levelDirectionList[scope.row.order_book_id]['3m']==='多'?'danger':'primary'-->
+                                    <!--                            :'info'"-->
+                                    <!--                                    >{{-->
+                                    <!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['3m']:''-->
+                                    <!--                                        }}-->
+                                    <!--                                    </el-tag>-->
+                                    <el-progress
+                                        :percentage="beichiList[scope.row.order_book_id]['percentage']"
+                                        :color="customColorMethod"
+                                        :text-inside="true"
+                                        :stroke-width="24"
+                                        class="mt-5"
+                                    ></el-progress>
                                 </template>
                             </el-table-column>
                             <el-table-column label="3m">
@@ -184,20 +191,20 @@
                                 </template>
                             </el-table-column>
 
-                            <el-table-column label="5F级别" width="65">
-                                <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        class="mr-5"
-                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
-                            levelDirectionList[scope.row.order_book_id]['5m']==='多'?'danger':'primary'
-                            :'info'"
-                                    >{{
-                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['5m']:''
-                                        }}
-                                    </el-tag>
-                                </template>
-                            </el-table-column>
+<!--                            <el-table-column label="5F级别" width="65">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <el-tag-->
+<!--                                        size="medium"-->
+<!--                                        class="mr-5"-->
+<!--                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?-->
+<!--                            levelDirectionList[scope.row.order_book_id]['5m']==='多'?'danger':'primary'-->
+<!--                            :'info'"-->
+<!--                                    >{{-->
+<!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['5m']:''-->
+<!--                                        }}-->
+<!--                                    </el-tag>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
                             <el-table-column label="5m">
                                 <template slot-scope="scope">
                                     <el-tag
@@ -207,20 +214,20 @@
                                     </el-tag>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="15F级别" width="70">
-                                <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        class="mr-5"
-                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
-                            levelDirectionList[scope.row.order_book_id]['15m']==='多'?'danger':'primary'
-                            :'info'"
-                                    >{{
-                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['15m']:''
-                                        }}
-                                    </el-tag>
-                                </template>
-                            </el-table-column>
+<!--                            <el-table-column label="15F级别" width="70">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <el-tag-->
+<!--                                        size="medium"-->
+<!--                                        class="mr-5"-->
+<!--                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?-->
+<!--                            levelDirectionList[scope.row.order_book_id]['15m']==='多'?'danger':'primary'-->
+<!--                            :'info'"-->
+<!--                                    >{{-->
+<!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['15m']:''-->
+<!--                                        }}-->
+<!--                                    </el-tag>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
                             <el-table-column label="15m">
                                 <template slot-scope="scope">
                                     <el-tag
@@ -230,20 +237,20 @@
                                     </el-tag>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="30F级别" width="70">
-                                <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        class="mr-5"
-                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
-                            levelDirectionList[scope.row.order_book_id]['30m']==='多'?'danger':'primary'
-                            :'info'"
-                                    >{{
-                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['30m']:''
-                                        }}
-                                    </el-tag>
-                                </template>
-                            </el-table-column>
+<!--                            <el-table-column label="30F级别" width="70">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <el-tag-->
+<!--                                        size="medium"-->
+<!--                                        class="mr-5"-->
+<!--                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?-->
+<!--                            levelDirectionList[scope.row.order_book_id]['30m']==='多'?'danger':'primary'-->
+<!--                            :'info'"-->
+<!--                                    >{{-->
+<!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['30m']:''-->
+<!--                                        }}-->
+<!--                                    </el-tag>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
                             <el-table-column label="30m">
                                 <template slot-scope="scope">
                                     <el-tag
@@ -253,20 +260,20 @@
                                     </el-tag>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="60F级别" width="70">
-                                <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        class="mr-5"
-                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?
-                            levelDirectionList[scope.row.order_book_id]['60m']==='多'?'danger':'primary'
-                            :'info'"
-                                    >{{
-                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['60m']:''
-                                        }}
-                                    </el-tag>
-                                </template>
-                            </el-table-column>
+<!--                            <el-table-column label="60F级别" width="70">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <el-tag-->
+<!--                                        size="medium"-->
+<!--                                        class="mr-5"-->
+<!--                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?-->
+<!--                            levelDirectionList[scope.row.order_book_id]['60m']==='多'?'danger':'primary'-->
+<!--                            :'info'"-->
+<!--                                    >{{-->
+<!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['60m']:''-->
+<!--                                        }}-->
+<!--                                    </el-tag>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
                             <el-table-column label="60m">
                                 <template slot-scope="scope">
                                     <el-tag
@@ -387,7 +394,7 @@
                 </el-row>
             </el-tab-pane>
             <el-tab-pane label="统计数据" name="third">
-            <StatisticsChat></StatisticsChat>
+                <StatisticsChat></StatisticsChat>
             </el-tab-pane>
         </el-tabs>
     </div>

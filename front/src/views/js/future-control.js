@@ -139,6 +139,7 @@ export default {
             // history 历史状态 获取的不一定是主力合约 ，提交表格触发更新
             prejudgeTableStatus: 'current',
             prejudgeTableId: '',
+            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'S', 'SM', 'BO', 'NID']
         }
     },
     computed: {
@@ -167,16 +168,16 @@ export default {
         // this.subscribeWS()
         this.getChangeiList()
         this.getSignalList()
-        this.getLevelDirectionList()
+        // this.getLevelDirectionList()
         this.getPrejudgeList()
         this.getBTCTicker()
         this.getGlobalFutureChangeList()
-        // setInterval(() => {
-        //     this.getSignalList()
-        //     this.getChangeiList()
-        //     this.getLevelDirectionList()
-        //     this.getBTCTicker()
-        // }, 20000)
+        setInterval(() => {
+            this.getSignalList()
+            this.getChangeiList()
+            // this.getLevelDirectionList()
+            this.getBTCTicker()
+        }, 20000)
     },
     methods: {
         subscribeWS() {
@@ -237,14 +238,14 @@ export default {
             this.globalFuturePercentage = parseInt(long / (long + short) * 100)
             console.log('获取外盘涨跌幅列表 计算百分比', this.globalFutureChangeList, this.globalFuturePercentage)
         },
-        getLevelDirectionList() {
-            futureApi.getLevelDirectionList().then(res => {
-                console.log('获取多空方向列表:', res)
-                this.levelDirectionList = res
-            }).catch((error) => {
-                console.log('获取多空方向列表:', error)
-            })
-        },
+        // getLevelDirectionList() {
+        //     futureApi.getLevelDirectionList().then(res => {
+        //         console.log('获取多空方向列表:', res)
+        //         this.levelDirectionList = res
+        //     }).catch((error) => {
+        //         console.log('获取多空方向列表:', error)
+        //     })
+        // },
         jumpToControl(type) {
             if (type === 'futures') {
                 this.$router.replace('/futures-control')
@@ -268,6 +269,7 @@ export default {
             futureApi.getSignalList().then(res => {
                 console.log('获取背驰列表:', res)
                 this.beichiList = res
+                this.processBeichiList()
                 if (this.firstRequestDominant) {
                     // 主力合约后端需要2秒才能返回，前端不要每次都去请求
                     // 本地缓存有主力合约数据
@@ -292,6 +294,31 @@ export default {
             }).catch((error) => {
                 console.log('获取背驰列表失败:', error)
             })
+        },
+
+        processBeichiList() {
+            for (let symbol in this.beichiList) {
+                let count = 0
+                let item = this.beichiList[symbol]
+                console.log("背驰item:", item, symbol)
+                for (let j in item) {
+                    let innerItem = item[j]
+                    if (innerItem !== '' && innerItem.indexOf('B') !== -1) {
+                        count++
+                    } else {
+
+                    }
+                    if (innerItem !== '' && innerItem.indexOf('多') !== -1) {
+                        count++
+                    }
+                }
+                // 外盘没有3分钟，多空比例需要提高一点
+                if (this.globalFutureSymbol.indexOf(symbol) !== -1) {
+                    item['percentage'] = count * 12.5
+                } else {
+                    item['percentage'] = count * 10
+                }
+            }
         },
         getChangeiList() {
             futureApi.getChangeiList().then(res => {
