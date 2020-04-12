@@ -84,7 +84,7 @@ module.exports = {
   // webpack-dev-server 相关配置
   devServer: {
     // 自动打开浏览器
-    open: true,
+    open: false,
     port: 8089,
     https: false,
     // TIP 修复热更新失效问题
