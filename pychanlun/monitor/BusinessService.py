@@ -552,7 +552,7 @@ class BusinessService:
 
     #  更新预判信息
     def updateFuturePrejudgeList(self, id, prejudgeList):
-        print("更新预判参数", id, prejudgeList)
+        # print("更新预判参数", id, prejudgeList)
         DBPyChanlun['prejudge_record'].update_one({'_id': ObjectId(id)}, {"$set": {
             'prejudgeList': prejudgeList
         }})

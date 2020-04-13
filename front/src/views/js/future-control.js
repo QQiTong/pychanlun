@@ -177,9 +177,13 @@ export default {
             this.getChangeiList()
             // this.getLevelDirectionList()
             this.getBTCTicker()
+            this.getGlobalFutureChangeList()
         }, 20000)
     },
     methods: {
+        onInputChange() {
+            this.createOrUpdatePrejudgeList('update')
+        },
         subscribeWS() {
             let ws = new WebSocket('ws://localhost:5000/control')
             ws.onopen = function (evt) {
