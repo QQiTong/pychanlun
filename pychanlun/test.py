@@ -30,7 +30,7 @@ from tqsdk import tafunc
 import re
 import pytz
 import string
-
+import hashlib
 tz = pytz.timezone('Asia/Shanghai')
 
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
@@ -675,6 +675,33 @@ def formatTime(localTime):
     date_created_stamp = int(time.mktime(localTime.timetuple()))
     timeArray = time.localtime(date_created_stamp)
     return time.strftime("%Y-%m-%d", timeArray)
+'''
+ 美股 外盘期货 代码
+ 伦镍：03NID
+ 原油：@CL0W
+ 黄金：@GC0W
+ 白银：@SI0W
+ 道琼斯：@YM0Y
+ 大豆：@ZS0W
+ 豆粕：@ZM0Y
+ 豆油：@ZL0W
+ A50: CN0Y
+ 棕榈油：CPO0W
+ 棉花：CT0W
+'''
+
+
+def testMeigu():
+    pwd = hashlib.md5(b'chanlun123456').hexdigest()
+    print("----",pwd)
+    url = "http://ldhqsj.com/us_k.action?username=chanlun&password="+pwd+"&id=AAPL&jys=NA&period=60&num=-100"
+    url2 = "http://ldhqsj.com/foreign_k.action?username=chanlun&password="+pwd+"&id=@ZM0Y&period=5&num=-100"
+    print("--",url2)
+    startTime = int(round(time.time() * 1000))
+    r = requests.get(url2)
+    endTime = int(round(time.time() * 1000)) - startTime
+    print("耗费时间：", endTime)
+    print(r.text)
 
 
 def app():
@@ -697,7 +724,8 @@ def app():
     # testTime2()
     # testMail()
     # testDingDing()
-    testGroupBy()
+    # testGroupBy()
+    testMeigu()
 
 
 if __name__ == '__main__':

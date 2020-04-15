@@ -288,7 +288,7 @@ export default {
                         for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
                             let symbolItem = this.futureSymbolList[i]
                             this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
-                            // this.prejudgeFormMap[symbolItem.order_book_id] = ''
+                            this.prejudgeFormMap[symbolItem.order_book_id] = ''
                         }
                         // 创建预判表单对象
                     }

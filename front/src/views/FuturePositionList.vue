@@ -308,6 +308,23 @@
             <!--          <el-tag v-if="props.row.holdReason">{{props.row.holdReason}}</el-tag>-->
             <!--        </template>-->
             <!--      </el-table-column>-->
+            <el-table-column label="操作状态" align="center" width="130">
+                <template slot-scope="{row}">
+                    <el-select
+                        v-model="row.status"
+                        class="form-input-short"
+                        size="mini"
+                        @change="changeStatus(row._id,row.status,row.close_price)"
+                    >
+                        <el-option
+                            v-for="item in statusOptions"
+                            :key="item.key"
+                            :label="item.display_name"
+                            :value="item.key"
+                        ></el-option>
+                    </el-select>
+                </template>
+            </el-table-column>
             <el-table-column label="品种" prop="symbol" align="center" width="80">
                 <template slot-scope="{row}">
                     <el-link
@@ -471,23 +488,7 @@
             <el-table-column label="最后更新时间" prop="last_update_time" align="center" width="150"/>
             <el-table-column label="最后信号" prop="last_update_signal" align="center" width="80"/>
             <el-table-column label="最后周期" prop="last_update_period" align="center" width="80"/>
-            <el-table-column label="操作状态" align="center">
-                <template slot-scope="{row}">
-                    <el-select
-                        v-model="row.status"
-                        class="form-input-short"
-                        size="mini"
-                        @change="changeStatus(row._id,row.status,row.close_price)"
-                    >
-                        <el-option
-                            v-for="item in statusOptions"
-                            :key="item.key"
-                            :label="item.display_name"
-                            :value="item.key"
-                        />
-                    </el-select>
-                </template>
-            </el-table-column>
+
             <!--            <el-table-column label="操作" align="center">-->
             <!--                <template slot-scope="{row,$index}">-->
             <!--                    &lt;!&ndash;          <el-button type="primary" size="mini" @click="handleUpdate(row)">编辑</el-button>&ndash;&gt;-->
@@ -1011,12 +1012,12 @@
                         return;
                     }
                     // 累加 预计止损
-                    if (index === 13) {
+                    if (index === 14) {
                         data.forEach((item) => {
                             stopSum += item.predict_stop_money
                         })
-                        sums[13] = stopSum.toFixed(2)
-                    } else if (index === 15) {
+                        sums[14] = stopSum.toFixed(2)
+                    } else if (index === 16) {
 
                         // 累加已止损
                         data.forEach((item) => {
@@ -1024,16 +1025,16 @@
                                 loseEndSum += item.lose_end_money
                             }
                         })
-                        sums[15] = loseEndSum.toFixed(2)
-                    } else if (index === 18) {
+                        sums[16] = loseEndSum.toFixed(2)
+                    } else if (index === 19) {
                         // 累加已盈利
                         data.forEach((item) => {
                             if (item.status === 'winEnd') {
                                 winEndSum += item.win_end_money
                             }
                         })
-                        sums[18] = winEndSum.toFixed(2)
-                    } else if (index === 9) {
+                        sums[19] = winEndSum.toFixed(2)
+                    } else if (index === 10) {
 
                         // 累加当前盈利
                         data.forEach((item) => {
@@ -1042,8 +1043,8 @@
                                 currentProfitSum += item.current_profit
                             }
                         })
-                        sums[9] = currentProfitSum.toFixed(2)
-                    } else if (index === 10) {
+                        sums[10] = currentProfitSum.toFixed(2)
+                    } else if (index === 11) {
 
                         // 累加当前盈利
                         data.forEach((item) => {
@@ -1055,7 +1056,7 @@
                                 }
                             }
                         })
-                        sums[10] = totalMargin.toFixed(2)
+                        sums[11] = totalMargin.toFixed(2)
                     } else {
                         sums[index] = ''
                     }
