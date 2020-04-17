@@ -676,33 +676,60 @@ def formatTime(localTime):
     timeArray = time.localtime(date_created_stamp)
     return time.strftime("%Y-%m-%d", timeArray)
 '''
- 美股 外盘期货 代码
- 伦镍：03NID
- 原油：@CL0W
- 黄金：@GC0W
- 白银：@SI0W
- 道琼斯：@YM0Y
- 大豆：@ZS0W
- 豆粕：@ZM0Y
- 豆油：@ZL0W
- A50: CN0Y
- 棕榈油：CPO0W
- 棉花：CT0W
+ 外盘期货 代码         入库别名简称           11个品种  这个 24小时采集  20秒采集1次   24*60*3 = 4320 次  
+ 原油：@CL0W           --CL
+ 黄金：@GC0W           --GC
+ 白银：@SI0W           --SI
+ 道琼斯：@YM0Y         --YM
+ A50: CN0Y             ---CN
+ 伦镍：03NID           --NID
+ 大豆：@ZS0W           ---ZS
+ 豆粕：@ZM0Y           --ZM
+ 豆油：@ZL0W           --ZL
+ 棕榈油：CPO0W         --CP
+ 棉花：CT0W            --CT
+ 
+ 美国股票    代码      8只股票  这个每天 晚上 21:00 到 凌晨 4:00 采集就可以了 . 20秒采集1次 一天采集 7*60 * 3 = 1260次           
+ 苹果        AAPL
+ 微软        MSFT
+ 谷歌        GOOG
+ Facebook    FB
+ 亚马逊      AMZN
+ 奈飞        NFLX
+ 英伟达      NVDA
+ AMD        AMD
+ Roku       roku
 '''
-
-
+# ldhqsj.com  备用地址 106.15.58.126
 def testMeigu():
+    code_map = {
+        '@CL0W':'CL',
+        '@GC0W':'GC',
+        '@SI0W':'SI',
+        '@YM0Y':'YM',
+        'CN0Y':'CN',
+        '03NID':'NID',
+        '@ZS0W':'ZS',
+        '@ZM0Y':'ZL',
+        'CPO0W':'CP',
+        'CT0W':'CT'
+    }
     pwd = hashlib.md5(b'chanlun123456').hexdigest()
-    print("----",pwd)
-    url = "http://ldhqsj.com/us_k.action?username=chanlun&password="+pwd+"&id=AAPL&jys=NA&period=60&num=-100"
-    url2 = "http://ldhqsj.com/foreign_k.action?username=chanlun&password="+pwd+"&id=@ZM0Y&period=5&num=-100"
-    print("--",url2)
+    # 请求多个品种的美国股票
+    stock = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password="+pwd+"&id=AAPL,MSFT,GOOG,FB,AMZN,NFLX,NVDA,AMD&jys=NA&period=1&num=-200"
+    # 请求多个品种的外盘期权
+    global_future = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password="+pwd+"&id=@CL0W,@GC0W,@SI0W,@YM0Y,CN0Y,03NID,@ZS0W,@ZM0Y,@ZL0W,CPO0W,CT0W&period=1&num=-200"
+    print("调用地址",stock)
+    print("调用地址",global_future)
     startTime = int(round(time.time() * 1000))
-    r = requests.get(url2)
+    stock_resp = requests.get(stock)
+    global_future_resp = requests.get(global_future)
     endTime = int(round(time.time() * 1000)) - startTime
-    print("耗费时间：", endTime)
-    print(r.text)
-
+    print("消耗时间：", endTime)
+    stock_result = stock_resp.text
+    global_future_result = global_future_resp.text
+    print("美股",stock_result)
+    print("期货",global_future_result)
 
 def app():
     # testBitmex()
