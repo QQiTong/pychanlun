@@ -682,12 +682,12 @@ def formatTime(localTime):
  白银：@SI0W           --SI
  道琼斯：@YM0Y         --YM
  A50: CN0Y             ---CN
- 伦镍：03NID           --NID
- 大豆：@ZS0W           ---ZS
- 豆粕：@ZM0Y           --ZM
- 豆油：@ZL0W           --ZL
- 棕榈油：CPO0W         --CP
- 棉花：CT0W            --CT
+ 伦镍：03NID           --NI
+ 大豆：@ZS0W           ---S
+ 豆粕：@ZM0Y           --M
+ 豆油：@ZL0W           --L
+ 棕榈油：CPO0W         --P
+ 棉花：CT0W            --T
  
  美国股票    代码      8只股票  这个每天 晚上 21:00 到 凌晨 4:00 采集就可以了 . 20秒采集1次 一天采集 7*60 * 3 = 1260次           
  苹果        AAPL
@@ -698,25 +698,13 @@ def formatTime(localTime):
  奈飞        NFLX
  英伟达      NVDA
  AMD        AMD
- Roku       roku
+ Roku       ROKU
 '''
 # ldhqsj.com  备用地址 106.15.58.126
 def testMeigu():
-    code_map = {
-        '@CL0W':'CL',
-        '@GC0W':'GC',
-        '@SI0W':'SI',
-        '@YM0Y':'YM',
-        'CN0Y':'CN',
-        '03NID':'NID',
-        '@ZS0W':'ZS',
-        '@ZM0Y':'ZL',
-        'CPO0W':'CP',
-        'CT0W':'CT'
-    }
     pwd = hashlib.md5(b'chanlun123456').hexdigest()
     # 请求多个品种的美国股票
-    stock = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password="+pwd+"&id=AAPL,MSFT,GOOG,FB,AMZN,NFLX,NVDA,AMD&jys=NA&period=1&num=-200"
+    stock = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password="+pwd+"&id=AAPL,MSFT,GOOG,FB,AMZN,NFLX,NVDA,AMD,ROKU&jys=NA&period=1&num=-200"
     # 请求多个品种的外盘期权
     global_future = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password="+pwd+"&id=@CL0W,@GC0W,@SI0W,@YM0Y,CN0Y,03NID,@ZS0W,@ZM0Y,@ZL0W,CPO0W,CT0W&period=1&num=-200"
     print("调用地址",stock)
@@ -753,7 +741,6 @@ def app():
     # testDingDing()
     # testGroupBy()
     testMeigu()
-
 
 if __name__ == '__main__':
     app()

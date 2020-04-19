@@ -26,7 +26,7 @@ klineDataTool = KlineDataTool()
 symbolListDigitCoin = ['BTC'
                        # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
                        ]
-globalFutureSymbol = config['globalFutureSymbol']
+globalFutureSymbol = config['global_future_symbol']
 # 内盘期货
 periodList1 = ['3m', '5m', '15m', '30m', '60m']
 # 数字货币
@@ -93,9 +93,12 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
     #  后面的存储的数据依赖 futureCalcObj
     if futureCalcObj == -1:
         return
+    # perOrderStopRate 的止损率大于0.3 的信号只保存不再提醒出来，也就是不做止损较大的单子
+    perOrderStopRate = futureCalcObj['perOrderStopRate']
+
     # 更新,实时更新持仓品种的价格
     saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
-                           stop_lose_price, futureCalcObj, False)
+                               stop_lose_price, futureCalcObj, False)
     amount = futureCalcObj['maxOrderCount']
     temp_fire_time = datetime.strptime(fire_time_str, "%Y-%m-%d %H:%M")
     # 触发时间转换成UTC时间
@@ -119,7 +122,8 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
                 'close_price': close_price,
                 'amount': amount,
                 'date_created': datetime.utcnow(),
-                'stop_lose_price': stop_lose_price
+                'stop_lose_price': stop_lose_price,
+                'per_order_stop_rate':round(perOrderStopRate,3)
             },
             '$inc': {
                 'update_count': 1
@@ -138,9 +142,10 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             'close_price': close_price,  # 提醒时最新价格
             'direction': direction,
             'stop_lose_price': stop_lose_price,  # 当前信号的止损价
+            'per_order_stop_rate':round(perOrderStopRate,3),
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if (date_created - fire_time).total_seconds() < 60 * 3:
+        if (date_created - fire_time).total_seconds() < 60 * 3 and perOrderStopRate < 0.3:
             # 新增
             saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                                    stop_lose_price, futureCalcObj, True)
@@ -161,6 +166,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
                 "date_created": date_created_str,
                 "close_price": close_price,
                 "remark": remark,
+                "per_order_stop_rate":round(perOrderStopRate,3),
                 "remind": 'Ding'
             }
             # 简洁版
@@ -907,7 +913,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
     if openPrice == stopPrice:
         return -1
     # 兼容数字货币
-    if 'BTC' in dominantSymbol or dominantSymbol in config['globalFutureSymbol']:
+    if 'BTC' in dominantSymbol or dominantSymbol in config['global_future_symbol']:
         account = digitCoinAccount
         margin_rate = 0.05
         # 因为使用20倍杠杆所以 需要除以20
@@ -939,7 +945,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
     # 根据最大资金使用率算出的开仓手数(四舍五入)
     maxOrderCount2 = round(maxAccountUse / perOrderMargin)
     maxOrderCount = maxOrderCount2 if maxOrderCount1 > maxOrderCount2 else maxOrderCount1
-    # print("-->",maxStopMoney,"-->",maxStopMoney / perOrderStopMoney,"-->",maxAccountUse,"-->",maxAccountUse / perOrderMargin ,"->",perOrderMargin)
+    # print(dominantSymbol,"--> ",period,"--> ",perOrderStopRate,"-->",maxStopMoney,"-->",maxStopMoney / perOrderStopMoney,"-->",maxAccountUse,"-->",maxAccountUse / perOrderMargin ,"->",perOrderMargin)
     # 返回最大开仓手数，1手止损的金额，1手止损的百分比,1手保证金,保证金率
     futureCalcObj = {
         'maxOrderCount': maxOrderCount,
@@ -955,7 +961,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
 # 主力合约，开仓价格，开仓数量，止损价格，止盈价格    用最新价来算回更准确，因为触发价可能会有滑点
 def calStopWinCount(symbol, period, positionInfo, closePrice):
     # 兼容数字货币和外盘期货
-    if 'BTC' in symbol or symbol in config['globalFutureSymbol']:
+    if 'BTC' in symbol or symbol in config['global_future_symbol']:
         return 0
     # 动止公式:  (1 - stopWinPosRate) / stopWinPosRate = winLoseRate
     # stopWinPosRate: 动态止盈多少仓位

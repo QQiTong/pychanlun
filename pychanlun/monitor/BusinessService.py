@@ -26,8 +26,9 @@ dominantSymbolList = []
 dominantSymbolInfoList = []
 # CL:原油; GC:黄金;SI:白银; CT:棉花;S:大豆;SM：豆粕; BO:豆油;NID:伦镍; ZSD:伦锌;
 # 马棕 日胶
-globalSymbol = config['globalFutureSymbol']
-digitCoinSymbol = config['digitCoinSymbol']
+global_future_symbol = config['global_future_symbol']
+global_stock_symbol = config['global_stock_symbol']
+digit_coin_symbol = config['digit_coin_symbol']
 hbSwapUrl = "http://api.btcgateway.pro/swap-ex/market/history/kline?contract_code=BTC-USD"
 hbSwapTickUrl = "http://api.btcgateway.pro/swap-ex/market/trade?contract_code=BTC-USD"
 
@@ -176,10 +177,13 @@ class BusinessService:
     #     return changeAndPrice
 
     def getGlobalFutureChangeList(self):
-        globalFutureSymbol = config['globalFutureSymbol']
+        global_future_symbol = config['global_future_symbol']
+        global_stock_symbol = config['global_stock_symbol']
+        combinSymbol = copy.deepcopy(global_future_symbol)
+        combinSymbol.extend(global_stock_symbol)
         changeList = {}
-        for i in range(len(globalFutureSymbol)):
-            item = globalFutureSymbol[i]
+        for i in range(len(combinSymbol)):
+            item = combinSymbol[i]
             # 查日线开盘价
             code = "%s_%s" % (item, '1d')
             data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
@@ -217,8 +221,8 @@ class BusinessService:
     def getDoinantSynmbol(self):
         conbinSymbolInfo = copy.deepcopy(dominantSymbolInfoList)
         #  把外盘 数字货币加进去
-        conbinSymbolInfo.extend(config['globalFutureSymbolInfo'])
-        conbinSymbolInfo.extend(config['digitCoinSymbolInfo'])
+        conbinSymbolInfo.extend(config['global_future_symbol_info'])
+        conbinSymbolInfo.extend(config['digit_coin_symbol_info'])
         return conbinSymbolInfo
 
     def getFutureSignalList(self, strategyType):
@@ -232,8 +236,9 @@ class BusinessService:
     def getNormalSignalList(self):
         symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
-        symbolList.extend(globalSymbol)
-        symbolList.extend(digitCoinSymbol)
+        symbolList.extend(global_future_symbol)
+        symbolList.extend(global_stock_symbol)
+        symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]
@@ -266,8 +271,9 @@ class BusinessService:
         symbolList = copy.deepcopy(dominantSymbolList)
 
         #  把外盘加进去
-        symbolList.extend(globalSymbol)
-        symbolList.extend(digitCoinSymbol)
+        symbolList.extend(global_future_symbol)
+        symbolList.extend(global_stock_symbol)
+        symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]
@@ -288,8 +294,9 @@ class BusinessService:
     def getStrategy4BeichiList(self):
         symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
-        symbolList.extend(globalSymbol)
-        symbolList.extend(digitCoinSymbol)
+        symbolList.extend(global_future_symbol)
+        symbolList.extend(global_stock_symbol)
+        symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]
@@ -341,8 +348,9 @@ class BusinessService:
     def getLevelDirectionList(self):
         symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
-        symbolList.extend(globalSymbol)
-        symbolList.extend(digitCoinSymbol)
+        symbolList.extend(global_future_symbol)
+        symbolList.extend(global_stock_symbol)
+        symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]

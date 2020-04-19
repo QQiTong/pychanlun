@@ -15,6 +15,7 @@ import pytz
 import signal
 import hashlib
 from io import StringIO
+from pychanlun.config import config
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -24,9 +25,11 @@ python pychanlun\market_data\global_futures.py
 
 ohlc_dict = { '开盘价': 'first', '最高价': 'max', '最低价': 'min', '收盘价': 'last', '成交量': 'sum' }
 
-stocks = ['AAPL','MSFT','GOOG','FB','AMZN','NFLX','NVDA','AMD']
-futures = ['@CL0W','@GC0W','@SI0W','@YM0Y','CN0Y','03NID','@ZS0W','@ZM0Y','@ZL0W','CPO0W','CT0W']
-
+stocks = config['global_stock_symbol']
+futures = config['global_future_symbol_origin']
+# 转化成简称入库
+global_future_alias = config['global_future_alias']
+global_future_symbol = config['global_future_symbol']
 is_run = True
 pwd = hashlib.md5(b'chanlun123456').hexdigest()
 
@@ -50,6 +53,9 @@ def fetch_stocks_mink():
         df.set_index('时间', inplace=True)
         for code in stocks:
             df1m = df[df['品种代码'] == code]
+            # 将外盘期货转化成简称
+            if code in futures:
+                code = global_future_alias[code]
             save_data_m(code, '1m', df1m)
             # 3m
             df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
@@ -69,6 +75,12 @@ def fetch_stocks_mink():
             # 240m
             df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
             save_data_m(code, '240m', df240m)
+            # 1D
+            df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+            save_data_m(code, '1d', df1d)
+            # 3D
+            df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+            save_data_m(code, '3d', df3d)
         if not is_run:
             break
         time.sleep(200)
@@ -94,6 +106,8 @@ def fetch_futures_mink():
         df.set_index('时间', inplace=True)
         for code in futures:
             df1m = df[df['品种代码'] == code]
+            if code in futures:
+                code = global_future_alias[code]
             save_data_m(code, '1m', df1m)
             # 3m
             df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
@@ -113,6 +127,12 @@ def fetch_futures_mink():
             # 240m
             df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
             save_data_m(code, '240m', df240m)
+            # 1D
+            df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+            save_data_m(code, '1d', df1d)
+            # 3D
+            df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+            save_data_m(code, '3d', df3d)
         if not is_run:
             break
         time.sleep(200)

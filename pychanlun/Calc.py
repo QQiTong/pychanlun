@@ -166,12 +166,12 @@ class Calc:
             bigLevelPeriod = self.futureLevelMap[period]
             klineDataBigLevel = klineDataTool.getStockData(symbol, bigLevelPeriod, endDate)
             klineDataBigLevel2 = []
-        elif symbol in config['globalFutureSymbol']:
+        #    外盘期货和股票
+        elif symbol in config['global_future_symbol'] or symbol in config['global_stock_symbol']:
             cat = "GLOBAL_FUTURE"
             klineData = klineDataTool.getGlobalFutureData(symbol, period, endDate)
             bigLevelPeriod = self.futureLevelMap[period]
             klineDataBigLevel = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod, endDate)
-
             bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
             klineDataBigLevel2 = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod2, endDate)
 

@@ -99,12 +99,22 @@ config = {
         'CL': {'margin_rate': 0.1, 'contract_multiplier': 1000},  # 8:30 -14:00 0.1      其它时间 0.15
         'GC': {'margin_rate': 0.02, 'contract_multiplier': 100},  # 8:30 -14:00 0.02   其它时间 0.03
         'SI': {'margin_rate': 0.04, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06
+        'YM': {'margin_rate': 1, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06
+        'CN': {'margin_rate': 1, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06
         'CT': {'margin_rate': 0.05, 'contract_multiplier': 1},
-        'S': {'margin_rate': 0.05, 'contract_multiplier': 1},
-        'SM': {'margin_rate': 0.062, 'contract_multiplier': 1},
-        'BO': {'margin_rate': 0.05, 'contract_multiplier': 1},
+        'ZS': {'margin_rate': 0.05, 'contract_multiplier': 1},
+        'ZM': {'margin_rate': 0.062, 'contract_multiplier': 1},
+        'ZL': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'NID': {'margin_rate': 0.05, 'contract_multiplier': 1},
-        'ZSD': {'margin_rate': 0.05, 'contract_multiplier': 1}
+        'AAPL': {'margin_rate': 1, 'contract_multiplier': 1},
+        'MSFT': {'margin_rate': 1, 'contract_multiplier': 1},
+        'GOOG': {'margin_rate': 1, 'contract_multiplier': 1},
+        'FB': {'margin_rate': 1, 'contract_multiplier': 1},
+        'AMZN': {'margin_rate': 1, 'contract_multiplier': 1},
+        'NFLX': {'margin_rate': 1, 'contract_multiplier': 1},
+        'NVDA': {'margin_rate': 1, 'contract_multiplier': 1},
+        'AMD': {'margin_rate': 1, 'contract_multiplier': 1},
+        'ROKU': {'margin_rate': 1, 'contract_multiplier': 1},
     },
     'periodList': [
         '1m',
@@ -118,12 +128,28 @@ config = {
         '1w'
     ],
     # 外盘期货品种
-    # CL:原油; GC:黄金;SI:白银; CT:棉花;S:大豆;SM:豆粕; BO:豆油;NID:伦镍; ZSD:伦锌;
-    'globalFutureSymbol': ['CL', 'GC', 'SI', 'CT', 'S', 'SM', 'BO', 'NID',
-                           # 'ZSD'
-                           ],
-    'digitCoinSymbol': ['BTC'],
-    'digitCoinSymbolInfo': [{
+    # CL:原油; GC:黄金;SI:白银; CT:棉花;ZS:大豆;ZM:豆粕; ZL:豆油;NID:伦镍;
+    # YM:道琼斯 CN:A50 CP:马棕榈
+    'global_future_symbol_origin': ['@CL0W', '@GC0W', '@SI0W', '@YM0Y', 'CN0Y', '03NID', '@ZS0W', '@ZM0Y', '@ZL0W', 'CPO0W', 'CT0W'],
+    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'CN', 'NID', 'CP', 'CT', 'ZS', 'ZM', 'ZL'],
+    # 美国股票
+    'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD', 'ROKU'],
+    # 前端请求使用简称
+    'global_future_alias': {
+        '@CL0W': 'CL',
+        '@GC0W': 'GC',
+        '@SI0W': 'SI',
+        '@YM0Y': 'YM',
+        'CN0Y': 'CN',
+        '03NID': 'NID',
+        'CPO0W': 'CP',
+        'CT0W': 'CT',
+        '@ZS0W': 'ZS',
+        '@ZM0Y': 'ZM',
+        '@ZL0W': 'ZL',
+    },
+    'digit_coin_symbol': ['BTC'],
+    'digit_coin_symbol_info': [{
         'contract_multiplier': 1,
         'de_listed_date': 'forever',
         'exchange': 'OKEX',
@@ -141,144 +167,186 @@ config = {
         'feeRate': 0.012
     }],
 
-    'globalFutureSymbolInfo': [{
-        'contract_multiplier': 20,
-        'de_listed_date': 'forever',
-        'exchange': 'NYMEX能源',
-        'listed_date': 'forever',
-        'margin_rate': 1,
-        'market_tplus': 0,
-        'maturity_date': 'forever',
-        'order_book_id': 'CL',
-        'round_lot': 1,
-        'symbol': 'CL',
-        'trading_hours': '7*24',
-        'type': 'Future',
-        'underlying_order_book_id': 'null',
-        'underlying_symbol': 'CL',
-        'feeRate': 0.012
-    },
+    'global_future_symbol_info': [
         {
             'contract_multiplier': 20,
-            'de_listed_date': 'forever',
-            'exchange': '纽约COMEX',
-            'listed_date': 'forever',
+            'exchange': '美国',
             'margin_rate': 1,
-            'market_tplus': 0,
-            'maturity_date': 'forever',
+            'order_book_id': 'CL',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 20,
+            'exchange': '美国',
+            'margin_rate': 1,
             'order_book_id': 'GC',
-            'round_lot': 1,
-            'symbol': 'GC',
             'trading_hours': '7*24',
-            'type': 'Future',
-            'underlying_order_book_id': 'null',
-            'underlying_symbol': 'GC',
+            'type': 'future',
             'feeRate': 0.012
         },
         {
             'contract_multiplier': 20,
-            'de_listed_date': 'forever',
-            'exchange': '纽约COMEX',
-            'listed_date': 'forever',
+            'exchange': '美国',
             'margin_rate': 1,
-            'market_tplus': 0,
-            'maturity_date': 'forever',
             'order_book_id': 'SI',
-            'round_lot': 1,
-            'symbol': 'SI',
             'trading_hours': '7*24',
-            'type': 'Future',
-            'underlying_order_book_id': 'null',
-            'underlying_symbol': 'SI',
+            'type': 'future',
             'feeRate': 0.012
         },
-
         {
             'contract_multiplier': 20,
-            'de_listed_date': 'forever',
+            'exchange': '新加坡',
+            'margin_rate': 1,
+            'order_book_id': 'CN',
+            'trading_hours': '7*24',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 20,
             'exchange': '美国',
-            'listed_date': 'forever',
             'margin_rate': 1,
-            'market_tplus': 0,
-            'maturity_date': 'forever',
-            'order_book_id': 'CT',
-            'round_lot': 1,
-            'symbol': 'CT',
+            'order_book_id': 'YM',
             'trading_hours': '7*24',
-            'type': 'Future',
-            'underlying_order_book_id': 'null',
-            'underlying_symbol': 'CT',
+            'type': 'future',
             'feeRate': 0.012
         },
         {
             'contract_multiplier': 20,
-            'de_listed_date': 'forever',
+            'exchange': '马来西亚',
+            'margin_rate': 1,
+            'order_book_id': 'CP',
+            'trading_hours': '7*24',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 20,
             'exchange': '美国',
-            'listed_date': 'forever',
             'margin_rate': 1,
-            'market_tplus': 0,
-            'maturity_date': 'forever',
-            'order_book_id': 'S',
-            'round_lot': 1,
-            'symbol': 'S',
-            'trading_hours': '7*24',
-            'type': 'Future',
-            'underlying_order_book_id': 'null',
-            'underlying_symbol': 'S',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 20,
-            'de_listed_date': 'forever',
-            'exchange': '美国',
-            'listed_date': 'forever',
-            'margin_rate': 1,
-            'market_tplus': 0,
-            'maturity_date': 'forever',
-            'order_book_id': 'SM',
-            'round_lot': 1,
-            'symbol': 'SM',
-            'trading_hours': '7*24',
-            'type': 'Future',
-            'underlying_order_book_id': 'null',
-            'underlying_symbol': 'SM',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 20,
-            'de_listed_date': 'forever',
-            'exchange': '美国',
-            'listed_date': 'forever',
-            'margin_rate': 1,
-            'market_tplus': 0,
-            'maturity_date': 'forever',
-            'order_book_id': 'BO',
-            'round_lot': 1,
-            'symbol': 'BO',
-            'trading_hours': '7*24',
-            'type': 'Future',
-            'underlying_order_book_id': 'null',
-            'underlying_symbol': 'BO',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 20,
-            'de_listed_date': 'forever',
-            'exchange': '伦敦',
-            'listed_date': 'forever',
-            'margin_rate': 1,
-            'market_tplus': 0,
-            'maturity_date': 'forever',
             'order_book_id': 'NID',
-            'round_lot': 1,
-            'symbol': 'NID',
             'trading_hours': '7*24',
-            'type': 'Future',
-            'underlying_order_book_id': 'null',
-            'underlying_symbol': 'NID',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 20,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'CT',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 20,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'ZS',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 20,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'ZM',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 20,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'ZL',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'AAPL',
+            'trading_hours': '5*7',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'MSFT',
+            'trading_hours': '5*7',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'GOOG',
+            'trading_hours': '5*7',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'FB',
+            'trading_hours': '5*7',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'AMZN',
+            'trading_hours': '5*7',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'NFLX',
+            'trading_hours': '5*7',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'NVDA',
+            'trading_hours': '5*7',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'AMD',
+            'trading_hours': '5*7',
+            'type': 'stock',
+            'feeRate': 0.012
+        }, {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 1,
+            'order_book_id': 'ROKU',
+            'trading_hours': '5*7',
+            'type': 'stock',
             'feeRate': 0.012
         }]
-
 }
 
 cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]

@@ -22,7 +22,7 @@ tz = pytz.timezone('Asia/Shanghai')
 python pychanlun\market_data\global_futures.py
 """
 
-symbol_list = config['globalFutureSymbol']
+symbol_list = config['global_future_symbol']
 min_list = ['5', '15', '30', '60']
 
 is_run = True
