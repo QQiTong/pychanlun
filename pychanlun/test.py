@@ -698,13 +698,13 @@ def formatTime(localTime):
  奈飞        NFLX
  英伟达      NVDA
  AMD        AMD
- Roku       ROKU
+
 '''
 # ldhqsj.com  备用地址 106.15.58.126
 def testMeigu():
     pwd = hashlib.md5(b'chanlun123456').hexdigest()
     # 请求多个品种的美国股票
-    stock = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password="+pwd+"&id=AAPL,MSFT,GOOG,FB,AMZN,NFLX,NVDA,AMD,ROKU&jys=NA&period=1&num=-200"
+    stock = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password="+pwd+"&id=AAPL,MSFT,GOOG,FB,AMZN,NFLX,NVDA,AMD&jys=NA&period=1&num=-200"
     # 请求多个品种的外盘期权
     global_future = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password="+pwd+"&id=@CL0W,@GC0W,@SI0W,@YM0Y,CN0Y,03NID,@ZS0W,@ZM0Y,@ZL0W,CPO0W,CT0W&period=1&num=-200"
     print("调用地址",stock)

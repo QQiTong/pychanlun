@@ -115,7 +115,7 @@ config = {
         'NFLX': {'margin_rate': 1, 'contract_multiplier': 1},
         'NVDA': {'margin_rate': 1, 'contract_multiplier': 1},
         'AMD': {'margin_rate': 1, 'contract_multiplier': 1},
-        'ROKU': {'margin_rate': 1, 'contract_multiplier': 1},
+        # 'ROKU': {'margin_rate': 1, 'contract_multiplier': 1},
     },
     'periodList': [
         '1m',
@@ -134,7 +134,7 @@ config = {
     'global_future_symbol_origin': ['@CL0W', '@GC0W', '@SI0W', '@YM0Y', 'CN0Y', '03NID', '@ZS0W', '@ZM0Y', '@ZL0W', 'CPO0W', 'CT0W'],
     'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'CN', 'NID', 'CP', 'CT', 'ZS', 'ZM', 'ZL'],
     # 美国股票
-    'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD', 'ROKU'],
+    'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD'],
     # 前端请求使用简称
     'global_future_alias': {
         '@CL0W': 'CL',
@@ -339,15 +339,17 @@ config = {
             'trading_hours': '5*7',
             'type': 'stock',
             'feeRate': 0.012
-        }, {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 1,
-            'order_book_id': 'ROKU',
-            'trading_hours': '5*7',
-            'type': 'stock',
-            'feeRate': 0.012
-        }]
+        },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 1,
+        #     'order_book_id': 'ROKU',
+        #     'trading_hours': '5*7',
+        #     'type': 'stock',
+        #     'feeRate': 0.012
+        # }
+    ]
 }
 
 cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]

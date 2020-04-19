@@ -83,7 +83,7 @@ def fetch_stocks_mink():
             save_data_m(code, '3d', df3d)
         if not is_run:
             break
-        time.sleep(200)
+        time.sleep(20)
 
 
 def fetch_futures_mink():
@@ -135,7 +135,7 @@ def fetch_futures_mink():
             save_data_m(code, '3d', df3d)
         if not is_run:
             break
-        time.sleep(200)
+        time.sleep(20)
 
 
 def save_data_m(code, period, df):
