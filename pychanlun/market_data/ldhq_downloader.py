@@ -32,11 +32,32 @@ global_future_alias = config['global_future_alias']
 global_future_symbol = config['global_future_symbol']
 is_run = True
 pwd = hashlib.md5(b'chanlun123456').hexdigest()
+# 1、5、15、30、60、d、w、
+'''
+1分钟接口返回的数据格式：
 
+日期
+20200417
+品种代码,时间,开盘价,最高价,最低价,收盘价,成交量,成交额
+AAPL,12:41,280.575,280.83,280.548,280.818,76079,21355900
+
+5分钟接口返回的数据格式：
+
+品种代码,时间,开盘价,最高价,最低价,收盘价,成交量,成交额
+AAPL,20200312 11:55,252.36,252.48,251,252.12,1153129,290429100
+
+日线 周线 返回的数据格式：
+
+品种代码,日期,开盘价,最高价,最低价,收盘价,成交量,成交额
+AAPL,20180628,184.1,186.21,183.8,185.5,17365235,3215599000
+
+三种情况兼容处理
+
+'''
 def fetch_stocks_mink():
     while is_run:
         # 取分钟数据
-        url = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password="+pwd+"&id="+",".join(stocks)+"&jys=NA&period=1&num=-200"
+        url = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password="+pwd+"&id="+",".join(stocks)+"&jys=NA&period=d&num=-200"
         print(url)
         resp = requests.get(url)
         content = resp.text
@@ -49,8 +70,15 @@ def fetch_stocks_mink():
         df = pd.read_csv(StringIO("".join(lines)))
         if date_str is not None:
             df['时间'] = df['时间'].apply(lambda x: date_str + ' ' + x)
-        df['时间'] = df['时间'].apply(lambda x: datetime.datetime.strptime(x, '%Y%m%d %H:%M'))
-        df.set_index('时间', inplace=True)
+
+        if '时间' in df.columns.values:
+            df['时间'] = df['时间'].apply(lambda x: datetime.datetime.strptime(x, '%Y%m%d %H:%M'))
+            df.set_index('时间', inplace=True)
+
+        elif '日期' in df.columns.values:
+            df['日期'] = df['日期'].apply(lambda x: datetime.datetime.strptime(str(x), '%Y%m%d'))
+            df.set_index('日期', inplace=True)
+
         for code in stocks:
             df1m = df[df['品种代码'] == code]
             # 将外盘期货转化成简称
@@ -102,8 +130,12 @@ def fetch_futures_mink():
         df = pd.read_csv(StringIO("".join(lines)))
         if date_str is not None:
             df['时间'] = df['时间'].apply(lambda x: date_str + ' ' + x)
-        df['时间'] = df['时间'].apply(lambda x: datetime.datetime.strptime(x, '%Y%m%d %H:%M'))
-        df.set_index('时间', inplace=True)
+        if '时间' in df.columns.values:
+            df['时间'] = df['时间'].apply(lambda x: datetime.datetime.strptime(x, '%Y%m%d %H:%M'))
+            df.set_index('时间', inplace=True)
+        elif '日期' in df.columns.values:
+            df['日期'] = df['日期'].apply(lambda x: datetime.datetime.strptime(str(x), '%Y%m%d'))
+            df.set_index('日期', inplace=True)
         for code in futures:
             df1m = df[df['品种代码'] == code]
             if code in futures:

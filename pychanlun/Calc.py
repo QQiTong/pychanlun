@@ -299,10 +299,7 @@ class Calc:
         # 本级别段处理
         duanList = [0 for i in range(count)]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            if cat == "GLOBAL_FUTURE" and period == "3m":
-                pass
-            else:
-                CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod)
+            CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod)
         else:
             CalcDuan(count, duanList, biList, highList, lowList)
         x_data['duan'] = duanList

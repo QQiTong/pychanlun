@@ -26,7 +26,8 @@ klineDataTool = KlineDataTool()
 symbolListDigitCoin = ['BTC'
                        # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
                        ]
-globalFutureSymbol = config['global_future_symbol']
+global_future_symbol = config['global_future_symbol']
+global_stock_symbol = config['global_stock_symbol']
 # 内盘期货
 periodList1 = ['3m', '5m', '15m', '30m', '60m']
 # 数字货币
@@ -184,7 +185,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
 def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                            stop_lose_price, futureCalcObj, insert):
     # 外盘不录入持仓列表
-    if symbol in globalFutureSymbol:
+    if symbol in global_future_symbol:
         return
     temp_fire_time = datetime.strptime(fire_time_str, "%Y-%m-%d %H:%M")
     # 触发时间转换成UTC时间
@@ -415,10 +416,12 @@ def monitorFuturesAndDigitCoin(type, symbolList):
         symbolList = symbolListDigitCoin
         periodList = periodList1
 
-    else:
-        symbolList = globalFutureSymbol
+    elif type == "3":
+        symbolList = global_future_symbol
         periodList = periodList3
-
+    else:
+        symbolList = global_stock_symbol
+        periodList = periodList3
     try:
         while True:
             for i in range(len(symbolList)):
@@ -449,7 +452,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
             threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolList]).start()
         elif type == "3":
             print("外盘期货出异常了", Exception)
-            threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
+            threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol]).start()
         else:
             print("OKEX出异常了", Exception)
             time.sleep(10)
@@ -913,7 +916,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
     if openPrice == stopPrice:
         return -1
     # 兼容数字货币
-    if 'BTC' in dominantSymbol or dominantSymbol in config['global_future_symbol']:
+    if 'BTC' in dominantSymbol or dominantSymbol in config['global_future_symbol'] or dominantSymbol in config['global_stock_symbol']:
         account = digitCoinAccount
         margin_rate = 0.05
         # 因为使用20倍杠杆所以 需要除以20
@@ -1005,8 +1008,11 @@ def run(**kwargs):
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[7]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
 
-    # 外盘监控
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', globalFutureSymbol]).start()
+    # 外盘期货监控
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol]).start()
+    # 外盘股票监控
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['4', global_stock_symbol]).start()
+
 
     threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
 
