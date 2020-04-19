@@ -101,11 +101,12 @@ config = {
         'SI': {'margin_rate': 0.04, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06
         'YM': {'margin_rate': 1, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06
         'CN': {'margin_rate': 1, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06
+        'NID': {'margin_rate': 0.05, 'contract_multiplier': 1},
+        'CP': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'CT': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'ZS': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'ZM': {'margin_rate': 0.062, 'contract_multiplier': 1},
         'ZL': {'margin_rate': 0.05, 'contract_multiplier': 1},
-        'NID': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'AAPL': {'margin_rate': 1, 'contract_multiplier': 1},
         'MSFT': {'margin_rate': 1, 'contract_multiplier': 1},
         'GOOG': {'margin_rate': 1, 'contract_multiplier': 1},
