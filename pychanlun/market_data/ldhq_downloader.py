@@ -2,7 +2,6 @@
 
 import logging
 import traceback
-import datetime
 import time
 import threading
 
@@ -18,6 +17,7 @@ import signal
 import hashlib
 from io import StringIO
 from pychanlun.config import config
+from datetime import datetime, timedelta
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -25,7 +25,7 @@ tz = pytz.timezone('Asia/Shanghai')
 python pychanlun\market_data\global_futures.py
 """
 
-ohlc_dict = { '开盘价': 'first', '最高价': 'max', '最低价': 'min', '收盘价': 'last', '成交量': 'sum' }
+ohlc_dict = {'开盘价': 'first', '最高价': 'max', '最低价': 'min', '收盘价': 'last', '成交量': 'sum'}
 
 stocks = config['global_stock_symbol']
 futures = config['global_future_symbol_origin']
@@ -34,6 +34,21 @@ global_future_alias = config['global_future_alias']
 global_future_symbol = config['global_future_symbol']
 is_run = True
 pwd = hashlib.md5(b'chanlun123456').hexdigest()
+
+#  美国股票以及  CL原油 GC 黄金 SI 白银  CT 棉花  时间比北京时间慢了 12小时;
+#  YM 道琼斯指数  ZS ZM ZL 比北京时间慢了 13小时;
+#  NID 伦镍 比北京时间少了5小时.
+#  其他的不用转换
+
+add_5_hours_symbol_origin = ['03NID']
+add_12_hours_symbol_origin = ['@CL0W', '@GC0W', '@SI0W', 'CT0W']
+add_13_hours_symbol_origin = ['@YM0Y,@ZS0W', '@ZM0Y', '@ZL0W']
+
+# 需要增加12小时的品种
+add_5_hours_symbol = ['NID']
+add_12_hours_symbol = ['CL', 'GC', 'SI', 'CT']
+add_13_hours_symbol = ['YM','ZS', 'ZM', 'ZL']
+
 # 1、5、15、30、60、d、w、
 '''
 1分钟接口返回的数据格式：
@@ -57,11 +72,13 @@ AAPL,20180628,184.1,186.21,183.8,185.5,17365235,3215599000
 
 '''
 dingMsg = DingMsg()
+
+
 def fetch_stocks_mink():
     while is_run:
         try:
             # 取分钟数据
-            url = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password="+pwd+"&id="+",".join(stocks)+"&jys=NA&period=d&num=-200"
+            url = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password=" + pwd + "&id=" + ",".join(stocks) + "&jys=NA&period=d&num=-200"
             print(url)
             resp = requests.get(url)
             content = resp.text
@@ -76,11 +93,10 @@ def fetch_stocks_mink():
                 df['时间'] = df['时间'].apply(lambda x: date_str + ' ' + x)
 
             if '时间' in df.columns.values:
-                df['时间'] = df['时间'].apply(lambda x: datetime.datetime.strptime(x, '%Y%m%d %H:%M'))
+                df1m['时间'] = df1m['时间'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=12))
                 df.set_index('时间', inplace=True)
-
             elif '日期' in df.columns.values:
-                df['日期'] = df['日期'].apply(lambda x: datetime.datetime.strptime(str(x), '%Y%m%d'))
+                df['日期'] = df['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=12))
                 df.set_index('日期', inplace=True)
 
             for code in stocks:
@@ -125,7 +141,7 @@ def fetch_futures_mink():
     while is_run:
         try:
             # 取分钟数据
-            url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password="+pwd+"&id="+",".join(futures)+"&period=1&num=-200"
+            url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + pwd + "&id=" + ",".join(futures) + "&period=1&num=-200"
             print(url)
             resp = requests.get(url)
             content = resp.text
@@ -138,16 +154,35 @@ def fetch_futures_mink():
             df = pd.read_csv(StringIO("".join(lines)))
             if date_str is not None:
                 df['时间'] = df['时间'].apply(lambda x: date_str + ' ' + x)
-            if '时间' in df.columns.values:
-                df['时间'] = df['时间'].apply(lambda x: datetime.datetime.strptime(x, '%Y%m%d %H:%M'))
-                df.set_index('时间', inplace=True)
-            elif '日期' in df.columns.values:
-                df['日期'] = df['日期'].apply(lambda x: datetime.datetime.strptime(str(x), '%Y%m%d'))
-                df.set_index('日期', inplace=True)
+            # if '时间' in df.columns.values:
+            #     df.set_index('时间', inplace=False)
+            # elif '日期' in df.columns.values:
+            #     df.set_index('日期', inplace=False)
             for code in futures:
                 df1m = df[df['品种代码'] == code]
                 if code in futures:
                     code = global_future_alias[code]
+                if '时间' in df.columns.values:
+                    if code in add_5_hours_symbol:
+                        df1m['时间'] = df1m['时间'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=5))
+                    elif code in add_12_hours_symbol:
+                        df1m['时间'] = df1m['时间'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=12))
+                    elif code in add_13_hours_symbol:
+                        df1m['时间'] = df1m['时间'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=13))
+                    else:
+                        df1m['时间'] = df1m['时间'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M'))
+                    df1m.set_index('时间', inplace=True)
+                elif '日期' in df.columns.values:
+                    if code in add_5_hours_symbol:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=5))
+                    elif code in add_12_hours_symbol:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=12))
+                    elif code in add_13_hours_symbol:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=13))
+                    else:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M'))
+                    df1m.set_index('日期', inplace=True)
+
                 save_data_m(code, '1m', df1m)
                 # 3m
                 df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
@@ -214,7 +249,7 @@ def signal_hanlder(signalnum, frame):
 def run(**kwargs):
     signal.signal(signal.SIGINT, signal_hanlder)
     thread_list = []
-    # thread_list.append(threading.Thread(target=fetch_stocks_mink))
+    thread_list.append(threading.Thread(target=fetch_stocks_mink))
     thread_list.append(threading.Thread(target=fetch_futures_mink))
     for thread in thread_list:
         thread.start()

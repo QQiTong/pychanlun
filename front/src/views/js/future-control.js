@@ -140,7 +140,7 @@ export default {
             // history 历史状态 获取的不一定是主力合约 ，提交表格触发更新
             prejudgeTableStatus: 'current',
             prejudgeTableId: '',
-            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'S', 'SM', 'BO', 'NID']
+            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID']
         }
     },
     computed: {
@@ -305,7 +305,7 @@ export default {
             for (let symbol in this.beichiList) {
                 let count = 0
                 let item = this.beichiList[symbol]
-                // console.log("背驰item:", item, symbol)
+                console.log("背驰item:", item, symbol)
                 for (let j in item) {
                     let innerItem = item[j]
                     if (innerItem !== '' && innerItem.indexOf('B') !== -1) {
@@ -318,11 +318,11 @@ export default {
                     }
                 }
                 // 外盘没有3分钟，多空比例需要提高一点
-                if (this.globalFutureSymbol.indexOf(symbol) !== -1) {
-                    item['percentage'] = count * 12.5
-                } else {
-                    item['percentage'] = count * 10
-                }
+                // if (this.globalFutureSymbol.indexOf(symbol) !== -1) {
+                //     item['percentage'] = count * 12.5
+                // } else {
+                item['percentage'] = count * 10
+                // }
             }
         },
         getChangeiList() {

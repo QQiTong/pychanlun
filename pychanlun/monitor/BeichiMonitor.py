@@ -34,7 +34,7 @@ periodList1 = ['3m', '5m', '15m', '30m', '60m']
 # 数字货币
 periodList2 = ['1m', '3m', '5m', '15m', '30m', '60m']
 # 外盘期货
-periodList3 = ['5m', '15m', '30m', '60m']
+periodList3 = ['3m','5m', '15m', '30m', '60m']
 # 高级别 高高级别映射
 # 暂时用3d 3d
 futureLevelMap = {
@@ -89,6 +89,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
                      stop_lose_price, futureCalcObj):
     #  后面的存储的数据依赖 futureCalcObj
     if futureCalcObj == -1:
+        print("symbol ->", symbol," period->",period )
         return
     # perOrderStopRate 的止损率大于0.3 的信号只保存不再提醒出来，也就是不做止损较大的单子
     perOrderStopRate = futureCalcObj['perOrderStopRate']
@@ -1014,10 +1015,10 @@ def run(**kwargs):
     # 外盘期货监控
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol]).start()
     # 外盘股票监控
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['4', global_stock_symbol]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['4', global_stock_symbol]).start()
 
 
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
 
 
 if __name__ == '__main__':

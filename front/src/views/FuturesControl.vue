@@ -164,7 +164,7 @@
                     </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="多空走势" width="100">
+                            <el-table-column label="多空走势" width="500">
                                 <template slot-scope="scope">
                                     <!--                                    <el-tag-->
                                     <!--                                        size="medium"-->
