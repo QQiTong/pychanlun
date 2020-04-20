@@ -25,6 +25,7 @@ export default {
                 // start用于仓位管理计算
                 currentSymbol: null,
                 currentMarginRate: null,
+                marginLevel: null,
                 // 合约乘数
                 contractMultiplier: null,
                 // 账户总额
@@ -271,7 +272,7 @@ export default {
         },
         getSignalList() {
             futureApi.getSignalList().then(res => {
-                console.log('获取背驰列表:', res)
+                // console.log('获取背驰列表:', res)
                 this.beichiList = res
                 this.processBeichiList()
                 if (this.firstRequestDominant) {
@@ -304,7 +305,7 @@ export default {
             for (let symbol in this.beichiList) {
                 let count = 0
                 let item = this.beichiList[symbol]
-                console.log("背驰item:", item, symbol)
+                // console.log("背驰item:", item, symbol)
                 for (let j in item) {
                     let innerItem = item[j]
                     if (innerItem !== '' && innerItem.indexOf('B') !== -1) {
@@ -363,6 +364,7 @@ export default {
                 this.calcPosForm.stopRate = 0.1
                 this.calcPosForm.currentMarginRate = symbolInfo.margin_rate
             }
+            this.calcPosForm.marginLevel = (1 / this.calcPosForm.currentMarginRate).toFixed(2)
             this.calcPosForm.contractMultiplier = symbolInfo.contract_multiplier
             this.calcPosForm.currentSymbol = symbolInfo.underlying_symbol
             this.calcPosForm.openPrice = price

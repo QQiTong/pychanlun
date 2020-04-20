@@ -652,7 +652,7 @@ export default {
           this.listLoading = false;
           this.listQuery.total = res.total;
           this.positionList = res.records;
-          console.log("后端返回的持仓列表", res);
+          // console.log("后端返回的持仓列表", res);
         })
         .catch(error => {
           this.listLoading = false;

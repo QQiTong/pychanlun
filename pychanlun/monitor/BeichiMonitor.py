@@ -2,6 +2,7 @@
 import logging
 import traceback
 from pychanlun.Calc import Calc
+from pychanlun.DingMsg import DingMsg
 from pychanlun.KlineDataTool import KlineDataTool
 import rqdatac as rq
 from datetime import datetime, timedelta
@@ -57,6 +58,7 @@ digitCoinAccount = 60.80 / 10000
 maxAccountUseRate = 0.1
 stopRate = 0.01
 mail = Mail()
+dingMsg = DingMsg()
 
 
 # 初始化业务对象
@@ -75,13 +77,7 @@ def sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, f
     #          '开:' + fire_time_str + ' 触:' + date_created_str)
     # requests.post(url)
 
-    url = 'https://oapi.dingtalk.com/robot/send?access_token=39474549996bad7e584523a02236d69b68be8963e2937274e4e0c57fbb629477'
-    program = {
-        "msgtype": "text",
-        "text": {"content": json.dumps(msg, ensure_ascii=False, indent=4)},
-    }
-    headers = {'Content-Type': 'application/json'}
-    f = requests.post(url, data=json.dumps(program), headers=headers)
+    dingMsg.send(msg)
     # if not mailResult:
     #     print("发送失败")
     # else:
@@ -148,9 +144,10 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
         })
         if (date_created - fire_time).total_seconds() < 60 * 3 and perOrderStopRate < 0.3:
             # 新增
-            saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
+            remind = saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                                    stop_lose_price, futureCalcObj, True)
-
+            if not remind:
+                return
             # 在3分钟内的触发邮件通知  3分钟就能扫内盘+外盘
             # 把数据库的utc时间 转成本地时间
             fire_time_str = (fire_time + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
@@ -184,6 +181,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
 # 自动录入持仓列表  新增 status(holding,winEnd,loseEnd 状态) profit(盈利) profit_rate(盈利率)
 def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                            stop_lose_price, futureCalcObj, insert):
+    remind = False
     # 外盘不录入持仓列表
     if symbol in global_future_symbol:
         return
@@ -232,6 +230,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                         'update_count': 1
                     }
                 }, upsert=True)
+                remind = True
             else:
                 DBPyChanlun['future_auto_position'].find_one_and_update({
                     'symbol': symbol, 'direction': direction, 'status': status
@@ -247,7 +246,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                     }
                 }, upsert=True)
         else:
-            # 动止信号 不插入持仓表
+            # 动止信号 不作为新的记录插入持仓表
             if signal != 'fractal':
                 DBPyChanlun['future_auto_position'].insert_one({
                     'symbol': symbol,
@@ -274,6 +273,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                     'last_update_period': '',
 
                 })
+                remind = True
     else:
         last_fire = DBPyChanlun['future_auto_position'].find_one({
             'symbol': symbol,
@@ -372,7 +372,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                                 'update_count': 1
                             }
                         }, upsert=True)
-
+    return remind
 
 # 记录品种当前级别的方向
 def saveFutureDirection(symbol, period, direction):
@@ -450,13 +450,16 @@ def monitorFuturesAndDigitCoin(type, symbolList):
         if type == "1":
             print("期货出异常了", Exception)
             threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolList]).start()
+        elif type == "2":
+            print("OKEX出异常了", Exception)
+            time.sleep(10)
+            threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
         elif type == "3":
             print("外盘期货出异常了", Exception)
             threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol]).start()
         else:
-            print("OKEX出异常了", Exception)
-            time.sleep(10)
-            threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
+            print("外盘股票出异常了", Exception)
+            threading.Thread(target=monitorFuturesAndDigitCoin, args=['4', global_stock_symbol]).start()
 
 
 '''
@@ -915,7 +918,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
     # openPrice stopPrice等于历史行情某个stopPrice 会导致除0异常
     if openPrice == stopPrice:
         return -1
-    # 兼容数字货币
+    # 兼容数字货币 外盘期货
     if 'BTC' in dominantSymbol or dominantSymbol in config['global_future_symbol'] or dominantSymbol in config['global_stock_symbol']:
         account = digitCoinAccount
         margin_rate = 0.05
@@ -927,7 +930,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period):
         perOrderStopMoney = round((perOrderMargin * perOrderStopRate), 4)
         maxAccountUse = account * 10000 * 0.4
         maxStopMoney = account * 10000 * 0.1
-    # 期货
+    # 内盘期货
     else:
         account = futuresAccount
         margin_rate = dominantSymbolInfoList[dominantSymbol]['margin_rate']
@@ -1011,7 +1014,7 @@ def run(**kwargs):
     # 外盘期货监控
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol]).start()
     # 外盘股票监控
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['4', global_stock_symbol]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['4', global_stock_symbol]).start()
 
 
     threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()

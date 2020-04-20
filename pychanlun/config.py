@@ -79,28 +79,28 @@ config = {
         'ZN': {'margin_rate': 0.1, 'contract_multiplier': 5},
         # 郑商所
         'MA': {'margin_rate': 0.07, 'contract_multiplier': 10},
-        'TA': {'margin_rate': 0.06, 'contract_multiplier': 5},
+        'TA': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'CF': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'SR': {'margin_rate': 0.05, 'contract_multiplier': 10},
-        'OI': {'margin_rate': 0.05, 'contract_multiplier': 10},
+        'OI': {'margin_rate': 0.065, 'contract_multiplier': 10},
+        'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
         # 大商所
         'J': {'margin_rate': 0.08, 'contract_multiplier': 100},
         'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
         'I': {'margin_rate': 0.08, 'contract_multiplier': 100},
-        'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
-        'M': {'margin_rate': 0.06, 'contract_multiplier': 10},
+        'M': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
-        'PP': {'margin_rate': 0.07, 'contract_multiplier': 5},
-        'P': {'margin_rate': 0.07, 'contract_multiplier': 10},
-        'Y': {'margin_rate': 0.06, 'contract_multiplier': 10},
+        'PP': {'margin_rate': 0.11, 'contract_multiplier': 5},
+        'P': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        'Y': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'CL': {'margin_rate': 0.1, 'contract_multiplier': 1000},  # 8:30 -14:00 0.1      其它时间 0.15
         'GC': {'margin_rate': 0.02, 'contract_multiplier': 100},  # 8:30 -14:00 0.02   其它时间 0.03
         'SI': {'margin_rate': 0.04, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06
-        'YM': {'margin_rate': 1, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06
-        'CN': {'margin_rate': 1, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06
+        'YM': {'margin_rate': 0.1, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06
+        'CN': {'margin_rate': 0.1, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06
         'NID': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'CP': {'margin_rate': 0.05, 'contract_multiplier': 1},
         'CT': {'margin_rate': 0.05, 'contract_multiplier': 1},
@@ -170,7 +170,7 @@ config = {
 
     'global_future_symbol_info': [
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '美国',
             'margin_rate': 1,
             'order_book_id': 'CL',
@@ -179,7 +179,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '美国',
             'margin_rate': 1,
             'order_book_id': 'GC',
@@ -188,7 +188,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '美国',
             'margin_rate': 1,
             'order_book_id': 'SI',
@@ -197,7 +197,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '新加坡',
             'margin_rate': 1,
             'order_book_id': 'CN',
@@ -206,7 +206,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '美国',
             'margin_rate': 1,
             'order_book_id': 'YM',
@@ -215,7 +215,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '马来西亚',
             'margin_rate': 1,
             'order_book_id': 'CP',
@@ -224,7 +224,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '美国',
             'margin_rate': 1,
             'order_book_id': 'NID',
@@ -233,7 +233,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '美国',
             'margin_rate': 1,
             'order_book_id': 'CT',
@@ -242,7 +242,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '美国',
             'margin_rate': 1,
             'order_book_id': 'ZS',
@@ -251,7 +251,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '美国',
             'margin_rate': 1,
             'order_book_id': 'ZM',
@@ -260,7 +260,7 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 20,
+            'contract_multiplier': 1,
             'exchange': '美国',
             'margin_rate': 1,
             'order_book_id': 'ZL',

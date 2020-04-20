@@ -175,6 +175,7 @@ export default {
             // 数字货币讲240m 替换成1m
             isDigitCoin: false,
             futureConfig: {},
+            symbolInfo: null
 
         }
     },
@@ -655,10 +656,10 @@ export default {
             // }
             let option
             if (update === 'update') {
-                console.log('更新', period)
+                // console.log('更新', period)
                 option = that.refreshOption(currentChart, resultData)
             } else {
-                console.log('重载', period)
+                // console.log('重载', period)
                 option = {
                     animation: false,
                     backgroundColor: this.echartsConfig.bgColor,
@@ -1260,7 +1261,7 @@ export default {
             option.series[8].data = this.calculateMA(resultData, 10);
             option.series[9].data = this.calculateMA(resultData, 60);
             // option.series[11].data = resultData.volume;
-            console.log('更新的option', option)
+            // console.log('更新的option', option)
             return option
         },
         splitData(jsonObj, period) {
@@ -2267,7 +2268,7 @@ export default {
             // 当前价格
             let currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
-
+            console.log("查bug",this.marginLevel,this.contractMultiplier,currentPrice)
             // 1手需要的保证金
             if (this.symbol.indexOf('BTC') === -1) {
                 this.marginPrice = (this.contractMultiplier * currentPrice / this.marginLevel).toFixed(2)

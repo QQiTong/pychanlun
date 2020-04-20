@@ -11,6 +11,9 @@
                 <el-form-item label="保证金系数">
                     <el-input v-model="calcPosForm.currentMarginRate" class="form-input " disabled/>
                 </el-form-item>
+                <el-form-item label="杠杠倍数">
+                    <el-input v-model="calcPosForm.marginLevel" class="form-input " disabled/>
+                </el-form-item>
                 <el-form-item label="合约乘数">
                     <el-input v-model="calcPosForm.contractMultiplier" class="form-input " disabled/>
                 </el-form-item>
