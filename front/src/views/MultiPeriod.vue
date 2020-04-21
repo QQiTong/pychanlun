@@ -40,7 +40,7 @@
                 <div id="main30" class="echarts">
                 </div>
             </div>
-            <div class="echarts-item" id="main240Parent" v-if="!isDigitCoin">
+            <div class="echarts-item" id="main240Parent" v-if="!isDigitCoinOrGlobal">
                 <div id="main240" class="echarts">
                 </div>
             </div>

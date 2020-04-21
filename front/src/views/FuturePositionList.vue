@@ -308,11 +308,10 @@
             <!--          <el-tag v-if="props.row.holdReason">{{props.row.holdReason}}</el-tag>-->
             <!--        </template>-->
             <!--      </el-table-column>-->
-            <el-table-column label="操作状态" align="center" width="130">
+            <el-table-column label="操作状态" align="center" width="100">
                 <template slot-scope="{row}">
                     <el-select
                         v-model="row.status"
-                        class="form-input-short"
                         size="mini"
                         @change="changeStatus(row._id,row.status,row.close_price)"
                     >
@@ -458,21 +457,21 @@
                 </template>
             </el-table-column>
             <el-table-column label="动止数" prop="stop_win_count" width="90" align="center">
-                <template slot-scope="{row}" >
+                <template slot-scope="{row}">
                     {{row.stop_win_count}}
                 </template>
             </el-table-column>
             <el-table-column label="动止价" prop="stop_win_count" width="90" align="center">
-                <template slot-scope="{row}" >
+                <template slot-scope="{row}">
                     {{row.stop_win_price}}
                 </template>
             </el-table-column>
             <el-table-column label="动止收益" prop="stop_win_money" width="90" align="center">
-                <template slot-scope="{row}" >
+                <template slot-scope="{row}">
                     {{row.stop_win_money}}
                 </template>
             </el-table-column>
-            <!-- 止盈结束的时候计算盈利率 -->
+            <!-- 止盈的时候计算盈利率 -->
             <!--            <el-table-column-->
             <!--                label="盈利率"-->
             <!--                width="100"-->
@@ -530,11 +529,11 @@
         {key: "close", display_name: "平"}
     ];
     const statusOptions = [
-        {key: "holding", display_name: "持仓中"},
+        {key: "holding", display_name: "持仓"},
         // {key: "prepare", display_name: "预埋单"},
-        {key: "winEnd", display_name: "止盈结束"},
-        {key: "loseEnd", display_name: "止损结束"},
-        {key: "exception", display_name: "异常单"}
+        {key: "winEnd", display_name: "止盈"},
+        {key: "loseEnd", display_name: "止损"},
+        {key: "exception", display_name: "异常"}
     ];
     const periodOptions = [
         {key: "3m", display_name: "3m"},
@@ -617,6 +616,7 @@
         },
         data() {
             return {
+                sumObj:null,
                 endDate: CommonTool.dateFormat('yyyy-MM-dd'),
                 futureConfig: {},
                 rateColors: ["#99A9BF", "#F7BA2A", "#FF9900"],
@@ -751,7 +751,7 @@
             },
             // 计算盈亏比
             calcWinLoseRate(row) {
-                let profitRate = this.calcProfitRate(row);
+                let profitRate = row.current_profit_rate * 100;
                 let stopLoseRate = this.calcStopLoseRate(row);
                 if (profitRate === "获取中" || stopLoseRate === "获取中") {
                     return "获取中";
@@ -763,38 +763,38 @@
             calcStopLoseRate(row) {
                 return row.per_order_stop_rate * 100
             },
-            //  计算收益率
-            calcProfitRate(row) {
-                let marginLevel = 1
-                if (row.symbol === 'BTC') {
-                    // BTC
-                    marginLevel = 1 / this.futureConfig[row.symbol].margin_rate
-                } else if (row.symbol.indexOf('sz') !== -1 || row.symbol.indexOf('sh') !== -1) {
-                    marginLevel = 1
-                } else {
-                    // 期货简单代码   RB
-                    let simpleSymbol = row.symbol.replace(/[0-9]/g, '')
-                    const margin_rate = this.futureConfig[simpleSymbol].margin_rate
-                    let currentMarginRate = margin_rate + this.marginLevelCompany
-                    marginLevel = Number((1 / (currentMarginRate)).toFixed(2))
-                }
-                let currentPercent = 0;
-                if (row.direction === "long") {
-                    currentPercent = (
-                        ((row.close_price - row.price) / row.price) *
-                        100 *
-                        marginLevel
-                    ).toFixed(2);
-                } else {
-                    currentPercent = (
-                        ((row.price - row.close_price) /
-                            row.close_price) *
-                        100 *
-                        marginLevel
-                    ).toFixed(2);
-                }
-                return currentPercent;
-            },
+            // //  计算收益率
+            // calcProfitRate(row) {
+            //     let marginLevel = 1
+            //     if (row.symbol === 'BTC') {
+            //         // BTC
+            //         marginLevel = 1 / this.futureConfig[row.symbol].margin_rate
+            //     } else if (row.symbol.indexOf('sz') !== -1 || row.symbol.indexOf('sh') !== -1) {
+            //         marginLevel = 1
+            //     } else {
+            //         // 期货简单代码   RB
+            //         let simpleSymbol = row.symbol.replace(/[0-9]/g, '')
+            //         const margin_rate = this.futureConfig[simpleSymbol].margin_rate
+            //         let currentMarginRate = margin_rate + this.marginLevelCompany
+            //         marginLevel = Number((1 / (currentMarginRate)).toFixed(2))
+            //     }
+            //     let currentPercent = 0;
+            //     if (row.direction === "long") {
+            //         currentPercent = (
+            //             ((row.close_price - row.price) / row.price) *
+            //             100 *
+            //             marginLevel
+            //         ).toFixed(2);
+            //     } else {
+            //         currentPercent = (
+            //             ((row.price - row.close_price) /
+            //                 row.close_price) *
+            //             100 *
+            //             marginLevel
+            //         ).toFixed(2);
+            //     }
+            //     return currentPercent;
+            // },
             changeStatus(id, status, close_price) {
                 console.log(id, status);
                 futureApi

@@ -78,9 +78,9 @@ def fetch_stocks_mink():
     while is_run:
         try:
             # 取分钟数据
-            url = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password=" + pwd + "&id=" + ",".join(stocks) + "&jys=NA&period=d&num=-200"
+            url = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password=" + pwd + "&id=" + ",".join(stocks) + "&jys=NA&period=d&num=-200&srcIndex=1"
             print(url)
-            resp = requests.get(url)
+            resp = requests.get(url,timeout=10)
             content = resp.text
             f = StringIO(content)
             lines = f.readlines()
@@ -93,7 +93,7 @@ def fetch_stocks_mink():
                 df['时间'] = df['时间'].apply(lambda x: date_str + ' ' + x)
 
             if '时间' in df.columns.values:
-                df1m['时间'] = df1m['时间'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=12))
+                df['时间'] = df['时间'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=12))
                 df.set_index('时间', inplace=True)
             elif '日期' in df.columns.values:
                 df['日期'] = df['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=12))
@@ -131,7 +131,7 @@ def fetch_stocks_mink():
                 save_data_m(code, '3d', df3d)
         except Exception:
             print("外盘股票采集出错", Exception)
-            dingMsg.send("外盘股票采集出错")
+            dingMsg.send("remind外盘股票采集出错")
         if not is_run:
             break
         time.sleep(20)
@@ -141,9 +141,9 @@ def fetch_futures_mink():
     while is_run:
         try:
             # 取分钟数据
-            url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + pwd + "&id=" + ",".join(futures) + "&period=1&num=-200"
+            url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + pwd + "&id=" + ",".join(futures) + "&period=1&num=-200&srcIndex=1"
             print(url)
-            resp = requests.get(url)
+            resp = requests.get(url,timeout=10)
             content = resp.text
             f = StringIO(content)
             lines = f.readlines()
@@ -174,13 +174,13 @@ def fetch_futures_mink():
                     df1m.set_index('时间', inplace=True)
                 elif '日期' in df.columns.values:
                     if code in add_5_hours_symbol:
-                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=5))
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=5))
                     elif code in add_12_hours_symbol:
-                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=12))
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=12))
                     elif code in add_13_hours_symbol:
-                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M') + timedelta(hours=13))
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=13))
                     else:
-                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M'))
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
                     df1m.set_index('日期', inplace=True)
 
                 save_data_m(code, '1m', df1m)
@@ -212,7 +212,7 @@ def fetch_futures_mink():
                 break
         except Exception:
             print("外盘期货采集出错", Exception)
-            dingMsg.send("外盘期货采集出错")
+            dingMsg.send("remind外盘期货采集出错")
         time.sleep(20)
 
 
@@ -249,7 +249,7 @@ def signal_hanlder(signalnum, frame):
 def run(**kwargs):
     signal.signal(signal.SIGINT, signal_hanlder)
     thread_list = []
-    thread_list.append(threading.Thread(target=fetch_stocks_mink))
+    # thread_list.append(threading.Thread(target=fetch_stocks_mink))
     thread_list.append(threading.Thread(target=fetch_futures_mink))
     for thread in thread_list:
         thread.start()

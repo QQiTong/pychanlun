@@ -172,19 +172,19 @@ export default {
             positionStatus: 'holding',
             dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
             currentInfo: null,
-            // 数字货币讲240m 替换成1m
-            isDigitCoin: false,
+            // 数字货币 和外盘 将240m 替换成1m
+            isDigitCoinOrGlobal: false,
             futureConfig: {},
-            symbolInfo: null
-
+            symbolInfo: null,
+            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'CP', 'YM', 'CN', 'BTC']
         }
     },
     beforeMount() {
         this.symbol = this.getParams('symbol')
-        if (this.symbol.indexOf('BTC') !== -1) {
-            this.isDigitCoin = true
+        if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
+            this.isDigitCoinOrGlobal = true
         } else {
-            this.isDigitCoin = false
+            this.isDigitCoinOrGlobal = false
         }
     },
     mounted() {
@@ -279,7 +279,7 @@ export default {
                 this.myChart15 = this.$echarts.init(document.getElementById('main15'))
                 this.myChart30 = this.$echarts.init(document.getElementById('main30'))
                 this.myChart60 = this.$echarts.init(document.getElementById('main60'))
-                if (this.isDigitCoin) {
+                if (this.isDigitCoinOrGlobal) {
                     this.myChart1 = this.$echarts.init(document.getElementById('main1'))
                     this.chartssize(document.getElementById('main1Parent'), document.getElementById('main1'))
                     this.myChart1.resize()
@@ -304,7 +304,7 @@ export default {
                     this.myChart15.resize()
                     this.myChart30.resize()
                     this.myChart60.resize()
-                    if (this.isDigitCoin) {
+                    if (this.isDigitCoinOrGlobal) {
                         this.myChart1.resize()
                     } else {
                         this.myChart240.resize()
@@ -518,7 +518,7 @@ export default {
                             that.sendRequest(symbol, '60m', update)
                             break
                         case 6:
-                            if (this.isDigitCoin) {
+                            if (this.isDigitCoinOrGlobal) {
                                 that.sendRequest(symbol, '1m', update)
                             } else {
                                 that.sendRequest(symbol, '240m', update)
@@ -557,7 +557,7 @@ export default {
                 if (this.firstFlag[5] === true) {
                     this.myChart60.showLoading()
                 }
-                if (this.isDigitCoin) {
+                if (this.isDigitCoinOrGlobal) {
                     if (this.firstFlag[6] === true) {
                         this.myChart1.showLoading()
                     }
@@ -599,7 +599,7 @@ export default {
                         this.myChart60.hideLoading()
                         this.firstFlag[5] = false
                     }
-                    if (this.isDigitCoin) {
+                    if (this.isDigitCoinOrGlobal) {
                         if (requestData.period === '1m') {
                             this.myChart1.hideLoading()
                             this.firstFlag[6] = false
@@ -2268,7 +2268,7 @@ export default {
             // 当前价格
             let currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
-            console.log("查bug",this.marginLevel,this.contractMultiplier,currentPrice)
+            console.log("查bug", this.marginLevel, this.contractMultiplier, currentPrice)
             // 1手需要的保证金
             if (this.symbol.indexOf('BTC') === -1) {
                 this.marginPrice = (this.contractMultiplier * currentPrice / this.marginLevel).toFixed(2)

@@ -498,10 +498,10 @@ class BusinessService:
     # close_price 最新收盘价 手动进行止盈止损操作
     '''
      status :
-      holding 持仓中
-      loseEnd 止损结束
-      winEnd  止盈结束
-      exception 异常单
+      holding 持仓
+      loseEnd 止损
+      winEnd  止盈
+      exception 异常
     '''
     def updatePositionStatus(self, id, status, close_price):
         date_created = datetime.utcnow()

@@ -418,10 +418,10 @@ const dynamicDirectionOptions = [
   { key: "short", display_name: "卖" }
 ];
 const statusOptions = [
-  { key: "holding", display_name: "持仓中" },
+  { key: "holding", display_name: "持仓" },
   { key: "prepare", display_name: "预埋单" },
-  { key: "winEnd", display_name: "止盈结束" },
-  { key: "loseEnd", display_name: "止损结束" },
+  { key: "winEnd", display_name: "止盈" },
+  { key: "loseEnd", display_name: "止损" },
 ];
 const periodOptions = [
   { key: "3m", display_name: "3m" },

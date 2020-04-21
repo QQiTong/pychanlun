@@ -305,7 +305,7 @@ export default {
             for (let symbol in this.beichiList) {
                 let count = 0
                 let item = this.beichiList[symbol]
-                console.log("背驰item:", item, symbol)
+                // console.log("背驰item:", item, symbol)
                 for (let j in item) {
                     let innerItem = item[j]
                     if (innerItem !== '' && innerItem.indexOf('B') !== -1) {
