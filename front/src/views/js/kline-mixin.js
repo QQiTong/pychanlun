@@ -800,7 +800,7 @@ export default {
                     },
                     color: ['yellow', 'green', 'blue', 'white', 'white', 'red' /* 'white', 'white', 'white' */],
                     legend: {
-                        data: ['笔', '段', '高级别段', 'MA5', 'MA10', 'MA60', /* '布林上轨', '布林中轨', '布林下轨' */],
+                        data: ['笔', '段', '高级别段', 'MA5', 'MA10','MA20','MA30', 'MA60', /* '布林上轨', '布林中轨', '布林下轨' */],
 
                         selected: {
                             '笔': true,
@@ -808,6 +808,8 @@ export default {
                             '高级别段': true,
                             'MA5': false,
                             'MA10': false,
+                            'MA20': false,
+                            'MA30': false,
                             'MA60': false,
                             // 'markline': true
                         },
@@ -1097,84 +1099,84 @@ export default {
                             animation: false
                         },
                         // index 4
-                        {
-                            name: 'MACD',
-                            type: 'bar',
-                            xAxisIndex: 1,
-                            yAxisIndex: 1,
-                            data: resultData.macd,
-                            barWidth: 2,
-                            itemStyle: {
-                                normal: {
-                                    color: function (params) {
-                                        let colorList
-                                        if (params.data >= 0) {
-                                            if (params.data >= that.echartsConfig.macdUpLastValue) {
-                                                colorList = that.echartsConfig.macdUpDarkColor
-                                            } else {
-                                                colorList = that.echartsConfig.macdUpLightColor
-                                            }
-                                            that.echartsConfig.macdUpLastValue = params.data
-                                        } else {
-                                            if (params.data <= that.echartsConfig.macdDownLastValue) {
-                                                colorList = that.echartsConfig.macdDownDarkColor
-                                            } else {
-                                                colorList = that.echartsConfig.macdDownLightColor
-                                            }
-                                            that.echartsConfig.macdDownLastValue = params.data
-                                        }
-                                        return colorList
-                                    },
-                                }
-                            }
-                        },
+                        // {
+                        //     name: 'MACD',
+                        //     type: 'bar',
+                        //     xAxisIndex: 1,
+                        //     yAxisIndex: 1,
+                        //     data: resultData.macd,
+                        //     barWidth: 2,
+                        //     itemStyle: {
+                        //         normal: {
+                        //             color: function (params) {
+                        //                 let colorList
+                        //                 if (params.data >= 0) {
+                        //                     if (params.data >= that.echartsConfig.macdUpLastValue) {
+                        //                         colorList = that.echartsConfig.macdUpDarkColor
+                        //                     } else {
+                        //                         colorList = that.echartsConfig.macdUpLightColor
+                        //                     }
+                        //                     that.echartsConfig.macdUpLastValue = params.data
+                        //                 } else {
+                        //                     if (params.data <= that.echartsConfig.macdDownLastValue) {
+                        //                         colorList = that.echartsConfig.macdDownDarkColor
+                        //                     } else {
+                        //                         colorList = that.echartsConfig.macdDownLightColor
+                        //                     }
+                        //                     that.echartsConfig.macdDownLastValue = params.data
+                        //                 }
+                        //                 return colorList
+                        //             },
+                        //         }
+                        //     }
+                        // },
                         // index 5
 
-                        {
-                            name: 'DIFF',
-                            type: 'line',
-                            xAxisIndex: 1,
-                            yAxisIndex: 1,
-                            data: resultData.diff,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 1,
-                                    color: 'white'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false,
-                            markPoint: {
-                                data: resultData.bcMACDValues
-                            },
-                        },
+                        // {
+                        //     name: 'DIFF',
+                        //     type: 'line',
+                        //     xAxisIndex: 1,
+                        //     yAxisIndex: 1,
+                        //     data: resultData.diff,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'white'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false,
+                        //     markPoint: {
+                        //         data: resultData.bcMACDValues
+                        //     },
+                        // },
                         // index 6
 
-                        {
-                            name: 'DEA',
-                            type: 'line',
-                            xAxisIndex: 1,
-                            yAxisIndex: 1,
-                            data: resultData.dea,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 1,
-                                    color: 'yellow'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false,
-                            // markPoint: {
-                            //     data: resultData.macdAreaValues
-                            // },
-                        },
-                        // index 7
+                        // {
+                        //     name: 'DEA',
+                        //     type: 'line',
+                        //     xAxisIndex: 1,
+                        //     yAxisIndex: 1,
+                        //     data: resultData.dea,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'yellow'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false,
+                        //     // markPoint: {
+                        //     //     data: resultData.macdAreaValues
+                        //     // },
+                        // },
+                        // index 4
                         {
                             name: 'MA5',
                             type: 'line',
@@ -1184,14 +1186,14 @@ export default {
                                 normal: {
                                     opacity: 0.9,
                                     type: 'solid',
-                                    width: 1,
+                                    width: 2,
                                     color: "white"
                                 },
                             },
                             symbol: 'none',
                             animation: false
                         },
-                        // //index 8
+                        // //index 5
                         {
                             name: 'MA10',
                             type: 'line',
@@ -1201,14 +1203,49 @@ export default {
                                 normal: {
                                     opacity: 0.9,
                                     type: 'solid',
-                                    width: 1,
+                                    width: 2,
                                     color: "yellow"
                                 },
                             },
                             symbol: 'none',
                             animation: false
                         },
-                        // index 9
+                        // index 6
+                        {
+                            name: 'MA20',
+                            type: 'line',
+                            data: that.calculateMA(resultData, 20),
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 0.9,
+                                    type: 'solid',
+                                    width: 2,
+                                    color: "green"
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false
+                        },
+                        // index 7
+                        {
+                            name: 'MA30',
+                            type: 'line',
+                            data: that.calculateMA(resultData, 30),
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 0.9,
+                                    type: 'solid',
+                                    width: 2,
+                                    color: "red"
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false
+                        },
+
+                        // index 8
                         {
                             name: 'MA60',
                             type: 'line',
@@ -1251,15 +1288,17 @@ export default {
             option.series[2].data = resultData.duanValues
             option.series[2].markPoint.data = resultData.duanPriceValues
             option.series[3].data = resultData.higherDuanValues
-            option.series[4].data = resultData.macd
-            option.series[5].data = resultData.diff
-            option.series[5].markPoint.data = resultData.bcMACDValues
+            // option.series[4].data = resultData.macd
+            // option.series[5].data = resultData.diff
+            // option.series[5].markPoint.data = resultData.bcMACDValues
 
-            option.series[6].data = resultData.dea
+            // option.series[6].data = resultData.dea
             // option.series[6].markPoint.data = resultData.bcMACDValues
-            option.series[7].data = this.calculateMA(resultData, 5);
-            option.series[8].data = this.calculateMA(resultData, 10);
-            option.series[9].data = this.calculateMA(resultData, 60);
+            option.series[4].data = this.calculateMA(resultData, 5);
+            option.series[5].data = this.calculateMA(resultData, 10);
+            option.series[6].data = this.calculateMA(resultData, 20);
+            option.series[7].data = this.calculateMA(resultData, 30);
+            option.series[8].data = this.calculateMA(resultData, 60);
             // option.series[11].data = resultData.volume;
             // console.log('更新的option', option)
             return option

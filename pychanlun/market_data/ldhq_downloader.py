@@ -78,9 +78,10 @@ def fetch_stocks_mink():
     while is_run:
         try:
             # 取分钟数据
-            url = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password=" + pwd + "&id=" + ",".join(stocks) + "&jys=NA&period=d&num=-200&srcIndex=1"
+            url = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password=" +\
+                  pwd + "&id=" + ",".join(stocks) + "&jys=NA&period=1&num=-200"
             print(url)
-            resp = requests.get(url,timeout=10)
+            resp = requests.get(url,timeout=20)
             content = resp.text
             f = StringIO(content)
             lines = f.readlines()
@@ -131,7 +132,7 @@ def fetch_stocks_mink():
                 save_data_m(code, '3d', df3d)
         except Exception:
             print("外盘股票采集出错", Exception)
-            dingMsg.send("remind外盘股票采集出错")
+            # dingMsg.send("remind外盘股票采集出错")
         if not is_run:
             break
         time.sleep(20)
@@ -141,9 +142,10 @@ def fetch_futures_mink():
     while is_run:
         try:
             # 取分钟数据
-            url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + pwd + "&id=" + ",".join(futures) + "&period=1&num=-200&srcIndex=1"
+            url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + \
+                  pwd + "&id=" + ",".join(futures) + "&period=1&num=-200"
             print(url)
-            resp = requests.get(url,timeout=10)
+            resp = requests.get(url,timeout=20)
             content = resp.text
             f = StringIO(content)
             lines = f.readlines()
@@ -205,14 +207,14 @@ def fetch_futures_mink():
                 # 1D
                 df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 save_data_m(code, '1d', df1d)
-                # 3D
+                # # 3D
                 df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 save_data_m(code, '3d', df3d)
             if not is_run:
                 break
         except Exception:
             print("外盘期货采集出错", Exception)
-            dingMsg.send("remind外盘期货采集出错")
+            # dingMsg.send("remind外盘期货采集出错")
         time.sleep(20)
 
 
@@ -249,7 +251,7 @@ def signal_hanlder(signalnum, frame):
 def run(**kwargs):
     signal.signal(signal.SIGINT, signal_hanlder)
     thread_list = []
-    # thread_list.append(threading.Thread(target=fetch_stocks_mink))
+    thread_list.append(threading.Thread(target=fetch_stocks_mink))
     thread_list.append(threading.Thread(target=fetch_futures_mink))
     for thread in thread_list:
         thread.start()

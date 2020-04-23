@@ -143,7 +143,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             'per_order_stop_rate':round(perOrderStopRate,3),
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if abs((date_created - fire_time).total_seconds()) < 60 * 3 and perOrderStopRate < 0.3:
+        if abs((date_created - fire_time).total_seconds()) < 60 * 3 and perOrderStopRate < 0.20:
             # 新增
             remind = saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                                    stop_lose_price, futureCalcObj, True)
@@ -182,6 +182,10 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
 # 自动录入持仓列表  新增 status(holding,winEnd,loseEnd 状态) profit(盈利) profit_rate(盈利率)
 def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
                            stop_lose_price, futureCalcObj, insert):
+    # CT 老虎无法交易，ZM 成交量太小
+    if symbol =='CT' or symbol =='ZM' or symbol=='CP' or symbol=='NID':
+        return False
+
     remind = False
     temp_fire_time = datetime.strptime(fire_time_str, "%Y-%m-%d %H:%M")
     # 触发时间转换成UTC时间

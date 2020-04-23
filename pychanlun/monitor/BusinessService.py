@@ -178,9 +178,9 @@ class BusinessService:
 
     def getGlobalFutureChangeList(self):
         global_future_symbol = config['global_future_symbol']
-        global_stock_symbol = config['global_stock_symbol']
+        # global_stock_symbol = config['global_stock_symbol']
         combinSymbol = copy.deepcopy(global_future_symbol)
-        combinSymbol.extend(global_stock_symbol)
+        # combinSymbol.extend(global_stock_symbol)
         changeList = {}
         for i in range(len(combinSymbol)):
             item = combinSymbol[i]
@@ -237,7 +237,7 @@ class BusinessService:
         symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
         symbolList.extend(global_future_symbol)
-        symbolList.extend(global_stock_symbol)
+        # symbolList.extend(global_stock_symbol)
         symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
@@ -272,7 +272,7 @@ class BusinessService:
 
         #  把外盘加进去
         symbolList.extend(global_future_symbol)
-        symbolList.extend(global_stock_symbol)
+        # symbolList.extend(global_stock_symbol)
         symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
@@ -295,7 +295,7 @@ class BusinessService:
         symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
         symbolList.extend(global_future_symbol)
-        symbolList.extend(global_stock_symbol)
+        # symbolList.extend(global_stock_symbol)
         symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
@@ -349,7 +349,7 @@ class BusinessService:
         symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
         symbolList.extend(global_future_symbol)
-        symbolList.extend(global_stock_symbol)
+        # symbolList.extend(global_stock_symbol)
         symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
