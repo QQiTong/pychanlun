@@ -75,21 +75,61 @@
             :futureSymbolList="futureSymbolList"
             :futureSymbolMap="futureSymbolMap"
             :marginLevelCompany="marginLevelCompany"
-        />
+            :globalFutureSymbol="globalFutureSymbol"
+        ></FuturePositionList>
         <el-divider content-position="center">信号列表 | 多空分布 | 内盘 | 外盘</el-divider>
-        <el-progress
-            :percentage="percentage"
-            :color="customColorMethod"
-            :text-inside="true"
-            :stroke-width="24"
-        />
-        <el-progress
-            :percentage="globalFuturePercentage"
-            :color="customColorMethod"
-            :text-inside="true"
-            :stroke-width="24"
-            class="mt-5"
-        />
+        <el-row>
+            <el-col :span="2">
+                内盘涨跌幅：
+            </el-col>
+            <el-col :span="22">
+                <el-progress
+                    :percentage="percentage"
+                    :color="customColorMethod"
+                    :text-inside="true"
+                    :stroke-width="24"
+                ></el-progress>
+            </el-col>
+        </el-row>
+        <el-row class="mt-5">
+            <el-col :span="2">
+                内盘信号多空：
+            </el-col>
+            <el-col :span="22">
+                <el-progress
+                    :percentage="signalPercentage"
+                    :color="customColorMethod"
+                    :text-inside="true"
+                    :stroke-width="24"
+                ></el-progress>
+            </el-col>
+        </el-row>
+        <el-row class="mt-5">
+            <el-col :span="2">
+                外盘涨跌幅：
+            </el-col>
+            <el-col :span="22">
+                <el-progress
+                    :percentage="globalFuturePercentage"
+                    :color="customColorMethod"
+                    :text-inside="true"
+                    :stroke-width="24"
+                ></el-progress>
+            </el-col>
+        </el-row>
+        <el-row class="mt-5">
+            <el-col :span="2">
+                外盘信号多空：
+            </el-col>
+            <el-col :span="22">
+                <el-progress
+                    :percentage="globalSignalPercentage"
+                    :color="customColorMethod"
+                    :text-inside="true"
+                    :stroke-width="24"
+                ></el-progress>
+            </el-col>
+        </el-row>
         <el-tabs v-model="activeTab" type="card" @tab-click="handleChangeTab" class="mt-5">
             <el-tab-pane label="最新行情" name="first">
                 <el-row>

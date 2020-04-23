@@ -107,14 +107,14 @@ config = {
         'ZS': {'margin_rate': 0.055, 'contract_multiplier': 50}, # 2314
         'ZM': {'margin_rate': 0.07, 'contract_multiplier': 100},# 2062
         'ZL': {'margin_rate': 0.06, 'contract_multiplier': 600}, # 935
-        'AAPL': {'margin_rate': 1, 'contract_multiplier': 1},
-        'MSFT': {'margin_rate': 1, 'contract_multiplier': 1},
-        'GOOG': {'margin_rate': 1, 'contract_multiplier': 1},
-        'FB': {'margin_rate': 1, 'contract_multiplier': 1},
-        'AMZN': {'margin_rate': 1, 'contract_multiplier': 1},
-        'NFLX': {'margin_rate': 1, 'contract_multiplier': 1},
-        'NVDA': {'margin_rate': 1, 'contract_multiplier': 1},
-        'AMD': {'margin_rate': 1, 'contract_multiplier': 1},
+        # 'AAPL': {'margin_rate': 1, 'contract_multiplier': 1},
+        # 'MSFT': {'margin_rate': 1, 'contract_multiplier': 1},
+        # 'GOOG': {'margin_rate': 1, 'contract_multiplier': 1},
+        # 'FB': {'margin_rate': 1, 'contract_multiplier': 1},
+        # 'AMZN': {'margin_rate': 1, 'contract_multiplier': 1},
+        # 'NFLX': {'margin_rate': 1, 'contract_multiplier': 1},
+        # 'NVDA': {'margin_rate': 1, 'contract_multiplier': 1},
+        # 'AMD': {'margin_rate': 1, 'contract_multiplier': 1},
         # 'ROKU': {'margin_rate': 1, 'contract_multiplier': 1},
     },
     'periodList': [
@@ -268,78 +268,78 @@ config = {
             'type': 'future',
             'feeRate': 0.012
         },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 1,
-            'order_book_id': 'AAPL',
-            'trading_hours': '5*7',
-            'type': 'stock',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 1,
-            'order_book_id': 'MSFT',
-            'trading_hours': '5*7',
-            'type': 'stock',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 1,
-            'order_book_id': 'GOOG',
-            'trading_hours': '5*7',
-            'type': 'stock',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 1,
-            'order_book_id': 'FB',
-            'trading_hours': '5*7',
-            'type': 'stock',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 1,
-            'order_book_id': 'AMZN',
-            'trading_hours': '5*7',
-            'type': 'stock',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 1,
-            'order_book_id': 'NFLX',
-            'trading_hours': '5*7',
-            'type': 'stock',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 1,
-            'order_book_id': 'NVDA',
-            'trading_hours': '5*7',
-            'type': 'stock',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 1,
-            'order_book_id': 'AMD',
-            'trading_hours': '5*7',
-            'type': 'stock',
-            'feeRate': 0.012
-        },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 1,
+        #     'order_book_id': 'AAPL',
+        #     'trading_hours': '5*7',
+        #     'type': 'stock',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 1,
+        #     'order_book_id': 'MSFT',
+        #     'trading_hours': '5*7',
+        #     'type': 'stock',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 1,
+        #     'order_book_id': 'GOOG',
+        #     'trading_hours': '5*7',
+        #     'type': 'stock',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 1,
+        #     'order_book_id': 'FB',
+        #     'trading_hours': '5*7',
+        #     'type': 'stock',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 1,
+        #     'order_book_id': 'AMZN',
+        #     'trading_hours': '5*7',
+        #     'type': 'stock',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 1,
+        #     'order_book_id': 'NFLX',
+        #     'trading_hours': '5*7',
+        #     'type': 'stock',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 1,
+        #     'order_book_id': 'NVDA',
+        #     'trading_hours': '5*7',
+        #     'type': 'stock',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 1,
+        #     'order_book_id': 'AMD',
+        #     'trading_hours': '5*7',
+        #     'type': 'stock',
+        #     'feeRate': 0.012
+        # },
         # {
         #     'contract_multiplier': 1,
         #     'exchange': '美国',

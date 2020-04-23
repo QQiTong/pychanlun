@@ -122,6 +122,9 @@ export default {
             percentage: 0,
             // 外盘盘涨跌幅百分比
             globalFuturePercentage: 0,
+            // 内外盘信号 多空
+            signalPercentage: 0,
+            globalSignalPercentage: 0,
             // 级别多空方向
             levelDirectionList: [],
             activeTab: 'first',
@@ -140,7 +143,7 @@ export default {
             // history 历史状态 获取的不一定是主力合约 ，提交表格触发更新
             prejudgeTableStatus: 'current',
             prejudgeTableId: '',
-            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID']
+            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'YM', 'CN', 'CP', 'BTC']
         }
     },
     computed: {
@@ -302,6 +305,10 @@ export default {
         },
 
         processBeichiList() {
+            let long = 0
+            let short = 0
+            let globalLong = 0
+            let globalShort = 0
             for (let symbol in this.beichiList) {
                 let count = 0
                 let item = this.beichiList[symbol]
@@ -310,8 +317,6 @@ export default {
                     let innerItem = item[j]
                     if (innerItem !== '' && innerItem.indexOf('B') !== -1) {
                         count++
-                    } else {
-
                     }
                     if (innerItem !== '' && innerItem.indexOf('多') !== -1) {
                         count++
@@ -323,6 +328,22 @@ export default {
                 // } else {
                 item['percentage'] = count * 10
                 // }
+                // 外盘
+                if (this.globalFutureSymbol.indexOf(symbol) !== -1) {
+                    if (item['percentage'] >= 50) {
+                        globalLong++
+                    } else {
+                        globalShort++
+                    }
+                    this.globalSignalPercentage = parseInt(globalLong / (globalLong + globalShort) * 100)
+                } else {
+                    if (item['percentage'] >= 50) {
+                        long++
+                    } else {
+                        short++
+                    }
+                    this.signalPercentage = parseInt(long / (long + short) * 100)
+                }
             }
         },
         getChangeiList() {
