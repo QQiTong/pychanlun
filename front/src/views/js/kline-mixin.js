@@ -623,9 +623,8 @@ export default {
             let zoomStart = 55
             const resultData = this.splitData(stockJsonData, period)
             let dataTitle = that.symbol + '  ' + period
-            // let subText = '杠杆: ' + this.marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
-            //     this.currentInfo
-            let subText = ""
+            let subText = '杠杆: ' + this.marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
+                this.currentInfo
             let currentChart
             // if (period === '1m') {
             //     currentChart = myChart1

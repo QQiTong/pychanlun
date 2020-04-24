@@ -87,35 +87,41 @@ def fetch_futures_mink():
                 df1m = df1m.sort_values(by="Date", ascending=True)
                 df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
                 df1m.set_index('Date', inplace=True)
-
                 code = global_future_alias[code]
 
                 save_data_m(code, '1m', df1m)
                 # 3m
                 df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                df3m = df3m[1:]
                 save_data_m(code, '3m', df3m)
                 # 5m
                 df5m = df1m.resample('5T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                df5m = df5m[1:]
                 save_data_m(code, '5m', df5m)
                 # 15m
                 df15m = df1m.resample('15T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                df15m = df15m[1:]
                 save_data_m(code, '15m', df15m)
                 # 30m
                 df30m = df1m.resample('30T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                df30m = df30m[1:]
                 save_data_m(code, '30m', df30m)
                 # 60mm
                 df60m = df1m.resample('60T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                df60m = df60m[1:]
                 save_data_m(code, '60m', df60m)
                 # 240m
                 df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                df240m = df240m[1:]
                 save_data_m(code, '240m', df240m)
                 # 1D
                 df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                df1d = df1d[1:]
                 save_data_m(code, '1d', df1d)
                 # # 3D
                 df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                df3d = df3d[1:]
                 save_data_m(code, '3d', df3d)
-
                 time.sleep(1)
                 if not is_run:
                     break

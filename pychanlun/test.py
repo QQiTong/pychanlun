@@ -786,11 +786,11 @@ def testWStock():
     df = df.sort_values(by="Date",ascending=True)
     endTime = int(round(time.time() * 1000)) - startTime
     print("消耗时间：", endTime)
-    print(df)
+    print(len(df))
     df['Date'] = df['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
     df.set_index('Date', inplace=True)
-
-    save_data_m("LENID3M",'1m',df)
+    print(len(df[1:]))
+    # save_data_m("LENID3M",'1m',df)
 
 def save_data_m(code, period, df):
     if not df.empty:
