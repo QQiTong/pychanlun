@@ -623,8 +623,9 @@ export default {
             let zoomStart = 55
             const resultData = this.splitData(stockJsonData, period)
             let dataTitle = that.symbol + '  ' + period
-            let subText = '杠杆: ' + this.marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
-                this.currentInfo
+            // let subText = '杠杆: ' + this.marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
+            //     this.currentInfo
+            let subText = ""
             let currentChart
             // if (period === '1m') {
             //     currentChart = myChart1
@@ -872,23 +873,23 @@ export default {
                                 }
                             }
                         },
-                        {
-                            type: 'category',
-                            gridIndex: 1,
-                            data: resultData.date,
-                            axisTick: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {lineStyle: {color: '#8392A5'}},
-                            axisPointer: {
-                                label: {
-                                    show: false
-                                }
-                            }
-                        },
+                        // {
+                        //     type: 'category',
+                        //     gridIndex: 1,
+                        //     data: resultData.date,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {lineStyle: {color: '#8392A5'}},
+                        //     axisPointer: {
+                        //         label: {
+                        //             show: false
+                        //         }
+                        //     }
+                        // },
                         // {
                         //     type: 'category',
                         //     gridIndex: 2,
@@ -929,20 +930,20 @@ export default {
                             },
                             axisLine: {lineStyle: {color: this.echartsConfig.bgColor}},
                         },
-                        {
-                            gridIndex: 1,
-                            splitNumber: 2,
-                            axisTick: {
-                                show: false
-                            },
-                            splitLine: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
-                        },
+                        // {
+                        //     gridIndex: 1,
+                        //     splitNumber: 2,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     splitLine: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
+                        // },
                         // 成交量
                         // {
                         //     gridIndex: 3,
@@ -971,13 +972,13 @@ export default {
                             end: 100,
                             minSpan: 10,
                         },
-                        {
-                            type: 'inside',
-                            xAxisIndex: [0, 1],
-                            start: 55,
-                            end: 100,
-                            minSpan: 10,
-                        },
+                        // {
+                        //     type: 'inside',
+                        //     xAxisIndex: [0, 1],
+                        //     start: 55,
+                        //     end: 100,
+                        //     minSpan: 10,
+                        // },
                         // {
                         //     type: 'inside',
                         //     xAxisIndex: [0, 1],

@@ -143,7 +143,7 @@ def fetch_futures_mink():
         try:
             # 取分钟数据
             url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + \
-                  pwd + "&id=" + ",".join(futures) + "&period=1&num=-200&srcIndex=1"
+                  pwd + "&id=" + ",".join(futures) + "&period=d&num=-1000&srcIndex=1"
             print(url)
             resp = requests.get(url,timeout=20)
             content = resp.text
@@ -174,41 +174,41 @@ def fetch_futures_mink():
                     else:
                         df1m['时间'] = df1m['时间'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M'))
                     df1m.set_index('时间', inplace=True)
-                # elif '日期' in df.columns.values:
-                #     if code in add_5_hours_symbol:
-                #         df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=5))
-                #     elif code in add_12_hours_symbol:
-                #         df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=12))
-                #     elif code in add_13_hours_symbol:
-                #         df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=13))
-                #     else:
-                #         df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
-                #     df1m.set_index('日期', inplace=True)
+                elif '日期' in df.columns.values:
+                    if code in add_5_hours_symbol:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=5))
+                    elif code in add_12_hours_symbol:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=12))
+                    elif code in add_13_hours_symbol:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=13))
+                    else:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
+                    df1m.set_index('日期', inplace=True)
 
-                save_data_m(code, '1m', df1m)
+                # save_data_m(code, '60m', df1m)
                 # 3m
-                df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                save_data_m(code, '3m', df3m)
+                # df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '3m', df3m)
                 # 5m
-                df5m = df1m.resample('5T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                save_data_m(code, '5m', df5m)
-                # 15m
-                df15m = df1m.resample('15T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                save_data_m(code, '15m', df15m)
-                # 30m
-                df30m = df1m.resample('30T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                save_data_m(code, '30m', df30m)
-                # 60mm
-                df60m = df1m.resample('60T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                save_data_m(code, '60m', df60m)
-                # 240m
-                df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                save_data_m(code, '240m', df240m)
-                # 1D
-                df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                save_data_m(code, '1d', df1d)
-                # # 3D
-                df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df5m = df1m.resample('5T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '5m', df5m)
+                # # 15m
+                # df15m = df1m.resample('15T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '15m', df15m)
+                # # 30m
+                # df30m = df1m.resample('30T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '30m', df30m)
+                # # 60mm
+                # df60m = df1m.resample('60T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '60m', df60m)
+                # # 240m
+                # df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '240m', df240m)
+                # # 1D
+                # df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                save_data_m(code, '1d', df1m)
+                # 3D
+                df3d = df1m.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 save_data_m(code, '3d', df3d)
             if not is_run:
                 break
@@ -251,7 +251,7 @@ def signal_hanlder(signalnum, frame):
 def run(**kwargs):
     signal.signal(signal.SIGINT, signal_hanlder)
     thread_list = []
-    thread_list.append(threading.Thread(target=fetch_stocks_mink))
+    # thread_list.append(threading.Thread(target=fetch_stocks_mink))
     thread_list.append(threading.Thread(target=fetch_futures_mink))
     for thread in thread_list:
         thread.start()
