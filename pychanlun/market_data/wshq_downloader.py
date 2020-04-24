@@ -80,7 +80,7 @@ def fetch_futures_mink():
         try:
             for code in futures:
                 # 取分钟数据
-                url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=200&symbol=%s&desc=1&q_type=0&return_t=3&qt_type=1&r_type=2&u=u2368&p=abc1818" % code
+                url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=5000&symbol=%s&desc=1&q_type=0&return_t=3&qt_type=1&r_type=2&u=u2368&p=abc1818" % code
                 print(url)
                 resp = requests.get(url, timeout=10)
                 df1m = pd.DataFrame(json.loads(resp.text))
@@ -126,7 +126,7 @@ def fetch_futures_mink():
                 if not is_run:
                     break
 
-            time.sleep(10)
+            time.sleep(100)
         except Exception as e:
             print("外盘期货采集出错", Exception, e)
             # dingMsg.send("remind外盘期货采集出错")

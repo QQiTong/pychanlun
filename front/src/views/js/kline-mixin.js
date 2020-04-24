@@ -176,7 +176,8 @@ export default {
             isDigitCoinOrGlobal: false,
             futureConfig: {},
             symbolInfo: null,
-            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'CP', 'YM', 'CN', 'BTC']
+            globalFutureSymbol: ['BTC']
+            // globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'CP', 'YM', 'CN', 'BTC']
         }
     },
     beforeMount() {
@@ -800,7 +801,7 @@ export default {
                     },
                     color: ['yellow', 'green', 'blue', 'white', 'white', 'red' /* 'white', 'white', 'white' */],
                     legend: {
-                        data: ['笔', '段', '高级别段', 'MA5', 'MA10','MA20','MA30', 'MA60', /* '布林上轨', '布林中轨', '布林下轨' */],
+                        data: ['笔', '段', '高级别段', 'MA5', 'MA10', 'MA20', 'MA30', 'MA60', /* '布林上轨', '布林中轨', '布林下轨' */],
 
                         selected: {
                             '笔': true,

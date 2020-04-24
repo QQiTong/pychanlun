@@ -34,7 +34,7 @@ periodList1 = ['3m', '5m', '15m', '30m', '60m']
 # 数字货币
 periodList2 = ['1m', '3m', '5m', '15m', '30m', '60m']
 # 外盘期货
-periodList3 = ['1m','3m','5m', '15m', '30m', '60m']
+periodList3 = ['3m','5m', '15m', '30m', '60m']
 # 高级别 高高级别映射
 # 暂时用3d 3d
 futureLevelMap = {

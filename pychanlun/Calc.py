@@ -401,7 +401,8 @@ class Calc:
         # resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
         # resJson['boll_bottom'] = getBoll(closePriceList)[2].tolist()
         # resJson['ama'] = getAma(closePriceList).tolist()
-        resJson['volume'] = volumeList
+        # 外盘 240m 成交量合成  有 Infinity的值，导致JSON解析异常，这里注释掉
+        # resJson['volume'] = volumeList
         resJson['zsdata'] = zsdata
         resJson['zsflag'] = zsflag
         resJson['duan_zsdata'] = duan_zsdata
