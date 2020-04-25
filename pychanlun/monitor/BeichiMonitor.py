@@ -55,6 +55,8 @@ futuresAccount = 50
 digitCoinFee = 0.001
 # 数字货币账户
 digitCoinAccount = 60.80 / 10000
+# 外盘期货账户
+global_future_account = 6.4
 maxAccountUseRate = 0.1
 stopRate = 0.01
 mail = Mail()
