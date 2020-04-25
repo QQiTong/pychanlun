@@ -16,6 +16,14 @@
             <el-button @click="quickSwitchDay('pre')" size="mini">前一天</el-button>
             <el-button @click="quickSwitchDay('next')" size="mini">后一天</el-button>
             <el-input v-model="inputSymbol" placeholder="请输入股票代码" size="mini" class="stock-input ml-5" @change="submitSymbol"/>
+            <el-button v-for="period in periodList" :key="period" size="mini" @click="switchPeriod(period)">{{period}}</el-button>
+            快速计算开仓手数：
+            <el-input v-model="quickCalc.openPrice" placeholder="开仓" size="mini" class="stock-input-short ml-5 mr-5"></el-input>
+            <el-input v-model="quickCalc.stopPrice" placeholder="止损" size="mini" class="stock-input-short ml-5 mr-5" @change="quickCalcMaxCount"></el-input>
+            <el-button size="mini" type="success" @click="quickCalcMaxCount">计算</el-button>
+            开仓手数：<el-tag type="danger" class="ml-5">{{quickCalc.count}}</el-tag>
+            止损率：<el-tag type="danger" class="ml-5">{{(quickCalc.stopRate* 100).toFixed(2)}}%</el-tag>
+            1手止损：<el-tag type="danger" class="ml-5">{{quickCalc.perOrderStopMoney}}</el-tag>
         </div>
 
         <div class="echarts-list">
@@ -40,14 +48,14 @@
                 <div id="main30" class="echarts">
                 </div>
             </div>
-            <div class="echarts-item" id="main240Parent" v-if="!isDigitCoinOrGlobal">
+            <div class="echarts-item" id="main240Parent" v-if="!isShow1Min">
                 <div id="main240" class="echarts">
                 </div>
             </div>
             <div class="echarts-item" id="main1Parent" v-else>
-                   <div id="main1" class="echarts">
-                   </div>
-             </div>
+                <div id="main1" class="echarts">
+                </div>
+            </div>
             <!--   <div class="echarts-item">
                    <div id="main1d" class="echarts">
                    </div>

@@ -71,8 +71,8 @@ class BusinessService:
             "date_created": {"$gte": start, "$lte": end}
         }).sort("_id", pymongo.ASCENDING)
         df = pd.DataFrame(list(data_list))
-
-        if len(df) == 0 :
+        # 当持仓表中没有 单子止盈过的的时候 win_end_money字段为空
+        if len(df) == 0 or 'win_end_money' not in df.columns.values or 'lose_end_money' not in df.columns.values:
             return {
                 'date': [],
                 'win_end_list': [],
@@ -399,6 +399,11 @@ class BusinessService:
                     x['lose_end_time'] = self.formatTime(x['lose_end_time'])
                 else:
                     x['lose_end_time'] = ''
+
+                if 'dynamicPositionList' in x:
+                    for y in x['dynamicPositionList']:
+                        y['date_created'] = self.formatTime(y['date_created'])
+
             return x
         else:
             return -1
@@ -448,6 +453,12 @@ class BusinessService:
             # 兼容老数据
             if ('total_margin' not in x or x['total_margin'] != ''):
                 x['total_margin'] = round(x['per_order_margin'] * x['amount'], 2)
+
+
+            if 'dynamicPositionList' in x :
+                for y in x['dynamicPositionList'] :
+                    y['date_created'] = self.formatTime(y['date_created'])
+
             # 占用保证金
             positionList.append(x)
         positionListResult = {

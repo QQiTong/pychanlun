@@ -49,7 +49,7 @@ export default {
 
                 higherColor: '#14d0cd',
                 higherHigherColor: 'green',
-                dynamicOpertionColor: 'pink',
+                dynamicOpertionColor: '#d026bf',
                 macdUpLastValue: Number.MIN_SAFE_INTEGER,
                 macdDownLastValue: Number.MAX_SAFE_INTEGER,
                 macdUpDarkColor: '#EF5350',
@@ -114,8 +114,7 @@ export default {
             marginLevelCompany: 0.01,
             marginPrice: 0, // 每手需要的保证金
 
-            // start用于仓位管理计算
-            currentSymbol: null,
+
             currentMarginRate: null,
             marginLevel: 1,
             // 合约乘数
@@ -124,6 +123,7 @@ export default {
             account: 0,
             // 期货账户总额
             futureAccount: this.$futureAccount,
+            globalFutureAccount: this.$globalFutureAccount,
             // 数字货币账户总额
             digitCoinAccount: this.$digitCoinAccount,
             // 开仓价格
@@ -173,19 +173,27 @@ export default {
             dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
             currentInfo: null,
             // 数字货币 和外盘 将240m 替换成1m
-            isDigitCoinOrGlobal: false,
+            isShow1Min: false,
             futureConfig: {},
             symbolInfo: null,
-            globalFutureSymbol: ['BTC']
-            // globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'CP', 'YM', 'CN', 'BTC']
+            show1MinSymbol: ['BTC'],
+            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'CP', 'YM', 'CN'],
+            //    快速计算开仓手数
+            quickCalc: {
+                openPrice: 0,
+                stopPrice: 0,
+                count: 0,
+                stopRate: 0,
+                perOrderStopMoney: 0
+            }
         }
     },
     beforeMount() {
         this.symbol = this.getParams('symbol')
-        if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
-            this.isDigitCoinOrGlobal = true
+        if (this.show1MinSymbol.indexOf(this.symbol) !== -1) {
+            this.isShow1Min = true
         } else {
-            this.isDigitCoinOrGlobal = false
+            this.isShow1Min = false
         }
     },
     mounted() {
@@ -280,7 +288,7 @@ export default {
                 this.myChart15 = this.$echarts.init(document.getElementById('main15'))
                 this.myChart30 = this.$echarts.init(document.getElementById('main30'))
                 this.myChart60 = this.$echarts.init(document.getElementById('main60'))
-                if (this.isDigitCoinOrGlobal) {
+                if (this.isShow1Min) {
                     this.myChart1 = this.$echarts.init(document.getElementById('main1'))
                     this.chartssize(document.getElementById('main1Parent'), document.getElementById('main1'))
                     this.myChart1.resize()
@@ -305,7 +313,7 @@ export default {
                     this.myChart15.resize()
                     this.myChart30.resize()
                     this.myChart60.resize()
-                    if (this.isDigitCoinOrGlobal) {
+                    if (this.isShow1Min) {
                         this.myChart1.resize()
                     } else {
                         this.myChart240.resize()
@@ -416,6 +424,7 @@ export default {
                 alert('请输入品种')
                 return
             }
+            this.processMargin()
             // 切换symbol 重置第一次请求标志
             // 一个大图+ 6个小图
             this.firstFlag = [true, true, true, true, true, true, true]
@@ -435,31 +444,42 @@ export default {
                 }
             }, 10000)
         },
+        processMargin() {
+            // 获取当前品种的合约 保证金率
+            if (this.symbol === 'BTC') {
+                // BTC
+                this.symbolInfo = this.futureConfig[this.symbol]
+                this.currentMarginRate = this.symbolInfo.margin_rate
+                this.marginLevel = 1 / this.currentMarginRate
+                this.contractMultiplier = 1
+            } else if (this.symbol.indexOf('sz') !== -1 || this.symbol.indexOf('sh') !== -1) {
+                this.currentMarginRate = 1
+                this.marginLevel = 1
+                this.contractMultiplier = 1
+
+            } else if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
+                // 外盘
+                this.symbolInfo = this.futureConfig[this.symbol]
+                this.currentMarginRate = this.symbolInfo.margin_rate
+                this.marginLevel = Number((1 / this.currentMarginRate).toFixed(2))
+                this.contractMultiplier = this.symbolInfo.contract_multiplier
+            } else {
+                // 内盘 期货简单代码   RB
+                let simpleSymbol = this.symbol.replace(/[0-9]/g, '')
+                this.symbolInfo = this.futureConfig[simpleSymbol]
+                const margin_rate = this.symbolInfo.margin_rate
+                this.currentMarginRate = margin_rate + this.marginLevelCompany
+                this.marginLevel = Number((1 / this.currentMarginRate).toFixed(2))
+                this.contractMultiplier = this.symbolInfo.contract_multiplier
+            }
+
+        },
         getFutureConfig() {
             futureApi.getFutureConfig().then(res => {
                 console.log('合约配置信息:', res)
                 this.futureConfig = res
-                // 获取当前品种的合约 保证金率
-                if (this.symbol === 'BTC') {
-                    // BTC
-                    this.symbolInfo = this.futureConfig[this.symbol]
-                    this.currentMarginRate = this.symbolInfo.margin_rate
-                    this.marginLevel = 1 / this.currentMarginRate
-                    this.contractMultiplier = 1
-                } else if (this.symbol.indexOf('sz') !== -1 || this.symbol.indexOf('sh') !== -1) {
-                    this.currentMarginRate = 1
-                    this.marginLevel = 1
-                    this.contractMultiplier = 1
-                } else {
-                    // 期货简单代码   RB
-                    let simpleSymbol = this.symbol.replace(/[0-9]/g, '')
-                    this.symbolInfo = this.futureConfig[simpleSymbol]
-                    const margin_rate = this.symbolInfo.margin_rate
-                    this.currentMarginRate = margin_rate + this.marginLevelCompany
-                    this.marginLevel = Number((1 / this.currentMarginRate).toFixed(2))
-                    this.contractMultiplier = this.symbolInfo.contract_multiplier
-                }
                 window.localStorage.setItem('symbolConfig', JSON.stringify(this.futureConfig))
+                this.processMargin()
                 this.requestSymbolData()
             }).catch((error) => {
                 this.requestFlag = true
@@ -519,7 +539,7 @@ export default {
                             that.sendRequest(symbol, '60m', update)
                             break
                         case 6:
-                            if (this.isDigitCoinOrGlobal) {
+                            if (this.isShow1Min) {
                                 that.sendRequest(symbol, '1m', update)
                             } else {
                                 that.sendRequest(symbol, '240m', update)
@@ -558,7 +578,7 @@ export default {
                 if (this.firstFlag[5] === true) {
                     this.myChart60.showLoading()
                 }
-                if (this.isDigitCoinOrGlobal) {
+                if (this.isShow1Min) {
                     if (this.firstFlag[6] === true) {
                         this.myChart1.showLoading()
                     }
@@ -600,7 +620,7 @@ export default {
                         this.myChart60.hideLoading()
                         this.firstFlag[5] = false
                     }
-                    if (this.isDigitCoinOrGlobal) {
+                    if (this.isShow1Min) {
                         if (requestData.period === '1m') {
                             this.myChart1.hideLoading()
                             this.firstFlag[6] = false
@@ -1178,91 +1198,91 @@ export default {
                         //     // },
                         // },
                         // index 4
-                        {
-                            name: 'MA5',
-                            type: 'line',
-                            data: that.calculateMA(resultData, 5),
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 0.9,
-                                    type: 'solid',
-                                    width: 2,
-                                    color: "white"
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        },
-                        // //index 5
-                        {
-                            name: 'MA10',
-                            type: 'line',
-                            data: that.calculateMA(resultData, 10),
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 0.9,
-                                    type: 'solid',
-                                    width: 2,
-                                    color: "yellow"
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        },
-                        // index 6
-                        {
-                            name: 'MA20',
-                            type: 'line',
-                            data: that.calculateMA(resultData, 20),
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 0.9,
-                                    type: 'solid',
-                                    width: 2,
-                                    color: "green"
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        },
-                        // index 7
-                        {
-                            name: 'MA30',
-                            type: 'line',
-                            data: that.calculateMA(resultData, 30),
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 0.9,
-                                    type: 'solid',
-                                    width: 2,
-                                    color: "red"
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        },
-
-                        // index 8
-                        {
-                            name: 'MA60',
-                            type: 'line',
-                            data: that.calculateMA(resultData, 60),
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 2,
-                                    color: "purple"
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        }
+                        // {
+                        //     name: 'MA5',
+                        //     type: 'line',
+                        //     data: that.calculateMA(resultData, 5),
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 0.9,
+                        //             type: 'solid',
+                        //             width: 2,
+                        //             color: "white"
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false
+                        // },
+                        // // //index 5
+                        // {
+                        //     name: 'MA10',
+                        //     type: 'line',
+                        //     data: that.calculateMA(resultData, 10),
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 0.9,
+                        //             type: 'solid',
+                        //             width: 2,
+                        //             color: "yellow"
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false
+                        // },
+                        // // index 6
+                        // {
+                        //     name: 'MA20',
+                        //     type: 'line',
+                        //     data: that.calculateMA(resultData, 20),
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 0.9,
+                        //             type: 'solid',
+                        //             width: 2,
+                        //             color: "green"
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false
+                        // },
+                        // // index 7
+                        // {
+                        //     name: 'MA30',
+                        //     type: 'line',
+                        //     data: that.calculateMA(resultData, 30),
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 0.9,
+                        //             type: 'solid',
+                        //             width: 2,
+                        //             color: "red"
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false
+                        // },
+                        //
+                        // // index 8
+                        // {
+                        //     name: 'MA60',
+                        //     type: 'line',
+                        //     data: that.calculateMA(resultData, 60),
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 2,
+                        //             color: "purple"
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false
+                        // }
                     ],
                     graphic: [],
                 }
@@ -1295,11 +1315,11 @@ export default {
 
             // option.series[6].data = resultData.dea
             // option.series[6].markPoint.data = resultData.bcMACDValues
-            option.series[4].data = this.calculateMA(resultData, 5);
-            option.series[5].data = this.calculateMA(resultData, 10);
-            option.series[6].data = this.calculateMA(resultData, 20);
-            option.series[7].data = this.calculateMA(resultData, 30);
-            option.series[8].data = this.calculateMA(resultData, 60);
+            // option.series[4].data = this.calculateMA(resultData, 5);
+            // option.series[5].data = this.calculateMA(resultData, 10);
+            // option.series[6].data = this.calculateMA(resultData, 20);
+            // option.series[7].data = this.calculateMA(resultData, 30);
+            // option.series[8].data = this.calculateMA(resultData, 60);
             // option.series[11].data = resultData.volume;
             // console.log('更新的option', option)
             return option
@@ -2003,12 +2023,12 @@ export default {
             let lastBeichiType = this.getLastBeichiData(jsonObj)
             let lastBeichi = null
             // 当前价格
-            let currentPrice = jsonObj.close[jsonObj.close.length - 1]
+            this.currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 1手需要的保证金
             if (this.symbol.indexOf('BTC') === -1) {
-                this.marginPrice = (this.contractMultiplier * currentPrice / this.marginLevel).toFixed(2)
+                this.marginPrice = (this.contractMultiplier * this.currentPrice / this.marginLevel).toFixed(2)
             } else {
-                this.marginPrice = (0.01 * currentPrice).toFixed(2)
+                this.marginPrice = (0.01 * this.currentPrice).toFixed(2)
             }
 
             // console.log("最后的背驰:", period, lastBeichiType)
@@ -2093,13 +2113,13 @@ export default {
                 if (lastBeichiType === 1 || lastBeichiType === 2 || lastBeichiType === 5 || lastBeichiType === 6 ||
                     lastBeichiType === 9 || lastBeichiType === 10 || lastBeichiType === 13 || lastBeichiType === 14 || lastBeichiType === 17) {
                     targetPrice = beichiPrice + diffPrice
-                    currentPercent = ((currentPrice - beichiPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
+                    currentPercent = ((this.currentPrice - beichiPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
                         stopWinPercent = ((stopWinPrice - beichiPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                     }
                 } else {
                     targetPrice = beichiPrice - diffPrice
-                    currentPercent = ((beichiPrice - currentPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
+                    currentPercent = ((beichiPrice - this.currentPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
                         stopWinPercent = ((beichiPrice - stopWinPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                     }
@@ -2109,17 +2129,17 @@ export default {
                 this.openPrice = beichiPrice
                 this.stopPrice = stopLosePrice
                 // 当前保证金比例
-                this.currentSymbol = this.symbol
+
                 // 计算开仓手数
-                this.calcAccount(currentPrice)
+                this.calcAccount(this.openPrice, this.stopPrice)
                 // console.log(beichiPrice, stopLosePrice, diffPrice, targetPrice)
                 // 单位是万
                 currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
                 // 跟据最新价格计算出来的信息
                 this.currentInfo = ' 率: ' + currentPercent + '% 额: ' + currentProfit + ' 万,盈亏比:' +
-                    (currentPercent / targetPercent).toFixed(1) + ' 新: ' + currentPrice.toFixed(2)
+                    (currentPercent / targetPercent).toFixed(1) + ' 新: ' + this.currentPrice.toFixed(2)
                 let markLineCurrent = {
-                    yAxis: currentPrice,
+                    yAxis: this.currentPrice,
                     lineStyle: {
                         normal: {
                             opacity: 1,
@@ -2133,7 +2153,7 @@ export default {
                     label: {
                         normal: {
                             color: 'yellow',
-                            formatter: '新: ' + currentPrice.toFixed(2)
+                            formatter: '新: ' + this.currentPrice.toFixed(2)
                         },
                     },
                 }
@@ -2213,6 +2233,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherColor,
                                 formatter: '顶: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
+                                position: 'insideEndTop'
                             },
                         },
                     }
@@ -2237,7 +2258,9 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
                                 formatter: '顶: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
+                                position: 'insideEndTop'
                             },
+
                         },
                     }
                     markLineData.push(markLineFractal)
@@ -2263,7 +2286,9 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherColor,
                                 formatter: '底分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
+                                position: 'insideEndTop'
                             },
+
                         },
                     }
                     markLineData.push(markLineFractal)
@@ -2287,6 +2312,8 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
                                 formatter: '底分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
+                                position: 'insideEndTop'
+
                             },
                         },
                     }
@@ -2306,30 +2333,30 @@ export default {
             let openAmount = this.currentPosition.amount
             let direction = this.currentPosition.direction
             // 当前价格
-            let currentPrice = jsonObj.close[jsonObj.close.length - 1]
+            this.currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
-            console.log("查bug", this.marginLevel, this.contractMultiplier, currentPrice)
+            console.log("查bug", this.marginLevel, this.contractMultiplier, this.currentPrice)
             // 1手需要的保证金
             if (this.symbol.indexOf('BTC') === -1) {
-                this.marginPrice = (this.contractMultiplier * currentPrice / this.marginLevel).toFixed(2)
+                this.marginPrice = (this.contractMultiplier * this.currentPrice / this.marginLevel).toFixed(2)
             } else {
-                this.marginPrice = 0.01 * currentPrice
+                this.marginPrice = 0.01 * this.currentPrice
             }
             // 止损价格
             let stopLosePrice = this.currentPosition.stop_lose_price
             // 当前盈利百分比
             let currentPercent = ''
             if (direction === 'long') {
-                currentPercent = ((currentPrice - openPrice) / openPrice * 100 * this.marginLevel).toFixed(2)
+                currentPercent = ((this.currentPrice - openPrice) / openPrice * 100 * this.marginLevel).toFixed(2)
             } else {
-                currentPercent = ((openPrice - currentPrice) / openPrice * 100 * this.marginLevel).toFixed(2)
+                currentPercent = ((openPrice - this.currentPrice) / openPrice * 100 * this.marginLevel).toFixed(2)
             }
             // 止损百分比
             let stopLosePercent = (Math.abs(openPrice - stopLosePrice) / stopLosePrice * 100 * this.marginLevel).toFixed(2)
             // 如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
-            this.currentInfo = '新: ' + currentPrice.toFixed(2)
+            this.currentInfo = '新: ' + this.currentPrice.toFixed(2)
             let markLineCurrent = {
-                yAxis: currentPrice,
+                yAxis: this.currentPrice,
                 lineStyle: {
                     normal: {
                         opacity: 1,
@@ -2343,7 +2370,7 @@ export default {
                 label: {
                     normal: {
                         color: 'yellow',
-                        formatter: '新: ' + currentPrice.toFixed(2)
+                        formatter: '新: ' + this.currentPrice.toFixed(2)
                     },
                 },
             }
@@ -2393,33 +2420,35 @@ export default {
             markLineData.push(markLineStop)
 
             // 动止记录
-            // for (let i = 0; i < this.currentPosition.dynamicPositionList.length; i++) {
-            //     // 数量
-            //     let dynamicItem = this.currentPosition.dynamicPositionList[i]
-            //     // let dynamicPercent = (Math.abs(dynamicItem.price - openPrice) / openPrice * 100 * marginLevel).toFixed(2)
-            //     let dynamicAmount = dynamicItem.amount
-            //     let direction = this.dynamicDirectionMap[dynamicItem.direction]
-            //     let markLineObj = {
-            //         yAxis: dynamicItem.price,
-            //         lineStyle: {
-            //             normal: {
-            //                 opacity: 1,
-            //                 type: 'dashed',
-            //                 width: 1,
-            //                 color: this.echartsConfig.dynamicOpertionColor
-            //             },
-            //         },
-            //         label: {
-            //             normal: {
-            //                 color: this.echartsConfig.dynamicOpertionColor,
-            //                 formatter: '动: ' + dynamicItem.price + ' ' + direction + ' ' + dynamicAmount + '手',
-            //             }
-            //         },
-            //         symbol: 'circle',
-            //         symbolSize: 1
-            //     }
-            //     markLineData.push(markLineObj)
-            // }
+            for (let i = 0; i < this.currentPosition.dynamicPositionList.length; i++) {
+                // 数量
+                let dynamicItem = this.currentPosition.dynamicPositionList[i]
+                // let dynamicPercent = (Math.abs(dynamicItem.price - openPrice) / openPrice * 100 * marginLevel).toFixed(2)
+                let stop_win_count = dynamicItem.stop_win_count
+                let direction = this.dynamicDirectionMap[dynamicItem.direction]
+                let markLineObj = {
+                    yAxis: dynamicItem.stop_win_price,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'dashed',
+                            width: 1,
+                            color: this.echartsConfig.dynamicOpertionColor
+                        },
+                    },
+                    label: {
+                        normal: {
+                            color: this.echartsConfig.dynamicOpertionColor,
+                            formatter: '动止: ' + dynamicItem.stop_win_price + ' ' + direction + ' ' + stop_win_count + '手' +
+                                ' 额：' + dynamicItem.stop_win_money,
+                            position: 'insideMiddleTop'
+                        }
+                    },
+                    symbol: 'circle',
+                    symbolSize: 1
+                }
+                markLineData.push(markLineObj)
+            }
 
             // 兼容股票  111
             if (!jsonObj['fractal']) {
@@ -2450,6 +2479,8 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherColor,
                                 formatter: '顶: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
+                                position: 'insideEndTop'
+
                             },
                         },
                     }
@@ -2474,6 +2505,8 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
                                 formatter: '顶: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
+                                position: 'insideEndTop'
+
                             },
                         },
                     }
@@ -2500,6 +2533,8 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherColor,
                                 formatter: '底: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
+                                position: 'insideEndTop'
+
                             },
                         },
                     }
@@ -2524,6 +2559,8 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
                                 formatter: '底: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
+                                position: 'insideEndTop'
+
                             },
                         },
                     }
@@ -2532,32 +2569,49 @@ export default {
             }
             return markLineData
         },
+        quickCalcMaxCount() {
+            this.calcAccount(this.quickCalc.openPrice, this.quickCalc.stopPrice)
+            this.quickCalc.count = this.maxOrderCount
+            this.quickCalc.stopRate = this.perOrderStopRate
+            this.quickCalc.perOrderStopMoney = Math.round(this.perOrderStopMoney, 0)
+        },
         // 计算开仓手数
-        calcAccount(currentPrice) {
+        calcAccount(openPrice, stopPrice) {
             if (this.currentMarginRate == null) {
                 alert('请选择保证金系数，开仓价，止损价')
                 return
             }
-            if (this.currentSymbol.indexOf('BTC') === -1) {
-                this.account = this.futureAccount
+            if (this.symbol.indexOf('BTC') !== -1) {
+                this.account = this.digitCoinAccount
+                // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
+                // OKEX 1张 = 0.01BTC  20倍杠杆， 1张就是 0.01* BTC的现价
+                // 单位usdt
+                this.perOrderMargin = 0.01 * this.currentPrice / 20
+                this.perOrderStopRate = ((Math.abs(openPrice - stopPrice) / openPrice + this.digitCoinFee) * 20).toFixed(2)
+                // 1手止损的百分比 需要加上手续费  0.05%  okex双向taker 就是 2%
+                this.perOrderStopMoney = Number((this.perOrderMargin * this.perOrderStopRate).toFixed(2))
+                this.maxAccountUseRate = 0.4
+                this.stopRate = 0.1
+            } else if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
+                // 外盘
+                this.account = this.globalFutureAccount
                 // 计算1手需要的保证金
-                this.perOrderMargin = Math.floor(this.openPrice * this.contractMultiplier * this.currentMarginRate)
-                this.perOrderStopMoney = Math.abs(this.openPrice - this.stopPrice) * this.contractMultiplier
+                this.perOrderMargin = Math.floor(openPrice * this.contractMultiplier * this.currentMarginRate)
+                this.perOrderStopMoney = Math.abs(openPrice - stopPrice) * this.contractMultiplier
                 // 1手止损的百分比
                 this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
                 this.maxAccountUseRate = 0.1
                 this.stopRate = 0.01
             } else {
-                this.account = this.digitCoinAccount
-                // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
-                // OKEX 1张 = 0.01BTC  20倍杠杆， 1张就是 0.01* BTC的现价
-                // 单位usdt
-                this.perOrderMargin = 0.01 * currentPrice / 20
-                this.perOrderStopRate = (Math.abs(this.openPrice - this.stopPrice) / this.openPrice + this.digitCoinFee) * 20
-                // 1手止损的百分比 需要加上手续费  0.05%  okex双向taker 就是 2%
-                this.perOrderStopMoney = Number((this.perOrderMargin * this.perOrderStopRate).toFixed(2))
-                this.maxAccountUseRate = 0.4
-                this.stopRate = 0.1
+                // 内盘
+                this.account = this.futureAccount
+                // 计算1手需要的保证金
+                this.perOrderMargin = Math.floor(openPrice * this.contractMultiplier * this.currentMarginRate)
+                this.perOrderStopMoney = Math.abs(openPrice - stopPrice) * this.contractMultiplier
+                // 1手止损的百分比
+                this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
+                this.maxAccountUseRate = 0.1
+                this.stopRate = 0.01
             }
 
             // 计算最大能使用的资金
@@ -2587,11 +2641,11 @@ export default {
             // 动止手数  = 开仓手数 * 1手止损  /( （动止价-开仓价）* 合约乘数 + 1手止损)
             // 如果填入了动止价
             if (this.dynamicWinPrice != null) {
-                this.dynamicWinCount = Math.round(this.maxOrderCount * this.perOrderStopMoney / ((this.dynamicWinPrice - this.openPrice) * this.contractMultiplier + this.perOrderStopMoney))
+                this.dynamicWinCount = Math.round(this.maxOrderCount * this.perOrderStopMoney / ((this.dynamicWinPrice - openPrice) * this.contractMultiplier + this.perOrderStopMoney))
             }
-            // console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " perOrderMargin:",
-            //     this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
-            //     " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate)
+            console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " perOrderMargin:",
+                this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
+                " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate)
         },
         calculateMA(resultData, dayCount) {
             let result = []

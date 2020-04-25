@@ -776,14 +776,16 @@ Volume  当日总成交量
 '''
 ohlc_dict = {'开盘价': 'first', '最高价': 'max', '最低价': 'min', '收盘价': 'last', '成交量': 'sum'}
 # 8个品种 4个市场  'LENID3M' 伦镍暂时没接 ，要接又多了一个市场
-futures = ['CEYMA0','CEESA0','CENQA0','WGCNA0','NECLA0','CMGCA0','CMSIA0']
+futures = ['CEYMA0', 'CEESA0', 'CENQA0', 'WGCNA0', 'NECLA0', 'CMGCA0', 'CMSIA0']
+
+
 def testWStock():
     startTime = int(round(time.time() * 1000))
     url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=5000&symbol=WGCNA0&desc=1&q_type=0&return_t=3&qt_type=1&r_type=2&u=u2368&p=abc1818"
     resp = requests.get(url)
-    print("==>",resp.text)
+    print("==>", resp.text)
     df = pd.DataFrame(json.loads(resp.text))
-    df = df.sort_values(by="Date",ascending=True)
+    df = df.sort_values(by="Date", ascending=True)
     endTime = int(round(time.time() * 1000)) - startTime
     print("消耗时间：", endTime)
     print(len(df))
@@ -791,6 +793,7 @@ def testWStock():
     df.set_index('Date', inplace=True)
     print(len(df[1:]))
     # save_data_m("LENID3M",'1m',df)
+
 
 def save_data_m(code, period, df):
     if not df.empty:
@@ -816,6 +819,43 @@ def save_data_m(code, period, df):
         batch = []
 
 
+def testMongoArr():
+    symbol = 'GC'
+    direction = 'long'
+    status = 'holding'
+    close_price = 1750
+    date_created = datetime.utcnow()
+    signal = 'fractal'
+    period = '5m'
+    stop_win_count = 1
+    stop_win_price = 1748
+    stop_win_money = 201
+    DBPyChanlun['future_auto_position'].find_one_and_update({
+        'symbol': symbol, 'direction': direction, 'status': status
+    }, {
+        '$set': {
+            'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+            'last_update_time': date_created,  # 最后信号更新时间
+            'last_update_signal': signal,  # 最后更新的信号
+            'last_update_period': period,  # 最后更新的周期
+
+            # 'amount':last_fire['amount'] - stop_win_count # 持仓的数量减去动止的数量
+        },
+        '$addToSet': {
+            'dynamicPositionList': {
+                'date_created': date_created,  # 动止时间
+                'stop_win_count': stop_win_count,  # 动止的数量
+                'stop_win_price': stop_win_price,  # 动止时的价格
+                'stop_win_money': stop_win_money,  # 动止时的盈利
+                'direction': direction
+            }
+        },
+        '$inc': {
+            'update_count': 1
+        }
+    }, upsert=True)
+
+
 def app():
     # testBitmex()
     # testBeichiDb()
@@ -839,7 +879,8 @@ def app():
     # testGroupBy()
     # testMeigu()
     # testFutu()
-    testWStock()
+    # testWStock()
+    testMongoArr()
 
 
 if __name__ == '__main__':

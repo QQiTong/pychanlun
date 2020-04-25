@@ -284,29 +284,29 @@
         >
             <!--                        show-summary
             -->
-            <!--       :summary-method="getSummaries" -->
-            <!--      <el-table-column type="expand" label="展开">-->
-            <!--        <template slot-scope="props">-->
-            <!--          <el-table-->
-            <!--            :data="props.row.dynamicPositionList"-->
-            <!--            border-->
-            <!--            fit-->
-            <!--            highlight-current-row-->
-            <!--            style="width: 100%;"-->
-            <!--            size="mini"-->
-            <!--          >-->
-            <!--            <el-table-column label="动态操作时间" align="center" width="120">-->
-            <!--              <template slot-scope="{row}">-->
-            <!--                <span>{{ row.time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>-->
-            <!--              </template>-->
-            <!--            </el-table-column>-->
-            <!--            <el-table-column label="动态操作价格" prop="price" align="center" width="120" />-->
-            <!--            <el-table-column label="动态操作数量" prop="amount" align="center" width="120" />-->
-            <!--            <el-table-column label="动态操作原因" prop="reason" align="center" />-->
-            <!--          </el-table>-->
-            <!--          <el-tag v-if="props.row.holdReason">{{props.row.holdReason}}</el-tag>-->
-            <!--        </template>-->
-            <!--      </el-table-column>-->
+<!--                   :summary-method="getSummaries" -->
+                  <el-table-column type="expand" label="展开">
+                    <template slot-scope="props">
+                      <el-table
+                        :data="props.row.dynamicPositionList"
+                        border
+                        fit
+                        highlight-current-row
+                        style="width: 100%;"
+                        size="mini"
+                      >
+                        <el-table-column label="动态操作时间" align="center" width="120">
+                          <template slot-scope="{row}">
+                            <span>{{ row.date_created | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+                          </template>
+                        </el-table-column>
+                        <el-table-column label="动态操作价格" prop="stop_win_price" align="center" width="120" />
+                        <el-table-column label="动态操作数量" prop="stop_win_count" align="center" width="120" />
+                        <el-table-column label="动态操作盈利" prop="stop_win_money" align="center" />
+                      </el-table>
+                      <el-tag v-if="props.row.holdReason">{{props.row.holdReason}}</el-tag>
+                    </template>
+                  </el-table-column>
             <el-table-column label="操作状态" align="center"
                              :key="0"
             >
@@ -475,21 +475,21 @@
                     </el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="动止数" prop="stop_win_count" width="90" align="center" :key="22">
-                <template slot-scope="{row}">
-                    {{row.stop_win_count}}
-                </template>
-            </el-table-column>
-            <el-table-column label="动止价" prop="stop_win_count" width="90" align="center" :key="23">
-                <template slot-scope="{row}">
-                    {{row.stop_win_price}}
-                </template>
-            </el-table-column>
-            <el-table-column label="动止收益" prop="stop_win_money" width="90" align="center" :key="24">
-                <template slot-scope="{row}">
-                    {{row.stop_win_money}}
-                </template>
-            </el-table-column>
+<!--            <el-table-column label="动止数" prop="stop_win_count" width="90" align="center" :key="22">-->
+<!--                <template slot-scope="{row}">-->
+<!--                    {{row.stop_win_count}}-->
+<!--                </template>-->
+<!--            </el-table-column>-->
+<!--            <el-table-column label="动止价" prop="stop_win_count" width="90" align="center" :key="23">-->
+<!--                <template slot-scope="{row}">-->
+<!--                    {{row.stop_win_price}}-->
+<!--                </template>-->
+<!--            </el-table-column>-->
+<!--            <el-table-column label="动止收益" prop="stop_win_money" width="90" align="center" :key="24">-->
+<!--                <template slot-scope="{row}">-->
+<!--                    {{row.stop_win_money}}-->
+<!--                </template>-->
+<!--            </el-table-column>-->
             <!-- 止盈的时候计算盈利率 -->
             <!--            <el-table-column-->
             <!--                label="盈利率"-->

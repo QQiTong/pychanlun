@@ -143,7 +143,7 @@ def fetch_futures_mink():
         try:
             # 取分钟数据
             url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + \
-                  pwd + "&id=" + ",".join(futures) + "&period=1&num=-200&srcIndex=1"
+                  pwd + "&id=" + ",".join(futures) + "&period=1&num=-200"
             print(url)
             resp = requests.get(url,timeout=20)
             content = resp.text

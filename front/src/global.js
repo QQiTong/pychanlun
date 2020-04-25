@@ -11,6 +11,7 @@ let digitCoinLevel = 20
 export default {
     install () {
         Vue.prototype.$futureAccount = futureAccount
+        Vue.prototype.$globalFutureAccount = globalFutureAccount
         Vue.prototype.$stockAccount = stockAccount
         Vue.prototype.$digitCoinAccount = digitCoinAccount
         Vue.prototype.$digitCoinLevel = digitCoinLevel
