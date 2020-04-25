@@ -69,6 +69,9 @@ def create_charts(klines, page_title="Awesome-Pyecharts", file="chanlun-kline.ht
                 symbol_size=10
             ),
         )
+        .set_series_opts(
+            markarea_opts=opts.MarkAreaOpts(is_silent=True, data=[])
+        )
         .set_global_opts(
             xaxis_opts=opts.AxisOpts(is_scale=True),
             yaxis_opts=opts.AxisOpts(

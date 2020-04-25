@@ -6,7 +6,6 @@ from pychanlun.funcat.time_series import (fit_series)
 from pychanlun import series_tool
 from pychanlun.basic.comm import FindPrevEq
 from pychanlun.basic.pattern import PerfectForBuyLong, PerfectForSellShort
-import copy
 
 class Entanglement:
     def __init__(self):
@@ -26,7 +25,7 @@ class Entanglement:
 
 def find_entanglements(time_series, duan_series, bi_series, high_series, low_series):
     count = len(time_series)
-    e_list = []
+    entanglements = []
     for i in range(count):
         if duan_series[i] == -1:
             # i是线段低点
@@ -72,7 +71,7 @@ def find_entanglements(time_series, duan_series, bi_series, high_series, low_ser
                                 e_down_list.pop()
                 for r in range(len(e_down_list)):
                     if e_down_list[r].formal:
-                        e_list.append(e_down_list[r])
+                        entanglements.append(e_down_list[r])
         if duan_series[i] == 1:
             # i是线段高点
             j = FindPrevEq(duan_series, -1, i)
@@ -117,11 +116,18 @@ def find_entanglements(time_series, duan_series, bi_series, high_series, low_ser
                                 e_up_list.pop()
                 for r in range(len(e_up_list)):
                     if e_up_list[r].formal:
-                        e_list.append(e_up_list[r])
-    return e_list
+                        entanglements.append(e_up_list[r])
+    return entanglements
 
 
-def la_hui(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def la_hui(klines, entanglements):
+    time_series = klines['timestamp']
+    high_series = klines['high']
+    low_series = klines['low']
+    open_series = klines['open']
+    close_series = klines['close']
+    bi_series = klines['bi']
+    duan_series = klines['duan']
     result = {
         'buy_zs_huila': {
             'idx': [],
@@ -140,9 +146,9 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             'tag': []
         }
     }
-    for i in range(len(e_list)):
-        e = e_list[i]
-        e_next = e_list[i+1] if i+1 < len(e_list) else None
+    for i in range(len(entanglements)):
+        e = entanglements[i]
+        e_next = entanglements[i+1] if i+1 < len(entanglements) else None
         if e.direction == 1:
             # 上涨中枢，找第一次的拉回
             # 离开中枢后的第一个笔结束
@@ -156,8 +162,8 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             if leave - e.end >= 5:
                 r = -1
                 k = len(low_series)
-                if i < len(e_list) - 1:
-                    k = e_list[i+1].start
+                if i < len(entanglements) - 1:
+                    k = entanglements[i+1].start
                 for x in range(leave + 1, k):
                     if e_next is not None and x >= e_next.start:
                         break
@@ -226,7 +232,14 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
     return result
 
 
-def tu_po(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def tu_po(klines, entanglements):
+    time_series = klines['timestamp']
+    high_series = klines['high']
+    low_series = klines['low']
+    open_series = klines['open']
+    close_series = klines['close']
+    bi_series = klines['bi']
+    duan_series = klines['duan']
     result = {
         'buy_zs_tupo': {
             'idx': [],
@@ -245,9 +258,9 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
             'tag': []
         }
     }
-    for i in range(len(e_list)):
-        e = e_list[i]
-        e_next = e_list[i+1] if i+1 < len(e_list) else None
+    for i in range(len(entanglements)):
+        e = entanglements[i]
+        e_next = entanglements[i+1] if i+1 < len(entanglements) else None
         if e.direction == 1:
             r = -1
             for x in range(e.end+1, len(high_series)):
@@ -284,7 +297,14 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                     result['sell_zs_tupo']['tag'].append('')
     return result
 
-def v_reverse(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def v_reverse(klines, entanglements):
+    time_series = klines['timestamp']
+    high_series = klines['high']
+    low_series = klines['low']
+    open_series = klines['open']
+    close_series = klines['close']
+    bi_series = klines['bi']
+    duan_series = klines['duan']
     result = {
         'buy_v_reverse': {
             'idx': [],
@@ -303,8 +323,8 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
             'tag': []
         }
     }
-    for i in range(len(e_list)):
-        e = e_list[i]
+    for i in range(len(entanglements)):
+        e = entanglements[i]
         if e.direction == 1:
             # 离开中枢后的第一段结束
             leave_end_index = pydash.index_of(duan_series, 1, e.end)
@@ -367,7 +387,14 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
     return result
 
 
-def po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def po_huai(klines):
+    time_series = klines['timestamp']
+    high_series = klines['high']
+    low_series = klines['low']
+    open_series = klines['open']
+    close_series = klines['close']
+    bi_series = klines['bi']
+    duan_series = klines['duan']
     result = {
         'buy_duan_break': {
             'idx': [],
