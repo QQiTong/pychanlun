@@ -12,7 +12,7 @@ def PerfectForBuyLong(signal_serial, high_serial, low_serial, idx):
     g2 = FindPrevEq(signal_serial, 1, d2)
     d3 = FindPrevEq(signal_serial, -1, g2)
     if d3 >= 0 and low_serial[d2] > low_serial[d3] and low_serial[d1] > low_serial[d3]:
-        if low_serial[d1] < low_serial[idx] < (high_serial[g2]+low_serial[d2])/2:
+        if low_serial[d1] < low_serial[idx] < high_serial[g2]:
             return True
     return False
 
@@ -27,7 +27,7 @@ def PerfectForSellShort(signal_serial, high_serial, low_series, idx):
     d2 = FindPrevEq(signal_serial, -1, g2)
     g3 = FindPrevEq(signal_serial, -1, d2)
     if g3 >= 0 and high_serial[g2] < high_serial[g3] and high_serial[g1] < high_serial[g3]:
-        if high_serial[g1] > high_serial[idx] > (high_serial[g2]+low_series[d2])/2:
+        if high_serial[g1] > high_serial[idx] > low_series[d2]/2:
             return True
     return False
 
