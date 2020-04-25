@@ -176,7 +176,8 @@ export default {
             isDigitCoinOrGlobal: false,
             futureConfig: {},
             symbolInfo: null,
-            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'CP', 'YM', 'CN', 'BTC']
+            globalFutureSymbol: ['BTC']
+            // globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'CP', 'YM', 'CN', 'BTC']
         }
     },
     beforeMount() {
@@ -800,7 +801,7 @@ export default {
                     },
                     color: ['yellow', 'green', 'blue', 'white', 'white', 'red' /* 'white', 'white', 'white' */],
                     legend: {
-                        data: ['笔', '段', '高级别段', 'MA5', 'MA10','MA20','MA30', 'MA60', /* '布林上轨', '布林中轨', '布林下轨' */],
+                        data: ['笔', '段', '高级别段', 'MA5', 'MA10', 'MA20', 'MA30', 'MA60', /* '布林上轨', '布林中轨', '布林下轨' */],
 
                         selected: {
                             '笔': true,
@@ -872,23 +873,23 @@ export default {
                                 }
                             }
                         },
-                        {
-                            type: 'category',
-                            gridIndex: 1,
-                            data: resultData.date,
-                            axisTick: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {lineStyle: {color: '#8392A5'}},
-                            axisPointer: {
-                                label: {
-                                    show: false
-                                }
-                            }
-                        },
+                        // {
+                        //     type: 'category',
+                        //     gridIndex: 1,
+                        //     data: resultData.date,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {lineStyle: {color: '#8392A5'}},
+                        //     axisPointer: {
+                        //         label: {
+                        //             show: false
+                        //         }
+                        //     }
+                        // },
                         // {
                         //     type: 'category',
                         //     gridIndex: 2,
@@ -929,20 +930,20 @@ export default {
                             },
                             axisLine: {lineStyle: {color: this.echartsConfig.bgColor}},
                         },
-                        {
-                            gridIndex: 1,
-                            splitNumber: 2,
-                            axisTick: {
-                                show: false
-                            },
-                            splitLine: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
-                        },
+                        // {
+                        //     gridIndex: 1,
+                        //     splitNumber: 2,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     splitLine: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
+                        // },
                         // 成交量
                         // {
                         //     gridIndex: 3,
@@ -971,13 +972,13 @@ export default {
                             end: 100,
                             minSpan: 10,
                         },
-                        {
-                            type: 'inside',
-                            xAxisIndex: [0, 1],
-                            start: 55,
-                            end: 100,
-                            minSpan: 10,
-                        },
+                        // {
+                        //     type: 'inside',
+                        //     xAxisIndex: [0, 1],
+                        //     start: 55,
+                        //     end: 100,
+                        //     minSpan: 10,
+                        // },
                         // {
                         //     type: 'inside',
                         //     xAxisIndex: [0, 1],

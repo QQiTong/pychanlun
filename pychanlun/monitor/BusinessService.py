@@ -72,7 +72,7 @@ class BusinessService:
         }).sort("_id", pymongo.ASCENDING)
         df = pd.DataFrame(list(data_list))
 
-        if len(df) == 0:
+        if len(df) == 0 :
             return {
                 'date': [],
                 'win_end_list': [],

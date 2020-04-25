@@ -34,7 +34,7 @@ periodList1 = ['3m', '5m', '15m', '30m', '60m']
 # 数字货币
 periodList2 = ['1m', '3m', '5m', '15m', '30m', '60m']
 # 外盘期货
-periodList3 = ['1m','3m','5m', '15m', '30m', '60m']
+periodList3 = ['3m','5m', '15m', '30m', '60m']
 # 高级别 高高级别映射
 # 暂时用3d 3d
 futureLevelMap = {
@@ -446,7 +446,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                 time.sleep(0)
             else:
                 time.sleep(5)
-    except Exception:
+    except Exception as e:
         logger.info("Error Occurred: {0}".format(traceback.format_exc()))
         print("Error Occurred: {0}".format(traceback.format_exc()))
         if type == "1":
@@ -457,7 +457,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
             time.sleep(10)
             threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
         elif type == "3":
-            print("外盘期货出异常了", Exception)
+            print("外盘期货出异常了", Exception,e,symbol)
             threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol]).start()
         else:
             print("外盘股票出异常了", Exception)

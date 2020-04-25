@@ -28,7 +28,8 @@ python pychanlun\market_data\global_futures.py
 ohlc_dict = {'开盘价': 'first', '最高价': 'max', '最低价': 'min', '收盘价': 'last', '成交量': 'sum'}
 
 stocks = config['global_stock_symbol']
-futures = config['global_future_symbol_origin']
+# futures = config['global_future_symbol_origin']
+futures = ['03NID','@ZS0W', '@ZM0Y', '@ZL0W', 'CPO0W', 'CT0W']
 # 转化成简称入库
 global_future_alias = config['global_future_alias']
 global_future_symbol = config['global_future_symbol']
@@ -143,7 +144,7 @@ def fetch_futures_mink():
         try:
             # 取分钟数据
             url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + \
-                  pwd + "&id=" + ",".join(futures) + "&period=1&num=-200&srcIndex=1"
+                  pwd + "&id=" + ",".join(futures) + "&period=60&num=-1000"
             print(url)
             resp = requests.get(url,timeout=20)
             content = resp.text
@@ -174,54 +175,46 @@ def fetch_futures_mink():
                     else:
                         df1m['时间'] = df1m['时间'].apply(lambda x: datetime.strptime(x, '%Y%m%d %H:%M'))
                     df1m.set_index('时间', inplace=True)
-                # elif '日期' in df.columns.values:
-                #     if code in add_5_hours_symbol:
-                #         df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=5))
-                #     elif code in add_12_hours_symbol:
-                #         df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=12))
-                #     elif code in add_13_hours_symbol:
-                #         df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=13))
-                #     else:
-                #         df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
-                #     df1m.set_index('日期', inplace=True)
+                elif '日期' in df.columns.values:
+                    if code in add_5_hours_symbol:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=5))
+                    elif code in add_12_hours_symbol:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=12))
+                    elif code in add_13_hours_symbol:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d') + timedelta(hours=13))
+                    else:
+                        df1m['日期'] = df1m['日期'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
+                    df1m.set_index('日期', inplace=True)
 
-                save_data_m(code, '1m', df1m)
+                save_data_m(code, '60m', df1m)
                 # 3m
-                df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df3m = df3m[1:]
-                save_data_m(code, '3m', df3m)
+                # df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '3m', df3m)
                 # 5m
-                df5m = df1m.resample('5T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df5m = df5m[1:]
-                save_data_m(code, '5m', df5m)
-                # 15m
-                df15m = df1m.resample('15T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df15m = df15m[1:]
-                save_data_m(code, '15m', df15m)
-                # 30m
-                df30m = df1m.resample('30T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df30m = df30m[1:]
-                save_data_m(code, '30m', df30m)
-                # 60mm
-                df60m = df1m.resample('60T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df60m = df60m[1:]
-                save_data_m(code, '60m', df60m)
-                # 240m
+                # df5m = df1m.resample('5T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '5m', df5m)
+                # # 15m
+                # df15m = df1m.resample('15T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '15m', df15m)
+                # # 30m
+                # df30m = df1m.resample('30T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '30m', df30m)
+                # # 60mm
+                # df60m = df1m.resample('60T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '60m', df60m)
+                # # 240m
                 df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df240m = df240m[1:]
                 save_data_m(code, '240m', df240m)
-                # 1D
-                df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df1d = df1d[1:]
-                save_data_m(code, '1d', df1d)
+                # # 1D
+                # df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '1d', df1d)
                 # # 3D
-                df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df3d = df3d[1:]
-                save_data_m(code, '3d', df3d)
+                # df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # save_data_m(code, '3d', df3d)
             if not is_run:
                 break
-        except Exception:
-            print("外盘期货采集出错", Exception)
+        except Exception as e:
+            print("外盘期货采集出错", Exception,e)
             # dingMsg.send("remind外盘期货采集出错")
         time.sleep(20)
 
@@ -259,7 +252,7 @@ def signal_hanlder(signalnum, frame):
 def run(**kwargs):
     signal.signal(signal.SIGINT, signal_hanlder)
     thread_list = []
-    thread_list.append(threading.Thread(target=fetch_stocks_mink))
+    # thread_list.append(threading.Thread(target=fetch_stocks_mink))
     thread_list.append(threading.Thread(target=fetch_futures_mink))
     for thread in thread_list:
         thread.start()
