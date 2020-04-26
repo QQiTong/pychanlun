@@ -90,8 +90,8 @@ export const futureApi = {
         })
     },
     // 查询单个持仓
-    getPosition (symbol, period, status) {
-        let url = `/api/get_position?symbol=${symbol}&period=${period}&status=${status}`
+    getPosition (symbol, period, status,direction) {
+        let url = `/api/get_position?symbol=${symbol}&period=${period}&status=${status}&direction=${direction}`
         return axios({
             url: url,
             method: 'get'

@@ -49,14 +49,20 @@ export default {
 
                 higherColor: '#14d0cd',
                 higherHigherColor: 'green',
-                dynamicOpertionColor: '#d026bf',
+                dynamicOpertionColor: 'yellow',
+                currentPriceColor: '#FFCDD2',
                 macdUpLastValue: Number.MIN_SAFE_INTEGER,
                 macdDownLastValue: Number.MAX_SAFE_INTEGER,
                 macdUpDarkColor: '#EF5350',
                 macdUpLightColor: '#FFCDD2',
                 macdDownDarkColor: '#26A69A',
                 macdDownLightColor: '#B2DFDB',
-
+                loadingOption: {
+                    text: '让子弹飞一会...',
+                    maskColor: '#0B0E11',
+                    textColor: 'white',
+                    color: '#FFCC08'
+                },
                 // 多周期显示不下,需要配置
                 multiPeriodGrid: [{
                     left: '0%',
@@ -170,6 +176,7 @@ export default {
             // 当前品种持仓信息
             currentPosition: null,
             positionStatus: 'holding',
+            positionDirection: '',
             dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
             currentInfo: null,
             // 数字货币 和外盘 将240m 替换成1m
@@ -211,6 +218,7 @@ export default {
             this.positionPeriod = this.getParams('positionPeriod')
             this.positionDirection = this.getParams('positionDirection')
             this.positionStatus = this.getParams('positionStatus')
+            this.positionDirection = this.getParams('positionDirection')
             if (this.symbol.indexOf('sz') !== -1 || this.symbol.indexOf('sh') !== -1) {
                 this.getStockPosition()
             } else {
@@ -252,7 +260,7 @@ export default {
             // if (this.period !== "") {
             //     period = this.period
             // }
-            futureApi.getPosition(this.symbol, this.positionPeriod, this.positionStatus).then(res => {
+            futureApi.getPosition(this.symbol, this.positionPeriod, this.positionStatus, this.positionDirection).then(res => {
                 this.currentPosition = res
                 console.log('获取当前品种持仓:', res)
             }).catch((error) => {
@@ -560,31 +568,31 @@ export default {
             this.requestFlag = false
             if (this.period !== '') {
                 if (this.firstFlag[0] === true) {
-                    this.myChart.showLoading()
+                    this.myChart.showLoading(this.echartsConfig.loadingOption)
                 }
             } else {
                 if (this.firstFlag[1] === true) {
-                    this.myChart3.showLoading()
+                    this.myChart3.showLoading(this.echartsConfig.loadingOption)
                 }
                 if (this.firstFlag[2] === true) {
-                    this.myChart5.showLoading()
+                    this.myChart5.showLoading(this.echartsConfig.loadingOption)
                 }
                 if (this.firstFlag[3] === true) {
-                    this.myChart15.showLoading()
+                    this.myChart15.showLoading(this.echartsConfig.loadingOption)
                 }
                 if (this.firstFlag[4] === true) {
-                    this.myChart30.showLoading()
+                    this.myChart30.showLoading(this.echartsConfig.loadingOption)
                 }
                 if (this.firstFlag[5] === true) {
-                    this.myChart60.showLoading()
+                    this.myChart60.showLoading(this.echartsConfig.loadingOption)
                 }
                 if (this.isShow1Min) {
                     if (this.firstFlag[6] === true) {
-                        this.myChart1.showLoading()
+                        this.myChart1.showLoading(this.echartsConfig.loadingOption)
                     }
                 } else {
                     if (this.firstFlag[6] === true) {
-                        this.myChart240.showLoading()
+                        this.myChart240.showLoading(this.echartsConfig.loadingOption)
                     }
                 }
             }
@@ -2025,10 +2033,11 @@ export default {
             // 当前价格
             this.currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 1手需要的保证金
-            if (this.symbol.indexOf('BTC') === -1) {
-                this.marginPrice = (this.contractMultiplier * this.currentPrice / this.marginLevel).toFixed(2)
+            if (this.symbol === 'BTC') {
+                this.marginPrice = (0.01 * this.currentPrice / this.marginLevel).toFixed(2)
             } else {
-                this.marginPrice = (0.01 * this.currentPrice).toFixed(2)
+                // 内盘 和外盘
+                this.marginPrice = (this.contractMultiplier * this.currentPrice / this.marginLevel).toFixed(2)
             }
 
             // console.log("最后的背驰:", period, lastBeichiType)
@@ -2152,7 +2161,7 @@ export default {
                     symbolSize: 1,
                     label: {
                         normal: {
-                            color: 'yellow',
+                            color: this.echartsConfig.currentPriceColor,
                             formatter: '新: ' + this.currentPrice.toFixed(2)
                         },
                     },
@@ -2337,10 +2346,11 @@ export default {
             // 合约乘数
             console.log("查bug", this.marginLevel, this.contractMultiplier, this.currentPrice)
             // 1手需要的保证金
-            if (this.symbol.indexOf('BTC') === -1) {
-                this.marginPrice = (this.contractMultiplier * this.currentPrice / this.marginLevel).toFixed(2)
+            if (this.symbol === 'BTC') {
+                this.marginPrice = (0.01 * this.currentPrice / this.marginLevel).toFixed(2)
             } else {
-                this.marginPrice = 0.01 * this.currentPrice
+                // 内盘 和外盘
+                this.marginPrice = (this.contractMultiplier * this.currentPrice / this.marginLevel).toFixed(2)
             }
             // 止损价格
             let stopLosePrice = this.currentPosition.stop_lose_price
@@ -2369,7 +2379,7 @@ export default {
                 symbolSize: 1,
                 label: {
                     normal: {
-                        color: 'yellow',
+                        color: this.echartsConfig.currentPriceColor,
                         formatter: '新: ' + this.currentPrice.toFixed(2)
                     },
                 },
@@ -2418,38 +2428,38 @@ export default {
                 },
             }
             markLineData.push(markLineStop)
-
-            // 动止记录
-            for (let i = 0; i < this.currentPosition.dynamicPositionList.length; i++) {
-                // 数量
-                let dynamicItem = this.currentPosition.dynamicPositionList[i]
-                // let dynamicPercent = (Math.abs(dynamicItem.price - openPrice) / openPrice * 100 * marginLevel).toFixed(2)
-                let stop_win_count = dynamicItem.stop_win_count
-                let direction = this.dynamicDirectionMap[dynamicItem.direction]
-                let markLineObj = {
-                    yAxis: dynamicItem.stop_win_price,
-                    lineStyle: {
-                        normal: {
-                            opacity: 1,
-                            type: 'dashed',
-                            width: 1,
-                            color: this.echartsConfig.dynamicOpertionColor
+            if (this.currentPosition.hasOwnProperty('dynamicPositionList')) {
+                // 动止记录
+                for (let i = 0; i < this.currentPosition.dynamicPositionList.length; i++) {
+                    // 数量
+                    let dynamicItem = this.currentPosition.dynamicPositionList[i]
+                    // let dynamicPercent = (Math.abs(dynamicItem.price - openPrice) / openPrice * 100 * marginLevel).toFixed(2)
+                    let stop_win_count = dynamicItem.stop_win_count
+                    let direction = this.dynamicDirectionMap[dynamicItem.direction]
+                    let markLineObj = {
+                        yAxis: dynamicItem.stop_win_price,
+                        lineStyle: {
+                            normal: {
+                                opacity: 1,
+                                type: 'dashed',
+                                width: 1,
+                                color: this.echartsConfig.dynamicOpertionColor
+                            },
                         },
-                    },
-                    label: {
-                        normal: {
-                            color: this.echartsConfig.dynamicOpertionColor,
-                            formatter: '动止: ' + dynamicItem.stop_win_price + ' ' + direction + ' ' + stop_win_count + '手' +
-                                ' 额：' + dynamicItem.stop_win_money,
-                            position: 'insideMiddleTop'
-                        }
-                    },
-                    symbol: 'circle',
-                    symbolSize: 1
+                        label: {
+                            normal: {
+                                color: this.echartsConfig.dynamicOpertionColor,
+                                formatter: '动止: ' + CommonTool.formatDate(dynamicItem.date_created, 'MM-dd HH:mm') + " " + dynamicItem.stop_win_price + ' ' + direction + ' ' + stop_win_count + '手' +
+                                    ' 额：' + dynamicItem.stop_win_money,
+                                position: 'insideMiddleTop'
+                            }
+                        },
+                        symbol: 'circle',
+                        symbolSize: 1
+                    }
+                    markLineData.push(markLineObj)
                 }
-                markLineData.push(markLineObj)
             }
-
             // 兼容股票  111
             if (!jsonObj['fractal']) {
                 return markLineData

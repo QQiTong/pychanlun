@@ -27,8 +27,8 @@
                     @change="getPositionList()"
                     class="ml-5 mr-5">
                 </el-date-picker>
-                <el-button @click="quickSwitchDay('pre')" size="mini">前一天</el-button>
-                <el-button @click="quickSwitchDay('next')" size="mini">后一天</el-button>
+                <el-button type="primary" @click="quickSwitchDay('pre')" size="mini" class="primary-button">前一天</el-button>
+                <el-button type="primary" @click="quickSwitchDay('next')" size="mini" class="primary-button">后一天</el-button>
             </el-form-item>
             <!--      <el-form-item>-->
             <!--        <el-button-->
@@ -276,37 +276,45 @@
         <!--        持仓列表-->
         <el-table
             :data="positionList"
-            border
             fit
             style="width: 100%;"
             size="mini"
             :row-class-name="tableRowClassName"
+            :row-key="getRowKeys"
+            :row-style="tableRowStyle"
+            header-cell-class-name="el-header-cell"
+            cell-class-name="el-cell"
         >
             <!--                        show-summary
             -->
-<!--                   :summary-method="getSummaries" -->
-                  <el-table-column type="expand" label="展开">
-                    <template slot-scope="props">
-                      <el-table
+            <!--                   :summary-method="getSummaries" -->
+            <el-table-column type="expand" label="展开">
+                <template slot-scope="props" v-if="props.row.hasOwnProperty('dynamicPositionList')">
+                    <el-table
                         :data="props.row.dynamicPositionList"
-                        border
                         fit
-                        highlight-current-row
-                        style="width: 100%;"
                         size="mini"
-                      >
-                        <el-table-column label="动态操作时间" align="center" width="120">
-                          <template slot-scope="{row}">
-                            <span>{{ row.date_created | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-                          </template>
+                        header-cell-class-name="el-header-cell"
+                        cell-class-name="el-cell"
+                    >
+                        <el-table-column label="动态操作时间" align="center">
+                            <template slot-scope="{row}">
+                                <span>{{ row.date_created | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+                            </template>
                         </el-table-column>
-                        <el-table-column label="动态操作价格" prop="stop_win_price" align="center" width="120" />
-                        <el-table-column label="动态操作数量" prop="stop_win_count" align="center" width="120" />
-                        <el-table-column label="动态操作盈利" prop="stop_win_money" align="center" />
-                      </el-table>
-                      <el-tag v-if="props.row.holdReason">{{props.row.holdReason}}</el-tag>
-                    </template>
-                  </el-table-column>
+                        <el-table-column label="动态操作价格" prop="stop_win_price" align="center"/>
+                        <el-table-column label="动态操作数量" prop="stop_win_count" align="center"/>
+                        <el-table-column label="动态操作盈利" prop="stop_win_money" align="center"/>
+                        <el-table-column label="分型价格" prop="fractal_price" align="center"/>
+                        <el-table-column label="滑点" prop="direction" align="center">
+                            <template slot-scope="{row}">
+                                <span>{{ Math.abs(row.stop_win_price-row.fractal_price).toFixed(1)}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="动态操作方向" prop="direction" align="center"/>
+                    </el-table>
+                </template>
+            </el-table-column>
             <el-table-column label="操作状态" align="center"
                              :key="0"
             >
@@ -315,6 +323,7 @@
                         v-model="row.status"
                         size="mini"
                         @change="changeStatus(row._id,row.status,row.close_price)"
+                        effect="dark"
                     >
                         <el-option
                             v-for="item in statusOptions"
@@ -353,9 +362,9 @@
 
             <el-table-column label="方向" prop="direction" align="center" :key="5">
                 <template slot-scope="{row}">
-                    <el-tag :type="row.direction | directionTagFilter">
+                    <span :class="row.direction | directionTagFilter">
                         <span>{{ row.direction | directionFilter }}</span>
-                    </el-tag>
+                    </span>
                 </template>
             </el-table-column>
             <el-table-column label="成本价" prop="price" align="center" :key="6"/>
@@ -381,7 +390,7 @@
                 :key="9"
             >
                 <template slot-scope="{row}">
-                    <el-tag :type="row.current_profit_rate| percentTagFilter">{{(row.current_profit_rate*100).toFixed(2)}}%</el-tag>
+                    <span :class="row.current_profit_rate| percentTagFilter">{{(row.current_profit_rate*100).toFixed(2)}}%</span>
                 </template>
             </el-table-column>
 
@@ -393,17 +402,17 @@
                 :key="10"
             >
                 <template slot-scope="{row}">
-                    <el-tag :type="row.current_profit| percentTagFilter">{{row.current_profit}}</el-tag>
+                    <span :class="row.current_profit| percentTagFilter">{{row.current_profit}}</span>
                 </template>
             </el-table-column>
             <el-table-column label="保证金" width="80" align="center" :key="11">
                 <template slot-scope="{row}">{{row.total_margin}}</template>
             </el-table-column>
-            <el-table-column label="止损价"  align="center" :key="12">
+            <el-table-column label="止损价" align="center" :key="12">
                 <template slot-scope="{row}">
-                    <el-tag type="warning">
+                    <span class="primary-yellow">
                         {{row.stop_lose_price}}
-                    </el-tag>
+                    </span>
                 </template>
             </el-table-column>
             <el-table-column label="止损率" width="80" align="center" :key="13">
@@ -468,28 +477,27 @@
                 :key="21"
             >
                 <template slot-scope="{row}">
-                    <el-tag
-                        :type="calcWinLoseRate(row) | winLoseRateTagFilter"
-                        effect="dark"
+                    <span
+                        :class="calcWinLoseRate(row) | winLoseRateTagFilter"
                     >{{calcWinLoseRate(row)}}
-                    </el-tag>
+                    </span>
                 </template>
             </el-table-column>
-<!--            <el-table-column label="动止数" prop="stop_win_count" width="90" align="center" :key="22">-->
-<!--                <template slot-scope="{row}">-->
-<!--                    {{row.stop_win_count}}-->
-<!--                </template>-->
-<!--            </el-table-column>-->
-<!--            <el-table-column label="动止价" prop="stop_win_count" width="90" align="center" :key="23">-->
-<!--                <template slot-scope="{row}">-->
-<!--                    {{row.stop_win_price}}-->
-<!--                </template>-->
-<!--            </el-table-column>-->
-<!--            <el-table-column label="动止收益" prop="stop_win_money" width="90" align="center" :key="24">-->
-<!--                <template slot-scope="{row}">-->
-<!--                    {{row.stop_win_money}}-->
-<!--                </template>-->
-<!--            </el-table-column>-->
+            <!--            <el-table-column label="动止数" prop="stop_win_count" width="90" align="center" :key="22">-->
+            <!--                <template slot-scope="{row}">-->
+            <!--                    {{row.stop_win_count}}-->
+            <!--                </template>-->
+            <!--            </el-table-column>-->
+            <!--            <el-table-column label="动止价" prop="stop_win_count" width="90" align="center" :key="23">-->
+            <!--                <template slot-scope="{row}">-->
+            <!--                    {{row.stop_win_price}}-->
+            <!--                </template>-->
+            <!--            </el-table-column>-->
+            <!--            <el-table-column label="动止收益" prop="stop_win_money" width="90" align="center" :key="24">-->
+            <!--                <template slot-scope="{row}">-->
+            <!--                    {{row.stop_win_money}}-->
+            <!--                </template>-->
+            <!--            </el-table-column>-->
             <!-- 止盈的时候计算盈利率 -->
             <!--            <el-table-column-->
             <!--                label="盈利率"-->
@@ -514,7 +522,6 @@
             <!--            </el-table-column>-->
         </el-table>
         <el-pagination
-            background
             layout="total,sizes,prev, pager, next"
             :current-page.sync="listQuery.current"
             :page-size="listQuery.size"
@@ -530,7 +537,7 @@
             <el-col :span="12">
                 外盘期货（$）
                 当前盈利：
-                <el-tag :type="globalSumObj.currentProfitSum| percentTagFilter" class="sum-text">{{globalSumObj.currentProfitSum}}</el-tag>
+                <span :class="globalSumObj.currentProfitSum| percentTagFilter" class="sum-text">{{globalSumObj.currentProfitSum}}</span>
                 预计止损：{{(globalSumObj.predictStopSum)}}
                 已止盈：{{(globalSumObj.winEndSum)}}
                 已止损：{{(globalSumObj.loseEndSum)}}
@@ -540,7 +547,7 @@
             <el-col :span="12">
                 内盘期货(￥)
                 当前盈利：
-                <el-tag :type="sumObj.currentProfitSum| percentTagFilter" class="sum-text">{{sumObj.currentProfitSum}}</el-tag>
+                <span :class="sumObj.currentProfitSum| percentTagFilter" class="sum-text">{{sumObj.currentProfitSum}}</span>
                 预计止损：{{(sumObj.predictStopSum)}}
                 已止盈：{{(sumObj.winEndSum)}}
                 已止损：{{(sumObj.loseEndSum)}}
@@ -612,25 +619,25 @@
             },
             directionTagFilter(direction) {
                 const directionMap = {
-                    long: "danger",
-                    short: "primary"
+                    long: "up-red",
+                    short: "down-green"
                 };
                 return directionMap[direction];
             },
             percentTagFilter(percent) {
                 if (percent > 0) {
-                    return "danger";
+                    return "up-red";
                 } else if (percent < 0) {
-                    return "primay";
+                    return "down-green";
                 } else {
-                    return "info";
+                    return "zero-gray";
                 }
             },
             winLoseRateTagFilter(rate) {
                 if (rate >= 1) {
-                    return "success";
+                    return "up-red";
                 } else {
-                    return "info";
+                    return "zero-gray";
                 }
             },
             directionFilter(direction) {
@@ -874,28 +881,45 @@
                         console.log("更新状态失败", error);
                     });
             },
+            getRowKeys(row) {
+                return row._id
+            },
+
+            // 修改table tr行的背景色
+            tableRowStyle({row, rowIndex}) {
+                return 'background-color: pink'
+            },
+            // 修改table header的背景色
+            tableHeaderColor({row, column, rowIndex, columnIndex}) {
+                // if (rowIndex === 0) {
+                return 'background-color: lightblue;color: #fff;font-weight: 500;'
+                // }
+            },
             tableRowClassName({row, rowIndex}) {
-                if (row.status === 'loseEnd') {
-                    return "warning-row";
-                } else if (row.status === 'winEnd') {
+                if (row.hasOwnProperty('dynamicPositionList')) {
                     return 'success-row';
                 }
                 return "";
-            },
+            }
+            ,
             handleSizeChange(currentSize) {
                 this.listQuery.size = currentSize;
                 this.getPositionList();
-            },
+            }
+            ,
             handlePageChange(currentPage) {
                 this.listQuery.current = currentPage;
                 this.getPositionList();
-            },
+            }
+            ,
             handleQueryStatusChange() {
                 this.getPositionList();
-            },
+            }
+            ,
             filterTags(value, row) {
                 return row.status === value;
-            },
+            }
+            ,
             handleJumpToKline(row) {
                 console.log(this.$parent);
                 // this.$parent.jumpToKline(symbol)
@@ -914,7 +938,8 @@
                 });
                 window.open(routeUrl.href, "_blank");
                 // }
-            },
+            }
+            ,
             getPositionList() {
                 // this.positionList = [];
                 // this.listLoading = true;
@@ -933,14 +958,16 @@
                         // this.listLoading = false;
                         console.log("获取持仓列表失败", error);
                     });
-            },
+            }
+            ,
             handleModifyStatus(row, status) {
                 this.$message({
                     message: "操作Success",
                     type: "success"
                 });
                 row.status = status;
-            },
+            }
+            ,
 
             resetForm() {
                 this.positionForm = {
@@ -959,7 +986,8 @@
                     holdReason: "",
                     dynamicPositionList: []
                 };
-            },
+            }
+            ,
             addDynamicPosition() {
                 this.positionForm.dynamicPositionList.push({
                     time: new Date(),
@@ -967,10 +995,12 @@
                     amount: "",
                     reason: ""
                 });
-            },
+            }
+            ,
             removeDynamicPosition(index) {
                 this.positionForm.dynamicPositionList.splice(index, 1);
-            },
+            }
+            ,
             // 新增持仓
             handleCreatePos() {
                 this.resetForm();
@@ -979,7 +1009,8 @@
                 this.$nextTick(() => {
                     this.$refs["positionFormRef"].clearValidate();
                 });
-            },
+            }
+            ,
             createData() {
                 this.$refs["positionFormRef"].validate(valid => {
                     if (valid) {
@@ -1010,7 +1041,8 @@
                             });
                     }
                 });
-            },
+            }
+            ,
             handleUpdate(row) {
                 // this.positionForm = Object.assign({}, row); // copy obj
                 this.positionForm = JSON.parse(JSON.stringify(row));
@@ -1019,7 +1051,8 @@
                 this.$nextTick(() => {
                     this.$refs["positionFormRef"].clearValidate();
                 });
-            },
+            }
+            ,
             updateData() {
                 this.$refs["positionFormRef"].validate(valid => {
                     if (valid) {
@@ -1049,7 +1082,8 @@
                             });
                     }
                 });
-            },
+            }
+            ,
             handleDelete(row, index) {
                 this.$notify({
                     title: "Success",
@@ -1058,7 +1092,8 @@
                     duration: 2000
                 });
                 this.positionList.splice(index, 1);
-            },
+            }
+            ,
 
             processSum() {
                 // 将内盘和外盘 分开计算
@@ -1108,7 +1143,8 @@
                         this.sumObj.marginSum += Math.round(item.total_margin, 0)
                     }
                 }
-            },
+            }
+            ,
             getSummaries(param) {
                 const {columns, data} = param;
                 const sums = [];
@@ -1195,6 +1231,88 @@
 </script>
 <style lang="stylus">
     .position-list-main {
+        //修改element-ui
+        background: #12161c;
+
+        .up-red {
+            color: #D04949
+        }
+
+        .down-green {
+            color: #279D61
+        }
+
+        .zero-gray {
+            color: #606266
+        }
+
+        .primary-color {
+            color: white !important
+        }
+        // element-ui table
+
+        //下拉选项
+
+        .el-select-dropdown {
+            background: #12161c !important
+        }
+
+        .el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
+            background-color: #0B0E11 !important;
+        }
+
+        .el-table--enable-row-hover .el-table__body tr:hover > td {
+            background-color: #0B0E11;
+        }
+
+        //表行间隔色
+
+        .el-table td, .building-top .el-table th.is-leaf {
+            border-bottom: 1px solid #0B0E11;
+        }
+
+        //表头间隔色
+
+        .el-table td, .el-table th.is-leaf {
+            border-bottom: 1px solid #0B0E11;
+        }
+
+        //表尾间隔色
+
+        .el-table--border::after, .el-table--group::after, .el-table::before {
+            border-bottom: 1px solid #0B0E11;
+            background: #0B0E11
+        }
+
+        //折叠行背景
+
+        td.el-table__expanded-cell {
+            background: #0B0E11
+        }
+
+        .el-table__expanded-cell:hover {
+            background: #0B0E11 !important
+        }
+
+        .el-header-cell {
+            background: #12161c;
+            color: #d4d0c6
+        }
+
+        .el-cell {
+            background: #12161c;
+            color: #d4d0c6
+        }
+
+        .el-table__empty-block {
+            background: #0B0E11;
+        }
+
+        .el-table__empty-text {
+            color: white
+        }
+
+
         .form-input {
             width: 200px !important;
         }
@@ -1226,8 +1344,9 @@
         .el-table .success-row {
             background: #f0f9eb;
         }
-        .sum-text{
-            font-size:20px;
+
+        .sum-text {
+            font-size: 20px;
         }
     }
 </style>

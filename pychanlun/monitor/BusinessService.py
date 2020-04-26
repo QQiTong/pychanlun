@@ -374,11 +374,11 @@ class BusinessService:
     def getFutureConfig(self):
         return config['futureConfig']
 
-    def getPosition(self, symbol, period, status):
+    def getPosition(self, symbol, period, status,direction):
         if period == 'all':
-            query = {'symbol': symbol, 'status': status}
+            query = {'symbol': symbol, 'status': status,'direction':direction}
         else:
-            query = {'symbol': symbol, 'period': period, 'status': status}
+            query = {'symbol': symbol, 'period': period, 'status': status,'direction':direction}
         # 当多空双开锁仓的时候，获取最新持仓的那个
         result = DBPyChanlun["future_auto_position"].find(
             query).sort("fire_time", pymongo.ASCENDING)

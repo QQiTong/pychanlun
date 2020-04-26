@@ -159,11 +159,11 @@ export default {
     filters: {
         changeTagFilter(change) {
             if (change > 0) {
-                return 'danger'
+                return 'up-red'
             } else if (change < 0) {
-                return 'primay'
+                return 'down-green'
             } else {
-                return 'info'
+                return 'zero-gray'
             }
         }
     },
@@ -453,9 +453,9 @@ export default {
         },
         customColorMethod(percentage) {
             if (percentage < 50) {
-                return '#409EFF'
+                return '#279D61'
             } else {
-                return '#F56C6C'
+                return '#D04949'
             }
         },
         handleChangeTab(tab, event) {

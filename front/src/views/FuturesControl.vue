@@ -41,7 +41,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="calcAccount">查询</el-button>
+                    <el-button type="primary" @click="calcAccount" class="primary-button">查询</el-button>
                 </el-form-item>
                 <el-form-item label="开仓手数">
                     <el-input v-model="calcPosForm.maxOrderCount" class="form-input " disabled/>
@@ -77,7 +77,7 @@
             :marginLevelCompany="marginLevelCompany"
             :globalFutureSymbol="globalFutureSymbol"
         ></FuturePositionList>
-        <el-divider content-position="center">信号列表 | 多空分布 | 内盘 | 外盘</el-divider>
+        <el-divider content-position="center"> 多空分布</el-divider>
         <el-row>
             <el-col :span="2">
                 内盘涨跌幅：
@@ -130,16 +130,16 @@
                 ></el-progress>
             </el-col>
         </el-row>
-        <el-tabs v-model="activeTab" type="card" @tab-click="handleChangeTab" class="mt-5">
+        <el-tabs v-model="activeTab" @tab-click="handleChangeTab" class="mt-5">
             <el-tab-pane label="最新行情" name="first">
                 <el-row>
                     <div class="current-market">
                         <el-table
-                            v-loading="beichiListLoading"
+                            :v-loading="false"
                             :data="futureSymbolList.filter(data => !symbolSearch || data.order_book_id.toLowerCase().includes(symbolSearch.toLowerCase()))"
                             size="mini"
-                            :stripe="true"
-                            :border="true"
+                            header-cell-class-name="el-header-cell"
+                            cell-class-name="el-cell"
                         >
                             <el-table-column align="left" width="80">
                                 <template slot="header" slot-scope="scope">
@@ -150,7 +150,7 @@
                                 </template>
                                 <template slot-scope="scope">
                                     <el-link
-                                        type="primary"
+                                        class="primary-color"
                                         :underline="false"
                                         @click="jumpToKline(scope.row.order_book_id)"
                                     >{{scope.row.order_book_id}}
@@ -174,23 +174,34 @@
                             </el-table-column>
                             <el-table-column label="涨跌幅" width="90">
                                 <template slot-scope="scope">
-                                    <el-tag
-                                        effect="dark"
-                                        :type="changeList && changeList[scope.row.order_book_id]? changeList[scope.row.order_book_id]['change'] : 0|changeTagFilter"
-                                        v-if="scope.row.order_book_id.indexOf('BTC')===-1"
-                                    >
-                                        {{ ((changeList && changeList[scope.row.order_book_id]?
+                                    <!--                                    <el-tag-->
+                                    <!--                                        effect="dark"-->
+                                    <!--                                        :type="changeList && changeList[scope.row.order_book_id]? changeList[scope.row.order_book_id]['change'] : 0|changeTagFilter"-->
+                                    <!--                                        v-if="scope.row.order_book_id.indexOf('BTC')===-1"-->
+                                    <!--                                    >-->
+                                    <!--                                        {{ ((changeList && changeList[scope.row.order_book_id]?-->
+                                    <!--                                        changeList[scope.row.order_book_id]['change'] : 0) * (1 /( scope.row.margin_rate-->
+                                    <!--                                        +marginLevelCompany)) *100).toFixed(1)}}%-->
+                                    <!--                                    </el-tag>-->
+                                    <!--                                    <el-tag-->
+                                    <!--                                        effect="dark"-->
+                                    <!--                                        :type="btcTicker.change|changeTagFilter"-->
+                                    <!--                                        v-else-->
+                                    <!--                                    >-->
+                                    <!--                                        {{ ((btcTicker.change?btcTicker.change:0) * (1 /scope.row.margin_rate)-->
+                                    <!--                                        *100).toFixed(1)}}%-->
+                                    <!--                                    </el-tag>-->
+
+                                    <span :class="changeList && changeList[scope.row.order_book_id]? changeList[scope.row.order_book_id]['change'] : 0|changeTagFilter"
+                                          v-if="scope.row.order_book_id.indexOf('BTC')===-1">
+                                         {{ ((changeList && changeList[scope.row.order_book_id]?
                                         changeList[scope.row.order_book_id]['change'] : 0) * (1 /( scope.row.margin_rate
                                         +marginLevelCompany)) *100).toFixed(1)}}%
-                                    </el-tag>
-                                    <el-tag
-                                        effect="dark"
-                                        :type="btcTicker.change|changeTagFilter"
-                                        v-else
-                                    >
+                                    </span>
+                                    <span v-else :class="btcTicker.change>0?'up-red':'down-green'">
                                         {{ ((btcTicker.change?btcTicker.change:0) * (1 /scope.row.margin_rate)
                                         *100).toFixed(1)}}%
-                                    </el-tag>
+                                    </span>
                                 </template>
                             </el-table-column>
                             <el-table-column label="最新价" width="70">
@@ -204,7 +215,7 @@
                     </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="多空走势" width="500">
+                            <el-table-column label="多空走势" width="500" align="center">
                                 <template slot-scope="scope">
                                     <!--                                    <el-tag-->
                                     <!--                                        size="medium"-->
@@ -224,13 +235,12 @@
                                     ></el-progress>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="3m">
+                            <el-table-column label="3m" align="center">
                                 <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        :type="beichiList[scope.row.order_book_id]['3m'].indexOf('B')!==-1?'danger':'primary'"
+                                    <span
+                                        :class="beichiList[scope.row.order_book_id]['3m'].indexOf('B')!==-1?'up-red':'down-green'"
                                     >{{ beichiList[scope.row.order_book_id]['3m'] }}
-                                    </el-tag>
+                                    </span>
                                 </template>
                             </el-table-column>
 
@@ -248,13 +258,12 @@
                             <!--                                    </el-tag>-->
                             <!--                                </template>-->
                             <!--                            </el-table-column>-->
-                            <el-table-column label="5m">
+                            <el-table-column label="5m" align="center">
                                 <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        :type="beichiList[scope.row.order_book_id]['5m'].indexOf('B')!==-1?'danger':'primary'"
+                                    <span
+                                        :class="beichiList[scope.row.order_book_id]['5m'].indexOf('B')!==-1?'up-red':'down-green'"
                                     >{{ beichiList[scope.row.order_book_id]['5m'] }}
-                                    </el-tag>
+                                    </span>
                                 </template>
                             </el-table-column>
                             <!--                            <el-table-column label="15F级别" width="70">-->
@@ -271,13 +280,12 @@
                             <!--                                    </el-tag>-->
                             <!--                                </template>-->
                             <!--                            </el-table-column>-->
-                            <el-table-column label="15m">
+                            <el-table-column label="15m" align="center">
                                 <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        :type="beichiList[scope.row.order_book_id]['15m'].indexOf('B')!==-1?'danger':'primary'"
+                                    <span
+                                        :class="beichiList[scope.row.order_book_id]['15m'].indexOf('B')!==-1?'up-red':'down-green'"
                                     >{{ beichiList[scope.row.order_book_id]['15m'] }}
-                                    </el-tag>
+                                    </span>
                                 </template>
                             </el-table-column>
                             <!--                            <el-table-column label="30F级别" width="70">-->
@@ -294,13 +302,12 @@
                             <!--                                    </el-tag>-->
                             <!--                                </template>-->
                             <!--                            </el-table-column>-->
-                            <el-table-column label="30m">
+                            <el-table-column label="30m" align="center">
                                 <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        :type="beichiList[scope.row.order_book_id]['30m'].indexOf('B')!==-1?'danger':'primary'"
+                                    <span
+                                        :class="beichiList[scope.row.order_book_id]['30m'].indexOf('B')!==-1?'up-red':'down-green'"
                                     >{{ beichiList[scope.row.order_book_id]['30m'] }}
-                                    </el-tag>
+                                    </span>
                                 </template>
                             </el-table-column>
                             <!--                            <el-table-column label="60F级别" width="70">-->
@@ -317,13 +324,12 @@
                             <!--                                    </el-tag>-->
                             <!--                                </template>-->
                             <!--                            </el-table-column>-->
-                            <el-table-column label="60m">
+                            <el-table-column label="60m" align="center">
                                 <template slot-scope="scope">
-                                    <el-tag
-                                        size="medium"
-                                        :type="beichiList[scope.row.order_book_id]['60m'].indexOf('B')!==-1?'danger':'primary'"
+                                    <span
+                                        :class="beichiList[scope.row.order_book_id]['60m'].indexOf('B')!==-1?'up-red':'down-green'"
                                     >{{ beichiList[scope.row.order_book_id]['60m'] }}
-                                    </el-tag>
+                                    </span>
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -346,6 +352,7 @@
                         <el-button
                             @click="createOrUpdatePrejudgeList('create')"
                             type="primary"
+                            class="primary-button"
                             size="mini"
                             v-if="prejudgeTableStatus ==='current'"
                             :loading="btnPrejudgeLoading"
@@ -354,6 +361,7 @@
                         <el-button
                             @click="createOrUpdatePrejudgeList('update')"
                             type="danger"
+                            class="primary-button"
                             size="mini"
                             v-if="prejudgeTableStatus ==='history'"
                             :loading="btnPrejudgeLoading"
@@ -364,7 +372,9 @@
                     <div class="current-market mt-5">
                         <div>
                             <!-- 新增 使用主力合约 -->
-                            <el-table :data="prejudgeFormList" v-if="prejudgeTableStatus==='current'">
+                            <el-table :data="prejudgeFormList" v-if="prejudgeTableStatus==='current'"
+                                      header-cell-class-name="el-header-cell"
+                                      cell-class-name="el-cell">
                                 <el-table-column label="品种" width="100">
                                     <template slot-scope="scope">{{scope.row.order_book_id}}</template>
                                 </el-table-column>
@@ -373,6 +383,7 @@
                                     <el-button
                                         @click="createOrUpdatePrejudgeList('create')"
                                         type="primary"
+                                        class="primary-button"
                                         size="mini"
                                         v-if="prejudgeTableStatus ==='current'"
                                         :loading="btnPrejudgeLoading"
@@ -381,6 +392,7 @@
                                     <el-button
                                         @click="createOrUpdatePrejudgeList('update')"
                                         type="danger"
+                                        class="primary-button"
                                         size="mini"
                                         v-if="prejudgeTableStatus ==='history'"
                                         :loading="btnPrejudgeLoading"

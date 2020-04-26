@@ -163,7 +163,8 @@ def get_position():
     symbol = request.args.get("symbol")
     period = request.args.get("period") or "all"
     status = request.args.get("status")
-    singlePosition = businessService.getPosition(symbol, period, status)
+    direction = request.args.get("direction")
+    singlePosition = businessService.getPosition(symbol, period, status,direction)
     return Response(json.dumps(singlePosition), mimetype='application/json')
 
 # 查询期货级别多空方向列表
