@@ -2,6 +2,7 @@ from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.pivot import FindPivots
 import pydash
 
+
 """
 判断idx前面的形态是不是看多完备形态
 """

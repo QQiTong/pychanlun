@@ -25,6 +25,7 @@ from pychanlun.basic.pattern import DualEntangleForBuyLong, DualEntangleForSellS
 import re
 from pychanlun.config import config
 
+
 # 币安的数据结构
 # [
 #     [
@@ -313,10 +314,10 @@ class Calc:
         CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
 
         entanglementList = entanglement.CalcEntanglements(timeList, duanList, biList, highList, lowList)
-        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
-        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
-        v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
-        duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, biList, duanList)
+        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
+        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
+        v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
+        duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
         # 段中枢
         entanglementHigherList = entanglement.CalcEntanglements(timeList, higherDuanList, duanList, highList, lowList)
         huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)

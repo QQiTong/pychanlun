@@ -7,6 +7,8 @@ from pychanlun import series_tool
 from pychanlun.basic.comm import FindPrevEq
 from pychanlun.basic.pattern import PerfectForBuyLong, PerfectForSellShort
 import copy
+from pychanlun.basic.pattern import BuyCategory
+
 
 class Entanglement:
     def __init__(self):
@@ -122,7 +124,7 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
     return e_list
 
 
-def la_hui(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def la_hui(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series, higher_duan_series=None):
     result = {
         'buy_zs_huila': {
             'idx': [],
@@ -224,10 +226,13 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                         result['buy_zs_huila']['tag'].append('完备')
                     else:
                         result['buy_zs_huila']['tag'].append('')
+                    if higher_duan_series is not None:
+                        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, r)
+                        result['buy_zs_huila']['tag'].append(category)
     return result
 
 
-def tu_po(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def tu_po(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series, higher_duan_series=None):
     result = {
         'buy_zs_tupo': {
             'idx': [],
@@ -266,6 +271,9 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                     result['buy_zs_tupo']['tag'].append('完备')
                 else:
                     result['buy_zs_tupo']['tag'].append('')
+                if higher_duan_series is not None:
+                    category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, r)
+                    result['buy_zs_tupo']['tag'].append(category)
         if e.direction == -1:
             r = -1
             for x in range(e.end+1, len(low_series)):
@@ -285,7 +293,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                     result['sell_zs_tupo']['tag'].append('')
     return result
 
-def v_reverse(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def v_reverse(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series, higher_duan_series=None):
     result = {
         'buy_v_reverse': {
             'idx': [],
@@ -363,12 +371,15 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                                     result['buy_v_reverse']['tag'].append('完备')
                                 else:
                                     result['buy_v_reverse']['tag'].append('')
+                                if higher_duan_series is not None:
+                                    category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, k)
+                                    result['buy_v_reverse']['tag'].append(category)
                             break
 
     return result
 
 
-def po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series, higher_duan_series=None):
     result = {
         'buy_duan_break': {
             'idx': [],
@@ -431,5 +442,8 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                             result['buy_duan_break']['tag'].append('完备')
                         else:
                             result['buy_duan_break']['tag'].append('')
+                        if higher_duan_series is not None:
+                            category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, k)
+                            result['buy_duan_break']['tag'].append(category)
                         break
     return result

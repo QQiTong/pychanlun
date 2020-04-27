@@ -186,14 +186,18 @@ class BusinessService:
             item = combinSymbol[i]
             # 查日线开盘价
             code = "%s_%s" % (item, '1d')
-            data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
-            ).sort("_id", pymongo.DESCENDING)
+            data_list = list(DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+            ).sort("_id", pymongo.DESCENDING))
+            if len(data_list) == 0:
+                continue
             dayOpenPrice = data_list[0]['open']
             code = "%s_%s" % (item, '5m')
 
             # 差5分钟收盘价
-            data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
-            ).sort("_id", pymongo.DESCENDING)
+            data_list = list(DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+            ).sort("_id", pymongo.DESCENDING))
+            if len(data_list) == 0:
+                continue
             minClosePrice = data_list[0]['open']
 
             change = round((minClosePrice - dayOpenPrice) / dayOpenPrice, 4)
