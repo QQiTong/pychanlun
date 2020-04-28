@@ -4,18 +4,18 @@
             <el-button type="primary" @click="jumpToControl('futures')" size="mini" class="primary-button">期货总控</el-button>
             <el-button type="danger" @click="jumpToControl('stock')" size="mini" class="primary-button">股票总控</el-button>
             <el-date-picker
-                v-model="endDate"
+                v-model="endDate_"
                 type="date"
                 placeholder="选择日期"
                 format="yyyy 年 MM 月 dd 日"
                 value-format="yyyy-MM-dd"
                 size="mini"
-                @change="submitSymbol"
+                @change="changeDate"
                 class="ml-5 mr-5">
             </el-date-picker>
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('pre')" size="mini">前一天</el-button>
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('next')" size="mini">后一天</el-button>
-            <el-input v-model="inputedSymbol" placeholder="请输入股票代码" size="mini" class="stock-input ml-5 mr-5" @change="submitSymbol"/>
+            <el-input v-model="inputSymbol_" placeholder="请输入代码" size="mini" class="stock-input ml-5 mr-5" @change="submitSymbol"/>
             <el-button type="primary" class="primary-button" v-for="period in periodList" :key="period" size="mini" @click="switchPeriod(period)"
                        v-if="showPeriodList">{{period}}
             </el-button>
@@ -34,7 +34,8 @@
         name: "KlineHeader",
         data() {
             return {
-                inputedSymbol: this.inputedSymbol
+                inputSymbol_: this.inputSymbol,
+                endDate_: this.endDate
             }
         },
         props: {
@@ -42,53 +43,57 @@
                 type: Boolean,
                 default:
                     false
-            }
-            ,
+            },
             quickCalc: {
                 type: Object,
                 default:
                     null
-            }
-            ,
+            },
             submitSymbol: {
                 type: Function,
                 default:
                     null
-            }
-            ,
+            },
             quickCalcMaxCount: {
                 type: Function,
                 default:
                     null
-            }
-            ,
+            },
             quickSwitchDay: {
                 type: Function,
                 default:
                     null
-            }
-            ,
+            },
             switchPeriod: {
                 type: Function,
                 default:
                     null
-            }
-            ,
+            },
             jumpToControl: {
                 type: Function,
                 default:
                     null
-            }
-            ,
+            },
+
+            changeDate: {
+                type: Function,
+                default:
+                    null
+            },
             periodList: {
                 type: Array,
                 default:
                     []
-            }
-            ,
+            },
+
             inputSymbol: "",
-            endDate:
-                ""
+            endDate: ""
+
+        },
+        methods:{
+            setELDatePicker(endDate){
+                this.endDate_ = endDate
+            }
         }
     }
 </script>

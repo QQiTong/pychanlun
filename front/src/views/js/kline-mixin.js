@@ -259,6 +259,7 @@ export default {
                 this.endDate = CommonTool.parseTime(nextDay, '{y}-{m}-{d}')
             }
             this.submitSymbol(this.symbol)
+            this.$refs.klineHeader.setELDatePicker(this.endDate)
         },
         getFutruePosition() {
             // let period = 'all'
@@ -429,6 +430,11 @@ export default {
             } else {
                 this.$router.replace('/stock-control')
             }
+        },
+        changeDate(val) {
+            this.endDate = val
+
+            this.submitSymbol(this.symbol)
         },
         submitSymbol(val) {
             this.inputSymbol = val
@@ -1916,54 +1922,54 @@ export default {
                 huilaValues.push(value)
             }
             // 大级别线段破坏
-            for (let i = 0; i < jsonObj.buy_duan_break_higher.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.buy_duan_break_higher.date[i], jsonObj.buy_duan_break_higher.data[i]],
-                    value: jsonObj.buy_duan_break_higher.data[i],
-                    symbolRotate: 0,
-                    symbolSize: 10,
-                    symbol: 'circle',
-                    symbolOffset: [0, '0%'],
-                    itemStyle: {
-                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
-                    },
-                    label: {
-                        // position: ['-50%','50%'],
-                        position: 'inside',
-                        offset: [0, 5],
-                        textBorderColor: 'red',
-                        textBorderWidth: 3,
-                        color: 'white',
-                        // borderColor: 'blue',
-                        // borderWidth: 1,
-                    },
-                }
-                huilaValues.push(value)
-            }
-            for (let i = 0; i < jsonObj.sell_duan_break_higher.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.sell_duan_break_higher.date[i], jsonObj.sell_duan_break_higher.data[i]],
-                    value: jsonObj.sell_duan_break_higher.data[i],
-                    symbolRotate: 180,
-                    symbolSize: 10,
-                    symbol: 'circle',
-                    symbolOffset: [0, '0%'],
-                    itemStyle: {
-                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
-                    },
-                    label: {
-                        // position: ['-50%','50%'],
-                        position: 'inside',
-                        offset: [0, 5],
-                        textBorderColor: 'red',
-                        textBorderWidth: 3,
-                        color: 'white',
-                        // borderColor: 'blue',
-                        // borderWidth: 1,
-                    },
-                }
-                huilaValues.push(value)
-            }
+            // for (let i = 0; i < jsonObj.buy_duan_break_higher.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.buy_duan_break_higher.date[i], jsonObj.buy_duan_break_higher.data[i]],
+            //         value: jsonObj.buy_duan_break_higher.data[i],
+            //         symbolRotate: 0,
+            //         symbolSize: 10,
+            //         symbol: 'circle',
+            //         symbolOffset: [0, '0%'],
+            //         itemStyle: {
+            //             normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
+            //         },
+            //         label: {
+            //             // position: ['-50%','50%'],
+            //             position: 'inside',
+            //             offset: [0, 5],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 3,
+            //             color: 'white',
+            //             // borderColor: 'blue',
+            //             // borderWidth: 1,
+            //         },
+            //     }
+            //     huilaValues.push(value)
+            // }
+            // for (let i = 0; i < jsonObj.sell_duan_break_higher.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.sell_duan_break_higher.date[i], jsonObj.sell_duan_break_higher.data[i]],
+            //         value: jsonObj.sell_duan_break_higher.data[i],
+            //         symbolRotate: 180,
+            //         symbolSize: 10,
+            //         symbol: 'circle',
+            //         symbolOffset: [0, '0%'],
+            //         itemStyle: {
+            //             normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
+            //         },
+            //         label: {
+            //             // position: ['-50%','50%'],
+            //             position: 'inside',
+            //             offset: [0, 5],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 3,
+            //             color: 'white',
+            //             // borderColor: 'blue',
+            //             // borderWidth: 1,
+            //         },
+            //     }
+            //     huilaValues.push(value)
+            // }
             let markLineData
             if (this.isPosition === 'true') {
                 markLineData = this.getPositionMarklineData(jsonObj)
@@ -2066,15 +2072,15 @@ export default {
                     case 5:
                         lastBeichi = jsonObj.buy_duan_break
                         break
-                    case 6:
-                        lastBeichi = jsonObj.buy_duan_break_higher
-                        break
+                    // case 6:
+                    //     lastBeichi = jsonObj.buy_duan_break_higher
+                    //     break
                     case 7:
                         lastBeichi = jsonObj.sell_duan_break
                         break
-                    case 8:
-                        lastBeichi = jsonObj.sell_duan_break_higher
-                        break
+                    // case 8:
+                    //     lastBeichi = jsonObj.sell_duan_break_higher
+                    //     break
                     // 突破
                     case 9:
                         lastBeichi = jsonObj.buy_zs_tupo
@@ -2696,9 +2702,9 @@ export default {
             let sell_zs_huila_higher = jsonObj.sell_zs_huila_higher
             // 线段破坏
             let buy_duan_break = jsonObj.buy_duan_break
-            let buy_duan_break_higher = jsonObj.buy_duan_break_higher
+            // let buy_duan_break_higher = jsonObj.buy_duan_break_higher
             let sell_duan_break = jsonObj.sell_duan_break
-            let sell_duan_break_higher = jsonObj.sell_duan_break_higher
+            // let sell_duan_break_higher = jsonObj.sell_duan_break_higher
 
             // 突破
             let buy_zs_tupo = jsonObj.buy_zs_tupo
@@ -2768,18 +2774,18 @@ export default {
                 buyTimeStr = buy_duan_break.date[buy_duan_break.date.length - 1]
                 buy_duan_break_stamp = this.timeStrToStamp(buyTimeStr)
             }
-            if (buy_duan_break_higher.date.length > 0) {
-                higherBuyTimeStr = buy_duan_break_higher.date[buy_duan_break_higher.date.length - 1]
-                buy_duan_break_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
-            }
+            // if (buy_duan_break_higher.date.length > 0) {
+            //     higherBuyTimeStr = buy_duan_break_higher.date[buy_duan_break_higher.date.length - 1]
+            //     buy_duan_break_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
+            // }
             if (sell_duan_break.date.length > 0) {
                 sellTimeStr = sell_duan_break.date[sell_duan_break.date.length - 1]
                 sell_duan_break_stamp = this.timeStrToStamp(sellTimeStr)
             }
-            if (sell_duan_break_higher.date.length > 0) {
-                higherSellTimeStr = sell_duan_break_higher.date[sell_duan_break_higher.date.length - 1]
-                sell_duan_break_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
-            }
+            // if (sell_duan_break_higher.date.length > 0) {
+            //     higherSellTimeStr = sell_duan_break_higher.date[sell_duan_break_higher.date.length - 1]
+            //     sell_duan_break_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
+            // }
             // 突破
             if (buy_zs_tupo.date.length > 0) {
                 buyTimeStr = buy_zs_tupo.date[buy_zs_tupo.date.length - 1]
@@ -2834,9 +2840,9 @@ export default {
             if (sell_zs_tupo_stamp === sell_duan_break_stamp) {
                 sell_duan_break_stamp = 0
             }
-            if (sell_zs_tupo_higher_stamp === sell_duan_break_higher_stamp) {
-                sell_duan_break_higher_stamp = 0
-            }
+            // if (sell_zs_tupo_higher_stamp === sell_duan_break_higher_stamp) {
+            //     sell_duan_break_higher_stamp = 0
+            // }
 
             let timeArray = [buy_zs_huila_stamp, buy_zs_huila_higher_stamp, sell_zs_huila_Stamp, sell_zs_huila_higher_stamp,
                 buy_duan_break_stamp, buy_duan_break_higher_stamp, sell_duan_break_stamp, sell_duan_break_higher_stamp,
