@@ -1,7 +1,9 @@
 <template>
     <div class="multi-period-main">
         <KlineHeader :periodList="periodList" :endDate="endDate" :inputSymbol="inputSymbol" :quickCalc="quickCalc"
-        :submitSymbol="submitSymbol" :quickCalcMaxCount="quickCalcMaxCount" :quickSwitchDay="quickSwitchDay" :jumpToControl="jumpToControl" :showPeriodList="false"></KlineHeader>
+                     :submitSymbol="submitSymbol" :quickCalcMaxCount="quickCalcMaxCount" :quickSwitchDay="quickSwitchDay"
+                     :switchPeriod="switchPeriod" :jumpToControl="jumpToControl" :showPeriodList="false"
+        ></KlineHeader>
         <div class="echarts-list">
             <div class="echarts-item" id="main3Parent">
                 <div id="main3" class="echarts">

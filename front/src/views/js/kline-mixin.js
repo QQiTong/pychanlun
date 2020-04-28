@@ -258,7 +258,7 @@ export default {
             } else {
                 this.endDate = CommonTool.parseTime(nextDay, '{y}-{m}-{d}')
             }
-            this.submitSymbol()
+            this.submitSymbol(this.symbol)
         },
         getFutruePosition() {
             // let period = 'all'
@@ -430,8 +430,9 @@ export default {
                 this.$router.replace('/stock-control')
             }
         },
-        submitSymbol() {
-            if (this.inputSymbol !== '') {
+        submitSymbol(val) {
+            this.inputSymbol = val
+            if (val !== '') {
                 this.symbol = this.inputSymbol.indexOf('sz') === -1 && this.inputSymbol.indexOf('sh') ? this.inputSymbol.toUpperCase() : this.inputSymbol
             } else {
                 alert('请输入品种')

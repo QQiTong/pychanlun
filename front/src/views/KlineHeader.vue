@@ -15,7 +15,7 @@
             </el-date-picker>
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('pre')" size="mini">前一天</el-button>
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('next')" size="mini">后一天</el-button>
-            <el-input v-model="inputSymbol" placeholder="请输入股票代码" size="mini" class="stock-input ml-5 mr-5" @change="submitSymbol"/>
+            <el-input v-model="inputedSymbol" placeholder="请输入股票代码" size="mini" class="stock-input ml-5 mr-5" @change="submitSymbol"/>
             <el-button type="primary" class="primary-button" v-for="period in periodList" :key="period" size="mini" @click="switchPeriod(period)"
                        v-if="showPeriodList">{{period}}
             </el-button>
@@ -32,41 +32,63 @@
 <script>
     export default {
         name: "KlineHeader",
+        data() {
+            return {
+                inputedSymbol: this.inputedSymbol
+            }
+        },
         props: {
             showPeriodList: {
                 type: Boolean,
-                default: false
-            },
+                default:
+                    false
+            }
+            ,
             quickCalc: {
                 type: Object,
-                default: null
-            },
+                default:
+                    null
+            }
+            ,
             submitSymbol: {
                 type: Function,
-                default: null
-            },
+                default:
+                    null
+            }
+            ,
             quickCalcMaxCount: {
                 type: Function,
-                default: null
-            },
+                default:
+                    null
+            }
+            ,
             quickSwitchDay: {
                 type: Function,
-                default: null
-            },
+                default:
+                    null
+            }
+            ,
             switchPeriod: {
                 type: Function,
-                default: null
-            },
+                default:
+                    null
+            }
+            ,
             jumpToControl: {
                 type: Function,
-                default: null
-            },
+                default:
+                    null
+            }
+            ,
             periodList: {
                 type: Array,
-                default: []
-            },
+                default:
+                    []
+            }
+            ,
             inputSymbol: "",
-            endDate: ""
+            endDate:
+                ""
         }
     }
 </script>
