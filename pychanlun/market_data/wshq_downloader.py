@@ -24,13 +24,29 @@ tz = pytz.timezone('Asia/Shanghai')
 """
 python pychanlun\market_data\global_futures.py
 """
-
 '''
 微盛投资
 http://www.wstock.net/
-实时API接口是按次数、市场收费的，这些品种分属我方WG市场(新加坡富时A50指数）CE市场 (道琼斯指数 标准普尔指数 纳斯达克指数 )、
-CM市场(纽约金 纽约银)、NE市场(美原油)、CO市场(美大豆、美豆油)，PM市场（伦敦镍）总共6个市场，每日1万次月费1980元/月；每日10万次月费3080元/月；
-每日100万次月费4680元/月；每日500万次月费6480元/月。
+实时API接口是按次数、市场收费的，这些品种分属我方
+WG市场(新加坡富时A50指数）
+CE市场 (道琼斯指数 标准普尔指数 纳斯达克指数 )、
+CM市场(纽约金 纽约银)、
+NE市场(美原油)、
+CO市场(美大豆、美豆油)，
+LE市场（伦敦镍）总共6个市场，
+每日1万次     1980元/月 频率1000ms
+每日10万次    3080元/月 频率500ms
+不限次数      3880元/月 频率300ms
+每日100万次   4680元/月 不限频率     
+每日500万次   6480元/月 不限频率     
+每日1000万次   7980元/月 不限频率     
+
+6个市场 1980元/月 1万次调用   23,760‬‬ /年   年付 8.5折  20,196‬/年
+5个市场 1780元/月 1万次调用   21,360‬ /年   年付 8.5折  18,156‬‬/年
+4个市场 1580元/月 1万次调用   18,960‬ /年   年付 8.5折  16,116‬‬/年
+2个市场 1180元/月 1万次调用   14,160 /年   年付 8.5折  12,036‬‬/年
+
+新浪虽然免费，但是没有3分钟和股指期货的数据
 
 请求参数：
 num：        指定返回记录数目
@@ -61,11 +77,17 @@ Volume  当日总成交量
 美黄金主力: CMGCA0
 美白银主力: CMSIA0
 
+
+美豆油连续：COZLA0
+美豆粕连续：COZMA0
+美大豆连续：COZSA0
+
+美棉花连续：IECTA0
+
 伦镍     : LENID3M
 '''
 dingMsg = DingMsg()
 
-# futures = config['global_future_symbol_origin']
 # 转化成简称入库
 global_future_alias = config['global_future_alias']
 global_future_symbol = config['global_future_symbol']
@@ -76,16 +98,25 @@ is_run = True
 
 
 def fetch_futures_mink():
+    count = 0
     while is_run:
         try:
             for code in futures:
+                # 1 ,3 ,5 ,15 ,30 ,60 ,240
+                qt_type = 1
+                # 0：日线 ,3： 分钟线
+                return_t = 3
                 # 取分钟数据
-                url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=5000&symbol=%s&desc=1&q_type=0&return_t=3&qt_type=1&r_type=2&u=u2368&p=abc1818" % code
-                print(url)
+                url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=5000&symbol=%s&desc=1&q_type=0&return_t=%s&qt_type=%s&r_type=2&u=u2368&p=abc1818" % (code,return_t,qt_type)
+
+                count = count +1
+                print(url, "调用次数:",count)
                 resp = requests.get(url, timeout=10)
                 df1m = pd.DataFrame(json.loads(resp.text))
                 df1m = df1m.sort_values(by="Date", ascending=True)
                 df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
+                # 刷日线的时候解开这个注释
+                # df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
                 df1m.set_index('Date', inplace=True)
                 code = global_future_alias[code]
 
@@ -126,7 +157,7 @@ def fetch_futures_mink():
                 if not is_run:
                     break
 
-            time.sleep(100)
+            time.sleep(10)
         except Exception as e:
             print("外盘期货采集出错", Exception, e)
             # dingMsg.send("remind外盘期货采集出错")

@@ -412,7 +412,9 @@
                                 </el-table-column>
                             </el-table>
                             <!-- 更新 不一定是主力合约-->
-                            <el-table :data="historyPrejudgeList" v-if="prejudgeTableStatus==='history'">
+                            <el-table :data="historyPrejudgeList" v-if="prejudgeTableStatus==='history'"
+                                      header-cell-class-name="el-header-cell"
+                                      cell-class-name="el-cell">
                                 <el-table-column label="历史品种" width="100">
                                     <template slot-scope="scope">{{scope.row}}</template>
                                 </el-table-column>
@@ -420,6 +422,7 @@
                                     <el-button
                                         @click="createOrUpdatePrejudgeList('create')"
                                         type="primary"
+                                        class="primary-button"
                                         size="mini"
                                         v-if="prejudgeTableStatus ==='current'"
                                         :loading="btnPrejudgeLoading"
@@ -428,6 +431,7 @@
                                     <el-button
                                         @click="createOrUpdatePrejudgeList('update')"
                                         type="danger"
+                                        class="primary-button"
                                         size="mini"
                                         v-if="prejudgeTableStatus ==='history'"
                                         :loading="btnPrejudgeLoading"

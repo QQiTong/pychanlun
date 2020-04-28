@@ -143,7 +143,7 @@ def fetch_futures_mink():
         try:
             # 取分钟数据
             url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + \
-                  pwd + "&id=" + ",".join(futures) + "&period=1&num=-200"
+                  pwd + "&id=" + ",".join(futures) + "&period=1&num=-200srcIndex=3"
             print(url)
             resp = requests.get(url,timeout=20)
             content = resp.text
@@ -220,8 +220,8 @@ def fetch_futures_mink():
                 save_data_m(code, '3d', df3d)
             if not is_run:
                 break
-        except Exception:
-            print("外盘期货采集出错", Exception)
+        except Exception as e:
+            print("外盘期货采集出错", Exception,e)
             # dingMsg.send("remind外盘期货采集出错")
         time.sleep(20)
 
@@ -259,7 +259,7 @@ def signal_hanlder(signalnum, frame):
 def run(**kwargs):
     signal.signal(signal.SIGINT, signal_hanlder)
     thread_list = []
-    thread_list.append(threading.Thread(target=fetch_stocks_mink))
+    # thread_list.append(threading.Thread(target=fetch_stocks_mink))
     thread_list.append(threading.Thread(target=fetch_futures_mink))
     for thread in thread_list:
         thread.start()

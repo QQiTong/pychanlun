@@ -2,6 +2,7 @@
 import {futureApi} from '@/api/futureApi'
 import {stockApi} from '@/api/stockApi'
 import CommonTool from '@/tool/CommonTool'
+import KlineHeader from "../KlineHeader"
 // import 'echarts/lib/chart/candlestick'
 // import 'echarts/lib/chart/line'
 // import 'echarts/lib/chart/bar'
@@ -16,8 +17,12 @@ import CommonTool from '@/tool/CommonTool'
 // import { Button, Select } from 'element-ui'
 
 export default {
+    components: {
+        'KlineHeader': KlineHeader
+    },
     data() {
         return {
+            showPeriodList: false,
             // 防重复请求
             requestFlag: true,
             // 控制加载动画是否第一次请求

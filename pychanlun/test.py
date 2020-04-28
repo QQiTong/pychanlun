@@ -33,7 +33,7 @@ import pytz
 import string
 import hashlib
 from futu import *
-
+from WindPy import w
 tz = pytz.timezone('Asia/Shanghai')
 
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
@@ -340,7 +340,7 @@ def testRQ():
     # print(df.iloc[0, 3])
     end = datetime.now() + timedelta(1)
     start = datetime.now() + timedelta(-1)
-    df1d = rq.get_price('SR2009', frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
+    df1d = rq.get_price('PG2011', frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
                         )
     print(df1d)
     # print(df1d.iloc[0,0])
@@ -736,44 +736,6 @@ def testFutu():
     quote_ctx.close()
 
 
-'''
-微盛投资
-http://www.wstock.net/
-实时API接口是按次数、市场收费的，这些品种分属我方IXIX市场(新加坡富时A50指数  道琼斯指数 标准普尔指数 纳斯达克指数 )、
-CM市场(纽约金 纽约银)、NE市场(美原油)、CO市场(美大豆、美豆油)，总共4个市场，每日1万次月费980元/月；每日10万次月费2480元/月；
-每日100万次月费3880元/月；每日500万次月费5480元/月。
-
-请求参数：
-num：        指定返回记录数目
-symbol：     品种名称
-desc：       1为倒序（递减），默认值为0表示递增
-q_type:     指定排序方式，0代表以Date排序，1代表以Volume排序，2代表以Amount排序，3代表以Symbol排序(默认值为3)
-return_t:   返回指定K线类型，0为日线，1为月线，2为周线，3为分钟线，4为季线，5为年线 (默认值0)
-qt_type:    指定分钟线类型，例如qt_type=1 则返回1分钟数据，qt_type=3则返回3分钟数据，以此类推(默认值为1)。需在return_t=3的情况下使用
-
-返回参数：
-symbol 	股票代码
-Name    股票名字
-Date    交易时间
-Open    开盘价
-High    最高价
-Low     最低价
-Close   收盘价
-Volume  当日总成交量
-
-小道琼连续: CEYMA0
-小标普连续: CEESA0
-小纳指连续: CENQA0
-
-富时A50:   WGCNA0
-
-原油连续：  NECLA0
-
-美黄金主力: CMGCA0
-美白银主力: CMSIA0
-
-伦镍     : LENID3M
-'''
 ohlc_dict = {'开盘价': 'first', '最高价': 'max', '最低价': 'min', '收盘价': 'last', '成交量': 'sum'}
 # 8个品种 4个市场  'LENID3M' 伦镍暂时没接 ，要接又多了一个市场
 futures = ['CEYMA0', 'CEESA0', 'CENQA0', 'WGCNA0', 'NECLA0', 'CMGCA0', 'CMSIA0']
@@ -781,7 +743,7 @@ futures = ['CEYMA0', 'CEESA0', 'CENQA0', 'WGCNA0', 'NECLA0', 'CMGCA0', 'CMSIA0']
 
 def testWStock():
     startTime = int(round(time.time() * 1000))
-    url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=5000&symbol=WGCNA0&desc=1&q_type=0&return_t=3&qt_type=1&r_type=2&u=u2368&p=abc1818"
+    url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=5000&symbol=NECLA0&desc=1&q_type=0&return_t=3&qt_type=1&r_type=2&u=u2368&p=abc1818"
     resp = requests.get(url)
     print("==>", resp.text)
     df = pd.DataFrame(json.loads(resp.text))
@@ -855,6 +817,19 @@ def testMongoArr():
         }
     }, upsert=True)
 
+# wind 外盘不提供分钟线数据
+def testWind():
+    w.start()
+    startTime = int(round(time.time() * 1000))
+    # 取IF00.CFE的分钟数据
+    codes="IF00.CFE"
+    fields="open,high,low,close"
+    error,wsd_data=w.wsd(codes, "open,high,low,close", "2015-12-10", "2015-12-22", "Fill=Previous", usedf=True)
+    print(error,wsd_data)
+    endTime = int(round(time.time() * 1000)) - startTime
+    print("消耗时间：", endTime)
+
+
 
 def app():
     # testBitmex()
@@ -879,8 +854,9 @@ def app():
     # testGroupBy()
     # testMeigu()
     # testFutu()
-    # testWStock()
-    testMongoArr()
+    testWStock()
+    # testMongoArr()
+    # testWind()
 
 
 if __name__ == '__main__':
