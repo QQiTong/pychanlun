@@ -802,23 +802,23 @@ def monitorDuanBreak(result, symbol, period, closePrice):
                 futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
                 saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
     # 监控高级别线段破坏
-    if len(result['buy_duan_break_higher']['date']) > 0:
-        fire_time = result['buy_duan_break_higher']['date'][-1]
-        price = result['buy_duan_break_higher']['data'][-1]
-        stop_lose_price = result['buy_duan_break_higher']['stop_lose_price'][-1]
-        remark = ''
-        direction = 'HB'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+    # if len(result['buy_duan_break_higher']['date']) > 0:
+    #     fire_time = result['buy_duan_break_higher']['date'][-1]
+    #     price = result['buy_duan_break_higher']['data'][-1]
+    #     stop_lose_price = result['buy_duan_break_higher']['stop_lose_price'][-1]
+    #     remark = ''
+    #     direction = 'HB'
+    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
 
-    if len(result['sell_duan_break_higher']['date']) > 0:
-        fire_time = result['sell_duan_break_higher']['date'][-1]
-        price = result['sell_duan_break_higher']['data'][-1]
-        stop_lose_price = result['sell_duan_break_higher']['stop_lose_price'][-1]
-        remark = ''
-        direction = 'HS'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+    # if len(result['sell_duan_break_higher']['date']) > 0:
+    #     fire_time = result['sell_duan_break_higher']['date'][-1]
+    #     price = result['sell_duan_break_higher']['data'][-1]
+    #     stop_lose_price = result['sell_duan_break_higher']['stop_lose_price'][-1]
+    #     remark = ''
+    #     direction = 'HS'
+    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
