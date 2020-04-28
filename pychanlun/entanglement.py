@@ -27,7 +27,6 @@ class Entanglement:
 
 
 def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_serial):
-    time_serial, duan_serial, bi_serial, high_serial, low_serial = fit_series(time_serial, duan_serial, bi_serial, high_serial, low_serial)
     count = len(time_serial)
     e_list = []
     for i in range(count):
