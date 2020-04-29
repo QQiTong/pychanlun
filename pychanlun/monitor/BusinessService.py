@@ -433,11 +433,14 @@ class BusinessService:
         if status == 'all':
             result = collection.find({'date_created': {"$gte": start_date, "$lte": end}}).skip(
                 (page - 1) * size).limit(size).sort("fire_time", pymongo.DESCENDING)
-            total = result.count()
+        # 有的单子需要长线拿住，因此持仓单不限制时间
+        elif status == 'holding':
+            result = collection.find({'status': status}).skip(
+                (page - 1) * size).limit(size).sort("fire_time", pymongo.DESCENDING)
         else:
             result = collection.find({'status': status, 'date_created': {"$gte": start_date, "$lte": end}}).skip(
                 (page - 1) * size).limit(size).sort("fire_time", pymongo.DESCENDING)
-            total = result.count()
+        total = result.count()
         for x in result:
             x['_id'] = str(x['_id'])
             x['fire_time'] = self.formatTime(x['fire_time'])

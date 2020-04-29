@@ -218,6 +218,7 @@ export default {
             const today = new Date();
             this.endDate = CommonTool.parseTime(today.getTime(), '{y}-{m}-{d}')
         }
+        this.$refs.klineHeader.setELDatePicker(this.endDate)
 
         if (this.isPosition === 'true') {
             this.positionPeriod = this.getParams('positionPeriod')
