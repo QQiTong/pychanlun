@@ -68,13 +68,13 @@ dingMsg = DingMsg()
 
 # 改成钉钉发送
 def sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price, date_created_str,
-              close_price, remark):
+              close_price, tag):
     print(msg)
     # mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
 
     # url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s" \
     #       "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s" \
-    #       % (signal, remark, symbol + '_' + period, signal, direction,
+    #       % (signal, tag, symbol + '_' + period, signal, direction,
     #          '开:' + str(close_price) + ' 止:' + str(stop_lose_price) + ' 触:' + str(price), amount,
     #          '开:' + fire_time_str + ' 触:' + date_created_str)
     # requests.post(url)
@@ -87,7 +87,7 @@ def sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, f
 
 
 # price 信号触发的价格， close_price 提醒时的收盘价 direction 多B 空S amount 开仓数量
-def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
+def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                      stop_lose_price, futureCalcObj):
     #  后面的存储的数据依赖 futureCalcObj
     if futureCalcObj == -1:
@@ -97,7 +97,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
     perOrderStopRate = futureCalcObj['perOrderStopRate']
 
     # 更新,实时更新持仓品种的价格
-    saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
+    saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                            stop_lose_price, futureCalcObj, False)
     amount = futureCalcObj['maxOrderCount']
     temp_fire_time = datetime.strptime(fire_time_str, "%Y-%m-%d %H:%M")
@@ -117,7 +117,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
         }, {
             '$set': {
                 'signal': signal,
-                'remark': remark,
+                'tag': tag,
                 'price': price,
                 'close_price': close_price,
                 'amount': amount,
@@ -135,7 +135,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             'period': period,
             'signal': signal,
             'amount': amount,
-            'remark': remark,
+            'tag': tag,
             'fire_time': fire_time,  # 信号发生的时间
             'price': price,
             'date_created': date_created,  # 记录插入的时间
@@ -147,7 +147,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
         })
         if abs((date_created - fire_time).total_seconds()) < 60 * 3 and perOrderStopRate < 0.30:
             # 新增
-            remind = saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
+            remind = saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                             stop_lose_price, futureCalcObj, True)
             if not remind:
                 return
@@ -166,7 +166,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
                 "price": price,
                 "date_created": date_created_str,
                 "close_price": close_price,
-                "remark": remark,
+                "tag": tag,
                 "per_order_stop_rate": round(perOrderStopRate, 3),
                 "remind": 'Ding'
             }
@@ -175,14 +175,14 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, remark, p
             #     symbol, period, signal, direction + ' ', " [amount]: " + str(amount),
             #     " [stop]: " + str(stop_lose_price), " [fire]: " + fire_time_str, " [price]: " + str(price),
             #     " [create]: " + date_created_str,
-            #     str(close_price), remark)
+            #     str(close_price), tag)
             sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price,
                       date_created_str,
-                      close_price, remark)
+                      close_price, tag)
 
 
 # 自动录入持仓列表  新增 status(holding,winEnd,loseEnd 状态) profit(盈利) profit_rate(盈利率)
-def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, remark, price, close_price,
+def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                            stop_lose_price, futureCalcObj, insert):
     # CT 老虎无法交易，ZM 成交量太小
     if symbol == 'CT' or symbol == 'ZM' or symbol == 'CP' or symbol == 'NID':
@@ -281,13 +281,14 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, rem
                 }, upsert=True)
         else:
             # 动止信号 不作为新的记录插入持仓表
-            if signal != 'fractal':
+            # 线段破坏 不作为新的记录插入持仓表
+            if signal != 'fractal' and signal != 'break':
                 DBPyChanlun['future_auto_position'].insert_one({
                     'symbol': symbol,
                     'period': period,
                     'signal': signal,
                     'amount': futureCalcObj['maxOrderCount'],
-                    'remark': remark,
+                    'tag': tag,
                     'fire_time': fire_time,  # 信号发生的时间
                     'price': price,
                     'date_created': date_created,  # 记录插入的时间
@@ -475,6 +476,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                     monitorHuila(result, symbol, period, close_price)
                     monitorTupo(result, symbol, period, close_price)
                     monitorVfan(result, symbol, period, close_price)
+                    # 取消线段破坏监控
                     monitorDuanBreak(result, symbol, period, close_price)
                     monitorFractal(result, symbol, period, close_price)
             if type == "1" or type == "3":
@@ -512,41 +514,41 @@ def monitorBeichi(result, symbol, period, closePrice):
         #    return
         fire_time = result['buyMACDBCData']['date'][-1]
         price = result['buyMACDBCData']['data'][-1]
-        # remark = result['buyMACDBCData']['tag'][-1]
-        remark = ""
+        # tag = result['buyMACDBCData']['tag'][-1]
+        tag = ""
         stop_lose_price = result['buyMACDBCData']['stop_lose_price'][-1]
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sellMACDBCData']['date']) > 0:
         # if not notHigher:
         #    return
         fire_time = result['sellMACDBCData']['date'][-1]
         price = result['sellMACDBCData']['data'][-1]
-        # remark = result['sellMACDBCData']['tag'][-1]
-        remark = ""
+        # tag = result['sellMACDBCData']['tag'][-1]
+        tag = ""
         stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     # 监控高级别背驰
     # if len(result['buy_zs_huila_higher']['date']) > 0:
     #     fire_time = result['buy_zs_huila_higher']['date'][-1]
     #     price = result['buy_zs_huila_higher']['data'][-1]
-    #     remark = result['buy_zs_huila_higher']['tag'][-1]
+    #     tag = result['buy_zs_huila_higher']['tag'][-1]
     #     stop_lose_price = result['buy_zs_huila_higher']['stop_lose_price'][-1]
     #     direction = 'HB'
     #     maxOrderCount,perOrderStopMoney,perOrderStopRate = calMaxOrderCount(symbol, price, stop_lose_price, period,signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount,
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, maxOrderCount,
     #                      stop_lose_price)
     # if len(result['sell_zs_huila_higher']['date']) > 0:
     #     fire_time = result['sell_zs_huila_higher']['date'][-1]
     #     price = result['sell_zs_huila_higher']['data'][-1]
-    #     remark = result['sell_zs_huila_higher']['tag'][-1]
+    #     tag = result['sell_zs_huila_higher']['tag'][-1]
     #     stop_lose_price = result['sell_zs_huila_higher']['stop_lose_price'][-1]
     #     direction = 'HS'
     #     maxOrderCount,perOrderStopMoney,perOrderStopRate = calMaxOrderCount(symbol, price, stop_lose_price, period,signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, maxOrderCount,
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, maxOrderCount,
     #                      stop_lose_price)
 
 
@@ -561,57 +563,57 @@ def monitorHuila(result, symbol, period, closePrice):
     big_period = period != '1m' and period != '3m' and period != '5m'
     notLower = result['notLower']
     notHigher = result['notHigher']
-
+    filter_tag = ['双盘', '完备', '二类', '三类']
     # 监控回拉
     if len(result['buy_zs_huila']['date']) > 0:
         fire_time = result['buy_zs_huila']['date'][-1]
         price = result['buy_zs_huila']['data'][-1]
-        remark = result['buy_zs_huila']['tag'][-1]
+        tag = result['buy_zs_huila']['tag'][-1]
         stop_lose_price = result['buy_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
         # 大级别直接保存
         if big_period:
-            saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         else:
             # 小级别除非是双盘，否则一定要不破前低
             if notLower:
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
-            elif remark == '双盘' or remark == '完备':
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+            elif tag in filter_tag:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_zs_huila']['date']) > 0:
         fire_time = result['sell_zs_huila']['date'][-1]
         price = result['sell_zs_huila']['data'][-1]
-        remark = result['sell_zs_huila']['tag'][-1]
+        tag = result['sell_zs_huila']['tag'][-1]
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
         if big_period:
-            saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         else:
             if notHigher:
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
-            elif remark == '双盘' or remark == '完备':
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+            elif tag in filter_tag:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     # 监控高级别回拉
     if len(result['buy_zs_huila_higher']['date']) > 0:
         fire_time = result['buy_zs_huila_higher']['date'][-1]
         price = result['buy_zs_huila_higher']['data'][-1]
-        remark = result['buy_zs_huila_higher']['tag'][-1]
+        tag = result['buy_zs_huila_higher']['tag'][-1]
         stop_lose_price = result['buy_zs_huila_higher']['stop_lose_price'][-1]
         direction = 'HB'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_zs_huila_higher']['date']) > 0:
         fire_time = result['sell_zs_huila_higher']['date'][-1]
         price = result['sell_zs_huila_higher']['data'][-1]
-        remark = result['sell_zs_huila_higher']['tag'][-1]
+        tag = result['sell_zs_huila_higher']['tag'][-1]
         stop_lose_price = result['sell_zs_huila_higher']['stop_lose_price'][-1]
         direction = 'HS'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -627,60 +629,47 @@ def monitorTupo(result, symbol, period, closePrice):
 
     # 监控突破
     if len(result['buy_zs_tupo']['date']) > 0:
+        fire_time = result['buy_zs_tupo']['date'][-1]
+        price = result['buy_zs_tupo']['data'][-1]
+        stop_lose_price = result['buy_zs_tupo']['stop_lose_price'][-1]
+        tag = ''
+        direction = 'B'
+        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if big_period:
-            fire_time = result['buy_zs_tupo']['date'][-1]
-            price = result['buy_zs_tupo']['data'][-1]
-            stop_lose_price = result['buy_zs_tupo']['stop_lose_price'][-1]
-            remark = ''
-            direction = 'B'
-            futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-            saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         else:
             if notLower:
-                fire_time = result['buy_zs_tupo']['date'][-1]
-                price = result['buy_zs_tupo']['data'][-1]
-                stop_lose_price = result['buy_zs_tupo']['stop_lose_price'][-1]
-                remark = ''
-                direction = 'B'
-                futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
-
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_zs_tupo']['date']) > 0:
+        fire_time = result['sell_zs_tupo']['date'][-1]
+        price = result['sell_zs_tupo']['data'][-1]
+        stop_lose_price = result['sell_zs_tupo']['stop_lose_price'][-1]
+        tag = ''
+        direction = 'S'
+        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if big_period:
-            fire_time = result['sell_zs_tupo']['date'][-1]
-            price = result['sell_zs_tupo']['data'][-1]
-            stop_lose_price = result['sell_zs_tupo']['stop_lose_price'][-1]
-            remark = ''
-            direction = 'S'
-            futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-            saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         else:
             if notHigher:
-                fire_time = result['sell_zs_tupo']['date'][-1]
-                price = result['sell_zs_tupo']['data'][-1]
-                stop_lose_price = result['sell_zs_tupo']['stop_lose_price'][-1]
-                remark = ''
-                direction = 'S'
-                futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     # 监控高级别突破
     if len(result['buy_zs_tupo_higher']['date']) > 0:
         fire_time = result['buy_zs_tupo_higher']['date'][-1]
         price = result['buy_zs_tupo_higher']['data'][-1]
         stop_lose_price = result['buy_zs_tupo_higher']['stop_lose_price'][-1]
-        remark = ''
+        tag = ''
         direction = 'HB'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_zs_tupo_higher']['date']) > 0:
         fire_time = result['sell_zs_tupo_higher']['date'][-1]
         price = result['sell_zs_tupo_higher']['data'][-1]
         stop_lose_price = result['sell_zs_tupo_higher']['stop_lose_price'][-1]
-        remark = ''
+        tag = ''
         direction = 'HS'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -696,60 +685,48 @@ def monitorVfan(result, symbol, period, closePrice):
 
     # 监控V反
     if len(result['buy_v_reverse']['date']) > 0:
+        fire_time = result['buy_v_reverse']['date'][-1]
+        price = result['buy_v_reverse']['data'][-1]
+        stop_lose_price = result['buy_v_reverse']['stop_lose_price'][-1]
+        tag = ''
+        direction = 'B'
+        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if big_period:
-            fire_time = result['buy_v_reverse']['date'][-1]
-            price = result['buy_v_reverse']['data'][-1]
-            stop_lose_price = result['buy_v_reverse']['stop_lose_price'][-1]
-            remark = ''
-            direction = 'B'
-            futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-            saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         else:
             if notLower:
-                fire_time = result['buy_v_reverse']['date'][-1]
-                price = result['buy_v_reverse']['data'][-1]
-                stop_lose_price = result['buy_v_reverse']['stop_lose_price'][-1]
-                remark = ''
-                direction = 'B'
-                futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_v_reverse']['date']) > 0:
+        fire_time = result['sell_v_reverse']['date'][-1]
+        price = result['sell_v_reverse']['data'][-1]
+        stop_lose_price = result['sell_v_reverse']['stop_lose_price'][-1]
+        tag = ''
+        direction = 'S'
+        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if big_period:
-            fire_time = result['sell_v_reverse']['date'][-1]
-            price = result['sell_v_reverse']['data'][-1]
-            stop_lose_price = result['sell_v_reverse']['stop_lose_price'][-1]
-            remark = ''
-            direction = 'S'
-            futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-            saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         else:
             if notHigher:
-                fire_time = result['sell_v_reverse']['date'][-1]
-                price = result['sell_v_reverse']['data'][-1]
-                stop_lose_price = result['sell_v_reverse']['stop_lose_price'][-1]
-                remark = ''
-                direction = 'S'
-                futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     # 监控高级别V反
     if len(result['buy_v_reverse_higher']['date']) > 0:
         fire_time = result['buy_v_reverse_higher']['date'][-1]
         price = result['buy_v_reverse_higher']['data'][-1]
         stop_lose_price = result['buy_v_reverse_higher']['stop_lose_price'][-1]
-        remark = ''
+        tag = ''
         direction = 'HB'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_v_reverse_higher']['date']) > 0:
         fire_time = result['sell_v_reverse_higher']['date'][-1]
         price = result['sell_v_reverse_higher']['data'][-1]
         stop_lose_price = result['sell_v_reverse_higher']['stop_lose_price'][-1]
-        remark = ''
+        tag = ''
         direction = 'HS'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -765,60 +742,48 @@ def monitorDuanBreak(result, symbol, period, closePrice):
 
     # 监控线段破坏
     if len(result['buy_duan_break']['date']) > 0:
+        fire_time = result['buy_duan_break']['date'][-1]
+        price = result['buy_duan_break']['data'][-1]
+        stop_lose_price = result['buy_duan_break']['stop_lose_price'][-1]
+        tag = ''
+        direction = 'B'
+        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if big_period:
-            fire_time = result['buy_duan_break']['date'][-1]
-            price = result['buy_duan_break']['data'][-1]
-            stop_lose_price = result['buy_duan_break']['stop_lose_price'][-1]
-            remark = ''
-            direction = 'B'
-            futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-            saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         else:
             if notLower:
-                fire_time = result['buy_duan_break']['date'][-1]
-                price = result['buy_duan_break']['data'][-1]
-                stop_lose_price = result['buy_duan_break']['stop_lose_price'][-1]
-                remark = ''
-                direction = 'B'
-                futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_duan_break']['date']) > 0:
+        fire_time = result['sell_duan_break']['date'][-1]
+        price = result['sell_duan_break']['data'][-1]
+        stop_lose_price = result['sell_duan_break']['stop_lose_price'][-1]
+        tag = ''
+        direction = 'S'
+        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if big_period:
-            fire_time = result['sell_duan_break']['date'][-1]
-            price = result['sell_duan_break']['data'][-1]
-            stop_lose_price = result['sell_duan_break']['stop_lose_price'][-1]
-            remark = ''
-            direction = 'S'
-            futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-            saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         else:
             if notHigher:
-                fire_time = result['sell_duan_break']['date'][-1]
-                price = result['sell_duan_break']['data'][-1]
-                stop_lose_price = result['sell_duan_break']['stop_lose_price'][-1]
-                remark = ''
-                direction = 'S'
-                futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     # 监控高级别线段破坏
     # if len(result['buy_duan_break_higher']['date']) > 0:
     #     fire_time = result['buy_duan_break_higher']['date'][-1]
     #     price = result['buy_duan_break_higher']['data'][-1]
     #     stop_lose_price = result['buy_duan_break_higher']['stop_lose_price'][-1]
-    #     remark = ''
+    #     tag = ''
     #     direction = 'HB'
     #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     # if len(result['sell_duan_break_higher']['date']) > 0:
     #     fire_time = result['sell_duan_break_higher']['date'][-1]
     #     price = result['sell_duan_break_higher']['data'][-1]
     #     stop_lose_price = result['sell_duan_break_higher']['stop_lose_price'][-1]
-    #     remark = ''
+    #     tag = ''
     #     direction = 'HS'
     #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice, stop_lose_price, futureCalcObj)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -880,7 +845,7 @@ def monitorFractal(result, symbol, period, closePrice):
             # 顶分型的底
             price = result['fractal'][0]['top_fractal']['bottom']
             stop_lose_price = result['fractal'][0]['top_fractal']['top']
-            remark = result['fractal'][0]['period']
+            tag = result['fractal'][0]['period']
             direction = 'S'
             # 顶分型的顶
             top_price = result['fractal'][0]['top_fractal']['top']
@@ -895,14 +860,14 @@ def monitorFractal(result, symbol, period, closePrice):
                 # 保存分型的价格
                 futureCalcObj['fractal_price'] = price
 
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
                                  stop_lose_price, futureCalcObj)
         # 高高级别
         if result['fractal'][1] != {} and result['fractal'][1]['direction'] == 1:
             fire_time = result['fractal'][1]['top_fractal']['date']
             price = result['fractal'][1]['top_fractal']['bottom']
             stop_lose_price = result['fractal'][1]['top_fractal']['top']
-            remark = result['fractal'][1]['period']
+            tag = result['fractal'][1]['period']
             direction = 'HS'
             # 顶分型的顶
             top_price = result['fractal'][1]['top_fractal']['top']
@@ -917,7 +882,7 @@ def monitorFractal(result, symbol, period, closePrice):
                 futureCalcObj['stop_win_price'] = closePrice
                 # 保存分型的价格
                 futureCalcObj['fractal_price'] = price
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
                                  stop_lose_price, futureCalcObj)
     if positionInfoShort != -1:
         # 空单查找向下笔的底分型
@@ -926,7 +891,7 @@ def monitorFractal(result, symbol, period, closePrice):
             fire_time = result['fractal'][0]['bottom_fractal']['date']
             price = result['fractal'][0]['bottom_fractal']['top']
             stop_lose_price = result['fractal'][0]['bottom_fractal']['bottom']
-            remark = result['fractal'][0]['period']
+            tag = result['fractal'][0]['period']
             direction = 'B'
             # 底分型的底部
             bottom_price = result['fractal'][0]['bottom_fractal']['bottom']
@@ -941,14 +906,14 @@ def monitorFractal(result, symbol, period, closePrice):
                 futureCalcObj['stop_win_price'] = closePrice
                 # 保存分型的价格
                 futureCalcObj['fractal_price'] = price
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
                                  stop_lose_price, futureCalcObj)
         # 高高级别
         if result['fractal'][1] != {} and result['fractal'][1]['direction'] == -1:
             fire_time = result['fractal'][1]['bottom_fractal']['date']
             price = result['fractal'][1]['bottom_fractal']['top']
             stop_lose_price = result['fractal'][1]['bottom_fractal']['bottom']
-            remark = result['fractal'][1]['period']
+            tag = result['fractal'][1]['period']
             direction = 'HB'
             # 底分型的底部
             bottom_price = result['fractal'][1]['bottom_fractal']['bottom']
@@ -963,7 +928,7 @@ def monitorFractal(result, symbol, period, closePrice):
                 futureCalcObj['stop_win_price'] = closePrice
                 # 保存分型的价格
                 futureCalcObj['fractal_price'] = price
-                saveFutureSignal(symbol, period, fire_time, direction, signal, remark, price, closePrice,
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
                                  stop_lose_price, futureCalcObj)
 
 
@@ -1070,8 +1035,8 @@ def run(**kwargs):
     # symbolListSplit = [symbolList[i:i + 3] for i in range(0, len(symbolList), 3)]
     # 24个品种 拆分2份
     symbolListSplit = [symbolList[i:i + 12] for i in range(0, len(symbolList), 12)]
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
+    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[3]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[4]]).start()
