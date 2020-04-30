@@ -209,6 +209,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     if duan_series[x] == 1:
                         break
                 if r >= 0:
+                    tags = []
                     result['buy_zs_huila']['idx'].append(r)
                     result['buy_zs_huila']['date'].append(time_series[r])
                     result['buy_zs_huila']['data'].append(e.bottom)
@@ -220,14 +221,13 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     else:
                         result['buy_zs_huila']['stop_lose_price'].append(0)
                         result['buy_zs_huila']['stop_win_price'].append(0)
-
                     if PerfectForBuyLong(duan_series, high_series, low_series, r):
-                        result['buy_zs_huila']['tag'].append('完备')
-                    else:
-                        result['buy_zs_huila']['tag'].append('')
+                        tags.append('完备')
                     if higher_duan_series is not None:
                         category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, r)
-                        result['buy_zs_huila']['tag'].append(category)
+                        if len(category) > 0:
+                            tags.append(category)
+                    result['buy_zs_huila']['tag'].append(','.join(tags))
     return result
 
 
@@ -262,17 +262,18 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 if duan_series[x] == 1:
                     break
             if r > 0:
+                tags = []
                 result['buy_zs_tupo']['idx'].append(r)
                 result['buy_zs_tupo']['date'].append(time_series[r])
                 result['buy_zs_tupo']['data'].append(e.gg)
                 result['buy_zs_tupo']['stop_lose_price'].append(e.zg)
                 if PerfectForBuyLong(duan_series, high_series, low_series, r):
-                    result['buy_zs_tupo']['tag'].append('完备')
-                else:
-                    result['buy_zs_tupo']['tag'].append('')
+                    tags.append('完备')
                 if higher_duan_series is not None:
                     category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, r)
-                    result['buy_zs_tupo']['tag'].append(category)
+                    if len(category) > 0:
+                        tags.append(category)
+                result['buy_zs_tupo']['tag'].append(','.join(tags))
         if e.direction == -1:
             r = -1
             for x in range(e.end+1, len(low_series)):
@@ -282,15 +283,16 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 if duan_series[x] == -1:
                     break
             if r > 0:
+                tags = []
                 result['sell_zs_tupo']['idx'].append(r)
                 result['sell_zs_tupo']['date'].append(time_series[r])
                 result['sell_zs_tupo']['data'].append(e.dd)
                 result['sell_zs_tupo']['stop_lose_price'].append(e.zd)
                 if PerfectForSellShort(duan_series, high_series, low_series, r):
-                    result['sell_zs_tupo']['tag'].append('完备')
-                else:
-                    result['sell_zs_tupo']['tag'].append('')
+                    tags.append('完备')
+                result['sell_zs_tupo']['tag'].append(','.join(tags))
     return result
+
 
 def v_reverse(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series, higher_duan_series=None):
     result = {
@@ -361,18 +363,19 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                         if bi_series[k] == 1:
                             break
                         if high_series[k] > resist_price:
+                            tags = []
                             if pydash.find_last_index(result['buy_v_reverse']['date'], lambda x: x == time_series[k]) == -1:
                                 result['buy_v_reverse']['idx'].append(k)
                                 result['buy_v_reverse']['date'].append(time_series[k])
                                 result['buy_v_reverse']['data'].append(resist_price)
                                 result['buy_v_reverse']['stop_lose_price'].append(low_series[leave_end_index])
                                 if PerfectForBuyLong(duan_series, high_series, low_series, k):
-                                    result['buy_v_reverse']['tag'].append('完备')
-                                else:
-                                    result['buy_v_reverse']['tag'].append('')
+                                    tags.append('完备')
                                 if higher_duan_series is not None:
                                     category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, k)
-                                    result['buy_v_reverse']['tag'].append(category)
+                                    if len(category) > 0:
+                                        tags.append(category)
+                                result['buy_v_reverse']['tag'].append(','.join(tags))
                             break
 
     return result
@@ -433,16 +436,17 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                     if duan_series[k] == 1:
                         break
                     if high_series[k] > high_series[anchor]:
+                        tags = []
                         result['buy_duan_break']['idx'].append(k)
                         result['buy_duan_break']['date'].append(time_series[k])
                         result['buy_duan_break']['data'].append(high_series[anchor])
                         result['buy_duan_break']['stop_lose_price'].append(low_series[i])
                         if PerfectForBuyLong(duan_series, high_series, low_series, k):
-                            result['buy_duan_break']['tag'].append('完备')
-                        else:
-                            result['buy_duan_break']['tag'].append('')
+                            tags.append('完备')
                         if higher_duan_series is not None:
                             category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, k)
-                            result['buy_duan_break']['tag'].append(category)
+                            if len(category) > 0:
+                                tags.append(category)
+                        result['buy_duan_break']['tag'].append(','.join(tags))
                         break
     return result
