@@ -469,16 +469,16 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                     calc = Calc()
                     print("current:", symbol, period, datetime.now())
                     result = calc.calcData(period, symbol)
-                    close_price = result['close'][-1]
-                    # 大级别macd 背驰成功率较高
-                    # if period != '1m' and period != '3m' and period != '5m':
-                    #     monitorBeichi(result, symbol, period, close_price)
-                    monitorHuila(result, symbol, period, close_price)
-                    monitorTupo(result, symbol, period, close_price)
-                    monitorVfan(result, symbol, period, close_price)
-                    # 取消线段破坏监控
-                    monitorDuanBreak(result, symbol, period, close_price)
-                    monitorFractal(result, symbol, period, close_price)
+                    if result.get('close') is not None and len(result['close']) > 0:
+                        close_price = result['close'][-1]
+                        # 大级别macd 背驰成功率较高
+                        # if period != '1m' and period != '3m' and period != '5m':
+                        #     monitorBeichi(result, symbol, period, close_price)
+                        monitorHuila(result, symbol, period, close_price)
+                        monitorTupo(result, symbol, period, close_price)
+                        monitorVfan(result, symbol, period, close_price)
+                        monitorDuanBreak(result, symbol, period, close_price)
+                        monitorFractal(result, symbol, period, close_price)
             if type == "1" or type == "3":
                 time.sleep(0)
             else:
