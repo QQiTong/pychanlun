@@ -265,7 +265,7 @@ class BusinessService:
             else:
                 level_direction = ""
             msg = "%s %s %s %s %s" % (level_direction,str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
-                                   str(signalItem['remark']))
+                                   str(signalItem['tag']))
             if signalItem['symbol'] in symbolListMap:
                 symbolListMap[signalItem['symbol']][signalItem['period']] = msg
         # print("期货信号列表", symbolListMap)
@@ -288,7 +288,7 @@ class BusinessService:
                 symbolListMap[symbol][period] = ""
         beichi_log_list = DBPyChanlun['strategy3_log'].find()
         for beichiItem in beichi_log_list:
-            msg = beichiItem['remark'], str(
+            msg = beichiItem['tag'], str(
                 round(beichiItem['price'], 2)), str(beichiItem['date_created'])
             if beichiItem['symbol'] in symbolListMap:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
@@ -310,7 +310,7 @@ class BusinessService:
                 symbolListMap[symbol][period] = ""
         beichi_log_list = DBPyChanlun['strategy4_log'].find()
         for beichiItem in beichi_log_list:
-            msg = beichiItem['remark'], str(
+            msg = beichiItem['tag'], str(
                 round(beichiItem['price'], 2)), str(beichiItem['date_created'])
             if beichiItem['symbol'] in symbolListMap:
                 symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
@@ -598,7 +598,7 @@ class BusinessService:
             item['period'] = row["period"]
             item['price'] = row["price"]
             item['stop_lose_price'] = row["stop_lose_price"]
-            item['remark'] = row["remark"]
+            item['tag'] = row["tag"]
             item['category'] = row["category"]
             item['tags'] = ", ".join(row["tags"])
             signalList.append(item)

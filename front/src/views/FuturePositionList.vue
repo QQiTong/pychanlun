@@ -359,7 +359,11 @@
                     <span>{{ row.signal| signalTypeFilter }}</span>
                 </template>
             </el-table-column>
-
+            <el-table-column label="分类" align="center" :key="4">
+                <template slot-scope="{row}">
+                    <span>{{ row.tag }}</span>
+                </template>
+            </el-table-column>
             <el-table-column label="方向" prop="direction" align="center" :key="5">
                 <template slot-scope="{row}">
                     <span :class="row.direction | directionTagFilter">
@@ -431,9 +435,9 @@
                              v-if="positionQueryForm.status==='loseEnd'"
                              :key="16">
                 <template slot-scope="{row}">
-                    <el-tag :type="row.lose_end_money|percentTagFilter">
+                    <span class="primary-yellow">
                         {{row.status ==='loseEnd'?row.lose_end_money:0}}
-                    </el-tag>
+                    </span>
                 </template>
             </el-table-column>
             <el-table-column label="亏损额比率" prop="lose_end_rate" width="110" align="center"
@@ -1249,6 +1253,7 @@
         .primary-color {
             color: white !important
         }
+
         // element-ui table
 
         //下拉选项
