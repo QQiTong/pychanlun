@@ -9,7 +9,6 @@ import pandas as pd
 import talib as ta
 import pychanlun.entanglement as entanglement
 
-from  et_stopwatch import Stopwatch
 from pychanlun.basic.bi import CalcBi, FindLastFractalRegion
 from pychanlun.basic.duan import CalcDuan, CalcDuanExp
 from pychanlun import Duan
@@ -264,12 +263,10 @@ class Calc:
 
         count = len(timeList)
         # 本级别笔
-        stopwatch = Stopwatch('计算本级别笔')
+
         biList = [0 for i in range(count)]
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList)
         x_data['bi'] = biList
-        stopwatch.stop()
-        logging.info(stopwatch)
 
         # 高级别笔
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
