@@ -37,9 +37,9 @@ LE市场（伦敦镍）总共6个市场，
 每日1万次     1980元/月 频率1000ms
 每日10万次    3080元/月 频率500ms
 不限次数      3880元/月 频率300ms
-每日100万次   4680元/月 不限频率     
-每日500万次   6480元/月 不限频率     
-每日1000万次   7980元/月 不限频率     
+每日100万次   4680元/月 不限频率
+每日500万次   6480元/月 不限频率
+每日1000万次   7980元/月 不限频率
 
 6个市场 1980元/月 1万次调用   23,760‬‬ /年   年付 8.5折  20,196‬/年
 5个市场 1780元/月 1万次调用   21,360‬ /年   年付 8.5折  18,156‬‬/年
@@ -111,7 +111,7 @@ def fetch_futures_mink():
 
                 count = count +1
                 print(url, "调用次数:",count)
-                resp = requests.get(url, timeout=10)
+                resp = requests.get(url, timeout=(30, 30))
                 df1m = pd.DataFrame(json.loads(resp.text))
                 df1m = df1m.sort_values(by="Date", ascending=True)
                 df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))

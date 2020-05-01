@@ -24,7 +24,7 @@ class BitmexDataBackend(DataBackend):
             "origin": "https://static.bitmex.com",
             "referer": "https://static.bitmex.com/",
             }
-        r = requests.get(self.endpoint, params=payload, headers=header)
+        r = requests.get(self.endpoint, params=payload, headers=header, timeout=(30, 30))
         prices = json.loads(r.text)
         t = prices.get('t', [])
         o = prices.get('o', [])

@@ -152,7 +152,8 @@ class BitstampGateway(BaseGateway):
             # Get response from server
             resp = requests.get(
                 "https://api.blockchain.info/price/bar-series",
-                params
+                params,
+                timeout=(30, 30)
             )
 
             # Break if request failed with other status code
