@@ -91,7 +91,7 @@ class KlineDataTool:
     #               "referer": "https://static.bitmex.com/",
     #               }
     #     startTime = datetime.now()
-    #     r = requests.get(url, params=payload, headers=header, timeout=(30, 30))
+    #     r = requests.get(url, params=payload, headers=header, timeout=(15, 15))
     #     endTime = datetime.now() - startTime
     #     klines = json.loads(r.text)
     #     print("bitmex接口花费时间:", endTime, datetime.now(), r,klines)
@@ -181,7 +181,7 @@ class KlineDataTool:
     #     }
     #
     #     startTime = datetime.now()
-    #     r = requests.get(url, params=payload, verify=False, timeout=(30, 30))
+    #     r = requests.get(url, params=payload, verify=False, timeout=(15, 15))
     #     endTime = datetime.now() - startTime
     #     klines = json.loads(r.text)['data']
     #     # print("火币接口花费时间:", endTime, datetime.now(), r)
@@ -305,7 +305,7 @@ class KlineDataTool:
             'size': 1000,
             't': timeStamp
         }
-        r = requests.get(okexUrl, params=payload, headers=headers, timeout=(30, 30))
+        r = requests.get(okexUrl, params=payload, headers=headers, timeout=(15, 15))
         data_list = json.loads(r.text)['data']
 
         df = pd.DataFrame(list(data_list))

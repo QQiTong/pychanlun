@@ -111,7 +111,7 @@ def fetch_futures_mink():
 
                 count = count +1
                 print(url, "调用次数:",count)
-                resp = requests.get(url, timeout=(30, 30))
+                resp = requests.get(url, timeout=(15, 15))
                 df1m = pd.DataFrame(json.loads(resp.text))
                 df1m = df1m.sort_values(by="Date", ascending=True)
                 df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))

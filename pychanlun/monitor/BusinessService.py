@@ -40,11 +40,11 @@ class BusinessService:
     # okex数字货币部分涨跌幅
     def getBTCTicker(self):
         okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/ticker"
-        r = requests.get(okexUrl, timeout=(30, 30))
+        r = requests.get(okexUrl, timeout=(15, 15))
         ticker = json.loads(r.text)
         # print("BTC实时价格",ticker)
         okexUrl2 = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/candles?granularity=86400"
-        r = requests.get(okexUrl2, timeout=(30, 30))
+        r = requests.get(okexUrl2, timeout=(15, 15))
         data_list = json.loads(r.text)
         dayOpenPrice = data_list[0][1]
         change = round((float(ticker['last']) - float(dayOpenPrice)) / float(dayOpenPrice), 4)
@@ -161,12 +161,12 @@ class BusinessService:
     #         'size': 1
     #     }
     #
-    #     r = requests.get(hbSwapUrl,params=dayParam, timeout=(30, 30))
+    #     r = requests.get(hbSwapUrl,params=dayParam, timeout=(15, 15))
     #     daykline = json.loads(r.text)
     #
     #     dayOpenPrice = daykline['data'][-1]['open']
     #
-    #     r = requests.get(hbSwapTickUrl, timeout=(30, 30))
+    #     r = requests.get(hbSwapTickUrl, timeout=(15, 15))
     #     minKline = json.loads(r.text)
     #     minClosePrice = minKline['tick']['data'][-1]['price']
     #     change = round((float(minClosePrice) - dayOpenPrice) / dayOpenPrice,4)

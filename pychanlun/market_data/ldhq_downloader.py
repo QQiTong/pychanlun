@@ -81,7 +81,7 @@ def fetch_stocks_mink():
             url = "http://ldhqsj.com/us_pluralK.action?username=chanlun&password=" +\
                   pwd + "&id=" + ",".join(stocks) + "&jys=NA&period=1&num=-200"
             print(url)
-            resp = requests.get(url, timeout=(30, 30))
+            resp = requests.get(url, timeout=(15, 15))
             content = resp.text
             f = StringIO(content)
             lines = f.readlines()
@@ -145,7 +145,7 @@ def fetch_futures_mink():
             url = "http://ldhqsj.com/foreign_pluralK.action?username=chanlun&password=" + \
                   pwd + "&id=" + ",".join(futures) + "&period=1&num=-200srcIndex=3"
             print(url)
-            resp = requests.get(url, timeout=(30, 30))
+            resp = requests.get(url, timeout=(15, 15))
             content = resp.text
             f = StringIO(content)
             lines = f.readlines()

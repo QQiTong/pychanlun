@@ -35,7 +35,7 @@ def fetch_global_futures_mink():
             for symbol in symbol_list:
                 var = "_%s_%s_%s" % (symbol, minute, datetime.datetime.now().timestamp())
                 url = "https://gu.sina.cn/ft/api/jsonp.php/var %s=/GlobalService.getMink?symbol=%s&type=%s" % (var, symbol, minute)
-                response = requests.get(url, headers = headers, timeout=(30, 30))
+                response = requests.get(url, headers = headers, timeout=(15, 15))
                 response_text = response.text
                 m = re.search(r'\((.*)\)', response.text)
                 content = m.group(1)
@@ -59,7 +59,7 @@ def fetch_global_futures_mink():
                 d = datetime.datetime.now().strftime('%Y_%m_%d')
                 var = "_%s_%s" % (symbol, d)
                 url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var %s=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=%s&_=%s&source=web" % (var, symbol, d)
-                response = requests.get(url, headers = headers, timeout=(30, 30))
+                response = requests.get(url, headers = headers, timeout=(15, 15))
                 response_text = response.text
                 m = re.search(r'\((.*)\)', response_text)
                 content = m.group(1)

@@ -47,7 +47,7 @@ def fetch_global_futures_mink():
                 url = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/candles?granularity=%s"   % (okexPeriodMap[minute])
                 # response = requests.get(url,proxies=cfg.PROXIES)
                 # okex.me这个域名不用翻墙
-                response = requests.get(url, timeout=(30, 30))
+                response = requests.get(url, timeout=(15, 15))
                 response_text = response.text
                 df = pd.DataFrame(json.loads(response_text))
                 # [['2020-03-22T02:31:00.000Z','12','32','54','34'],['2020-03-22T02:31:00.000Z','12','32','54','34']]

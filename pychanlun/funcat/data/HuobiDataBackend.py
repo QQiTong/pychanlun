@@ -24,7 +24,7 @@ class HuobiDataBackend(DataBackend):
             'symbol': code,
             'size': end - start
         }
-        r = requests.get(self.endpoint, params=payload,proxies=cfg.PROXIES, verify=False, timeout=(30, 30))
+        r = requests.get(self.endpoint, params=payload,proxies=cfg.PROXIES, verify=False, timeout=(15, 15))
         retJson = json.loads(r.text)
         data = retJson['data']
         recdata = []
