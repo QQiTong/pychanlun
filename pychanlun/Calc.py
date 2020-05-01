@@ -1,28 +1,21 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import json
-import os
 import time
+import re
+
 import numpy as np
 import pandas as pd
-import codecs
-
-from numpy import array
 import talib as ta
-from flask import make_response
-import copy
-import pydash
-from datetime import datetime
+import pychanlun.entanglement as entanglement
 
+from  et_stopwatch import Stopwatch
 from pychanlun.basic.bi import CalcBi, FindLastFractalRegion
 from pychanlun.basic.duan import CalcDuan, CalcDuanExp
 from pychanlun import Duan
 from pychanlun.KlineDataTool import KlineDataTool
-from pychanlun.Tools import Tools
-import pychanlun.divergence as divergence
-import pychanlun.entanglement as entanglement
 from pychanlun.basic.pattern import DualEntangleForBuyLong, DualEntangleForSellShort
-import re
 from pychanlun.config import config
 
 
@@ -150,8 +143,6 @@ class Calc:
         }
 
     def calcData(self, period, symbol, save=False, endDate=None):
-        start = time.clock()  # 开始计时
-        # 统计程序执行时间
 
         x_data = pd.DataFrame()
         xx_data = pd.DataFrame()
@@ -175,12 +166,10 @@ class Calc:
             klineDataBigLevel = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod, endDate)
             bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
             klineDataBigLevel2 = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod2, endDate)
-
         else:
             if 'BTC' in symbol:
                 cat = "DIGIT_COIN"
                 # 转换后的本级别
-
                 currentPeriod = self.okexPeriodMap[period]
 
                 klineData = klineDataTool.getDigitCoinData(symbol,currentPeriod,endDate)
@@ -276,9 +265,12 @@ class Calc:
 
         count = len(timeList)
         # 本级别笔
+        stopwatch = Stopwatch('计算本级别笔')
         biList = [0 for i in range(count)]
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList)
         x_data['bi'] = biList
+        stopwatch.stop()
+        logging.info(stopwatch)
 
         # 高级别笔
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
@@ -504,10 +496,6 @@ class Calc:
             fractialRegion2 = {} if fractialRegion2 is None else fractialRegion2
             resJson['fractal'] = [fractialRegion, fractialRegion2]
 
-        resJsonStr = json.dumps(resJson)
-
-        elapsed = (time.clock() - start)  # 结束计时
-        print("程序执行的时间:" + str(round(elapsed,2)) + "s", symbol, period)  # 印出时间
         return resJson
 
 

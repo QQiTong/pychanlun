@@ -1,23 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
-import time
-
-import geventwebsocket
-from flask import Flask, request, Response
-# from gevent.pywsgi import WSGIServer
-from waitress import serve
-
+import logging
 import json
-import numpy as np
-from rqdatac import *
+
+from et_stopwatch import Stopwatch
+
+from flask import Flask, request, Response
+from waitress import serve
 from pychanlun.Calc import Calc
-from pychanlun.config import config
-import rqdatac as rq
 from pychanlun.monitor.BusinessService import businessService
 from flask_sockets import Sockets
-# from geventwebsocket.handler import WebSocketHandler
 
 app = Flask(__name__)
 sockets = Sockets(app)
@@ -43,14 +35,19 @@ sockets = Sockets(app)
 #         except geventwebsocket.exceptions.WebSocketError as e:
 #             pass
 # -------------------------------通用接口-----------------------------------
+
+
 @app.route('/api/stock_data')
+@Stopwatch('/api/stock-data')
 def data():
     calc = Calc()
     period = request.args.get("period")
     symbol = request.args.get("symbol")
-    endDate = request.args.get("endDate")
-    result = calc.calcData(period, symbol, False, endDate)
+    end_date = request.args.get("endDate")
+    result = calc.calcData(period, symbol, False, end_date)
     return Response(json.dumps(result), mimetype='application/json')
+
+
 @app.route('/api/save_stock_data')
 def save_stock_date():
     calc = Calc()
