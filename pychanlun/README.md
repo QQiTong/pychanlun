@@ -33,6 +33,7 @@ MongoDB也要先安装成Windows服务模式，参考MongoDB文档。
 （管理员命令行模式）
 
 ```cmd
+nssm install pychanlun-api-service "C:/Users/23681/scoop/shims/python.exe"
 nssm install pychanlun-api-service "C:/Users/Administrator/scoop/shims/python.exe"
 nssm set pychanlun-api-service AppDirectory "D:/development/pychanlun"
 nssm set pychanlun-api-service AppParameters "pychanlun/cli.py server run --port 18888"
