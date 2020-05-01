@@ -620,13 +620,10 @@ def monitorHuila(result, symbol, period, closePrice):
 监控突破
 '''
 
-
+# 分析走势发现有很多顶部都是用3m 5m 的反向中枢突破套到的,如果突破失败，反手做多 就行了
+# 因此突破单不用 notLower notHigher 过滤
 def monitorTupo(result, symbol, period, closePrice):
     signal = 'tupo'
-    big_period = period != '1m' and period != '3m' and period != '5m'
-    notLower = result['notLower']
-    notHigher = result['notHigher']
-
     # 监控突破
     if len(result['buy_zs_tupo']['date']) > 0:
         fire_time = result['buy_zs_tupo']['date'][-1]
@@ -635,11 +632,7 @@ def monitorTupo(result, symbol, period, closePrice):
         tag = ''
         direction = 'B'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if big_period:
-            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        else:
-            if notLower:
-                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_zs_tupo']['date']) > 0:
         fire_time = result['sell_zs_tupo']['date'][-1]
         price = result['sell_zs_tupo']['data'][-1]
@@ -647,11 +640,7 @@ def monitorTupo(result, symbol, period, closePrice):
         tag = ''
         direction = 'S'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if big_period:
-            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        else:
-            if notHigher:
-                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     # 监控高级别突破
     if len(result['buy_zs_tupo_higher']['date']) > 0:
