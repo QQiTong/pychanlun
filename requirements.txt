@@ -11,7 +11,6 @@ pytest
 pytest-html
 ratelimit
 waitress
-tornado
 click
 pytdx
 tqsdk
