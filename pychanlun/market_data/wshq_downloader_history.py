@@ -37,9 +37,9 @@ LE市场（伦敦镍）总共6个市场，
 每日1万次     1980元/月 频率1000ms
 每日10万次    3080元/月 频率500ms
 不限次数      3880元/月 频率300ms
-每日100万次   4680元/月 不限频率
-每日500万次   6480元/月 不限频率
-每日1000万次   7980元/月 不限频率
+每日100万次   4680元/月 不限频率     
+每日500万次   6480元/月 不限频率     
+每日1000万次   7980元/月 不限频率     
 
 6个市场 1980元/月 1万次调用   23,760‬‬ /年   年付 8.5折  20,196‬/年
 5个市场 1780元/月 1万次调用   21,360‬ /年   年付 8.5折  18,156‬‬/年
@@ -57,7 +57,7 @@ return_t:   返回指定K线类型，0为日线，1为月线，2为周线，3为
 qt_type:    指定分钟线类型，例如qt_type=1 则返回1分钟数据，qt_type=3则返回3分钟数据，以此类推(默认值为1)。需在return_t=3的情况下使用
 
 返回参数：
-symbol  股票代码
+symbol 	股票代码
 Name    股票名字
 Date    交易时间
 Open    开盘价
@@ -93,10 +93,12 @@ global_future_alias = config['global_future_alias']
 global_future_symbol = config['global_future_symbol']
 ohlc_dict = {'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last', 'Volume': 'sum'}
 # 8个品种 LENID3M 暂时没接
-futures = ['CEYMA0', 'CEESA0', 'CENQA0', 'WGCNA0', 'NECLA0', 'CMGCA0', 'CMSIA0','COZSA0','COZLA0','COZMA0']
+futures = ['COZLA0','COZMA0','COZSA0']
 is_run = True
 
-
+'''
+此文件用于初始化历史数据
+'''
 def fetch_futures_mink():
     count = 0
     while is_run:
@@ -105,51 +107,51 @@ def fetch_futures_mink():
                 # 1 ,3 ,5 ,15 ,30 ,60 ,240
                 qt_type = 1
                 # 0：日线 ,3： 分钟线
-                return_t = 3
+                return_t = 0
                 # 取分钟数据
                 url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=5000&symbol=%s&desc=1&q_type=0&return_t=%s&qt_type=%s&r_type=2&u=u2368&p=abc1818" % (code,return_t,qt_type)
 
                 count = count +1
                 print(url, "调用次数:",count)
-                resp = requests.get(url, timeout=(15, 15))
+                resp = requests.get(url, timeout=10)
                 df1m = pd.DataFrame(json.loads(resp.text))
                 df1m = df1m.sort_values(by="Date", ascending=True)
-                df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
+                df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
                 # 刷日线的时候解开这个注释
                 # df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
                 df1m.set_index('Date', inplace=True)
                 code = global_future_alias[code]
 
-                save_data_m(code, '1m', df1m)
+                # save_data_m(code, '60m', df1m)
                 # 3m
-                df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df3m = df3m[1:]
-                save_data_m(code, '3m', df3m)
-                # 5m
-                df5m = df1m.resample('5T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df5m = df5m[1:]
-                save_data_m(code, '5m', df5m)
-                # 15m
-                df15m = df1m.resample('15T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df15m = df15m[1:]
-                save_data_m(code, '15m', df15m)
-                # 30m
-                df30m = df1m.resample('30T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df30m = df30m[1:]
-                save_data_m(code, '30m', df30m)
-                # 60mm
-                df60m = df1m.resample('60T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df60m = df60m[1:]
-                save_data_m(code, '60m', df60m)
-                # 240m
-                df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df240m = df240m[1:]
-                save_data_m(code, '240m', df240m)
-                # 1D
+                # df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df3m = df3m[1:]
+                # save_data_m(code, '3m', df3m)
+                # # 5m
+                # df5m = df1m.resample('5T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df5m = df5m[1:]
+                # save_data_m(code, '5m', df5m)
+                # # 15m
+                # df15m = df1m.resample('15T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df15m = df15m[1:]
+                # save_data_m(code, '15m', df15m)
+                # # 30m
+                # df30m = df1m.resample('30T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df30m = df30m[1:]
+                # save_data_m(code, '30m', df30m)
+                # # 60mm
+                # df60m = df1m.resample('60T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df60m = df60m[1:]
+                # save_data_m(code, '60m', df60m)
+                # # 240m
+                # df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df240m = df240m[1:]
+                # save_data_m(code, '240m', df240m)
+                # # 1D
                 df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 df1d = df1d[1:]
                 save_data_m(code, '1d', df1d)
-                # # 3D
+                # # # 3D
                 df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 df3d = df3d[1:]
                 save_data_m(code, '3d', df3d)

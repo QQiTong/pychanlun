@@ -98,23 +98,23 @@ config = {
         'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'PG': {'margin_rate': 0.08, 'contract_multiplier': 10},
 
-
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         # 外盘
         'CL': {'margin_rate': 0.56, 'contract_multiplier': 500},  # 8:30 -14:00 0.1      其它时间 0.15       11756
         'GC': {'margin_rate': 0.059, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
         'SI': {'margin_rate': 0.13, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
-        'YM': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
+
         'CN': {'margin_rate': 0.09, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06          1045
 
-        # 'ZS': {'margin_rate': 0.056, 'contract_multiplier': 50},  # 2314
-        # 'ZM': {'margin_rate': 0.07, 'contract_multiplier': 100},  # 2062
-        # 'ZL': {'margin_rate': 0.06, 'contract_multiplier': 600},  # 935
+        'ZS': {'margin_rate': 0.056, 'contract_multiplier': 50},  # 2314
+        'ZM': {'margin_rate': 0.07, 'contract_multiplier': 100},  # 2062
+        'ZL': {'margin_rate': 0.06, 'contract_multiplier': 600},  # 935
 
         # 'NID': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'CP': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # wshq
+        'YM': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
         'ES': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
         'NQ': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
 
@@ -143,10 +143,8 @@ config = {
     # CL:原油; GC:黄金;SI:白银; CT:棉花;ZS:大豆;ZM:豆粕; ZL:豆油;NID:伦镍;
     # YM:道琼斯 CN:A50 CP:马棕榈
     'global_future_symbol_origin': ['@CL0W', '@GC0W', '@SI0W', '@YM0Y', 'CN0Y', '03NID', '@ZS0W', '@ZM0Y', '@ZL0W', 'CPO0W', 'CT0W'],
-    # ldhq
-    # 'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'CN', 'NID', 'CP', 'CT', 'ZS', 'ZM', 'ZL'],
     # wshq
-    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'CN', 'NQ', 'ES'],
+    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN','ZS', 'ZM', 'ZL'],
     # 美国股票
     'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD'],
     # ldhq
@@ -176,7 +174,12 @@ config = {
 
         'WGCNA0': 'CN',
 
-        'LENID3M': 'NID',
+        # 'LENID3M': 'NID',
+
+        'COZSA0': 'ZS',
+        'COZMA0': 'ZM',
+        'COZLA0': 'ZL',
+
     },
     'digit_coin_symbol': ['BTC'],
     'digit_coin_symbol_info': [{
@@ -288,33 +291,33 @@ config = {
         #     'type': 'future',
         #     'feeRate': 0.012
         # },
-        # {
-        #     'contract_multiplier':50,
-        #     'exchange': '美国',
-        #     'margin_rate': 0.056,
-        #     'order_book_id': 'ZS',
-        #     'trading_hours': '7*24',
-        #     'type': 'future',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 100,
-        #     'exchange': '美国',
-        #     'margin_rate': 0.07,
-        #     'order_book_id': 'ZM',
-        #     'trading_hours': '7*24',
-        #     'type': 'future',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 600,
-        #     'exchange': '美国',
-        #     'margin_rate': 0.06,
-        #     'order_book_id': 'ZL',
-        #     'trading_hours': '7*24',
-        #     'type': 'future',
-        #     'feeRate': 0.012
-        # },
+        {
+            'contract_multiplier':50,
+            'exchange': '美国',
+            'margin_rate': 0.056,
+            'order_book_id': 'ZS',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 100,
+            'exchange': '美国',
+            'margin_rate': 0.07,
+            'order_book_id': 'ZM',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 600,
+            'exchange': '美国',
+            'margin_rate': 0.06,
+            'order_book_id': 'ZL',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
         # {
         #     'contract_multiplier': 1,
         #     'exchange': '美国',
