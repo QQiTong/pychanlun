@@ -38,13 +38,15 @@ sockets = Sockets(app)
 
 
 @app.route('/api/stock_data')
-@Stopwatch('/api/stock-data')
 def data():
+    stopwatch = Stopwatch('/api/stock_data')
     calc = Calc()
     period = request.args.get("period")
     symbol = request.args.get("symbol")
     end_date = request.args.get("endDate")
     result = calc.calcData(period, symbol, False, end_date)
+    stopwatch.stop()
+    logging.info(stopwatch)
     return Response(json.dumps(result), mimetype='application/json')
 
 
