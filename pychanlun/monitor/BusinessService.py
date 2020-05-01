@@ -265,7 +265,7 @@ class BusinessService:
             else:
                 level_direction = ""
             msg = "%s %s %s %s %s" % (level_direction,str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
-                                   str(signalItem['tag']))
+                                   str(signalItem.get('tag', '')))
             if signalItem['symbol'] in symbolListMap:
                 symbolListMap[signalItem['symbol']][signalItem['period']] = msg
         # print("期货信号列表", symbolListMap)

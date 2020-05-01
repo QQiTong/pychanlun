@@ -20,3 +20,4 @@ pysocks
 ccxt
 pyecharts
 et_stopwatch
+func_timeout
