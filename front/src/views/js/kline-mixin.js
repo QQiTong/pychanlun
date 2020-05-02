@@ -188,8 +188,8 @@ export default {
             globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'CP', 'YM', 'CN'],
             //    快速计算开仓手数
             quickCalc: {
-                openPrice: 0,
-                stopPrice: 0,
+                openPrice: "",
+                stopPrice: "",
                 count: 0,
                 stopRate: 0,
                 perOrderStopMoney: 0
@@ -378,7 +378,10 @@ export default {
                     query: {
                         symbol: this.symbol,
                         isPosition: 'true',
-                        endDate: this.endDate
+                        endDate: this.endDate,
+                        positionPeriod: this.positionPeriod,
+                        positionDirection: this.positionDirection,
+                        positionStatus: this.positionStatus,
                     }
                 })
             } else {

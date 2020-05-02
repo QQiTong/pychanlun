@@ -2,7 +2,7 @@
     <div class="multi-period-main">
         <KlineHeader ref="klineHeader" :periodList="periodList" :endDate="endDate" :inputSymbol="inputSymbol" :quickCalc="quickCalc"
                      :submitSymbol="submitSymbol" :quickCalcMaxCount="quickCalcMaxCount" :quickSwitchDay="quickSwitchDay"
-                     :switchPeriod="switchPeriod" :jumpToControl="jumpToControl" :showPeriodList="false" :changeDate="changeDate"
+                     :switchPeriod="switchPeriod" :jumpToControl="jumpToControl" :showPeriodList="false" :changeDate="changeDate" :jumpToMultiPeriod="jumpToMultiPeriod"
         ></KlineHeader>
         <div class="echarts-list">
             <div class="echarts-item" id="main3Parent">
