@@ -96,7 +96,8 @@ def FindPivots(from_idx, to_idx, duan_series, high_series, low_series, direction
                         pivot['dd'] = dd
                         pivot['end'] = sequence[idx]['end']
                         pivot['sequence_count'] = pivot['sequence_count'] + 1
-                        pivots.append(pivot) # 成立中枢
+                        # 成立中枢
+                        pivots.append(pivot)
                     else:
                         pivot = { 'sequence_count': 0 }
                 else:

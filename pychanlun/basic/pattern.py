@@ -78,7 +78,7 @@ def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
     gg1 = pydash.find_last_index(higher_duan_series[:idx+1], lambda x: x == 1) # 走势高点
     if dd1 > gg1 >= 0:
         # 最后一个确认的是下跌走势
-        d1 = pydash.find_index(duan_series[dd1+1:idx+1], lambda x: x == -1)
+        d1 = dd1 + 1 + pydash.find_index(duan_series[dd1+1:idx+1], lambda x: x == -1)
         c = len(pydash.filter_(duan_series[dd1+1:idx+1], lambda x: x == -1))
         # 下跌中枢
         pivots = FindPivots(gg1, dd1, duan_series, high_series, low_series, -1)
@@ -89,8 +89,9 @@ def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
             # 走势低点后还有线段低点，但是还没有形成新的走势
             if len(pivots) > 0 and low_series[d1] > pivots[-1]['zg']:
                 category = '三类买'
-            elif c == 1:
+            if c == 1:
                 category = '二类买'
+
     elif gg1 > dd1 >= 0:
         # 最后一个确认的是上涨走势
         d1 = gg1 + pydash.find_index(duan_series[gg1:idx+1], lambda x: x == -1)
@@ -117,7 +118,7 @@ def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
                 if low_series[d1] > pivots[-1]['gg']:
                     category = '三类买'
                 else:
-                    category = '扩展完备'
+                    category = '扩展完备买'
     return category
 
 
@@ -130,7 +131,7 @@ def sell_category(higher_duan_series, duan_series, high_series, low_series, idx)
     gg1 = pydash.find_last_index(higher_duan_series[:idx+1], lambda x: x == 1)
     if gg1 > dd1 >= 0:
         # 最后一个确认的是上涨走势
-        g1 = pydash.find_index(duan_series[dd1+1:idx+1], lambda x: x == 1)
+        g1 = dd1 + 1 + pydash.find_index(duan_series[dd1+1:idx+1], lambda x: x == 1)
         c = len(pydash.filter_(duan_series[dd1+1:idx+1], lambda x: x == 1))
         # 上涨
         pivots = FindPivots(dd1, gg1, duan_series, high_series, low_series, 1)
@@ -141,8 +142,9 @@ def sell_category(higher_duan_series, duan_series, high_series, low_series, idx)
             # 走势高点后还有线段高点，但是还没有形成新的走势
             if len(pivots) > 0 and high_series[g1] < pivots[-1]['zd']:
                 category = '三类卖'
-            elif c == 1:
+            if c == 1:
                 category = '二类卖'
+
     elif dd1 > gg1 >= 0:
         # 最后一个确认的是下跌走势
         # 下跌走势低点后面的第一个线段高点
@@ -168,8 +170,8 @@ def sell_category(higher_duan_series, duan_series, high_series, low_series, idx)
                 category = '完备卖'
             elif len(pivots) > 0:
                 # 有中枢
-                if high_series[g1] < pivots[-1]['zd']:
-                    category = '三卖'
+                if high_series[g1] < pivots[-1]['dd']:
+                    category = '三类卖'
                 else:
-                    category = '中枢延伸或扩展'
+                    category = '扩展完备卖'
     return category
