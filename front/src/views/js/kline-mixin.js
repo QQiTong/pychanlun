@@ -3,6 +3,7 @@ import {futureApi} from '@/api/futureApi'
 import {stockApi} from '@/api/stockApi'
 import CommonTool from '@/tool/CommonTool'
 import KlineHeader from "../KlineHeader"
+
 // import 'echarts/lib/chart/candlestick'
 // import 'echarts/lib/chart/line'
 // import 'echarts/lib/chart/bar'
@@ -23,8 +24,7 @@ export default {
     data() {
         return {
             showPeriodList: false,
-            // 防重复请求
-            requestFlag: true,
+
             // 控制加载动画是否第一次请求
             firstFlag: [true, true, true, true, true, true, true],
             // 大图
@@ -455,11 +455,7 @@ export default {
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
             that.timer = setInterval(() => {
-                if (that.requestFlag) {
-                    that.switchSymbol(that.symbol, 'update')
-                } else {
-                    // console.log('wait...')
-                }
+                that.switchSymbol(that.symbol, 'update')
             }, 10000)
         },
         processMargin() {
@@ -497,7 +493,6 @@ export default {
                 window.localStorage.setItem('symbolConfig', JSON.stringify(this.futureConfig))
                 this.processMargin()
             }).catch((error) => {
-                this.requestFlag = true
                 console.log('获取合约配置失败:', error)
             })
         },
@@ -563,7 +558,6 @@ export default {
             this.getStockData(requestData, update)
         },
         getStockData(requestData, update) {
-            this.requestFlag = false
             if (this.period !== '') {
                 if (this.firstFlag[0] === true) {
                     this.myChart.showLoading(this.echartsConfig.loadingOption)
@@ -595,54 +589,59 @@ export default {
                 }
             }
 
-            futureApi.stockData(requestData).then(res => {
-                // 如果之前请求的symbol 和当前的symbol不一致，直接过滤
-                if (res && (res.symbol !== this.symbol || res.endDate !== this.endDate || res.period !== requestData.period)) {
-                    console.log('symbol或period结束日期不一致，过滤掉之前的请求')
-                    return
-                }
-                this.requestFlag = true
-                if (this.period !== '') {
-                    this.myChart.hideLoading()
-                    this.firstFlag[0] = false
-                } else {
-                    if (requestData.period === '3m') {
-                        this.myChart3.hideLoading()
-                        this.firstFlag[1] = false
+            console.log(this.$cache);
+
+            const requesting = this.$cache.get(`REQUESTING#${requestData.symbol}#${requestData.period}`)
+            if (!requesting) {
+                this.$cache.set(`REQUESTING#${requestData.symbol}#${requestData.period}`, true, 60)
+                futureApi.stockData(requestData).then(res => {
+                    // 如果之前请求的symbol 和当前的symbol不一致，直接过滤
+                    if (res && (res.symbol !== this.symbol || res.endDate !== this.endDate || res.period !== requestData.period)) {
+                        console.log('symbol或period结束日期不一致，过滤掉之前的请求')
+                        return
                     }
-                    if (requestData.period === '5m') {
-                        this.myChart5.hideLoading()
-                        this.firstFlag[2] = false
-                    }
-                    if (requestData.period === '15m') {
-                        this.myChart15.hideLoading()
-                        this.firstFlag[3] = false
-                    }
-                    if (requestData.period === '30m') {
-                        this.myChart30.hideLoading()
-                        this.firstFlag[4] = false
-                    }
-                    if (requestData.period === '60m') {
-                        this.myChart60.hideLoading()
-                        this.firstFlag[5] = false
-                    }
-                    if (this.isShow1Min) {
-                        if (requestData.period === '1m') {
-                            this.myChart1.hideLoading()
-                            this.firstFlag[6] = false
-                        }
+                    if (this.period !== '') {
+                        this.myChart.hideLoading()
+                        this.firstFlag[0] = false
                     } else {
-                        if (requestData.period === '240m') {
-                            this.myChart240.hideLoading()
-                            this.firstFlag[6] = false
+                        if (requestData.period === '3m') {
+                            this.myChart3.hideLoading()
+                            this.firstFlag[1] = false
+                        }
+                        if (requestData.period === '5m') {
+                            this.myChart5.hideLoading()
+                            this.firstFlag[2] = false
+                        }
+                        if (requestData.period === '15m') {
+                            this.myChart15.hideLoading()
+                            this.firstFlag[3] = false
+                        }
+                        if (requestData.period === '30m') {
+                            this.myChart30.hideLoading()
+                            this.firstFlag[4] = false
+                        }
+                        if (requestData.period === '60m') {
+                            this.myChart60.hideLoading()
+                            this.firstFlag[5] = false
+                        }
+                        if (this.isShow1Min) {
+                            if (requestData.period === '1m') {
+                                this.myChart1.hideLoading()
+                                this.firstFlag[6] = false
+                            }
+                        } else {
+                            if (requestData.period === '240m') {
+                                this.myChart240.hideLoading()
+                                this.firstFlag[6] = false
+                            }
                         }
                     }
-                }
-                // console.log("结果", res)
-                this.draw(res, update, requestData.period)
-            }).catch(() => {
-                this.requestFlag = true
-            })
+                    this.draw(res, update, requestData.period)
+                    this.$cache.del(`REQUESTING#${requestData.symbol}#${requestData.period}`)
+                }).catch(e => {
+                    console.log(e)
+                })
+            }
         },
 
         draw(stockJsonData, update, period) {
