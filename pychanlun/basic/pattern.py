@@ -79,7 +79,9 @@ def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
     if dd1 > gg1 >= 0:
         # 最后一个确认的是下跌走势
         d1 = pydash.find_index(duan_series[dd1+1:idx+1], lambda x: x == -1)
-        pivots = FindPivots(gg1, dd1, duan_series, high_series, low_series, -1) # 下跌中枢
+        c = len(pydash.filter_(duan_series[dd1+1:idx+1], lambda x: x == -1))
+        # 下跌中枢
+        pivots = FindPivots(gg1, dd1, duan_series, high_series, low_series, -1)
         if d1 == -1:
             # 走势低点后面没有线段低点
             category = '一类买'
@@ -87,7 +89,7 @@ def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
             # 走势低点后还有线段低点，但是还没有形成新的走势
             if len(pivots) > 0 and low_series[d1] > pivots[-1]['zg']:
                 category = '三类买'
-            else:
+            elif c == 1:
                 category = '二类买'
     elif gg1 > dd1 >= 0:
         # 最后一个确认的是上涨走势
@@ -129,6 +131,7 @@ def sell_category(higher_duan_series, duan_series, high_series, low_series, idx)
     if gg1 > dd1 >= 0:
         # 最后一个确认的是上涨走势
         g1 = pydash.find_index(duan_series[dd1+1:idx+1], lambda x: x == 1)
+        c = len(pydash.filter_(duan_series[dd1+1:idx+1], lambda x: x == 1))
         # 上涨
         pivots = FindPivots(dd1, gg1, duan_series, high_series, low_series, 1)
         if g1 == -1:
@@ -138,7 +141,7 @@ def sell_category(higher_duan_series, duan_series, high_series, low_series, idx)
             # 走势高点后还有线段高点，但是还没有形成新的走势
             if len(pivots) > 0 and high_series[g1] < pivots[-1]['zd']:
                 category = '三类卖'
-            else:
+            elif c == 1:
                 category = '二类卖'
     elif dd1 > gg1 >= 0:
         # 最后一个确认的是下跌走势
