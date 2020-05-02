@@ -82,12 +82,11 @@
             },
             periodList: {
                 type: Array,
-                default:
-                    []
+                default: []
             },
 
-            inputSymbol: ,
-            endDate: 
+            inputSymbol: null,
+            endDate: null
 
         },
         methods: {

@@ -359,7 +359,7 @@
                     <span>{{ row.signal| signalTypeFilter }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="分类" align="center" :key="4">
+            <el-table-column label="分类" align="center" :key="28">
                 <template slot-scope="{row}">
                     <span>{{ row.tag }}</span>
                 </template>
