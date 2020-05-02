@@ -233,11 +233,11 @@ export default {
         // 本地缓存有合约配置数据
         if (futureConfig != null) {
             this.futureConfig = JSON.parse(futureConfig)
-            this.requestSymbolData()
         } else {
             // 新设备 直接进入大图页面 先获取合约配置数据
             this.getFutureConfig()
         }
+        this.requestSymbolData()
     },
     beforeDestroy() {
         clearTimeout(this.timer)
@@ -443,12 +443,15 @@ export default {
             // 切换symbol 重置第一次请求标志
             // 一个大图+ 6个小图
             this.firstFlag = [true, true, true, true, true, true, true]
-            this.switchSymbol(this.symbol, 'reload')
+            this.requestSymbolData()
             // this.replaceParamVal("symbol",this.symbol)
         },
         // 请求数据
         requestSymbolData() {
             let that = this
+            if (that.timer) {
+                clearInterval(that.timer)
+            }
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
             that.timer = setInterval(() => {
@@ -493,7 +496,6 @@ export default {
                 this.futureConfig = res
                 window.localStorage.setItem('symbolConfig', JSON.stringify(this.futureConfig))
                 this.processMargin()
-                this.requestSymbolData()
             }).catch((error) => {
                 this.requestFlag = true
                 console.log('获取合约配置失败:', error)
@@ -512,15 +514,6 @@ export default {
                 document.title = `${symbol}-${that.period}`
             } else {
                 document.title = symbol
-            }
-            if (that.timer) {
-                clearTimeout(that.timer)
-                that.timer = setInterval(() => {
-                    if (this.requestFlag) {
-                        that.switchSymbol(symbol, 'update')
-                    } else {
-                    }
-                }, 10000)
             }
             const {...query} = that.$route.query
             // 如果是大图，只请求一个周期的数据

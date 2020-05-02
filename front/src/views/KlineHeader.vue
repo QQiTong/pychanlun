@@ -16,9 +16,12 @@
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('pre')" size="mini">前一天</el-button>
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('next')" size="mini">后一天</el-button>
             <el-input v-model="inputSymbol_" placeholder="请输入代码" size="mini" class="stock-input ml-5 mr-5" @change="submitSymbol"/>
-            <el-button type="primary" class="primary-button" v-for="period in periodList" :key="period" size="mini" @click="switchPeriod(period)"
-                       v-if="showPeriodList">{{period}}
-            </el-button>
+            <span v-if="showPeriodList">
+                <el-button type="primary" class="primary-button" v-for="period in periodList" :key="period" size="mini" @click="switchPeriod(period)">
+                    {{period}}
+                </el-button>
+            </span>
+
             快速计算开仓手数：
             <el-input v-model="quickCalc.openPrice" placeholder="开仓" size="mini" class="stock-input-short ml-5 mr-5"></el-input>
             <el-input v-model="quickCalc.stopPrice" placeholder="止损" size="mini" class="stock-input-short ml-5 mr-5" @change="quickCalcMaxCount"></el-input>
@@ -41,53 +44,46 @@
         props: {
             showPeriodList: {
                 type: Boolean,
-                default:
-                    false
+                default: false
             },
             quickCalc: {
                 type: Object,
-                default:
-                    null
+                default: null
             },
             submitSymbol: {
                 type: Function,
-                default:
-                    null
+                default: null
             },
             quickCalcMaxCount: {
                 type: Function,
-                default:
-                    null
+                default: null
             },
             quickSwitchDay: {
                 type: Function,
-                default:
-                    null
+                default: null
             },
             switchPeriod: {
                 type: Function,
-                default:
-                    null
+                default: null
             },
             jumpToControl: {
                 type: Function,
-                default:
-                    null
+                default: null
             },
-
             changeDate: {
                 type: Function,
-                default:
-                    null
+                default: null
             },
             periodList: {
                 type: Array,
-                default:
-                    []
+                default: null
             },
-
-            inputSymbol: ,
-            endDate: 
+            inputSymbol: {
+                type: String
+            },
+            endDate: {
+                type: String
+            }
 
         },
         methods: {

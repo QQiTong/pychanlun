@@ -334,6 +334,8 @@ class BusinessService:
             # print(item)
             df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
                                 start_date=start, end_date=end)
+            if df1d is None:
+                continue
             df1m = rq.current_minute(item)
             preday = df1d.iloc[0, 3]
             today = df1m.iloc[0, 0]
