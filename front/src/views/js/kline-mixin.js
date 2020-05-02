@@ -591,7 +591,7 @@ export default {
 
             const requesting = this.$cache.get(`REQUESTING#${requestData.symbol}#${requestData.period}`)
             if (!requesting) {
-                this.$cache.set(`REQUESTING#${requestData.symbol}#${requestData.period}`, true, 30)
+                this.$cache.set(`REQUESTING#${requestData.symbol}#${requestData.period}`, true, 60)
                 futureApi.stockData(requestData).then(res => {
                     // 如果之前请求的symbol 和当前的symbol不一致，直接过滤
                     if (res && (res.symbol !== this.symbol || res.endDate !== this.endDate || res.period !== requestData.period)) {
