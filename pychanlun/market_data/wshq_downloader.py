@@ -92,7 +92,7 @@ dingMsg = DingMsg()
 global_future_alias = config['global_future_alias']
 global_future_symbol = config['global_future_symbol']
 ohlc_dict = {'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last', 'Volume': 'sum'}
-# 8个品种 LENID3M 暂时没接
+# 10个品种 5个市场
 futures = ['CEYMA0', 'CEESA0', 'CENQA0', 'WGCNA0', 'NECLA0', 'CMGCA0', 'CMSIA0','COZSA0','COZLA0','COZMA0']
 is_run = True
 
@@ -156,8 +156,14 @@ def fetch_futures_mink():
                 time.sleep(1)
                 if not is_run:
                     break
-
-            time.sleep(10)
+            '''
+            间隔
+            10s  11592 次
+            20s  10416 次
+            25s  9696  次
+            '''
+            #
+            time.sleep(25)
         except Exception as e:
             print("外盘期货采集出错", Exception, e)
             # dingMsg.send("remind外盘期货采集出错")
