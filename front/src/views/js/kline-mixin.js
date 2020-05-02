@@ -589,8 +589,6 @@ export default {
                 }
             }
 
-            console.log(this.$cache);
-
             const requesting = this.$cache.get(`REQUESTING#${requestData.symbol}#${requestData.period}`)
             if (!requesting) {
                 this.$cache.set(`REQUESTING#${requestData.symbol}#${requestData.period}`, true, 60)
