@@ -75,27 +75,24 @@ export default {
                     height: '85%',
                     top: 50
                 },
-                    {
-                        left: '0%',
-                        right: '18%',
-                        top: '82%',
-                        height: '20%',
-                    },
-
-                ],
+                {
+                    left: '0%',
+                    right: '18%',
+                    top: '82%',
+                    height: '20%',
+                }],
                 klineBigGrid: [{
                     left: '0%',
                     right: '5%',
                     height: '90%',
                     top: 50
                 },
-                    {
-                        left: '0%',
-                        right: '5%',
-                        top: '85%',
-                        height: '20%',
-                    },
-                ],
+                {
+                    left: '0%',
+                    right: '5%',
+                    top: '85%',
+                    height: '20%',
+                }],
             },
             // 品种
             symbol: 'RB2005',
@@ -124,7 +121,6 @@ export default {
             // 不同期货公司提高的点数不一样 ,华安是在基础上加1%
             marginLevelCompany: 0.01,
             marginPrice: 0, // 每手需要的保证金
-
 
             currentMarginRate: null,
             marginLevel: 1,
@@ -240,10 +236,8 @@ export default {
             this.requestSymbolData()
         } else {
             // 新设备 直接进入大图页面 先获取合约配置数据
-
             this.getFutureConfig()
         }
-
     },
     beforeDestroy() {
         clearTimeout(this.timer)
@@ -477,7 +471,6 @@ export default {
                 this.currentMarginRate = 1
                 this.marginLevel = 1
                 this.contractMultiplier = 1
-
             } else if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
                 // 外盘
                 this.symbolInfo = this.futureConfig[this.symbol]
@@ -493,7 +486,6 @@ export default {
                 this.marginLevel = Number((1 / this.currentMarginRate).toFixed(2))
                 this.contractMultiplier = this.symbolInfo.contract_multiplier
             }
-
         },
         getFutureConfig() {
             futureApi.getFutureConfig().then(res => {
@@ -2108,7 +2100,7 @@ export default {
                     case 14:
                         lastBeichi = jsonObj.sell_v_reverse_higher
                         break
-                    //背驰
+                    // 背驰
                     case 15:
                         lastBeichi = jsonObj.buyMACDBCData
                         break
@@ -2859,7 +2851,7 @@ export default {
             }
 
             if (buy_zs_huila_stamp === 0 && buy_zs_huila_higher_stamp === 0 && sell_zs_huila_Stamp === 0 && sell_zs_huila_higher_stamp === 0 &&
-                buy_duan_break_stamp === 0  && sell_duan_break_stamp === 0 &&
+                buy_duan_break_stamp === 0 && sell_duan_break_stamp === 0 &&
                 buy_zs_tupo_stamp === 0 && buy_zs_tupo_higher_stamp === 0 && sell_zs_tupo_stamp === 0 && sell_zs_tupo_higher_stamp === 0 &&
                 buy_v_reverse_stamp === 0 && buy_v_reverse_higher_stamp === 0 && sell_v_reverse_stamp === 0 && sell_v_reverse_higher_stamp &&
                 buy_beichi_stamp === 0 && sell_beichi_stamp === 0

@@ -7,9 +7,9 @@ var gtInit = (function (global, factory) {
   "use strict";
   if (typeof module === "object" && typeof module.exports === "object") {
     // CommonJS
-    module.exports = global.document ?
-      factory(global, true) :
-      function (w) {
+    module.exports = global.document
+      ? factory(global, true)
+      : function (w) {
         if (!w.document) {
           throw new Error("Geetest requires a window with a document");
         }
@@ -113,9 +113,8 @@ var gtInit = (function (global, factory) {
     script.onload = script.onreadystatechange = function () {
       if (!loaded &&
         (!script.readyState ||
-          "loaded" === script.readyState ||
-          "complete" === script.readyState)) {
-
+          script.readyState === "loaded" ||
+          script.readyState === "complete")) {
         loaded = true;
         setTimeout(function () {
           cb(false);
@@ -162,7 +161,6 @@ var gtInit = (function (global, factory) {
   };
   var load = function (protocol, domains, path, query, cb) {
     var tryRequest = function (at) {
-
       var url = makeURL(protocol, domains[at], path, query);
       loadScript(url, function (err) {
         if (err) {
@@ -278,4 +276,3 @@ var gtInit = (function (global, factory) {
 export default {
   gtInit
 }
-

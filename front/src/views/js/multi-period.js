@@ -1,6 +1,6 @@
 import klineMixin from "./kline-mixin"
 
 export default {
-    name:"multi-period",
+    name: "multi-period",
     mixins: [klineMixin],
 }

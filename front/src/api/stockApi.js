@@ -31,7 +31,7 @@ export const stockApi = {
         })
     },
 
-    //持仓操作
+    // 持仓操作
     // 新增一个持仓
     createPosition(data) {
         let url = `/api/create_stock_position`
@@ -42,7 +42,7 @@ export const stockApi = {
         })
     },
     // 查询单个持仓
-    getPosition(symbol, period,status) {
+    getPosition(symbol, period, status) {
         let url = `/api/get_stock_position?symbol=${symbol}&period=${period}&status=${status}`
         return axios({
             url: url,
@@ -67,7 +67,7 @@ export const stockApi = {
         })
     },
     // 更新持仓状态
-    updatePositionStatus(id,status) {
+    updatePositionStatus(id, status) {
         let url = `/api/update_stock_position_status?id=${id}&status=${status}`
         return axios({
             url: url,

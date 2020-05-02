@@ -100,7 +100,6 @@
             this.winPiechart = null
             this.losePieChart.dispose()
             this.losePieChart = null
-
         },
         methods: {
             getStatisticList() {
@@ -398,8 +397,6 @@
                     this.winPiechart.resize()
                     this.losePieChart.resize()
                 })
-
-
             },
             // 计算echarts 高度
             chartssize(container, charts) {

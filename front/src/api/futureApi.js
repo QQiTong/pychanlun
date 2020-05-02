@@ -90,7 +90,7 @@ export const futureApi = {
         })
     },
     // 查询单个持仓
-    getPosition (symbol, period, status,direction) {
+    getPosition (symbol, period, status, direction) {
         let url = `/api/get_position?symbol=${symbol}&period=${period}&status=${status}&direction=${direction}`
         return axios({
             url: url,
@@ -98,7 +98,7 @@ export const futureApi = {
         })
     },
     // 查询持仓列表
-    getPositionList (status, page, size,endDate) {
+    getPositionList (status, page, size, endDate) {
         let url = `/api/get_position_list?status=${status}&page=${page}&size=${size}&endDate=${endDate}`
         return axios({
             url: url,
@@ -123,7 +123,7 @@ export const futureApi = {
     //     })
     // },
     // 更新自动录入的持仓列表
-    updatePositionStatus (id, status,close_price) {
+    updatePositionStatus (id, status, close_price) {
         let url = `/api/update_position_status?id=${id}&status=${status}&close_price=${close_price}`
         return axios({
             url: url,

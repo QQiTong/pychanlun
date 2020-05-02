@@ -904,26 +904,21 @@
                     return 'success-row';
                 }
                 return "";
-            }
-            ,
+            },
             handleSizeChange(currentSize) {
                 this.listQuery.size = currentSize;
                 this.getPositionList();
-            }
-            ,
+            },
             handlePageChange(currentPage) {
                 this.listQuery.current = currentPage;
                 this.getPositionList();
-            }
-            ,
+            },
             handleQueryStatusChange() {
                 this.getPositionList();
-            }
-            ,
+            },
             filterTags(value, row) {
                 return row.status === value;
-            }
-            ,
+            },
             handleJumpToKline(row) {
                 console.log(this.$parent);
                 // this.$parent.jumpToKline(symbol)
@@ -942,8 +937,7 @@
                 });
                 window.open(routeUrl.href, "_blank");
                 // }
-            }
-            ,
+            },
             getPositionList() {
                 // this.positionList = [];
                 // this.listLoading = true;
@@ -962,16 +956,14 @@
                         // this.listLoading = false;
                         console.log("获取持仓列表失败", error);
                     });
-            }
-            ,
+            },
             handleModifyStatus(row, status) {
                 this.$message({
                     message: "操作Success",
                     type: "success"
                 });
                 row.status = status;
-            }
-            ,
+            },
 
             resetForm() {
                 this.positionForm = {
@@ -990,8 +982,7 @@
                     holdReason: "",
                     dynamicPositionList: []
                 };
-            }
-            ,
+            },
             addDynamicPosition() {
                 this.positionForm.dynamicPositionList.push({
                     time: new Date(),
@@ -999,12 +990,10 @@
                     amount: "",
                     reason: ""
                 });
-            }
-            ,
+            },
             removeDynamicPosition(index) {
                 this.positionForm.dynamicPositionList.splice(index, 1);
-            }
-            ,
+            },
             // 新增持仓
             handleCreatePos() {
                 this.resetForm();
@@ -1013,8 +1002,7 @@
                 this.$nextTick(() => {
                     this.$refs["positionFormRef"].clearValidate();
                 });
-            }
-            ,
+            },
             createData() {
                 this.$refs["positionFormRef"].validate(valid => {
                     if (valid) {
@@ -1045,8 +1033,7 @@
                             });
                     }
                 });
-            }
-            ,
+            },
             handleUpdate(row) {
                 // this.positionForm = Object.assign({}, row); // copy obj
                 this.positionForm = JSON.parse(JSON.stringify(row));
@@ -1055,8 +1042,7 @@
                 this.$nextTick(() => {
                     this.$refs["positionFormRef"].clearValidate();
                 });
-            }
-            ,
+            },
             updateData() {
                 this.$refs["positionFormRef"].validate(valid => {
                     if (valid) {
@@ -1086,8 +1072,7 @@
                             });
                     }
                 });
-            }
-            ,
+            },
             handleDelete(row, index) {
                 this.$notify({
                     title: "Success",
@@ -1096,8 +1081,7 @@
                     duration: 2000
                 });
                 this.positionList.splice(index, 1);
-            }
-            ,
+            },
 
             processSum() {
                 // 将内盘和外盘 分开计算
@@ -1147,8 +1131,7 @@
                         this.sumObj.marginSum += Math.round(item.total_margin, 0)
                     }
                 }
-            }
-            ,
+            },
             getSummaries(param) {
                 const {columns, data} = param;
                 const sums = [];
@@ -1316,7 +1299,6 @@
         .el-table__empty-text {
             color: white
         }
-
 
         .form-input {
             width: 200px !important;

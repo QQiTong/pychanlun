@@ -396,7 +396,7 @@
 <script>
 import CommonTool from "@/tool/CommonTool";
 import { stockApi } from "@/api/stockApi";
-//仓位控制
+// 仓位控制
 const positionPercentOptions = [
   { key: "10", display_name: "10%" },
   { key: "20", display_name: "20%" },
@@ -512,21 +512,21 @@ export default {
         period: "",
         signal: "",
         status: "holding",
-        //方向
+        // 方向
         direction: "long",
         positionPercent: "",
-        //价格
+        // 价格
         price: "",
-        //数量
+        // 数量
         amount: "",
         stopLosePrice: "",
-        //区间套级别
+        // 区间套级别
         // nestLevel: "2级套",
-        //介入逻辑
+        // 介入逻辑
         enterReason: "",
-        //持仓逻辑
+        // 持仓逻辑
         holdReason: "",
-        //动态止盈,加仓，止损，锁仓列表
+        // 动态止盈,加仓，止损，锁仓列表
         dynamicPositionList: []
       },
       rules: {
@@ -631,8 +631,8 @@ export default {
     handleJumpToKline(row) {
       console.log(this.$parent);
       // this.$parent.jumpToKline(symbol)
-      //结束状态 k线页面不获取持仓信息
-      if (row.status !== "winEnd" && row.status !=="loseEnd") {
+      // 结束状态 k线页面不获取持仓信息
+      if (row.status !== "winEnd" && row.status !== "loseEnd") {
         let routeUrl = this.$router.resolve({
           path: "/multi-period",
           query: {
@@ -722,7 +722,7 @@ export default {
                 type: "success",
                 duration: 2000
               });
-              //拉取后端接口获取最新持仓列表
+              // 拉取后端接口获取最新持仓列表
               this.getPositionList(
                 this.positionQueryForm.status,
                 this.listQuery.current,
@@ -738,7 +738,7 @@ export default {
       });
     },
     handleUpdate(row) {
-      //this.positionForm = Object.assign({}, row); // copy obj
+      // this.positionForm = Object.assign({}, row); // copy obj
       this.positionForm = JSON.parse(JSON.stringify(row));
       this.dialogStatus = "update";
       this.dialogFormVisible = true;
@@ -763,7 +763,7 @@ export default {
                 type: "success",
                 duration: 2000
               });
-              //拉取后端接口获取最新持仓列表
+              // 拉取后端接口获取最新持仓列表
               this.getPositionList(
                 this.positionQueryForm.status,
                 this.listQuery.current,

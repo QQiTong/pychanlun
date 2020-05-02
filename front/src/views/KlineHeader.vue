@@ -86,12 +86,12 @@
                     []
             },
 
-            inputSymbol: "",
-            endDate: ""
+            inputSymbol: ,
+            endDate: 
 
         },
-        methods:{
-            setELDatePicker(endDate){
+        methods: {
+            setELDatePicker(endDate) {
                 this.endDate_ = endDate
             }
         }
