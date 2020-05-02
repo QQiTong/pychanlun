@@ -15,7 +15,7 @@ from pychanlun import Duan
 from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.pattern import DualEntangleForBuyLong, PerfectForBuyLong, BuyCategory
+from pychanlun.basic.pattern import DualEntangleForBuyLong, PerfectForBuyLong, buy_category
 import talib as ta
 import numpy as np
 import pydash
@@ -175,7 +175,7 @@ def calculate(info):
             tags.append("双盘")
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
+        category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-拉回笔中枢确认底背',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
@@ -194,7 +194,7 @@ def calculate(info):
 
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
+        category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-升破笔中枢',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
@@ -213,7 +213,7 @@ def calculate(info):
 
         if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
-        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
+        category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-笔中枢三卖V', fire_time,
                     price, stop_lose_price, 'BUY_LONG', tags, category)
 
@@ -224,7 +224,7 @@ def calculate(info):
         fire_time = duan_pohuai['buy_duan_break']['date'][i]
         price = duan_pohuai['buy_duan_break']['data'][i]
         stop_lose_price = duan_pohuai['buy_duan_break']['stop_lose_price'][i]
-        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx)
+        category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-线段破坏', fire_time,
                     price, stop_lose_price, 'BUY_LONG', [], category)
 

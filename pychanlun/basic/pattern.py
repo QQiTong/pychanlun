@@ -72,27 +72,37 @@ def DualEntangleForSellShort(duan_series, entanglement_list, higher_entaglement_
 
 
 # 买点的所在形态
-def BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx):
+def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
     category = ''
     dd1 = pydash.find_last_index(higher_duan_series[:idx+1], lambda x: x == -1) # 走势低点
     gg1 = pydash.find_last_index(higher_duan_series[:idx+1], lambda x: x == 1) # 走势高点
-    if dd1 > gg1 >= 0: # 最后一个确认的是下跌走势
+    if dd1 > gg1 >= 0:
+        # 最后一个确认的是下跌走势
         d1 = pydash.find_index(duan_series[dd1+1:idx+1], lambda x: x == -1)
         pivots = FindPivots(gg1, dd1, duan_series, high_series, low_series, -1) # 下跌中枢
-        if d1 == -1: # 走势低点后面没有线段低点
+        if d1 == -1:
+            # 走势低点后面没有线段低点
             category = '一类买'
-        else: # 走势低点后还有线段低点，但是还没有形成新的走势
+        else:
+            # 走势低点后还有线段低点，但是还没有形成新的走势
             if len(pivots) > 0 and low_series[d1] > pivots[-1]['zg']:
                 category = '三类买'
             else:
                 category = '二类买'
-    elif gg1 > dd1 >= 0: # 最后一个确认的是上涨走势
-        d1 = gg1 + pydash.find_index(duan_series[gg1:idx+1], lambda x: x == -1) # 上涨走势高点后面的第一个线段低点
-        pivots = FindPivots(dd1, gg1, duan_series, high_series, low_series, 1) # 上涨中枢
-        c = len(pydash.chain(duan_series[dd1:gg1]).filter(lambda x: x == 1).value()) # 上涨走势中有几个反向线段
-        c2 = len(pydash.chain(duan_series[gg1:idx+1]).filter(lambda x: x == -1).value()) # 上涨走势高点后面又几个反向线段
-        if d1 > gg1: # 上涨走势高点后有线段低点
-            if len(pivots) == 0 and c >= 1: # 没有中枢是三段及三段以上走势
+    elif gg1 > dd1 >= 0:
+        # 最后一个确认的是上涨走势
+        d1 = gg1 + pydash.find_index(duan_series[gg1:idx+1], lambda x: x == -1)
+        # 上涨走势高点后面的第一个线段低点
+        pivots = FindPivots(dd1, gg1, duan_series, high_series, low_series, 1)
+        # 上涨中枢
+        c = len(pydash.chain(duan_series[dd1:gg1]).filter(lambda x: x == 1).value())
+        # 上涨走势中有几个反向线段
+        c2 = len(pydash.chain(duan_series[gg1:idx+1]).filter(lambda x: x == -1).value())
+        # 上涨走势高点后面又几个反向线段
+        if d1 > gg1:
+            # 上涨走势高点后有线段低点
+            if len(pivots) == 0 and c >= 1:
+                # 没有中枢是三段及三段以上走势
                 i = pydash.find_last_index(duan_series[:gg1], lambda x: x == 1)
                 if low_series[d1] > high_series[i]:
                     category = '准三买'
@@ -100,11 +110,12 @@ def BuyCategory(higher_duan_series, duan_series, high_series, low_series, idx):
                     category = '完备买'
             elif len(pivots) == 0 and c2 == 2:
                 category = '完备买'
-            elif len(pivots) > 0: # 有中枢
-                if low_series[d1] > pivots[-1]['zg']:
+            elif len(pivots) > 0:
+                # 有中枢
+                if low_series[d1] > pivots[-1]['gg']:
                     category = '三类买'
                 else:
-                    category = '中枢延伸或扩展'
+                    category = '扩展完备'
     return category
 
 

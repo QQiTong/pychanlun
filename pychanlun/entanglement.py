@@ -4,7 +4,7 @@ import pydash
 
 from pychanlun.basic.comm import FindPrevEq
 from pychanlun.basic.pattern import PerfectForBuyLong, PerfectForSellShort
-from pychanlun.basic.pattern import BuyCategory, sell_category
+from pychanlun.basic.pattern import buy_category, sell_category
 
 
 class Entanglement:
@@ -231,7 +231,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     if PerfectForBuyLong(duan_series, high_series, low_series, r):
                         tags.append('完备')
                     if higher_duan_series is not None:
-                        category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, r)
+                        category = buy_category(higher_duan_series, duan_series, high_series, low_series, r)
                         if len(category) > 0:
                             tags.append(category)
                     result['buy_zs_huila']['tag'].append(','.join(tags))
@@ -277,7 +277,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 if PerfectForBuyLong(duan_series, high_series, low_series, r):
                     tags.append('完备')
                 if higher_duan_series is not None:
-                    category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, r)
+                    category = buy_category(higher_duan_series, duan_series, high_series, low_series, r)
                     if len(category) > 0:
                         tags.append(category)
                 result['buy_zs_tupo']['tag'].append(','.join(tags))
@@ -388,7 +388,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                                 if PerfectForBuyLong(duan_series, high_series, low_series, k):
                                     tags.append('完备')
                                 if higher_duan_series is not None:
-                                    category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, k)
+                                    category = buy_category(higher_duan_series, duan_series, high_series, low_series, k)
                                     if len(category) > 0:
                                         tags.append(category)
                                 result['buy_v_reverse']['tag'].append(','.join(tags))
@@ -465,7 +465,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                         if PerfectForBuyLong(duan_series, high_series, low_series, k):
                             tags.append('完备买')
                         if higher_duan_series is not None:
-                            category = BuyCategory(higher_duan_series, duan_series, high_series, low_series, k)
+                            category = buy_category(higher_duan_series, duan_series, high_series, low_series, k)
                             if len(category) > 0:
                                 tags.append(category)
                         result['buy_duan_break']['tag'].append(','.join(tags))

@@ -25,24 +25,32 @@ def FindPivots(from_idx, to_idx, duan_series, high_series, low_series, direction
             for idx in range(len(sequence)):
                 if pivot['sequence_count'] == 0:
                     pivot['zg'] = sequence[idx]['high']
+                    pivot['gg'] = sequence[idx]['high']
                     pivot['zd'] = sequence[idx]['low']
+                    pivot['dd'] = sequence[idx]['low']
                     pivot['start'] = sequence[idx]['start']
                     pivot['end'] = sequence[idx]['end']
                     pivot['sequence_count'] = 1
                 elif pivot['sequence_count'] == 1:
                     zg = min(sequence[idx]['high'], pivot['zg'])
                     zd = max(sequence[idx]['low'], pivot['zd'])
+                    gg = max(sequence[idx]['high'], pivot['gg'])
+                    dd = min(sequence[idx]['low'], pivot['dd'])
                     if zg >= zd:
                         pivot['zg'] = zg
                         pivot['zd'] = zd
+                        pivot['gg'] = gg
+                        pivot['dd'] = dd
                         pivot['end'] = sequence[idx]['end']
                         pivot['sequence_count'] = pivot['sequence_count'] + 1
-                        pivots.append(pivot) # 成立中枢
+                        # 成立中枢
+                        pivots.append(pivot)
                     else:
                         pivot = { 'sequence_count': 0 }
                 else:
                     if sequence[idx]['high'] >= pivot['zd'] and sequence[idx]['low'] <= pivot['zg']:
-                        pivot['end'] = sequence[idx]['end'] # 中枢继续延伸
+                        # 中枢继续延伸
+                        pivot['end'] = sequence[idx]['end']
                         pivot['sequence_count'] = pivot['sequence_count'] + 1
                     else:
                         pivot = { 'sequence_count': 0 }
@@ -69,16 +77,23 @@ def FindPivots(from_idx, to_idx, duan_series, high_series, low_series, direction
             for idx in range(len(sequence)):
                 if pivot['sequence_count'] == 0:
                     pivot['zg'] = sequence[idx]['high']
+                    pivot['gg'] = sequence[idx]['high']
                     pivot['zd'] = sequence[idx]['low']
+                    pivot['dd'] = sequence[idx]['low']
                     pivot['start'] = sequence[idx]['start']
                     pivot['end'] = sequence[idx]['end']
                     pivot['sequence_count'] = pivot['sequence_count'] + 1
                 elif pivot['sequence_count'] == 1:
                     zg = min(sequence[idx]['high'], pivot['zg'])
                     zd = max(sequence[idx]['low'], pivot['zd'])
+                    gg = max(sequence[idx]['high'], pivot['gg'])
+                    dd = min(sequence[idx]['low'], pivot['dd'])
                     if zg >= zd:
                         pivot['zg'] = zg
                         pivot['zd'] = zd
+                        pivot['zd'] = zd
+                        pivot['gg'] = gg
+                        pivot['dd'] = dd
                         pivot['end'] = sequence[idx]['end']
                         pivot['sequence_count'] = pivot['sequence_count'] + 1
                         pivots.append(pivot) # 成立中枢
@@ -86,7 +101,8 @@ def FindPivots(from_idx, to_idx, duan_series, high_series, low_series, direction
                         pivot = { 'sequence_count': 0 }
                 else:
                     if sequence[idx]['high'] >= pivot['zd'] and sequence[idx]['low'] <= pivot['zg']:
-                        pivot['end'] = sequence[idx]['end'] # 中枢继续延伸
+                        # 中枢继续延伸
+                        pivot['end'] = sequence[idx]['end']
                         pivot['sequence_count'] = pivot['sequence_count'] + 1
                     else:
                         pivot = { 'sequence_count': 0 }
