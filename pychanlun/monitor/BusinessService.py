@@ -337,11 +337,11 @@ class BusinessService:
             if df1d is None:
                 continue
             df1m = rq.current_minute(item)
-            preday = df1d.iloc[0, 3]
             today = df1m.iloc[0, 0]
-            if df1d is None or df1m is None:
+            if df1d is None:
                 change = "--"
             else:
+                preday = df1d.iloc[0, 3]
                 change = round(((today - preday) / preday), 4)
                 # print(preday, today, change)
             resultItem = {'change': change, 'price': today}

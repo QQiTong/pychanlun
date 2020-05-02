@@ -78,12 +78,8 @@
                 type: Array,
                 default: null
             },
-            inputSymbol: {
-                type: String
-            },
-            endDate: {
-                type: String
-            }
+            inputSymbol: null,
+            endDate: null
 
         },
         methods: {
