@@ -2099,60 +2099,60 @@ export default {
                     case 1:
                         lastBeichi = jsonObj.buy_zs_huila
                         break
+                    // case 2:
+                    //     lastBeichi = jsonObj.buy_zs_huila_higher
+                    //     break
                     case 2:
-                        lastBeichi = jsonObj.buy_zs_huila_higher
-                        break
-                    case 3:
                         lastBeichi = jsonObj.sell_zs_huila
                         break
-                    case 4:
-                        lastBeichi = jsonObj.sell_zs_huila_higher
-                        break
+                    // case 4:
+                    //     lastBeichi = jsonObj.sell_zs_huila_higher
+                    //     break
                     // 线段破坏
-                    case 5:
+                    case 3:
                         lastBeichi = jsonObj.buy_duan_break
                         break
                     // case 6:
                     //     lastBeichi = jsonObj.buy_duan_break_higher
                     //     break
-                    case 6:
+                    case 4:
                         lastBeichi = jsonObj.sell_duan_break
                         break
                     // case 8:
                     //     lastBeichi = jsonObj.sell_duan_break_higher
                     //     break
                     // 突破
-                    case 7:
+                    case 5:
                         lastBeichi = jsonObj.buy_zs_tupo
                         break
-                    case 8:
-                        lastBeichi = jsonObj.buy_zs_tupo_higher
-                        break
-                    case 9:
+                    // case 6:
+                    //     lastBeichi = jsonObj.buy_zs_tupo_higher
+                    //     break
+                    case 6:
                         lastBeichi = jsonObj.sell_zs_tupo
                         break
-                    case 10:
-                        lastBeichi = jsonObj.sell_zs_tupo_higher
-                        break
+                    // case 8:
+                    //     lastBeichi = jsonObj.sell_zs_tupo_higher
+                    //     break
                     // V反
-                    case 11:
+                    case 7:
                         lastBeichi = jsonObj.buy_v_reverse
                         break
-                    case 12:
-                        lastBeichi = jsonObj.buy_v_reverse_higher
-                        break
-                    case 13:
+                    // case 12:
+                    //     lastBeichi = jsonObj.buy_v_reverse_higher
+                    //     break
+                    case 8:
                         lastBeichi = jsonObj.sell_v_reverse
                         break
-                    case 14:
-                        lastBeichi = jsonObj.sell_v_reverse_higher
+                    // case 14:
+                    //     lastBeichi = jsonObj.sell_v_reverse_higher
+                    //     break
+                    //  5浪v反
+                    case 9:
+                        lastBeichi = jsonObj.buy_five_v_reverse
                         break
-                    // 背驰
-                    case 15:
-                        lastBeichi = jsonObj.buyMACDBCData
-                        break
-                    case 16:
-                        lastBeichi = jsonObj.sellMACDBCData
+                    case 10:
+                        lastBeichi = jsonObj.sell_five_v_reverse
                         break
                 }
                 // 背驰时的价格
@@ -2171,8 +2171,7 @@ export default {
                 let currentPercent = ''
                 // 当前收益（单位万/元）
                 let currentProfit = ''
-                if (lastBeichiType === 1 || lastBeichiType === 2 || lastBeichiType === 5 || lastBeichiType === 7 ||
-                    lastBeichiType === 8 || lastBeichiType === 11 || lastBeichiType === 12 || lastBeichiType === 13 || lastBeichiType === 15) {
+                if (lastBeichiType % 2 === 1) {
                     targetPrice = beichiPrice + diffPrice
                     currentPercent = ((this.currentPrice - beichiPrice) / beichiPrice * 100 * this.marginLevel).toFixed(2)
                     if (stopWinPrice !== 0) {
@@ -2758,15 +2757,20 @@ export default {
             let sell_v_reverse = jsonObj.sell_v_reverse
             // let sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
 
+            let buy_five_v_reverse = jsonObj.buy_five_v_reverse
+            // let buy_v_reverse_higher = jsonObj.buy_v_reverse_higher
+            let sell_five_v_reverse = jsonObj.sell_five_v_reverse
+            // let sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
+
             // 背驰
-            let buyMACDBCData = jsonObj.buyMACDBCData
-            let sellMACDBCData = jsonObj.sellMACDBCData
+            // let buyMACDBCData = jsonObj.buyMACDBCData
+            // let sellMACDBCData = jsonObj.sellMACDBCData
 
             // 回拉
             let buy_zs_huila_stamp = 0
-            let buy_zs_huila_higher_stamp = 0
+            // let buy_zs_huila_higher_stamp = 0
             let sell_zs_huila_Stamp = 0
-            let sell_zs_huila_higher_stamp = 0
+            // let sell_zs_huila_higher_stamp = 0
             // 线段破坏
             let buy_duan_break_stamp = 0
             // let buy_duan_break_higher_stamp = 0
@@ -2774,18 +2778,20 @@ export default {
             // let sell_duan_break_higher_stamp = 0
             // 突破
             let buy_zs_tupo_stamp = 0
-            let buy_zs_tupo_higher_stamp = 0
+            // let buy_zs_tupo_higher_stamp = 0
             let sell_zs_tupo_stamp = 0
-            let sell_zs_tupo_higher_stamp = 0
+
+            // let sell_zs_tupo_higher_stamp = 0
             // V反
             let buy_v_reverse_stamp = 0
-            let buy_v_reverse_higher_stamp = 0
+            // let buy_v_reverse_higher_stamp = 0
             let sell_v_reverse_stamp = 0
-            let sell_v_reverse_higher_stamp = 0
-
+            // let sell_v_reverse_higher_stamp = 0
+            let buy_five_v_reverse_stamp = 0
+            let sell_five_v_reverse_stamp = 0
             // 背驰
-            let buy_beichi_stamp = 0
-            let sell_beichi_stamp = 0
+            // let buy_beichi_stamp = 0
+            // let sell_beichi_stamp = 0
 
             let buyTimeStr
             let higherBuyTimeStr
@@ -2856,19 +2862,27 @@ export default {
                 sellTimeStr = sell_v_reverse.date[sell_v_reverse.date.length - 1]
                 sell_v_reverse_stamp = this.timeStrToStamp(sellTimeStr)
             }
-            // if (sell_v_reverse_higher.date.length > 0) {
-            //     higherSellTimeStr = sell_v_reverse_higher.date[sell_v_reverse_higher.date.length - 1]
-            //     sell_v_reverse_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
-            // }
+
+            // 5浪 V反
+            if (buy_five_v_reverse.date.length > 0) {
+                buyTimeStr = buy_five_v_reverse.date[buy_five_v_reverse.date.length - 1]
+                buy_five_v_reverse_stamp = this.timeStrToStamp(buyTimeStr)
+            }
+
+            if (sell_five_v_reverse.date.length > 0) {
+                sellTimeStr = sell_five_v_reverse.date[sell_five_v_reverse.date.length - 1]
+                sell_five_v_reverse_stamp = this.timeStrToStamp(sellTimeStr)
+            }
+
             // 背驰
-            if (buyMACDBCData.date.length > 0) {
-                buyTimeStr = buyMACDBCData.date[buyMACDBCData.date.length - 1]
-                buy_beichi_stamp = this.timeStrToStamp(buyTimeStr)
-            }
-            if (sellMACDBCData.date.length > 0) {
-                sellTimeStr = sellMACDBCData.date[sellMACDBCData.date.length - 1]
-                sell_beichi_stamp = this.timeStrToStamp(sellTimeStr)
-            }
+            // if (buyMACDBCData.date.length > 0) {
+            //     buyTimeStr = buyMACDBCData.date[buyMACDBCData.date.length - 1]
+            //     buy_beichi_stamp = this.timeStrToStamp(buyTimeStr)
+            // }
+            // if (sellMACDBCData.date.length > 0) {
+            //     sellTimeStr = sellMACDBCData.date[sellMACDBCData.date.length - 1]
+            //     sell_beichi_stamp = this.timeStrToStamp(sellTimeStr)
+            // }
 
             // 当线段破坏和中枢突破时间相等的时候，使用中枢突破信号，因为中枢突破止损更小
             if (buy_zs_tupo_stamp === buy_duan_break_stamp) {
@@ -2884,10 +2898,11 @@ export default {
             //     sell_duan_break_higher_stamp = 0
             // }
 
-            let timeArray = [buy_zs_huila_stamp, buy_zs_huila_higher_stamp, sell_zs_huila_Stamp, sell_zs_huila_higher_stamp,
+            let timeArray = [buy_zs_huila_stamp, sell_zs_huila_Stamp,
                 buy_duan_break_stamp, sell_duan_break_stamp,
-                buy_zs_tupo_stamp, buy_zs_tupo_higher_stamp, sell_zs_tupo_stamp, sell_zs_tupo_higher_stamp,
-                buy_v_reverse_stamp, buy_v_reverse_higher_stamp, sell_v_reverse_stamp, sell_v_reverse_higher_stamp, buy_beichi_stamp, sell_beichi_stamp]
+                buy_zs_tupo_stamp, sell_zs_tupo_stamp,
+                buy_v_reverse_stamp, sell_v_reverse_stamp,
+                buy_five_v_reverse_stamp, sell_five_v_reverse_stamp]
             let maxPos = 0
             let maxTime = timeArray[0]
             for (let i = 0; i < timeArray.length; i++) {
@@ -2897,11 +2912,11 @@ export default {
                 }
             }
 
-            if (buy_zs_huila_stamp === 0 && buy_zs_huila_higher_stamp === 0 && sell_zs_huila_Stamp === 0 && sell_zs_huila_higher_stamp === 0 &&
+            if (buy_zs_huila_stamp === 0 && sell_zs_huila_Stamp === 0 &&
                 buy_duan_break_stamp === 0 && sell_duan_break_stamp === 0 &&
-                buy_zs_tupo_stamp === 0 && buy_zs_tupo_higher_stamp === 0 && sell_zs_tupo_stamp === 0 && sell_zs_tupo_higher_stamp === 0 &&
-                buy_v_reverse_stamp === 0 && buy_v_reverse_higher_stamp === 0 && sell_v_reverse_stamp === 0 && sell_v_reverse_higher_stamp &&
-                buy_beichi_stamp === 0 && sell_beichi_stamp === 0
+                buy_zs_tupo_stamp === 0 && sell_zs_tupo_stamp === 0 &&
+                buy_v_reverse_stamp === 0 && sell_v_reverse_stamp === 0 &&
+                buy_five_v_reverse_stamp === 0 && sell_five_v_reverse_stamp === 0
             ) {
                 return 0
             } else {
