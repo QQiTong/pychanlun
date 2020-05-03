@@ -2415,7 +2415,11 @@ export default {
             // 止损百分比
             let stopLosePercent = (Math.abs(openPrice - stopLosePrice) / stopLosePrice * 100 * this.marginLevel).toFixed(2)
             // 如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
-            this.currentInfo = '新: ' + this.currentPrice.toFixed(2)
+            let targetPercent = (Math.abs(openPrice - stopLosePrice) / openPrice * 100 * this.marginLevel).toFixed(2)
+            // 单位是万
+            let currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
+            this.currentInfo = ' 率: ' + currentPercent + '% 额: ' + currentProfit + ' 万,盈亏比:' +
+                (currentPercent / targetPercent).toFixed(1) + ' 新: ' + this.currentPrice.toFixed(2)
             let markLineCurrent = {
                 yAxis: this.currentPrice,
                 lineStyle: {
