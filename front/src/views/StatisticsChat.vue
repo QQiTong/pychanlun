@@ -17,7 +17,7 @@
                 size="mini"
                 :picker-options="pickerOptions">
             </el-date-picker>
-            <el-button @click="getStatisticList()" type="primary" size="mini" class="ml-5">刷新</el-button>
+            <el-button @click="getStatisticList()" type="primary" size="mini" class="ml-5 primary-button">刷新</el-button>
             <div class="statistic-echarts-list">
                 <div class="profit-chart" id="profit-chart-parent">
                     <div id="profit-chart"/>
@@ -114,7 +114,7 @@
             processData() {
                 // 盈利列表
                 this.profitChart.setOption({
-                    backgroundColor: '#344b58',
+                    backgroundColor: '#12161c',
                     title: {
                         text: '统计',
                         x: '20',
@@ -124,7 +124,7 @@
                             fontSize: '22'
                         },
                         subtextStyle: {
-                            color: '#90979c',
+                            color: '#fff',
                             fontSize: '16'
                         }
                     },
@@ -150,7 +150,7 @@
                         x: '5%',
                         top: '10%',
                         textStyle: {
-                            color: '#90979c'
+                            color: '#fff'
                         },
                         data: ['盈利', '亏损', '净盈利']
                     },
@@ -159,7 +159,7 @@
                         type: 'category',
                         axisLine: {
                             lineStyle: {
-                                color: '#90979c'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -184,7 +184,7 @@
                         },
                         axisLine: {
                             lineStyle: {
-                                color: '#90979c'
+                                color: '#fff'
                             }
                         },
                         axisTick: {
@@ -215,7 +215,7 @@
                         textStyle: {
                             color: '#fff'
                         },
-                        borderColor: '#90979c'
+                        borderColor: '#fff'
 
                     }, {
                         type: 'inside',
@@ -296,15 +296,20 @@
                         text: '平均盈利排行',
                         top: '2%',
                         textStyle: {
-                            color: 'black'
+                            color: 'white'
                         }
                     },
                     xAxis: {
                         type: 'category',
-                        data: this.statisticList.win_symbol_list
+                        data: this.statisticList.win_symbol_list,
+                        axisLine: {lineStyle: {color: "white"}}
                     },
                     yAxis: {
-                        type: 'value'
+                        type: 'value',
+                        axisLine: {lineStyle: {color: "white"}},
+                        splitLine: {
+                            show: false
+                        },
                     },
                     tooltip: {
                         trigger: 'item',
@@ -339,7 +344,7 @@
                         text: '平均亏损排行',
                         top: '2%',
                         textStyle: {
-                            color: 'black'
+                            color: 'white'
                         }
                     },
                     tooltip: {
@@ -355,9 +360,15 @@
                     xAxis: {
                         type: 'category',
                         data: this.statisticList.lose_symbol_list,
+                        axisLine: {lineStyle: {color: "white"}},
+
                     },
                     yAxis: {
-                        type: 'value'
+                        type: 'value',
+                        axisLine: {lineStyle: {color: "white"}},
+                        splitLine: {
+                            show: false
+                        },
                     },
                     series: [
                         {
@@ -430,6 +441,16 @@
             height: 300px;
             margin-top 100px;
         }*/
+    }
+
+    input.el-range-input {
+        background-color: #12161c;
+        border: 1px solid rgba(127, 127, 122, .2);
+        color: white
+    }
+
+    .el-date-editor .el-range-input {
+        color: white !important
     }
 
     .statistic-echarts-list {

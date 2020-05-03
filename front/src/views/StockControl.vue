@@ -2,9 +2,9 @@
     <div class="stock-control-main">
         <MyHeader></MyHeader>
         <el-divider content-position="center">持仓列表</el-divider>
-        <StockPositionList/>
+<!--        <StockPositionList/>-->
         <el-divider content-position="center">信号列表 | 多空分布</el-divider>
-        <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true" :stroke-width="24"/>
+<!--        <el-progress :percentage="percentage" :color="customColorMethod" :text-inside="true" :stroke-width="24"/>-->
         <el-table v-loading="loading" :data="signalList" size="mini" :stripe="true" :border="true">
             <el-table-column
                 prop="code"

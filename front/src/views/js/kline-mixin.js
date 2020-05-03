@@ -75,24 +75,24 @@ export default {
                     height: '85%',
                     top: 50
                 },
-                {
-                    left: '0%',
-                    right: '18%',
-                    top: '82%',
-                    height: '20%',
-                }],
+                    {
+                        left: '0%',
+                        right: '18%',
+                        top: '82%',
+                        height: '20%',
+                    }],
                 klineBigGrid: [{
                     left: '0%',
                     right: '5%',
                     height: '90%',
                     top: 50
                 },
-                {
-                    left: '0%',
-                    right: '5%',
-                    top: '85%',
-                    height: '20%',
-                }],
+                    {
+                        left: '0%',
+                        right: '5%',
+                        top: '85%',
+                        height: '20%',
+                    }],
             },
             // 品种
             symbol: 'RB2005',
@@ -397,6 +397,10 @@ export default {
 
         jumpToKlineBig(period) {
             if (this.isPosition === 'true') {
+                if (period !== this.positionPeriod) {
+                    alert("开仓级别和K线图不一致！")
+                    return
+                }
                 this.$router.push({
                     path: '/kline-big',
                     query: {
