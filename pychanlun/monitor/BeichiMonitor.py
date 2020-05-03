@@ -598,22 +598,22 @@ def monitorHuila(result, symbol, period, closePrice):
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     # 监控高级别回拉
-    if len(result['buy_zs_huila_higher']['date']) > 0:
-        fire_time = result['buy_zs_huila_higher']['date'][-1]
-        price = result['buy_zs_huila_higher']['data'][-1]
-        tag = result['buy_zs_huila_higher']['tag'][-1]
-        stop_lose_price = result['buy_zs_huila_higher']['stop_lose_price'][-1]
-        direction = 'HB'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-    if len(result['sell_zs_huila_higher']['date']) > 0:
-        fire_time = result['sell_zs_huila_higher']['date'][-1]
-        price = result['sell_zs_huila_higher']['data'][-1]
-        tag = result['sell_zs_huila_higher']['tag'][-1]
-        stop_lose_price = result['sell_zs_huila_higher']['stop_lose_price'][-1]
-        direction = 'HS'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+    # if len(result['buy_zs_huila_higher']['date']) > 0:
+    #     fire_time = result['buy_zs_huila_higher']['date'][-1]
+    #     price = result['buy_zs_huila_higher']['data'][-1]
+    #     tag = result['buy_zs_huila_higher']['tag'][-1]
+    #     stop_lose_price = result['buy_zs_huila_higher']['stop_lose_price'][-1]
+    #     direction = 'HB'
+    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+    # if len(result['sell_zs_huila_higher']['date']) > 0:
+    #     fire_time = result['sell_zs_huila_higher']['date'][-1]
+    #     price = result['sell_zs_huila_higher']['data'][-1]
+    #     tag = result['sell_zs_huila_higher']['tag'][-1]
+    #     stop_lose_price = result['sell_zs_huila_higher']['stop_lose_price'][-1]
+    #     direction = 'HS'
+    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -643,22 +643,22 @@ def monitorTupo(result, symbol, period, closePrice):
         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     # 监控高级别突破
-    if len(result['buy_zs_tupo_higher']['date']) > 0:
-        fire_time = result['buy_zs_tupo_higher']['date'][-1]
-        price = result['buy_zs_tupo_higher']['data'][-1]
-        stop_lose_price = result['buy_zs_tupo_higher']['stop_lose_price'][-1]
-        tag = ''
-        direction = 'HB'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-    if len(result['sell_zs_tupo_higher']['date']) > 0:
-        fire_time = result['sell_zs_tupo_higher']['date'][-1]
-        price = result['sell_zs_tupo_higher']['data'][-1]
-        stop_lose_price = result['sell_zs_tupo_higher']['stop_lose_price'][-1]
-        tag = ''
-        direction = 'HS'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+    # if len(result['buy_zs_tupo_higher']['date']) > 0:
+    #     fire_time = result['buy_zs_tupo_higher']['date'][-1]
+    #     price = result['buy_zs_tupo_higher']['data'][-1]
+    #     stop_lose_price = result['buy_zs_tupo_higher']['stop_lose_price'][-1]
+    #     tag = ''
+    #     direction = 'HB'
+    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+    # if len(result['sell_zs_tupo_higher']['date']) > 0:
+    #     fire_time = result['sell_zs_tupo_higher']['date'][-1]
+    #     price = result['sell_zs_tupo_higher']['data'][-1]
+    #     stop_lose_price = result['sell_zs_tupo_higher']['stop_lose_price'][-1]
+    #     tag = ''
+    #     direction = 'HS'
+    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -699,23 +699,23 @@ def monitorVfan(result, symbol, period, closePrice):
             if notHigher:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     # 监控高级别V反
-    if len(result['buy_v_reverse_higher']['date']) > 0:
-        fire_time = result['buy_v_reverse_higher']['date'][-1]
-        price = result['buy_v_reverse_higher']['data'][-1]
-        stop_lose_price = result['buy_v_reverse_higher']['stop_lose_price'][-1]
-        tag = ''
-        direction = 'HB'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-
-    if len(result['sell_v_reverse_higher']['date']) > 0:
-        fire_time = result['sell_v_reverse_higher']['date'][-1]
-        price = result['sell_v_reverse_higher']['data'][-1]
-        stop_lose_price = result['sell_v_reverse_higher']['stop_lose_price'][-1]
-        tag = ''
-        direction = 'HS'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+    # if len(result['buy_v_reverse_higher']['date']) > 0:
+    #     fire_time = result['buy_v_reverse_higher']['date'][-1]
+    #     price = result['buy_v_reverse_higher']['data'][-1]
+    #     stop_lose_price = result['buy_v_reverse_higher']['stop_lose_price'][-1]
+    #     tag = ''
+    #     direction = 'HB'
+    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+    #
+    # if len(result['sell_v_reverse_higher']['date']) > 0:
+    #     fire_time = result['sell_v_reverse_higher']['date'][-1]
+    #     price = result['sell_v_reverse_higher']['data'][-1]
+    #     stop_lose_price = result['sell_v_reverse_higher']['stop_lose_price'][-1]
+    #     tag = ''
+    #     direction = 'HS'
+    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
