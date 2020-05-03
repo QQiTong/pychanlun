@@ -308,10 +308,9 @@ class Calc:
         duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
         # 段中枢
         entanglementHigherList = entanglement.CalcEntanglements(timeList, higherDuanList, duanList, highList, lowList)
-        huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
-        tupo_higher = entanglement.tu_po(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
-        v_reverse_higher = entanglement.v_reverse(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
-        # duan_pohuai_higher = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
+        # huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
+        # tupo_higher = entanglement.tu_po(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
+        # v_reverse_higher = entanglement.v_reverse(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
 
         # 计算是不是双盘结构
         for idx in range(len(huila["sell_zs_huila"]["date"])):
@@ -466,18 +465,18 @@ class Calc:
 
         resJson['buy_zs_huila'] = huila['buy_zs_huila']
         resJson['sell_zs_huila'] =huila['sell_zs_huila']
-        resJson['buy_zs_huila_higher'] = huila_higher['buy_zs_huila']
-        resJson['sell_zs_huila_higher'] =huila_higher['sell_zs_huila']
+        # resJson['buy_zs_huila_higher'] = huila_higher['buy_zs_huila']
+        # resJson['sell_zs_huila_higher'] =huila_higher['sell_zs_huila']
 
         resJson['buy_zs_tupo'] = tupo['buy_zs_tupo']
         resJson['sell_zs_tupo'] = tupo['sell_zs_tupo']
-        resJson['buy_zs_tupo_higher'] = tupo_higher['buy_zs_tupo']
-        resJson['sell_zs_tupo_higher'] = tupo_higher['sell_zs_tupo']
+        # resJson['buy_zs_tupo_higher'] = tupo_higher['buy_zs_tupo']
+        # resJson['sell_zs_tupo_higher'] = tupo_higher['sell_zs_tupo']
 
         resJson['buy_v_reverse'] = v_reverse['buy_v_reverse']
         resJson['sell_v_reverse'] = v_reverse['sell_v_reverse']
-        resJson['buy_v_reverse_higher'] = v_reverse_higher['buy_v_reverse']
-        resJson['sell_v_reverse_higher'] = v_reverse_higher['sell_v_reverse']
+        # resJson['buy_v_reverse_higher'] = v_reverse_higher['buy_v_reverse']
+        # resJson['sell_v_reverse_higher'] = v_reverse_higher['sell_v_reverse']
 
         resJson['buy_duan_break'] = duan_pohuai['buy_duan_break']
         resJson['sell_duan_break'] = duan_pohuai['sell_duan_break']

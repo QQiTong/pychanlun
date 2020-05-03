@@ -18,7 +18,7 @@ from pychanlun import Duan
 from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_Long, buy_category
+from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
 import pandas as pd
 import smtplib
 from email.mime.text import MIMEText
@@ -131,7 +131,7 @@ def calculate_and_notify(code, period):
 
         if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
             tags.append("双盘")
-        if perfect_buy_Long(duan_series, high_series, low_series, duan_end):
+        if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-拉回笔中枢确认底背',
@@ -150,7 +150,7 @@ def calculate_and_notify(code, period):
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
 
-        if perfect_buy_Long(duan_series, high_series, low_series, duan_end):
+        if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-升破笔中枢',
@@ -169,7 +169,7 @@ def calculate_and_notify(code, period):
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
 
-        if perfect_buy_Long(duan_series, high_series, low_series, duan_end):
+        if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-笔中枢三卖V', fire_time,

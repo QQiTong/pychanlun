@@ -1614,57 +1614,57 @@ export default {
                 huilaValues.push(value)
             }
             // 大级别中枢拉回
-            for (let i = 0; i < jsonObj.buy_zs_huila_higher.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.buy_zs_huila_higher.date[i], jsonObj.buy_zs_huila_higher.data[i]],
-                    value: jsonObj.buy_zs_huila_higher.data[i] + jsonObj.buy_zs_huila_higher.tag[i],
-                    symbolRotate: -90,
-                    symbol: 'pin',
-                    symbolOffset: [0, '0%'],
-                    itemStyle: {
-                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
-                    },
-                    label: {
-                        // position: ['-50%','50%'],
-                        position: 'inside',
-                        offset: [5, 5],
-                        textBorderColor: 'red',
-                        textBorderWidth: 3,
-                        color: 'white',
-                        // borderColor: 'blue',
-                        // borderWidth: 1,
-                    },
-                }
-                huilaValues.push(value)
-            }
-            for (let i = 0; i < jsonObj.sell_zs_huila_higher.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.sell_zs_huila_higher.date[i], jsonObj.sell_zs_huila_higher.data[i]],
-                    value: jsonObj.sell_zs_huila_higher.data[i] + jsonObj.sell_zs_huila_higher.tag[i],
-                    symbolRotate: 90,
-                    symbol: 'pin',
-                    symbolOffset: [0, '0%'],
-                    itemStyle: {
-                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
-                    },
-                    label: {
-                        // position: ['-50%','50%'],
-                        position: 'inside',
-                        offset: [-5, 5],
-                        textBorderColor: 'red',
-                        textBorderWidth: 3,
-                        color: 'white',
-                        // borderColor: 'blue',
-                        // borderWidth: 1,
-                    },
-                }
-                huilaValues.push(value)
-            }
+            // for (let i = 0; i < jsonObj.buy_zs_huila_higher.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.buy_zs_huila_higher.date[i], jsonObj.buy_zs_huila_higher.data[i]],
+            //         value: jsonObj.buy_zs_huila_higher.data[i] + jsonObj.buy_zs_huila_higher.tag[i],
+            //         symbolRotate: -90,
+            //         symbol: 'pin',
+            //         symbolOffset: [0, '0%'],
+            //         itemStyle: {
+            //             normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
+            //         },
+            //         label: {
+            //             // position: ['-50%','50%'],
+            //             position: 'inside',
+            //             offset: [5, 5],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 3,
+            //             color: 'white',
+            //             // borderColor: 'blue',
+            //             // borderWidth: 1,
+            //         },
+            //     }
+            //     huilaValues.push(value)
+            // }
+            // for (let i = 0; i < jsonObj.sell_zs_huila_higher.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.sell_zs_huila_higher.date[i], jsonObj.sell_zs_huila_higher.data[i]],
+            //         value: jsonObj.sell_zs_huila_higher.data[i] + jsonObj.sell_zs_huila_higher.tag[i],
+            //         symbolRotate: 90,
+            //         symbol: 'pin',
+            //         symbolOffset: [0, '0%'],
+            //         itemStyle: {
+            //             normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
+            //         },
+            //         label: {
+            //             // position: ['-50%','50%'],
+            //             position: 'inside',
+            //             offset: [-5, 5],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 3,
+            //             color: 'white',
+            //             // borderColor: 'blue',
+            //             // borderWidth: 1,
+            //         },
+            //     }
+            //     huilaValues.push(value)
+            // }
             // 中枢突破
             for (let i = 0; i < jsonObj.buy_zs_tupo.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_zs_tupo.date[i], jsonObj.buy_zs_tupo.data[i]],
-                    value: jsonObj.buy_zs_tupo.data[i],
+                    value: jsonObj.buy_zs_tupo.data[i] + jsonObj.buy_zs_tupo.tag[i],
                     symbolRotate: 0,
                     symbol: 'arrow',
                     symbolSize: 30,
@@ -1689,7 +1689,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_zs_tupo.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_zs_tupo.date[i], jsonObj.sell_zs_tupo.data[i]],
-                    value: jsonObj.sell_zs_tupo.data[i],
+                    value: jsonObj.sell_zs_tupo.data[i] + jsonObj.sell_zs_tupo.tag[i],
                     symbolRotate: 180,
                     symbolSize: 30,
                     symbol: 'arrow',
@@ -1711,59 +1711,59 @@ export default {
                 huilaValues.push(value)
             }
             // 大级别中枢突破
-            for (let i = 0; i < jsonObj.buy_zs_tupo_higher.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.buy_zs_tupo_higher.date[i], jsonObj.buy_zs_tupo_higher.data[i]],
-                    value: jsonObj.buy_zs_tupo_higher.data[i],
-                    symbolRotate: 0,
-                    symbolSize: 30,
-                    symbol: 'arrow',
-                    symbolOffset: [0, '0%'],
-                    itemStyle: {
-                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
-                    },
-                    label: {
-                        // position: ['-50%','50%'],
-                        position: 'inside',
-                        offset: [0, 5],
-                        textBorderColor: 'red',
-                        textBorderWidth: 3,
-                        color: 'white',
-                        // borderColor: 'blue',
-                        // borderWidth: 1,
-                    },
-                }
-                huilaValues.push(value)
-            }
-            for (let i = 0; i < jsonObj.sell_zs_tupo_higher.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.sell_zs_tupo_higher.date[i], jsonObj.sell_zs_tupo_higher.data[i]],
-                    value: jsonObj.sell_zs_tupo_higher.data[i],
-                    symbolRotate: 180,
-                    symbolSize: 30,
-                    symbol: 'arrow',
-                    symbolOffset: [0, '0%'],
-                    itemStyle: {
-                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
-                    },
-                    label: {
-                        // position: ['-50%','50%'],
-                        position: 'inside',
-                        offset: [0, 5],
-                        textBorderColor: 'red',
-                        textBorderWidth: 3,
-                        color: 'white',
-                        // borderColor: 'blue',
-                        // borderWidth: 1,
-                    },
-                }
-                huilaValues.push(value)
-            }
+            // for (let i = 0; i < jsonObj.buy_zs_tupo_higher.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.buy_zs_tupo_higher.date[i], jsonObj.buy_zs_tupo_higher.data[i]],
+            //         value: jsonObj.buy_zs_tupo_higher.data[i],
+            //         symbolRotate: 0,
+            //         symbolSize: 30,
+            //         symbol: 'arrow',
+            //         symbolOffset: [0, '0%'],
+            //         itemStyle: {
+            //             normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
+            //         },
+            //         label: {
+            //             // position: ['-50%','50%'],
+            //             position: 'inside',
+            //             offset: [0, 5],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 3,
+            //             color: 'white',
+            //             // borderColor: 'blue',
+            //             // borderWidth: 1,
+            //         },
+            //     }
+            //     huilaValues.push(value)
+            // }
+            // for (let i = 0; i < jsonObj.sell_zs_tupo_higher.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.sell_zs_tupo_higher.date[i], jsonObj.sell_zs_tupo_higher.data[i]],
+            //         value: jsonObj.sell_zs_tupo_higher.data[i],
+            //         symbolRotate: 180,
+            //         symbolSize: 30,
+            //         symbol: 'arrow',
+            //         symbolOffset: [0, '0%'],
+            //         itemStyle: {
+            //             normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
+            //         },
+            //         label: {
+            //             // position: ['-50%','50%'],
+            //             position: 'inside',
+            //             offset: [0, 5],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 3,
+            //             color: 'white',
+            //             // borderColor: 'blue',
+            //             // borderWidth: 1,
+            //         },
+            //     }
+            //     huilaValues.push(value)
+            // }
             // 3买卖V反
             for (let i = 0; i < jsonObj.buy_v_reverse.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_v_reverse.date[i], jsonObj.buy_v_reverse.data[i]],
-                    value: jsonObj.buy_v_reverse.data[i],
+                    value: jsonObj.buy_v_reverse.data[i] + jsonObj.buy_v_reverse.tag[i],
                     symbolRotate: 0,
                     symbol: 'diamond',
                     symbolSize: 30,
@@ -1788,7 +1788,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_v_reverse.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_v_reverse.date[i], jsonObj.sell_v_reverse.data[i]],
-                    value: jsonObj.sell_v_reverse.data[i],
+                    value: jsonObj.sell_v_reverse.data[i] + jsonObj.sell_v_reverse.tag[i],
                     symbolRotate: 180,
                     symbolSize: 30,
                     symbol: 'diamond',
@@ -1811,61 +1811,61 @@ export default {
             }
 
             // 3买卖V反 大级别
-            for (let i = 0; i < jsonObj.buy_v_reverse_higher.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.buy_v_reverse_higher.date[i], jsonObj.buy_v_reverse_higher.data[i]],
-                    value: jsonObj.buy_v_reverse_higher.data[i],
-                    symbolRotate: 0,
-                    symbol: 'diamond',
-                    symbolSize: 30,
-                    symbolOffset: [0, '0%'],
-                    itemStyle: {
-                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
-                    },
-                    label: {
-                        // position: ['-50%','50%'],
-                        position: 'inside',
-                        offset: [0, 5],
-                        textBorderColor: 'red',
-                        textBorderWidth: 3,
-                        color: 'white',
-                        // borderColor: 'blue',
-                        // borderWidth: 1,
-                    },
-                }
-                huilaValues.push(value)
-            }
+            // for (let i = 0; i < jsonObj.buy_v_reverse_higher.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.buy_v_reverse_higher.date[i], jsonObj.buy_v_reverse_higher.data[i]],
+            //         value: jsonObj.buy_v_reverse_higher.data[i],
+            //         symbolRotate: 0,
+            //         symbol: 'diamond',
+            //         symbolSize: 30,
+            //         symbolOffset: [0, '0%'],
+            //         itemStyle: {
+            //             normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
+            //         },
+            //         label: {
+            //             // position: ['-50%','50%'],
+            //             position: 'inside',
+            //             offset: [0, 5],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 3,
+            //             color: 'white',
+            //             // borderColor: 'blue',
+            //             // borderWidth: 1,
+            //         },
+            //     }
+            //     huilaValues.push(value)
+            // }
 
-            for (let i = 0; i < jsonObj.sell_v_reverse_higher.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.sell_v_reverse_higher.date[i], jsonObj.sell_v_reverse_higher.data[i]],
-                    value: jsonObj.sell_v_reverse_higher.data[i],
-                    symbolRotate: 180,
-                    symbolSize: 30,
-                    symbol: 'diamond',
-                    symbolOffset: [0, '0%'],
-                    itemStyle: {
-                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
-                    },
-                    label: {
-                        // position: ['-50%','50%'],
-                        position: 'inside',
-                        offset: [0, 5],
-                        textBorderColor: 'red',
-                        textBorderWidth: 3,
-                        color: 'white',
-                        // borderColor: 'blue',
-                        // borderWidth: 1,
-                    },
-                }
-                huilaValues.push(value)
-            }
+            // for (let i = 0; i < jsonObj.sell_v_reverse_higher.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.sell_v_reverse_higher.date[i], jsonObj.sell_v_reverse_higher.data[i]],
+            //         value: jsonObj.sell_v_reverse_higher.data[i],
+            //         symbolRotate: 180,
+            //         symbolSize: 30,
+            //         symbol: 'diamond',
+            //         symbolOffset: [0, '0%'],
+            //         itemStyle: {
+            //             normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
+            //         },
+            //         label: {
+            //             // position: ['-50%','50%'],
+            //             position: 'inside',
+            //             offset: [0, 5],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 3,
+            //             color: 'white',
+            //             // borderColor: 'blue',
+            //             // borderWidth: 1,
+            //         },
+            //     }
+            //     huilaValues.push(value)
+            // }
 
             // 线段破坏
             for (let i = 0; i < jsonObj.buy_duan_break.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_duan_break.date[i], jsonObj.buy_duan_break.data[i]],
-                    value: jsonObj.buy_duan_break.data[i],
+                    value: jsonObj.buy_duan_break.data[i] + jsonObj.buy_duan_break.tag[i],
                     symbolRotate: 0,
                     symbol: 'circle',
                     symbolSize: 10,
@@ -1890,7 +1890,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_duan_break.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_duan_break.date[i], jsonObj.sell_duan_break.data[i]],
-                    value: jsonObj.sell_duan_break.data[i],
+                    value: jsonObj.sell_duan_break.data[i] + jsonObj.sell_duan_break.tag[i],
                     symbolRotate: 180,
                     symbolSize: 10,
                     symbol: 'circle',
@@ -2687,9 +2687,9 @@ export default {
         getLastBeichiData(jsonObj) {
             // 回拉
             let buy_zs_huila = jsonObj.buy_zs_huila
-            let buy_zs_huila_higher = jsonObj.buy_zs_huila_higher
+            // let buy_zs_huila_higher = jsonObj.buy_zs_huila_higher
             let sell_zs_huila = jsonObj.sell_zs_huila
-            let sell_zs_huila_higher = jsonObj.sell_zs_huila_higher
+            // let sell_zs_huila_higher = jsonObj.sell_zs_huila_higher
             // 线段破坏
             let buy_duan_break = jsonObj.buy_duan_break
             // let buy_duan_break_higher = jsonObj.buy_duan_break_higher
@@ -2698,15 +2698,15 @@ export default {
 
             // 突破
             let buy_zs_tupo = jsonObj.buy_zs_tupo
-            let buy_zs_tupo_higher = jsonObj.buy_zs_tupo_higher
+            // let buy_zs_tupo_higher = jsonObj.buy_zs_tupo_higher
             let sell_zs_tupo = jsonObj.sell_zs_tupo
-            let sell_zs_tupo_higher = jsonObj.sell_zs_tupo_higher
+            // let sell_zs_tupo_higher = jsonObj.sell_zs_tupo_higher
 
             // V反
             let buy_v_reverse = jsonObj.buy_v_reverse
-            let buy_v_reverse_higher = jsonObj.buy_v_reverse_higher
+            // let buy_v_reverse_higher = jsonObj.buy_v_reverse_higher
             let sell_v_reverse = jsonObj.sell_v_reverse
-            let sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
+            // let sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
 
             // 背驰
             let buyMACDBCData = jsonObj.buyMACDBCData
@@ -2746,18 +2746,18 @@ export default {
                 buyTimeStr = buy_zs_huila.date[buy_zs_huila.date.length - 1]
                 buy_zs_huila_stamp = this.timeStrToStamp(buyTimeStr)
             }
-            if (buy_zs_huila_higher.date.length > 0) {
-                higherBuyTimeStr = buy_zs_huila_higher.date[buy_zs_huila_higher.date.length - 1]
-                buy_zs_huila_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
-            }
+            // if (buy_zs_huila_higher.date.length > 0) {
+            //     higherBuyTimeStr = buy_zs_huila_higher.date[buy_zs_huila_higher.date.length - 1]
+            //     buy_zs_huila_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
+            // }
             if (sell_zs_huila.date.length > 0) {
                 sellTimeStr = sell_zs_huila.date[sell_zs_huila.date.length - 1]
                 sell_zs_huila_Stamp = this.timeStrToStamp(sellTimeStr)
             }
-            if (sell_zs_huila_higher.date.length > 0) {
-                higherSellTimeStr = sell_zs_huila_higher.date[sell_zs_huila_higher.date.length - 1]
-                sell_zs_huila_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
-            }
+            // if (sell_zs_huila_higher.date.length > 0) {
+            //     higherSellTimeStr = sell_zs_huila_higher.date[sell_zs_huila_higher.date.length - 1]
+            //     sell_zs_huila_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
+            // }
 
             // 线段破坏
             if (buy_duan_break.date.length > 0) {
@@ -2781,35 +2781,35 @@ export default {
                 buyTimeStr = buy_zs_tupo.date[buy_zs_tupo.date.length - 1]
                 buy_zs_tupo_stamp = this.timeStrToStamp(buyTimeStr)
             }
-            if (buy_zs_tupo_higher.date.length > 0) {
-                higherBuyTimeStr = buy_zs_tupo_higher.date[buy_zs_tupo_higher.date.length - 1]
-                buy_zs_tupo_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
-            }
+            // if (buy_zs_tupo_higher.date.length > 0) {
+            //     higherBuyTimeStr = buy_zs_tupo_higher.date[buy_zs_tupo_higher.date.length - 1]
+            //     buy_zs_tupo_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
+            // }
             if (sell_zs_tupo.date.length > 0) {
                 sellTimeStr = sell_zs_tupo.date[sell_zs_tupo.date.length - 1]
                 sell_zs_tupo_stamp = this.timeStrToStamp(sellTimeStr)
             }
-            if (sell_zs_tupo_higher.date.length > 0) {
-                higherSellTimeStr = sell_zs_tupo_higher.date[sell_zs_tupo_higher.date.length - 1]
-                sell_zs_tupo_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
-            }
+            // if (sell_zs_tupo_higher.date.length > 0) {
+            //     higherSellTimeStr = sell_zs_tupo_higher.date[sell_zs_tupo_higher.date.length - 1]
+            //     sell_zs_tupo_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
+            // }
             // V反
             if (buy_v_reverse.date.length > 0) {
                 buyTimeStr = buy_v_reverse.date[buy_v_reverse.date.length - 1]
                 buy_v_reverse_stamp = this.timeStrToStamp(buyTimeStr)
             }
-            if (buy_v_reverse_higher.date.length > 0) {
-                higherBuyTimeStr = buy_v_reverse_higher.date[buy_v_reverse_higher.date.length - 1]
-                buy_v_reverse_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
-            }
+            // if (buy_v_reverse_higher.date.length > 0) {
+            //     higherBuyTimeStr = buy_v_reverse_higher.date[buy_v_reverse_higher.date.length - 1]
+            //     buy_v_reverse_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
+            // }
             if (sell_v_reverse.date.length > 0) {
                 sellTimeStr = sell_v_reverse.date[sell_v_reverse.date.length - 1]
                 sell_v_reverse_stamp = this.timeStrToStamp(sellTimeStr)
             }
-            if (sell_v_reverse_higher.date.length > 0) {
-                higherSellTimeStr = sell_v_reverse_higher.date[sell_v_reverse_higher.date.length - 1]
-                sell_v_reverse_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
-            }
+            // if (sell_v_reverse_higher.date.length > 0) {
+            //     higherSellTimeStr = sell_v_reverse_higher.date[sell_v_reverse_higher.date.length - 1]
+            //     sell_v_reverse_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
+            // }
             // 背驰
             if (buyMACDBCData.date.length > 0) {
                 buyTimeStr = buyMACDBCData.date[buyMACDBCData.date.length - 1]
