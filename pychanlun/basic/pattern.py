@@ -11,7 +11,7 @@ def perfect_buy_long(signal_series, high_series, low_series, idx):
     g2 = FindPrevEq(signal_series, 1, d2)
     d3 = FindPrevEq(signal_series, -1, g2)
     if d3 >= 0 and low_series[d2] > low_series[d3] and low_series[d1] > low_series[d3]:
-        if low_series[d1] < low_series[idx] < max(high_series[g1], high_series[g2]):
+        if low_series[d1] < low_series[idx] and low_series[d1] < min(high_series[g1], high_series[g2]):
             return True
     return False
 
@@ -24,7 +24,7 @@ def perfect_sell_short(signal_series, high_series, low_series, idx):
     d2 = FindPrevEq(signal_series, -1, g2)
     g3 = FindPrevEq(signal_series, 1, d2)
     if g3 >= 0 and high_series[g2] < high_series[g3] and high_series[g1] < high_series[g3]:
-        if high_series[g1] > high_series[idx] > min(low_series[d1], low_series[d2]):
+        if high_series[g1] > high_series[idx] and high_series[g1] > max(low_series[d1], low_series[d2]):
             return True
     return False
 
@@ -70,6 +70,14 @@ def DualEntangleForSellShort(duan_series, entanglement_list, higher_entaglement_
 # 买点的所在形态
 def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
     category = ''
+    d1 = FindPrevEq(duan_series, -1, idx)
+    g1 = FindPrevEq(duan_series, 1, d1)
+    d2 = FindPrevEq(duan_series, -1, g1)
+    g2 = FindPrevEq(duan_series, 1, d2)
+    d3 = FindPrevEq(duan_series, -1, g2)
+    if d3 >= 0 and low_series[d1] > low_series[d2] > low_series[d3] and high_series[g1] > high_series[g2] and low_series[d1] > high_series[g2]:
+        category = '准三买'
+        return category
     dd1 = pydash.find_last_index(higher_duan_series[:idx+1], lambda x: x == -1) # 走势低点
     gg1 = pydash.find_last_index(higher_duan_series[:idx+1], lambda x: x == 1) # 走势高点
     if dd1 > gg1 >= 0:
@@ -121,6 +129,13 @@ def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
 # 卖点的所在形态
 def sell_category(higher_duan_series, duan_series, high_series, low_series, idx):
     category = ''
+    g1 = FindPrevEq(duan_series, 1, idx)
+    d1 = FindPrevEq(duan_series, -1, g1)
+    g2 = FindPrevEq(duan_series, 1, d1)
+    d2 = FindPrevEq(duan_series, -1, g2)
+    g3 = FindPrevEq(duan_series, 1, d2)
+    if g3 >= 0 and high_series[g1] < high_series[g2] > high_series[g3] and low_series[d1] < low_series[d2] and high_series[g1] < low_series[d2]:
+        category = '准三卖'
     # 走势低点
     dd1 = pydash.find_last_index(higher_duan_series[:idx+1], lambda x: x == -1)
     # 走势高点
@@ -156,7 +171,7 @@ def sell_category(higher_duan_series, duan_series, high_series, low_series, idx)
             if len(pivots) == 0 and c >= 1:
                 # 没有中枢是三段及三段以上走势
                 i = pydash.find_last_index(duan_series[:dd1], lambda x: x == -1)
-                if high_series[g1] < low_series[i]:
+                if high_series[g1] < low_series[i] and len(pydash.filter_(duan_series[dd1:idx], lambda x: x == 1)) == 1:
                     # 反弹高点连下端走势的最后一个低点也没到，为准三买
                     category = '准三卖'
                 else:
