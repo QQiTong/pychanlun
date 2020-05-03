@@ -1860,6 +1860,56 @@ export default {
             //     }
             //     huilaValues.push(value)
             // }
+            // 5浪及以上 V反
+            for (let i = 0; i < jsonObj.buy_five_v_reverse.date.length; i++) {
+                let value = {
+                    coord: [jsonObj.buy_five_v_reverse.date[i], jsonObj.buy_five_v_reverse.data[i]],
+                    value: jsonObj.buy_five_v_reverse.data[i] + jsonObj.buy_five_v_reverse.tag[i],
+                    symbolRotate: 0,
+                    symbol: 'diamond',
+                    symbolSize: 30,
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: this.echartsConfig.higherUpColor, opacity: '0.9'}
+                    },
+                    label: {
+                        // position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
+                    },
+                }
+                huilaValues.push(value)
+            }
+
+            for (let i = 0; i < jsonObj.sell_five_v_reverse.date.length; i++) {
+                let value = {
+                    coord: [jsonObj.sell_five_v_reverse.date[i], jsonObj.sell_five_v_reverse.data[i]],
+                    value: jsonObj.sell_five_v_reverse.data[i] + jsonObj.sell_five_v_reverse.tag[i],
+                    symbolRotate: 180,
+                    symbolSize: 30,
+                    symbol: 'diamond',
+                    symbolOffset: [0, '0%'],
+                    itemStyle: {
+                        normal: {color: this.echartsConfig.higherDownColor, opacity: '0.9'}
+                    },
+                    label: {
+                        // position: ['-50%','50%'],
+                        position: 'inside',
+                        offset: [0, 5],
+                        textBorderColor: 'red',
+                        textBorderWidth: 3,
+                        color: 'white',
+                        // borderColor: 'blue',
+                        // borderWidth: 1,
+                    },
+                }
+                huilaValues.push(value)
+            }
 
             // 线段破坏
             for (let i = 0; i < jsonObj.buy_duan_break.date.length; i++) {
