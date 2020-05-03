@@ -9,13 +9,16 @@ let digitCoinAccount = 60.3 / 10000
 let globalFutureAccount = 6.4
 // 数字货币 杠杆倍数
 let digitCoinLevel = 20
+// 'NID', 'CP', 'CT',
+let globalFutureSymbol = ['CL', 'GC', 'SI', 'ZS', 'ZM', 'ZL', 'YM', 'ES', 'NQ', 'CN']
 
 export default {
-    install () {
+    install() {
         Vue.prototype.$futureAccount = futureAccount
         Vue.prototype.$globalFutureAccount = globalFutureAccount
         Vue.prototype.$stockAccount = stockAccount
         Vue.prototype.$digitCoinAccount = digitCoinAccount
         Vue.prototype.$digitCoinLevel = digitCoinLevel
+        Vue.prototype.$globalFutureSymbol = globalFutureSymbol
     }
 }

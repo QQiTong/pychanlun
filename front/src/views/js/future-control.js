@@ -143,7 +143,7 @@ export default {
             // history 历史状态 获取的不一定是主力合约 ，提交表格触发更新
             prejudgeTableStatus: 'current',
             prejudgeTableId: '',
-            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'YM', 'CN', 'CP', 'BTC']
+            globalFutureSymbol: this.$globalFutureSymbol
         }
     },
     computed: {
