@@ -305,6 +305,7 @@ class Calc:
         huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
         tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
         v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
+        five_v_fan = entanglement.five_v_fan(timeList, duanList, biList, highList, lowList, higherDuanList)
         duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
         # 段中枢
         entanglementHigherList = entanglement.CalcEntanglements(timeList, higherDuanList, duanList, highList, lowList)
@@ -477,6 +478,9 @@ class Calc:
         resJson['sell_v_reverse'] = v_reverse['sell_v_reverse']
         # resJson['buy_v_reverse_higher'] = v_reverse_higher['buy_v_reverse']
         # resJson['sell_v_reverse_higher'] = v_reverse_higher['sell_v_reverse']
+
+        resJson['buy_five_v_reverse'] = five_v_fan['buy_five_v_reverse']
+        resJson['sell_five_v_reverse'] = five_v_fan['sell_five_v_reverse']
 
         resJson['buy_duan_break'] = duan_pohuai['buy_duan_break']
         resJson['sell_duan_break'] = duan_pohuai['sell_duan_break']
