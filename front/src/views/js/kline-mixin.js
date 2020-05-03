@@ -185,7 +185,7 @@ export default {
             futureConfig: {},
             symbolInfo: null,
             show1MinSymbol: ['BTC'],
-            globalFutureSymbol: ['CL', 'GC', 'SI', 'CT', 'ZS', 'ZM', 'ZL', 'NID', 'CP', 'YM', 'CN'],
+            globalFutureSymbol: this.$globalFutureSymbol,
             //    快速计算开仓手数
             quickCalc: {
                 openPrice: "",

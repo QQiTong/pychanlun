@@ -115,8 +115,8 @@ config = {
         # 'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # wshq
         'YM': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
-        'ES': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
-        'NQ': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
+        'ES': {'margin_rate': 0.086, 'contract_multiplier': 5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
+        'NQ': {'margin_rate': 0.086, 'contract_multiplier': 2},  # 18:30 -14:00 0.04   其它时间 0.06          13200
 
         # 'AAPL': {'margin_rate': 1, 'contract_multiplier': 1},
         # 'MSFT': {'margin_rate': 1, 'contract_multiplier': 1},
@@ -247,18 +247,18 @@ config = {
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 0.5,
+            'contract_multiplier': 5,
             'exchange': '美国',
-            'margin_rate': 0.13,
+            'margin_rate': 0.086,
             'order_book_id': 'ES',
             'trading_hours': '7*24',
             'type': 'future',
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 0.5,
+            'contract_multiplier': 2,
             'exchange': '美国',
-            'margin_rate': 0.13,
+            'margin_rate': 0.086,
             'order_book_id': 'NQ',
             'trading_hours': '7*24',
             'type': 'future',
