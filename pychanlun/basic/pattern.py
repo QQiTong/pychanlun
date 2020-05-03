@@ -24,7 +24,7 @@ def perfect_sell_short(signal_series, high_series, low_series, idx):
     d2 = FindPrevEq(signal_series, -1, g2)
     g3 = FindPrevEq(signal_series, 1, d2)
     if g3 >= 0 and high_series[g2] < high_series[g3] and high_series[g1] < high_series[g3]:
-        if high_series[g1] > high_series[idx] > min(low_series[d2], low_series[d2]):
+        if high_series[g1] > high_series[idx] > min(low_series[d1], low_series[d2]):
             return True
     return False
 
