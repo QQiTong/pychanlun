@@ -476,7 +476,8 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                         #     monitorBeichi(result, symbol, period, close_price)
                         monitorHuila(result, symbol, period, close_price)
                         monitorTupo(result, symbol, period, close_price)
-                        monitorVfan(result, symbol, period, close_price)
+                        monitorVReverse(result, symbol, period, close_price)
+                        monitorFiveVReverse(result, symbol, period, close_price)
                         monitorDuanBreak(result, symbol, period, close_price)
                         monitorFractal(result, symbol, period, close_price)
             if type == "1" or type == "3":
@@ -531,27 +532,6 @@ def monitorBeichi(result, symbol, period, closePrice):
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-    # 监控高级别背驰
-    # if len(result['buy_zs_huila_higher']['date']) > 0:
-    #     fire_time = result['buy_zs_huila_higher']['date'][-1]
-    #     price = result['buy_zs_huila_higher']['data'][-1]
-    #     tag = result['buy_zs_huila_higher']['tag'][-1]
-    #     stop_lose_price = result['buy_zs_huila_higher']['stop_lose_price'][-1]
-    #     direction = 'HB'
-    #     maxOrderCount,perOrderStopMoney,perOrderStopRate = calMaxOrderCount(symbol, price, stop_lose_price, period,signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, maxOrderCount,
-    #                      stop_lose_price)
-    # if len(result['sell_zs_huila_higher']['date']) > 0:
-    #     fire_time = result['sell_zs_huila_higher']['date'][-1]
-    #     price = result['sell_zs_huila_higher']['data'][-1]
-    #     tag = result['sell_zs_huila_higher']['tag'][-1]
-    #     stop_lose_price = result['sell_zs_huila_higher']['stop_lose_price'][-1]
-    #     direction = 'HS'
-    #     maxOrderCount,perOrderStopMoney,perOrderStopRate = calMaxOrderCount(symbol, price, stop_lose_price, period,signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, maxOrderCount,
-    #                      stop_lose_price)
-
-
 '''
 监控回拉
 '''
@@ -596,26 +576,6 @@ def monitorHuila(result, symbol, period, closePrice):
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
             elif tag in filter_tag:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-
-    # 监控高级别回拉
-    # if len(result['buy_zs_huila_higher']['date']) > 0:
-    #     fire_time = result['buy_zs_huila_higher']['date'][-1]
-    #     price = result['buy_zs_huila_higher']['data'][-1]
-    #     tag = result['buy_zs_huila_higher']['tag'][-1]
-    #     stop_lose_price = result['buy_zs_huila_higher']['stop_lose_price'][-1]
-    #     direction = 'HB'
-    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-    # if len(result['sell_zs_huila_higher']['date']) > 0:
-    #     fire_time = result['sell_zs_huila_higher']['date'][-1]
-    #     price = result['sell_zs_huila_higher']['data'][-1]
-    #     tag = result['sell_zs_huila_higher']['tag'][-1]
-    #     stop_lose_price = result['sell_zs_huila_higher']['stop_lose_price'][-1]
-    #     direction = 'HS'
-    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-
-
 '''
 监控突破
 '''
@@ -666,8 +626,8 @@ def monitorTupo(result, symbol, period, closePrice):
 '''
 
 
-def monitorVfan(result, symbol, period, closePrice):
-    signal = 'vfan'
+def monitorVReverse(result, symbol, period, closePrice):
+    signal = 'vreverse'
     big_period = period != '1m' and period != '3m' and period != '5m'
     notLower = result['notLower']
     notHigher = result['notHigher']
@@ -698,25 +658,39 @@ def monitorVfan(result, symbol, period, closePrice):
         else:
             if notHigher:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-    # 监控高级别V反
-    # if len(result['buy_v_reverse_higher']['date']) > 0:
-    #     fire_time = result['buy_v_reverse_higher']['date'][-1]
-    #     price = result['buy_v_reverse_higher']['data'][-1]
-    #     stop_lose_price = result['buy_v_reverse_higher']['stop_lose_price'][-1]
-    #     tag = ''
-    #     direction = 'HB'
-    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-    #
-    # if len(result['sell_v_reverse_higher']['date']) > 0:
-    #     fire_time = result['sell_v_reverse_higher']['date'][-1]
-    #     price = result['sell_v_reverse_higher']['data'][-1]
-    #     stop_lose_price = result['sell_v_reverse_higher']['stop_lose_price'][-1]
-    #     tag = ''
-    #     direction = 'HS'
-    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+'''
+监控5浪及以上 V反
+'''
+def monitorFiveVReverse(result, symbol, period, closePrice):
+    signal = 'five_vreverse'
+    big_period = period != '1m' and period != '3m' and period != '5m'
+    notLower = result['notLower']
+    notHigher = result['notHigher']
+    if len(result['buy_five_v_reverse']['date']) > 0:
+        fire_time = result['buy_five_v_reverse']['date'][-1]
+        price = result['buy_five_v_reverse']['data'][-1]
+        stop_lose_price = result['buy_five_v_reverse']['stop_lose_price'][-1]
+        tag = ''
+        direction = 'B'
+        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            if notLower:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
+    if len(result['sell_five_v_reverse']['date']) > 0:
+        fire_time = result['sell_five_v_reverse']['date'][-1]
+        price = result['sell_five_v_reverse']['data'][-1]
+        stop_lose_price = result['sell_five_v_reverse']['stop_lose_price'][-1]
+        tag = ''
+        direction = 'S'
+        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            if notHigher:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 '''
 监控 线段破坏
@@ -755,25 +729,6 @@ def monitorDuanBreak(result, symbol, period, closePrice):
         else:
             if notHigher:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-    # 监控高级别线段破坏
-    # if len(result['buy_duan_break_higher']['date']) > 0:
-    #     fire_time = result['buy_duan_break_higher']['date'][-1]
-    #     price = result['buy_duan_break_higher']['data'][-1]
-    #     stop_lose_price = result['buy_duan_break_higher']['stop_lose_price'][-1]
-    #     tag = ''
-    #     direction = 'HB'
-    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-
-    # if len(result['sell_duan_break_higher']['date']) > 0:
-    #     fire_time = result['sell_duan_break_higher']['date'][-1]
-    #     price = result['sell_duan_break_higher']['data'][-1]
-    #     stop_lose_price = result['sell_duan_break_higher']['stop_lose_price'][-1]
-    #     tag = ''
-    #     direction = 'HS'
-    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-
 
 '''
 监控 持仓品种的向上两个级别的顶底分型
