@@ -459,6 +459,8 @@ class KlineDataTool:
             '3d': -31 * 30
         }
         start_date =  end + timedelta(timeDeltaMap[period])
+        if period == '240m':
+            period = '180m'
         code = "%s_%s" % (symbol, period)
         data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
             "_id": { "$gte": start_date, "$lte": end }

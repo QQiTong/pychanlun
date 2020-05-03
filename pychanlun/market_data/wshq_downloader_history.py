@@ -93,7 +93,8 @@ global_future_alias = config['global_future_alias']
 global_future_symbol = config['global_future_symbol']
 ohlc_dict = {'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last', 'Volume': 'sum'}
 # 8个品种 LENID3M 暂时没接
-futures = ['COZLA0','COZMA0','COZSA0']
+futures = ['CEYMA0', 'CEESA0', 'CENQA0', 'WGCNA0', 'NECLA0', 'CMGCA0', 'CMSIA0','COZSA0','COZLA0','COZMA0']
+
 is_run = True
 
 '''
@@ -104,10 +105,10 @@ def fetch_futures_mink():
     while is_run:
         try:
             for code in futures:
-                # 1 ,3 ,5 ,15 ,30 ,60 ,240
-                qt_type = 1
+                # 1 ,3 ,5 ,15 ,30 ,60 ,180,240
+                qt_type = 180
                 # 0：日线 ,3： 分钟线
-                return_t = 0
+                return_t = 3
                 # 取分钟数据
                 url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=5000&symbol=%s&desc=1&q_type=0&return_t=%s&qt_type=%s&r_type=2&u=u2368&p=abc1818" % (code,return_t,qt_type)
 
@@ -116,13 +117,13 @@ def fetch_futures_mink():
                 resp = requests.get(url, timeout=10)
                 df1m = pd.DataFrame(json.loads(resp.text))
                 df1m = df1m.sort_values(by="Date", ascending=True)
-                df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
+                df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
                 # 刷日线的时候解开这个注释
                 # df1m['Date'] = df1m['Date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
                 df1m.set_index('Date', inplace=True)
                 code = global_future_alias[code]
 
-                # save_data_m(code, '60m', df1m)
+                save_data_m(code, '180m', df1m)
                 # 3m
                 # df3m = df1m.resample('3T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 # df3m = df3m[1:]
@@ -148,13 +149,13 @@ def fetch_futures_mink():
                 # df240m = df240m[1:]
                 # save_data_m(code, '240m', df240m)
                 # # 1D
-                df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df1d = df1d[1:]
-                save_data_m(code, '1d', df1d)
+                # df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df1d = df1d[1:]
+                # save_data_m(code, '1d', df1d)
                 # # # 3D
-                df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df3d = df3d[1:]
-                save_data_m(code, '3d', df3d)
+                # df3d = df1d.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df3d = df3d[1:]
+                # save_data_m(code, '3d', df3d)
                 time.sleep(1)
                 if not is_run:
                     break

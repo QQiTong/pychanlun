@@ -102,7 +102,7 @@ def fetch_futures_mink():
     while is_run:
         try:
             for code in futures:
-                # 1 ,3 ,5 ,15 ,30 ,60 ,240
+                # 1 ,3 ,5 ,15 ,30 ,60,180 ,240
                 qt_type = 1
                 # 0：日线 ,3： 分钟线
                 return_t = 3
@@ -142,9 +142,13 @@ def fetch_futures_mink():
                 df60m = df60m[1:]
                 save_data_m(code, '60m', df60m)
                 # 240m
-                df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                df240m = df240m[1:]
-                save_data_m(code, '240m', df240m)
+                # df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df240m = df240m[1:]
+                # save_data_m(code, '240m', df240m)
+                # 180m
+                df180m = df1m.resample('180T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                df180m = df180m[1:]
+                save_data_m(code, '180m', df180m)
                 # 1D
                 df1d = df1m.resample('1D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 df1d = df1d[1:]
