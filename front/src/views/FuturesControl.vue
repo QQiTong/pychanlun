@@ -376,7 +376,14 @@
                                       header-cell-class-name="el-header-cell"
                                       cell-class-name="el-cell">
                                 <el-table-column label="品种" width="100">
-                                    <template slot-scope="scope">{{scope.row.order_book_id}}</template>
+                                    <template slot-scope="scope">
+                                        <el-link
+                                            class="primary-color"
+                                            :underline="false"
+                                            @click="jumpToKline(scope.row.order_book_id)"
+                                        >{{scope.row.order_book_id}}
+                                        </el-link>
+                                    </template>
                                 </el-table-column>
 
                                 <el-table-column width="80">
@@ -416,7 +423,14 @@
                                       header-cell-class-name="el-header-cell"
                                       cell-class-name="el-cell">
                                 <el-table-column label="历史品种" width="100">
-                                    <template slot-scope="scope">{{scope.row}}</template>
+                                    <template slot-scope="scope">
+                                        <el-link
+                                            class="primary-color"
+                                            :underline="false"
+                                            @click="jumpToKline(scope.row)"
+                                        >{{scope.row}}
+                                        </el-link>
+                                    </template>
                                 </el-table-column>
                                 <el-table-column width="80">
                                     <el-button
