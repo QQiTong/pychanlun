@@ -121,7 +121,7 @@ def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
                 # 有中枢
                 if low_series[d1] > pivots[-1]['gg']:
                     category = '三类买'
-                else:
+                elif len(pydash.filter_(duan_series[gg1:idx], lambda x: x == -1)) == 1:
                     category = '扩展完备买'
     return category
 
@@ -183,6 +183,6 @@ def sell_category(higher_duan_series, duan_series, high_series, low_series, idx)
                 # 有中枢
                 if high_series[g1] < pivots[-1]['dd']:
                     category = '三类卖'
-                else:
+                elif len(pydash.filter_(duan_series[dd1:idx], lambda x: x == 1)) == 1:
                     category = '扩展完备卖'
     return category
