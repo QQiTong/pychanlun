@@ -111,7 +111,7 @@ def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
             if len(pivots) == 0 and c >= 1:
                 # 没有中枢是三段及三段以上走势
                 i = pydash.find_last_index(duan_series[:gg1], lambda x: x == 1)
-                if low_series[d1] > high_series[i]:
+                if low_series[d1] > high_series[i] and len(pydash.filter_(duan_series[gg1:idx], lambda x: x == -1)) == 1:
                     category = '准三买'
                 else:
                     category = '完备买'
