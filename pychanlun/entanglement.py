@@ -3,7 +3,7 @@
 import pydash
 
 from pychanlun.basic.comm import FindPrevEq
-from pychanlun.basic.pattern import PerfectForBuyLong, PerfectForSellShort
+from pychanlun.basic.pattern import perfect_buy_Long, perfect_sell_short
 from pychanlun.basic.pattern import buy_category, sell_category
 
 
@@ -187,7 +187,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                         result['sell_zs_huila']['stop_lose_price'].append(0)
                         result['sell_zs_huila']['stop_win_price'].append(0)
 
-                    if PerfectForSellShort(duan_series, high_series, low_series, r):
+                    if perfect_sell_short(duan_series, high_series, low_series, r):
                         tags.append('完备卖')
                     if higher_duan_series is not None:
                         category = sell_category(higher_duan_series, duan_series, high_series, low_series, r)
@@ -229,7 +229,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     else:
                         result['buy_zs_huila']['stop_lose_price'].append(0)
                         result['buy_zs_huila']['stop_win_price'].append(0)
-                    if PerfectForBuyLong(duan_series, high_series, low_series, r):
+                    if perfect_buy_Long(duan_series, high_series, low_series, r):
                         tags.append('完备买')
                     if higher_duan_series is not None:
                         category = buy_category(higher_duan_series, duan_series, high_series, low_series, r)
@@ -276,7 +276,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 result['buy_zs_tupo']['date'].append(time_series[r])
                 result['buy_zs_tupo']['data'].append(e.gg)
                 result['buy_zs_tupo']['stop_lose_price'].append(e.zg)
-                if PerfectForBuyLong(duan_series, high_series, low_series, r):
+                if perfect_buy_Long(duan_series, high_series, low_series, r):
                     tags.append('完备买')
                 if higher_duan_series is not None:
                     category = buy_category(higher_duan_series, duan_series, high_series, low_series, r)
@@ -298,7 +298,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                 result['sell_zs_tupo']['date'].append(time_series[r])
                 result['sell_zs_tupo']['data'].append(e.dd)
                 result['sell_zs_tupo']['stop_lose_price'].append(e.zd)
-                if PerfectForSellShort(duan_series, high_series, low_series, r):
+                if perfect_sell_short(duan_series, high_series, low_series, r):
                     tags.append('完备卖')
                 if higher_duan_series is not None:
                     category = sell_category(higher_duan_series, duan_series, high_series, low_series, r)
@@ -355,7 +355,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                                 result['sell_v_reverse']['date'].append(time_series[k])
                                 result['sell_v_reverse']['data'].append(resist_price)
                                 result['sell_v_reverse']['stop_lose_price'].append(high_series[leave_end_index])
-                                if PerfectForSellShort(duan_series, high_series, low_series, k):
+                                if perfect_sell_short(duan_series, high_series, low_series, k):
                                     tags.append('完备卖')
                                 if higher_duan_series is not None:
                                     category = sell_category(higher_duan_series, duan_series, high_series, low_series,
@@ -390,7 +390,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                                 result['buy_v_reverse']['date'].append(time_series[k])
                                 result['buy_v_reverse']['data'].append(resist_price)
                                 result['buy_v_reverse']['stop_lose_price'].append(low_series[leave_end_index])
-                                if PerfectForBuyLong(duan_series, high_series, low_series, k):
+                                if perfect_buy_Long(duan_series, high_series, low_series, k):
                                     tags.append('完备买')
                                 if higher_duan_series is not None:
                                     category = buy_category(higher_duan_series, duan_series, high_series, low_series, k)
@@ -441,7 +441,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                         result['sell_duan_break']['date'].append(time_series[k])
                         result['sell_duan_break']['data'].append(low_series[anchor])
                         result['sell_duan_break']['stop_lose_price'].append(high_series[i])
-                        if PerfectForSellShort(duan_series, high_series, low_series, k):
+                        if perfect_sell_short(duan_series, high_series, low_series, k):
                             tags.append('完备卖')
                         if higher_duan_series is not None:
                             category = sell_category(higher_duan_series, duan_series, high_series, low_series,
@@ -469,7 +469,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                         result['buy_duan_break']['date'].append(time_series[k])
                         result['buy_duan_break']['data'].append(high_series[anchor])
                         result['buy_duan_break']['stop_lose_price'].append(low_series[i])
-                        if PerfectForBuyLong(duan_series, high_series, low_series, k):
+                        if perfect_buy_Long(duan_series, high_series, low_series, k):
                             tags.append('完备买')
                         if higher_duan_series is not None:
                             category = buy_category(higher_duan_series, duan_series, high_series, low_series, k)

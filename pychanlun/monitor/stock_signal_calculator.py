@@ -15,7 +15,7 @@ from pychanlun import Duan
 from pychanlun import entanglement as entanglement
 from pychanlun import divergence as divergence
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.pattern import DualEntangleForBuyLong, PerfectForBuyLong, buy_category
+from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_Long, buy_category
 import talib as ta
 import numpy as np
 import pydash
@@ -173,7 +173,7 @@ def calculate(info):
 
         if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
             tags.append("双盘")
-        if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
+        if perfect_buy_Long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-拉回笔中枢确认底背',
@@ -192,7 +192,7 @@ def calculate(info):
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
 
-        if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
+        if perfect_buy_Long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-升破笔中枢',
@@ -211,7 +211,7 @@ def calculate(info):
         duan_start = FindPrevEq(duan_series, 1, ent.start)
         duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
 
-        if PerfectForBuyLong(duan_series, high_series, low_series, duan_end):
+        if perfect_buy_Long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '多-笔中枢三卖V', fire_time,
