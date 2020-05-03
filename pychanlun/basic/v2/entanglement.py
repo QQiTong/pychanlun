@@ -5,7 +5,7 @@ import pydash
 from pychanlun.funcat.time_series import (fit_series)
 from pychanlun import series_tool
 from pychanlun.basic.comm import FindPrevEq
-from pychanlun.basic.pattern import PerfectForBuyLong, PerfectForSellShort
+from pychanlun.basic.pattern import perfect_buy_long, perfect_sell_short
 
 class Entanglement:
     def __init__(self):
@@ -187,7 +187,7 @@ def la_hui(klines, entanglements):
                         result['sell_zs_huila']['stop_lose_price'].append(0)
                         result['sell_zs_huila']['stop_win_price'].append(0)
 
-                    if PerfectForSellShort(duan_series, high_series, low_series, r):
+                    if perfect_sell_short(duan_series, high_series, low_series, r):
                         result['sell_zs_huila']['tag'].append('完备')
                     else:
                         result['sell_zs_huila']['tag'].append('')
@@ -225,7 +225,7 @@ def la_hui(klines, entanglements):
                         result['buy_zs_huila']['stop_lose_price'].append(0)
                         result['buy_zs_huila']['stop_win_price'].append(0)
 
-                    if PerfectForBuyLong(duan_series, high_series, low_series, r):
+                    if perfect_buy_long(duan_series, high_series, low_series, r):
                         result['buy_zs_huila']['tag'].append('完备')
                     else:
                         result['buy_zs_huila']['tag'].append('')
@@ -274,7 +274,7 @@ def tu_po(klines, entanglements):
                 result['buy_zs_tupo']['date'].append(time_series[r])
                 result['buy_zs_tupo']['data'].append(e.gg)
                 result['buy_zs_tupo']['stop_lose_price'].append(e.zg)
-                if PerfectForBuyLong(duan_series, high_series, low_series, r):
+                if perfect_buy_long(duan_series, high_series, low_series, r):
                     result['buy_zs_tupo']['tag'].append('完备')
                 else:
                     result['buy_zs_tupo']['tag'].append('')
@@ -291,7 +291,7 @@ def tu_po(klines, entanglements):
                 result['sell_zs_tupo']['date'].append(time_series[r])
                 result['sell_zs_tupo']['data'].append(e.dd)
                 result['sell_zs_tupo']['stop_lose_price'].append(e.zd)
-                if PerfectForSellShort(duan_series, high_series, low_series, r):
+                if perfect_sell_short(duan_series, high_series, low_series, r):
                     result['sell_zs_tupo']['tag'].append('完备')
                 else:
                     result['sell_zs_tupo']['tag'].append('')
@@ -349,7 +349,7 @@ def v_reverse(klines, entanglements):
                                 result['sell_v_reverse']['date'].append(time_series[k])
                                 result['sell_v_reverse']['data'].append(resist_price)
                                 result['sell_v_reverse']['stop_lose_price'].append(high_series[leave_end_index])
-                                if PerfectForSellShort(duan_series, high_series, low_series, k):
+                                if perfect_sell_short(duan_series, high_series, low_series, k):
                                     result['sell_v_reverse']['tag'].append('完备')
                                 else:
                                     result['sell_v_reverse']['tag'].append('')
@@ -378,7 +378,7 @@ def v_reverse(klines, entanglements):
                                 result['buy_v_reverse']['date'].append(time_series[k])
                                 result['buy_v_reverse']['data'].append(resist_price)
                                 result['buy_v_reverse']['stop_lose_price'].append(low_series[leave_end_index])
-                                if PerfectForBuyLong(duan_series, high_series, low_series, k):
+                                if perfect_buy_long(duan_series, high_series, low_series, k):
                                     result['buy_v_reverse']['tag'].append('完备')
                                 else:
                                     result['buy_v_reverse']['tag'].append('')
@@ -431,7 +431,7 @@ def po_huai(klines):
                         result['sell_duan_break']['date'].append(time_series[k])
                         result['sell_duan_break']['data'].append(low_series[anchor])
                         result['sell_duan_break']['stop_lose_price'].append(high_series[i])
-                        if PerfectForSellShort(duan_series, high_series, low_series, k):
+                        if perfect_sell_short(duan_series, high_series, low_series, k):
                             result['sell_duan_break']['tag'].append('完备')
                         else:
                             result['sell_duan_break']['tag'].append('')
@@ -453,7 +453,7 @@ def po_huai(klines):
                         result['buy_duan_break']['date'].append(time_series[k])
                         result['buy_duan_break']['data'].append(high_series[anchor])
                         result['buy_duan_break']['stop_lose_price'].append(low_series[i])
-                        if PerfectForBuyLong(duan_series, high_series, low_series, k):
+                        if perfect_buy_long(duan_series, high_series, low_series, k):
                             result['buy_duan_break']['tag'].append('完备')
                         else:
                             result['buy_duan_break']['tag'].append('')
