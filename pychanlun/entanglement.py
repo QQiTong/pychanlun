@@ -414,11 +414,19 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
             'tag': []
         }
     }
+    count = len(time_series)
     for i in range(len(e_list)):
         e = e_list[i]
+        next_e = e_list[i+1] if i < len(e_list) - 1 else None
         if e.direction == 1:
             # 离开中枢后的第一段结束
-            leave_end_index = pydash.index_of(duan_series, 1, e.end)
+            leave_end_index = -1
+            for x in range(e.end+1, count):
+                if duan_series == 1:
+                    leave_end_index = x
+                    break
+                if next_e is not None and x >= e.start:
+                    break
             if leave_end_index >= 0:
                 # 存在强3买
                 buy3 = False
@@ -454,7 +462,13 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                             break
         if e.direction == -1:
             # 离开中枢后的第一段结束
-            leave_end_index = pydash.index_of(duan_series, -1, e.end)
+            leave_end_index = -1
+            for x in range(e.end+1, count):
+                if duan_series == -1:
+                    leave_end_index = x
+                    break
+                if next_e is not None and x >= e.start:
+                    break
             if leave_end_index >= 0:
                 # 存在3卖
                 sell3 = False
@@ -487,7 +501,6 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                                             tags.append(category)
                                 result['buy_v_reverse']['tag'].append(','.join(tags))
                             break
-
     return result
 
 
