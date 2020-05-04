@@ -89,6 +89,11 @@ def buy_category(higher_duan_series, duan_series, high_series, low_series, idx):
         if d1 == dd1:
             # 走势低点后面没有线段低点
             category = '一类买'
+            for x in range(dd1, len(duan_series)):
+                if duan_series[x] == 1:
+                    if x < idx and low_series[idx] < high_series[x]:
+                        category = '二类买'
+                    break
         else:
             # 走势低点后还有线段低点，但是还没有形成新的走势
             if len(pivots) > 0 and low_series[d1] > pivots[-1]['zg']:
@@ -149,6 +154,11 @@ def sell_category(higher_duan_series, duan_series, high_series, low_series, idx)
         if g1 == gg1:
             # 走势高点后面没有线段高点
             category = '一类卖'
+            for x in range(gg1, len(duan_series)):
+                if duan_series[x] == -1:
+                    if x < idx and high_series[idx] > low_series[x]:
+                        category = '二类卖'
+                    break
         else:
             # 走势高点后还有线段高点，但是还没有形成新的走势
             if len(pivots) > 0 and high_series[g1] < pivots[-1]['zd']:
