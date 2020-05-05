@@ -1,12 +1,12 @@
 import Vue from 'vue'
 // 期货账户
-let futureAccount = 50
+let futureAccount = 100
 // 股票账户
 let stockAccount = 3
 // 数字货币账户
 let digitCoinAccount = 60.3 / 10000
 // 外盘账户
-let globalFutureAccount = 6.4
+let globalFutureAccount = 7
 // 数字货币 杠杆倍数
 let digitCoinLevel = 20
 // 'NID', 'CP', 'CT',
