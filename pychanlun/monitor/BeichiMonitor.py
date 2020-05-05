@@ -50,18 +50,19 @@ dominantSymbolInfoList = {}
 # 期货公司在原有保证金基础上1%
 marginLevelCompany = 0.01
 # 期货账户
-futuresAccount = 50
+futuresAccount = 96
 # 数字货币手续费0.05% 开平仓0.1%
 digitCoinFee = 0.001
 # 数字货币账户
 digitCoinAccount = 60.80 / 10000
 # 外盘期货账户
-global_future_account = 6.4
+global_future_account = 7
 maxAccountUseRate = 0.1
 stopRate = 0.01
 mail = Mail()
 dingMsg = DingMsg()
 
+filter_tag = ['双盘', '完备买','完备卖','扩展完备买','扩展完备卖','一类买','一类卖','二类买','二类卖', '三类买','三类卖','准三买','准三卖']
 
 # 初始化业务对象
 # businessService = BusinessService()
@@ -543,7 +544,7 @@ def monitorHuila(result, symbol, period, closePrice):
     big_period = period != '1m' and period != '3m' and period != '5m'
     notLower = result['notLower']
     notHigher = result['notHigher']
-    filter_tag = ['双盘', '完备', '二类', '三类']
+
     # 监控回拉
     if len(result['buy_zs_huila']['date']) > 0:
         fire_time = result['buy_zs_huila']['date'][-1]
@@ -601,26 +602,6 @@ def monitorTupo(result, symbol, period, closePrice):
         direction = 'S'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-
-    # 监控高级别突破
-    # if len(result['buy_zs_tupo_higher']['date']) > 0:
-    #     fire_time = result['buy_zs_tupo_higher']['date'][-1]
-    #     price = result['buy_zs_tupo_higher']['data'][-1]
-    #     stop_lose_price = result['buy_zs_tupo_higher']['stop_lose_price'][-1]
-    #     tag = ''
-    #     direction = 'HB'
-    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-    # if len(result['sell_zs_tupo_higher']['date']) > 0:
-    #     fire_time = result['sell_zs_tupo_higher']['date'][-1]
-    #     price = result['sell_zs_tupo_higher']['data'][-1]
-    #     stop_lose_price = result['sell_zs_tupo_higher']['stop_lose_price'][-1]
-    #     tag = ''
-    #     direction = 'HS'
-    #     futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-    #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-
-
 '''
 监控3买卖 V反
 '''
