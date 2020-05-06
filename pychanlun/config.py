@@ -60,9 +60,10 @@ config = {
         "PP",
         "P",
         "Y",
-        "PG"
+        "PG",
         # "L",
-        # "JD"
+        # "JD",
+        "A"
     ],
     # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整
     'margin_rate_company': 0.01,
@@ -97,6 +98,7 @@ config = {
         'Y': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'PG': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        'A': {'margin_rate': 0.08, 'contract_multiplier': 10},
 
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         # 外盘

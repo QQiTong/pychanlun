@@ -570,8 +570,9 @@
         {key: "tupo", display_name: "突破"},
         {key: "huila", display_name: "拉回"},
         {key: "break", display_name: "破坏"},
-        {key: "vfan", display_name: "V反"},
-        {key: "beichi", display_name: "背驰"}
+        {key: "v_reverse", display_name: "V反"},
+        {key: "beichi", display_name: "背驰"},
+        {key: "five_v_reverse", display_name: "5浪V"}
     ];
     const directionOptions = [
         {key: "long", display_name: "多"},

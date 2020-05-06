@@ -185,8 +185,8 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag, pric
 # 自动录入持仓列表  新增 status(holding,winEnd,loseEnd 状态) profit(盈利) profit_rate(盈利率)
 def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                            stop_lose_price, futureCalcObj, insert):
-    # CT 老虎无法交易，ZM 成交量太小
-    if symbol == 'CT' or symbol == 'ZM' or symbol == 'CP' or symbol == 'NID':
+    # CT NID CP 老虎无法交易
+    if symbol == 'CT'or symbol == 'CP' or symbol == 'NID':
         return False
 
     remind = False
@@ -608,7 +608,7 @@ def monitorTupo(result, symbol, period, closePrice):
 
 
 def monitorVReverse(result, symbol, period, closePrice):
-    signal = 'vreverse'
+    signal = 'v_reverse'
     big_period = period != '1m' and period != '3m' and period != '5m'
     notLower = result['notLower']
     notHigher = result['notHigher']
@@ -643,7 +643,7 @@ def monitorVReverse(result, symbol, period, closePrice):
 监控5浪及以上 V反
 '''
 def monitorFiveVReverse(result, symbol, period, closePrice):
-    signal = 'five_vreverse'
+    signal = 'five_v_reverse'
     big_period = period != '1m' and period != '3m' and period != '5m'
     notLower = result['notLower']
     notHigher = result['notHigher']
@@ -960,8 +960,8 @@ def run(**kwargs):
     # symbolListSplit = [symbolList[i:i + 3] for i in range(0, len(symbolList), 3)]
     # 24个品种 拆分2份
     symbolListSplit = [symbolList[i:i + 12] for i in range(0, len(symbolList), 12)]
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[3]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[4]]).start()
