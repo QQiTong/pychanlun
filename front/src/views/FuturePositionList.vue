@@ -369,7 +369,7 @@
 
             <el-table-column label="信号" align="center" :key="4">
                 <template slot-scope="{row}">
-                    <span>{{ row.signal| signalTypeFilter }}</span>
+                    <span  :class="row.signal==='tupo'?'down-green':'up-red'">{{ row.signal| signalTypeFilter }}</span>
                 </template>
             </el-table-column>
             <el-table-column label="分类" align="center" :key="28">

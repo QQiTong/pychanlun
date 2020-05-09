@@ -16,7 +16,6 @@ from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.basic.pattern import DualEntangleForBuyLong, DualEntangleForSellShort
 from pychanlun.config import config
 
-
 # 币安的数据结构
 # [
 #     [
@@ -79,7 +78,7 @@ class Calc:
             '1w': '1week'
         }
         self.okexPeriodMap = {
-            '1m':'60',
+            '1m': '60',
             '3m': '180',
             '5m': '300',
             '15m': '900',
@@ -170,13 +169,13 @@ class Calc:
                 # 转换后的本级别
                 currentPeriod = self.okexPeriodMap[period]
 
-                klineData = klineDataTool.getDigitCoinData(symbol,currentPeriod,endDate)
+                klineData = klineDataTool.getDigitCoinData(symbol, currentPeriod, endDate)
                 # 转换后的高级别
                 bigLevelPeriod = self.okexPeriodMap[self.levelMap[period]]
-                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod,endDate)
+                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod, endDate)
                 # 转换后的高高级别
                 bigLevelPeriod2 = self.okexPeriodMap[self.levelMap[self.levelMap[period]]]
-                klineDataBigLevel2 = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod2,endDate)
+                klineDataBigLevel2 = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod2, endDate)
             else:
                 # 期货
                 cat = "FUTURE"
@@ -187,9 +186,9 @@ class Calc:
                 bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
                 klineDataBigLevel2 = klineDataTool.getFutureData(symbol, bigLevelPeriod2, endDate)
 
-        jsonObj = klineData # 本级别的K线数据
-        jsonObjBigLevel = klineDataBigLevel # 高级别的K线数据
-        jsonObjBigLevel2 = klineDataBigLevel2 # 高高级别的K线数据
+        jsonObj = klineData  # 本级别的K线数据
+        jsonObjBigLevel = klineDataBigLevel  # 高级别的K线数据
+        jsonObjBigLevel2 = klineDataBigLevel2  # 高高级别的K线数据
 
         # 本级别数据
         openPriceList = []
@@ -265,13 +264,17 @@ class Calc:
         # 本级别笔
 
         biList = [0 for i in range(count)]
-        CalcBi(count, biList, highList, lowList, openPriceList, closePriceList)
+        if period == '1m' or period == '3m' or period == '5m':
+            small_period = True
+        else:
+            small_period = False
+        CalcBi(count, biList, highList, lowList, openPriceList, closePriceList,small_period)
         x_data['bi'] = biList
 
         # 高级别笔
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             biListBigLevel = [0 for i in range(len(timeListBigLevel))]
-            CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
+            CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel,small_period)
             fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
             if fractialRegion is not None:
                 fractialRegion["period"] = bigLevelPeriod
@@ -280,7 +283,7 @@ class Calc:
         # 高高级别笔
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
-            CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
+            CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2,small_period)
             fractialRegion2 = FindLastFractalRegion(len(timeListBigLevel2), biListBigLevel2, timeListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
             if fractialRegion2 is not None:
                 fractialRegion2["period"] = bigLevelPeriod2
@@ -465,7 +468,7 @@ class Calc:
         # resJson['sellHigherMACDBCData'] = sellMACDBCData2
 
         resJson['buy_zs_huila'] = huila['buy_zs_huila']
-        resJson['sell_zs_huila'] =huila['sell_zs_huila']
+        resJson['sell_zs_huila'] = huila['sell_zs_huila']
         # resJson['buy_zs_huila_higher'] = huila_higher['buy_zs_huila']
         # resJson['sell_zs_huila_higher'] =huila_higher['sell_zs_huila']
 
@@ -511,6 +514,7 @@ def getLineData(timeList, signalList, highList, lowList):
             res['data'].append(lowList[i])
             res['date'].append(timeList[i])
     return res
+
 
 def getZhongShuData(entanglementList):
     zsdata = []
@@ -626,17 +630,17 @@ def calcArea(diff, macd, timeList):
         if macd[i] > 0:
             if currentFlag == -1:
                 macdAreaList['value'].append(downSum)
-                macdAreaList['data'].append(round(diff[i],2))
+                macdAreaList['data'].append(round(diff[i], 2))
                 macdAreaList['date'].append(timeList[i])
                 downSum = 0
                 currentFlag = 1
-            upSum = round(upSum + macd[i]*100)
+            upSum = round(upSum + macd[i] * 100)
         else:
             if currentFlag == 1:
                 macdAreaList['value'].append(upSum)
-                macdAreaList['data'].append(round(diff[i],2))
+                macdAreaList['data'].append(round(diff[i], 2))
                 macdAreaList['date'].append(timeList[i])
                 upSum = 0
                 currentFlag = -1
-            downSum = round(downSum + macd[i]*100)
+            downSum = round(downSum + macd[i] * 100)
     return macdAreaList
