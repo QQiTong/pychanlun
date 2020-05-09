@@ -146,7 +146,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag, pric
             'per_order_stop_rate': round(perOrderStopRate, 3),
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if abs((date_created - fire_time).total_seconds()) < 60 * 3 and perOrderStopRate < 0.30:
+        if abs((date_created - fire_time).total_seconds()) < 60 * 3 and perOrderStopRate <= 0.2:
             # 新增
             remind = saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                             stop_lose_price, futureCalcObj, True)

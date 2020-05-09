@@ -363,12 +363,15 @@ export default {
             })
         },
         jumpToKline(symbol) {
+            // 夜盘交易，时间算第二天的
+            let date = new Date()
+            let nextDay = date.getTime() + 3600 * 1000 * 24
             // 总控页面不关闭，开启新页面
             let routeUrl = this.$router.resolve({
                 path: '/multi-period',
                 query: {
                     symbol: symbol,
-                    endDate: CommonTool.dateFormat('yyyy-MM-dd')
+                    endDate: CommonTool.parseTime(nextDay, '{y}-{m}-{d}')
                 }
             })
             window.open(routeUrl.href, '_blank')

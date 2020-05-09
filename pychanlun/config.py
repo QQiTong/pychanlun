@@ -32,38 +32,40 @@ config = {
     'default': DevelopmentConfig,
     'production': ProductionConfig,
     'symbolList': [
-        # 上期所
+        # 黑色系
         "RB",
         "HC",
+        "I",
+        "J",
+        "JM",
+        # 化工系
         "RU",
         "FU",
         "BU",
-        # "AU",
-        # "AG",
-        "NI",
-        # "ZN",
-        # "SP",
-        # 郑商所
         "MA",
         "TA",
-        "CF",
-        "SR",
-        "OI",
-        # "AP",
-        # 大商所
-        "J",
-        "JM",
-        "I",
-        "RM",
-        "M",
         "EG",
         "PP",
-        "P",
-        "Y",
         "PG",
         # "L",
+        # 农产品
+        "CF",
+        "SR",
+        "AP",
+        "A",
+        "M",
+        "RM",
         # "JD",
-        "A"
+        # 食用油
+        "OI",
+        "P",
+        "Y",
+        # 金属类
+        "NI",
+        # "AU",
+        # "AG",
+        # "ZN",
+        # "SP",
     ],
     # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整
     'margin_rate_company': 0.01,
@@ -146,7 +148,7 @@ config = {
     # YM:道琼斯 CN:A50 CP:马棕榈
     'global_future_symbol_origin': ['@CL0W', '@GC0W', '@SI0W', '@YM0Y', 'CN0Y', '03NID', '@ZS0W', '@ZM0Y', '@ZL0W', 'CPO0W', 'CT0W'],
     # wshq
-    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN','ZS', 'ZM', 'ZL'],
+    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL'],
     # 美国股票
     'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD'],
     # ldhq
@@ -294,7 +296,7 @@ config = {
         #     'feeRate': 0.012
         # },
         {
-            'contract_multiplier':50,
+            'contract_multiplier': 50,
             'exchange': '美国',
             'margin_rate': 0.056,
             'order_book_id': 'ZS',

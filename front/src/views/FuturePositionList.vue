@@ -334,14 +334,27 @@
                     </el-select>
                 </template>
             </el-table-column>
-            <el-table-column label="品种" prop="symbol" align="center"
+            <el-table-column label="品种" prop="symbol" align="left"
                              :key="1">
                 <template slot-scope="{row}">
                     <el-link
                         type="primary"
                         :underline="false"
                         @click="handleJumpToKline(row)"
-                    >{{ row.symbol }}
+                        v-if="globalFutureSymbol.indexOf(row.symbol)!==-1"
+                    >
+                        {{row.symbol}}
+                        <span class="up-red">外 </span>
+                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 动</span>
+                    </el-link>
+                    <el-link
+                        type="primary"
+                        :underline="false"
+                        @click="handleJumpToKline(row)"
+                        v-else
+                    >
+                        {{row.symbol}}
+                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 动</span>
                     </el-link>
                     <!-- todo                      @click="handleJumpToKline(row)"-->
                 </template>
@@ -922,6 +935,9 @@
             },
             handleJumpToKline(row) {
                 console.log(this.$parent);
+                // 夜盘交易，时间算第二天的
+                let date = new Date()
+                let nextDay = date.getTime() + 3600 * 1000 * 24
                 // this.$parent.jumpToKline(symbol)
                 // 结束状态 k线页面不获取持仓信息
                 // if (row.status !== "winEnd" && row.status !== "loseEnd") {
@@ -933,7 +949,7 @@
                         positionPeriod: row.period, // 开仓周期
                         positionDirection: row.direction, // 持仓方向
                         positionStatus: row.status, // 当前状态
-                        endDate: CommonTool.dateFormat("yyyy-MM-dd")
+                        endDate: CommonTool.parseTime(nextDay, '{y}-{m}-{d}')
                     }
                 });
                 window.open(routeUrl.href, "_blank");
