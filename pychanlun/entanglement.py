@@ -264,8 +264,11 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
     }
     for i in range(len(e_list)):
         e = e_list[i]
-        e_next = e_list[i + 1] if i + 1 < len(e_list) else None
+        e_pre = e_list[i - 1] if i > 0 else None
         if e.direction == 1:
+            duan_start = pydash.find_last_index(duan_series[:e.start], lambda t: t == -1)
+            if e_pre is not None and 0 <= duan_start < e_pre.start:
+                continue
             r = -1
             for x in range(e.end + 1, len(high_series)):
                 if high_series[x] > e.gg:
@@ -288,6 +291,9 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                             tags.append(category)
                 result['buy_zs_tupo']['tag'].append(','.join(tags))
         if e.direction == -1:
+            duan_start = pydash.find_last_index(duan_series[:e.start], lambda t: t == 1)
+            if e_pre is not None and 0 <= duan_start < e_pre.start:
+                continue
             r = -1
             for x in range(e.end + 1, len(low_series)):
                 if low_series[x] < e.dd:
