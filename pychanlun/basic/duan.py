@@ -91,7 +91,7 @@ def CalcDuan(count, duan, bi, high, low):
                                 if i2 < i:
                                     i = i2
 
-def CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod=""):
+def CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList):
     if len(duanList) < 0:
         return
     idx = 0

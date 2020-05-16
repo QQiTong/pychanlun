@@ -258,7 +258,7 @@ class Calc:
                 lowListBigLevel2.append(round(float(item['low']), 2))
                 openPriceListBigLevel2.append(round(float(item['open']), 2))
                 closePriceListBigLevel2.append(round(float(item['close']), 2))
-                timeIndexListBigLevel2.append(localTime)
+                timeIndexListBigLevel2.append(time.mktime(localTime))
 
         count = len(timeList)
         # 本级别笔
@@ -291,14 +291,17 @@ class Calc:
         # 本级别段处理
         duanList = [0 for i in range(count)]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList, bigLevelPeriod)
+            CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList)
         else:
             CalcDuan(count, duanList, biList, highList, lowList)
         x_data['duan'] = duanList
 
         # 高一级别段处理
         higherDuanList = [0 for i in range(count)]
-        CalcDuan(count, higherDuanList, duanList, highList, lowList)
+        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
+            CalcDuanExp(count, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
+        else:
+            CalcDuan(count, higherDuanList, duanList, highList, lowList)
 
         # 高高一级别段处理
         higherHigherDuanList = [0 for i in range(count)]
