@@ -161,9 +161,9 @@ export default {
             totalOrderStopMoney: 0,
 
             // 动态止盈价格(动态止盈部分手数使剩下的止损也不亏钱)
-            dynamicWinPrice: null,
+            // dynamicWinPrice: null,
             // 动态止盈手数
-            dynamicWinCount: 0,
+            // dynamicWinCount: 0,
             // end仓位管理计算
             // 结束日期
             endDate: CommonTool.dateFormat('yyyy-MM-dd'),
@@ -190,6 +190,8 @@ export default {
             quickCalc: {
                 openPrice: "",
                 stopPrice: "",
+                dynamicWinPrice: "",
+                dynamicWinCount: "",
                 count: 0,
                 stopRate: 0,
                 perOrderStopMoney: 0
@@ -2705,12 +2707,12 @@ export default {
             // 动止手数 * （动止价-开仓价）* 合约乘数 = （开仓手数-动止手数）* 1手止损
             // 动止手数  = 开仓手数 * 1手止损  /( （动止价-开仓价）* 合约乘数 + 1手止损)
             // 如果填入了动止价
-            if (this.dynamicWinPrice != null) {
-                this.dynamicWinCount = Math.round(this.maxOrderCount * this.perOrderStopMoney / ((this.dynamicWinPrice - openPrice) * this.contractMultiplier + this.perOrderStopMoney))
+            if (this.quickCalc.dynamicWinPrice != null) {
+                this.quickCalc.dynamicWinCount = Math.round(this.maxOrderCount * this.perOrderStopMoney / ((this.quickCalc.dynamicWinPrice - openPrice) * this.contractMultiplier + this.perOrderStopMoney))
             }
             console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " perOrderMargin:",
                 this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
-                " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate)
+                " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate, " dynamicWinCount:", this.quickCalc.dynamicWinCount)
         },
         calculateMA(resultData, dayCount) {
             let result = []

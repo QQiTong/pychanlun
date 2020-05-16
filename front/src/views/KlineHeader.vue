@@ -23,10 +23,12 @@
             计算开仓手数：
             <el-input v-model="quickCalc.openPrice" placeholder="开仓价" size="mini" class="input-short ml-5 mr-5"></el-input>
             <el-input v-model="quickCalc.stopPrice" placeholder="止损价" size="mini" class="input-short ml-5 mr-5" @change="quickCalcMaxCount"></el-input>
+            <el-input v-model="quickCalc.dynamicWinPrice" placeholder="动止价" size="mini" class="input-short ml-5 mr-5" @change="quickCalcMaxCount"></el-input>
             <el-button size="mini" type="primary" class="primary-button" @click="quickCalcMaxCount">计算</el-button>
             开仓手数：<span class="up-red ml-5">{{quickCalc.count}}</span>
             止损率：<span class="up-red ml-5">{{(quickCalc.stopRate* 100).toFixed(2)}}%</span>
             1手止损：<span class="up-red ml-5">{{quickCalc.perOrderStopMoney}}</span>
+            动止手数：<span class="up-red ml-5">{{quickCalc.dynamicWinCount}}</span>
         </div>
     </div>
 </template>

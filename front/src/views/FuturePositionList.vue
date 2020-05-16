@@ -359,6 +359,13 @@
                     <!-- todo                      @click="handleJumpToKline(row)"-->
                 </template>
             </el-table-column>
+            <el-table-column label="方向" prop="direction" align="center" :key="5">
+                <template slot-scope="{row}">
+                    <span :class="row.direction | directionTagFilter">
+                        <span>{{ row.direction | directionFilter }}</span>
+                    </span>
+                </template>
+            </el-table-column>
             <el-table-column label="周期" prop="period" align="center"
                              :key="2"/>
             <el-table-column label="入场时间" align="center" :key="3">
@@ -377,13 +384,7 @@
                     <span>{{ row.tag }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="方向" prop="direction" align="center" :key="5">
-                <template slot-scope="{row}">
-                    <span :class="row.direction | directionTagFilter">
-                        <span>{{ row.direction | directionFilter }}</span>
-                    </span>
-                </template>
-            </el-table-column>
+
             <el-table-column label="成本价" prop="price" align="center" :key="6"/>
             <el-table-column label="数量" prop="amount" align="center" :key="7"/>
             <!--            后台只更新持仓单的最新价，浮盈率，浮盈额. 老合约没必要继续更新最新价，因此这几个字段都不显示，但是列不能删除

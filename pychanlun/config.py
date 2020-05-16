@@ -99,7 +99,7 @@ config = {
         'P': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'Y': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
-        'PG': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        'PG': {'margin_rate': 0.11, 'contract_multiplier': 20},
         'A': {'margin_rate': 0.08, 'contract_multiplier': 10},
 
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
