@@ -42,7 +42,7 @@ def MergeCandles(high, low, open_price, close_price, from_index, to_index, dir):
 # to_index 终点(含)
 # dir 笔方向
 # small_period 是否是小级别
-def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, dir, strict=False,small_period=False):
+def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, dir, strict=False, small_period=False):
     if not strict:
         if dir == 1:
             g1 = FindPrevEq(bi, 1, from_index)
@@ -131,11 +131,11 @@ def IsBi(count, bi, high, low, open_price, close_price, from_index, to_index, di
 
 # index传入前一笔的结束位置，如果前一笔不是严格的笔，进行合并。
 # 合并要符合闪电形态，而且只合一次。
-def AdjustBi(count, bi, high, low, open_price, close_price, index,small_period):
+def AdjustBi(count, bi, high, low, open_price, close_price, index, small_period):
     if bi[index] == 1:
         i = FindPrevEq(bi, -1, index)
         if i > 0:
-            if not IsBi(count, bi, high, low, open_price, close_price, i, index, 1, True,small_period):
+            if not IsBi(count, bi, high, low, open_price, close_price, i, index, 1, True, small_period):
                 # 不是严格成笔，需要调整
                 # g1记录当前笔的高的位置
                 # d1记录当前笔的低的位置
@@ -176,7 +176,7 @@ def AdjustBi(count, bi, high, low, open_price, close_price, index,small_period):
 # high 最高价的序列
 # low 最低价的序列
 # small_period 是否是小级别
-def CalcBi(count, bi, high, low, open_price, close_price,small_period=False):
+def CalcBi(count, bi, high, low, open_price, close_price, small_period=False):
     # 标记分型的顶底
     for i in range(1, count):
         # x 前一个笔低点
@@ -207,19 +207,19 @@ def CalcBi(count, bi, high, low, open_price, close_price,small_period=False):
                         bi[k] = 0
                     break
         elif b1:
-            if (x == y and x == 0)  or y > x or IsBi(count, bi, high, low, open_price, close_price, x, i, 1, False,small_period):
+            if (x == y and x == 0)  or y > x or IsBi(count, bi, high, low, open_price, close_price, x, i, 1, False, small_period):
                 bi[x] = -1
                 bi[i] = 1
                 for t in range(x + 1, i):
                     bi[t] = 0
-                AdjustBi(count, bi, high, low, open_price, close_price, x,small_period)
+                AdjustBi(count, bi, high, low, open_price, close_price, x, small_period)
         elif b2:
-            if (x == y and y == 0) or x > y or IsBi(count, bi, high, low, open_price, close_price, y, i, -1, False,small_period):
+            if (x == y and y == 0) or x > y or IsBi(count, bi, high, low, open_price, close_price, y, i, -1, False, small_period):
                 bi[y] = 1
                 bi[i] = -1
                 for t in range(y + 1, i):
                     bi[t] = 0
-                AdjustBi(count, bi, high, low, open_price, close_price, y,small_period)
+                AdjustBi(count, bi, high, low, open_price, close_price, y, small_period)
     idxL = FindPrevEq(bi, -1, len(bi))
     idxH = FindPrevEq(bi, 1, len(bi))
     if idxL > idxH and idxL - idxH < 5:

@@ -91,36 +91,35 @@ def CalcDuan(count, duan, bi, high, low):
                                 if i2 < i:
                                     i = i2
 
-def CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList):
-    if len(duanList) < 0:
+
+def calc_duan_exp(count, duan_list, bi_list_big_level, time_index_list_big_level, time_index_list, high_list, low_list):
+    if len(duan_list) < 0:
         return
     idx = 0
-    for i in range(len(biListBigLevel)):
-        if i < len(timeIndexListBigLevel) - 2:
-            bigT2 = timeIndexListBigLevel[i+1]
+    for i in range(len(bi_list_big_level)):
+        if i < len(time_index_list_big_level) - 1:
+            big_t2 = time_index_list_big_level[i + 1]
         else:
-            bigT2 = datetime.now(tz=tz).timestamp()
-        # if bigLevelPeriod == "1d" or bigLevelPeriod == "3d":
-            # bigT2 = bigT2 + 64800
-        if biListBigLevel[i] == 1:
-            h = highList[idx]
+            big_t2 = datetime.now(tz=tz).timestamp()
+        if bi_list_big_level[i] == 1:
+            h = high_list[idx]
             x = idx
             for x in range(idx, count):
-                if timeIndexList[x] < bigT2:
-                    if highList[x] >= h:
-                        h = highList[x]
+                if time_index_list[x] < big_t2:
+                    if high_list[x] >= h:
+                        h = high_list[x]
                         idx = x
                 else:
                     break
-            duanList[idx] = 1
-        elif biListBigLevel[i] == -1:
-            l = lowList[idx]
+            duan_list[idx] = 1
+        elif bi_list_big_level[i] == -1:
+            l = low_list[idx]
             x = idx
             for x in range(idx, count):
-                if timeIndexList[x] < bigT2:
-                    if lowList[x] <= l:
-                        l = lowList[x]
+                if time_index_list[x] < big_t2:
+                    if low_list[x] <= l:
+                        l = low_list[x]
                         idx = x
                 else:
                     break
-            duanList[idx] = -1
+            duan_list[idx] = -1

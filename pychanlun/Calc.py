@@ -10,7 +10,7 @@ import talib as ta
 import pychanlun.entanglement as entanglement
 
 from pychanlun.basic.bi import CalcBi, FindLastFractalRegion
-from pychanlun.basic.duan import CalcDuan, CalcDuanExp
+from pychanlun.basic.duan import CalcDuan, calc_duan_exp
 from pychanlun import Duan
 from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.basic.pattern import DualEntangleForBuyLong, DualEntangleForSellShort
@@ -264,17 +264,15 @@ class Calc:
         # 本级别笔
 
         biList = [0 for i in range(count)]
-        if period == '1m' or period == '3m' or period == '5m':
-            small_period = True
-        else:
-            small_period = False
-        CalcBi(count, biList, highList, lowList, openPriceList, closePriceList,small_period)
+        CalcBi(count, biList, highList, lowList, openPriceList, closePriceList,
+               True if period in ['1m', '3m', '5m'] else False)
         x_data['bi'] = biList
 
         # 高级别笔
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             biListBigLevel = [0 for i in range(len(timeListBigLevel))]
-            CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel,small_period)
+            CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel,
+                   closePriceListBigLevel, True if bigLevelPeriod in ['1m', '3m', '5m'] else False)
             fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
             if fractialRegion is not None:
                 fractialRegion["period"] = bigLevelPeriod
@@ -283,7 +281,10 @@ class Calc:
         # 高高级别笔
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
-            CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2,small_period)
+            CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2,
+                   openPriceListBigLevel2,
+                   closePriceListBigLevel2,
+                   True if bigLevelPeriod2 in ['1m', '3m', '5m'] else False)
             fractialRegion2 = FindLastFractalRegion(len(timeListBigLevel2), biListBigLevel2, timeListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
             if fractialRegion2 is not None:
                 fractialRegion2["period"] = bigLevelPeriod2
@@ -291,7 +292,7 @@ class Calc:
         # 本级别段处理
         duanList = [0 for i in range(count)]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            CalcDuanExp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList)
+            calc_duan_exp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList)
         else:
             CalcDuan(count, duanList, biList, highList, lowList)
         x_data['duan'] = duanList
@@ -299,7 +300,7 @@ class Calc:
         # 高一级别段处理
         higherDuanList = [0 for i in range(count)]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            CalcDuanExp(count, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
+            calc_duan_exp(count, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
         else:
             CalcDuan(count, higherDuanList, duanList, highList, lowList)
 
