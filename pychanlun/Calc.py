@@ -262,17 +262,17 @@ class Calc:
 
         count = len(timeList)
         # 本级别笔
-
+        small_period_list = ['1m', '3m', '5m','15m','30m','60m']
         biList = [0 for i in range(count)]
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList,
-               True if period in ['1m', '3m', '5m'] else False)
+               True if period in small_period_list else False)
         x_data['bi'] = biList
 
         # 高级别笔
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             biListBigLevel = [0 for i in range(len(timeListBigLevel))]
             CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel,
-                   closePriceListBigLevel, True if bigLevelPeriod in ['1m', '3m', '5m'] else False)
+                   closePriceListBigLevel, True if bigLevelPeriod in small_period_list else False)
             fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
             if fractialRegion is not None:
                 fractialRegion["period"] = bigLevelPeriod
@@ -284,7 +284,7 @@ class Calc:
             CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2,
                    openPriceListBigLevel2,
                    closePriceListBigLevel2,
-                   True if bigLevelPeriod2 in ['1m', '3m', '5m'] else False)
+                   True if bigLevelPeriod2 in small_period_list else False)
             fractialRegion2 = FindLastFractalRegion(len(timeListBigLevel2), biListBigLevel2, timeListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
             if fractialRegion2 is not None:
                 fractialRegion2["period"] = bigLevelPeriod2
