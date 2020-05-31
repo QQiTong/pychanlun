@@ -57,15 +57,15 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, dir, str
     if to_index - from_index < 4:
         # K柱数量不够不成笔
         return False
-    pre_candles = None
+    prev_candles = None
     if dir == 1:
         g1 = FindPrevEq(bi, 1, from_index)
         if g1 >= 0:
-            pre_candles = merge_candles(high, low, open_price, close_price, g1, from_index, -1)
+            prev_candles = merge_candles(high, low, open_price, close_price, g1, from_index, -1)
     if dir == -1:
         d1 = FindPrevEq(bi, -1, from_index)
         if d1 >= 0:
-            pre_candles = merge_candles(high, low, open_price, close_price, d1, from_index, 1)
+            prev_candles = merge_candles(high, low, open_price, close_price, d1, from_index, 1)
 
     candles = merge_candles(high, low, open_price, close_price, from_index, to_index, dir)
     if len(candles) < 5:
@@ -85,19 +85,49 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, dir, str
         bottomHigh = 0
         topLow = 0
         sticks = candles[0]['sticks'] + candles[1]['sticks']
-        if pre_candles is not None:
-            sticks = pre_candles[-2]['sticks'] + sticks
+        if prev_candles is not None and len(prev_candles) > 1:
+            sticks = prev_candles[-2]['sticks'] + sticks
         for idx in range(len(sticks)):
             if bottomHigh == 0:
                 bottomHigh = sticks[idx]['h']
             elif sticks[idx]['h'] > bottomHigh:
                 bottomHigh = sticks[idx]['h']
+
+        temp_candles = [{
+            'high': high[to_index],
+            'low': low[to_index],
+            'sticks': [{ 'h': max(open_price[to_index], close_price[to_index]), 'l': min(open_price[to_index], close_price[to_index]) }]
+        }]
+        for k in range(to_index + 1, len(bi)):
+            if high[k] > high[to_index]:
+                # 没有顶分型
+                return False
+            else:
+                if high[k] < temp_candles[-1]['high'] and low[k] < temp_candles[-1]['low']:
+                    temp_candles.append({
+                        'high': high[k],
+                        'low': low[k],
+                        'sticks': [{
+                            'h': max(open_price[k], close_price[k]), 'l': min(open_price[k], close_price[k])
+                        }]
+                    })
+                    break
+                else:
+                    temp_candles[-1]['high'] = max(temp_candles[-1]['high'], high[k])
+                    temp_candles[-1]['low'] = max(temp_candles[-1]['low'], low[k])
+                    temp_candles[-1]['sticks'].append({
+                        'h': max(open_price[k], close_price[k]), 'l': min(open_price[k], close_price[k])
+                    })
+
         sticks = candles[-2]['sticks'] + candles[-1]['sticks']
+        if len(temp_candles) > 1:
+            sticks = sticks + temp_candles[1]['sticks']
         for idx in range(len(sticks)):
             if topLow == 0:
                 topLow = sticks[idx]['l']
             elif sticks[idx]['l'] < topLow:
                 topLow = sticks[idx]['l']
+
         # 顶和底有重叠，不能成笔
         if topLow < bottomHigh:
             return False
@@ -116,19 +146,50 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, dir, str
         topLow = 0
         bottomHigh = 0
         sticks = candles[0]['sticks'] + candles[1]['sticks']
-        if pre_candles is not None:
-            sticks = pre_candles[-2]['sticks'] + sticks
+        if prev_candles is not None and len(prev_candles) > 1:
+            sticks = prev_candles[-2]['sticks'] + sticks
         for idx in range(0, len(sticks)):
             if topLow == 0:
                 topLow = sticks[idx]['l']
             elif sticks[idx]['l'] < topLow:
                 topLow = sticks[idx]['l']
+
+        temp_candles = [{
+            'high': high[to_index],
+            'low': low[to_index],
+            'sticks': [{'h': max(open_price[to_index], close_price[to_index]),
+                        'l': min(open_price[to_index], close_price[to_index])}]
+        }]
+        for k in range(to_index + 1, len(bi)):
+            if low[k] < low[to_index]:
+                # 没有顶分型
+                return False
+            else:
+                if high[k] > temp_candles[-1]['high'] and low[k] > temp_candles[-1]['low']:
+                    temp_candles.append({
+                        'high': high[k],
+                        'low': low[k],
+                        'sticks': [{
+                            'h': max(open_price[k], close_price[k]), 'l': min(open_price[k], close_price[k])
+                        }]
+                    })
+                    break
+                else:
+                    temp_candles[-1]['high'] = min(temp_candles[-1]['high'], high[k])
+                    temp_candles[-1]['low'] = min(temp_candles[-1]['low'], low[k])
+                    temp_candles[-1]['sticks'].append({
+                        'h': max(open_price[k], close_price[k]), 'l': min(open_price[k], close_price[k])
+                    })
+
         sticks = candles[-2]['sticks'] + candles[-1]['sticks']
+        if len(temp_candles) > 1:
+            sticks = sticks + temp_candles[1]['sticks']
         for idx in range(0, len(sticks)):
             if bottomHigh == 0:
                 bottomHigh = sticks[idx]['h']
             elif sticks[idx]['h'] > bottomHigh:
                 bottomHigh = sticks[idx]['h']
+
         # 顶和底有重叠，不能成笔
         if bottomHigh > topLow:
             return False
