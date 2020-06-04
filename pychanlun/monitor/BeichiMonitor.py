@@ -62,7 +62,8 @@ stopRate = 0.01
 mail = Mail()
 dingMsg = DingMsg()
 
-filter_tag = ['双盘', '完备买','完备卖','扩展完备买','扩展完备卖','一类买','一类卖','二类买','二类卖', '三类买','三类卖','准三买','准三卖']
+filter_tag = ['双盘', '完备买', '完备卖', '扩展完备买', '扩展完备卖', '一类买', '一类卖', '二类买', '二类卖', '三类买', '三类卖', '准三买', '准三卖']
+
 
 # 初始化业务对象
 # businessService = BusinessService()
@@ -173,7 +174,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag, pric
             }
             # 简洁版
             # msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
-            #     symbol, period, signal, direction + ' ', " [amount]: " + str(amount),
+            #     symbol, period, signal, direction + ' ', " [amount]: " + str(amount),这个也怪我
             #     " [stop]: " + str(stop_lose_price), " [fire]: " + fire_time_str, " [price]: " + str(price),
             #     " [create]: " + date_created_str,
             #     str(close_price), tag)
@@ -186,7 +187,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag, pric
 def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                            stop_lose_price, futureCalcObj, insert):
     # CT NID CP 老虎无法交易
-    if symbol == 'CT'or symbol == 'CP' or symbol == 'NID':
+    if symbol == 'CT' or symbol == 'CP' or symbol == 'NID':
         return False
 
     remind = False
@@ -197,10 +198,14 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
     status = 'holding'
     date_created = datetime.utcnow()
     # 如果持仓表中这条记录 那么更新最新价格，如果没有新增
+
+    different_direction = ""
     if direction == 'S' or direction == 'HS':
         direction = 'short'
+        different_direction = 'long'
     else:
         direction = 'long'
+        different_direction = 'short'
 
     # 如果是分型动止，方向需要反过来
     if signal == 'fractal':
@@ -208,9 +213,16 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
         direction = 'long' if direction == 'short' else 'short'
     if insert is True:
         # 同品种 但是不同周期 的更新也记录下来
+        # 同方向的持仓
         last_fire = DBPyChanlun['future_auto_position'].find_one({
             'symbol': symbol,
             'direction': direction,
+            'status': status
+        })
+        # 反方向的持仓
+        different_last_fire = DBPyChanlun['future_auto_position'].find_one({
+            'symbol': symbol,
+            'direction': different_direction,
             'status': status
         })
         # 持仓列表有该方向的记录
@@ -283,7 +295,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
         else:
             # 动止信号 不作为新的记录插入持仓表
             # 线段破坏 不作为新的记录插入持仓表
-            if signal != 'fractal' and signal != 'break':
+            if signal != 'fractal':
                 DBPyChanlun['future_auto_position'].insert_one({
                     'symbol': symbol,
                     'period': period,
@@ -310,6 +322,22 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
 
                 })
                 remind = True
+        # 将之前反方向的持仓止盈
+        if different_last_fire is not None:
+            DBPyChanlun['future_auto_position'].find_one_and_update({
+                'symbol': symbol, 'direction': different_direction, 'status': status
+            }, {
+                '$set': {
+                    'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                    'last_update_time': date_created,  # 最后信号更新时间
+                    'last_update_signal': signal,  # 最后更新的信号
+                    'last_update_period': period,  # 最后更新的周期
+                    'status':'winEnd'              # 将之前反方向的持仓状态改为止盈
+                },
+                '$inc': {
+                    'update_count': 1
+                }
+            }, upsert=True)
     else:
         last_fire = DBPyChanlun['future_auto_position'].find_one({
             'symbol': symbol,
@@ -621,11 +649,11 @@ def monitorVReverse(result, symbol, period, closePrice):
         tag = ''
         direction = 'B'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        # if big_period:
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        # else:
-        #     if notLower:
-        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            if notLower:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_v_reverse']['date']) > 0:
         fire_time = result['sell_v_reverse']['date'][-1]
@@ -634,11 +662,11 @@ def monitorVReverse(result, symbol, period, closePrice):
         tag = ''
         direction = 'S'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        # if big_period:
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        # else:
-        #     if notHigher:
-        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            if notHigher:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 '''
 监控5浪及以上 V反
 '''
@@ -654,11 +682,11 @@ def monitorFiveVReverse(result, symbol, period, closePrice):
         tag = ''
         direction = 'B'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        # if big_period:
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        # else:
-        #     if notLower:
-        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            if notLower:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_five_v_reverse']['date']) > 0:
         fire_time = result['sell_five_v_reverse']['date'][-1]
@@ -667,11 +695,12 @@ def monitorFiveVReverse(result, symbol, period, closePrice):
         tag = ''
         direction = 'S'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        # if big_period:
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        # else:
-        #     if notHigher:
-        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            if notHigher:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+
 
 '''
 监控 线段破坏
@@ -692,11 +721,11 @@ def monitorDuanBreak(result, symbol, period, closePrice):
         tag = ''
         direction = 'B'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        # if big_period:
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        # else:
-        #     if notLower:
-        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            if notLower:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_duan_break']['date']) > 0:
         fire_time = result['sell_duan_break']['date'][-1]
@@ -705,11 +734,12 @@ def monitorDuanBreak(result, symbol, period, closePrice):
         tag = ''
         direction = 'S'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        # if big_period:
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        # else:
-        #     if notHigher:
-        # saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            if notHigher:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+
 
 '''
 监控 持仓品种的向上两个级别的顶底分型

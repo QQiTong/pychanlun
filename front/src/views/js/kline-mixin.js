@@ -239,12 +239,34 @@ export default {
             // 新设备 直接进入大图页面 先获取合约配置数据
             this.getFutureConfig()
         }
+        // 快速选择主力合约
+        let futureSymbolList = window.localStorage.getItem('symbolList')
+        if (futureSymbolList != null) {
+            this.futureSymbolList = JSON.parse(futureSymbolList)
+        } else {
+            // 新设备 直接进入大图页面 先获取合约配置数据
+            this.getDominantSymbol()
+        }
         this.requestSymbolData()
     },
     beforeDestroy() {
         clearTimeout(this.timer)
     },
     methods: {
+        getDominantSymbol() {
+            futureApi.getDominant().then(res => {
+                console.log('获取主力合约:', res)
+                this.futureSymbolList = res
+                window.localStorage.setItem('symbolList', JSON.stringify(this.futureSymbolList))
+                // this.firstRequestDominant = false
+            }).catch((error) => {
+                console.log('获取主力合约失败:', error)
+                // this.firstRequestDominant = false
+            })
+        },
+        quickSwitchSymbol(symbol) {
+            this.switchSymbol(symbol, 'reload')
+        },
         quickSwitchDay(type) {
             let tempDate = this.endDate.replace(/-/g, '/')
             let date = new Date(tempDate)
@@ -2193,13 +2215,16 @@ export default {
                 // 当前保证金比例
 
                 // 计算开仓手数
-                this.calcAccount(this.openPrice, this.stopPrice)
+                this.calcAccount(this.openPrice, this.stopPrice, jsonObj.period)
                 // console.log(beichiPrice, stopLosePrice, diffPrice, targetPrice)
-                // 单位是万
+                // 盈利额
                 currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
+                // 动止算法2     动止百分比 = 1/(1+盈亏比)
+                let dynamicWinCount = Math.ceil(this.maxOrderCount * (1 / (1 + currentPercent / targetPercent)))
                 // 跟据最新价格计算出来的信息
                 this.currentInfo = ' 率: ' + currentPercent + '% 额: ' + currentProfit + ' 万,盈亏比:' +
-                    (currentPercent / targetPercent).toFixed(1) + ' 新: ' + this.currentPrice.toFixed(2)
+                    (currentPercent / targetPercent).toFixed(1) + ' 新: ' + this.currentPrice.toFixed(2) +
+                    ' 动止: ' + dynamicWinCount
                 let markLineCurrent = {
                     yAxis: this.currentPrice,
                     lineStyle: {
@@ -2419,9 +2444,14 @@ export default {
             // 如果中间做过动止，加仓，又没有平今的话，持仓成本是变动的，因此这个盈利率和盈亏比只是跟据开仓价来计算的
             let targetPercent = (Math.abs(openPrice - stopLosePrice) / openPrice * 100 * this.marginLevel).toFixed(2)
             // 单位是万
-            let currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
+            let currentProfit = ((openAmount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
+            // 动止算法2     动止百分比 = 1/(1+盈亏比)
+
+            let dynamicWinCount = Math.ceil(openAmount * (1 / (1 + currentPercent / targetPercent)))
+
             this.currentInfo = ' 率: ' + currentPercent + '% 额: ' + currentProfit + ' 万,盈亏比:' +
-                (currentPercent / targetPercent).toFixed(1) + ' 新: ' + this.currentPrice.toFixed(2)
+                (currentPercent / targetPercent).toFixed(1) + ' 新: ' + this.currentPrice.toFixed(2) +
+                ' 动止: ' + dynamicWinCount
             let markLineCurrent = {
                 yAxis: this.currentPrice,
                 lineStyle: {
@@ -2643,7 +2673,7 @@ export default {
             this.quickCalc.perOrderStopMoney = Math.round(this.perOrderStopMoney, 0)
         },
         // 计算开仓手数
-        calcAccount(openPrice, stopPrice) {
+        calcAccount(openPrice, stopPrice, period) {
             if (this.currentMarginRate == null) {
                 alert('请选择保证金系数，开仓价，止损价')
                 return
@@ -2707,12 +2737,14 @@ export default {
             // 动止手数 * （动止价-开仓价）* 合约乘数 = （开仓手数-动止手数）* 1手止损
             // 动止手数  = 开仓手数 * 1手止损  /( （动止价-开仓价）* 合约乘数 + 1手止损)
             // 如果填入了动止价
-            if (this.quickCalc.dynamicWinPrice != null) {
-                this.quickCalc.dynamicWinCount = Math.round(this.maxOrderCount * this.perOrderStopMoney / ((this.quickCalc.dynamicWinPrice - openPrice) * this.contractMultiplier + this.perOrderStopMoney))
+            if (this.quickCalc.dynamicWinPrice !== "") {
+                this.quickCalc.dynamicWinCount = Math.ceil(this.maxOrderCount * this.perOrderStopMoney / (Math.abs(this.quickCalc.dynamicWinPrice - openPrice) * this.contractMultiplier + this.perOrderStopMoney))
             }
+            // 用最新价作为动止价计算各个周期的动止手数
             console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " perOrderMargin:",
                 this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
-                " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate, " dynamicWinCount:", this.quickCalc.dynamicWinCount)
+                " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate, " dynamicWinCount:", this.quickCalc.dynamicWinCount,
+                " period:", period)
         },
         calculateMA(resultData, dayCount) {
             let result = []

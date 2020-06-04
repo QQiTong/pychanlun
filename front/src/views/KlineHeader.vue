@@ -28,7 +28,22 @@
             开仓手数：<span class="up-red ml-5">{{quickCalc.count}}</span>
             止损率：<span class="up-red ml-5">{{(quickCalc.stopRate* 100).toFixed(2)}}%</span>
             1手止损：<span class="up-red ml-5">{{quickCalc.perOrderStopMoney}}</span>
-            动止手数：<span class="up-red ml-5">{{quickCalc.dynamicWinCount}}</span>
+            动止手数：<span class="up-red ml-5 mr-5">{{quickCalc.dynamicWinCount}}</span>
+            <!--            <el-button size="mini" type="primary" class="primary-button ml-5" @click="quickSwitchSymbol('RU2009')">RU2009</el-button>-->
+            <!--            <el-button size="mini" type="primary" class="primary-button" @click="quickSwitchSymbol('RB2010')">RB2010</el-button>-->
+            <!--            <el-button size="mini" type="primary" class="primary-button" @click="quickSwitchSymbol('MA2009')">MA2009</el-button>-->
+            <!--            <el-button size="mini" type="primary" class="primary-button" @click="quickSwitchSymbol('M2009')">M2009</el-button>-->
+            <!--            <el-button size="mini" type="primary" class="primary-button" @click="quickSwitchSymbol('Y2009')">Y2009</el-button>-->
+            <!--            <el-button size="mini" type="primary" class="primary-button" @click="quickSwitchSymbol('RM2009')">RM2009</el-button>-->
+            <!--            <el-button size="mini" type="primary" class="primary-button" @click="quickSwitchSymbol('NI2007')">NI2007</el-button>-->
+            <el-select size="mini" v-model="inputSymbol_" class="form-input" placeholder="请选择" @change="quickSwitchSymbol(inputSymbol_)">
+                <el-option
+                    v-for="item in futureSymbolList"
+                    :key="item.order_book_id"
+                    :label="item.order_book_id"
+                    :value="item.order_book_id"
+                />
+            </el-select>
         </div>
     </div>
 </template>
@@ -76,14 +91,22 @@
             },
             jumpToMultiPeriod: {
                 type: Function,
-                default:null
+                default: null
+            },
+            quickSwitchSymbol: {
+                type: Function,
+                default: null
             },
             periodList: {
                 type: Array,
                 default: null
             },
             inputSymbol: null,
-            endDate: null
+            endDate: null,
+            futureSymbolList: {
+                type: Array,
+                default: null
+            }
         },
         methods: {
             setELDatePicker(endDate) {

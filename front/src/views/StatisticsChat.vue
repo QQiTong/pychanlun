@@ -279,9 +279,9 @@
                                     label: {
                                         show: true,
                                         position: 'top',
-                                        formatter(p) {
-                                            return p.value > 0 ? p.value : ''
-                                        }
+                                        // formatter(p) {
+                                        //     return p.value > 0 ? p.value : p.value
+                                        // }
                                     }
                                 }
                             },
