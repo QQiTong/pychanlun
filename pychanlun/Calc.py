@@ -269,8 +269,8 @@ class Calc:
         x_data['bi'] = biList
 
         # 高级别笔
+        biListBigLevel = [0 for i in range(len(timeListBigLevel))]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            biListBigLevel = [0 for i in range(len(timeListBigLevel))]
             CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel,
                    closePriceListBigLevel, True if bigLevelPeriod in small_period_list else False)
             fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
@@ -279,8 +279,8 @@ class Calc:
             xx_data['bi'] = biListBigLevel
 
         # 高高级别笔
+        biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            biListBigLevel2 = [0 for i in range(len(timeListBigLevel2))]
             CalcBi(len(timeListBigLevel2), biListBigLevel2, highListBigLevel2, lowListBigLevel2,
                    openPriceListBigLevel2,
                    closePriceListBigLevel2,
@@ -292,7 +292,7 @@ class Calc:
         # 本级别段处理
         duanList = [0 for i in range(count)]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            calc_duan_exp(count, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList)
+            calc_duan_exp(count, biList, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList)
         else:
             CalcDuan(count, duanList, biList, highList, lowList)
         x_data['duan'] = duanList
@@ -300,7 +300,7 @@ class Calc:
         # 高一级别段处理
         higherDuanList = [0 for i in range(count)]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            calc_duan_exp(count, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
+            calc_duan_exp(count, biList, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
         else:
             CalcDuan(count, higherDuanList, duanList, highList, lowList)
 
