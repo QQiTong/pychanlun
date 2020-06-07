@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pychanlun.basic.comm import FindPrevEq
+import pydash
 
 
 def merge_candles(high, low, open_price, close_price, from_index, to_index, dir):
@@ -206,6 +207,37 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
             return False
     return True
 
+
+def adjust_bi(bi_list, high_list, low_list, x, y):
+    if bi_list[x] == 1 and bi_list[y] == -1:
+        # 向下笔
+        xx = x
+        for t in range(x + 1, y + 1):
+            if high_list[t] > high_list[xx]:
+                xx = t
+        if xx > x:
+            bi_list[x] = 0
+            bi_list[xx] = 1
+            j = pydash.find_last_index(bi_list[:xx], lambda k : k == -1)
+            if j >= 0:
+                return adjust_bi(bi_list, high_list, low_list, j, xx)
+            return xx
+    elif bi_list[x] == -1 and bi_list[y] == 1:
+        # 向上笔
+        xx = x
+        for t in range(x + 1, y + 1):
+            if low_list[t] < low_list[xx]:
+                xx = t
+        if xx > x:
+            bi_list[x] = 0
+            bi_list[xx] = -1
+            j = pydash.find_last_index(bi_list[:xx], lambda k: k == 1)
+            if j >= 0:
+                return adjust_bi(bi_list, high_list, low_list, j, xx)
+            return xx
+    return y
+
+
 # 计算笔信号
 # count 数据序列长度
 # bi 输出的笔信号序列
@@ -246,29 +278,17 @@ def CalcBi(count, bi, high, low, open_price, close_price, small_period=False):
             if (x == y and x == 0) or y > x or is_bi(bi, high, low, open_price, close_price, x, i, 1, small_period):
                 bi[x] = -1
                 bi[i] = 1
-                xx = x
                 for t in range(x + 1, i):
                     bi[t] = 0
-                    if low[t] < low[xx]:
-                        xx = t
-                if xx > x:
-                    bi[x] = 0;
-                    bi[xx] = -1
-                    i = xx + 1
+                i = adjust_bi(bi, high, low, x, i)
 
         elif b2:
             if (x == y and y == 0) or x > y or is_bi(bi, high, low, open_price, close_price, y, i, -1, small_period):
                 bi[y] = 1
                 bi[i] = -1
-                yy = y
                 for t in range(y + 1, i):
                     bi[t] = 0
-                    if high[t] > high[yy]:
-                        yy = t
-                if yy > y:
-                    bi[y] = 0
-                    bi[yy] = 1
-                    i = yy + 1
+                i = adjust_bi(bi, high, low, y, i)
 
     idxL = FindPrevEq(bi, -1, len(bi))
     idxH = FindPrevEq(bi, 1, len(bi))
