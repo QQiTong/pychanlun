@@ -246,10 +246,9 @@ def CalcBi(count, bi, high, low, open_price, close_price, small_period=False):
             if (x == y and x == 0) or y > x or is_bi(bi, high, low, open_price, close_price, x, i, 1, small_period):
                 bi[x] = -1
                 bi[i] = 1
+                xx = x
                 for t in range(x + 1, i):
                     bi[t] = 0
-                xx = x
-                for t in range(x, i):
                     if low[t] < low[xx]:
                         xx = t
                 if xx > x:
@@ -261,10 +260,9 @@ def CalcBi(count, bi, high, low, open_price, close_price, small_period=False):
             if (x == y and y == 0) or x > y or is_bi(bi, high, low, open_price, close_price, y, i, -1, small_period):
                 bi[y] = 1
                 bi[i] = -1
+                yy = y
                 for t in range(y + 1, i):
                     bi[t] = 0
-                yy = y
-                for t in range(y, i):
                     if high[t] > high[yy]:
                         yy = t
                 if yy > y:
