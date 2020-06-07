@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import pytz
+import pydash
 from pychanlun.basic.comm import FindPrevEq, FindNextEq
 from datetime import datetime
-import pytz
+
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -112,7 +114,12 @@ def calc_duan_exp(count, bi_list, duan_list, bi_list_big_level, time_index_list_
                 else:
                     break
             duan_list[idx] = 1
-            bi_list[idx] = 1
+            if bi_list[idx] != 1:
+                gIdx = pydash.find_last_index(bi_list[:idx], lambda k: k == 1)
+                dIdx = pydash.find_last_index(bi_list[:idx], lambda k: k == -1)
+                if gIdx > dIdx:
+                    bi_list[gIdx] = 0
+                bi_list[idx] = 1
         elif bi_list_big_level[i] == -1:
             l = low_list[idx]
             x = idx
@@ -124,4 +131,9 @@ def calc_duan_exp(count, bi_list, duan_list, bi_list_big_level, time_index_list_
                 else:
                     break
             duan_list[idx] = -1
-            bi_list[idx] = -1
+            if bi_list[idx] != -1:
+                gIdx = pydash.find_last_index(bi_list[:idx], lambda k: k == 1)
+                dIdx = pydash.find_last_index(bi_list[:idx], lambda k: k == -1)
+                if dIdx > gIdx:
+                    bi_list[dIdx] = 0
+                bi_list[idx] = -1

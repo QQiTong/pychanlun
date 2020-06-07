@@ -206,48 +206,6 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
             return False
     return True
 
-
-# index传入前一笔的结束位置，如果前一笔不是严格的笔，进行合并。
-# 合并要符合闪电形态，而且只合一次。
-def adjust_bi(bi, high, low, open_price, close_price, index, small_period):
-    if bi[index] == 1:
-        i = FindPrevEq(bi, -1, index)
-        if i > 0:
-            if not is_bi(bi, high, low, open_price, close_price, i, index, 1, small_period):
-                # 不是严格成笔，需要调整
-                # g1记录当前笔的高的位置
-                # d1记录当前笔的低的位置
-                g1 = index
-                d1 = i
-                # g2记录前一笔的高的位置
-                # d2记录前一笔的低的位置
-                g2 = FindPrevEq(bi, 1, d1)
-                d2 = FindPrevEq(bi, -1, g2)
-                if d2 >= 0:
-                    # 两笔找全，看看是不是可以合并
-                    if high[g1] >= high[g2] and low[d1] >= low[d2]:
-                        for j in range(d2 + 1, g1):
-                            bi[j] = 0
-    elif bi[index] == -1:
-        i = FindPrevEq(bi, 1, index)
-        if i > 0:
-            if not is_bi(bi, high, low, open_price, close_price, i, index, -1, small_period):
-                # 不是严格成笔，需要调整
-                # d1记录当前笔的低的位置
-                # g1记录当前笔的高的位置
-                d1 = index
-                g1 = i
-                # d2记录前一笔的低的位置
-                # g2记录前一笔的高的位置
-                d2 = FindPrevEq(bi, -1, g1)
-                g2 = FindPrevEq(bi, 1, d2)
-                if g2 >= 0:
-                    # 两笔找全，看看是不是可以合并
-                    if low[d1] <= low[d2] and high[g1] <= high[g2]:
-                        for j in range(g2 + 1, d1):
-                            bi[j] = 0
-
-
 # 计算笔信号
 # count 数据序列长度
 # bi 输出的笔信号序列
@@ -290,14 +248,30 @@ def CalcBi(count, bi, high, low, open_price, close_price, small_period=False):
                 bi[i] = 1
                 for t in range(x + 1, i):
                     bi[t] = 0
-                # adjust_bi(bi, high, low, open_price, close_price, x, small_period)
+                xx = x
+                for t in range(x, i):
+                    if low[t] < low[xx]:
+                        xx = t
+                if xx > x:
+                    bi[x] = 0;
+                    bi[xx] = -1
+                    i = xx + 1
+
         elif b2:
             if (x == y and y == 0) or x > y or is_bi(bi, high, low, open_price, close_price, y, i, -1, small_period):
                 bi[y] = 1
                 bi[i] = -1
                 for t in range(y + 1, i):
                     bi[t] = 0
-                # adjust_bi(bi, high, low, open_price, close_price, y, small_period)
+                yy = y
+                for t in range(y, i):
+                    if high[t] > high[yy]:
+                        yy = t
+                if yy > y:
+                    bi[y] = 0
+                    bi[yy] = 1
+                    i = yy + 1
+
     idxL = FindPrevEq(bi, -1, len(bi))
     idxH = FindPrevEq(bi, 1, len(bi))
     if idxL > idxH and idxL - idxH < 5:
