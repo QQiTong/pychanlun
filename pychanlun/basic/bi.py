@@ -217,6 +217,7 @@ def adjust_bi(bi_list, high_list, low_list, x, y):
                 xx = t
         if xx > x:
             bi_list[x] = 0
+            bi_list[y] = 0
             bi_list[xx] = 1
             j = pydash.find_last_index(bi_list[:xx], lambda k : k == -1)
             if j >= 0:
@@ -230,6 +231,7 @@ def adjust_bi(bi_list, high_list, low_list, x, y):
                 xx = t
         if xx > x:
             bi_list[x] = 0
+            bi_list[y] = 0
             bi_list[xx] = -1
             j = pydash.find_last_index(bi_list[:xx], lambda k: k == 1)
             if j >= 0:
