@@ -28,6 +28,7 @@ class ProductionConfig(Config):
     pass
 
 
+
 config = {
     'default': DevelopmentConfig,
     'production': ProductionConfig,
@@ -64,8 +65,11 @@ config = {
         "NI",
         # "AU",
         # "AG",
-        # "ZN",
+        "ZN",
         # "SP",
+        "IC",
+        "IF",
+        "IH",
     ],
     # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整
     'margin_rate_company': 0.01,
@@ -101,6 +105,9 @@ config = {
         'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'PG': {'margin_rate': 0.11, 'contract_multiplier': 20},
         'A': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        'IC': {'margin_rate': 0.12, 'contract_multiplier': 200},
+        'IF': {'margin_rate': 0.10, 'contract_multiplier': 300},
+        'IH': {'margin_rate': 0.10, 'contract_multiplier': 300},
 
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         # 外盘
@@ -405,5 +412,4 @@ config = {
         # }
     ]
 }
-
 cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]

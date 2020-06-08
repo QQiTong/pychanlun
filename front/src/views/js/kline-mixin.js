@@ -2854,18 +2854,18 @@ export default {
             // }
 
             // 线段破坏
-            if (buy_duan_break.date.length > 0) {
-                buyTimeStr = buy_duan_break.date[buy_duan_break.date.length - 1]
-                buy_duan_break_stamp = this.timeStrToStamp(buyTimeStr)
-            }
+            // if (buy_duan_break.date.length > 0) {
+            //     buyTimeStr = buy_duan_break.date[buy_duan_break.date.length - 1]
+            //     buy_duan_break_stamp = this.timeStrToStamp(buyTimeStr)
+            // }
             // if (buy_duan_break_higher.date.length > 0) {
             //     higherBuyTimeStr = buy_duan_break_higher.date[buy_duan_break_higher.date.length - 1]
             //     buy_duan_break_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
             // }
-            if (sell_duan_break.date.length > 0) {
-                sellTimeStr = sell_duan_break.date[sell_duan_break.date.length - 1]
-                sell_duan_break_stamp = this.timeStrToStamp(sellTimeStr)
-            }
+            // if (sell_duan_break.date.length > 0) {
+            //     sellTimeStr = sell_duan_break.date[sell_duan_break.date.length - 1]
+            //     sell_duan_break_stamp = this.timeStrToStamp(sellTimeStr)
+            // }
             // if (sell_duan_break_higher.date.length > 0) {
             //     higherSellTimeStr = sell_duan_break_higher.date[sell_duan_break_higher.date.length - 1]
             //     sell_duan_break_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
