@@ -594,15 +594,14 @@ class BusinessService:
         df = pd.DataFrame(list(data_list))
         signalList = []
         for idx, row in df.iterrows():
-            item = {}
-            item['code'] = row["code"]
-            item['fire_time'] = row["fire_time"].strftime("%Y-%m-%d %H:%M")
-            item['period'] = row["period"]
-            item['price'] = row["price"]
-            item['stop_lose_price'] = row["stop_lose_price"]
-            item['tag'] = row["tag"]
-            item['category'] = row["category"]
-            item['tags'] = ", ".join(row["tags"])
+            item = {
+                'code': row["code"],
+                'fire_time': row["fire_time"].strftime("%Y-%m-%d %H:%M"),
+                'period': row["period"],
+                'price': row["price"],
+                'stop_lose_price': row["stop_lose_price"],
+                'category': row["category"],
+                'tags': ", ".join(row["tags"])}
             signalList.append(item)
         return signalList
 
