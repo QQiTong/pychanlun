@@ -74,7 +74,7 @@ def calculate(info):
         ma34 = ta.MA(np.array(close), timeperiod=34)
         if close[-1] < ma34[-1]:
             return
-        bars = pydash.chain(bars).takeRight(10).value()
+        bars = pydash.chain(bars).take_right(10).value()
         c = 0
         for x in range(1, len(bars)):
             cur_close = decimal.Decimal('%.2f' % bars[x]['close'])

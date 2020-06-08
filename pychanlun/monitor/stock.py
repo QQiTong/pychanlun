@@ -7,23 +7,19 @@ import signal
 import threading
 import pydash
 from pytdx.hq import TdxHq_API
-import random
 from pymongo import UpdateOne
 from pychanlun.db import DBPyChanlun
 from bson.codec_options import CodecOptions
 import pymongo
 from pychanlun.basic.bi import CalcBi, CalcBiList
 from pychanlun.basic.duan import CalcDuan
-from pychanlun import Duan
 from pychanlun import entanglement as entanglement
-from pychanlun import divergence as divergence
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
 import pandas as pd
 import smtplib
 from email.mime.text import MIMEText
 from email.utils import formataddr
-import json
 import requests
 import datetime
 import traceback
@@ -32,7 +28,12 @@ import traceback
 tz = pytz.timezone('Asia/Shanghai')
 
 is_run = True
-period_map = { '1m': 7, '5m': 0, '15m': 1 }
+period_map = {
+    '1m': 7,
+    '5m': 0,
+    '15m': 1
+}
+
 
 def monitoring_stock():
     TDX_HOME = os.environ.get("TDX_HOME")
