@@ -292,13 +292,6 @@ def CalcBi(count, bi, high, low, open_price, close_price, small_period=False):
                     bi[t] = 0
                 i = adjust_bi(bi, high, low, y, i)
 
-    idxL = FindPrevEq(bi, -1, len(bi))
-    idxH = FindPrevEq(bi, 1, len(bi))
-    if idxL > idxH and idxL - idxH < 5:
-        bi[idxL] = 0
-    elif idxH > idxL and idxH - idxL < 5:
-        bi[idxH] = 0
-
 
 def CalcBiList(count, bi, high, low):
     biList = []
