@@ -83,27 +83,12 @@ def calculate_stock_signal(**kwargs):
 
 
 @run.command()
-@click.argument("command", default="download")
-@click.option('--source', type=str, default="tdxlocal")
-@click.option('--days', type=int, default=7)
 @click.option('--code', type=str)
 @click.option('--period', type=str)
-def stock(**kwargs):
-    command = kwargs.get("command")
-    if command == "download":
-        source = kwargs.get("source")
-        if source == "tdxlocal":
-            logging.info("从通达信下载股票数据 开始")
-            tdx_local_downloader.run(**kwargs)
-            logging.info("从通达信下载股票数据 完成")
-    elif command == "calculate":
-        logging.info("股票信号计算 开始")
-        stock_signal_calculator.run(**kwargs)
-        logging.info("股票信号计算 结束")
-    elif command == "monitoring":
-        logging.info("股票监控 开始")
-        stock_monitoring.run(**kwargs)
-        logging.info("股票监控 结束")
+def monitoring_stock(**kwargs):
+    logging.info("股票监控 开始")
+    stock_monitoring.run(**kwargs)
+    logging.info("股票监控 结束")
 
 
 if __name__ == '__main__':

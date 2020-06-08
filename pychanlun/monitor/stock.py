@@ -23,15 +23,16 @@ from email.utils import formataddr
 import requests
 import datetime
 import traceback
+from pychanlun.monitor.zero_notify import do_notify
 
 
 tz = pytz.timezone('Asia/Shanghai')
 
 is_run = True
 period_map = {
-    '1m': 7,
     '5m': 0,
-    '15m': 1
+    '15m': 1,
+    '30m': 2
 }
 
 
@@ -58,28 +59,19 @@ def monitoring_stock():
                 for period in period_map:
                     bars = api.get_security_bars(period_map[period], market, code, 0, 200)
                     save_bars(symbol, period, bars) # 保存数据
-                    if period == '1m':
-                        # 合成3m数据
-                        ohlc = {'open': 'first', 'high': 'max', 'low': 'min',
-                                'close': 'last', 'vol': 'sum', 'amount': 'sum'}
-                        df = api.to_df(bars)
-                        df['datetime'] = df['datetime'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H:%M'))
-                        df.set_index('datetime', inplace=True)
-                        df3m = df.resample('3T', closed='right', label='right').agg(
-                                ohlc).dropna(how='any')
-                        calculate_and_notify(symbol, '3m') # 计算信号和通知
-                    else:
-                        calculate_and_notify(symbol, period) # 计算信号和通知
+                    calculate_and_notify(symbol, period) # 计算信号和通知
                     if not is_run:
                         break
                 if not is_run:
-                        break
+                    break
 
 
 def calculate_and_notify(code, period):
-
-    bars = DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).find().sort('_id', pymongo.DESCENDING).limit(2000)
+    bars = DBPyChanlun['%s_%s' % (code, period)] \
+        .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+        .find() \
+        .sort('_id', pymongo.DESCENDING) \
+        .limit(1000)
     bars = list(bars)
     bars.reverse()
     if len(bars) < 13:
@@ -94,8 +86,7 @@ def calculate_and_notify(code, period):
 
     # 笔信号
     bi_series = [0 for i in range(count)]
-    CalcBi(count, bi_series, high_series,
-           low_series, open_series, close_series)
+    CalcBi(count, bi_series, high_series, low_series, open_series, close_series)
     duan_series = [0 for i in range(count)]
     CalcDuan(count, duan_series, bi_series, high_series, low_series)
 
@@ -216,53 +207,36 @@ def save_bars(code, period, bars):
 def save_signal(code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
-        logging.info("%s %s %s %s %s %s %s" % (code, period, remark, tags, category, fire_time, price))
-        x = DBPyChanlun['stock_signal'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find_one_and_update({
-            "code": code, "period": period, "fire_time": fire_time, "position": position
-        }, {
-            '$set': {
-                'code': code,
-                'period': period,
-                'remark': remark,
-                'fire_time': fire_time,
-                'price': price,
-                'stop_lose_price': stop_lose_price,
-                'position': position,
-                'tags': tags,
-                'category': category
-            }
-        }, upsert=True)
+        x = DBPyChanlun['stock_signal'] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find_one_and_update({
+                "code": code,
+                "period": period,
+                "fire_time": fire_time,
+                "position": position
+            }, {
+                '$set': {
+                    'code': code,
+                    'period': period,
+                    'remark': remark,
+                    'fire_time': fire_time,
+                    'price': price,
+                    'stop_lose_price': stop_lose_price,
+                    'position': position,
+                    'tags': tags,
+                    'category': category
+                }
+            }, upsert=True)
         if x is None and fire_time > datetime.datetime.now(tz=tz) - datetime.timedelta(hours=1):
+            logging.info("%s %s %s %s %s %s %s" % (code, period, remark, tags, category, fire_time, price))
             # 首次信号，做通知
-            do_notify(code, '买入', period, remark, fire_time, price, 100, stop_lose_price, position, tags, category)
+            notify(code, '买入', period, remark, fire_time, price, 100, stop_lose_price, position, tags, category)
 
 
-my_sender = 'java_boss@mail.zyaoxin.com'  # 发件人邮箱账号
-my_pass = 'LiangHua123456'  # 发件人邮箱密码
-receivers = ['236819579@qq.com']  # 收件人邮箱账号，我这边发送给自己
-
-
-def do_notify(code, order_direction, period, remark, fire_time, price, volume, stop_lose_price, position, tags=[], category=""):
-    url = "http://www.yutiansut.com/signal?user_id=oL-C4wwNEB9PhRD6QSItldvbdesQ&template=xiadan_report&strategy_id=zero" \
-          "&realaccount=zero&code=%s&order_direction=%s&price=%s&volume=%s&order_time=%s" \
-          % (code, order_direction, price, volume, datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
-    requests.post(url)
-    title = "%s预警: 代码%s 价格%s 数量%s 周期%s" % (order_direction, code, price, volume, period)
+def notify(code, order_direction, period, remark, fire_time, price, volume, stop_lose_price, position, tags=[], category=""):
     content = "%s预警: 代码%s 价格%s 数量%s 周期%s \n触发时间%s 止损%s %s %s %s %s" % (
             order_direction, code, price, volume, period, fire_time, stop_lose_price, remark, position, tags, category)
-    try:
-        msg = MIMEText(content, 'plain', 'utf-8')
-        msg['From'] = formataddr(["Reminder", my_sender])  # 括号里的对应发件人邮箱昵称、发件人邮箱账号
-        # msg['To'] = my_user  # 括号里的对应收件人邮箱昵称、收件人邮箱账号
-        msg['Subject'] = title  # 邮件的主题，也可以说是标题
-        server = smtplib.SMTP_SSL("smtpdm.aliyun.com", 465)  # 发件人邮箱中的SMTP服务器，端口是25
-        server.login(my_sender, my_pass)  # 括号中对应的是发件人邮箱账号、邮箱密码
-        for i in range(len(receivers)):
-            msg['To'] = receivers[i]
-            server.sendmail(my_sender, receivers[i], msg.as_string())  # 括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
-        server.quit()  # 关闭连接
-    except Exception:  # 如果 try 中的语句没有执行，则会执行下面的 ret=False
-        logging.info("Error Occurred: {0}".format(traceback.format_exc()))
+    do_notify(content)
 
 
 def signal_hanlder(signalnum, frame):
