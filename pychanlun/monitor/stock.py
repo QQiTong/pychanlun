@@ -58,8 +58,11 @@ def monitoring_stock():
                     symbol = 'sh%s' % code
                 for period in period_map:
                     bars = api.get_security_bars(period_map[period], market, code, 0, 200)
-                    save_bars(symbol, period, bars) # 保存数据
-                    calculate_and_notify(symbol, period) # 计算信号和通知
+                    if bars is not None:
+                        save_bars(symbol, period, bars)
+                        calculate_and_notify(symbol, period)
+                    else:
+                        print("No bars")
                     if not is_run:
                         break
                 if not is_run:
@@ -228,15 +231,10 @@ def save_signal(code, period, remark, fire_time, price, stop_lose_price, positio
                 }
             }, upsert=True)
         if x is None and fire_time > datetime.datetime.now(tz=tz) - datetime.timedelta(hours=1):
-            logging.info("%s %s %s %s %s %s %s" % (code, period, remark, tags, category, fire_time, price))
             # 首次信号，做通知
-            notify(code, '买入', period, remark, fire_time, price, 100, stop_lose_price, position, tags, category)
-
-
-def notify(code, order_direction, period, remark, fire_time, price, volume, stop_lose_price, position, tags=[], category=""):
-    content = "%s预警: 代码%s 价格%s 数量%s 周期%s \n触发时间%s 止损%s %s %s %s %s" % (
-            order_direction, code, price, volume, period, fire_time, stop_lose_price, remark, position, tags, category)
-    do_notify(content)
+            content = "%s %s %s %s %s %s %s" % (code, period, remark, tags, category, fire_time, price)
+            logging.info(content)
+            do_notify(content)
 
 
 def signal_hanlder(signalnum, frame):
