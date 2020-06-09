@@ -17,12 +17,7 @@ from pychanlun import entanglement as entanglement
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
 import pandas as pd
-import smtplib
-from email.mime.text import MIMEText
-from email.utils import formataddr
-import requests
 import datetime
-import traceback
 from pychanlun.monitor.zero_notify import do_notify
 
 
@@ -41,9 +36,16 @@ def monitoring_stock():
     if TDX_HOME is None:
         logging.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
+    stocks = []
     with open(os.path.join(TDX_HOME, "T0002\\blocknew\\ZXG.blk"), "r") as fo:
         lines = fo.readlines()
-        stocks = pydash.chain(lines).map(lambda x: x.strip()).filter(lambda x: len(x) > 0).value()
+        stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
+    for x in range(0, 33):
+        block = "T0002\\blocknew\\CL%s.blk" % str(x).zfill(2)
+        with open(os.path.join(TDX_HOME, block), "r") as fo:
+            lines = fo.readlines()
+            stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
+    stocks = pydash.uniq(stocks)
 
     api = TdxHq_API(heartbeat=True, auto_retry=True)
 
