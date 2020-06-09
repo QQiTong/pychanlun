@@ -114,6 +114,12 @@ def calc_duan_exp(count, bi_list, duan_list, bi_list_big_level, time_index_list_
                 else:
                     break
             duan_list[idx] = 1
+            if bi_list[idx] != 1:
+                g_idx = pydash.find_last_index(bi_list[:idx], lambda k: k == 1)
+                d_idx = pydash.find_last_index(bi_list[:idx], lambda k: k == -1)
+                if g_idx > d_idx:
+                    bi_list[g_idx] = 0
+                    bi_list[idx] = 1
         elif bi_list_big_level[i] == -1:
             l = low_list[idx]
             x = idx
@@ -125,3 +131,9 @@ def calc_duan_exp(count, bi_list, duan_list, bi_list_big_level, time_index_list_
                 else:
                     break
             duan_list[idx] = -1
+            if bi_list[idx] != -1:
+                g_idx = pydash.find_last_index(bi_list[:idx], lambda k: k == 1)
+                d_idx = pydash.find_last_index(bi_list[:idx], lambda k: k == -1)
+                if d_idx > g_idx:
+                    bi_list[d_idx] = 0
+                    bi_list[idx] = -1
