@@ -232,7 +232,7 @@ def save_signal(code, period, remark, fire_time, price, stop_lose_price, positio
             }, upsert=True)
         if x is None and fire_time > datetime.datetime.now(tz=tz) - datetime.timedelta(hours=1):
             # 首次信号，做通知
-            content = "%s %s %s %s %s %s %s" % (code, period, remark, tags, category, fire_time, price)
+            content = "【事件通知】 %s %s %s %s %s %s %s" % (code, period, remark, tags, category, fire_time, price)
             logging.info(content)
             do_notify(content)
 
