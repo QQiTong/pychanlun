@@ -332,7 +332,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
                     'last_update_time': date_created,  # 最后信号更新时间
                     'last_update_signal': signal,  # 最后更新的信号
                     'last_update_period': period,  # 最后更新的周期
-                    'status':'winEnd'              # 将之前反方向的持仓状态改为止盈
+                    'status': 'winEnd'  # 将之前反方向的持仓状态改为止盈
                 },
                 '$inc': {
                     'update_count': 1
@@ -561,6 +561,8 @@ def monitorBeichi(result, symbol, period, closePrice):
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+
+
 '''
 监控回拉
 '''
@@ -582,14 +584,14 @@ def monitorHuila(result, symbol, period, closePrice):
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
         # 大级别直接保存
-        # if big_period:
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        # else:
-        #     # 小级别除非是双盘，否则一定要不破前低
-        #     if notLower:
-        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        #     elif tag in filter_tag:
-        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            # 小级别除非是双盘，否则一定要不破前低
+            if notLower:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+            elif tag in filter_tag:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_zs_huila']['date']) > 0:
         fire_time = result['sell_zs_huila']['date'][-1]
@@ -598,16 +600,17 @@ def monitorHuila(result, symbol, period, closePrice):
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
-        # if big_period:
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        # else:
-        #     if notHigher:
-        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-        #     elif tag in filter_tag:
-        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if big_period:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        else:
+            if notHigher:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+            elif tag in filter_tag:
+                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 '''
 监控突破
 '''
+
 
 # 分析走势发现有很多顶部都是用3m 5m 的反向中枢突破套到的,如果突破失败，反手做多 就行了
 # 因此突破单不用 notLower notHigher 过滤
@@ -630,6 +633,8 @@ def monitorTupo(result, symbol, period, closePrice):
         direction = 'S'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+
+
 '''
 监控3买卖 V反
 '''
@@ -667,9 +672,13 @@ def monitorVReverse(result, symbol, period, closePrice):
         else:
             if notHigher:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+
+
 '''
 监控5浪及以上 V反
 '''
+
+
 def monitorFiveVReverse(result, symbol, period, closePrice):
     signal = 'five_v_reverse'
     big_period = period != '1m' and period != '3m' and period != '5m'
@@ -986,12 +995,13 @@ def run(**kwargs):
          ('rqdatad-pro.ricequant.com', 16011))
     # 主力合约，主力合约详细信息
     symbolList, dominantSymbolInfoList = getDominantSymbol()
-    # 24个品种 拆分成8份
-    # symbolListSplit = [symbolList[i:i + 3] for i in range(0, len(symbolList), 3)]
-    # 24个品种 拆分2份
-    symbolListSplit = [symbolList[i:i + 12] for i in range(0, len(symbolList), 12)]
+    # 24个品种 拆分成2份  2分16秒 轮完一次
+    # symbolListSplit = [symbolList[i:i + 12] for i in range(0, len(symbolList), 12)]
+    # 27个品种 拆分3份   1份25秒 轮完一次
+    symbolListSplit = [symbolList[i:i + 9] for i in range(0, len(symbolList), 9)]
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
     threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
+    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[3]]).start()
     # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[4]]).start()

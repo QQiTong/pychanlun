@@ -28,7 +28,6 @@ class ProductionConfig(Config):
     pass
 
 
-
 config = {
     'default': DevelopmentConfig,
     'production': ProductionConfig,
@@ -48,7 +47,8 @@ config = {
         "EG",
         "PP",
         "PG",
-        # "L",
+        "L",
+        "EB",
         # 农产品
         "CF",
         "SR",
@@ -56,7 +56,7 @@ config = {
         "A",
         "M",
         "RM",
-        # "JD",
+        "JD",
         # 食用油
         "OI",
         "P",
@@ -67,9 +67,9 @@ config = {
         # "AG",
         "ZN",
         # "SP",
-        "IC",
-        "IF",
-        "IH",
+        # "IC",
+        # "IF",
+        # "IH",
     ],
     # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整
     'margin_rate_company': 0.01,
@@ -99,7 +99,12 @@ config = {
         'I': {'margin_rate': 0.08, 'contract_multiplier': 100},
         'M': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
+        # 聚丙烯
         'PP': {'margin_rate': 0.11, 'contract_multiplier': 5},
+        # 苯乙烯
+        'EB': {'margin_rate': 0.12, 'contract_multiplier': 5},
+        # 聚乙烯
+        'L': {'margin_rate': 0.11, 'contract_multiplier': 5},
         'P': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'Y': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},

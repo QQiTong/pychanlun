@@ -262,7 +262,7 @@ class Calc:
 
         count = len(timeList)
         # 本级别笔
-        small_period_list = ['1m', '3m', '5m','15m','30m','60m']
+        small_period_list = ['1m', '3m', '5m','15m']
         biList = [0 for i in range(count)]
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList,
                True if period in small_period_list else False)
