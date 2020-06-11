@@ -83,6 +83,8 @@ def calculate(info):
                 c = c + 1
         if c == 0:
             return
+    else:
+        return
 
     bars = DBPyChanlun['%s_%s' % (code, period)] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz))\
@@ -121,10 +123,9 @@ def calculate(info):
     else:
         cutoff_time = datetime.now(tz=tz) - timedelta(days=10000)
 
-    DBPyChanlun['%s_%s' % (code, period)].with_options(codec_options=CodecOptions(
-        tz_aware=True, tzinfo=tz)).delete_many({
-        "_id": {"$lt": cutoff_time}
-    })
+    DBPyChanlun['%s_%s' % (code, period)] \
+        .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+        .delete_many({"_id": {"$lt": cutoff_time}})
 
     # 笔信号
     bi_series = [0 for i in range(count)]
@@ -248,11 +249,12 @@ def export_to_tdx():
         logging.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
     seq = []
+    t = datetime.now(tz) - timedelta(days=5)
+    t = t.replace(hour=0, minute=0, second=0, microsecond=0)
     signals = DBPyChanlun['stock_signal'] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
-        .find({'period': {'$in': ['30m', '60m', '240m']}}) \
-        .sort('fire_time', pymongo.DESCENDING) \
-        .limit(30)
+        .find({'period': {'$in': ['30m', '60m', '240m']}, 'fire_time': {'$gte': t}}) \
+        .sort('fire_time', pymongo.DESCENDING)
 
     for signal in list(signals):
         code = signal["code"]
