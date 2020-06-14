@@ -21,10 +21,10 @@
                     <el-input v-model="calcPosForm.openPrice" class="form-input"/>
                 </el-form-item>
                 <el-form-item label="止损价格">
-                    <el-input v-model="calcPosForm.stopPrice" class="form-input"/>
+                    <el-input v-model="calcPosForm.stopPrice" class="form-input" @change="calcAccount"/>
                 </el-form-item>
                 <el-form-item label="动止价(选填)">
-                    <el-input v-model="calcPosForm.dynamicWinPrice" class="form-input"/>
+                    <el-input v-model="calcPosForm.dynamicWinPrice" @change="calcAccount" class="form-input"/>
                 </el-form-item>
                 <el-form-item label="最大资金使用率">
                     <el-select v-model="calcPosForm.maxAccountUseRate" class="select-input">

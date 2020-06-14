@@ -35,6 +35,7 @@ export default {
                 futureAccount: this.$futureAccount,
                 // 数字货币账户总额
                 digitCoinAccount: this.$digitCoinAccount,
+                globalFutureAccount: this.$globalFutureAccount,
                 // 开仓价格
                 openPrice: null,
                 // 止损价格
@@ -211,12 +212,19 @@ export default {
             }
         },
         getBTCTicker() {
-            futureApi.getBTCTicker().then(res => {
-                this.btcTicker = res
-                console.log('获取okexTiker', this.btcTicker)
-            }).catch((error) => {
-                console.log('获取okexTiker失败:', error)
-            })
+            const requesting = this.$cache.get(`BTC_TICKER`)
+            if (!requesting) {
+                this.$cache.set(`BTC_TICKER`, true, 60)
+                futureApi.getBTCTicker().then(res => {
+                    this.btcTicker = res
+                    console.log('获取okexTiker', this.btcTicker)
+                    this.$cache.del(`BTC_TICKER`)
+
+                }).catch((error) => {
+                    console.log('获取okexTiker失败:', error)
+                })
+            }
+
         },
         processChangeList() {
             // 计算多空分布
@@ -274,34 +282,39 @@ export default {
             })
         },
         getSignalList() {
-            futureApi.getSignalList().then(res => {
-                // console.log('获取背驰列表:', res)
-                this.beichiList = res
-                this.processBeichiList()
-                if (this.firstRequestDominant) {
-                    // 主力合约后端需要2秒才能返回，前端不要每次都去请求
-                    // 本地缓存有主力合约数据
-                    let symbolList = window.localStorage.getItem('symbolList')
-                    if (symbolList != null) {
-                        this.beichiListLoading = false
-                        this.futureSymbolList = JSON.parse(symbolList)
-                        this.prejudgeFormList = JSON.parse(symbolList)
-                        this.futureSymbolMap = {}
-                        this.prejudgeFormMap = {}
-                        // console.log("111", this.futureSymbolList)
-                        for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
-                            let symbolItem = this.futureSymbolList[i]
-                            this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
-                            this.prejudgeFormMap[symbolItem.order_book_id] = ''
+            const requesting = this.$cache.get(`SIGNAL_LIST`)
+            if (!requesting) {
+                this.$cache.set(`SIGNAL_LIST`, true, 60)
+                futureApi.getSignalList().then(res => {
+                    // console.log('获取背驰列表:', res)
+                    this.beichiList = res
+                    this.processBeichiList()
+                    if (this.firstRequestDominant) {
+                        // 主力合约后端需要2秒才能返回，前端不要每次都去请求
+                        // 本地缓存有主力合约数据
+                        let symbolList = window.localStorage.getItem('symbolList')
+                        if (symbolList != null) {
+                            this.beichiListLoading = false
+                            this.futureSymbolList = JSON.parse(symbolList)
+                            this.prejudgeFormList = JSON.parse(symbolList)
+                            this.futureSymbolMap = {}
+                            this.prejudgeFormMap = {}
+                            // console.log("111", this.futureSymbolList)
+                            for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
+                                let symbolItem = this.futureSymbolList[i]
+                                this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
+                                this.prejudgeFormMap[symbolItem.order_book_id] = ''
+                            }
+                            // 创建预判表单对象
                         }
-                        // 创建预判表单对象
+                        // 静默更新主力合约
+                        this.getDominantSymbol()
                     }
-                    // 静默更新主力合约
-                    this.getDominantSymbol()
-                }
-            }).catch((error) => {
-                console.log('获取背驰列表失败:', error)
-            })
+                    this.$cache.del(`SIGNAL_LIST`)
+                }).catch((error) => {
+                    console.log('获取背驰列表失败:', error)
+                })
+            }
         },
 
         processBeichiList() {
@@ -347,20 +360,34 @@ export default {
             }
         },
         getChangeiList() {
-            futureApi.getChangeiList().then(res => {
-                this.changeList = res
-                this.processChangeList()
-            }).catch((error) => {
-                console.log('获取涨跌幅失败:', error)
-            })
+            const requesting = this.$cache.get(`CHANGE_LIST`)
+            if (!requesting) {
+                this.$cache.set(`CHANGE_LIST`, true, 60)
+                futureApi.getChangeiList().then(res => {
+                    this.changeList = res
+                    this.processChangeList()
+                    this.$cache.del(`CHANGE_LIST`)
+                }).catch((error) => {
+                    console.log('获取涨跌幅失败:', error)
+                })
+            }
+
         },
         getGlobalFutureChangeList() {
-            futureApi.getGlobalFutureChangeList().then(res => {
-                this.globalFutureChangeList = res
-                this.processGlobalFutureChangeList()
-            }).catch((error) => {
-                console.log('获取涨跌幅失败:', error)
-            })
+            const requesting = this.$cache.get(`GLOBAL_CHANGE`)
+            console.log("请求：", requesting)
+            if (!requesting) {
+                this.$cache.set(`GLOBAL_CHANGE`, true, 60)
+                futureApi.getGlobalFutureChangeList().then(res => {
+                    this.globalFutureChangeList = res
+                    this.processGlobalFutureChangeList()
+                    this.$cache.del(`GLOBAL_CHANGE`)
+
+                }).catch((error) => {
+                    console.log('获取涨跌幅失败:', error)
+                })
+            }
+
         },
         jumpToKline(symbol) {
             // 夜盘交易，时间算第二天的
@@ -377,20 +404,25 @@ export default {
             window.open(routeUrl.href, '_blank')
         },
         fillMarginRate(symbolInfo, price) {
-            if (symbolInfo.order_book_id.indexOf('BTC') === -1) {
-                this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
-                this.calcPosForm.account = this.calcPosForm.futureAccount
-                this.calcPosForm.maxAccountUseRate = 0.1
-                this.calcPosForm.stopRate = 0.01
-            } else {
+            if (symbolInfo.order_book_id.indexOf('BTC') !== -1) {
                 this.calcPosForm.account = this.calcPosForm.digitCoinAccount
                 this.calcPosForm.maxAccountUseRate = 0.4
                 this.calcPosForm.stopRate = 0.1
                 this.calcPosForm.currentMarginRate = symbolInfo.margin_rate
+            } else if (this.globalFutureSymbol.indexOf(symbolInfo.order_book_id) !== -1) {
+                this.calcPosForm.account = this.calcPosForm.globalFutureAccount
+                this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate).toFixed(3))
+                this.calcPosForm.maxAccountUseRate = 0.25
+                this.calcPosForm.stopRate = 0.02
+            } else {
+                this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
+                this.calcPosForm.account = this.calcPosForm.futureAccount
+                this.calcPosForm.maxAccountUseRate = 0.1
+                this.calcPosForm.stopRate = 0.01
             }
             this.calcPosForm.marginLevel = (1 / this.calcPosForm.currentMarginRate).toFixed(2)
             this.calcPosForm.contractMultiplier = symbolInfo.contract_multiplier
-            this.calcPosForm.currentSymbol = symbolInfo.underlying_symbol
+            this.calcPosForm.currentSymbol = symbolInfo.underlying_symbol ? symbolInfo.underlying_symbol : symbolInfo.order_book_id
             this.calcPosForm.openPrice = price
         },
         /**
@@ -402,14 +434,7 @@ export default {
                 alert('请填入保证金系数，开仓价，止损价')
                 return
             }
-            if (this.calcPosForm.currentSymbol.indexOf('BTC') === -1) {
-                this.calcPosForm.account = this.calcPosForm.futureAccount
-                // 计算1手需要的保证金
-                this.calcPosForm.perOrderMargin = Math.floor(this.calcPosForm.openPrice * this.calcPosForm.contractMultiplier * this.calcPosForm.currentMarginRate)
-                this.calcPosForm.perOrderStopMoney = Math.abs(this.calcPosForm.openPrice - this.calcPosForm.stopPrice) * this.calcPosForm.contractMultiplier
-                // 1手止损的百分比
-                this.calcPosForm.perOrderStopRate = (this.calcPosForm.perOrderStopMoney / this.calcPosForm.perOrderMargin).toFixed(2)
-            } else {
+            if (this.calcPosForm.currentSymbol.indexOf('BTC') !== -1) {
                 this.calcPosForm.account = this.calcPosForm.digitCoinAccount
                 // 火币1张就是100usd  20倍杠杠 1张保证金是5usd
                 // OKEX 1张 = 0.01BTC  20倍杠杆， 1张就是 0.01* BTC的现价
@@ -420,6 +445,19 @@ export default {
                 this.calcPosForm.perOrderMargin = (0.01 * Number(this.btcTicker.price) / 20).toFixed(2)
                 this.calcPosForm.perOrderStopRate = ((Math.abs(this.calcPosForm.openPrice - this.calcPosForm.stopPrice) / this.calcPosForm.openPrice + this.calcPosForm.digitCoinFee) * 20).toFixed(2)
                 this.calcPosForm.perOrderStopMoney = Number((this.calcPosForm.perOrderMargin * this.calcPosForm.perOrderStopRate).toFixed(2))
+            } else if (this.globalFutureSymbol.indexOf(this.calcPosForm.currentSymbol) !== -1) {
+                // 计算1手需要的保证金
+                this.calcPosForm.perOrderMargin = Math.floor(this.calcPosForm.openPrice * this.calcPosForm.contractMultiplier * this.calcPosForm.currentMarginRate)
+                this.calcPosForm.perOrderStopMoney = (Math.abs(this.calcPosForm.openPrice - this.calcPosForm.stopPrice) * this.calcPosForm.contractMultiplier).toFixed(0)
+                // 1手止损的百分比
+                this.calcPosForm.perOrderStopRate = (this.calcPosForm.perOrderStopMoney / this.calcPosForm.perOrderMargin).toFixed(2)
+            } else {
+                this.calcPosForm.account = this.calcPosForm.futureAccount
+                // 计算1手需要的保证金
+                this.calcPosForm.perOrderMargin = Math.floor(this.calcPosForm.openPrice * this.calcPosForm.contractMultiplier * this.calcPosForm.currentMarginRate)
+                this.calcPosForm.perOrderStopMoney = Math.abs(this.calcPosForm.openPrice - this.calcPosForm.stopPrice) * this.calcPosForm.contractMultiplier
+                // 1手止损的百分比
+                this.calcPosForm.perOrderStopRate = (this.calcPosForm.perOrderStopMoney / this.calcPosForm.perOrderMargin).toFixed(2)
             }
             // 计算最大能使用的资金
             let maxAccountUse = this.calcPosForm.account * 10000 * this.calcPosForm.maxAccountUseRate
@@ -435,10 +473,10 @@ export default {
 
             this.calcPosForm.maxOrderCount = maxOrderCount1 > maxOrderCount2 ? maxOrderCount2 : maxOrderCount1
             // 总保证金
-            this.calcPosForm.totalOrderMargin = (this.calcPosForm.perOrderMargin * this.calcPosForm.maxOrderCount).toFixed(2)
+            this.calcPosForm.totalOrderMargin = (this.calcPosForm.perOrderMargin * this.calcPosForm.maxOrderCount).toFixed(0)
 
             // 总止损额
-            this.calcPosForm.totalOrderStopMoney = (this.calcPosForm.perOrderStopMoney * this.calcPosForm.maxOrderCount).toFixed(2)
+            this.calcPosForm.totalOrderStopMoney = (this.calcPosForm.perOrderStopMoney * this.calcPosForm.maxOrderCount).toFixed(0)
 
             // 计算当前资金使用率
             this.calcPosForm.accountUseRate = ((this.calcPosForm.maxOrderCount * this.calcPosForm.perOrderMargin) / this.calcPosForm.account / 10000).toFixed(2)
@@ -448,7 +486,7 @@ export default {
             // 动止手数  = 开仓手数 * 1手止损  /( （动止价-开仓价）* 合约乘数 + 1手止损)
             // 如果填入了动止价
             if (this.calcPosForm.dynamicWinPrice != null) {
-                this.calcPosForm.dynamicWinCount = Math.round(this.calcPosForm.maxOrderCount * this.calcPosForm.perOrderStopMoney / ((this.calcPosForm.dynamicWinPrice - this.calcPosForm.openPrice) * this.calcPosForm.contractMultiplier + this.calcPosForm.perOrderStopMoney))
+                this.calcPosForm.dynamicWinCount = Math.ceil(this.calcPosForm.maxOrderCount * this.calcPosForm.perOrderStopMoney / (Math.abs(this.calcPosForm.dynamicWinPrice - this.calcPosForm.openPrice) * this.calcPosForm.contractMultiplier + this.calcPosForm.perOrderStopMoney))
             }
             console.log('maxAccountUse:', maxAccountUse, ' maxStopMoney :', maxStopMoney, ' perOrderMargin:',
                 this.calcPosForm.perOrderMargin, ' maxOrderCount:', this.calcPosForm.maxOrderCount, ' maxOrderCount2:', maxOrderCount2, ' perOrderStopMoney:', this.calcPosForm.perOrderStopMoney,

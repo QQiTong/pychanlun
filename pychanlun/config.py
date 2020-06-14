@@ -53,10 +53,10 @@ config = {
         "CF",
         "SR",
         "AP",
+        "JD",
         "A",
         "M",
         "RM",
-        "JD",
         # 食用油
         "OI",
         "P",
@@ -90,7 +90,7 @@ config = {
         'TA': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'CF': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'SR': {'margin_rate': 0.05, 'contract_multiplier': 10},
-        'OI': {'margin_rate': 0.065, 'contract_multiplier': 10},
+        'OI': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
         # 大商所
@@ -116,8 +116,8 @@ config = {
 
         'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         # 外盘
-        'CL': {'margin_rate': 0.56, 'contract_multiplier': 500},  # 8:30 -14:00 0.1      其它时间 0.15       11756
-        'GC': {'margin_rate': 0.059, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
+        'CL': {'margin_rate': 0.31, 'contract_multiplier': 500},  # 8:30 -14:00 0.1      其它时间 0.15       11756
+        'GC': {'margin_rate': 0.054, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
         'SI': {'margin_rate': 0.13, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
 
         'CN': {'margin_rate': 0.09, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06          1045
@@ -220,7 +220,7 @@ config = {
         {
             'contract_multiplier': 500,
             'exchange': '美国',
-            'margin_rate': 0.56,
+            'margin_rate': 0.31,
             'order_book_id': 'CL',
             'trading_hours': '7*24',
             'type': 'future',

@@ -376,7 +376,7 @@
 
             <el-table-column label="信号" align="center" :key="4">
                 <template slot-scope="{row}">
-                    <span  :class="row.signal==='tupo'?'down-green':'up-red'">{{ row.signal| signalTypeFilter }}</span>
+                    <span :class="row.signal==='tupo'?'down-green':'up-red'">{{ row.signal| signalTypeFilter }}</span>
                 </template>
             </el-table-column>
             <el-table-column label="分类" align="center" :key="28">
@@ -474,18 +474,18 @@
                              v-if="positionQueryForm.status==='winEnd'"
                              :key="19">
                 <template slot-scope="{row}">
-                    <el-tag type="danger">
+                    <span class="up-red">
                         {{row.status ==='winEnd'?row.win_end_money:0}}
-                    </el-tag>
+                    </span>
                 </template>
             </el-table-column>
             <el-table-column label="已盈利比率" prop="win_end_rate" width="110" align="center"
                              v-if="positionQueryForm.status==='winEnd'"
                              :key="20">
                 <template slot-scope="{row}">
-                    <el-tag type="danger">
+                    <span class="up-red">
                         {{row.status==='winEnd'?(row.win_end_rate * 100).toFixed(0)+'%':0}}
-                    </el-tag>
+                    </span>
                 </template>
             </el-table-column>
             <el-table-column
@@ -959,21 +959,26 @@
             getPositionList() {
                 // this.positionList = [];
                 // this.listLoading = true;
-                futureApi
-                    .getPositionList(this.positionQueryForm.status,
-                        this.listQuery.current,
-                        this.listQuery.size, this.endDate)
-                    .then(res => {
-                        this.listLoading = false;
-                        this.listQuery.total = res.total;
-                        this.positionList = res.records;
-                        this.processSum()
-                        console.log("后端返回的持仓列表", res);
-                    })
-                    .catch(error => {
-                        // this.listLoading = false;
-                        console.log("获取持仓列表失败", error);
-                    });
+                const requesting = this.$cache.get(`POSITION_LIST#${this.positionQueryForm.status}#${this.listQuery.current}#${this.listQuery.size}#${this.endDate}`)
+                if (!requesting) {
+                    this.$cache.set(`POSITION_LIST#${this.positionQueryForm.status}#${this.listQuery.current}#${this.listQuery.size}#${this.endDate}`, true, 60)
+                    futureApi
+                        .getPositionList(this.positionQueryForm.status,
+                            this.listQuery.current,
+                            this.listQuery.size, this.endDate)
+                        .then(res => {
+                            this.listLoading = false;
+                            this.listQuery.total = res.total;
+                            this.positionList = res.records;
+                            this.processSum()
+                            console.log("后端返回的持仓列表", res);
+                            this.$cache.del(`POSITION_LIST#${this.positionQueryForm.status}#${this.listQuery.current}#${this.listQuery.size}#${this.endDate}`)
+                        })
+                        .catch(error => {
+                            // this.listLoading = false;
+                            console.log("获取持仓列表失败", error);
+                        });
+                }
             },
             handleModifyStatus(row, status) {
                 this.$message({

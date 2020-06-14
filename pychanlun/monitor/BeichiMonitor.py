@@ -295,7 +295,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
         else:
             # 动止信号 不作为新的记录插入持仓表
             # 线段破坏 不作为新的记录插入持仓表
-            if signal != 'fractal':
+            if signal != 'fractal' and signal != 'break':
                 DBPyChanlun['future_auto_position'].insert_one({
                     'symbol': symbol,
                     'period': period,
@@ -322,8 +322,19 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
 
                 })
                 remind = True
-        # 将之前反方向的持仓止盈
-        if different_last_fire is not None:
+        # 将之前反方向的持仓止盈 当前为动止信号，不全部止盈
+        if signal != 'fractal' and different_last_fire is not None and last_fire is not None:
+            if last_fire['direction'] == 'long':
+                if different_last_fire['price'] >= last_fire['price']:
+                    status = 'winEnd'
+                else:
+                    status = 'loseEnd'
+            else:
+                if different_last_fire['price'] <= last_fire['price']:
+                    status = 'winEnd'
+                else:
+                    status = 'loseEnd'
+
             DBPyChanlun['future_auto_position'].find_one_and_update({
                 'symbol': symbol, 'direction': different_direction, 'status': status
             }, {
@@ -332,7 +343,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
                     'last_update_time': date_created,  # 最后信号更新时间
                     'last_update_signal': signal,  # 最后更新的信号
                     'last_update_period': period,  # 最后更新的周期
-                    'status': 'winEnd'  # 将之前反方向的持仓状态改为止盈
+                    'status': status  # 将之前反方向的持仓状态改为止盈
                 },
                 '$inc': {
                     'update_count': 1
@@ -590,7 +601,7 @@ def monitorHuila(result, symbol, period, closePrice):
             # 小级别除非是双盘，否则一定要不破前低
             if notLower:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-            elif tag in filter_tag:
+            elif "双盘" in tag:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_zs_huila']['date']) > 0:
@@ -605,7 +616,7 @@ def monitorHuila(result, symbol, period, closePrice):
         else:
             if notHigher:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-            elif tag in filter_tag:
+            elif "双盘" in tag:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 '''
 监控突破
@@ -979,10 +990,10 @@ def calStopWinCount(symbol, period, positionInfo, closePrice):
     winLoseRate = round(abs(stop_win_price - open_pos_price) /
                         abs(open_pos_price - stop_lose_price), 2)
     # 标准动止 第1次 高级别 走30%  ， 第2次 高高级别再走30%  ，但如果当前盈亏比已经超过 2.3：1，那么第1次就不用动止30%，需要计算
-    if winLoseRate > 2.3:
-        stopWinPosRate = round(1 / (winLoseRate + 1), 2)
-    else:
-        stopWinPosRate = 0.3
+    # if winLoseRate > 2.3:
+    stopWinPosRate = round(1 / (winLoseRate + 1), 2)
+    # else:
+    #     stopWinPosRate = 0.3
     stopWinCount = round(stopWinPosRate * open_pos_amount)
     print("当前盈亏比", winLoseRate, "当前动止仓位百分比",
           stopWinPosRate, "动止手数", stopWinCount)

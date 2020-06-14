@@ -181,7 +181,7 @@ export default {
             dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
             currentInfo: null,
             // 数字货币 和外盘 将240m 替换成1m
-            isShow1Min: false,
+            isShow1Min: true,
             futureConfig: {},
             symbolInfo: null,
             show1MinSymbol: ['BTC'],
@@ -200,11 +200,11 @@ export default {
     },
     beforeMount() {
         this.symbol = this.getParams('symbol')
-        if (this.show1MinSymbol.indexOf(this.symbol) !== -1) {
-            this.isShow1Min = true
-        } else {
-            this.isShow1Min = false
-        }
+        // if (this.show1MinSymbol.indexOf(this.symbol) !== -1) {
+        //     this.isShow1Min = true
+        // } else {
+        //     this.isShow1Min = false
+        // }
     },
     mounted() {
         // 不共用symbol对象, symbol是双向绑定的
@@ -2320,7 +2320,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherColor,
                                 formatter: '顶: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
-                                position: 'insideEndTop'
+                                position: 'insideMiddleBottom'
                             },
                         },
                     }
@@ -2345,7 +2345,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
                                 formatter: '顶: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
-                                position: 'insideEndTop'
+                                position: 'insideMiddleBottom'
                             },
 
                         },
@@ -2373,7 +2373,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherColor,
                                 formatter: '底分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
-                                position: 'insideEndTop'
+                                position: 'insideMiddleTop'
                             },
 
                         },
@@ -2399,7 +2399,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
                                 formatter: '底分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
-                                position: 'insideEndTop'
+                                position: 'insideMiddleTop'
 
                             },
                         },
@@ -2668,6 +2668,14 @@ export default {
         },
         quickCalcMaxCount() {
             this.calcAccount(this.quickCalc.openPrice, this.quickCalc.stopPrice)
+
+            // 计算动态止盈手数， 即剩下仓位被止损也不会亏钱
+            // 动止手数 * （动止价-开仓价）* 合约乘数 = （开仓手数-动止手数）* 1手止损
+            // 动止手数  = 开仓手数 * 1手止损  /( （动止价-开仓价）* 合约乘数 + 1手止损)
+            // 如果填入了动止价
+            if (this.quickCalc.dynamicWinPrice !== "") {
+                this.quickCalc.dynamicWinCount = Math.ceil(this.maxOrderCount * this.perOrderStopMoney / (Math.abs(this.quickCalc.dynamicWinPrice - this.quickCalc.openPrice) * this.contractMultiplier + this.perOrderStopMoney))
+            }
             this.quickCalc.count = this.maxOrderCount
             this.quickCalc.stopRate = this.perOrderStopRate
             this.quickCalc.perOrderStopMoney = Math.round(this.perOrderStopMoney, 0)
@@ -2697,8 +2705,8 @@ export default {
                 this.perOrderStopMoney = Math.abs(openPrice - stopPrice) * this.contractMultiplier
                 // 1手止损的百分比
                 this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
-                this.maxAccountUseRate = 0.1
-                this.stopRate = 0.01
+                this.maxAccountUseRate = 0.25
+                this.stopRate = 0.02
             } else {
                 // 内盘
                 this.account = this.futureAccount
@@ -2733,19 +2741,13 @@ export default {
             // 计算当前资金使用率
             this.accountUseRate = ((this.maxOrderCount * this.perOrderMargin) / this.account / 10000).toFixed(2)
 
-            // 计算动态止盈手数， 即剩下仓位被止损也不会亏钱
-            // 动止手数 * （动止价-开仓价）* 合约乘数 = （开仓手数-动止手数）* 1手止损
-            // 动止手数  = 开仓手数 * 1手止损  /( （动止价-开仓价）* 合约乘数 + 1手止损)
-            // 如果填入了动止价
-            if (this.quickCalc.dynamicWinPrice !== "") {
-                this.quickCalc.dynamicWinCount = Math.ceil(this.maxOrderCount * this.perOrderStopMoney / (Math.abs(this.quickCalc.dynamicWinPrice - openPrice) * this.contractMultiplier + this.perOrderStopMoney))
-            }
             // 用最新价作为动止价计算各个周期的动止手数
-            console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " perOrderMargin:",
-                this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
-                " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate, " dynamicWinCount:", this.quickCalc.dynamicWinCount,
-                " period:", period)
+            // console.log("maxAccountUse:", maxAccountUse, " maxStopMoney :", maxStopMoney, " perOrderMargin:",
+            //     this.perOrderMargin, " maxOrderCount:", this.maxOrderCount, " maxOrderCount2:", maxOrderCount2, " perOrderStopMoney:", this.perOrderStopMoney,
+            //     " accountUseRate:", this.accountUseRate, " perOrderStopRate:", this.perOrderStopRate, " dynamicWinCount:", this.quickCalc.dynamicWinCount,
+            //     " period:", period)
         },
+
         calculateMA(resultData, dayCount) {
             let result = []
             for (let i = 0, len = resultData.values.length; i < len; i++) {
