@@ -300,7 +300,8 @@ class Calc:
         # 高一级别段处理
         higherDuanList = [0 for i in range(count)]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            calc_duan_exp(count, biList, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
+            # calc_duan_exp(count, biList, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
+            CalcDuan(count, higherDuanList, duanList, highList, lowList)
         else:
             CalcDuan(count, higherDuanList, duanList, highList, lowList)
 
