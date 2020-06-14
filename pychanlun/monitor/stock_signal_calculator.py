@@ -129,27 +129,25 @@ def calculate(info):
 
     # 笔信号
     bi_series = [0 for i in range(count)]
-    CalcBi(count, bi_series, high_series,
-           low_series, open_series, close_series)
+    CalcBi(count, bi_series, high_series, low_series, open_series, close_series)
     duan_series = [0 for i in range(count)]
     CalcDuan(count, duan_series, bi_series, high_series, low_series)
 
     higher_duan_series = [0 for i in range(count)]
     CalcDuan(count, higher_duan_series, duan_series, high_series, low_series)
 
-    entanglement_list = entanglement.CalcEntanglements(
-        time_series, duan_series, bi_series, high_series, low_series)
-    zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series,
-                                   low_series, open_series, close_series, bi_series, duan_series)
-    zs_tupo = entanglement.tu_po(entanglement_list, time_series, high_series,
-                                 low_series, open_series, close_series, bi_series, duan_series)
-    v_reverse = entanglement.v_reverse(entanglement_list, time_series, high_series,
-                                       low_series, open_series, close_series, bi_series, duan_series)
-    duan_pohuai = entanglement.po_huai(time_series, high_series, low_series, open_series, close_series, bi_series,
-                                       duan_series)
+    entanglement_list = entanglement.CalcEntanglements(time_series, duan_series, bi_series, high_series, low_series)
+    zs_huila = entanglement \
+        .la_hui(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    zs_tupo = entanglement \
+        .tu_po(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    v_reverse = entanglement \
+        .v_reverse(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    duan_pohuai = entanglement \
+        .po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
 
-    higher_entaglement_list = entanglement.CalcEntanglements(
-        time_series, higher_duan_series, duan_series, high_series, low_series)
+    higher_entaglement_list = entanglement \
+        .CalcEntanglements(time_series, higher_duan_series, duan_series, high_series, low_series)
 
     # 笔中枢信号的记录
     count = len(zs_huila['buy_zs_huila']['date'])
