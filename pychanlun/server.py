@@ -185,8 +185,9 @@ def update_future_prejudge_list():
 @app.route('/api/get_stock_signal_list')
 def get_stock_signal_list():
     page = int(request.args.get("page") or "1")
-    if page <= 0: page = 1
-    stockSignalList = func_timeout(30, businessService.getStockSignalList, args=(page,))
+    if page <= 0:
+        page = 1
+    stockSignalList = func_timeout(30, businessService.get_stock_signal_list, args=(page,))
     return Response(json.dumps(stockSignalList), mimetype='application/json')
 
 

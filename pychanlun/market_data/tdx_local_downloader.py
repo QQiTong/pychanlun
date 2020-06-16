@@ -2,31 +2,27 @@
 
 import os
 import logging
-from pytdx.reader import TdxDailyBarReader, TdxLCMinBarReader, TdxFileNotFoundException
 import re
-from pychanlun.db import DBPyChanlun
+import traceback
 import pytz
+import pandas as pd
+from pytdx.reader import TdxDailyBarReader, TdxLCMinBarReader
+from pychanlun.db import DBPyChanlun
 from datetime import datetime, timedelta, time
 from multiprocessing import Pool
 from pymongo import UpdateOne
-import pandas as pd
-import traceback
 
-"""
-rx: https://rxpy.readthedocs.io/en/latest/get_started.html
-"""
 
 tz = pytz.timezone('Asia/Shanghai')
 
 
 def run(**kwargs):
-    logger = logging.getLogger()
     TDX_HOME = os.environ.get("TDX_HOME")
     if TDX_HOME is None:
-        logger.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
+        logging.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
 
-    days = kwargs.get("days", 7)
+    days = kwargs.get("days", 5)
 
     codes = []
     for subdir in ["sh", "sz"]:
@@ -54,14 +50,14 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    for idx in range(len(codes)):
-        info = codes[idx]
-        logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
-        parse_and_save_1m(info)
-    # pool = Pool()
-    # pool.map(parse_and_save_1m, codes)
-    # pool.close()
-    # pool.join()
+    # for idx in range(len(codes)):
+    #     info = codes[idx]
+    #     logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
+    #     parse_and_save_1m(info)
+    pool = Pool()
+    pool.map(parse_and_save_1m, codes)
+    pool.close()
+    pool.join()
 
     codes = []
     for subdir in ["sh", "sz"]:
@@ -89,14 +85,14 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    for idx in range(len(codes)):
-        info = codes[idx]
-        logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
-        parse_and_save_5m(info)
-    # pool = Pool()
-    # pool.map(parse_and_save_5m, codes)
-    # pool.close()
-    # pool.join()
+    # for idx in range(len(codes)):
+    #     info = codes[idx]
+    #     logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
+    #     parse_and_save_5m(info)
+    pool = Pool()
+    pool.map(parse_and_save_5m, codes)
+    pool.close()
+    pool.join()
 
     codes = []
     for subdir in ["sh", "sz"]:
@@ -124,14 +120,14 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    for idx in range(len(codes)):
-        info = codes[idx]
-        logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
-        parse_and_save_day(info)
-    # pool = Pool()
-    # pool.map(parse_and_save_day, codes)
-    # pool.close()
-    # pool.join()
+    # for idx in range(len(codes)):
+    #     info = codes[idx]
+    #     logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
+    #     parse_and_save_day(info)
+    pool = Pool()
+    pool.map(parse_and_save_day, codes)
+    pool.close()
+    pool.join()
 
 
 def calc_60m(df):
@@ -139,22 +135,22 @@ def calc_60m(df):
     rows = []
     for index, row in df.iterrows():
         rows.append(row)
-        if index.time() == time(hour=10,minute=30,second=0,microsecond=0):
+        if index.time() == time(hour=10, minute=30, second=0, microsecond=0):
             g = pd.DataFrame(rows)
             bar = {"date": index, "open": rows[0]["open"], "close": rows[-1]["close"], "high": g.high.max(), "low": g.low.min(), "volume": g.volume.sum(), "amount":g.amount.sum()}
             bars.append(bar)
             rows = []
-        elif index.time() == time(hour=11,minute=30,second=0,microsecond=0):
+        elif index.time() == time(hour=11, minute=30, second=0, microsecond=0):
             g = pd.DataFrame(rows)
             bar = {"date": index, "open": rows[0]["open"], "close": rows[-1]["close"], "high": g.high.max(), "low": g.low.min(), "volume": g.volume.sum(), "amount":g.amount.sum()}
             bars.append(bar)
             rows = []
-        elif index.time() == time(hour=14,minute=0,second=0,microsecond=0):
+        elif index.time() == time(hour=14, minute=0, second=0, microsecond=0):
             g = pd.DataFrame(rows)
             bar = {"date": index, "open": rows[0]["open"], "close": rows[-1]["close"], "high": g.high.max(), "low": g.low.min(), "volume": g.volume.sum(), "amount":g.amount.sum()}
             bars.append(bar)
             rows = []
-        elif index.time() == time(hour=15,minute=0,second=0,microsecond=0):
+        elif index.time() == time(hour=15, minute=0, second=0, microsecond=0):
             g = pd.DataFrame(rows)
             bar = {"date": index, "open": rows[0]["open"], "close": rows[-1]["close"], "high": g.high.max(), "low": g.low.min(), "volume": g.volume.sum(), "amount":g.amount.sum()}
             bars.append(bar)
@@ -172,7 +168,6 @@ def parse_and_save_1m(info):
     reader = TdxLCMinBarReader()
     df = reader.get_df(info["filepath"])
     df = df[df.index >= start_time]
-    # save_data(info["code"], "1m", df)
 
     ohlc = {'open': 'first', 'high': 'max', 'low': 'min',
             'close': 'last', 'volume': 'sum', 'amount': 'sum'}

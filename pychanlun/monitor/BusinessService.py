@@ -587,7 +587,7 @@ class BusinessService:
 
     # --------------------股票部份----------------------------------------------
 
-    def getStockSignalList(self, page=1):
+    def get_stock_signal_list(self, page=1):
         data_list = DBPyChanlun["stock_signal"].with_options(
             codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({}).sort(
             "fire_time", pymongo.DESCENDING).skip((page - 1) * 1000).limit(1000)
@@ -599,6 +599,7 @@ class BusinessService:
                 'fire_time': row["fire_time"].strftime("%Y-%m-%d %H:%M"),
                 'period': row["period"],
                 'price': row["price"],
+                'remark': row["remark"],
                 'stop_lose_price': row["stop_lose_price"],
                 'category': row["category"],
                 'tags': ", ".join(row["tags"])}
