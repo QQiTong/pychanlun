@@ -22,7 +22,7 @@ def run(**kwargs):
         logging.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
 
-    days = kwargs.get("days", 5)
+    days = kwargs.get("days", 3)
 
     codes = []
     for subdir in ["sh", "sz"]:
@@ -50,14 +50,14 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    # for idx in range(len(codes)):
-    #     info = codes[idx]
-    #     logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
-    #     parse_and_save_1m(info)
-    pool = Pool()
-    pool.map(parse_and_save_1m, codes)
-    pool.close()
-    pool.join()
+    for idx in range(len(codes)):
+        info = codes[idx]
+        logging.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
+        parse_and_save_1m(info)
+    # pool = Pool()
+    # pool.map(parse_and_save_1m, codes)
+    # pool.close()
+    # pool.join()
 
     codes = []
     for subdir in ["sh", "sz"]:
@@ -120,14 +120,14 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    # for idx in range(len(codes)):
-    #     info = codes[idx]
-    #     logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
-    #     parse_and_save_day(info)
-    pool = Pool()
-    pool.map(parse_and_save_day, codes)
-    pool.close()
-    pool.join()
+    for idx in range(len(codes)):
+        info = codes[idx]
+        logging.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
+        parse_and_save_day(info)
+    # pool = Pool()
+    # pool.map(parse_and_save_day, codes)
+    # pool.close()
+    # pool.join()
 
 
 def calc_60m(df):
@@ -169,8 +169,7 @@ def parse_and_save_1m(info):
     df = reader.get_df(info["filepath"])
     df = df[df.index >= start_time]
 
-    ohlc = {'open': 'first', 'high': 'max', 'low': 'min',
-            'close': 'last', 'volume': 'sum', 'amount': 'sum'}
+    ohlc = {'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum', 'amount': 'sum'}
     # 合成3分钟数据
     df3m = df.resample('3T', closed='right', label='right').agg(
         ohlc).dropna(how='any')
@@ -185,8 +184,7 @@ def parse_and_save_5m(info):
     df = df[df.index >= start_time]
     save_data(info["code"], "5m", df)
 
-    ohlc = {'open': 'first', 'high': 'max', 'low': 'min',
-            'close': 'last', 'volume': 'sum', 'amount': 'sum'}
+    ohlc = {'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum', 'amount': 'sum'}
     # 合成15分钟数据
     df15m = df.resample('15T', closed='right', label='right').agg(
         ohlc).dropna(how='any')
@@ -201,7 +199,6 @@ def parse_and_save_5m(info):
 
 
 def parse_and_save_day(info):
-    logger = logging.getLogger()
     try:
         start_time = datetime.now() - timedelta(days=info["days"])
         reader = TdxDailyBarReader()
@@ -209,15 +206,15 @@ def parse_and_save_day(info):
         df = df[df.index >= start_time]
         save_data(info["code"], "240m", df)
     except BaseException as e:
-        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
+        logging.info("Error Occurred: {0}".format(traceback.format_exc()))
     return True
 
 
 def save_data(code, period, df):
     batch = []
-    for time, row in df.iterrows():
+    for t, row in df.iterrows():
         batch.append(UpdateOne({
-            "_id": time.replace(tzinfo=tz)
+            "_id": t.replace(tzinfo=tz)
         }, {
             "$set": {
                 "open": round(row["open"], 2),

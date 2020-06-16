@@ -67,7 +67,7 @@ def global_futures(**kwargs):
 
 @run.command()
 @click.option('--source', type=str, default="tdxlocal")
-@click.option('--days', type=int, default=5)
+@click.option('--days', type=int, default=3)
 @click.option('--code', type=str)
 @click.option('--period', type=str)
 def download_stock_data(**kwargs):
