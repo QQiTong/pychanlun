@@ -31,6 +31,11 @@ def server(**kwargs):
         apiserver.run(**kwargs)
 
 
+@run.command()
+def run_api_server(**kwargs):
+    apiserver.run(**kwargs)
+
+
 """
 运行背驰监控程序
 pychanlun monitor beichi
@@ -62,7 +67,7 @@ def global_futures(**kwargs):
 
 @run.command()
 @click.option('--source', type=str, default="tdxlocal")
-@click.option('--days', type=int, default=7)
+@click.option('--days', type=int, default=3)
 @click.option('--code', type=str)
 @click.option('--period', type=str)
 def download_stock_data(**kwargs):
