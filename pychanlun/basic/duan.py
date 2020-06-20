@@ -94,9 +94,10 @@ def CalcDuan(count, duan, bi, high, low):
                                     i = i2
 
 
-def calc_duan_exp(count, bi_list, duan_list, bi_list_big_level, time_index_list_big_level, time_index_list, high_list, low_list):
-    if len(duan_list) < 0:
-        return
+def calc_duan_exp(bi_list, time_index_list, bi_list_big_level, time_index_list_big_level, high_list, low_list):
+    count = len(bi_list)
+    duan_list = [0 for i in range(count)]
+
     idx = 0
     for i in range(len(bi_list_big_level)):
         if i < len(time_index_list_big_level) - 1:
@@ -174,3 +175,4 @@ def calc_duan_exp(count, bi_list, duan_list, bi_list_big_level, time_index_list_
                             else:
                                 bi_list[y] = 0
                         direction = -1
+    return duan_list

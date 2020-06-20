@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import time
 import re
 
@@ -262,7 +261,7 @@ class Calc:
 
         count = len(timeList)
         # 本级别笔
-        small_period_list = ['1m', '3m', '5m','15m']
+        small_period_list = ['1m', '3m', '5m', '15m']
         biList = [0 for i in range(count)]
         CalcBi(count, biList, highList, lowList, openPriceList, closePriceList,
                True if period in small_period_list else False)
@@ -273,7 +272,9 @@ class Calc:
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
             CalcBi(len(timeListBigLevel), biListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel,
                    closePriceListBigLevel, True if bigLevelPeriod in small_period_list else False)
-            fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel, highListBigLevel, lowListBigLevel, openPriceListBigLevel, closePriceListBigLevel)
+            fractialRegion = FindLastFractalRegion(len(timeListBigLevel), biListBigLevel, timeListBigLevel,
+                                                   highListBigLevel, lowListBigLevel, openPriceListBigLevel,
+                                                   closePriceListBigLevel)
             if fractialRegion is not None:
                 fractialRegion["period"] = bigLevelPeriod
             xx_data['bi'] = biListBigLevel
@@ -285,23 +286,32 @@ class Calc:
                    openPriceListBigLevel2,
                    closePriceListBigLevel2,
                    True if bigLevelPeriod2 in small_period_list else False)
-            fractialRegion2 = FindLastFractalRegion(len(timeListBigLevel2), biListBigLevel2, timeListBigLevel2, highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2, closePriceListBigLevel2)
+            fractialRegion2 = FindLastFractalRegion(len(timeListBigLevel2), biListBigLevel2, timeListBigLevel2,
+                                                    highListBigLevel2, lowListBigLevel2, openPriceListBigLevel2,
+                                                    closePriceListBigLevel2)
             if fractialRegion2 is not None:
                 fractialRegion2["period"] = bigLevelPeriod2
-
-        # 本级别段处理
-        duanList = [0 for i in range(count)]
-        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            calc_duan_exp(count, biList, duanList, biListBigLevel, timeIndexListBigLevel, timeIndexList, highList, lowList)
-        else:
-            CalcDuan(count, duanList, biList, highList, lowList)
-        x_data['duan'] = duanList
 
         # 高一级别段处理
         higherDuanList = [0 for i in range(count)]
         if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
-            # calc_duan_exp(count, biList, higherDuanList, biListBigLevel2, timeIndexListBigLevel2, timeIndexList, highList, lowList)
-            CalcDuan(count, higherDuanList, duanList, highList, lowList)
+            higherDuanList = calc_duan_exp(biListBigLevel, timeIndexListBigLevel,
+                                           biListBigLevel2, timeIndexListBigLevel2,
+                                           highListBigLevel, lowListBigLevel)
+            higherDuanList = calc_duan_exp(biList, timeIndexList, higherDuanList, timeIndexListBigLevel2, highList, lowList)
+
+        # 本级别段处理
+        duanList = [0 for i in range(count)]
+        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
+            duanList = calc_duan_exp(biList, timeIndexList,
+                                     biListBigLevel, timeIndexListBigLevel,
+                                     highList, lowList)
+        else:
+            CalcDuan(count, duanList, biList, highList, lowList)
+        x_data['duan'] = duanList
+
+        if cat == "FUTURE" or cat == "DIGIT_COIN" or cat == "GLOBAL_FUTURE":
+            pass
         else:
             CalcDuan(count, higherDuanList, duanList, highList, lowList)
 
@@ -310,11 +320,15 @@ class Calc:
         CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
 
         entanglementList = entanglement.CalcEntanglements(timeList, duanList, biList, highList, lowList)
-        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
-        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
-        v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
+        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList,
+                                    biList, duanList, higherDuanList)
+        tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList,
+                                  duanList, higherDuanList)
+        v_reverse = entanglement.v_reverse(entanglementList, timeList, highList, lowList, openPriceList, closePriceList,
+                                           biList, duanList, higherDuanList)
         five_v_fan = entanglement.five_v_fan(timeList, duanList, biList, highList, lowList, higherDuanList)
-        duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, biList, duanList, higherDuanList)
+        duan_pohuai = entanglement.po_huai(timeList, highList, lowList, openPriceList, closePriceList, biList, duanList,
+                                           higherDuanList)
         # 段中枢
         entanglementHigherList = entanglement.CalcEntanglements(timeList, higherDuanList, duanList, highList, lowList)
         # huila_higher = entanglement.la_hui(entanglementHigherList, timeList, highList, lowList, openPriceList, closePriceList, duanList, higherDuanList)
@@ -364,7 +378,8 @@ class Calc:
                 duan_pohuai["buy_duan_break"]["tag"][idx] = "双盘"
 
         # 高级别段中枢
-        entanglementHigherHigherList = entanglement.CalcEntanglements(timeList, higherHigherDuanList, higherDuanList, highList, lowList)
+        entanglementHigherHigherList = entanglement.CalcEntanglements(timeList, higherHigherDuanList, higherDuanList,
+                                                                      highList, lowList)
 
         zsdata, zsflag = getZhongShuData(entanglementList)
         duan_zsdata, duan_zsflag = getZhongShuData(entanglementHigherList)
