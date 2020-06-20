@@ -9,7 +9,6 @@ import pandas as pd
 from pytdx.reader import TdxDailyBarReader, TdxLCMinBarReader
 from pychanlun.db import DBPyChanlun
 from datetime import datetime, timedelta, time
-from multiprocessing import Pool
 from pymongo import UpdateOne
 
 
@@ -54,10 +53,6 @@ def run(**kwargs):
         info = codes[idx]
         logging.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
         parse_and_save_1m(info)
-    # pool = Pool()
-    # pool.map(parse_and_save_1m, codes)
-    # pool.close()
-    # pool.join()
 
     codes = []
     for subdir in ["sh", "sz"]:
@@ -85,14 +80,10 @@ def run(**kwargs):
             filepath = os.path.join(path, filename)
             if code is not None:
                 codes.append({"code": code, "filepath": filepath, "days": days})
-    # for idx in range(len(codes)):
-    #     info = codes[idx]
-    #     logger.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
-    #     parse_and_save_5m(info)
-    pool = Pool()
-    pool.map(parse_and_save_5m, codes)
-    pool.close()
-    pool.join()
+    for idx in range(len(codes)):
+        info = codes[idx]
+        logging.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
+        parse_and_save_5m(info)
 
     codes = []
     for subdir in ["sh", "sz"]:
@@ -124,10 +115,6 @@ def run(**kwargs):
         info = codes[idx]
         logging.info("%s/%s code=%s filepath=%s", idx+1, len(codes), info["code"], info["filepath"])
         parse_and_save_day(info)
-    # pool = Pool()
-    # pool.map(parse_and_save_day, codes)
-    # pool.close()
-    # pool.join()
 
 
 def calc_60m(df):
@@ -137,22 +124,54 @@ def calc_60m(df):
         rows.append(row)
         if index.time() == time(hour=10, minute=30, second=0, microsecond=0):
             g = pd.DataFrame(rows)
-            bar = {"date": index, "open": rows[0]["open"], "close": rows[-1]["close"], "high": g.high.max(), "low": g.low.min(), "volume": g.volume.sum(), "amount":g.amount.sum()}
+            bar = {
+                "date": index,
+                "open": rows[0]["open"],
+                "close": rows[-1]["close"],
+                "high": g.high.max(),
+                "low": g.low.min(),
+                "volume": g.volume.sum(),
+                "amount": g.amount.sum()
+            }
             bars.append(bar)
             rows = []
         elif index.time() == time(hour=11, minute=30, second=0, microsecond=0):
             g = pd.DataFrame(rows)
-            bar = {"date": index, "open": rows[0]["open"], "close": rows[-1]["close"], "high": g.high.max(), "low": g.low.min(), "volume": g.volume.sum(), "amount":g.amount.sum()}
+            bar = {
+                "date": index,
+                "open": rows[0]["open"],
+                "close": rows[-1]["close"],
+                "high": g.high.max(),
+                "low": g.low.min(),
+                "volume": g.volume.sum(),
+                "amount": g.amount.sum()
+            }
             bars.append(bar)
             rows = []
         elif index.time() == time(hour=14, minute=0, second=0, microsecond=0):
             g = pd.DataFrame(rows)
-            bar = {"date": index, "open": rows[0]["open"], "close": rows[-1]["close"], "high": g.high.max(), "low": g.low.min(), "volume": g.volume.sum(), "amount":g.amount.sum()}
+            bar = {
+                "date": index,
+                "open": rows[0]["open"],
+                "close": rows[-1]["close"],
+                "high": g.high.max(),
+                "low": g.low.min(),
+                "volume": g.volume.sum(),
+                "amount": g.amount.sum()
+            }
             bars.append(bar)
             rows = []
         elif index.time() == time(hour=15, minute=0, second=0, microsecond=0):
             g = pd.DataFrame(rows)
-            bar = {"date": index, "open": rows[0]["open"], "close": rows[-1]["close"], "high": g.high.max(), "low": g.low.min(), "volume": g.volume.sum(), "amount":g.amount.sum()}
+            bar = {
+                "date": index,
+                "open": rows[0]["open"],
+                "close": rows[-1]["close"],
+                "high": g.high.max(),
+                "low": g.low.min(),
+                "volume": g.volume.sum(),
+                "amount": g.amount.sum()
+            }
             bars.append(bar)
             rows = []
     if len(bars) > 0:
@@ -171,8 +190,7 @@ def parse_and_save_1m(info):
 
     ohlc = {'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum', 'amount': 'sum'}
     # 合成3分钟数据
-    df3m = df.resample('3T', closed='right', label='right').agg(
-        ohlc).dropna(how='any')
+    df3m = df.resample('3T', closed='right', label='right').agg(ohlc).dropna(how='any')
     save_data(info["code"], "3m", df3m)
     return True
 
@@ -186,11 +204,9 @@ def parse_and_save_5m(info):
 
     ohlc = {'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum', 'amount': 'sum'}
     # 合成15分钟数据
-    df15m = df.resample('15T', closed='right', label='right').agg(
-        ohlc).dropna(how='any')
+    df15m = df.resample('15T', closed='right', label='right').agg(ohlc).dropna(how='any')
     save_data(info["code"], "15m", df15m)
-    df30m = df.resample('30T', closed='right', label='right').agg(
-        ohlc).dropna(how='any')
+    df30m = df.resample('30T', closed='right', label='right').agg(ohlc).dropna(how='any')
     save_data(info["code"], "30m", df30m)
     df60m = calc_60m(df30m)
     if df60m is not None:
@@ -199,13 +215,14 @@ def parse_and_save_5m(info):
 
 
 def parse_and_save_day(info):
+    # noinspection PyBroadException
     try:
         start_time = datetime.now() - timedelta(days=info["days"])
         reader = TdxDailyBarReader()
         df = reader.get_df(info["filepath"])
         df = df[df.index >= start_time]
         save_data(info["code"], "240m", df)
-    except BaseException as e:
+    except Exception as e:
         logging.info("Error Occurred: {0}".format(traceback.format_exc()))
     return True
 
@@ -213,9 +230,7 @@ def parse_and_save_day(info):
 def save_data(code, period, df):
     batch = []
     for t, row in df.iterrows():
-        batch.append(UpdateOne({
-            "_id": t.replace(tzinfo=tz)
-        }, {
+        batch.append(UpdateOne({"_id": t.replace(tzinfo=tz)}, {
             "$set": {
                 "open": round(row["open"], 2),
                 "close": round(row["close"], 2),
