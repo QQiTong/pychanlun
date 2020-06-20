@@ -21,25 +21,13 @@ python setup.py develop
 如果以开发模式安装后，可以这样启动。
 
 ```cmd
-pychanlun server run
-```
-
-或者
-
-```cmd
-pychanlun server
+pychanlun run-api-server
 ```
 
 如果没有安装，可以这样启动。
 
 ```cmd
-python pychanlun\cli.py server run
-```
-
-或者
-
-```cmd
-python pychanlun\cli.py server
+python pychanlun\cli.py run-api-server
 ```
 
 还可以以模块方式启动api服务。
@@ -51,19 +39,13 @@ python -m pychanlun
 ## 启动背驰监控程序
 
 ```cmd
-pychanlun monitor beichi
+pychanlun monitoring
 ```
 
 或者
 
 ```cmd
-python pychanlun\cli.py monitor beichi
-```
-
-或者默认启动的也是背驰监控
-
-```cmd
-pychanlun monitor
+python pychanlun\cli.py monitoring
 ```
 
 ## 其它

@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os, sys
-
 import logging
 import click
-from pychanlun import server as apiserver
+from pychanlun import server as api_server
 from pychanlun.monitor import BeichiMonitor, stock_signal_calculator
 from pychanlun.market_data import tdx_local_downloader, global_futures_downloader
 from pychanlun.monitor import stock as stock_monitoring
@@ -17,52 +15,37 @@ def run():
 
 """
 运行api服务器
-pychanlun server run
+pychanlun run-api-server
 """
 
 
 @run.command()
-@click.argument("command", default="run")
 @click.option('--port', type=int, default=5000)
-def server(**kwargs):
-    """运行服务端"""
-    command = kwargs.get('command')
-    if command == "run":
-        apiserver.run(**kwargs)
-
-
-@run.command()
 def run_api_server(**kwargs):
-    apiserver.run(**kwargs)
+    api_server.run(**kwargs)
 
 
 """
 运行背驰监控程序
-pychanlun monitor beichi
+pychanlun monitoring
 """
 
 
 @run.command()
-@click.argument("name", default="beichi")
-def monitor(**kwargs):
+def monitoring(**kwargs):
     """运行监控"""
-    name = kwargs.get("name")
-    if name == "beichi":
-        BeichiMonitor.run(**kwargs)
+    BeichiMonitor.run(**kwargs)
 
 
 """
 下载外盘数据
-pychanlun global-futures download
+pychanlun download-global-future-data
 """
 
 
 @run.command()
-@click.argument("name", default="download")
-def global_futures(**kwargs):
-    name = kwargs.get("name")
-    if name == "download":
-        global_futures_downloader.run(**kwargs)
+def download_global_future_data(**kwargs):
+    global_futures_downloader.run(**kwargs)
 
 
 @run.command()
