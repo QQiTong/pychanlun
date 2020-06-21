@@ -6,11 +6,14 @@ import logging
 import signal
 import threading
 import pydash
+import pymongo
+
+from multiprocessing import Pool
 from pytdx.hq import TdxHq_API
 from pymongo import UpdateOne
 from pychanlun.db import DBPyChanlun
 from bson.codec_options import CodecOptions
-import pymongo
+
 from pychanlun.basic.bi import CalcBi, CalcBiList
 from pychanlun.basic.duan import CalcDuan
 from pychanlun import entanglement as entanglement
@@ -18,17 +21,14 @@ from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
 import pandas as pd
 import datetime
-from pychanlun.monitor.zero_notify import do_notify
+from pychanlun.zerodegree.notify import send_ding_message
+
 
 
 tz = pytz.timezone('Asia/Shanghai')
 
 is_run = True
-period_map = {
-    '5m': 0,
-    '15m': 1,
-    '30m': 2
-}
+period_map = {'5m': 0, '15m': 1, '30m': 2}
 
 
 def monitoring_stock():
@@ -98,19 +98,13 @@ def calculate_and_notify(code, period):
     higher_duan_series = [0 for i in range(count)]
     CalcDuan(count, higher_duan_series, duan_series, high_series, low_series)
 
-    entanglement_list = entanglement.CalcEntanglements(
-        time_series, duan_series, bi_series, high_series, low_series)
-    zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series,
-                                   low_series, open_series, close_series, bi_series, duan_series)
-    zs_tupo = entanglement.tu_po(entanglement_list, time_series, high_series,
-                                 low_series, open_series, close_series, bi_series, duan_series)
-    v_reverse = entanglement.v_reverse(entanglement_list, time_series, high_series,
-                                       low_series, open_series, close_series, bi_series, duan_series)
+    entanglement_list = entanglement.CalcEntanglements(time_series, duan_series, bi_series, high_series, low_series)
+    zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    zs_tupo = entanglement.tu_po(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    v_reverse = entanglement.v_reverse(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
     duan_pohuai = entanglement.po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
 
-
-    higher_entaglement_list = entanglement.CalcEntanglements(
-        time_series, higher_duan_series, duan_series, high_series, low_series)
+    higher_entaglement_list = entanglement.CalcEntanglements(time_series, higher_duan_series, duan_series, high_series, low_series)
 
     # 笔中枢信号的记录
     count = len(zs_huila['buy_zs_huila']['date'])
@@ -131,7 +125,7 @@ def calculate_and_notify(code, period):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '多-拉回笔中枢确认底背',
+        save_signal(code, period, '拉回笔中枢看涨',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
     count = len(zs_tupo['buy_zs_tupo']['date'])
@@ -150,7 +144,7 @@ def calculate_and_notify(code, period):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '多-升破笔中枢',
+        save_signal(code, period, '升破笔中枢看涨',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
     count = len(v_reverse['buy_v_reverse']['date'])
@@ -169,7 +163,7 @@ def calculate_and_notify(code, period):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '多-笔中枢三卖V', fire_time,
+        save_signal(code, period, '笔中枢三卖V看涨', fire_time,
                     price, stop_lose_price, 'BUY_LONG', tags, category)
 
 
@@ -180,7 +174,7 @@ def calculate_and_notify(code, period):
         price = duan_pohuai['buy_duan_break']['data'][i]
         stop_lose_price = duan_pohuai['buy_duan_break']['stop_lose_price'][i]
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '多-线段破坏', fire_time,
+        save_signal(code, period, '线段反看涨', fire_time,
                     price, stop_lose_price, 'BUY_LONG', [], category)
 
 
@@ -234,9 +228,9 @@ def save_signal(code, period, remark, fire_time, price, stop_lose_price, positio
             }, upsert=True)
         if x is None and fire_time > datetime.datetime.now(tz=tz) - datetime.timedelta(hours=1):
             # 首次信号，做通知
-            content = "【事件通知】 %s %s %s %s %s %s %s" % (code, period, remark, tags, category, fire_time, price)
+            content = "【事件通知】%s-%s-%s-%s-%s-%s-%s" % (code, period, remark, tags, category, fire_time, price)
             logging.info(content)
-            do_notify(content)
+            send_ding_message(content)
 
 
 def signal_hanlder(signalnum, frame):
@@ -261,4 +255,7 @@ def run(**kwargs):
 
 
 if __name__ == '__main__':
-    run()
+    try:
+        run()
+    finally:
+        exit()
