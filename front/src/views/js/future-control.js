@@ -72,8 +72,9 @@ export default {
             futureSymbolList: [],
             futureSymbolMap: {},
             periodList: ['3m', '5m', '15m', '30m', '60m'],
-            beichiList: {},
+            beichiList: null,
             changeList: null, // 涨跌幅
+            dayMa20List: null, // MA
             globalFutureChangeList: null,
             marginLevelCompany: 0.01,
             firstRequestDominant: true,
@@ -171,6 +172,7 @@ export default {
 
     mounted() {
         // this.subscribeWS()
+        this.getDayMaList()
         this.getChangeiList()
         this.getSignalList()
         // this.getLevelDirectionList()
@@ -357,6 +359,19 @@ export default {
                     }
                     this.signalPercentage = parseInt(long / (long + short) * 100)
                 }
+            }
+        },
+        getDayMaList() {
+            const requesting = this.$cache.get(`DAY_MA_LIST`)
+            if (!requesting) {
+                this.$cache.set(`DAY_MA_LIST`, true, 60)
+                futureApi.getDayMaList().then(res => {
+                    this.dayMa20List = res
+                    console.log(this.dayMa20List)
+                    this.$cache.del(`DAY_MA_LIST`)
+                }).catch((error) => {
+                    console.log('获取日MA失败:', error)
+                })
             }
         },
         getChangeiList() {

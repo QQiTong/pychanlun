@@ -38,6 +38,12 @@ def get_btc_ticker():
 # --------------------------------期货部分------------------------------------
 
 # 获取期货统计信息
+@app.route('/api/get_day_ma_list')
+def get_day_ma_list():
+    day_ma_list = func_timeout(30, businessService.get_day_ma_list)
+    return Response(json.dumps(day_ma_list), mimetype='application/json')
+
+# 获取期货统计信息
 @app.route('/api/get_statistic_list')
 def get_statistic_list():
     date_range = request.args.get("dateRange")

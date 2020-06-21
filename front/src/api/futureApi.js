@@ -67,6 +67,12 @@ export const futureApi = {
             method: 'get',
         })
     },
+    getDayMaList () {
+        return axios({
+            url: `/api/get_day_ma_list`,
+            method: 'get',
+        })
+    },
     getGlobalFutureChangeList () {
         return axios({
             url: `/api/get_global_future_change_list`,

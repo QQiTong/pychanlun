@@ -215,7 +215,7 @@
                     </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="多空走势" width="500" align="center">
+                            <el-table-column label="多空走势" width="100" align="center">
                                 <template slot-scope="scope">
                                     <!--                                    <el-tag-->
                                     <!--                                        size="medium"-->
@@ -226,13 +226,19 @@
                                     <!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['3m']:''-->
                                     <!--                                        }}-->
                                     <!--                                    </el-tag>-->
-                                    <el-progress
-                                        :percentage="beichiList[scope.row.order_book_id]['percentage']"
-                                        :color="customColorMethod"
-                                        :text-inside="true"
-                                        :stroke-width="24"
-                                        class="mt-5"
-                                    ></el-progress>
+<!--                                    <el-progress-->
+<!--                                        :percentage="beichiList[scope.row.order_book_id].hasOwnProperty('percentage')?beichiList[scope.row.order_book_id]['percentage']:0"-->
+<!--                                        :color="customColorMethod"-->
+<!--                                        :text-inside="true"-->
+<!--                                        :stroke-width="24"-->
+<!--                                        class="mt-5"-->
+<!--                                    >-->
+<!--                                    </el-progress>-->
+                                   <span :class="dayMa20List && dayMa20List[scope.row.order_book_id] ? (dayMa20List[scope.row.order_book_id]['above_ma_20']===1 ?'up-red':'down-green'):'zero-gray'"
+                                          >
+                                         {{ dayMa20List && dayMa20List[scope.row.order_book_id] ?dayMa20List[scope.row.order_book_id]['above_ma_20'] ===1?'多':'空' : '--'}}
+                                    </span>
+
                                 </template>
                             </el-table-column>
                             <el-table-column label="3m" align="center">

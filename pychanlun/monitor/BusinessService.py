@@ -15,6 +15,8 @@ import time
 import requests
 import copy
 import string
+import talib as ta
+import numpy as np
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -82,7 +84,7 @@ class BusinessService:
                 'lose_money_list': [],
                 'win_symbol_list': [],
                 'lose_symbol_list': []
-        }
+            }
 
         for idx, row in df.iterrows():
             # 根据日期分组
@@ -264,8 +266,8 @@ class BusinessService:
                 level_direction = signalItem['level_direction']
             else:
                 level_direction = ""
-            msg = "%s %s %s %s %s" % (level_direction,str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
-                                   str(signalItem.get('tag', '')))
+            msg = "%s %s %s %s %s" % (level_direction, str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
+                                      str(signalItem.get('tag', '')))
             if signalItem['symbol'] in symbolListMap:
                 symbolListMap[signalItem['symbol']][signalItem['period']] = msg
         # print("期货信号列表", symbolListMap)
@@ -351,6 +353,64 @@ class BusinessService:
         conbineChangeList = dict(symbolChangeMap, **globalChangeList)
         return conbineChangeList
 
+    def calc_ma(self,close_list, day):
+        ma = ta.MA(np.array(close_list), day)
+        result = np.nan_to_num(ma).round(decimals=2)
+        return result
+
+    # 获取内盘 20日 均线
+    def get_day_ma_list(self):
+        symbol_ma_20_map = {}
+        for i in range(len(dominantSymbolList)):
+            item = dominantSymbolList[i]
+            end = datetime.now() + timedelta(1)
+            start = datetime.now() + timedelta(-31)
+            df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+                                start_date=start, end_date=end)
+            day_close = list(df1d['close'])
+            df1m = rq.current_minute(item)
+            current_price = df1m.iloc[0, 0]
+            day_ma_20 = self.calc_ma(day_close, 20)[-1]
+            # todo  这里用 True 和 False  无法序列化
+            result_item = {'above_ma_20': 1 if current_price >= day_ma_20 else -1}
+            symbol_ma_20_map[item] = result_item
+        global_day_ma_list = self.get_global_day_ma_list()
+        conbine_day_ma_list = dict(symbol_ma_20_map, **global_day_ma_list)
+        print(conbine_day_ma_list)
+        return conbine_day_ma_list
+
+    # 获取外盘20日均线
+    def get_global_day_ma_list(self):
+        global_future_symbol = config['global_future_symbol']
+        combinSymbol = copy.deepcopy(global_future_symbol)
+        aboveList = {}
+        for i in range(len(combinSymbol)):
+            item = combinSymbol[i]
+            # 查日线开盘价
+            code = "%s_%s" % (item, '1d')
+            data_list = list(DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+            ).limit(31).sort("_id", pymongo.DESCENDING))
+            if len(data_list) == 0:
+                continue
+            data_list.reverse()
+            day_close_price_list = list(pd.DataFrame(data_list)['close'])
+            day_ma_20 = self.calc_ma(day_close_price_list, 20)
+            code = "%s_%s" % (item, '1m')
+
+            # 查1分钟收盘价
+            data_list = list(DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+            ).sort("_id", pymongo.DESCENDING))
+            if len(data_list) == 0:
+                continue
+            min_close_price = list(pd.DataFrame(data_list)['close'])[0]
+            # todo  这里用 True 和 False  无法序列化
+            above_item = {
+                'above_ma_20': 1 if min_close_price >= day_ma_20[-1] else -1
+            }
+            # print(item, '-> ', above_item)
+            aboveList[item] = above_item
+        return aboveList
+
     def getLevelDirectionList(self):
         symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
@@ -380,11 +440,11 @@ class BusinessService:
     def getFutureConfig(self):
         return config['futureConfig']
 
-    def getPosition(self, symbol, period, status,direction):
+    def getPosition(self, symbol, period, status, direction):
         if period == 'all':
-            query = {'symbol': symbol, 'status': status,'direction':direction}
+            query = {'symbol': symbol, 'status': status, 'direction': direction}
         else:
-            query = {'symbol': symbol, 'period': period, 'status': status,'direction':direction}
+            query = {'symbol': symbol, 'period': period, 'status': status, 'direction': direction}
         # 当多空双开锁仓的时候，获取最新持仓的那个
         result = DBPyChanlun["future_auto_position"].find(
             query).sort("fire_time", pymongo.ASCENDING)
@@ -463,9 +523,8 @@ class BusinessService:
             if ('total_margin' not in x or x['total_margin'] != ''):
                 x['total_margin'] = round(x['per_order_margin'] * x['amount'], 2)
 
-
-            if 'dynamicPositionList' in x :
-                for y in x['dynamicPositionList'] :
+            if 'dynamicPositionList' in x:
+                for y in x['dynamicPositionList']:
                     y['date_created'] = self.formatTime(y['date_created'])
 
             # 占用保证金
@@ -523,6 +582,7 @@ class BusinessService:
       winEnd  止盈
       exception 异常
     '''
+
     def updatePositionStatus(self, id, status, close_price):
         date_created = datetime.utcnow()
         item = DBPyChanlun['future_auto_position'].find_one({'_id': ObjectId(id)})

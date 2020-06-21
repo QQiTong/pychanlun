@@ -34,6 +34,9 @@ import string
 import hashlib
 from futu import *
 from WindPy import w
+import talib as ta
+import copy
+
 tz = pytz.timezone('Asia/Shanghai')
 
 periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
@@ -817,19 +820,73 @@ def testMongoArr():
         }
     }, upsert=True)
 
+
 # wind 外盘不提供分钟线数据
 def testWind():
     w.start()
     startTime = int(round(time.time() * 1000))
     # 取IF00.CFE的分钟数据
-    codes="IF00.CFE"
-    fields="open,high,low,close"
-    error,wsd_data=w.wsd(codes, "open,high,low,close", "2015-12-10", "2015-12-22", "Fill=Previous", usedf=True)
-    print(error,wsd_data)
+    codes = "IF00.CFE"
+    fields = "open,high,low,close"
+    error, wsd_data = w.wsd(codes, "open,high,low,close", "2015-12-10", "2015-12-22", "Fill=Previous", usedf=True)
+    print(error, wsd_data)
     endTime = int(round(time.time() * 1000)) - startTime
     print("消耗时间：", endTime)
 
 
+def calc_ma(close_list,day):
+    ma = ta.MA(np.array(close_list), day)
+    result = np.nan_to_num(ma).round(decimals=2)
+    return result
+
+def get_global_day_ma_list():
+    global_future_symbol = config['global_future_symbol']
+    combinSymbol = copy.deepcopy(global_future_symbol)
+    aboveList = {}
+    for i in range(len(combinSymbol)):
+        item = combinSymbol[i]
+        # 查日线开盘价
+        code = "%s_%s" % (item, '1d')
+        data_list = list(DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+        ).limit(31).sort("_id", pymongo.DESCENDING))
+        if len(data_list) == 0:
+            continue
+        data_list.reverse()
+        day_close_price_list = list(pd.DataFrame(data_list)['close'])
+        day_ma_20 = calc_ma(day_close_price_list,20)
+        code = "%s_%s" % (item, '1m')
+
+        # 查1分钟收盘价
+        data_list = list(DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+        ).sort("_id", pymongo.DESCENDING))
+        if len(data_list) == 0:
+            continue
+        min_close_price = list(pd.DataFrame(data_list)['close'])[0]
+        above_item = {
+            'above_ma_20': min_close_price >= day_ma_20[-1]
+        }
+        print(item, '-> ', above_item)
+        aboveList[item] = above_item
+    return aboveList
+def testMA():
+    symbol_ma_20_map = {}
+    dominantSymbolList = getDominantSymbol()
+    for i in range(len(dominantSymbolList)):
+        item = dominantSymbolList[i]
+        end = datetime.now() + timedelta(1)
+        start = datetime.now() + timedelta(-31)
+        df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+                            start_date=start, end_date=end)
+        day_close = list(df1d['close'])
+        df1m = rq.current_minute(item)
+        current_price = df1m.iloc[0, 0]
+        day_ma_20 = calc_ma(day_close,20)[-1]
+        result_item = {'above_ma_20': current_price >= day_ma_20}
+        symbol_ma_20_map[item] = result_item
+    global_day_ma_list = get_global_day_ma_list()
+    conbine_day_ma_list = dict(symbol_ma_20_map, **global_day_ma_list)
+    print(conbine_day_ma_list)
+    return conbine_day_ma_list
 
 def app():
     # testBitmex()
@@ -854,10 +911,12 @@ def app():
     # testGroupBy()
     # testMeigu()
     # testFutu()
-    testWStock()
+    # testWStock()
     # testMongoArr()
     # testWind()
-
-
+    testMA()
+    # a = {'above_ma_20':{'b':True}}
+    # b = json.dumps(a)
+    # print(b)
 if __name__ == '__main__':
     app()
