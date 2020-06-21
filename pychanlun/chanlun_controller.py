@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import re
+import pydash
+import logging
+import traceback
 
 import pandas as pd
 
@@ -23,14 +26,23 @@ def get_data(symbol, period, end_date=None):
         get_instrument_data = klineDataTool.getFutureData
 
     # 取数据
+    data_list = []
+    required_period_list.reverse()
     for period_one in required_period_list:
         kline_data = get_instrument_data(symbol, period_one, end_date)
         kline_data = pd.DataFrame(kline_data)
-        print(kline_data)
+        data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
+
+    data_list = pydash.take_right_while(data_list, lambda value: len(value["kline_data"]) > 0)
+    for idx in range(len(data_list)):
+        data = data_list[idx]
 
 
 if __name__ == '__main__':
+    # noinspection PyBroadException
     try:
         get_data("RB2010", "5m")
+    except Exception as e:
+        logging.info("Error Occurred: {0}".format(traceback.format_exc()))
     finally:
         exit()

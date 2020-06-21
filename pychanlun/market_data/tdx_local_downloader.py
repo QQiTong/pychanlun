@@ -221,9 +221,10 @@ def parse_and_save_day(info):
         reader = TdxDailyBarReader()
         df = reader.get_df(info["filepath"])
         df = df[df.index >= start_time]
-        # 这里240m就是日线
-        save_data(info["code"], "240m", df)
         save_data(info["code"], "1d", df)
+        # 把日线数据当成180m和240m数据个存一份
+        save_data(info["code"], "180m", df)
+        save_data(info["code"], "240m", df)
     except Exception as e:
         logging.info("Error Occurred: {0}".format(traceback.format_exc()))
     return True
