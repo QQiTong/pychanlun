@@ -37,14 +37,14 @@ def run(**kwargs):
     if code is None:
         collection_list = DBPyChanlun.list_collection_names()
         for code in collection_list:
-            match = re.match("((sh|sz)(\\d{6}))_(30m|60m|240m)", code, re.I)
+            match = re.match("((sh|sz)(\\d{6}))_(30m|60m|180m)", code, re.I)
             if match is not None:
                 code = match.group(1)
                 period = match.group(4)
                 codes.append({"code": code, "period": period})
     else:
         if period is None:
-            for period in ['30m', '60m', '240m']:
+            for period in ['30m', '60m', '180m']:
                 codes.append({'code': code, 'period': period})
         else:
             codes.append({'code': code, 'period': period})
@@ -63,7 +63,7 @@ def calculate(info):
     period = info["period"]
 
     # 日线均线计算，只计算34日均线上的股票
-    bars = DBPyChanlun['%s_%s' % (code, '240m')] \
+    bars = DBPyChanlun['%s_%s' % (code, '180m')] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
         .find().sort('_id', pymongo.DESCENDING).limit(500)
     bars = list(bars)
@@ -106,7 +106,7 @@ def calculate(info):
     close_series = df['close']
 
     # 清理一些历史数据节省空间
-    if period == '240m':
+    if period == '180m':
         cutoff_time = datetime.now(tz=tz) - timedelta(days=10000)
     elif period == '60m':
         cutoff_time = datetime.now(tz=tz) - timedelta(hours=10000)
@@ -251,7 +251,7 @@ def export_to_tdx():
     t = t.replace(hour=0, minute=0, second=0, microsecond=0)
     signals = DBPyChanlun['stock_signal'] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
-        .find({'period': {'$in': ['30m', '60m', '240m']}, 'fire_time': {'$gte': t}}) \
+        .find({'period': {'$in': ['30m', '60m', '180m']}, 'fire_time': {'$gte': t}}) \
         .sort('fire_time', pymongo.DESCENDING)
 
     for signal in list(signals):

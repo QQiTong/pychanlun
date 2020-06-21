@@ -22,7 +22,7 @@ python pychanlun\market_data\global_futures.py
 """
 
 # OKEX 限速规则：20次/2s
-min_list = ['1m','3m','5m','15m','30m','60m','240m','1d','1w']
+min_list = ['1m','3m','5m','15m','30m','60m','180m','1d','1w']
 
 okexPeriodMap = {
             '1m':'60',
@@ -31,7 +31,7 @@ okexPeriodMap = {
             '15m': '900',
             '60m': '3600',
             '30m': '1800',
-            '240m': '14400',
+            '180m': '10800',
             '1d': '86400',
             '1w': '604800'
         }

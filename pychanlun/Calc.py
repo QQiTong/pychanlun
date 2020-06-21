@@ -58,8 +58,8 @@ class Calc:
             '60m': '1d',
             '1d': '1w',
             '5m': '30m',
-            '30m': '240m',
-            '240m': '1w',
+            '30m': '180m',
+            '180m': '1w',
             '1w': '1w'
         }
 
@@ -72,7 +72,7 @@ class Calc:
             '60m': '60min',
 
             '30m': '30min',
-            '240m': '4hour',
+            '180m': '4hour',
             '1d': '1day',
             '1w': '1week'
         }
@@ -83,7 +83,7 @@ class Calc:
             '15m': '900',
             '60m': '3600',
             '30m': '1800',
-            '240m': '14400',
+            '180m': '10800',
             '1d': '86400',
             '1w': '604800'
         }
@@ -109,7 +109,7 @@ class Calc:
         #     '1day': '1d',
         #     '5min': '5m',
         #     '30min': '30m',
-        #     '4hour': '240m',
+        #     '4hour': '180m',
         #     '1week': '7d'
         # }
 
@@ -121,8 +121,8 @@ class Calc:
             '60m': '1d',
             '1d': '3d',
             '5m': '30m',
-            '30m': '240m',
-            '240m': '3d',
+            '30m': '180m',
+            '180m': '3d',
             '3d': '3d',  # 周线数量只有33根画不出macd 只好取3d了
         }
         #     period参数转换
@@ -134,7 +134,8 @@ class Calc:
             '1d': '1d',
             '5m': '5m',
             '30m': '30m',
-            '240m': '240m',
+            '180m': '180m',
+            '3d': '3d',
             '1w': '1w'
         }
 
@@ -413,7 +414,7 @@ class Calc:
         # resJson['boll_middle'] = getBoll(closePriceList)[1].tolist()
         # resJson['boll_bottom'] = getBoll(closePriceList)[2].tolist()
         # resJson['ama'] = getAma(closePriceList).tolist()
-        # 外盘 240m 成交量合成  有 Infinity的值，导致JSON解析异常，这里注释掉
+        # 外盘 180m 成交量合成  有 Infinity的值，导致JSON解析异常，这里注释掉
         # resJson['volume'] = volumeList
         resJson['zsdata'] = zsdata
         resJson['zsflag'] = zsflag

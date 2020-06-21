@@ -39,24 +39,24 @@ periodList3 = ['3m', '5m', '15m', '30m', '60m']
 # 暂时用3d 3d
 futureLevelMap = {
     '3m': ['15m', '60m'],
-    '5m': ['30m', '240m'],
+    '5m': ['30m', '180m'],
     '15m': ['60m', '1d'],
-    '30m': ['240m', '3d'],
+    '30m': ['180m', '3d'],
     '60m': ['1d', '3d'],
-    '240m': ['3d', '3d'],
+    '180m': ['3d', '3d'],
 }
 dominantSymbolInfoList = {}
 
 # 期货公司在原有保证金基础上1%
 marginLevelCompany = 0.01
 # 期货账户
-futuresAccount = 100
+futuresAccount = 60
 # 数字货币手续费0.05% 开平仓0.1%
 digitCoinFee = 0.001
 # 数字货币账户
 digitCoinAccount = 60.80 / 10000
 # 外盘期货账户
-global_future_account = 7
+global_future_account = 6
 maxAccountUseRate = 0.1
 stopRate = 0.01
 mail = Mail()
@@ -601,7 +601,7 @@ def monitorHuila(result, symbol, period, closePrice):
             # 小级别除非是双盘，否则一定要不破前低
             if notLower:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-            elif "双盘" in tag:
+            elif "双盘" in tag or "完备" in tag:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_zs_huila']['date']) > 0:
@@ -616,7 +616,7 @@ def monitorHuila(result, symbol, period, closePrice):
         else:
             if notHigher:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
-            elif "双盘" in tag:
+            elif "双盘" in tag or "完备" in tag:
                 saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 '''
 监控突破

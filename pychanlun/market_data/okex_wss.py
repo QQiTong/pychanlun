@@ -84,7 +84,7 @@ def handleMsg(msg):
         period = '60m'
     # 240分钟
     if msg['table'] == 'swap/candle14400s':
-        period = '240m'
+        period = '180m'
     # 1day
     if msg['table'] == 'swap/candle86400s':
         period = '1d'

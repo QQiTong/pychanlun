@@ -429,7 +429,7 @@ const periodOptions = [
   { key: "15m", display_name: "15m" },
   { key: "30m", display_name: "30m" },
   { key: "60m", display_name: "60m" },
-  { key: "240m", display_name: "240m" }
+  { key: "180m", display_name: "180m" }
 ];
 // arr to obj, such as { CN : "China", US : "USA" }
 const signalTypeKeyValue = signalTypeOptions.reduce((acc, cur) => {

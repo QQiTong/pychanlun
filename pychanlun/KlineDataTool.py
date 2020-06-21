@@ -67,7 +67,7 @@ class KlineDataTool:
     #     elif period == "60m":
     #         period = '60'
     #         fromDate = toDate - 10 * 1000 * 5 * 60
-    #     elif period == "240m":
+    #     elif period == "180m":
     #         period = '1'
     #         target = 240
     #         fromDate = toDate - 1000 * 5 * 60
@@ -266,7 +266,7 @@ class KlineDataTool:
     #         '15m': -31 * 3,
     #         '30m': -31 * 8,
     #         '60m': -31 * 8,
-    #         '240m': -31 * 8,
+    #         '180m': -31 * 8,
     #         '1d': -31 * 10,
     #         '3d': -31 * 30,
     #         '1w': -31* 30
@@ -346,25 +346,23 @@ class KlineDataTool:
             '15m': -31 * 3,
             '30m': -31 * 8,
             '60m': -31 * 8,
-            '240m': -31 * 8,
+            '180m': -31 * 8,
             '1d': -31 * 10,
             '3d': -31 * 30
         }
         start_date =  end + timedelta(timeDeltaMap[period])
-        if period == '240m':
-            period = '180m'
         df = rq.get_price(symbol, frequency=period,
                           fields=['open', 'high', 'low', 'close', 'volume'], start_date=start_date, end_date=end)
 
-        # df = get_price('RB1910.XSGE', frequency='240m', end_date=datetime.now(), count=200,
+        # df = get_price('RB1910.XSGE', frequency='180m', end_date=datetime.now(), count=200,
         #                fields=['open', 'high', 'low', 'close', 'volume'])
-        # todo 米匡240m 数据有问题,比通达信和文化财经多一个时间,需要手动去除,但是手动去除也不准,需要等米匡修复
-        # todo 米匡回复: 240m 是按照交易时间切分的, 一天固定3根k线,而文华财经和通达信是一天固定2根,后面自己处理吧
+        # todo 米匡180m 数据有问题,比通达信和文化财经多一个时间,需要手动去除,但是手动去除也不准,需要等米匡修复
+        # todo 米匡回复: 180m 是按照交易时间切分的, 一天固定3根k线,而文华财经和通达信是一天固定2根,后面自己处理吧
         # 还是不能这样处理,会导致很多高低点丢失,影响到30F的结构
-        # if period == '240m':
+        # if period == '180m':
         #     cols = [x for i, x in enumerate(df.index) if '15:00:00' in str(df.index[i])]
         #     df = df.drop(cols)
-        # if period == '240m':
+        # if period == '180m':
         #     ohlc_dict = {
         #         'open': 'first',
         #         'high': 'max',
@@ -417,7 +415,7 @@ class KlineDataTool:
             '15m': -31 * 3,
             '30m': -31 * 8,
             '60m': -31 * 8,
-            '240m': -31 * 8,
+            '180m': -31 * 8,
             '1d': -31 * 10,
             '3d': -31 * 30
         }
@@ -454,13 +452,11 @@ class KlineDataTool:
             '15m': -31 * 3,
             '30m': -31 * 8,
             '60m': -31 * 8,
-            '240m': -31 * 8,
+            '180m': -31 * 8,
             '1d': -31 * 10,
             '3d': -31 * 30
         }
         start_date =  end + timedelta(timeDeltaMap[period])
-        if period == '240m':
-            period = '180m'
         code = "%s_%s" % (symbol, period)
         data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
             "_id": { "$gte": start_date, "$lte": end }

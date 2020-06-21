@@ -108,7 +108,7 @@ while True:
                 if currentTime - lastTime < 1000 * 60 * 60:
                     print("continue->", symbolList[i], "->", n, periodList[j])
                     continue
-            elif periodList[j] == '240m':
+            elif periodList[j] == '180m':
                 if currentTime - lastTime < 1000 * 60 * 240:
                     continue
 

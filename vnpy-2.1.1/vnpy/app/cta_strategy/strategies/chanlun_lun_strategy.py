@@ -56,7 +56,7 @@ class ChanLunStrategy(CtaTemplate):
         self.bg = BarGenerator(self,3,self.on_3min_bar)
         # todo 拟合计算
         # self.bg = BarGenerator(self,30,self.on_30min_bar)
-        # self.bg = BarGenerator(self,240,self.on_240min_bar)
+        # self.bg = BarGenerator(self,240,self.on_180min_bar)
         self.am = ArrayManager(200)
 
     def on_init(self):
@@ -112,7 +112,7 @@ class ChanLunStrategy(CtaTemplate):
     #     self.higherDuanList = [0 for i in range(count)]
     #     CalcDuan(count, self.higherDuanList, self.duanList, self.highList, self.lowList)
 
-    # def on_240min_bar(self, bar: BarData):
+    # def on_180min_bar(self, bar: BarData):
     #     am = self.am
     #     am.update_bar(bar)
     #     if not am.inited:

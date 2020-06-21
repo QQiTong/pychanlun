@@ -141,10 +141,10 @@ def fetch_futures_mink():
                 df60m = df1m.resample('60T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 df60m = df60m[1:]
                 save_data_m(code, '60m', df60m)
-                # 240m
-                # df240m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
-                # df240m = df240m[1:]
-                # save_data_m(code, '240m', df240m)
+                # 180m
+                # df180m = df1m.resample('240T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
+                # df180m = df180m[1:]
+                # save_data_m(code, '180m', df180m)
                 # 180m
                 df180m = df1m.resample('180T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 df180m = df180m[1:]

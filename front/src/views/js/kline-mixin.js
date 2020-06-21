@@ -171,7 +171,7 @@ export default {
             selectedSymbol: '',
             // 输入的交割过的期货品种 或者 股票品种
             inputSymbol: '',
-            periodList: ['1m', '3m', '5m', '15m', '30m', '60m', '240m'],
+            periodList: ['1m', '3m', '5m', '15m', '30m', '60m', '180m'],
             // 是否指显示当前持仓的开平动止
             isPosition: false,
             // 当前品种持仓信息
@@ -180,8 +180,8 @@ export default {
             positionDirection: '',
             dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
             currentInfo: null,
-            // 数字货币 和外盘 将240m 替换成1m
-            isShow1Min: true,
+            // 数字货币 和外盘 将180m 替换成1m
+            isShow1Min: false,
             futureConfig: {},
             symbolInfo: null,
             show1MinSymbol: ['BTC'],
@@ -574,7 +574,7 @@ export default {
                             if (this.isShow1Min) {
                                 that.sendRequest(symbol, '1m', update)
                             } else {
-                                that.sendRequest(symbol, '240m', update)
+                                that.sendRequest(symbol, '180m', update)
                             }
                             break
                         // case 7:
@@ -659,7 +659,7 @@ export default {
                                 this.firstFlag[6] = false
                             }
                         } else {
-                            if (requestData.period === '240m') {
+                            if (requestData.period === '180m') {
                                 this.myChart240.hideLoading()
                                 this.firstFlag[6] = false
                             }
@@ -709,10 +709,128 @@ export default {
             // else if (period === '1d') {
             //     currentChart = myChart1d
             // }
+            let specialMA5 = 5
+            let specialMA20 = 20
+            // 5日  20日 均线
+            // 内盘 每天交易时间 6小时， 外盘交易时间24小时  ,
+            if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
+                // 其中 ZM ZS ZL 是18小时
+                if (this.symbol === 'ZS' || this.symbol === 'ZM' || this.symbol === 'ZL') {
+                    switch (period) {
+                        case '1m':
+                            specialMA5 = 5400
+                            specialMA20 = 21600
+                            break
+                        case '3m':
+                            specialMA5 = 1800
+                            specialMA20 = 7200
+                            break
+                        case '5m':
+                            specialMA5 = 1080
+                            specialMA20 = 4320
+                            break
+                        case '15m':
+                            specialMA5 = 360
+                            specialMA20 = 1440
+                            break
+                        case '30m':
+                            // 5 * 48 = 240
+                            // 20 *48 = 960
+                            specialMA5 = 180
+                            specialMA20 = 720
+                            break
+                        case '60m':
+                            // 5*18 = 90
+                            // 20*18 = 360
+                            specialMA5 = 90
+                            specialMA20 = 360
+                            break
+                        case '180m':
+                            // 180
+                            specialMA5 = 30
+                            specialMA20 = 120
+                            break
+                    }
+                } else {
+                    switch (period) {
+                        case '1m':
+                            specialMA5 = 7200
+                            specialMA20 = 28800
+                            break
+                        case '3m':
+                            specialMA5 = 2400
+                            specialMA20 = 9600
+                            break
+                        case '5m':
+                            specialMA5 = 1440
+                            specialMA20 = 5760
+                            break
+                        case '15m':
+                            specialMA5 = 480
+                            specialMA20 = 1920
+                            break
+                        case '30m':
+                            // 5 * 48 = 240
+                            // 20 *48 = 960
+                            specialMA5 = 240
+                            specialMA20 = 960
+                            break
+                        case '60m':
+                            // 5*24 = 120
+                            // 20*24 = 480
+                            specialMA5 = 120
+                            specialMA20 = 480
+                            break
+                        case '180m':
+                            // 180
+                            specialMA5 = 40
+                            specialMA20 = 160
+                            break
+                    }
+                }
+
+            } else {
+                switch (period) {
+                    case '1m':
+                        specialMA5 = 1800
+                        specialMA20 = 7200
+                        break
+                    case '3m':
+                        specialMA5 = 600
+                        specialMA20 = 2400
+                        break
+                    case '5m':
+                        specialMA5 = 360
+                        specialMA20 = 1440
+                        break
+                    case '15m':
+                        specialMA5 = 120
+                        specialMA20 = 480
+                        break
+                    case '30m':
+                        // 20 *12 = 240
+                        // 5 * 12 = 40
+                        specialMA5 = 60
+                        specialMA20 = 240
+                        break
+                    case '60m':
+                        // 20*6 = 120
+                        // 5*6 = 30
+                        specialMA5 = 30
+                        specialMA20 = 120
+                        break
+                    case '180m':
+                        // 180
+                        specialMA5 = 10
+                        specialMA20 = 40
+                        break
+                }
+            }
+            console.log(period, specialMA5, specialMA20)
             let option
             if (update === 'update') {
                 // console.log('更新', period)
-                option = that.refreshOption(currentChart, resultData)
+                option = that.refreshOption(currentChart, resultData, specialMA5, specialMA20)
             } else {
                 // console.log('重载', period)
                 option = {
@@ -1232,22 +1350,22 @@ export default {
                         //     // },
                         // },
                         // index 4
-                        // {
-                        //     name: 'MA5',
-                        //     type: 'line',
-                        //     data: that.calculateMA(resultData, 5),
-                        //     smooth: true,
-                        //     lineStyle: {
-                        //         normal: {
-                        //             opacity: 0.9,
-                        //             type: 'solid',
-                        //             width: 2,
-                        //             color: "white"
-                        //         },
-                        //     },
-                        //     symbol: 'none',
-                        //     animation: false
-                        // },
+                        {
+                            name: 'MA5',
+                            type: 'line',
+                            data: that.calculateMA(resultData, specialMA5),
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 0.9,
+                                    type: 'solid',
+                                    width: 2,
+                                    color: "white"
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false
+                        },
                         // // //index 5
                         // {
                         //     name: 'MA10',
@@ -1301,22 +1419,22 @@ export default {
                         // },
                         //
                         // // index 8
-                        // {
-                        //     name: 'MA60',
-                        //     type: 'line',
-                        //     data: that.calculateMA(resultData, 60),
-                        //     smooth: true,
-                        //     lineStyle: {
-                        //         normal: {
-                        //             opacity: 1,
-                        //             type: 'solid',
-                        //             width: 2,
-                        //             color: "purple"
-                        //         },
-                        //     },
-                        //     symbol: 'none',
-                        //     animation: false
-                        // }
+                        {
+                            name: 'MA20',
+                            type: 'line',
+                            data: that.calculateMA(resultData, specialMA20),
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 1,
+                                    type: 'solid',
+                                    width: 2,
+                                    color: "purple"
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false
+                        }
                     ],
                     graphic: [],
                 }
@@ -1331,7 +1449,7 @@ export default {
             }
             currentChart.setOption(option)
         },
-        refreshOption(chart, resultData) {
+        refreshOption(chart, resultData, specialMA5, specialMA20) {
             let option = chart.getOption()
             option.series[0].data = resultData.values
             option.xAxis[0].data = resultData.date
@@ -1353,7 +1471,8 @@ export default {
             // option.series[5].data = this.calculateMA(resultData, 10);
             // option.series[6].data = this.calculateMA(resultData, 20);
             // option.series[7].data = this.calculateMA(resultData, 30);
-            // option.series[8].data = this.calculateMA(resultData, 60);
+            option.series[4].data = this.calculateMA(resultData, specialMA5);
+            option.series[5].data = this.calculateMA(resultData, specialMA20);
             // option.series[11].data = resultData.volume;
             // console.log('更新的option', option)
             return option
@@ -2422,7 +2541,7 @@ export default {
             // 当前价格
             this.currentPrice = jsonObj.close[jsonObj.close.length - 1]
             // 合约乘数
-            console.log("查bug", this.marginLevel, this.contractMultiplier, this.currentPrice)
+            // console.log("查bug", this.marginLevel, this.contractMultiplier, this.currentPrice)
             // 1手需要的保证金
             if (this.symbol === 'BTC') {
                 this.marginPrice = (0.01 * this.currentPrice / this.marginLevel).toFixed(2)
