@@ -8,13 +8,12 @@ import threading
 import pydash
 import pymongo
 
-from multiprocessing import Pool
 from pytdx.hq import TdxHq_API
 from pymongo import UpdateOne
 from pychanlun.db import DBPyChanlun
 from bson.codec_options import CodecOptions
 
-from pychanlun.basic.bi import CalcBi, CalcBiList
+from pychanlun.basic.bi import CalcBi
 from pychanlun.basic.duan import CalcDuan
 from pychanlun import entanglement as entanglement
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
@@ -22,7 +21,6 @@ from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, bu
 import pandas as pd
 import datetime
 from pychanlun.zerodegree.notify import send_ding_message
-
 
 
 tz = pytz.timezone('Asia/Shanghai')
@@ -46,6 +44,8 @@ def monitoring_stock():
             lines = fo.readlines()
             stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
     stocks = pydash.uniq(stocks)
+
+    logging.info("监控股票数量: {}".format(len(stocks)))
 
     api = TdxHq_API(heartbeat=True, auto_retry=True)
 
@@ -166,7 +166,6 @@ def calculate_and_notify(code, period):
         save_signal(code, period, '笔中枢三卖V看涨', fire_time,
                     price, stop_lose_price, 'BUY_LONG', tags, category)
 
-
     count = len(duan_pohuai['buy_duan_break']['date'])
     for i in range(count):
         idx = duan_pohuai['buy_duan_break']['idx'][i]
@@ -233,16 +232,15 @@ def save_signal(code, period, remark, fire_time, price, stop_lose_price, positio
             send_ding_message(content)
 
 
-def signal_hanlder(signalnum, frame):
+def signal_handler(signal_num, frame):
     logging.info("正在停止程序。")
     global is_run
     is_run = False
 
 
 def run(**kwargs):
-    signal.signal(signal.SIGINT, signal_hanlder)
-    thread_list = []
-    thread_list.append(threading.Thread(target=monitoring_stock))
+    signal.signal(signal.SIGINT, signal_handler)
+    thread_list = [threading.Thread(target=monitoring_stock)]
     for thread in thread_list:
         thread.start()
 

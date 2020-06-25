@@ -40,6 +40,10 @@ def run(**kwargs):
             match = re.match("((sh|sz)(\\d{6}))_(30m|60m|240m)", code, re.I)
             if match is not None:
                 code = match.group(1)
+                code_head2 = code[2:4]
+                code_head4 = code[2:5]
+                if code_head4 in ['1318']:
+                    continue
                 period = match.group(4)
                 codes.append({"code": code, "period": period})
     else:
