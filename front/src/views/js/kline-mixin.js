@@ -981,7 +981,7 @@ export default {
                             '高级别段': true,
                             'MA5': false,
                             'MA10': false,
-                            'MA20': true,
+                            'MA20': false,
                             'MA30': false,
                             'MA60': false,
                             // 'markline': true

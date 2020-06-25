@@ -32,7 +32,8 @@ def merge_candles(high, low, open_price, close_price, from_index, to_index, dir)
                     candles[-1]['high'] = high[i]
                 elif direction == -1:
                     candles[-1]['low'] = low[i]
-        candles[-1]['sticks'].append({ 'h': max(open_price[i], close_price[i]), 'l': min(open_price[i], close_price[i]) })
+        # candles[-1]['sticks'].append({ 'h': max(open_price[i], close_price[i]), 'l': min(open_price[i], close_price[i]) })
+        candles[-1]['sticks'].append({ 'h': high[i], 'l': low[i] })
     return candles
 
 
@@ -90,7 +91,8 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
         temp_candles = [{
             'high': high[to_index],
             'low': low[to_index],
-            'sticks': [{ 'h': max(open_price[to_index], close_price[to_index]), 'l': min(open_price[to_index], close_price[to_index]) }]
+            # 'sticks': [{ 'h': max(open_price[to_index], close_price[to_index]), 'l': min(open_price[to_index], close_price[to_index]) }]
+            'sticks': [{'h': high[to_index], 'l': low[to_index]}]
         }]
         for k in range(to_index + 1, len(bi)):
             if high[k] > high[to_index]:
@@ -102,8 +104,9 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
                         'high': high[k],
                         'low': low[k],
                         'sticks': [{
-                            'h': max(open_price[k], close_price[k]),
-                            'l': min(open_price[k], close_price[k])
+                            # 'h': max(open_price[k], close_price[k]),
+                            # 'l': min(open_price[k], close_price[k])
+                            'h': high[to_index], 'l': low[to_index]
                         }]
                     })
                     break
@@ -111,8 +114,9 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
                     temp_candles[-1]['high'] = max(temp_candles[-1]['high'], high[k])
                     temp_candles[-1]['low'] = max(temp_candles[-1]['low'], low[k])
                     temp_candles[-1]['sticks'].append({
-                        'h': max(open_price[k], close_price[k]),
-                        'l': min(open_price[k], close_price[k])
+                        # 'h': max(open_price[k], close_price[k]),
+                        # 'l': min(open_price[k], close_price[k])
+                        'h': high[to_index], 'l': low[to_index]
                     })
 
         sticks = candles[-2]['sticks'] + candles[-1]['sticks']
@@ -154,10 +158,12 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
         temp_candles = [{
             'high': high[to_index],
             'low': low[to_index],
-            'sticks': [{
-                'h': max(open_price[to_index], close_price[to_index]),
-                'l': min(open_price[to_index], close_price[to_index])
-            }]
+            # 'sticks': [{
+            #     'h': max(open_price[to_index], close_price[to_index]),
+            #     'l': min(open_price[to_index], close_price[to_index])
+            # }]
+            'sticks': [{'h': high[to_index], 'l': low[to_index]}]
+
         }]
         for k in range(to_index + 1, len(bi)):
             if low[k] < low[to_index]:
@@ -169,8 +175,9 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
                         'high': high[k],
                         'low': low[k],
                         'sticks': [{
-                            'h': max(open_price[k], close_price[k]),
-                            'l': min(open_price[k], close_price[k])
+                            # 'h': max(open_price[k], close_price[k]),
+                            # 'l': min(open_price[k], close_price[k])
+                            'h': high[to_index], 'l': low[to_index]
                         }]
                     })
                     break
@@ -178,8 +185,9 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
                     temp_candles[-1]['high'] = min(temp_candles[-1]['high'], high[k])
                     temp_candles[-1]['low'] = min(temp_candles[-1]['low'], low[k])
                     temp_candles[-1]['sticks'].append({
-                        'h': max(open_price[k], close_price[k]),
-                        'l': min(open_price[k], close_price[k])
+                        # 'h': max(open_price[k], close_price[k]),
+                        # 'l': min(open_price[k], close_price[k])
+                        'h': high[to_index], 'l': low[to_index]
                     })
 
         sticks = candles[-2]['sticks'] + candles[-1]['sticks']
