@@ -167,6 +167,78 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["low"])
     )
 
+    # 计算买卖预警信号
+    hui_la = entanglement.la_hui(
+        entanglement_list,
+        list(time_str),
+        list(kline_data["high"]),
+        list(kline_data["low"]),
+        list(kline_data["open"]),
+        list(kline_data["close"]),
+        list(kline_data["bi"]),
+        list(kline_data["duan"]),
+        list(kline_data["duan2"])
+    )
+
+    buy_zs_huila = hui_la['buy_zs_huila']
+    sell_zs_huila = hui_la['sell_zs_huila']
+
+    tu_po = entanglement.tu_po(
+        entanglement_list,
+        list(time_str),
+        list(kline_data["high"]),
+        list(kline_data["low"]),
+        list(kline_data["open"]),
+        list(kline_data["close"]),
+        list(kline_data["bi"]),
+        list(kline_data["duan"]),
+        list(kline_data["duan2"])
+    )
+
+    buy_zs_tupo = tu_po['buy_zs_tupo']
+    sell_zs_tupo = tu_po['sell_zs_tupo']
+
+    v_reverse = entanglement.v_reverse(
+        entanglement_list,
+        list(time_str),
+        list(kline_data["high"]),
+        list(kline_data["low"]),
+        list(kline_data["open"]),
+        list(kline_data["close"]),
+        list(kline_data["bi"]),
+        list(kline_data["duan"]),
+        list(kline_data["duan2"])
+    )
+
+    buy_v_reverse = v_reverse['buy_v_reverse']
+    sell_v_reverse = v_reverse['sell_v_reverse']
+
+    five_v_fan = entanglement.five_v_fan(
+        list(time_str),
+        list(kline_data["duan"]),
+        list(kline_data["bi"]),
+        list(kline_data["high"]),
+        list(kline_data["low"]),
+        list(kline_data["duan2"])
+    )
+
+    buy_five_v_reverse = five_v_fan['buy_five_v_reverse']
+    sell_five_v_reverse = five_v_fan['sell_five_v_reverse']
+
+    duan_pohuai = entanglement.po_huai(
+        list(time_str),
+        list(kline_data["high"]),
+        list(kline_data["low"]),
+        list(kline_data["open"]),
+        list(kline_data["close"]),
+        list(kline_data["bi"]),
+        list(kline_data["duan"]),
+        list(kline_data["duan2"])
+    )
+
+    buy_duan_break = duan_pohuai['buy_duan_break']
+    sell_duan_break = duan_pohuai['sell_duan_break']
+
     resp = {
         "symbol": data["symbol"],
         "period": data["period"],
@@ -186,16 +258,16 @@ def get_data(symbol, period, end_date=None):
         "duan_zsflag": zs_flag2,
         "higher_duan_zsdata": [],
         "higher_duan_zsflag": [],
-        "buy_zs_huila": {"data": [], "date": []},
-        "sell_zs_huila": {"data": [], "date": []},
-        "buy_zs_tupo": {"data": [], "date": []},
-        "sell_zs_tupo": {"data": [], "date": []},
-        "buy_v_reverse": {"data": [], "date": []},
-        "sell_v_reverse": {"data": [], "date": []},
-        "buy_five_v_reverse": {"data": [], "date": []},
-        "sell_five_v_reverse": {"data": [], "date": []},
-        "buy_duan_break": {"data": [], "date": []},
-        "sell_duan_break": {"data": [], "date": []},
+        "buy_zs_huila": buy_zs_huila,
+        "sell_zs_huila": sell_zs_huila,
+        "buy_zs_tupo": buy_zs_tupo,
+        "sell_zs_tupo": sell_zs_tupo,
+        "buy_v_reverse": buy_v_reverse,
+        "sell_v_reverse": sell_v_reverse,
+        "buy_five_v_reverse": buy_five_v_reverse,
+        "sell_five_v_reverse": sell_five_v_reverse,
+        "buy_duan_break": buy_duan_break,
+        "sell_duan_break": sell_duan_break,
     }
     stopwatch.stop()
     logging.info(stopwatch)
