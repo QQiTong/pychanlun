@@ -9,12 +9,11 @@ import datetime
 import pandas as pd
 from et_stopwatch import Stopwatch
 
-from pychanlun.basic.comm import get_required_period_list
 from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.config import config
 from pychanlun.basic.bi import calculate_bi
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
-from pychanlun.basic.util import get_Line_data
+from pychanlun.basic.util import get_required_period_list, get_Line_data
 
 
 def get_data(symbol, period, end_date=None):
@@ -44,13 +43,14 @@ def get_data(symbol, period, end_date=None):
     # time列是以秒表示的timestamp
     # 周期大的排在前面，周期小的排在后面，方便从大周期开始往小周期计算
     small_period_list = ['1m', '3m', '5m', '15m', '30m', '60m']
-    data_list = pydash.take_right_while(data_list, lambda value: len(value["kline_data"]) > 0)
 
+    data_list = pydash.take_right_while(data_list, lambda value: len(value["kline_data"]) > 0)
     for idx in range(len(data_list)):
         if idx == 0:
             data = data_list[idx]
             count = len(data["kline_data"])
             bi_list = [0 for i in range(count)]
+            duan_list = [0 for i in range(count)]
             calculate_bi(
                 bi_list,
                 list(data["kline_data"]["high"]),
@@ -60,6 +60,7 @@ def get_data(symbol, period, end_date=None):
                 True if period in small_period_list else False
             )
             data["kline_data"]["bi"] = bi_list
+            data["kline_data"]["duan"] = duan_list
         elif idx == 1:
             data2 = data_list[idx-1]
             data = data_list[idx]
@@ -74,7 +75,14 @@ def get_data(symbol, period, end_date=None):
                 list(data["kline_data"]["high"]),
                 list(data["kline_data"]["low"])
             )
-            split_bi_in_duan(bi_list, duan_list, list(data["kline_data"]["high"]), list(data["kline_data"]["low"]))
+            split_bi_in_duan(
+                bi_list,
+                duan_list,
+                list(data["kline_data"]["high"]),
+                list(data["kline_data"]["low"]),
+                list(data["kline_data"]["open"]),
+                list(data["kline_data"]["close"])
+            )
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
         else:
@@ -92,25 +100,50 @@ def get_data(symbol, period, end_date=None):
                 list(data["kline_data"]["high"]),
                 list(data["kline_data"]["low"])
             )
-            split_bi_in_duan(bi_list, duan_list, list(data["kline_data"]["high"]), list(data["kline_data"]["low"]))
+            split_bi_in_duan(
+                bi_list,
+                duan_list,
+                list(data["kline_data"]["high"]),
+                list(data["kline_data"]["low"]),
+                list(data["kline_data"]["open"]),
+                list(data["kline_data"]["close"])
+            )
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
-            print(list(bi_list))
-            print(list(duan_list))
-
-    kline_data = data_list[-1]["kline_data"]
+    kline_data = data["kline_data"]
     time_str = kline_data["time"].apply(lambda value: datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M"))
     bidata = get_Line_data(list(time_str), list(kline_data["bi"]), list(kline_data["high"]), list(kline_data["low"]))
     duandata = get_Line_data(list(time_str), list(kline_data["duan"]), list(kline_data["high"]), list(kline_data["low"]))
 
     resp = {
+        "symbol": data["symbol"],
+        "period": data["period"],
+        "endDate": end_date,
         "date": list(time_str),
         "open": list(kline_data["open"]),
         "high": list(kline_data["high"]),
         "low": list(kline_data["low"]),
         "close": list(kline_data["close"]),
         "bidata": bidata,
-        "duandata": duandata
+        "duandata": duandata,
+        "higherDuanData": {"data": [], "date": []},
+        "higherHigherDuanData": {"data": [], "date": []},
+        "zsdata": [],
+        "zsflag": [],
+        "duan_zsdata": [],
+        "duan_zsflag": [],
+        "higher_duan_zsdata": [],
+        "higher_duan_zsflag": [],
+        "buy_zs_huila": {"data": [], "date": []},
+        "sell_zs_huila": {"data": [], "date": []},
+        "buy_zs_tupo": {"data": [], "date": []},
+        "sell_zs_tupo": {"data": [], "date": []},
+        "buy_v_reverse": {"data": [], "date": []},
+        "sell_v_reverse": {"data": [], "date": []},
+        "buy_five_v_reverse": {"data": [], "date": []},
+        "sell_five_v_reverse": {"data": [], "date": []},
+        "buy_duan_break": {"data": [], "date": []},
+        "sell_duan_break": {"data": [], "date": []},
     }
     stopwatch.stop()
     logging.info(stopwatch)

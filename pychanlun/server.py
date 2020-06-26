@@ -10,6 +10,7 @@ from func_timeout import func_timeout
 
 from pychanlun.Calc import Calc
 from pychanlun.monitor.BusinessService import businessService
+from pychanlun.chanlun_controller import get_data
 
 app = Flask(__name__)
 
@@ -17,11 +18,10 @@ app = Flask(__name__)
 @app.route('/api/stock_data')
 def stock_data():
     stopwatch = Stopwatch('/api/stock_data')
-    calc = Calc()
     period = request.args.get("period")
     symbol = request.args.get("symbol")
     end_date = request.args.get("endDate")
-    result = func_timeout(30, calc.calcData, args=(period, symbol, False, end_date))
+    result = func_timeout(30, get_data, args=(symbol, period, end_date))
     stopwatch.stop()
     logging.info(stopwatch)
     return Response(json.dumps(result), mimetype='application/json')
