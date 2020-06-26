@@ -18,3 +18,17 @@ def get_Line_data(time_list, signal_list, high_list, low_list):
             resp['data'].append(low_list[i])
             resp['date'].append(time_list[i])
     return resp
+
+
+def get_zhong_shu_data(entanglement_list):
+    zs_data = []
+    zs_flag = []
+    for i in range(len(entanglement_list)):
+        e = entanglement_list[i]
+        if e.direction == -1:
+            zs_flag.append(-1)
+            zs_data.append([[e.startTime, e.top], [e.endTime, e.bottom]])
+        else:
+            zs_flag.append(1)
+            zs_data.append([[e.startTime, e.bottom], [e.endTime, e.top]])
+    return zs_data, zs_flag

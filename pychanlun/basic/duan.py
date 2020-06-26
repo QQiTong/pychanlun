@@ -213,13 +213,17 @@ def calculate_duan(duan_list, time_list, bi_list2, time_list2, high_list, low_li
 
 def split_bi_in_duan(bi_list, duan_list, high_list, low_list, open_list, close_list):
     for i in range(len(bi_list)):
+        d1 = pydash.find_last_index(bi_list[:i], lambda value: value == -1)
+        g1 = pydash.find_last_index(bi_list[:i], lambda value: value == 1)
         if duan_list[i] == 1:
+            if g1 > d1:
+                bi_list[g1] = 0
             bi_list[i] = 1
         elif duan_list[i] == -1:
+            if d1 > g1:
+                bi_list[d1] = 0
             bi_list[i] = -1
         else:
-            d1 = pydash.find_last_index(bi_list[:i], lambda value: value == -1)
-            g1 = pydash.find_last_index(bi_list[:i], lambda value: value == 1)
             if d1 > g1:
                 # 前面是向下笔
                 if low_list[i] < low_list[d1]:

@@ -61,9 +61,3 @@ def FindPrevEntanglement(e_list, t):
         if e_list[idx].endTime < t:
             return e_list[idx]
     return None
-
-
-
-
-
-

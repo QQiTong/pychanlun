@@ -13,7 +13,8 @@ from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.config import config
 from pychanlun.basic.bi import calculate_bi
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
-from pychanlun.basic.util import get_required_period_list, get_Line_data
+from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data
+import pychanlun.entanglement as entanglement
 
 
 def get_data(symbol, period, end_date=None):
@@ -92,11 +93,20 @@ def get_data(symbol, period, end_date=None):
             count = len(data["kline_data"])
             bi_list = [0 for i in range(count)]
             duan_list = [0 for i in range(count)]
+            duan_list2 = [0 for i in range(count)]
             calculate_duan(
                 duan_list,
                 list(data["kline_data"]["time"]),
                 list(data2["kline_data"]["bi"]),
                 list(data2["kline_data"]["time"]),
+                list(data["kline_data"]["high"]),
+                list(data["kline_data"]["low"])
+            )
+            calculate_duan(
+                duan_list2,
+                list(data["kline_data"]["time"]),
+                list(data3["kline_data"]["bi"]),
+                list(data3["kline_data"]["time"]),
                 list(data["kline_data"]["high"]),
                 list(data["kline_data"]["low"])
             )
@@ -110,10 +120,52 @@ def get_data(symbol, period, end_date=None):
             )
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
+            data["kline_data"]["duan2"] = duan_list2
+
+    data = data_list[-1]
     kline_data = data["kline_data"]
+
     time_str = kline_data["time"].apply(lambda value: datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M"))
-    bidata = get_Line_data(list(time_str), list(kline_data["bi"]), list(kline_data["high"]), list(kline_data["low"]))
-    duandata = get_Line_data(list(time_str), list(kline_data["duan"]), list(kline_data["high"]), list(kline_data["low"]))
+
+    # 计算笔中枢
+    entanglement_list = entanglement.CalcEntanglements(
+        list(time_str),
+        list(kline_data["duan"]),
+        list(kline_data["bi"]),
+        list(kline_data["high"]),
+        list(kline_data["low"])
+    )
+    zs_data, zs_flag = get_zhong_shu_data(entanglement_list)
+
+    # 计算段中枢
+    if "duan2" in kline_data.columns:
+        entanglement_list2 = entanglement.CalcEntanglements(
+            list(time_str),
+            list(kline_data["duan2"]),
+            list(kline_data["duan"]),
+            list(kline_data["high"]),
+            list(kline_data["low"])
+        )
+        zs_data2, zs_flag2 = get_zhong_shu_data(entanglement_list2)
+
+    bi_data = get_Line_data(
+        list(time_str),
+        list(kline_data["bi"]),
+        list(kline_data["high"]),
+        list(kline_data["low"])
+    )
+    duan_data = get_Line_data(
+        list(time_str),
+        list(kline_data["duan"]),
+        list(kline_data["high"]),
+        list(kline_data["low"])
+    )
+    duan_data2 = get_Line_data(
+        list(time_str),
+        list(kline_data["duan2"]),
+        list(kline_data["high"]),
+        list(kline_data["low"])
+    )
 
     resp = {
         "symbol": data["symbol"],
@@ -124,14 +176,14 @@ def get_data(symbol, period, end_date=None):
         "high": list(kline_data["high"]),
         "low": list(kline_data["low"]),
         "close": list(kline_data["close"]),
-        "bidata": bidata,
-        "duandata": duandata,
-        "higherDuanData": {"data": [], "date": []},
+        "bidata": bi_data,
+        "duandata": duan_data,
+        "higherDuanData": duan_data2,
         "higherHigherDuanData": {"data": [], "date": []},
-        "zsdata": [],
-        "zsflag": [],
-        "duan_zsdata": [],
-        "duan_zsflag": [],
+        "zsdata": zs_data,
+        "zsflag": zs_flag,
+        "duan_zsdata": zs_data2,
+        "duan_zsflag": zs_flag2,
         "higher_duan_zsdata": [],
         "higher_duan_zsflag": [],
         "buy_zs_huila": {"data": [], "date": []},
