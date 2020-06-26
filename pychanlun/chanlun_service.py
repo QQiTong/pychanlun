@@ -7,6 +7,7 @@ import traceback
 import datetime
 
 import pandas as pd
+import numpy as np
 from et_stopwatch import Stopwatch
 
 from pychanlun.KlineDataTool import KlineDataTool
@@ -52,6 +53,7 @@ def get_data(symbol, period, end_date=None):
             count = len(data["kline_data"])
             bi_list = [0 for i in range(count)]
             duan_list = [0 for i in range(count)]
+            duan_list2 = [0 for i in range(count)]
             calculate_bi(
                 bi_list,
                 list(data["kline_data"]["high"]),
@@ -62,12 +64,14 @@ def get_data(symbol, period, end_date=None):
             )
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
+            data["kline_data"]["duan2"] = duan_list2
         elif idx == 1:
             data2 = data_list[idx-1]
             data = data_list[idx]
             count = len(data["kline_data"])
             bi_list = [0 for i in range(count)]
             duan_list = [0 for i in range(count)]
+            duan_list2 = [0 for i in range(count)]
             calculate_duan(
                 duan_list,
                 list(data["kline_data"]["time"]),
@@ -86,6 +90,7 @@ def get_data(symbol, period, end_date=None):
             )
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
+            data["kline_data"]["duan2"] = duan_list2
         else:
             data3 = data_list[idx-2]
             data2 = data_list[idx-1]
@@ -121,6 +126,11 @@ def get_data(symbol, period, end_date=None):
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
             data["kline_data"]["duan2"] = duan_list2
+
+    daily_data = get_instrument_data(symbol, "1d", end_date)
+    daily_data = pd.DataFrame(daily_data)
+    daily_data = daily_data.set_index("time")
+    ma20 = np.round(pd.Series.rolling(daily_data["close"], window=20).mean(), 2)
 
     data = data_list[-1]
     kline_data = data["kline_data"]
@@ -177,7 +187,8 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["close"]),
         list(kline_data["bi"]),
         list(kline_data["duan"]),
-        list(kline_data["duan2"])
+        list(kline_data["duan2"]),
+        ma20
     )
 
     buy_zs_huila = hui_la['buy_zs_huila']
@@ -192,7 +203,8 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["close"]),
         list(kline_data["bi"]),
         list(kline_data["duan"]),
-        list(kline_data["duan2"])
+        list(kline_data["duan2"]),
+        ma20
     )
 
     buy_zs_tupo = tu_po['buy_zs_tupo']
@@ -207,7 +219,8 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["close"]),
         list(kline_data["bi"]),
         list(kline_data["duan"]),
-        list(kline_data["duan2"])
+        list(kline_data["duan2"]),
+        ma20
     )
 
     buy_v_reverse = v_reverse['buy_v_reverse']
@@ -219,7 +232,8 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["bi"]),
         list(kline_data["high"]),
         list(kline_data["low"]),
-        list(kline_data["duan2"])
+        list(kline_data["duan2"]),
+        ma20
     )
 
     buy_five_v_reverse = five_v_fan['buy_five_v_reverse']
@@ -233,7 +247,8 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["close"]),
         list(kline_data["bi"]),
         list(kline_data["duan"]),
-        list(kline_data["duan2"])
+        list(kline_data["duan2"]),
+        ma20
     )
 
     buy_duan_break = duan_pohuai['buy_duan_break']
@@ -275,7 +290,7 @@ def get_data(symbol, period, end_date=None):
     return resp
 
 
-# 测试运行: python D:\development\pychanlun\pychanlun\chanlun_controller.py
+# 测试运行: python D:\development\pychanlun\pychanlun\chanlun_service.py
 if __name__ == '__main__':
     # noinspection PyBroadException
     try:
