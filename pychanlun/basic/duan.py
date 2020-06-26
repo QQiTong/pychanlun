@@ -176,3 +176,45 @@ def calc_duan_exp(bi_list, time_index_list, bi_list_big_level, time_index_list_b
                                 bi_list[y] = 0
                         direction = -1
     return duan_list
+
+
+def calculate_duan(duan_list, time_list, bi_list2, time_list2, high_list, low_list):
+    count = len(duan_list)
+    idx = 0
+    for i in range(len(bi_list2)):
+        if i < len(time_list2) - 1:
+            big_t2 = time_list2[i + 1]
+        else:
+            big_t2 = datetime.now(tz=tz).timestamp()
+        if bi_list2[i] == 1:
+            h = high_list[idx]
+            x = idx
+            for x in range(idx, count):
+                if time_list[x] < big_t2:
+                    if high_list[x] >= h:
+                        h = high_list[x]
+                        idx = x
+                else:
+                    break
+            duan_list[idx] = 1
+        elif bi_list2[i] == -1:
+            l = low_list[idx]
+            x = idx
+            for x in range(idx, count):
+                if time_list[x] < big_t2:
+                    if low_list[x] <= l:
+                        l = low_list[x]
+                        idx = x
+                else:
+                    break
+            duan_list[idx] = -1
+
+
+def split_bi_in_duan(bi_list, duan_list, high_list, low_list):
+    for i in range(len(bi_list)):
+        if duan_list[i] == 1:
+            bi_list = 1
+        elif duan_list[i] == -1:
+            bi_list = -1
+        else:
+            pass

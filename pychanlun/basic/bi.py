@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from pychanlun.basic.comm import FindPrevEq
 import pydash
 
+from pychanlun.basic.comm import FindPrevEq
 
-def merge_candles(high, low, open_price, close_price, from_index, to_index, dir):
+
+def merge_candles(high, low, open_price, close_price, idx_from, idx_to, direction):
     candles = []
     # dir 指笔的运行方向
     # direction 指包含处理的方向
-    direction = -dir
-    for i in range(from_index, to_index + 1):
+    direction = -direction
+    for i in range(idx_from, idx_to + 1):
         if len(candles) == 0:
             candle = {'high': high[i], 'low': low[i], 'sticks': []}
             candles.append(candle)
@@ -373,3 +374,51 @@ def FindLastFractalRegion(count, bi_series, time_series, high_series, low_series
                     bottom = sticks[idx]["l"]
             top_fractal = { "date": dt, "top": top, "bottom": bottom }
             return { "direction": -1, "top_fractal": top_fractal, "bottom_fractal": bottom_fractal }
+
+
+def calculate_bi(bi_list, high_list, low_list, open_list, close_list, small_period=False):
+    count = len(bi_list)
+    # 标记分型的顶底
+    for i in range(1, count):
+        # x 前一个笔低点
+        x = FindPrevEq(bi_list, -1, i)
+        x = max(0, x)
+        # y 前一个笔高点
+        y = FindPrevEq(bi_list, 1, i)
+        y = max(0, y)
+
+        maxHigh = max(high_list[x:i])
+        minLow = min(low_list[y:i])
+
+        # 是新高
+        b1 = high_list[i] > maxHigh
+        # 是新低
+        b2 = low_list[i] < minLow
+
+        if b1 and b2:
+            for idx in range(i-1, -1, -1):
+                if bi_list[idx] == 1 and high_list[idx] > high_list[i]:
+                    bi_list[i] = -1
+                    for k in range(idx+1, i):
+                        bi_list[k] = 0
+                    break
+                elif bi_list[idx] == -1 and low_list[idx] < low_list[i]:
+                    bi_list[i] = 1
+                    for k in range(idx+1, i):
+                        bi_list[k] = 0
+                    break
+        elif b1:
+            if (x == y and x == 0) or y > x or is_bi(bi_list, high_list, low_list, open_list, close_list, x, i, 1, small_period):
+                bi_list[x] = -1
+                bi_list[i] = 1
+                for t in range(x + 1, i):
+                    bi_list[t] = 0
+                i = adjust_bi(bi_list, high_list, low_list, x, i)
+
+        elif b2:
+            if (x == y and y == 0) or x > y or is_bi(bi_list, high_list, low_list, open_list, close_list, y, i, -1, small_period):
+                bi_list[y] = 1
+                bi_list[i] = -1
+                for t in range(y + 1, i):
+                    bi_list[t] = 0
+                i = adjust_bi(bi_list, high_list, low_list, y, i)
