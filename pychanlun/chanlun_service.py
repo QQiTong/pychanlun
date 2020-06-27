@@ -12,7 +12,7 @@ from et_stopwatch import Stopwatch
 
 from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.config import config
-from pychanlun.basic.bi import calculate_bi
+from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
 from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data, is_small_period
 import pychanlun.entanglement as entanglement
@@ -38,6 +38,8 @@ def get_data(symbol, period, end_date=None):
     for period_one in required_period_list:
         kline_data = get_instrument_data(symbol, period_one, end_date)
         kline_data = pd.DataFrame(kline_data)
+        kline_data["time_str"] = kline_data["time"] \
+            .apply(lambda value: datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M"))
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
 
     # data_list包含了计算各个周期需要的K线数据，其中的kline_data是一个DataFrame的数据结构
@@ -134,13 +136,12 @@ def get_data(symbol, period, end_date=None):
     ma20 = np.round(pd.Series.rolling(daily_data["close"], window=20).mean(), 2)
 
     data = data_list[-1]
-    kline_data = data["kline_data"]
 
-    time_str = kline_data["time"].apply(lambda value: datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M"))
+    kline_data = data["kline_data"]
 
     # 计算笔中枢
     entanglement_list = entanglement.CalcEntanglements(
-        list(time_str),
+        list(kline_data["time_str"]),
         list(kline_data["duan"]),
         list(kline_data["bi"]),
         list(kline_data["high"]),
@@ -151,7 +152,7 @@ def get_data(symbol, period, end_date=None):
     # 计算段中枢
     if "duan2" in kline_data.columns:
         entanglement_list2 = entanglement.CalcEntanglements(
-            list(time_str),
+            list(kline_data["time_str"]),
             list(kline_data["duan2"]),
             list(kline_data["duan"]),
             list(kline_data["high"]),
@@ -160,19 +161,19 @@ def get_data(symbol, period, end_date=None):
         zs_data2, zs_flag2 = get_zhong_shu_data(entanglement_list2)
 
     bi_data = get_Line_data(
-        list(time_str),
+        list(kline_data["time_str"]),
         list(kline_data["bi"]),
         list(kline_data["high"]),
         list(kline_data["low"])
     )
     duan_data = get_Line_data(
-        list(time_str),
+        list(kline_data["time_str"]),
         list(kline_data["duan"]),
         list(kline_data["high"]),
         list(kline_data["low"])
     )
     duan_data2 = get_Line_data(
-        list(time_str),
+        list(kline_data["time_str"]),
         list(kline_data["duan2"]),
         list(kline_data["high"]),
         list(kline_data["low"])
@@ -181,7 +182,7 @@ def get_data(symbol, period, end_date=None):
     # 计算买卖预警信号
     hui_la = entanglement.la_hui(
         entanglement_list,
-        list(time_str),
+        list(kline_data["time_str"]),
         list(kline_data["high"]),
         list(kline_data["low"]),
         list(kline_data["open"]),
@@ -197,7 +198,7 @@ def get_data(symbol, period, end_date=None):
 
     tu_po = entanglement.tu_po(
         entanglement_list,
-        list(time_str),
+        list(kline_data["time_str"]),
         list(kline_data["high"]),
         list(kline_data["low"]),
         list(kline_data["open"]),
@@ -213,7 +214,7 @@ def get_data(symbol, period, end_date=None):
 
     v_reverse = entanglement.v_reverse(
         entanglement_list,
-        list(time_str),
+        list(kline_data["time_str"]),
         list(kline_data["high"]),
         list(kline_data["low"]),
         list(kline_data["open"]),
@@ -228,7 +229,7 @@ def get_data(symbol, period, end_date=None):
     sell_v_reverse = v_reverse['sell_v_reverse']
 
     five_v_fan = entanglement.five_v_fan(
-        list(time_str),
+        list(kline_data["time_str"]),
         list(kline_data["duan"]),
         list(kline_data["bi"]),
         list(kline_data["high"]),
@@ -241,7 +242,7 @@ def get_data(symbol, period, end_date=None):
     sell_five_v_reverse = five_v_fan['sell_five_v_reverse']
 
     duan_pohuai = entanglement.po_huai(
-        list(time_str),
+        list(kline_data["time_str"]),
         list(kline_data["high"]),
         list(kline_data["low"]),
         list(kline_data["open"]),
@@ -255,11 +256,42 @@ def get_data(symbol, period, end_date=None):
     buy_duan_break = duan_pohuai['buy_duan_break']
     sell_duan_break = duan_pohuai['sell_duan_break']
 
+    # 顶底分型
+    if len(data_list) > 1:
+        data2 = data_list[-2]
+        kline_data2 = data2["kline_data"]
+        fractal_region = FindLastFractalRegion(
+            len(kline_data2),
+            kline_data2["bi"],
+            kline_data2["time_str"],
+            kline_data2["high"],
+            kline_data2["low"],
+            kline_data2["open"],
+            kline_data2["close"]
+        )
+        if fractal_region is not None:
+            fractal_region["period"] = data2["period"]
+
+    if len(data_list) > 2:
+        data3= data_list[-3]
+        kline_data3 = data3["kline_data"]
+        fractal_region2 = FindLastFractalRegion(
+            len(kline_data3),
+            kline_data3["bi"],
+            kline_data3["time_str"],
+            kline_data3["high"],
+            kline_data3["low"],
+            kline_data3["open"],
+            kline_data3["close"]
+        )
+        if fractal_region2 is not None:
+            fractal_region2["period"] = data3["period"]
+
     resp = {
         "symbol": data["symbol"],
         "period": data["period"],
         "endDate": end_date,
-        "date": list(time_str),
+        "date": list(kline_data["time_str"]),
         "open": list(kline_data["open"]),
         "high": list(kline_data["high"]),
         "low": list(kline_data["low"]),
@@ -285,6 +317,11 @@ def get_data(symbol, period, end_date=None):
         "buy_duan_break": buy_duan_break,
         "sell_duan_break": sell_duan_break,
     }
+
+    fractal_region = {} if fractal_region is None else fractal_region
+    fractal_region2 = {} if fractal_region2 is None else fractal_region2
+    resp['fractal'] = [fractal_region, fractal_region2]
+
     stopwatch.stop()
     logging.info(stopwatch)
 
