@@ -1,6 +1,6 @@
 #!/bin/bash
 
-name="mongo-server"
+name="mongodb-server"
 
 docker rm -f $name
 docker rmi -f $name

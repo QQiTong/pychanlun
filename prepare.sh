@@ -5,7 +5,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get install -y tzdata
 dpkg-reconfigure --frontend noninteractive tzdata
 
-python -m pip install --upgrade pip setuptools wheel
+python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade pip setuptools wheel
 
 tar -xzf ta-lib-0.4.0-src.tar.gz
 cd ta-lib/
