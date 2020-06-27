@@ -211,7 +211,7 @@ def calculate_duan(duan_list, time_list, bi_list2, time_list2, high_list, low_li
             duan_list[idx] = -1
 
 
-def split_bi_in_duan(bi_list, duan_list, high_list, low_list, open_list, close_list):
+def split_bi_in_duan(bi_list, duan_list, high_list, low_list, open_list, close_list, small_period=False):
     for i in range(len(bi_list)):
         d1 = pydash.find_last_index(bi_list[:i], lambda value: value == -1)
         g1 = pydash.find_last_index(bi_list[:i], lambda value: value == 1)
@@ -232,7 +232,7 @@ def split_bi_in_duan(bi_list, duan_list, high_list, low_list, open_list, close_l
                 else:
                     max_high = max(high_list[d1:i])
                     if high_list[i] > max_high:
-                        if is_bi(bi_list, high_list, low_list, open_list, close_list, d1, i, 1):
+                        if is_bi(bi_list, high_list, low_list, open_list, close_list, d1, i, 1, small_period):
                             bi_list[i] = 1
             elif g1 > d1:
                 # 前面是向上笔
@@ -242,5 +242,5 @@ def split_bi_in_duan(bi_list, duan_list, high_list, low_list, open_list, close_l
                 else:
                     min_low = min(low_list[g1:i])
                     if low_list[i] < min_low:
-                        if is_bi(bi_list, high_list, low_list, open_list, close_list, g1, i, -1):
+                        if is_bi(bi_list, high_list, low_list, open_list, close_list, g1, i, -1, small_period):
                             bi_list[i] = -1

@@ -32,3 +32,10 @@ def get_zhong_shu_data(entanglement_list):
             zs_flag.append(1)
             zs_data.append([[e.startTime, e.bottom], [e.endTime, e.top]])
     return zs_data, zs_flag
+
+
+SMALL_PERIODS = ['1m', '3m', '5m', '15m', '30m', '60m']
+
+
+def is_small_period(period):
+    return True if period in SMALL_PERIODS else False
