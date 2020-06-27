@@ -6,6 +6,7 @@ docker rm -f $name
 docker rmi -f $name
 
 docker build -f Dockerfile.web -t $name .
+
 docker run --restart=always -d \
     --name $name \
     --network pychanlun-net \

@@ -13,6 +13,7 @@ cd ta-lib/
 make -j
 make install
 
-python -m pip install numpy
-python -m pip install TA-Lib
+python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple numpy
+python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple TA-Lib
+
 pip install --extra-index-url https://rquser:ricequant99@py.ricequant.com/simple/ rqdatac

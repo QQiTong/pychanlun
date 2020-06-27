@@ -14,4 +14,4 @@ ENV RQDATAC2_CONF=rqdata://license:R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl0
 
 EXPOSE 5000
 
-ENTRYPOINT ["python", "-m", "pychanlun.server"]
+ENTRYPOINT ["python", "pychanlun\cli.py", "run-api-server"]
