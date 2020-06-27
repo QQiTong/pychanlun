@@ -257,6 +257,7 @@ def get_data(symbol, period, end_date=None):
     sell_duan_break = duan_pohuai['sell_duan_break']
 
     # 顶底分型
+    fractal_region = None
     if len(data_list) > 1:
         data2 = data_list[-2]
         kline_data2 = data2["kline_data"]
@@ -272,6 +273,7 @@ def get_data(symbol, period, end_date=None):
         if fractal_region is not None:
             fractal_region["period"] = data2["period"]
 
+    fractal_region2 = None
     if len(data_list) > 2:
         data3= data_list[-3]
         kline_data3 = data3["kline_data"]
