@@ -447,8 +447,8 @@ class KlineDataTool:
         end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
         timeDeltaMap = {
             '1m': -7*3,
-            '3m': -31*3,
-            '5m': -31*3,
+            '3m': -7*1,
+            '5m': -7*1,
             '15m': -31 * 3,
             '30m': -31 * 8,
             '60m': -31 * 8,

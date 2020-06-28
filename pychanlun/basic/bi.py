@@ -136,7 +136,7 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
         isValid = False
         for t in range(2, len(candles) - 2):
             for idx in range(len(candles[t]['sticks'])):
-                if candles[t]['sticks'][idx]['l'] > bottom_high and candles[t]['sticks'][idx]['h'] < top_low:
+                if candles[t]['sticks'][idx]['l'] >= bottom_high and candles[t]['sticks'][idx]['h'] <= top_low:
                     isValid = True
                     break
             if isValid:
@@ -207,7 +207,7 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
         isValid = False
         for t in range(2, len(candles) - 2):
             for idx in range(len(candles[t]['sticks'])):
-                if candles[t]['sticks'][idx]['l'] > bottom_high and candles[t]['sticks'][idx]['h'] < top_low:
+                if candles[t]['sticks'][idx]['l'] >= bottom_high and candles[t]['sticks'][idx]['h'] <= top_low:
                     isValid = True
                     break
             if isValid:
