@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
 ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
 export DEBIAN_FRONTEND=noninteractive
+
 apt-get install -y tzdata
+
 dpkg-reconfigure --frontend noninteractive tzdata
 
 python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade pip setuptools wheel
@@ -16,4 +19,4 @@ make install
 python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple numpy
 python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple TA-Lib
 
-pip install --extra-index-url https://rquser:ricequant99@py.ricequant.com/simple/ rqdatac
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --extra-index-url https://rquser:ricequant99@py.ricequant.com/simple/ rqdatac
