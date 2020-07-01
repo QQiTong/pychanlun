@@ -62,6 +62,6 @@ pycparser
 prettytable
 websocket-client
 zipp
-pychanlun
-rqdatac
 tushare
+et_stopwatch
+func_timeout
