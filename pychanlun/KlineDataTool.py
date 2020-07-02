@@ -446,20 +446,21 @@ class KlineDataTool:
             end = datetime.strptime(endDate, "%Y-%m-%d")
         end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
         timeDeltaMap = {
-            '1m': -7*3,
-            '3m': -7*1,
-            '5m': -7*1,
-            '15m': -31 * 3,
-            '30m': -31 * 8,
-            '60m': -31 * 8,
-            '180m': -31 * 8,
-            '1d': -31 * 10,
-            '3d': -31 * 30
+            '1m': -3,
+            '3m': -3*3,
+            '5m': -3*5,
+            '15m': -3*15,
+            '30m': -3*30,
+            '60m': -3*60,
+            '180m': -3*180,
+            '1d': -1000,
+            '3d': -3000
         }
-        start_date =  end + timedelta(timeDeltaMap[period])
+        start_date = end + timedelta(timeDeltaMap[period])
         code = "%s_%s" % (symbol, period)
-        data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-            "_id": { "$gte": start_date, "$lte": end }
+        data_list = DBPyChanlun[code] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({"_id": {"$gte": start_date, "$lte": end}
         }).sort("_id", pymongo.ASCENDING)
         df = pd.DataFrame(list(data_list))
 
