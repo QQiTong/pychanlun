@@ -6,7 +6,7 @@ from pychanlun.DingMsg import DingMsg
 import signal
 import rqdatac as rq
 from datetime import datetime, timedelta
-from rqdatac import *
+from et_stopwatch import Stopwatch
 import time
 import threading
 from pychanlun.Mail import Mail
@@ -511,10 +511,14 @@ def monitorFuturesAndDigitCoin(type, symbolList):
     while is_run:
         try:
             for i in range(len(symbolList)):
+                if not is_run:
+                    break
                 for j in range(len(periodList)):
+                    if not is_run:
+                        break
                     symbol = symbolList[i]
                     period = periodList[j]
-                    print("current:", symbol, period, datetime.now())
+                    stopwatch = Stopwatch('{}\t{}\t{}'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), symbol, period))
                     result = get_data(symbol, period)
                     if result.get('close') is not None and len(result['close']) > 0:
                         close_price = result['close'][-1]
@@ -527,6 +531,8 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                         monitorFiveVReverse(result, symbol, period, close_price)
                         monitorDuanBreak(result, symbol, period, close_price)
                         monitorFractal(result, symbol, period, close_price)
+                    stopwatch.stop()
+                    print(stopwatch)
             if type == "1" or type == "3":
                 time.sleep(0)
             else:
