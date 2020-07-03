@@ -518,7 +518,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                         break
                     symbol = symbolList[i]
                     period = periodList[j]
-                    stopwatch = Stopwatch('{}\t{}\t{}'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), symbol, period))
+                    stopwatch = Stopwatch('{} {} {}'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), symbol, period))
                     result = get_data(symbol, period)
                     if result.get('close') is not None and len(result['close']) > 0:
                         close_price = result['close'][-1]
