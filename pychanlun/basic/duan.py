@@ -4,7 +4,7 @@ import pytz
 import pydash
 from pychanlun.basic.comm import FindPrevEq, FindNextEq
 from datetime import datetime
-from pychanlun.basic.bi import is_bi
+from pychanlun.basic.bi import is_bi, adjust_bi
 
 
 tz = pytz.timezone('Asia/Shanghai')
@@ -229,6 +229,7 @@ def split_bi_in_duan(bi_list, duan_list, high_list, low_list, open_list, close_l
                 if low_list[i] < low_list[d1]:
                     bi_list[d1] = 0
                     bi_list[i] = -1
+                    i = adjust_bi(bi_list, high_list, low_list, g1, i)
                 else:
                     max_high = max(high_list[d1:i])
                     if high_list[i] > max_high:
@@ -239,6 +240,7 @@ def split_bi_in_duan(bi_list, duan_list, high_list, low_list, open_list, close_l
                 if high_list[i] > high_list[g1]:
                     bi_list[g1] = 0
                     bi_list[i] = 1
+                    i = adjust_bi(bi_list, high_list, low_list, d1, i)
                 else:
                     min_low = min(low_list[g1:i])
                     if low_list[i] < min_low:
