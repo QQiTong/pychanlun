@@ -44,8 +44,7 @@ def merge_candles(high, low, open_price, close_price, idx_from, idx_to, directio
 # from_index 起点(含)
 # to_index 终点(含)
 # dir 笔方向
-# small_period 是否是小级别
-def is_bi(bi, high, low, open_price, close_price, from_index, to_index, direction, small_period=False):
+def is_bi(bi, high, low, open_price, close_price, from_index, to_index, direction):
     if to_index - from_index < 4:
         # K柱数量不够不成笔
         return False
@@ -70,9 +69,6 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
     elif direction == -1:
         if candles[-1]['low'] > candles[-2]['low']:
             return False
-    if not small_period and to_index - from_index + 1 >= 13:
-        # 满足13K就不看是否重叠了
-        return True
 
     # 查看顶底是否重叠
     if direction == 1:
@@ -201,8 +197,7 @@ def adjust_bi(bi_list, high_list, low_list, x, y):
 # bi 输出的笔信号序列
 # high 最高价的序列
 # low 最低价的序列
-# small_period 是否是小级别
-def CalcBi(count, bi, high, low, open_price, close_price, small_period=False):
+def CalcBi(count, bi, high, low, open_price, close_price):
     # 标记分型的顶底
     for i in range(1, count):
         # x 前一个笔低点
@@ -233,7 +228,7 @@ def CalcBi(count, bi, high, low, open_price, close_price, small_period=False):
                         bi[k] = 0
                     break
         elif b1:
-            if (x == y and x == 0) or y > x or is_bi(bi, high, low, open_price, close_price, x, i, 1, small_period):
+            if (x == y and x == 0) or y > x or is_bi(bi, high, low, open_price, close_price, x, i, 1):
                 bi[x] = -1
                 bi[i] = 1
                 for t in range(x + 1, i):
@@ -241,7 +236,7 @@ def CalcBi(count, bi, high, low, open_price, close_price, small_period=False):
                 i = adjust_bi(bi, high, low, x, i)
 
         elif b2:
-            if (x == y and y == 0) or x > y or is_bi(bi, high, low, open_price, close_price, y, i, -1, small_period):
+            if (x == y and y == 0) or x > y or is_bi(bi, high, low, open_price, close_price, y, i, -1):
                 bi[y] = 1
                 bi[i] = -1
                 for t in range(y + 1, i):
@@ -308,7 +303,7 @@ def FindLastFractalRegion(count, bi_series, time_series, high_series, low_series
             return {"direction": -1, "top_fractal": top_fractal, "bottom_fractal": bottom_fractal}
 
 
-def calculate_bi(bi_list, high_list, low_list, open_list, close_list, small_period=False):
+def calculate_bi(bi_list, high_list, low_list, open_list, close_list):
     count = len(bi_list)
     # 标记分型的顶底
     for i in range(1, count):
@@ -340,7 +335,7 @@ def calculate_bi(bi_list, high_list, low_list, open_list, close_list, small_peri
                         bi_list[k] = 0
                     break
         elif b1:
-            if (x == y and x == 0) or y > x or is_bi(bi_list, high_list, low_list, open_list, close_list, x, i, 1, small_period):
+            if (x == y and x == 0) or y > x or is_bi(bi_list, high_list, low_list, open_list, close_list, x, i, 1):
                 bi_list[x] = -1
                 bi_list[i] = 1
                 for t in range(x + 1, i):
@@ -348,7 +343,7 @@ def calculate_bi(bi_list, high_list, low_list, open_list, close_list, small_peri
                 i = adjust_bi(bi_list, high_list, low_list, x, i)
 
         elif b2:
-            if (x == y and y == 0) or x > y or is_bi(bi_list, high_list, low_list, open_list, close_list, y, i, -1, small_period):
+            if (x == y and y == 0) or x > y or is_bi(bi_list, high_list, low_list, open_list, close_list, y, i, -1):
                 bi_list[y] = 1
                 bi_list[i] = -1
                 for t in range(y + 1, i):

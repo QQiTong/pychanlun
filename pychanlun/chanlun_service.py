@@ -14,7 +14,7 @@ from pychanlun.KlineDataTool import KlineDataTool
 from pychanlun.config import config
 from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
-from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data, is_small_period
+from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data
 import pychanlun.entanglement as entanglement
 
 
@@ -60,8 +60,7 @@ def get_data(symbol, period, end_date=None):
                 list(data["kline_data"]["high"]),
                 list(data["kline_data"]["low"]),
                 list(data["kline_data"]["open"]),
-                data["kline_data"]["close"],
-                is_small_period(data["period"])
+                data["kline_data"]["close"]
             )
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
@@ -87,8 +86,7 @@ def get_data(symbol, period, end_date=None):
                 list(data["kline_data"]["high"]),
                 list(data["kline_data"]["low"]),
                 list(data["kline_data"]["open"]),
-                list(data["kline_data"]["close"]),
-                is_small_period(data["period"])
+                list(data["kline_data"]["close"])
             )
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
@@ -123,8 +121,7 @@ def get_data(symbol, period, end_date=None):
                 list(data["kline_data"]["high"]),
                 list(data["kline_data"]["low"]),
                 list(data["kline_data"]["open"]),
-                list(data["kline_data"]["close"]),
-                is_small_period(data["period"])
+                list(data["kline_data"]["close"])
             )
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
