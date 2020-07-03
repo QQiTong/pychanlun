@@ -10,6 +10,8 @@ import pandas as pd
 import numpy as np
 from et_stopwatch import Stopwatch
 
+from pychanlun import Duan
+
 from func_timeout import func_set_timeout
 
 from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData
@@ -39,6 +41,8 @@ def get_data(symbol, period, end_date=None):
     required_period_list.reverse()
     for period_one in required_period_list:
         kline_data = get_instrument_data(symbol, period_one, end_date, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+        if kline_data is None or len(kline_data) == 0:
+            continue
         kline_data = pd.DataFrame(kline_data)
         kline_data["time_str"] = kline_data["time"] \
             .apply(lambda value: datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M"))
@@ -323,10 +327,27 @@ def get_data(symbol, period, end_date=None):
     fractal_region2 = {} if fractal_region2 is None else fractal_region2
     resp['fractal'] = [fractal_region, fractal_region2]
 
+    resp['notLower'] = calcNotLower(list(kline_data["duan"]), list(kline_data["low"]))
+    resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["low"]))
+
     stopwatch.stop()
     logging.info(stopwatch)
 
     return resp
+
+
+def calcNotLower(duanList, lowList):
+    if Duan.notLower(duanList, lowList):
+        return True
+    else:
+        return False
+
+
+def calcNotHigher(duanList, highList):
+    if Duan.notHigher(duanList, highList):
+        return True
+    else:
+        return False
 
 
 # 测试运行: python D:\development\pychanlun\pychanlun\chanlun_service.py

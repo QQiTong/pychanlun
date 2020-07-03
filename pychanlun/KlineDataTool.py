@@ -70,15 +70,15 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
         end = datetime.strptime(endDate, "%Y-%m-%d")
         # symbol = re.sub('\d+', "88", symbol)
     timeDeltaMap = {
-        '1m': -7 * 3,
-        '3m': -31 * 3,
-        '5m': -31 * 3,
-        '15m': -31 * 3,
-        '30m': -31 * 8,
-        '60m': -31 * 8,
-        '180m': -31 * 8,
-        '1d': -31 * 10,
-        '3d': -31 * 30
+        '1m': -3,
+        '3m': -3 * 3,
+        '5m': -3 * 5,
+        '15m': -3 * 15,
+        '30m': -3 * 30,
+        '60m': -3 * 60,
+        '180m': -3 * 180,
+        '1d': -1000,
+        '3d': -3000
     }
     start_date = end + timedelta(timeDeltaMap[period])
     df = rq.get_price(symbol, frequency=period,
@@ -140,15 +140,15 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
         end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     timeDeltaMap = {
-        '1m': -7 * 3,
-        '3m': -31 * 3,
-        '5m': -31 * 3,
-        '15m': -31 * 3,
-        '30m': -31 * 8,
-        '60m': -31 * 8,
-        '180m': -31 * 8,
-        '1d': -31 * 10,
-        '3d': -31 * 30
+        '1m': -3,
+        '3m': -3 * 3,
+        '5m': -3 * 5,
+        '15m': -3 * 15,
+        '30m': -3 * 30,
+        '60m': -3 * 60,
+        '180m': -3 * 180,
+        '1d': -1000,
+        '3d': -3000
     }
     start_date = end + timedelta(timeDeltaMap[period])
     code = "%s_%s" % (symbol, period)

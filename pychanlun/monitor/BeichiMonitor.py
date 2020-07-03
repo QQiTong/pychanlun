@@ -3,7 +3,7 @@ import logging
 import traceback
 from pychanlun.chanlun_service import get_data
 from pychanlun.DingMsg import DingMsg
-
+import signal
 import rqdatac as rq
 from datetime import datetime, timedelta
 from rqdatac import *
@@ -478,6 +478,15 @@ def getDominantSymbol():
     return dominantSymbolList, dominantSymbolInfoList
 
 
+is_run = True
+
+
+def signal_hanlder(signalnum, frame):
+    logging.info("正在停止程序。")
+    global is_run
+    is_run = False
+
+
 # 监控期货
 # timeScope 监控距离现在多少分钟的
 def monitorFuturesAndDigitCoin(type, symbolList):
@@ -499,14 +508,14 @@ def monitorFuturesAndDigitCoin(type, symbolList):
     else:
         symbolList = global_stock_symbol
         periodList = periodList3
-    try:
-        while True:
+    while is_run:
+        try:
             for i in range(len(symbolList)):
                 for j in range(len(periodList)):
                     symbol = symbolList[i]
                     period = periodList[j]
                     print("current:", symbol, period, datetime.now())
-                    result = get_data(period, symbol)
+                    result = get_data(symbol, period)
                     if result.get('close') is not None and len(result['close']) > 0:
                         close_price = result['close'][-1]
                         # 大级别macd 背驰成功率较高
@@ -522,28 +531,17 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                 time.sleep(0)
             else:
                 time.sleep(5)
-    except Exception as e:
-        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
-        print("Error Occurred: {0}".format(traceback.format_exc()))
-        if type == "1":
-            print("期货出异常了", Exception)
-            threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolList]).start()
-        elif type == "2":
-            print("OKEX出异常了", Exception)
-            time.sleep(10)
-            threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
-        elif type == "3":
-            print("外盘期货出异常了", Exception, e, symbol)
-            threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol]).start()
-        else:
-            print("外盘股票出异常了", Exception)
-            threading.Thread(target=monitorFuturesAndDigitCoin, args=['4', global_stock_symbol]).start()
-
-
-'''
-监控背驰
-'''
-
+        except Exception as e:
+            print("Error Occurred: {0}".format(traceback.format_exc()))
+            if type == "1":
+                print("期货出异常了", Exception)
+            elif type == "2":
+                print("OKEX出异常了", Exception)
+                time.sleep(10)
+            elif type == "3":
+                print("外盘期货出异常了", Exception, e, symbol)
+            else:
+                print("外盘股票出异常了", Exception)
 
 def monitorBeichi(result, symbol, period, closePrice):
     signal = 'beichi'
@@ -580,9 +578,9 @@ def monitorBeichi(result, symbol, period, closePrice):
 # 为提高胜率 小级别 一定要 不破前高和 不破前低才能进场
 def monitorHuila(result, symbol, period, closePrice):
     signal = 'huila'
-    big_period = period != '1m' and period != '3m' and period != '5m'
-    notLower = result['notLower']
-    notHigher = result['notHigher']
+    # big_period = period != '1m' and period != '3m' and period != '5m'
+    # notLower = result['notLower']
+    # notHigher = result['notHigher']
 
     # 监控回拉
     if len(result['buy_zs_huila']['date']) > 0:
@@ -999,32 +997,27 @@ def calStopWinCount(symbol, period, positionInfo, closePrice):
 
 
 def run(**kwargs):
-    init('license',
-         'R-yCtlfkzEy5pJSHCL3BIuraslQ-bE4Fh11pt2_iPkpl09pI0rDCvhQ7CEQ0nEqbZ5tcEt-Bs1YWfR3RE9IxRbgJpU9Kjli3oOMOXEpEMy5spOZpmf8Gp9DVgdysfNEga4QxX7Wy-SY--_Qrvtq-iUHmmRHVRn3_RYS0Zp21TIY=d1ew3T3pkd68D5yrr2OoLr7uBF6A3AekruZMo-KhGPqaYFMFOTztTeFJmnY-N3lCPFEhm673p1BZIZDrN_pC_njhwl-r5jZnAMptcHM0Ge1FK6Pz7XiauJGE5KBNvHjLHcFtvlAGtvh83sjm70tTmVqfFHETKfUVpz2ogbCzCAo=',
-         ('rqdatad-pro.ricequant.com', 16011))
+    signal.signal(signal.SIGINT, signal_hanlder)
     # 主力合约，主力合约详细信息
     symbolList, dominantSymbolInfoList = getDominantSymbol()
     # 24个品种 拆分成2份  2分16秒 轮完一次
     # symbolListSplit = [symbolList[i:i + 12] for i in range(0, len(symbolList), 12)]
     # 27个品种 拆分3份   1份25秒 轮完一次
     symbolListSplit = [symbolList[i:i + 9] for i in range(0, len(symbolList), 9)]
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]).start()
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[3]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[4]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[5]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[6]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[7]]).start()
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['1',symbolList]).start()
+    thread_list = [threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]),
+                   threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]),
+                   threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]),]
+                   # threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol])]
 
-    # 外盘期货监控
-    threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol]).start()
-    # 外盘股票监控
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=['4', global_stock_symbol]).start()
+    for thread in thread_list:
+        thread.start()
 
-    # threading.Thread(target=monitorFuturesAndDigitCoin, args=["2", symbolListDigitCoin]).start()
+    while True:
+        for thread in thread_list:
+            if thread.is_alive():
+                break
+        else:
+            break
 
 
 if __name__ == '__main__':
