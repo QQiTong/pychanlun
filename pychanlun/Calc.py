@@ -151,40 +151,40 @@ class Calc:
         match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
         if match_stock is not None:
             cat = "STOCK"
-            klineData = klineDataTool.getStockData(symbol, period, endDate)
+            klineData = getStockData(symbol, period, endDate)
             bigLevelPeriod = self.futureLevelMap[period]
-            klineDataBigLevel = klineDataTool.getStockData(symbol, bigLevelPeriod, endDate)
+            klineDataBigLevel = getStockData(symbol, bigLevelPeriod, endDate)
             klineDataBigLevel2 = []
         #    外盘期货和股票
         elif symbol in config['global_future_symbol'] or symbol in config['global_stock_symbol']:
             cat = "GLOBAL_FUTURE"
-            klineData = klineDataTool.getGlobalFutureData(symbol, period, endDate)
+            klineData = getGlobalFutureData(symbol, period, endDate)
             bigLevelPeriod = self.futureLevelMap[period]
-            klineDataBigLevel = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod, endDate)
+            klineDataBigLevel = getGlobalFutureData(symbol, bigLevelPeriod, endDate)
             bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
-            klineDataBigLevel2 = klineDataTool.getGlobalFutureData(symbol, bigLevelPeriod2, endDate)
+            klineDataBigLevel2 = getGlobalFutureData(symbol, bigLevelPeriod2, endDate)
         else:
             if 'BTC' in symbol:
                 cat = "DIGIT_COIN"
                 # 转换后的本级别
                 currentPeriod = self.okexPeriodMap[period]
 
-                klineData = klineDataTool.getDigitCoinData(symbol, currentPeriod, endDate)
+                klineData = getDigitCoinData(symbol, currentPeriod, endDate)
                 # 转换后的高级别
                 bigLevelPeriod = self.okexPeriodMap[self.levelMap[period]]
-                klineDataBigLevel = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod, endDate)
+                klineDataBigLevel = getDigitCoinData(symbol, bigLevelPeriod, endDate)
                 # 转换后的高高级别
                 bigLevelPeriod2 = self.okexPeriodMap[self.levelMap[self.levelMap[period]]]
-                klineDataBigLevel2 = klineDataTool.getDigitCoinData(symbol, bigLevelPeriod2, endDate)
+                klineDataBigLevel2 = getDigitCoinData(symbol, bigLevelPeriod2, endDate)
             else:
                 # 期货
                 cat = "FUTURE"
                 currentPeriod = self.periodMap[period]
-                klineData = klineDataTool.getFutureData(symbol, currentPeriod, endDate)
+                klineData = getFutureData(symbol, currentPeriod, endDate)
                 bigLevelPeriod = self.futureLevelMap[currentPeriod]
-                klineDataBigLevel = klineDataTool.getFutureData(symbol, bigLevelPeriod, endDate)
+                klineDataBigLevel = getFutureData(symbol, bigLevelPeriod, endDate)
                 bigLevelPeriod2 = self.futureLevelMap[bigLevelPeriod]
-                klineDataBigLevel2 = klineDataTool.getFutureData(symbol, bigLevelPeriod2, endDate)
+                klineDataBigLevel2 = getFutureData(symbol, bigLevelPeriod2, endDate)
 
         jsonObj = klineData  # 本级别的K线数据
         jsonObjBigLevel = klineDataBigLevel  # 高级别的K线数据

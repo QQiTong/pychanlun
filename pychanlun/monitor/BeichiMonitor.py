@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
 import logging
 import traceback
-from pychanlun.Calc import Calc
+from pychanlun.chanlun_service import get_data
 from pychanlun.DingMsg import DingMsg
-from pychanlun.KlineDataTool import KlineDataTool
+
 import rqdatac as rq
 from datetime import datetime, timedelta
 from rqdatac import *
 import time
 import threading
 from pychanlun.Mail import Mail
-import json
+
 from pychanlun.db import DBPyChanlun
 from pychanlun.config import config
 from pychanlun.monitor.BusinessService import businessService
 import pytz
-import requests
+
 import pymongo
 
 tz = pytz.timezone('Asia/Shanghai')
 '''
 综合监控
 '''
-klineDataTool = KlineDataTool()
 # 米筐数据 主力连续合约RB88 这个会比实时数据少一天
 symbolListDigitCoin = ['BTC'
                        # 'ETH_CQ', 'BCH_CQ', 'LTC_CQ', 'BSV_CQ'
@@ -506,9 +505,8 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                 for j in range(len(periodList)):
                     symbol = symbolList[i]
                     period = periodList[j]
-                    calc = Calc()
                     print("current:", symbol, period, datetime.now())
-                    result = calc.calcData(period, symbol)
+                    result = get_data(period, symbol)
                     if result.get('close') is not None and len(result['close']) > 0:
                         close_price = result['close'][-1]
                         # 大级别macd 背驰成功率较高

@@ -71,7 +71,7 @@ while True:
         for j in range(len(periodList)):
             symbol = symbolList[i]
             period = periodList[j]
-            klineData = klineDataTool.getFutureData(symbol, period, 200)
+            klineData = getFutureData(symbol, period, 200)
             price = klineData[-1]['open']
             currentTime = klineData[-1]['time']
             precurrentTime = klineData[-2]['time']
