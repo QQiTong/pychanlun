@@ -10,7 +10,7 @@ from bson import CodecOptions
 from pymongo import UpdateOne
 
 from pychanlun.Calc import Calc
-from pychanlun.KlineDataTool import KlineDataTool
+
 from pychanlun.Mail import Mail
 from pychanlun.funcat.api import *
 from pychanlun.monitor import BeichiMonitor
@@ -888,6 +888,11 @@ def testMA():
     print(conbine_day_ma_list)
     return conbine_day_ma_list
 
+def testSplit():
+    a = [i for i in range(10)]
+    b  = [a[i:i + 5] for i in range(0, len(a), 5)]
+    print(b)
+
 def app():
     # testBitmex()
     # testBeichiDb()
@@ -914,9 +919,7 @@ def app():
     # testWStock()
     # testMongoArr()
     # testWind()
-    testMA()
-    # a = {'above_ma_20':{'b':True}}
-    # b = json.dumps(a)
-    # print(b)
+    # testMA()
+    testSplit()
 if __name__ == '__main__':
     app()

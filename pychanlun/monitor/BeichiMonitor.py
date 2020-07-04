@@ -503,7 +503,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
         periodList = periodList2
 
     elif type == "3":
-        symbolList = global_future_symbol
+        # symbolList = global_future_symbol
         periodList = periodList3
     else:
         symbolList = global_stock_symbol
@@ -1009,12 +1009,22 @@ def run(**kwargs):
     # 24个品种 拆分成2份  2分16秒 轮完一次
     # symbolListSplit = [symbolList[i:i + 12] for i in range(0, len(symbolList), 12)]
     # 27个品种 拆分3份   1份25秒 轮完一次
-    symbolListSplit = [symbolList[i:i + 9] for i in range(0, len(symbolList), 9)]
+    # 外盘 10个品种
+    symbolListSplit = [symbolList[i:i + 7] for i in range(0, len(symbolList), 7)]
+    global_future_split = [global_future_symbol[i:i + 3] for i in range(0, len(global_future_symbol), 3)]
+
     thread_list = [threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]),
                    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]),
-                   threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]),]
-                   # threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_symbol])]
+                   threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]),
+                   threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[3]]),
+                   threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_split[0]]),
+                   threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_split[1]]),
+                   threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_split[2]]),
+                   threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_split[3]])]
 
+    #  测试一：内盘3线程 ，外盘4线程 ，共7线程    内盘 3分10秒 循环一次  外盘 2分34秒 循环一次
+    #  测试二：内盘3线程 ，外盘2线程 ，共5线程    内盘 2分30秒 循环一次  外盘 3分24秒 循环一次
+    #  测试三：内盘4线程， 外盘4线程 ，共8线程    内盘 2分58秒 循环一次  外盘 3分08秒 循环一次
     for thread in thread_list:
         thread.start()
 
