@@ -6,27 +6,34 @@ import logging
 import signal
 import threading
 import pydash
-import pymongo
 
 from pytdx.hq import TdxHq_API
-from pymongo import UpdateOne
 from pychanlun.db import DBPyChanlun
+from pychanlun.db import DBQuantAxis
 from bson.codec_options import CodecOptions
 
-from pychanlun.basic.bi import CalcBi
-from pychanlun.basic.duan import CalcDuan
 from pychanlun import entanglement as entanglement
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
 import pandas as pd
 import datetime
 from pychanlun.zerodegree.notify import send_ding_message
+from pychanlun.basic.bi import calculate_bi
+from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
+from et_stopwatch import Stopwatch
 
 
 tz = pytz.timezone('Asia/Shanghai')
 
 is_run = True
-period_map = {'5m': 0, '15m': 1, '30m': 2}
+period_map = {
+    '5m': 0,
+    '15m': 1,
+    '30m': 2,
+    '60m': 3,
+    '1d': 4,
+    '1w': 5
+}
 
 
 def monitoring_stock():
@@ -55,48 +62,136 @@ def monitoring_stock():
                 market = int(stock[0:1])
                 code = stock[1:]
                 if market == 0:
+                    sse = 'sz'
                     symbol = 'sz%s' % code
                 elif market == 1:
+                    sse = 'sh'
                     symbol = 'sh%s' % code
-                for period in period_map:
-                    bars = api.get_security_bars(period_map[period], market, code, 0, 200)
-                    if bars is not None:
-                        save_bars(symbol, period, bars)
-                        calculate_and_notify(symbol, period)
-                    else:
-                        print("No bars")
+                for period in ['5m', '15m']:
+                    stopwatch = Stopwatch('%s %3s' % (symbol, period))
+                    calculate_and_notify(api, market, sse, symbol, code, period)
+                    stopwatch.stop()
+                    print(stopwatch)
                     if not is_run:
                         break
                 if not is_run:
                     break
 
 
-def calculate_and_notify(code, period):
-    bars = DBPyChanlun['%s_%s' % (code, period)] \
-        .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
-        .find() \
-        .sort('_id', pymongo.DESCENDING) \
-        .limit(1000)
-    bars = list(bars)
-    bars.reverse()
-    if len(bars) < 13:
+def calculate_and_notify(api, market, sse, symbol, code, period):
+    if period not in ['5m', '15m']:
         return
-    count = len(bars)
-    df = pd.DataFrame(bars)
-    time_series = df['_id']
-    high_series = df['high']
-    low_series = df['low']
-    open_series = df['open']
-    close_series = df['close']
+    if period == '5m':
+        required_period_list = ['5m', '30m', '1d']
+    elif period == '15m':
+        required_period_list = ['15m', '60m', '1w']
 
-    # 笔信号
-    bi_series = [0 for i in range(count)]
-    CalcBi(count, bi_series, high_series, low_series, open_series, close_series)
-    duan_series = [0 for i in range(count)]
-    CalcDuan(count, duan_series, bi_series, high_series, low_series)
+    data_list = []
+    required_period_list.reverse()
+    for period_one in required_period_list:
+        kline_data = api.get_security_bars(period_map[period_one], market, code, 0, 800)
 
-    higher_duan_series = [0 for i in range(count)]
-    CalcDuan(count, higher_duan_series, duan_series, high_series, low_series)
+        if kline_data is None or len(kline_data) == 0:
+            return
+        kline_data = pd.DataFrame(kline_data)
+        kline_data["time_str"] = kline_data['datetime']
+        kline_data['datetime'] = kline_data['time_str'] \
+            .apply(lambda value: datetime.datetime.strptime(value, '%Y-%m-%d %H:%M').replace(tzinfo=tz))
+        kline_data['time_stamp'] = kline_data['datetime'].apply(lambda value: value.timestamp())
+        data_list.append({"symbol": code, "period": period_one, "kline_data": kline_data})
+    data_list = pydash.take_right_while(data_list, lambda value: len(value["kline_data"]) > 0)
+
+    for idx in range(len(data_list)):
+        if idx == 0:
+            data = data_list[idx]
+            count = len(data["kline_data"])
+            bi_list = [0 for i in range(count)]
+            duan_list = [0 for i in range(count)]
+            duan_list2 = [0 for i in range(count)]
+            calculate_bi(
+                bi_list,
+                list(data["kline_data"]["high"]),
+                list(data["kline_data"]["low"]),
+                list(data["kline_data"]["open"]),
+                data["kline_data"]["close"]
+            )
+            data["kline_data"]["bi"] = bi_list
+            data["kline_data"]["duan"] = duan_list
+            data["kline_data"]["duan2"] = duan_list2
+        elif idx == 1:
+            data2 = data_list[idx - 1]
+            data = data_list[idx]
+            count = len(data["kline_data"])
+            bi_list = [0 for i in range(count)]
+            duan_list = [0 for i in range(count)]
+            duan_list2 = [0 for i in range(count)]
+            calculate_duan(
+                duan_list,
+                list(data["kline_data"]["time_stamp"]),
+                list(data2["kline_data"]["bi"]),
+                list(data2["kline_data"]["time_stamp"]),
+                list(data["kline_data"]["high"]),
+                list(data["kline_data"]["low"])
+            )
+            split_bi_in_duan(
+                bi_list,
+                duan_list,
+                list(data["kline_data"]["high"]),
+                list(data["kline_data"]["low"]),
+                list(data["kline_data"]["open"]),
+                list(data["kline_data"]["close"])
+            )
+            data["kline_data"]["bi"] = bi_list
+            data["kline_data"]["duan"] = duan_list
+            data["kline_data"]["duan2"] = duan_list2
+        else:
+            data3 = data_list[idx - 2]
+            data2 = data_list[idx - 1]
+            data = data_list[idx]
+            count = len(data["kline_data"])
+            bi_list = [0 for i in range(count)]
+            duan_list = [0 for i in range(count)]
+            duan_list2 = [0 for i in range(count)]
+            calculate_duan(
+                duan_list,
+                list(data["kline_data"]["time_stamp"]),
+                list(data2["kline_data"]["bi"]),
+                list(data2["kline_data"]["time_stamp"]),
+                list(data["kline_data"]["high"]),
+                list(data["kline_data"]["low"])
+            )
+            calculate_duan(
+                duan_list2,
+                list(data["kline_data"]["time_stamp"]),
+                list(data3["kline_data"]["bi"]),
+                list(data3["kline_data"]["time_stamp"]),
+                list(data["kline_data"]["high"]),
+                list(data["kline_data"]["low"])
+            )
+            split_bi_in_duan(
+                bi_list,
+                duan_list,
+                list(data["kline_data"]["high"]),
+                list(data["kline_data"]["low"]),
+                list(data["kline_data"]["open"]),
+                list(data["kline_data"]["close"])
+            )
+            data["kline_data"]["bi"] = bi_list
+            data["kline_data"]["duan"] = duan_list
+            data["kline_data"]["duan2"] = duan_list2
+
+    data = data_list[-1]
+    df = data["kline_data"]
+
+    time_series = list(df['datetime'])
+    high_series = list(df['high'])
+    low_series = list(df['low'])
+    open_series = list(df['open'])
+    close_series = list(df['close'])
+    bi_series = list(df['bi'])
+    duan_series = list(df['duan'])
+
+    higher_duan_series = list(df['duan2'])
 
     entanglement_list = entanglement.CalcEntanglements(time_series, duan_series, bi_series, high_series, low_series)
     zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
@@ -173,48 +268,28 @@ def calculate_and_notify(code, period):
         price = duan_pohuai['buy_duan_break']['data'][i]
         stop_lose_price = duan_pohuai['buy_duan_break']['stop_lose_price'][i]
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '线段反看涨', fire_time,
+        save_signal(sse, symbol, code, period, '线段反看涨', fire_time,
                     price, stop_lose_price, 'BUY_LONG', [], category)
 
 
-def save_bars(code, period, bars):
-    batch = []
-    for idx in range(len(bars)):
-        bar = bars[idx]
-        t = datetime.datetime.strptime(bar['datetime'], '%Y-%m-%d %H:%M')
-        batch.append(UpdateOne({
-            "_id": t.replace(tzinfo=tz)
-        }, {
-            "$set": {
-                "open": bar['open'],
-                "close": bar['close'],
-                "high": bar['high'],
-                "low": bar['low'],
-                "volume": bar['vol'],
-                "amount": bar['amount']
-            }
-        }, upsert=True))
-        if len(batch) >= 100:
-            DBPyChanlun["%s_%s" % (code, period)].bulk_write(batch)
-            batch = []
-    if len(batch) > 0:
-        DBPyChanlun["%s_%s" % (code, period)].bulk_write(batch)
-        batch = []
-
-
-def save_signal(code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
+def save_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
+        stock_one = DBQuantAxis['stock_list'].find_one({"code": code, "sse": sse})
+        name = stock_one['name'] if stock_one is not None else None
         x = DBPyChanlun['stock_signal'] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
             .find_one_and_update({
+                "symbol": symbol,
                 "code": code,
                 "period": period,
                 "fire_time": fire_time,
                 "position": position
             }, {
                 '$set': {
+                    "symbol": symbol,
                     'code': code,
+                    'name': name,
                     'period': period,
                     'remark': remark,
                     'fire_time': fire_time,
@@ -227,7 +302,8 @@ def save_signal(code, period, remark, fire_time, price, stop_lose_price, positio
             }, upsert=True)
         if x is None and fire_time > datetime.datetime.now(tz=tz) - datetime.timedelta(hours=1):
             # 首次信号，做通知
-            content = "【事件通知】%s-%s-%s-%s-%s-%s-%s" % (code, period, remark, tags, category, fire_time, price)
+            content = "【事件通知】%s-%s-%s-%s-%s-%s-%s-%s" \
+                      % (symbol, name, period, remark, fire_time.strftime("%Y%m%d%H%M"), price, tags, category)
             logging.info(content)
             send_ding_message(content)
 
