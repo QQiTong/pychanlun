@@ -44,7 +44,6 @@ def get_data(symbol, period, end_date=None):
         kline_data = get_instrument_data(symbol, period_one, end_date, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
         if kline_data is None or len(kline_data) == 0:
             continue
-        kline_data = pd.DataFrame(kline_data)
         kline_data["time_str"] = kline_data["time"] \
             .apply(lambda value: datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M"))
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
