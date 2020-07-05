@@ -42,14 +42,17 @@ def monitoring_stock():
         logging.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
     stocks = []
-    with open(os.path.join(TDX_HOME, "T0002\\blocknew\\ZXG.blk"), "r") as fo:
-        lines = fo.readlines()
-        stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
-    for x in range(0, 33):
-        block = "T0002\\blocknew\\CL%s.blk" % str(x).zfill(2)
-        with open(os.path.join(TDX_HOME, block), "r") as fo:
+    block_path = os.path.join(TDX_HOME, "T0002\\blocknew\\ZXG.blk")
+    if os.path.exists(block_path):
+        with open(block_path, "r") as fo:
             lines = fo.readlines()
             stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
+    for x in range(0, 33):
+        block_path = os.path.join(TDX_HOME, "T0002\\blocknew\\CL%s.blk" % str(x).zfill(2))
+        if os.path.exists(block_path):
+            with open(block_path, "r") as fo:
+                lines = fo.readlines()
+                stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
     stocks = pydash.uniq(stocks)
 
     logging.info("监控股票数量: {}".format(len(stocks)))
@@ -79,6 +82,7 @@ def monitoring_stock():
 
 
 def calculate_and_notify(api, market, sse, symbol, code, period):
+    print(market, sse, symbol, code, period)
     if period not in ['5m', '15m']:
         return
     if period == '5m':
