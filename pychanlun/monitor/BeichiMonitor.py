@@ -505,7 +505,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                         break
                     symbol = symbolList[i]
                     period = periodList[j]
-                    stopwatch = Stopwatch('%-10s %-10s %-10s' % ('总耗时', symbol, period))
+                    stopwatch = Stopwatch('%-10s %-10s %-10s' % ('耗时', symbol, period))
                     do_monitoring(symbol, period)
                     stopwatch.stop()
                     print(stopwatch)

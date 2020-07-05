@@ -39,23 +39,20 @@ def get_data(symbol, period, end_date=None):
     # 取数据
     data_list = []
     required_period_list.reverse()
-    stopwatch = Stopwatch("%-10s %-10s %-10s" % ('读数据', symbol, period))
     for period_one in required_period_list:
         kline_data = get_instrument_data(symbol, period_one, end_date, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
         if kline_data is None or len(kline_data) == 0:
             continue
+        kline_data = kline_data.iloc[:, -1000:]
+        kline_data = pd.DataFrame(kline_data)
         kline_data["time_str"] = kline_data["time"] \
             .apply(lambda value: datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M"))
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
-    stopwatch.stop()
-    print(stopwatch)
 
     # data_list包含了计算各个周期需要的K线数据，其中的kline_data是一个DataFrame的数据结构
     # 初始的列有: index time open high low close volume
     # time列是以秒表示的timestamp
     # 周期大的排在前面，周期小的排在后面，方便从大周期开始往小周期计算
-    stopwatch = Stopwatch("%-10s %-10s %-10s" % ('信号计算', symbol, period))
-    data_list = pydash.take_right_while(data_list, lambda value: len(value["kline_data"]) > 0)
     for idx in range(len(data_list)):
         if idx == 0:
             data = data_list[idx]
@@ -134,8 +131,7 @@ def get_data(symbol, period, end_date=None):
             data["kline_data"]["bi"] = bi_list
             data["kline_data"]["duan"] = duan_list
             data["kline_data"]["duan2"] = duan_list2
-    stopwatch.stop()
-    print(stopwatch)
+
     daily_data = get_instrument_data(symbol, "1d", end_date)
     daily_data = pd.DataFrame(daily_data)
     daily_data = daily_data.set_index("time")
