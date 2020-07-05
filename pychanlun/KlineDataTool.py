@@ -3,7 +3,6 @@
 import requests
 import json
 from datetime import datetime, timedelta
-import numpy as np
 import pandas as pd
 import time
 from functools import lru_cache
@@ -36,22 +35,10 @@ def getDigitCoinData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-
     }
     r = requests.get(okexUrl, params=payload, headers=headers, timeout=(15, 15))
     data_list = json.loads(r.text)['data']
-
-    df = pd.DataFrame(list(data_list))
-
-    klineList = []
-    for idx, row in df.iterrows():
-        item = {}
-        date = datetime.strptime(row[0], "%Y-%m-%dT%H:%M:%S.%fZ")
-        date = date + timedelta(hours=8)
-        item['time'] = int(time.mktime(date.timetuple()))
-        item['open'] = 0 if pd.isna(row[1]) else row[1]
-        item['high'] = 0 if pd.isna(row[2]) else row[2]
-        item['low'] = 0 if pd.isna(row[3]) else row[3]
-        item['close'] = 0 if pd.isna(row[4]) else row[4]
-        item['volume'] = 0 if pd.isna(row[5]) else row[5]
-        klineList.append(item)
-    return klineList
+    df = pd.DataFrame(list(data_list), columns=['time', 'open', 'high', 'low', 'close', 'volume'])
+    df['time'] = df['time'].apply(lambda value: datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    df.fillna(0, inplace=True)
+    return df
 
 
 @lru_cache(maxsize=128)
@@ -70,13 +57,13 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
         end = datetime.strptime(endDate, "%Y-%m-%d")
         # symbol = re.sub('\d+', "88", symbol)
     timeDeltaMap = {
-        '1m': -3,
-        '3m': -3 * 3,
-        '5m': -3 * 5,
-        '15m': -3 * 15,
-        '30m': -3 * 30,
-        '60m': -3 * 60,
-        '180m': -3 * 180,
+        '1m': -5,
+        '3m': -5 * 3,
+        '5m': -5 * 5,
+        '15m': -5 * 15,
+        '30m': -5 * 30,
+        '60m': -5 * 60,
+        '180m': -5 * 180,
         '1d': -1000,
         '3d': -3000
     }
@@ -106,29 +93,9 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
     #     df = df.resample('4H', closed='left', label='left') \
     #         .agg(ohlc_dict).dropna(how='any')
 
-    nparray = np.array(df)
-    npKlineList = nparray.tolist()
-    # npIndexList = pd.to_numeric(df.index) // 1000000000
-    klineList = []
-
-    for i in range(len(npKlineList)):
-        # timeStamp = int(time.mktime(npKlineList[i][0].timetuple()))
-        timeStamp = int(time.mktime(df.index[i].timetuple()))
-        item = {}
-        item['time'] = timeStamp
-        item['open'] = 0 if pd.isna(npKlineList[i][0]) else npKlineList[i][0]
-        item['high'] = 0 if pd.isna(npKlineList[i][1]) else npKlineList[i][1]
-        item['low'] = 0 if pd.isna(npKlineList[i][2]) else npKlineList[i][2]
-        item['close'] = 0 if pd.isna(npKlineList[i][3]) else npKlineList[i][3]
-        item['volume'] = 0 if pd.isna(npKlineList[i][4]) else npKlineList[i][4]
-        klineList.append(item)
-        # print("item->", item)
-    # print("期货k线结果:", klineList)
-    # endTime = datetime.now() - startTime
-    # print("函数时间", endTime)
-    # if period=='3d':
-    # print(len(klineList))
-    return klineList
+    df['time'] = df.index.to_series().apply(lambda value: value.timestamp())
+    df.fillna(0, inplace=True)
+    return df
 
 
 @lru_cache(maxsize=128)
@@ -140,13 +107,13 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
         end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     timeDeltaMap = {
-        '1m': -3,
-        '3m': -3 * 3,
-        '5m': -3 * 5,
-        '15m': -3 * 15,
-        '30m': -3 * 30,
-        '60m': -3 * 60,
-        '180m': -3 * 180,
+        '1m': -5,
+        '3m': -5 * 3,
+        '5m': -5 * 5,
+        '15m': -5 * 15,
+        '30m': -5 * 30,
+        '60m': -5 * 60,
+        '180m': -5 * 180,
         '1d': -1000,
         '3d': -3000
     }
@@ -155,19 +122,11 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
     data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
         "_id": {"$gte": start_date, "$lte": end}
     }).sort("_id", pymongo.ASCENDING)
-    df = pd.DataFrame(list(data_list))
-
-    klineList = []
-    for idx, row in df.iterrows():
-        item = {}
-        item['time'] = int(time.mktime(row["_id"].timetuple()))
-        item['open'] = 0 if pd.isna(row["open"]) else row["open"]
-        item['high'] = 0 if pd.isna(row["high"]) else row["high"]
-        item['low'] = 0 if pd.isna(row["low"]) else row["low"]
-        item['close'] = 0 if pd.isna(row["close"]) else row["close"]
-        item['volume'] = 0 if pd.isna(row["volume"]) else row["volume"]
-        klineList.append(item)
-    return klineList
+    data_list = list(data_list)
+    kline_data = pd.DataFrame(data_list)
+    kline_data['time'] = kline_data['_id'].apply(lambda value: value.timestamp())
+    kline_data.fillna(0, inplace=True)
+    return kline_data
 
 
 @lru_cache(maxsize=128)
@@ -193,13 +152,8 @@ def getGlobalFutureData(symbol, period, endDate, stamp=datetime.now().strftime("
     data_list = DBPyChanlun[code] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
         .find({"_id": {"$gte": start_date, "$lte": end}}).sort("_id", pymongo.ASCENDING)
-    df = pd.DataFrame(list(data_list))
-
-    klineList = []
-    for idx, row in df.iterrows():
-        item = {'time': int(time.mktime(row["_id"].timetuple())), 'open': 0 if pd.isna(row["open"]) else row["open"],
-                'high': 0 if pd.isna(row["high"]) else row["high"], 'low': 0 if pd.isna(row["low"]) else row["low"],
-                'close': 0 if pd.isna(row["close"]) else row["close"],
-                'volume': 0 if pd.isna(row["volume"]) else row["volume"]}
-        klineList.append(item)
-    return klineList
+    data_list = list(data_list)
+    kline_data = pd.DataFrame(data_list)
+    kline_data['time'] = kline_data['_id'].apply(lambda value: value.timestamp())
+    kline_data.fillna(0, inplace=True)
+    return kline_data

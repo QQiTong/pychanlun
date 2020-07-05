@@ -71,20 +71,7 @@ filter_tag = ['双盘', '完备买', '完备卖', '扩展完备买', '扩展完�
 def sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price, date_created_str,
               close_price, tag):
     print(msg)
-    # mailResult = mail.send(json.dumps(msg, ensure_ascii=False, indent=4))
-
-    # url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s" \
-    #       "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s" \
-    #       % (signal, tag, symbol + '_' + period, signal, direction,
-    #          '开:' + str(close_price) + ' 止:' + str(stop_lose_price) + ' 触:' + str(price), amount,
-    #          '开:' + fire_time_str + ' 触:' + date_created_str)
-    # requests.post(url)
-
     dingMsg.send(msg)
-    # if not mailResult:
-    #     print("发送失败")
-    # else:
-    #     print("发送成功")
 
 
 # price 信号触发的价格， close_price 提醒时的收盘价 direction 多B 空S amount 开仓数量
@@ -518,19 +505,8 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                         break
                     symbol = symbolList[i]
                     period = periodList[j]
-                    stopwatch = Stopwatch('{} {} {}'.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), symbol, period))
-                    result = get_data(symbol, period)
-                    if result.get('close') is not None and len(result['close']) > 0:
-                        close_price = result['close'][-1]
-                        # 大级别macd 背驰成功率较高
-                        # if period != '1m' and period != '3m' and period != '5m':
-                        #     monitorBeichi(result, symbol, period, close_price)
-                        monitorHuila(result, symbol, period, close_price)
-                        monitorTupo(result, symbol, period, close_price)
-                        monitorVReverse(result, symbol, period, close_price)
-                        monitorFiveVReverse(result, symbol, period, close_price)
-                        monitorDuanBreak(result, symbol, period, close_price)
-                        monitorFractal(result, symbol, period, close_price)
+                    stopwatch = Stopwatch('%-10s %-10s %-10s' % ('总耗时', symbol, period))
+                    do_monitoring(symbol, period)
                     stopwatch.stop()
                     print(stopwatch)
             if type == "1" or type == "3":
@@ -548,6 +524,22 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                 print("外盘期货出异常了", Exception, e, symbol)
             else:
                 print("外盘股票出异常了", Exception)
+
+
+def do_monitoring(symbol, period):
+    result = get_data(symbol, period)
+    if result.get('close') is not None and len(result['close']) > 0:
+        close_price = result['close'][-1]
+        # 大级别macd 背驰成功率较高
+        # if period != '1m' and period != '3m' and period != '5m':
+        #     monitorBeichi(result, symbol, period, close_price)
+        monitorHuila(result, symbol, period, close_price)
+        monitorTupo(result, symbol, period, close_price)
+        monitorVReverse(result, symbol, period, close_price)
+        monitorFiveVReverse(result, symbol, period, close_price)
+        monitorDuanBreak(result, symbol, period, close_price)
+        monitorFractal(result, symbol, period, close_price)
+
 
 def monitorBeichi(result, symbol, period, closePrice):
     signal = 'beichi'
@@ -1012,7 +1004,7 @@ def run(**kwargs):
     # 外盘 10个品种
     symbolListSplit = [symbolList[i:i + 7] for i in range(0, len(symbolList), 7)]
     global_future_split = [global_future_symbol[i:i + 3] for i in range(0, len(global_future_symbol), 3)]
-
+    #
     thread_list = [threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[0]]),
                    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[1]]),
                    threading.Thread(target=monitorFuturesAndDigitCoin, args=['1', symbolListSplit[2]]),
@@ -1025,6 +1017,7 @@ def run(**kwargs):
     #  测试一：内盘3线程 ，外盘4线程 ，共7线程    内盘 3分10秒 循环一次  外盘 2分34秒 循环一次
     #  测试二：内盘3线程 ，外盘2线程 ，共5线程    内盘 2分30秒 循环一次  外盘 3分24秒 循环一次
     #  测试三：内盘4线程， 外盘4线程 ，共8线程    内盘 2分58秒 循环一次  外盘 3分08秒 循环一次
+    stopwatch = Stopwatch("监控")
     for thread in thread_list:
         thread.start()
 
@@ -1034,6 +1027,8 @@ def run(**kwargs):
                 break
         else:
             break
+    stopwatch.stop()
+    print(stopwatch)
 
 
 if __name__ == '__main__':
