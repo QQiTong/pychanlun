@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import logging
+
+from logbook import Logger
 import traceback
 from pychanlun.chanlun_service import get_data
 from pychanlun.DingMsg import DingMsg
@@ -18,7 +19,11 @@ import pytz
 
 import pymongo
 
+log = Logger(__name__)
+
 tz = pytz.timezone('Asia/Shanghai')
+
+
 '''
 综合监控
 '''
@@ -469,7 +474,7 @@ is_run = True
 
 
 def signal_hanlder(signalnum, frame):
-    logging.info("正在停止程序。")
+    log.info("正在停止程序。")
     global is_run
     is_run = False
 
@@ -477,7 +482,6 @@ def signal_hanlder(signalnum, frame):
 # 监控期货
 # timeScope 监控距离现在多少分钟的
 def monitorFuturesAndDigitCoin(type, symbolList):
-    logger = logging.getLogger()
     if type == "1":
         # auth('13088887055', 'chanlun123456')
         # count = get_query_count()
@@ -508,7 +512,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                     stopwatch = Stopwatch('%-10s %-10s %-10s' % ('耗时', symbol, period))
                     do_monitoring(symbol, period)
                     stopwatch.stop()
-                    print(stopwatch)
+                    log.info(stopwatch)
             if type == "1" or type == "3":
                 time.sleep(0)
             else:

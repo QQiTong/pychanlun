@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-import logging
+import sys
+from logbook import Logger, StreamHandler
 from rqdatac import init
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -12,11 +13,4 @@ init(
     ('rqdatad-pro.ricequant.com', 16011)
 )
 
-logger = logging.getLogger('pychanlun')
-logger.propagate = 0
-logger.setLevel(logging.INFO)
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+StreamHandler(sys.stdout).push_application()

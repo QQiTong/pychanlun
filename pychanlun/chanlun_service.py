@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import re
-import logging
 import traceback
 import datetime
 
+from logbook import Logger
 import pandas as pd
 import numpy as np
 from et_stopwatch import Stopwatch
@@ -20,7 +20,7 @@ from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
 from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data
 import pychanlun.entanglement as entanglement
 
-logger = logging.getLogger('pychanlun')
+log = Logger(__name__)
 
 
 @func_set_timeout(60)
@@ -331,7 +331,7 @@ def get_data(symbol, period, end_date=None):
     resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["low"]))
 
     stopwatch.stop()
-    logger.info(stopwatch)
+    log.info(stopwatch)
 
     return resp
 
@@ -354,8 +354,8 @@ def calcNotHigher(duanList, highList):
 if __name__ == '__main__':
     # noinspection PyBroadException
     try:
-        get_data("RB2010", "5m")
+        get_data("YM", "3m")
     except Exception as e:
-        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
+        log.info("Error Occurred: {0}".format(traceback.format_exc()))
     finally:
         exit()

@@ -76,3 +76,4 @@ rqdatac
 PyYAML
 seaborn
 statsmodels
+logbook

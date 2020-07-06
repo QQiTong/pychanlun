@@ -2,7 +2,7 @@
 
 import pytz
 import os
-import logging
+from logbook import Logger
 import signal
 import threading
 import pydash
@@ -24,6 +24,7 @@ from et_stopwatch import Stopwatch
 
 
 tz = pytz.timezone('Asia/Shanghai')
+log = Logger(__name__)
 
 is_run = True
 period_map = {
@@ -39,7 +40,7 @@ period_map = {
 def monitoring_stock():
     TDX_HOME = os.environ.get("TDX_HOME")
     if TDX_HOME is None:
-        logging.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
+        log.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
     stocks = []
     block_path = os.path.join(TDX_HOME, "T0002\\blocknew\\ZXG.blk")
@@ -55,7 +56,7 @@ def monitoring_stock():
                 stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
     stocks = pydash.uniq(stocks)
 
-    logging.info("监控股票数量: {}".format(len(stocks)))
+    log.info("监控股票数量: {}".format(len(stocks)))
 
     api = TdxHq_API(heartbeat=True, auto_retry=True)
 
@@ -74,7 +75,7 @@ def monitoring_stock():
                     stopwatch = Stopwatch('%s %3s' % (symbol, period))
                     calculate_and_notify(api, market, sse, symbol, code, period)
                     stopwatch.stop()
-                    print(stopwatch)
+                    log.info(stopwatch)
                     if not is_run:
                         break
                 if not is_run:
@@ -82,7 +83,6 @@ def monitoring_stock():
 
 
 def calculate_and_notify(api, market, sse, symbol, code, period):
-    print(market, sse, symbol, code, period)
     if period not in ['5m', '15m']:
         return
     if period == '5m':
@@ -308,12 +308,12 @@ def save_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_p
             # 首次信号，做通知
             content = "【事件通知】%s-%s-%s-%s-%s-%s-%s-%s" \
                       % (symbol, name, period, remark, fire_time.strftime("%m%d%H%M"), price, tags, category)
-            logging.info(content)
+            log.info(content)
             send_ding_message(content)
 
 
 def signal_handler(signal_num, frame):
-    logging.info("正在停止程序。")
+    log.info("正在停止程序。")
     global is_run
     is_run = False
 
