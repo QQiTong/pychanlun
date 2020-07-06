@@ -2,7 +2,6 @@
 
 import os
 import logging
-from logging import handlers
 from rqdatac import init
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -13,8 +12,11 @@ init(
     ('rqdatad-pro.ricequant.com', 16011)
 )
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(threadName)s %(levelname)s %(message)s')
-# logger = logging.getLogger()
-# logfile = os.path.join(BASE_DIR, "logs\pychanlun.log")
-# fh = handlers.RotatingFileHandler(filename=logfile, maxBytes=10*1024*1024, backupCount=5)
-# logger.addHandler(fh)
+logger = logging.getLogger('pychanlun')
+logger.propagate = 0
+logger.setLevel(logging.INFO)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)

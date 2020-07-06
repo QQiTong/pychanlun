@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import re
-import pydash
 import logging
 import traceback
 import datetime
@@ -21,10 +20,12 @@ from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
 from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data
 import pychanlun.entanglement as entanglement
 
+logger = logging.getLogger('pychanlun')
+
 
 @func_set_timeout(60)
 def get_data(symbol, period, end_date=None):
-    stopwatch = Stopwatch('计算数据')
+    stopwatch = Stopwatch('get_data')
     required_period_list = get_required_period_list(period)
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
     if match_stock is not None:
@@ -330,7 +331,7 @@ def get_data(symbol, period, end_date=None):
     resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["low"]))
 
     stopwatch.stop()
-    logging.info(stopwatch)
+    logger.info(stopwatch)
 
     return resp
 
@@ -355,6 +356,6 @@ if __name__ == '__main__':
     try:
         get_data("RB2010", "5m")
     except Exception as e:
-        logging.info("Error Occurred: {0}".format(traceback.format_exc()))
+        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
     finally:
         exit()
