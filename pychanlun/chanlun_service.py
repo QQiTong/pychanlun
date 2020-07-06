@@ -25,7 +25,7 @@ log = Logger(__name__)
 
 @func_set_timeout(60)
 def get_data(symbol, period, end_date=None):
-    stopwatch = Stopwatch('get_data')
+    stopwatch = Stopwatch('get_data {} {}'.format(symbol, period))
     required_period_list = get_required_period_list(period)
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
     if match_stock is not None:
