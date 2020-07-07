@@ -52,7 +52,7 @@ def get_data(symbol, period, end_date=None):
         kline_data = pd.DataFrame(kline_data)
         kline_data["time_str"] = kline_data["time"] \
             .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
-        
+
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
 
     # data_list包含了计算各个周期需要的K线数据，其中的kline_data是一个DataFrame的数据结构

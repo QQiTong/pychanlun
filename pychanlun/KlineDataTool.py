@@ -92,7 +92,7 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
     #     df = df.resample('4H', closed='left', label='left') \
     #         .agg(ohlc_dict).dropna(how='any')
 
-    df['time'] = df.index.to_series().apply(lambda value: value.timestamp())
+    df['time'] = df.index.to_series().apply(lambda value: value.replace(tzinfo=tz).timestamp())
     df.fillna(0, inplace=True)
     return df
 
