@@ -70,7 +70,6 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
     start_date = end + timedelta(timeDeltaMap[period])
     df = rq.get_price(symbol, frequency=period,
                       fields=['open', 'high', 'low', 'close', 'volume'], start_date=start_date, end_date=end)
-
     # df = get_price('RB1910.XSGE', frequency='180m', end_date=datetime.now(), count=200,
     #                fields=['open', 'high', 'low', 'close', 'volume'])
     # todo 米匡180m 数据有问题,比通达信和文化财经多一个时间,需要手动去除,但是手动去除也不准,需要等米匡修复

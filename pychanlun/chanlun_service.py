@@ -8,6 +8,7 @@ from logbook import Logger
 import pandas as pd
 import numpy as np
 from et_stopwatch import Stopwatch
+import pytz
 
 from pychanlun import Duan
 
@@ -21,6 +22,8 @@ from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zh
 import pychanlun.entanglement as entanglement
 
 log = Logger(__name__)
+
+tz = pytz.timezone('Asia/Shanghai')
 
 
 @func_set_timeout(60)
@@ -44,10 +47,12 @@ def get_data(symbol, period, end_date=None):
         kline_data = get_instrument_data(symbol, period_one, end_date, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
         if kline_data is None or len(kline_data) == 0:
             continue
+
         kline_data = kline_data.iloc[:, -1000:]
         kline_data = pd.DataFrame(kline_data)
         kline_data["time_str"] = kline_data["time"] \
-            .apply(lambda value: datetime.datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M"))
+            .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
+        
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
 
     # data_list包含了计算各个周期需要的K线数据，其中的kline_data是一个DataFrame的数据结构
