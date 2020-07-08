@@ -517,7 +517,7 @@ def monitorFuturesAndDigitCoin(type, symbolList):
                 time.sleep(0)
             else:
                 time.sleep(5)
-        except Exception as e:
+        except BaseException as e:
             print("Error Occurred: {0}".format(traceback.format_exc()))
             if type == "1":
                 print("期货出异常了", Exception)
