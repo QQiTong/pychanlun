@@ -11,7 +11,7 @@ import pychanlun.entanglement as entanglement
 from pychanlun.basic.bi import CalcBi, FindLastFractalRegion
 from pychanlun.basic.duan import CalcDuan, calc_duan_exp
 from pychanlun import Duan
-from pychanlun.KlineDataTool import KlineDataTool
+from pychanlun import KlineDataTool
 from pychanlun.basic.pattern import DualEntangleForBuyLong, DualEntangleForSellShort
 from pychanlun.config import config
 

@@ -33,7 +33,7 @@ import pytz
 import string
 import hashlib
 from futu import *
-from WindPy import w
+# from WindPy import w
 import talib as ta
 import copy
 
@@ -343,8 +343,8 @@ def testRQ():
     # print(df.iloc[0, 3])
     end = datetime.now() + timedelta(1)
     start = datetime.now() + timedelta(-1)
-    df1d = rq.get_price('PG2011', frequency='1m', fields=['open', 'high', 'low', 'close', 'volume'],
-                        )
+    df1d = rq.get_price('RB2010', frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+                        start_date='2020-07-07',end_date='2020-07-08')
     print(df1d)
     # print(df1d.iloc[0,0])
     # print(df1d.iloc[0,1])
@@ -899,7 +899,7 @@ def app():
     # testHuila()
     # testChange()
     # testTQ()
-    # testRQ()
+    testRQ()
     # testMonitor()
     # testThread()
     # testHuobi()
@@ -920,6 +920,6 @@ def app():
     # testMongoArr()
     # testWind()
     # testMA()
-    testSplit()
+    # testSplit()
 if __name__ == '__main__':
     app()

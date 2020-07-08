@@ -54,7 +54,7 @@ dominantSymbolInfoList = {}
 # 期货公司在原有保证金基础上1%
 marginLevelCompany = 0.01
 # 期货账户
-futuresAccount = 60
+futuresAccount = 75
 # 数字货币手续费0.05% 开平仓0.1%
 digitCoinFee = 0.001
 # 数字货币账户
@@ -1005,8 +1005,8 @@ def run(**kwargs):
     # 24个品种 拆分成2份  2分16秒 轮完一次
     # symbolListSplit = [symbolList[i:i + 12] for i in range(0, len(symbolList), 12)]
     # 27个品种 拆分3份   1份25秒 轮完一次
-    # 外盘 10个品种
-    global_future_split = [global_future_symbol[i:i + 3] for i in range(0, len(global_future_symbol), 3)]
+    # 外盘 14个品种
+    global_future_split = [global_future_symbol[i:i + 4] for i in range(0, len(global_future_symbol), 4)]
     #
     thread_list = [threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_split[0]]),
                    threading.Thread(target=monitorFuturesAndDigitCoin, args=['3', global_future_split[1]]),

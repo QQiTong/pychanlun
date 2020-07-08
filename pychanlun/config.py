@@ -126,9 +126,11 @@ config = {
         'ZM': {'margin_rate': 0.07, 'contract_multiplier': 100},  # 2062
         'ZL': {'margin_rate': 0.06, 'contract_multiplier': 600},  # 935
 
-        # 'NID': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'NID': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'ZSD': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'CP': {'margin_rate': 0.1, 'contract_multiplier': 1},
-        # 'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'SB': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # wshq
         'YM': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
         'ES': {'margin_rate': 0.086, 'contract_multiplier': 5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
@@ -158,25 +160,10 @@ config = {
     # 外盘期货品种
     # CL:原油; GC:黄金;SI:白银; CT:棉花;ZS:大豆;ZM:豆粕; ZL:豆油;NID:伦镍;
     # YM:道琼斯 CN:A50 CP:马棕榈
-    'global_future_symbol_origin': ['@CL0W', '@GC0W', '@SI0W', '@YM0Y', 'CN0Y', '03NID', '@ZS0W', '@ZM0Y', '@ZL0W', 'CPO0W', 'CT0W'],
     # wshq
-    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL'],
+    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL','NID','ZSD','CT','SB'],
     # 美国股票
     'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD'],
-    # ldhq
-    # 'global_future_alias': {
-    #     '@CL0W': 'CL',
-    #     '@GC0W': 'GC',
-    #     '@SI0W': 'SI',
-    #     '@YM0Y': 'YM',
-    #     'CN0Y': 'CN',
-    #     '03NID': 'NID',
-    #     'CPO0W': 'CP',
-    #     'CT0W': 'CT',
-    #     '@ZS0W': 'ZS',
-    #     '@ZM0Y': 'ZM',
-    #     '@ZL0W': 'ZL',
-    # },
     # wshq
     'global_future_alias': {
         'NECLA0': 'CL',
@@ -190,12 +177,15 @@ config = {
 
         'WGCNA0': 'CN',
 
-        # 'LENID3M': 'NID',
-
         'COZSA0': 'ZS',
         'COZMA0': 'ZM',
         'COZLA0': 'ZL',
 
+        'IECTA0': 'CT', # 美棉花
+        'IESBA0': 'SB', # 美糖
+
+        'LENID3M': 'NID', # 伦镍
+        'LEZSD3M': 'ZSD', # 伦锌
     },
     'digit_coin_symbol': ['BTC'],
     'digit_coin_symbol_info': [{
@@ -289,24 +279,42 @@ config = {
         #     'type': 'stock',
         #     'feeRate': 0.012
         # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 0.1,
-        #     'order_book_id': 'NID',
-        #     'trading_hours': '7*24',
-        #     'type': 'future',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 0.1,
-        #     'order_book_id': 'CT',
-        #     'trading_hours': '7*24',
-        #     'type': 'future',
-        #     'feeRate': 0.012
-        # },
+        {
+            'contract_multiplier': 1,
+            'exchange': '伦敦',
+            'margin_rate': 0.1,
+            'order_book_id': 'NID',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+       {
+            'contract_multiplier': 1,
+            'exchange': '伦敦',
+            'margin_rate': 0.1,
+            'order_book_id': 'ZSD',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 0.1,
+            'order_book_id': 'CT',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '美国',
+            'margin_rate': 0.1,
+            'order_book_id': 'SB',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
         {
             'contract_multiplier': 50,
             'exchange': '美国',

@@ -93,7 +93,7 @@ global_future_alias = config['global_future_alias']
 global_future_symbol = config['global_future_symbol']
 ohlc_dict = {'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last', 'Volume': 'sum'}
 # 10个品种 5个市场
-futures = ['CEYMA0', 'CEESA0', 'CENQA0', 'WGCNA0', 'NECLA0', 'CMGCA0', 'CMSIA0','COZSA0','COZLA0','COZMA0']
+futures = ['CEYMA0', 'CEESA0', 'CENQA0', 'WGCNA0', 'NECLA0', 'CMGCA0', 'CMSIA0','COZSA0','COZLA0','COZMA0','LENID3M','LEZSD3M','IECTA0','IESBA0']
 is_run = True
 
 
@@ -167,7 +167,7 @@ def fetch_futures_mink():
             25s  9696  次
             '''
             #
-            time.sleep(18)
+            time.sleep(25)
         except Exception as e:
             print("外盘期货采集出错", Exception, e)
             # dingMsg.send("remind外盘期货采集出错")
