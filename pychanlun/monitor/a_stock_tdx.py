@@ -264,16 +264,16 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '笔中枢三卖V看涨', fire_time,
                     price, stop_lose_price, 'BUY_LONG', tags, category)
-
-    count = len(duan_pohuai['buy_duan_break']['date'])
-    for i in range(count):
-        idx = duan_pohuai['buy_duan_break']['idx'][i]
-        fire_time = duan_pohuai['buy_duan_break']['date'][i]
-        price = duan_pohuai['buy_duan_break']['data'][i]
-        stop_lose_price = duan_pohuai['buy_duan_break']['stop_lose_price'][i]
-        category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(sse, symbol, code, period, '线段破坏看涨', fire_time,
-                    price, stop_lose_price, 'BUY_LONG', [], category)
+    #
+    # count = len(duan_pohuai['buy_duan_break']['date'])
+    # for i in range(count):
+    #     idx = duan_pohuai['buy_duan_break']['idx'][i]
+    #     fire_time = duan_pohuai['buy_duan_break']['date'][i]
+    #     price = duan_pohuai['buy_duan_break']['data'][i]
+    #     stop_lose_price = duan_pohuai['buy_duan_break']['stop_lose_price'][i]
+    #     category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
+    #     save_signal(sse, symbol, code, period, '线段破坏看涨', fire_time,
+    #                 price, stop_lose_price, 'BUY_LONG', [], category)
 
 
 def save_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
