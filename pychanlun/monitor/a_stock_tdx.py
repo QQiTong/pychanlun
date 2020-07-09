@@ -1,27 +1,27 @@
 # -*- coding: utf-8 -*-
 
-import pytz
+import datetime
 import os
-from logbook import Logger
 import signal
 import threading
-import pydash
 
-from pytdx.hq import TdxHq_API
-from pychanlun.db import DBPyChanlun
-from pychanlun.db import DBQuantAxis
+import pandas as pd
+import pydash
+import pytz
 from bson.codec_options import CodecOptions
+from et_stopwatch import Stopwatch
+from logbook import Logger
+from pytdx.hq import TdxHq_API
 
 from pychanlun import entanglement as entanglement
-from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
-import pandas as pd
-import datetime
-from pychanlun.zerodegree.notify import send_ding_message
 from pychanlun.basic.bi import calculate_bi
+from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
-from et_stopwatch import Stopwatch
-
+from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
+from pychanlun.db import DBPyChanlun
+from pychanlun.db import DBQuantAxis
+from pychanlun.zerodegree.notify import send_ding_message
+import QUANTAXIS as QA
 
 tz = pytz.timezone('Asia/Shanghai')
 log = Logger(__name__)
@@ -94,15 +94,23 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
     required_period_list.reverse()
     for period_one in required_period_list:
         kline_data = api.get_security_bars(period_map[period_one], market, code, 0, 800)
-
         if kline_data is None or len(kline_data) == 0:
             return
         kline_data = pd.DataFrame(kline_data)
+
+        MACD = QA.MACD(kline_data['close'], 12, 26, 9)
+        kline_data['diff'] = MACD['DIFF']
+        kline_data['dea'] = MACD['DEA']
+        kline_data['macd'] = MACD['MACD']
+        kline_data['jc'] = QA.CROSS(MACD['DIFF'], MACD['DEA'])
+        kline_data['sc'] = QA.CROSS(MACD['DEA'], MACD['DIFF'])
         kline_data["time_str"] = kline_data['datetime']
         kline_data['datetime'] = kline_data['time_str'] \
             .apply(lambda value: datetime.datetime.strptime(value, '%Y-%m-%d %H:%M').replace(tzinfo=tz))
         kline_data['time_stamp'] = kline_data['datetime'].apply(lambda value: value.timestamp())
+
         data_list.append({"symbol": code, "period": period_one, "kline_data": kline_data})
+
     data_list = pydash.take_right_while(data_list, lambda value: len(value["kline_data"]) > 0)
 
     for idx in range(len(data_list)):
@@ -201,7 +209,6 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
     zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
     zs_tupo = entanglement.tu_po(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
     v_reverse = entanglement.v_reverse(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
-    duan_pohuai = entanglement.po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
 
     higher_entaglement_list = entanglement.CalcEntanglements(time_series, higher_duan_series, duan_series, high_series, low_series)
 
@@ -264,16 +271,6 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
         save_signal(code, period, '笔中枢三卖V看涨', fire_time,
                     price, stop_lose_price, 'BUY_LONG', tags, category)
-    #
-    # count = len(duan_pohuai['buy_duan_break']['date'])
-    # for i in range(count):
-    #     idx = duan_pohuai['buy_duan_break']['idx'][i]
-    #     fire_time = duan_pohuai['buy_duan_break']['date'][i]
-    #     price = duan_pohuai['buy_duan_break']['data'][i]
-    #     stop_lose_price = duan_pohuai['buy_duan_break']['stop_lose_price'][i]
-    #     category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-    #     save_signal(sse, symbol, code, period, '线段破坏看涨', fire_time,
-    #                 price, stop_lose_price, 'BUY_LONG', [], category)
 
 
 def save_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):

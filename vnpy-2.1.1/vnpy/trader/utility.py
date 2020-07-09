@@ -300,7 +300,7 @@ class ArrayManager(object):
     """
     For:
     1. time series container of bar data
-    2. calculating technical indicator value
+    2. calculating technical pattern value
     """
 
     def __init__(self, size: int = 100):
@@ -720,7 +720,7 @@ class ArrayManager(object):
         Tuple[float, float]
     ]:
         """
-        Aroon indicator.
+        Aroon pattern.
         """
         aroon_up, aroon_down = talib.AROON(self.high, self.low, n)
 
