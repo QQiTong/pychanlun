@@ -22,6 +22,7 @@ from pychanlun.db import DBPyChanlun
 from pychanlun.db import DBQuantAxis
 from pychanlun.zerodegree.notify import send_ding_message
 import QUANTAXIS as QA
+from pychanlun.chart.chanlun_chart import create_charts
 
 tz = pytz.timezone('Asia/Shanghai')
 log = Logger(__name__)
@@ -80,6 +81,8 @@ def monitoring_stock():
                         break
                 if not is_run:
                     break
+                break
+            break
 
 
 def calculate_and_notify(api, market, sse, symbol, code, period):
@@ -194,6 +197,8 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
 
     data = data_list[-1]
     df = data["kline_data"]
+    create_charts(df, page_title="%s %s" % (data["symbol"], data["period"]),
+                  file="E:\\charts\\%s-%s.html" % (data["symbol"], data["period"]))
 
     time_series = list(df['datetime'])
     high_series = list(df['high'])

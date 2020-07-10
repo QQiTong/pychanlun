@@ -5,11 +5,16 @@ from pyecharts.charts import Kline, Line, Bar, Grid
 """
 用pyecharts生成一张图表快照
 """
+
+
 def create_charts(klines, page_title="Awesome-Pyecharts", file="chanlun-kline.html"):
     grid_chart = Grid(init_opts=opts.InitOpts(
-        width="1300px", height="650px", page_title=page_title
+        width="1300px",
+        height="650px",
+        page_title=page_title,
+        js_host="https://cdn.staticfile.org/echarts/4.6.0/"
     ))
-    times = klines['time_tag'].tolist()
+    times = klines['time_str'].tolist()
     datas = klines[['open', 'close', 'low', 'high']].values.tolist()
     bi_lines = []
     line = []
@@ -17,26 +22,26 @@ def create_charts(klines, page_title="Awesome-Pyecharts", file="chanlun-kline.ht
         if klines.loc[idx, 'bi'] == 1:
             if len(line) == 1:
                 line.append({
-                    'xAxis': klines.loc[idx, 'time_tag'],
+                    'xAxis': klines.loc[idx, 'time_str'],
                     'yAxis': klines.loc[idx, 'high'],
                     'value': klines.loc[idx, 'high'],
                 })
                 bi_lines.append(line)
             line = [{
-                'xAxis': klines.loc[idx, 'time_tag'],
+                'xAxis': klines.loc[idx, 'time_str'],
                 'yAxis': klines.loc[idx, 'high'],
                 'value': klines.loc[idx, 'high'],
             }]
         elif klines.loc[idx, 'bi'] == -1:
             if len(line) == 1:
                 line.append({
-                    'xAxis': klines.loc[idx, 'time_tag'],
+                    'xAxis': klines.loc[idx, 'time_str'],
                     'yAxis': klines.loc[idx, 'low'],
                     'value': klines.loc[idx, 'low'],
                 })
                 bi_lines.append(line)
             line = [{
-                'xAxis': klines.loc[idx, 'time_tag'],
+                'xAxis': klines.loc[idx, 'time_str'],
                 'yAxis': klines.loc[idx, 'low'],
                 'value': klines.loc[idx, 'low'],
             }]
@@ -45,10 +50,10 @@ def create_charts(klines, page_title="Awesome-Pyecharts", file="chanlun-kline.ht
     duan_ydata = []
     for idx in range(len(klines)):
         if klines.loc[idx, 'duan'] == 1:
-            duan_xdata.append(klines.loc[idx, 'time_tag'])
+            duan_xdata.append(klines.loc[idx, 'time_str'])
             duan_ydata.append(klines.loc[idx, 'high'])
         elif klines.loc[idx, 'duan'] == -1:
-            duan_xdata.append(klines.loc[idx, 'time_tag'])
+            duan_xdata.append(klines.loc[idx, 'time_str'])
             duan_ydata.append(klines.loc[idx, 'low'])
 
     kline = (
