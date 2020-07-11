@@ -68,7 +68,6 @@ numba
 Cython
 pexpect
 ply
-pychanlun
 rqdatac
 seaborn
 statsmodels
