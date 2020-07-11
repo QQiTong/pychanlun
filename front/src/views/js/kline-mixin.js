@@ -809,7 +809,7 @@ export default {
                         break
                     case '30m':
                         // 20 *12 = 240
-                        // 5 * 12 = 40
+                        // 5 * 12 = 60
                         specialMA5 = 60
                         specialMA20 = 240
                         break
