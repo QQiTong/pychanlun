@@ -4,7 +4,9 @@ import datetime
 import os
 import signal
 import threading
+import time
 
+import QUANTAXIS as QA
 import pandas as pd
 import pydash
 import pytz
@@ -21,8 +23,6 @@ from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, bu
 from pychanlun.db import DBPyChanlun
 from pychanlun.db import DBQuantAxis
 from pychanlun.zerodegree.notify import send_ding_message
-import QUANTAXIS as QA
-from pychanlun.chart.chanlun_chart import create_charts
 
 tz = pytz.timezone('Asia/Shanghai')
 log = Logger(__name__)
@@ -81,8 +81,6 @@ def monitoring_stock():
                         break
                 if not is_run:
                     break
-                break
-            break
 
 
 def calculate_and_notify(api, market, sse, symbol, code, period):
@@ -112,7 +110,13 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
             .apply(lambda value: datetime.datetime.strptime(value, '%Y-%m-%d %H:%M').replace(tzinfo=tz))
         kline_data['time_stamp'] = kline_data['datetime'].apply(lambda value: value.timestamp())
 
-        data_list.append({"symbol": code, "period": period_one, "kline_data": kline_data})
+        data_list.append({
+            "sse": sse,
+            "symbol": symbol,
+            "code": code,
+            "period": period_one,
+            "kline_data": kline_data
+        })
 
     data_list = pydash.take_right_while(data_list, lambda value: len(value["kline_data"]) > 0)
 
@@ -197,8 +201,8 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
 
     data = data_list[-1]
     df = data["kline_data"]
-    create_charts(df, page_title="%s %s" % (data["symbol"], data["period"]),
-                  file="E:\\charts\\%s-%s.html" % (data["symbol"], data["period"]))
+    # create_charts(df, page_title="%s %s" % (data["symbol"], data["period"]),
+    #               file="E:\\charts\\%s-%s.html" % (data["symbol"], data["period"]))
 
     time_series = list(df['datetime'])
     high_series = list(df['high'])
@@ -236,8 +240,19 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '拉回笔中枢看涨',
-                    fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
+        save_signal(
+            sse,
+            symbol,
+            code,
+            period,
+            '拉回笔中枢看涨',
+            fire_time,
+            price,
+            stop_lose_price,
+            'BUY_LONG',
+            tags,
+            category
+        )
 
     count = len(zs_tupo['buy_zs_tupo']['date'])
     for i in range(count):
@@ -255,8 +270,19 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '升破笔中枢看涨',
-                    fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
+        save_signal(
+            sse,
+            symbol,
+            code,
+            period,
+            '升破笔中枢看涨',
+            fire_time,
+            price,
+            stop_lose_price,
+            'BUY_LONG',
+            tags,
+            category
+        )
 
     count = len(v_reverse['buy_v_reverse']['date'])
     for i in range(count):
@@ -274,8 +300,19 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '笔中枢三卖V看涨', fire_time,
-                    price, stop_lose_price, 'BUY_LONG', tags, category)
+        save_signal(
+            sse,
+            symbol,
+            code,
+            period,
+            '笔中枢三卖V看涨',
+            fire_time,
+            price,
+            stop_lose_price,
+            'BUY_LONG',
+            tags,
+            category
+        )
 
 
 def save_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
@@ -328,7 +365,8 @@ def run(**kwargs):
 
     while True:
         for thread in thread_list:
-            if thread.isAlive():
+            if thread.is_alive():
+                time.sleep(200)
                 break
         else:
             break

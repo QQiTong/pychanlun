@@ -5,17 +5,14 @@ requests
 pydash
 apscheduler
 pymongo
-rx
 pytest
 ratelimit
 waitress
 click
 pytdx
 tqsdk
-ccxt
 pyecharts
 
-py
 colorama
 pip
 Brotli
@@ -73,7 +70,8 @@ pexpect
 ply
 pychanlun
 rqdatac
-PyYAML
 seaborn
 statsmodels
 logbook
+
+quantaxis
