@@ -655,6 +655,7 @@ class BusinessService:
         signalList = []
         for idx, row in df.iterrows():
             item = {
+                'symbol': row["symbol"],
                 'code': row["code"],
                 'fire_time': row["fire_time"].strftime("%Y-%m-%d %H:%M"),
                 'period': row["period"],

@@ -1,28 +1,31 @@
 # -*- coding: utf-8 -*-
 
-from pychanlun.db import DBPyChanlun
-import re
-import os
-import logging
 import decimal
+import logging
+import os
 from datetime import datetime, timedelta, date
 from multiprocessing import Pool
-from bson.codec_options import CodecOptions
-import pytz
-import pymongo
-from pychanlun.basic.bi import CalcBi, CalcBiList
-from pychanlun.basic.duan import CalcDuan
-from pychanlun import Duan
-from pychanlun import entanglement as entanglement
-from pychanlun import divergence as divergence
-from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
-import talib as ta
+
 import numpy as np
-import pydash
 import pandas as pd
+import pydash
+import pymongo
+import pytz
+import talib as ta
+from bson.codec_options import CodecOptions
+
+from pychanlun import entanglement as entanglement
+from pychanlun.basic.bi import CalcBi
+from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
+from pychanlun.basic.duan import CalcDuan
+from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
+from pychanlun.db import DBPyChanlun
+from pychanlun.db import DBQuantAxis
 
 tz = pytz.timezone('Asia/Shanghai')
+
+
+periodMap = {"30m": "30min", "60m": "60min"}
 
 
 def run(**kwargs):
@@ -31,27 +34,26 @@ def run(**kwargs):
     DBPyChanlun["stock_signal"] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
         .delete_many({"fire_time": {"$lte": cutoff_time}})
-    code = kwargs.get('code')
+    symbol = kwargs.get('symbol')
     period = kwargs.get('period')
     codes = []
-    if code is None:
-        collection_list = DBPyChanlun.list_collection_names()
-        for code in collection_list:
-            match = re.match("((sh|sz)(\\d{6}))_(30m|60m|240m)", code, re.I)
-            if match is not None:
-                code = match.group(1)
-                code_head2 = code[2:4]
-                code_head4 = code[2:5]
-                if code_head4 in ['1318']:
-                    continue
-                period = match.group(4)
-                codes.append({"code": code, "period": period})
+    if symbol is None:
+        stock_list = DBQuantAxis["stock_list"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find()
+        for stock in stock_list:
+            symbol = "%s%s" % (stock["sse"], stock["code"])
+            if period is None:
+                for period in ['30m', '60m']:
+                    codes.append({"symbol": symbol, "period": period})
+            else:
+                codes.append({"symbol": symbol, "period": period})
     else:
         if period is None:
-            for period in ['30m', '60m', '240m']:
-                codes.append({'code': code, 'period': period})
+            for period in ['30m', '60m']:
+                codes.append({'symbol': symbol, 'period': period})
         else:
-            codes.append({'code': code, 'period': period})
+            codes.append({'symbol': symbol, 'period': period})
 
     # 计算执缠策略
     pool = Pool()
@@ -63,13 +65,14 @@ def run(**kwargs):
 
 
 def calculate(info):
-    code = info["code"]
+    symbol = info["symbol"]
     period = info["period"]
 
     # 日线均线计算，只计算34日均线上的股票
-    bars = DBPyChanlun['%s_%s' % (code, '240m')] \
+    bars = DBQuantAxis["stock_day"] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
-        .find().sort('_id', pymongo.DESCENDING).limit(500)
+        .find({"code": symbol[2:]}) \
+        .sort('_id', pymongo.DESCENDING).limit(500)
     bars = list(bars)
     bars.reverse()
     if len(bars) > 0:
@@ -90,46 +93,21 @@ def calculate(info):
     else:
         return
 
-    bars = DBPyChanlun['%s_%s' % (code, period)] \
+    bars = DBQuantAxis["stock_min"] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz))\
-        .find().sort('_id', pymongo.DESCENDING)\
+        .find({"code": symbol[2:]}).sort('_id', pymongo.DESCENDING)\
         .limit(1000)
     bars = list(bars)
     bars.reverse()
-    if len(bars) == 0:
-        DBPyChanlun['%s_%s' % (code, period)].drop()
-        return
-    elif len(bars) < 13:
+    if len(bars) < 13:
         return
     count = len(bars)
     df = pd.DataFrame(bars)
-    time_series = df['_id']
+    time_series = df['time_stamp']
     high_series = df['high']
     low_series = df['low']
     open_series = df['open']
     close_series = df['close']
-
-    # 清理一些历史数据节省空间
-    if period == '240m':
-        cutoff_time = datetime.now(tz=tz) - timedelta(days=10000)
-    elif period == '60m':
-        cutoff_time = datetime.now(tz=tz) - timedelta(hours=10000)
-    elif period == '30m':
-        cutoff_time = datetime.now(tz=tz) - timedelta(hours=5000)
-    elif period == '15m':
-        cutoff_time = datetime.now(tz=tz) - timedelta(hours=2500)
-    elif period == '5m':
-        cutoff_time = datetime.now(tz=tz) - timedelta(minutes=50000)
-    elif period == '3m':
-        cutoff_time = datetime.now(tz=tz) - timedelta(minutes=30000)
-    elif period == '1m':
-        cutoff_time = datetime.now(tz=tz) - timedelta(minutes=10000)
-    else:
-        cutoff_time = datetime.now(tz=tz) - timedelta(days=10000)
-
-    DBPyChanlun['%s_%s' % (code, period)] \
-        .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
-        .delete_many({"_id": {"$lt": cutoff_time}})
 
     # 笔信号
     bi_series = [0 for i in range(count)]
@@ -172,7 +150,7 @@ def calculate(info):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '多-拉回笔中枢确认底背',
+        save_signal(symbol[:2], symbol, symbol[2:], period, '多-拉回笔中枢确认底背',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
     count = len(zs_tupo['buy_zs_tupo']['date'])
@@ -191,7 +169,7 @@ def calculate(info):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '多-升破笔中枢',
+        save_signal(symbol[:2], symbol, symbol[2:], period, '多-升破笔中枢',
                     fire_time, price, stop_lose_price, 'BUY_LONG', tags, category)
 
     count = len(v_reverse['buy_v_reverse']['date'])
@@ -210,7 +188,7 @@ def calculate(info):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '多-笔中枢三卖V', fire_time,
+        save_signal(symbol[:2], symbol, symbol[2:], period, '多-笔中枢三卖V', fire_time,
                     price, stop_lose_price, 'BUY_LONG', tags, category)
 
     count = len(duan_pohuai['buy_duan_break']['date'])
@@ -220,11 +198,11 @@ def calculate(info):
         price = duan_pohuai['buy_duan_break']['data'][i]
         stop_lose_price = duan_pohuai['buy_duan_break']['stop_lose_price'][i]
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(code, period, '多-线段破坏', fire_time,
+        save_signal(symbol[:2], symbol, symbol[2:], period, '多-线段破坏', fire_time,
                     price, stop_lose_price, 'BUY_LONG', [], category)
 
 
-def save_signal(code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
+def save_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
         logging.info("%s %s %s %s %s %s %s" % (code, period, remark, tags, category, fire_time, price))
@@ -232,6 +210,8 @@ def save_signal(code, period, remark, fire_time, price, stop_lose_price, positio
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz))\
             .find_one_and_update({"code": code, "period": period, "fire_time": fire_time, "position": position}, {
                 '$set': {
+                    'sse': sse,
+                    'symbol': symbol,
                     'code': code,
                     'period': period,
                     'remark': remark,
