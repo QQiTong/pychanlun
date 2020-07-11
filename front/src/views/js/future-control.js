@@ -501,7 +501,7 @@ export default {
             // 动止手数  = 开仓手数 * 1手止损  /( （动止价-开仓价）* 合约乘数 + 1手止损)
             // 如果填入了动止价
             if (this.calcPosForm.dynamicWinPrice != null) {
-                this.calcPosForm.dynamicWinCount = Math.ceil(this.calcPosForm.maxOrderCount * this.calcPosForm.perOrderStopMoney / (Math.abs(this.calcPosForm.dynamicWinPrice - this.calcPosForm.openPrice) * this.calcPosForm.contractMultiplier + this.calcPosForm.perOrderStopMoney))
+                this.calcPosForm.dynamicWinCount = Math.ceil(this.calcPosForm.maxOrderCount * this.calcPosForm.perOrderStopMoney / (Math.abs(Number(this.calcPosForm.dynamicWinPrice) - Number(this.calcPosForm.openPrice)) * Number(this.calcPosForm.contractMultiplier) + Number(this.calcPosForm.perOrderStopMoney)))
             }
             console.log('maxAccountUse:', maxAccountUse, ' maxStopMoney :', maxStopMoney, ' perOrderMargin:',
                 this.calcPosForm.perOrderMargin, ' maxOrderCount:', this.calcPosForm.maxOrderCount, ' maxOrderCount2:', maxOrderCount2, ' perOrderStopMoney:', this.calcPosForm.perOrderStopMoney,

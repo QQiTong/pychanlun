@@ -110,7 +110,7 @@ def fetch_futures_mink():
                 url = "http://db2015.wstock.cn/wsDB_API/kline.php?num=5000&symbol=%s&desc=1&q_type=0&return_t=%s&qt_type=%s&r_type=2&u=u2368&p=abc1818" % (code,return_t,qt_type)
 
                 count = count +1
-                print(url, "调用次数:",count)
+                print(url, "调用次数:",count,datetime.now())
                 resp = requests.get(url, timeout=(15, 15))
                 df1m = pd.DataFrame(json.loads(resp.text))
                 df1m = df1m.sort_values(by="Date", ascending=True)
@@ -167,7 +167,7 @@ def fetch_futures_mink():
             25s  9696  次
             '''
             #
-            time.sleep(25)
+            time.sleep(20)
         except Exception as e:
             print("外盘期货采集出错", Exception, e)
             # dingMsg.send("remind外盘期货采集出错")
