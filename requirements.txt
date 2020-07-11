@@ -14,7 +14,6 @@ tqsdk
 pyecharts
 
 colorama
-pip
 Brotli
 cryptography
 lxml
@@ -29,7 +28,6 @@ Jinja2
 Werkzeug
 itsdangerous
 cffi
-setuptools
 nose
 scipy
 matplotlib
@@ -47,10 +45,9 @@ attrs
 pluggy
 packaging
 atomicwrites
-gunicorn
+
 aiodns
 chardet
-tornado
 tzlocal
 wcwidth
 urllib3
