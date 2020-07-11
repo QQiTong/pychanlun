@@ -106,7 +106,7 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
         # isValid 表示是否有独立K柱不和底或顶重叠
         isValid = False
         for t in range(2, len(candles) - 2):
-            if candles[t]['low'] >= bottom_high or candles[t]['high'] <= top_low:
+            if candles[t]['low'] >= bottom_high:
                 isValid = True
                 break
             if isValid:
@@ -151,7 +151,7 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
         isValid = False
         for t in range(2, len(candles) - 2):
             # if candles[t]['low'] >= bottom_high and candles[t]['high'] <= top_low:
-            if candles[t]['low'] >= bottom_high or candles[t]['high'] <= top_low:
+            if candles[t]['high'] <= top_low:
                 isValid = True
                 break
             if isValid:
