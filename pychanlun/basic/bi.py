@@ -109,8 +109,6 @@ def is_bi(bi, high, low, open_price, close_price, from_index, to_index, directio
             if candles[t]['low'] >= bottom_high:
                 isValid = True
                 break
-            if isValid:
-                break
         if not isValid:
             return False
     elif direction == -1:

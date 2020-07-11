@@ -9,9 +9,11 @@ from functools import lru_cache
 
 import rqdatac as rq
 from pychanlun.db import DBPyChanlun
+from pychanlun.db import DBQuantAxis
 from bson.codec_options import CodecOptions
 import pytz
 import pymongo
+from QUANTAXIS.QAData.data_resample import QA_data_stockmin_resample, QA_data_day_resample
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -117,13 +119,109 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
         '3d': -3000
     }
     start_date = end + timedelta(timeDeltaMap[period])
-    code = "%s_%s" % (symbol, period)
-    data_list = DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "_id": {"$gte": start_date, "$lte": end}
-    }).sort("_id", pymongo.ASCENDING)
-    data_list = list(data_list)
-    kline_data = pd.DataFrame(data_list)
-    kline_data['time'] = kline_data['_id'].apply(lambda value: value.timestamp())
+    code = symbol[2:]
+    if period == "1m":
+        data_list = DBQuantAxis["stock_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+                "code": code,
+                "type": "1min",
+                "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+            }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        kline_data = pd.DataFrame(data_list)
+        print(kline_data)
+        kline_data['time'] = kline_data['time_stamp']
+    elif period == "3m":
+        data_list = DBQuantAxis["stock_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+                "code": code,
+                "type": "1min",
+                "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+            }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        kline_data = QA_data_stockmin_resample(kline_data, 3)
+        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+
+    elif period == "5m":
+        data_list = DBQuantAxis["stock_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+                "code": code,
+                "type": "5min",
+                "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+            }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        kline_data = pd.DataFrame(data_list)
+        kline_data['time'] = kline_data['time_stamp']
+    elif period == "15m":
+        data_list = DBQuantAxis["stock_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+                "code": code,
+                "type": "15min",
+                "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+            }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        kline_data = pd.DataFrame(data_list)
+        kline_data['time'] = kline_data['time_stamp']
+    elif period == "30m":
+        data_list = DBQuantAxis["stock_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+                "code": code,
+                "type": "30min",
+                "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+            }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        kline_data = pd.DataFrame(data_list)
+        kline_data['time'] = kline_data['time_stamp']
+    elif period == "60m":
+        data_list = DBQuantAxis["stock_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+                "code": code,
+                "type": "60min",
+                "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+            }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        kline_data = pd.DataFrame(data_list)
+        kline_data['time'] = kline_data['time_stamp']
+    elif period == "180m" or period == "240m" or period == "1d":
+        data_list = DBQuantAxis["stock_day"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+                "code": code,
+                "date_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+            }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        kline_data = pd.DataFrame(data_list)
+        kline_data['time'] = kline_data['date_stamp']
+    elif period == "3d":
+        data_list = DBQuantAxis["stock_day"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+                "code": code,
+                "date_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+            }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        kline_data = pd.DataFrame(data_list)
+        kline_data['date'] = kline_data['date'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d"))
+        kline_data = QA_data_day_resample(kline_data, "w")
+        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+
     kline_data.fillna(0, inplace=True)
     return kline_data
 
@@ -156,3 +254,8 @@ def getGlobalFutureData(symbol, period, endDate, stamp=datetime.now().strftime("
     kline_data['time'] = kline_data['_id'].apply(lambda value: value.timestamp())
     kline_data.fillna(0, inplace=True)
     return kline_data
+
+
+if __name__ == '__main__':
+    data = getStockData("sh000001", "3m", "2020-07-11")
+    print(data)

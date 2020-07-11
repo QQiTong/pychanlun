@@ -359,7 +359,7 @@ def calcNotHigher(duanList, highList):
 if __name__ == '__main__':
     # noinspection PyBroadException
     try:
-        get_data("YM", "3m")
+        get_data("sz000001", "3m")
     except Exception as e:
         log.info("Error Occurred: {0}".format(traceback.format_exc()))
     finally:
