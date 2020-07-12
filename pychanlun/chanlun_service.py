@@ -141,6 +141,7 @@ def get_data(symbol, period, end_date=None):
     daily_data = get_instrument_data(symbol, "1d", end_date)
     daily_data = pd.DataFrame(daily_data)
     daily_data = daily_data.set_index("time")
+    ma5 = np.round(pd.Series.rolling(daily_data["close"], window=5).mean(), 2)
     ma20 = np.round(pd.Series.rolling(daily_data["close"], window=20).mean(), 2)
 
     data = data_list[-1]
@@ -198,6 +199,7 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["bi"]),
         list(kline_data["duan"]),
         list(kline_data["duan2"]),
+        ma5,
         ma20
     )
 
@@ -214,6 +216,7 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["bi"]),
         list(kline_data["duan"]),
         list(kline_data["duan2"]),
+        ma5,
         ma20
     )
 
@@ -230,6 +233,7 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["bi"]),
         list(kline_data["duan"]),
         list(kline_data["duan2"]),
+        ma5,
         ma20
     )
 
@@ -243,7 +247,8 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["high"]),
         list(kline_data["low"]),
         list(kline_data["duan2"]),
-        ma20
+        ma5,
+        ma20,
     )
 
     buy_five_v_reverse = five_v_fan['buy_five_v_reverse']
@@ -258,6 +263,7 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["bi"]),
         list(kline_data["duan"]),
         list(kline_data["duan2"]),
+        ma5,
         ma20
     )
 

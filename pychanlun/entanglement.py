@@ -129,7 +129,7 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
 
 
 def la_hui(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series,
-           higher_duan_series=None, ma20=None):
+           higher_duan_series=None, ma5=None,ma20=None):
     result = {
         'buy_zs_huila': {
             'idx': [],
@@ -138,7 +138,9 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
-            'above_ma20': []
+            'above_ma5': [],
+            'above_ma20': [],
+
         },
         'sell_zs_huila': {
             'idx': [],
@@ -147,6 +149,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
+            'above_ma5': [],
             'above_ma20': []
         }
     }
@@ -200,6 +203,15 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                             if category not in tags:
                                 tags.append(category)
                     result['sell_zs_huila']['tag'].append(','.join(tags))
+
+                    above_ma5 = True
+                    if ma5 is not None:
+                        t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
+                        t = t.replace(hour=0, minute=0).timestamp()
+                        if t in ma5 and e.top < ma5[t]:
+                            above_ma5 = False
+                    result['sell_zs_huila']['above_ma5'].append(above_ma5)
+
                     above_ma20 = True
                     if ma20 is not None:
                         t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
@@ -249,6 +261,15 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                             if category not in tags:
                                 tags.append(category)
                     result['buy_zs_huila']['tag'].append(','.join(tags))
+
+                    above_ma5 = False
+                    if ma5 is not None:
+                        t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
+                        t = t.replace(hour=0, minute=0).timestamp()
+                        if t in ma5 and e.bottom > ma5[t]:
+                            above_ma5 = True
+                    result['buy_zs_huila']['above_ma5'].append(above_ma5)
+
                     above_ma20 = False
                     if ma20 is not None:
                         t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
@@ -260,7 +281,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
 
 
 def tu_po(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series,
-          higher_duan_series=None, ma20=None):
+          higher_duan_series=None, ma5=None,ma20=None):
     result = {
         'buy_zs_tupo': {
             'idx': [],
@@ -269,6 +290,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
+            'above_ma5': [],
             'above_ma20': []
         },
         'sell_zs_tupo': {
@@ -278,6 +300,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
+            'above_ma5': [],
             'above_ma20': []
         }
     }
@@ -309,6 +332,15 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                         if category not in tags:
                             tags.append(category)
                 result['buy_zs_tupo']['tag'].append(','.join(tags))
+
+                above_ma5 = False
+                if ma5 is not None:
+                    t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
+                    t = t.replace(hour=0, minute=0).timestamp()
+                    if t in ma5 and e.gg > ma5[t]:
+                        above_ma5 = True
+                result['buy_zs_tupo']['above_ma5'].append(above_ma5)
+
                 above_ma20 = False
                 if ma20 is not None:
                     t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
@@ -316,6 +348,8 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                     if t in ma20 and e.gg > ma20[t]:
                         above_ma20 = True
                 result['buy_zs_tupo']['above_ma20'].append(above_ma20)
+
+
         if e.direction == -1:
             duan_start = pydash.find_last_index(duan_series[:e.start], lambda t: t == 1)
             if e_pre is not None and 0 <= duan_start < e_pre.start:
@@ -341,6 +375,15 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
                         if category not in tags:
                             tags.append(category)
                 result['sell_zs_tupo']['tag'].append(','.join(tags))
+
+                above_ma5 = True
+                if ma5 is not None:
+                    t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
+                    t = t.replace(hour=0, minute=0).timestamp()
+                    if t in ma5 and e.dd < ma5[t]:
+                        above_ma5 = False
+                result['sell_zs_tupo']['above_ma5'].append(above_ma5)
+
                 above_ma20 = True
                 if ma20 is not None:
                     t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
@@ -351,7 +394,7 @@ def tu_po(e_list, time_series, high_series, low_series, open_series, close_serie
     return result
 
 
-def five_v_fan(time_series, duan_series, bi_series, high_series, low_series, higher_duan_series, ma20=None):
+def five_v_fan(time_series, duan_series, bi_series, high_series, low_series, higher_duan_series, ma5=None, ma20=None):
     result = {
         'sell_five_v_reverse': {
             'idx': [],
@@ -360,6 +403,7 @@ def five_v_fan(time_series, duan_series, bi_series, high_series, low_series, hig
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
+            'above_ma5': [],
             'above_ma20': []
         },
         'buy_five_v_reverse': {
@@ -369,6 +413,7 @@ def five_v_fan(time_series, duan_series, bi_series, high_series, low_series, hig
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
+            'above_ma5': [],
             'above_ma20': []
         }
     }
@@ -399,6 +444,15 @@ def five_v_fan(time_series, duan_series, bi_series, high_series, low_series, hig
                                     if category not in tags:
                                         tags.append(category)
                             result['sell_five_v_reverse']['tag'].append(','.join(tags))
+
+                            above_ma5 = True
+                            if ma5 is not None:
+                                t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
+                                t = t.replace(hour=0, minute=0).timestamp()
+                                if t in ma5 and low_series[d1] < ma5[t]:
+                                    above_ma5 = False
+                            result['sell_five_v_reverse']['above_ma5'].append(above_ma5)
+
                             above_ma20 = True
                             if ma20 is not None:
                                 t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
@@ -436,6 +490,15 @@ def five_v_fan(time_series, duan_series, bi_series, high_series, low_series, hig
                                     if category not in tags:
                                         tags.append(category)
                             result['buy_five_v_reverse']['tag'].append(','.join(tags))
+
+                            above_ma5 = False
+                            if ma5 is not None:
+                                t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
+                                t = t.replace(hour=0, minute=0).timestamp()
+                                if t in ma5 and high_series[g1] > ma5[t]:
+                                    above_ma5 = False
+                            result['buy_five_v_reverse']['above_ma5'].append(above_ma5)
+
                             above_ma20 = False
                             if ma20 is not None:
                                 t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
@@ -450,7 +513,7 @@ def five_v_fan(time_series, duan_series, bi_series, high_series, low_series, hig
 
 
 def v_reverse(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series,
-              higher_duan_series=None, ma20=None):
+              higher_duan_series=None, ma5=None,ma20=None):
     result = {
         'buy_v_reverse': {
             'idx': [],
@@ -459,6 +522,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
+            'above_ma5': [],
             'above_ma20': []
         },
         'sell_v_reverse': {
@@ -468,6 +532,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
+            'above_ma5': [],
             'above_ma20': []
         }
     }
@@ -516,6 +581,15 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                                         if category not in tags:
                                             tags.append(category)
                                 result['sell_v_reverse']['tag'].append(','.join(tags))
+
+                                above_ma5 = True
+                                if ma5 is not None:
+                                    t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
+                                    t = t.replace(hour=0, minute=0).timestamp()
+                                    if t in ma5 and resist_price < ma5[t]:
+                                        above_ma5 = False
+                                result['sell_v_reverse']['above_ma5'].append(above_ma5)
+
                                 above_ma20 = True
                                 if ma20 is not None:
                                     t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
@@ -564,6 +638,15 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                                         if category not in tags:
                                             tags.append(category)
                                 result['buy_v_reverse']['tag'].append(','.join(tags))
+
+                                above_ma5 = False
+                                if ma5 is not None:
+                                    t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
+                                    t = t.replace(hour=0, minute=0).timestamp()
+                                    if t in ma5 and resist_price > ma5[t]:
+                                        above_ma5 = True
+                                result['buy_v_reverse']['above_ma5'].append(above_ma5)
+
                                 above_ma20 = False
                                 if ma20 is not None:
                                     t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
@@ -576,7 +659,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
 
 
 def po_huai(time_series, high_series, low_series, open_series, close_series, bi_series, duan_series,
-            higher_duan_series=None, ma20=None):
+            higher_duan_series=None, ma5=None,ma20=None):
     result = {
         'buy_duan_break': {
             'idx': [],
@@ -585,6 +668,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
+            'above_ma5': [],
             'above_ma20': []
         },
         'sell_duan_break': {
@@ -594,6 +678,7 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
             'stop_lose_price': [],
             'stop_win_price': [],
             'tag': [],
+            'above_ma5': [],
             'above_ma20': []
         }
     }
@@ -625,6 +710,15 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                                 if category not in tags:
                                     tags.append(category)
                         result['sell_duan_break']['tag'].append(','.join(tags))
+
+                        above_ma5 = True
+                        if ma5 is not None:
+                            t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
+                            t = t.replace(hour=0, minute=0).timestamp()
+                            if t in ma5 and low_series[anchor] < ma5[t]:
+                                above_ma5 = False
+                        result['sell_duan_break']['above_ma5'].append(above_ma5)
+
                         above_ma20 = True
                         if ma20 is not None:
                             t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
@@ -659,6 +753,15 @@ def po_huai(time_series, high_series, low_series, open_series, close_series, bi_
                                 if category not in tags:
                                     tags.append(category)
                         result['buy_duan_break']['tag'].append(','.join(tags))
+
+                        above_ma5 = False
+                        if ma5 is not None:
+                            t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
+                            t = t.replace(hour=0, minute=0).timestamp()
+                            if t in ma5 and high_series[anchor] > ma5[t]:
+                                above_ma5 = True
+                        result['buy_duan_break']['above_ma5'].append(above_ma5)
+
                         above_ma20 = False
                         if ma20 is not None:
                             t = datetime.datetime.strptime(time_series[k], "%Y-%m-%d %H:%M")
