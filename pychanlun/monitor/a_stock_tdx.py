@@ -23,6 +23,8 @@ from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, bu
 from pychanlun.db import DBPyChanlun
 from pychanlun.db import DBQuantAxis
 from pychanlun.zerodegree.notify import send_ding_message
+from func_timeout import func_set_timeout
+
 
 tz = pytz.timezone('Asia/Shanghai')
 

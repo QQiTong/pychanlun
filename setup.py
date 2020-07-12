@@ -14,15 +14,10 @@ setup(
         "pydash",
         "apscheduler",
         "pymongo",
-        "gunicorn",
-        "gevent",
-        "json-logging-py",
-        "rx",
         "pytest",
         "pytest-html",
         "ratelimit",
         "waitress",
-        "tornado",
         "click"
     ]
 )
