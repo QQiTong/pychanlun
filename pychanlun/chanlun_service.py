@@ -4,7 +4,8 @@ import re
 import traceback
 import datetime
 
-from logbook import Logger
+from loguru import logger
+
 import pandas as pd
 import numpy as np
 from et_stopwatch import Stopwatch
@@ -21,7 +22,6 @@ from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
 from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data
 import pychanlun.entanglement as entanglement
 
-log = Logger(__name__)
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -336,7 +336,7 @@ def get_data(symbol, period, end_date=None):
     resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["low"]))
 
     stopwatch.stop()
-    log.info(stopwatch)
+    logger.info(stopwatch)
 
     return resp
 
@@ -361,6 +361,6 @@ if __name__ == '__main__':
     try:
         get_data("sz000001", "3m")
     except Exception as e:
-        log.info("Error Occurred: {0}".format(traceback.format_exc()))
+        logger.info("Error Occurred: {0}".format(traceback.format_exc()))
     finally:
         exit()

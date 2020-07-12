@@ -12,7 +12,7 @@ import pydash
 import pytz
 from bson.codec_options import CodecOptions
 from et_stopwatch import Stopwatch
-from logbook import Logger
+from loguru import logger
 from pytdx.hq import TdxHq_API
 
 from pychanlun import entanglement as entanglement
@@ -25,7 +25,6 @@ from pychanlun.db import DBQuantAxis
 from pychanlun.zerodegree.notify import send_ding_message
 
 tz = pytz.timezone('Asia/Shanghai')
-log = Logger(__name__)
 
 is_run = True
 period_map = {
@@ -41,7 +40,7 @@ period_map = {
 def monitoring_stock():
     TDX_HOME = os.environ.get("TDX_HOME")
     if TDX_HOME is None:
-        log.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
+        logger.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
     stocks = []
     block_path = os.path.join(TDX_HOME, "T0002\\blocknew\\ZXG.blk")
@@ -57,7 +56,7 @@ def monitoring_stock():
                 stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
     stocks = pydash.uniq(stocks)
 
-    log.info("监控股票数量: {}".format(len(stocks)))
+    logger.info("监控股票数量: {}".format(len(stocks)))
 
     api = TdxHq_API(heartbeat=True, auto_retry=True)
 
@@ -76,13 +75,13 @@ def monitoring_stock():
                     stopwatch = Stopwatch('%s %3s' % (symbol, period))
                     calculate_and_notify(api, market, sse, symbol, code, period)
                     stopwatch.stop()
-                    log.info(stopwatch)
+                    logger.info(stopwatch)
                     if not is_run:
                         break
                 if not is_run:
                     break
 
-
+@func_set_timeout(60)
 def calculate_and_notify(api, market, sse, symbol, code, period):
     if period not in ['5m', '15m']:
         return
@@ -347,12 +346,12 @@ def save_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_p
             # 首次信号，做通知
             content = "【事件通知】%s-%s-%s-%s-%s-%s-%s-%s" \
                       % (symbol, name, period, remark, fire_time.strftime("%m%d%H%M"), price, tags, category)
-            log.info(content)
+            logger.info(content)
             send_ding_message(content)
 
 
 def signal_handler(signal_num, frame):
-    log.info("正在停止程序。")
+    logger.info("正在停止程序。")
     global is_run
     is_run = False
 
