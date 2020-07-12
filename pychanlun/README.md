@@ -31,12 +31,12 @@ scoop install nssm
 MongoDB也要先安装成Windows服务模式，参考MongoDB文档。
 
 （管理员命令行模式）
-
+# nssm set pychanlun-api-service AppParameters "pychanlun/cli.py run-api-server --port 18888"
+# nssm install pychanlun-api-service "C:/Users/Administrator/scoop/shims/python.exe"
 ```cmd
 nssm install pychanlun-api-service "C:/Python/Python37/python.exe"
-nssm install pychanlun-api-service "C:/Users/Administrator/scoop/shims/python.exe"
 nssm set pychanlun-api-service AppDirectory "D:/development/pychanlun"
-nssm set pychanlun-api-service AppParameters "pychanlun/cli.py run-api-server --port 18888"
+nssm set pychanlun-api-service AppParameters "run-api-server --port 18888"
 nssm set pychanlun-api-service DependOnService MongoDB
 nssm start pychanlun-api-service
 ```
