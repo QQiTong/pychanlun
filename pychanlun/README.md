@@ -31,10 +31,8 @@ scoop install nssm
 MongoDB也要先安装成Windows服务模式，参考MongoDB文档。
 
 （管理员命令行模式）
-# nssm set pychanlun-api-service AppParameters "pychanlun/cli.py run-api-server --port 18888"
-# nssm install pychanlun-api-service "C:/Users/Administrator/scoop/shims/python.exe"
 ```cmd
-nssm install pychanlun-api-service "C:/Python/Python37/python.exe"
+nssm install pychanlun-api-service "pychanlun"
 nssm set pychanlun-api-service AppDirectory "D:/development/pychanlun"
 nssm set pychanlun-api-service AppParameters "run-api-server --port 18888"
 nssm set pychanlun-api-service DependOnService MongoDB
@@ -46,9 +44,8 @@ nssm start pychanlun-api-service
 （管理员命令行模式）
 
 ```cmd
-nssm install global-futures-downloader "C:/Users/Administrator/scoop/shims/python.exe"
-nssm set global-futures-downloader AppDirectory "D:/development/pychanlun"
-nssm set global-futures-downloader AppParameters "pychanlun/cli.py download-global-future-data"
+nssm install global-futures-downloader "pychanlun"
+nssm set global-futures-downloader AppParameters "download-global-future-data"
 nssm set global-futures-downloader DependOnService MongoDB
 nssm start global-futures-downloader
 ```
@@ -57,9 +54,9 @@ nssm start global-futures-downloader
 （管理员命令行模式）
 
 ```cmd
-nssm install global-futures-downloader "C:/Users/23681/scoop/shims/python.exe"
+nssm install global-futures-downloader "pychanlun"
 nssm set global-futures-downloader AppDirectory "D:/development/pychanlun"
-nssm set global-futures-downloader AppParameters "pychanlun/cli.py download-global-future-data"
+nssm set global-futures-downloader AppParameters "download-global-future-data"
 nssm set global-futures-downloader DependOnService MongoDB
 nssm start global-futures-downloader
 ```

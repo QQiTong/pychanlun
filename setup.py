@@ -8,8 +8,10 @@ setup(
     version = "1.0.0",
     packages = find_packages(),
     install_requires = [
+        "numpy",
         "flask",
-        "pandas",
+        "pandas==0.24.2",
+        "scipy==1.1.0",
         "requests",
         "pydash",
         "apscheduler",
@@ -18,6 +20,16 @@ setup(
         "pytest-html",
         "ratelimit",
         "waitress",
-        "click"
+        "click",
+        "pytdx",
+        "tqsdk",
+        "et_stopwatch",
+        "func_timeout",
+        "loguru",
+        "quantaxis",
+        "pyecharts",
+        "matplotlib",
+        "prettytable",
+        "tushare"
     ]
 )

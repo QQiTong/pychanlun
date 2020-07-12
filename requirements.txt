@@ -18,3 +18,5 @@ prettytable
 tushare
 quantaxis
 loguru
+et_stopwatch
+func_timeout
