@@ -12,7 +12,7 @@
 
 山东理工大学：<http://pypi.sdutlinux.org/>
 
-豆瓣：<http://pypi.douban.com/simple/>
+豆瓣：<https://pypi.douban.com/simple/>
 
 note：新版ubuntu要求使用https源，要注意。
 

@@ -1,6 +1,6 @@
 numpy
 flask
-pandas
+pandas==0.24.2
 requests
 pydash
 apscheduler
@@ -29,7 +29,7 @@ Werkzeug
 itsdangerous
 cffi
 nose
-scipy
+scipy==1.1.0
 matplotlib
 mpmath
 sympy
@@ -67,7 +67,7 @@ pexpect
 ply
 rqdatac
 seaborn
-statsmodels
+statsmodels==0.9.0
 logbook
 
 quantaxis
