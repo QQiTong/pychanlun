@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 
-import rqdatac as rq
-import os
-import json
-from pychanlun.config import config, cfg
-from datetime import datetime, timedelta
-from pychanlun.db import DBPyChanlun
-from bson.codec_options import CodecOptions
-import pytz
-import pymongo
-import pandas as pd
-from bson import ObjectId
-import time
-import requests
 import copy
+import json
 import string
-import talib as ta
+import time
+from datetime import datetime, timedelta
+
+import QUANTAXIS as QA
 import numpy as np
+import pandas as pd
+import pymongo
+import pytz
+import requests
+import rqdatac as rq
+from bson import ObjectId
+from bson.codec_options import CodecOptions
+
+from pychanlun.config import config
+from pychanlun.db import DBPyChanlun
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -353,8 +354,8 @@ class BusinessService:
         conbineChangeList = dict(symbolChangeMap, **globalChangeList)
         return conbineChangeList
 
-    def calc_ma(self,close_list, day):
-        ma = ta.MA(np.array(close_list), day)
+    def calc_ma(self, close_list, day):
+        ma = QA.MA(pd.Series(close_list), day)
         result = np.nan_to_num(ma).round(decimals=2)
         return result
 
