@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import pydash
-from pychanlun.funcat.api import *
 
 
 def notHigher(duan_s, high_s):
@@ -14,6 +13,7 @@ def notHigher(duan_s, high_s):
         if high_s[i1] <= high_s[i2]:
             return True
     return False
+
 
 def notLower(duan_s, low_s):
     """

@@ -11,7 +11,6 @@ import pandas as pd
 import pydash
 import pymongo
 import pytz
-import talib as ta
 from bson.codec_options import CodecOptions
 
 from pychanlun import entanglement as entanglement
@@ -21,6 +20,7 @@ from pychanlun.basic.duan import CalcDuan
 from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
 from pychanlun.db import DBPyChanlun
 from pychanlun.db import DBQuantAxis
+import QUANTAXIS as QA
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -77,9 +77,8 @@ def calculate(info):
     bars.reverse()
     if len(bars) > 0:
         df = pd.DataFrame(bars)
-        close = [float(x) for x in df.close]
-        ma34 = ta.MA(np.array(close), timeperiod=34)
-        if close[-1] < ma34[-1]:
+        ma34 = QA.MA(df.close, 34)
+        if df.close[-1] < ma34[-1]:
             return
         bars = pydash.chain(bars).take_right(10).value()
         c = 0
