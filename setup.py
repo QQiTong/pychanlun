@@ -30,6 +30,7 @@ setup(
         "pyecharts",
         "matplotlib",
         "prettytable",
-        "tushare"
+        "tushare",
+        "pytz"
     ]
 )

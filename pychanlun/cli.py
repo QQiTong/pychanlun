@@ -4,7 +4,7 @@ import logging
 import click
 from pychanlun import server as api_server
 from pychanlun.monitor import BeichiMonitor
-from pychanlun.select import stock_signal
+from pychanlun.select import a_stock_signal
 from pychanlun.market_data import tdx_local_downloader, global_futures_downloader
 from pychanlun.monitor import a_stock_tdx as stock_monitoring
 
@@ -65,9 +65,9 @@ def download_stock_data(**kwargs):
 @run.command()
 @click.option('--code', type=str)
 @click.option('--period', type=str)
-def calculate_stock_signal(**kwargs):
+def select_a_stock_signal(**kwargs):
     logging.info("股票信号计算 开始")
-    stock_signal.run(**kwargs)
+    a_stock_signal.run(**kwargs)
     logging.info("股票信号计算 结束")
 
 

@@ -10,21 +10,16 @@ import QUANTAXIS as QA
 import pandas as pd
 import pydash
 import pytz
-from bson.codec_options import CodecOptions
 from et_stopwatch import Stopwatch
+from func_timeout import func_set_timeout
 from loguru import logger
 from pytdx.hq import TdxHq_API
 
 from pychanlun import entanglement as entanglement
-from pychanlun.basic.bi import calculate_bi
 from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
-from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
+from pychanlun.basic.kline_analyse import calculate_bi_duan
 from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
-from pychanlun.db import DBPyChanlun
-from pychanlun.db import DBQuantAxis
-from pychanlun.zerodegree.notify import send_ding_message
-from func_timeout import func_set_timeout
-
+from pychanlun.monitor.a_stock_common import save_a_stock_signal
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -61,7 +56,7 @@ def monitoring_stock():
     logger.info("监控股票数量: {}".format(len(stocks)))
 
     api = TdxHq_API(heartbeat=True, auto_retry=True)
-
+    global is_run
     with api.connect('119.147.212.81', 7709):
         while is_run:
             for stock in stocks:
@@ -82,6 +77,7 @@ def monitoring_stock():
                         break
                 if not is_run:
                     break
+
 
 @func_set_timeout(60)
 def calculate_and_notify(api, market, sse, symbol, code, period):
@@ -120,85 +116,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         })
 
     data_list = pydash.take_right_while(data_list, lambda value: len(value["kline_data"]) > 0)
-
-    for idx in range(len(data_list)):
-        if idx == 0:
-            data = data_list[idx]
-            count = len(data["kline_data"])
-            bi_list = [0 for i in range(count)]
-            duan_list = [0 for i in range(count)]
-            duan_list2 = [0 for i in range(count)]
-            calculate_bi(
-                bi_list,
-                list(data["kline_data"]["high"]),
-                list(data["kline_data"]["low"]),
-                list(data["kline_data"]["open"]),
-                data["kline_data"]["close"]
-            )
-            data["kline_data"]["bi"] = bi_list
-            data["kline_data"]["duan"] = duan_list
-            data["kline_data"]["duan2"] = duan_list2
-        elif idx == 1:
-            data2 = data_list[idx - 1]
-            data = data_list[idx]
-            count = len(data["kline_data"])
-            bi_list = [0 for i in range(count)]
-            duan_list = [0 for i in range(count)]
-            duan_list2 = [0 for i in range(count)]
-            calculate_duan(
-                duan_list,
-                list(data["kline_data"]["time_stamp"]),
-                list(data2["kline_data"]["bi"]),
-                list(data2["kline_data"]["time_stamp"]),
-                list(data["kline_data"]["high"]),
-                list(data["kline_data"]["low"])
-            )
-            split_bi_in_duan(
-                bi_list,
-                duan_list,
-                list(data["kline_data"]["high"]),
-                list(data["kline_data"]["low"]),
-                list(data["kline_data"]["open"]),
-                list(data["kline_data"]["close"])
-            )
-            data["kline_data"]["bi"] = bi_list
-            data["kline_data"]["duan"] = duan_list
-            data["kline_data"]["duan2"] = duan_list2
-        else:
-            data3 = data_list[idx - 2]
-            data2 = data_list[idx - 1]
-            data = data_list[idx]
-            count = len(data["kline_data"])
-            bi_list = [0 for i in range(count)]
-            duan_list = [0 for i in range(count)]
-            duan_list2 = [0 for i in range(count)]
-            calculate_duan(
-                duan_list,
-                list(data["kline_data"]["time_stamp"]),
-                list(data2["kline_data"]["bi"]),
-                list(data2["kline_data"]["time_stamp"]),
-                list(data["kline_data"]["high"]),
-                list(data["kline_data"]["low"])
-            )
-            calculate_duan(
-                duan_list2,
-                list(data["kline_data"]["time_stamp"]),
-                list(data3["kline_data"]["bi"]),
-                list(data3["kline_data"]["time_stamp"]),
-                list(data["kline_data"]["high"]),
-                list(data["kline_data"]["low"])
-            )
-            split_bi_in_duan(
-                bi_list,
-                duan_list,
-                list(data["kline_data"]["high"]),
-                list(data["kline_data"]["low"]),
-                list(data["kline_data"]["open"]),
-                list(data["kline_data"]["close"])
-            )
-            data["kline_data"]["bi"] = bi_list
-            data["kline_data"]["duan"] = duan_list
-            data["kline_data"]["duan2"] = duan_list2
+    data_list = calculate_bi_duan(data_list)
 
     data = data_list[-1]
     df = data["kline_data"]
@@ -241,7 +159,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(
+        save_a_stock_signal(
             sse,
             symbol,
             code,
@@ -271,7 +189,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(
+        save_a_stock_signal(
             sse,
             symbol,
             code,
@@ -301,7 +219,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         if perfect_buy_long(duan_series, high_series, low_series, duan_end):
             tags.append("完备")
         category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_signal(
+        save_a_stock_signal(
             sse,
             symbol,
             code,
@@ -314,42 +232,6 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
             tags,
             category
         )
-
-
-def save_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
-    # 股票只是BUY_LONG才记录
-    if position == "BUY_LONG":
-        stock_one = DBQuantAxis['stock_list'].find_one({"code": code, "sse": sse})
-        name = stock_one['name'] if stock_one is not None else None
-        x = DBPyChanlun['stock_signal'] \
-            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
-            .find_one_and_update({
-                "symbol": symbol,
-                "code": code,
-                "period": period,
-                "fire_time": fire_time,
-                "position": position
-            }, {
-                '$set': {
-                    "symbol": symbol,
-                    'code': code,
-                    'name': name,
-                    'period': period,
-                    'remark': remark,
-                    'fire_time': fire_time,
-                    'price': price,
-                    'stop_lose_price': stop_lose_price,
-                    'position': position,
-                    'tags': tags,
-                    'category': category
-                }
-            }, upsert=True)
-        if x is None and fire_time > datetime.datetime.now(tz=tz) - datetime.timedelta(hours=1):
-            # 首次信号，做通知
-            content = "【事件通知】%s-%s-%s-%s-%s-%s-%s-%s" \
-                      % (symbol, name, period, remark, fire_time.strftime("%m%d%H%M"), price, tags, category)
-            logger.info(content)
-            send_ding_message(content)
 
 
 def signal_handler(signal_num, frame):
