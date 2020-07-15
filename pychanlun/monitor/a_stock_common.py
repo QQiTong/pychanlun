@@ -41,7 +41,7 @@ def save_a_stock_signal(sse, symbol, code, period, remark, fire_time, price, sto
                     'category': category
                 }
             }, upsert=True)
-        if x is None:
+        if x is None and fire_time > datetime.datetime.now(tz=tz) - datetime.timedelta(days=30):
             # 首次信号，做通知
             content = "【事件通知】%s-%s-%s-%s-%s-%s-%s-%s" \
                       % (symbol, name, period, remark, fire_time.strftime("%m%d%H%M"), price, tags, category)

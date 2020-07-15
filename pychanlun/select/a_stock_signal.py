@@ -4,7 +4,6 @@ import decimal
 import logging
 import os
 from datetime import datetime, timedelta, timezone
-from multiprocessing import Pool
 
 import pandas as pd
 import pytz
@@ -55,11 +54,10 @@ def run(**kwargs):
         else:
             code_period_list.append({'sse': sse, 'symbol': symbol, 'code': code, 'period': period})
 
-    pool = Pool()
-    pool.map(calculate_raising_limit, code_list)
-    pool.map(calculate_chanlun_signal, code_period_list)
-    pool.close()
-    pool.join()
+    for idx in range(len(code_list)):
+        calculate_raising_limit(code_list[idx])
+    for idx in range(len(code_period_list)):
+        calculate_chanlun_signal(code_period_list[idx])
 
     export_to_tdx()
 
