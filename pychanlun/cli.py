@@ -65,7 +65,7 @@ def download_stock_data(**kwargs):
 @run.command()
 @click.option('--code', type=str)
 @click.option('--period', type=str)
-def select_a_stock_signal(**kwargs):
+def select_a_stock(**kwargs):
     logging.info("股票信号计算 开始")
     a_stock_signal.run(**kwargs)
     logging.info("股票信号计算 结束")
