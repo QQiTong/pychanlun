@@ -55,10 +55,9 @@ def run(**kwargs):
         else:
             code_period_list.append({'sse': sse, 'symbol': symbol, 'code': code, 'period': period})
 
-    # 计算执缠策略
     pool = Pool()
     pool.map(calculate_raising_limit, code_list)
-    # pool.map(calculate_chanlun_signal, code_period_list)
+    pool.map(calculate_chanlun_signal, code_period_list)
     pool.close()
     pool.join()
 
