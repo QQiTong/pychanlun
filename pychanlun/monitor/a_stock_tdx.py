@@ -2,6 +2,7 @@
 
 import datetime
 import os
+import random
 import signal
 import threading
 import time
@@ -52,7 +53,7 @@ def monitoring_stock():
                 lines = fo.readlines()
                 stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
     stocks = pydash.uniq(stocks)
-
+    random.shuffle(stocks)
     logger.info("监控股票数量: {}".format(len(stocks)))
 
     api = TdxHq_API(heartbeat=True, auto_retry=True)
