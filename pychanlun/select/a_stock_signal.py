@@ -168,7 +168,6 @@ def export_to_tdx():
 
     for x in range(1, 32):
         group = str(x).zfill(2)
-        print(group)
         result = signals[signals["group"] == group]
         seq = []
         for _, row in result.iterrows():
