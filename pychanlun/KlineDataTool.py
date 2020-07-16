@@ -115,6 +115,7 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
         '30m': -5 * 30,
         '60m': -5 * 60,
         '180m': -5 * 180,
+        '240m': -5 * 180,
         '1d': -1000,
         '3d': -3000
     }
