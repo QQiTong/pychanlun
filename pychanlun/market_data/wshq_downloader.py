@@ -167,7 +167,7 @@ def fetch_futures_mink():
             25s  9696  次
             '''
             #
-            time.sleep(20)
+            time.sleep(19)
         except Exception as e:
             print("外盘期货采集出错", Exception, e)
             # dingMsg.send("remind外盘期货采集出错")

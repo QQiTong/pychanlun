@@ -12,7 +12,7 @@ from pymongo import UpdateOne
 from pychanlun.Calc import Calc
 
 from pychanlun.Mail import Mail
-from pychanlun.funcat.api import *
+# from pychanlun.funcat.api import *
 from pychanlun.monitor import BeichiMonitor
 import sys
 from rqdatac import *
@@ -894,12 +894,13 @@ def testSplit():
     print(b)
 
 def app():
+    testDingDing()
     # testBitmex()
     # testBeichiDb()
     # testHuila()
     # testChange()
     # testTQ()
-    testRQ()
+    # testRQ()
     # testMonitor()
     # testThread()
     # testHuobi()

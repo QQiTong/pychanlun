@@ -181,7 +181,7 @@ export default {
             dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
             currentInfo: null,
             // 数字货币 和外盘 将180m 替换成1m
-            isShow1Min: false,
+            isShow1Min: true,
             futureConfig: {},
             symbolInfo: null,
             show1MinSymbol: ['BTC'],
