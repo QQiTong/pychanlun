@@ -21,6 +21,7 @@ from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.kline_analyse import calculate_bi_duan
 from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
 from pychanlun.monitor.a_stock_common import save_a_stock_signal
+from pychanlun.pattern.second_perfect import second_perfect
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -103,6 +104,10 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         kline_data['macd'] = MACD['MACD']
         kline_data['jc'] = QA.CROSS(MACD['DIFF'], MACD['DEA'])
         kline_data['sc'] = QA.CROSS(MACD['DEA'], MACD['DIFF'])
+        ma5 = QA.MA(kline_data['close'], 5)
+        ma20 = QA.MA(kline_data['close'], 20)
+        kline_data['ma5'] = ma5
+        kline_data['ma20'] = ma20
         kline_data["time_str"] = kline_data['datetime']
         kline_data['datetime'] = kline_data['time_str'] \
             .apply(lambda value: datetime.datetime.strptime(value, '%Y-%m-%d %H:%M').replace(tzinfo=tz))
@@ -124,115 +129,75 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
     # create_charts(df, page_title="%s %s" % (data["symbol"], data["period"]),
     #               file="E:\\charts\\%s-%s.html" % (data["symbol"], data["period"]))
 
-    time_series = list(df['datetime'])
+    time_str_series = list(df['time_str'])
     high_series = list(df['high'])
     low_series = list(df['low'])
     open_series = list(df['open'])
     close_series = list(df['close'])
     bi_series = list(df['bi'])
     duan_series = list(df['duan'])
+    ma5 = list(df['ma5'])
+    ma20 = list(df['ma20'])
 
     higher_duan_series = list(df['duan2'])
 
-    entanglement_list = entanglement.CalcEntanglements(time_series, duan_series, bi_series, high_series, low_series)
-    zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
-    zs_tupo = entanglement.tu_po(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
-    v_reverse = entanglement.v_reverse(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    entanglement_list = entanglement.CalcEntanglements(time_str_series, duan_series, bi_series, high_series, low_series)
+    zs_huila = entanglement.la_hui(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    zs_tupo = entanglement.tu_po(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    v_reverse = entanglement.v_reverse(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    five_v_fan = entanglement.five_v_fan(
+        list(kline_data["time_str"]),
+        list(kline_data["duan"]),
+        list(kline_data["bi"]),
+        list(kline_data["high"]),
+        list(kline_data["low"]),
+        list(kline_data["duan2"]),
+        ma5,
+        ma20,
+    )
+    second_perfect_data = second_perfect(df)
 
-    higher_entaglement_list = entanglement.CalcEntanglements(time_series, higher_duan_series, duan_series, high_series, low_series)
+    resp = {
+        "buy_zs_huila": zs_huila['buy_zs_huila'],
+        "buy_zs_tupo": zs_tupo['buy_zs_tupo'],
+        "buy_v_reverse": v_reverse['buy_v_reverse'],
+        "buy_five_v_reverse": five_v_fan['buy_five_v_reverse'],
+        "buy_second_perfect": second_perfect_data['buy_second_perfect']
+    }
 
-    # 笔中枢信号的记录
-    count = len(zs_huila['buy_zs_huila']['date'])
-    for i in range(count):
-        idx = zs_huila['buy_zs_huila']['idx'][i]
-        fire_time = zs_huila['buy_zs_huila']['date'][i]
-        price = zs_huila['buy_zs_huila']['data'][i]
-        stop_lose_price = zs_huila['buy_zs_huila']['stop_lose_price'][i]
-        tags = []
-        # 当前级别的中枢
-        ent = FindPrevEntanglement(entanglement_list, fire_time)
-        # 中枢开始的段
-        duan_start = FindPrevEq(duan_series, 1, ent.start)
-        duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
-
-        if DualEntangleForBuyLong(duan_series, entanglement_list, higher_entaglement_list, fire_time, price):
-            tags.append("双盘")
-        if perfect_buy_long(duan_series, high_series, low_series, duan_end):
-            tags.append("完备")
-        category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_a_stock_signal(
-            sse,
-            symbol,
-            code,
-            period,
-            '拉回笔中枢看涨',
-            fire_time,
-            price,
-            stop_lose_price,
-            'BUY_LONG',
-            tags,
-            category
-        )
-
-    count = len(zs_tupo['buy_zs_tupo']['date'])
-    for i in range(count):
-        idx = zs_tupo['buy_zs_tupo']['idx'][i]
-        fire_time = zs_tupo['buy_zs_tupo']['date'][i]
-        price = zs_tupo['buy_zs_tupo']['data'][i]
-        stop_lose_price = zs_tupo['buy_zs_tupo']['stop_lose_price'][i]
-        tags = []
-        # 当前级别的中枢
-        ent = FindPrevEntanglement(entanglement_list, fire_time)
-        # 中枢开始的段
-        duan_start = FindPrevEq(duan_series, 1, ent.start)
-        duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
-
-        if perfect_buy_long(duan_series, high_series, low_series, duan_end):
-            tags.append("完备")
-        category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_a_stock_signal(
-            sse,
-            symbol,
-            code,
-            period,
-            '升破笔中枢看涨',
-            fire_time,
-            price,
-            stop_lose_price,
-            'BUY_LONG',
-            tags,
-            category
-        )
-
-    count = len(v_reverse['buy_v_reverse']['date'])
-    for i in range(count):
-        idx = v_reverse['buy_v_reverse']['idx'][i]
-        fire_time = v_reverse['buy_v_reverse']['date'][i]
-        price = v_reverse['buy_v_reverse']['data'][i]
-        stop_lose_price = v_reverse['buy_v_reverse']['stop_lose_price'][i]
-        tags = []
-        # 当前级别的中枢
-        ent = FindPrevEntanglement(entanglement_list, fire_time)
-        # 中枢开始的段
-        duan_start = FindPrevEq(duan_series, 1, ent.start)
-        duan_end = FindNextEq(duan_series, -1, duan_start, len(duan_series))
-
-        if perfect_buy_long(duan_series, high_series, low_series, duan_end):
-            tags.append("完备")
-        category = buy_category(higher_duan_series, duan_series, high_series, low_series, idx)
-        save_a_stock_signal(
-            sse,
-            symbol,
-            code,
-            period,
-            '笔中枢三卖V看涨',
-            fire_time,
-            price,
-            stop_lose_price,
-            'BUY_LONG',
-            tags,
-            category
-        )
+    signal_map = {
+        "buy_zs_huila": "回拉中枢看上涨",
+        "buy_zs_tupo": "突破中枢上涨",
+        "buy_v_reverse": "V反上涨",
+        "buy_five_v_reverse": "五浪V反上涨",
+        "buy_second_perfect": "完备套上涨"
+    }
+    signal_map = {
+        "buy_second_perfect": "完备套上涨"
+    }
+    for signal_type in signal_map:
+        signals = resp[signal_type]
+        for idx in range(len(signals["date"])):
+            fire_time = signals["date"][idx]
+            fire_time = tz.localize(datetime.datetime.strptime(fire_time, "%Y-%m-%d %H:%M"))
+            price = signals["data"][idx]
+            stop_lose_price = signals["stop_lose_price"][idx]
+            tag = signals["tag"][idx]
+            tags = [] if tag is None else tag.split(",")
+            save_a_stock_signal(
+                sse,
+                symbol,
+                code,
+                period,
+                signal_map[signal_type],
+                fire_time,
+                price,
+                stop_lose_price,
+                'BUY_LONG',
+                tags,
+                "",
+                True
+            )
 
 
 def signal_handler(signal_num, frame):
@@ -250,7 +215,7 @@ def run(**kwargs):
     while True:
         for thread in thread_list:
             if thread.is_alive():
-                time.sleep(200)
+                time.sleep(60)
                 break
         else:
             break
