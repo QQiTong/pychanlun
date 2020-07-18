@@ -28,7 +28,7 @@ tz = pytz.timezone('Asia/Shanghai')
 
 @func_set_timeout(60)
 def get_data(symbol, period, end_date=None):
-    stopwatch = Stopwatch('get_data {} {}'.format(symbol, period))
+    # stopwatch = Stopwatch('get_data {} {}'.format(symbol, period))
     required_period_list = get_required_period_list(period)
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
     if match_stock is not None:
@@ -54,6 +54,9 @@ def get_data(symbol, period, end_date=None):
             .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
 
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
+
+    if len(data_list) == 0:
+        return None
 
     # data_list包含了计算各个周期需要的K线数据，其中的kline_data是一个DataFrame的数据结构
     # 初始的列有: index time open high low close volume
@@ -341,8 +344,8 @@ def get_data(symbol, period, end_date=None):
     resp['notLower'] = calcNotLower(list(kline_data["duan"]), list(kline_data["low"]))
     resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["low"]))
 
-    stopwatch.stop()
-    logger.info(stopwatch)
+    # stopwatch.stop()
+    # logger.info(stopwatch)
 
     return resp
 

@@ -251,6 +251,8 @@ def getGlobalFutureData(symbol, period, endDate, stamp=datetime.now().strftime("
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
         .find({"_id": {"$gte": start_date, "$lte": end}}).sort("_id", pymongo.ASCENDING)
     data_list = list(data_list)
+    if len(data_list) == 0:
+        return None
     kline_data = pd.DataFrame(data_list)
     kline_data['time'] = kline_data['_id'].apply(lambda value: value.timestamp())
     kline_data.fillna(0, inplace=True)
