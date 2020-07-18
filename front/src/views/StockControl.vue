@@ -9,7 +9,7 @@
             <el-table-column
                 prop="code"
                 label="代码"
-                width="180"
+                width="100"
             >
                 <template slot-scope="scope">
                     <el-link type="primary" :underline="false" @click="jumpToKline(scope.row.symbol,scope.row.period)">
@@ -18,9 +18,20 @@
                 </template>
             </el-table-column>
             <el-table-column
+                prop="name"
+                label="名称"
+                width="100"
+            >
+                <template slot-scope="scope">
+                    <el-link type="primary" :underline="false" @click="jumpToKline(scope.row.symbol,scope.row.period)">
+                        {{scope.row.name}}
+                    </el-link>
+                </template>
+            </el-table-column>
+            <el-table-column
                 prop="period"
                 label="周期"
-                width="180"
+                width="80"
                 :filters="[{ text: '5m', value: '5m' }, { text: '15m', value: '15m' },{ text: '30m', value: '30m' }]"
                 :filter-method="filterPeriod"
                 filter-placement="bottom-end"
@@ -28,24 +39,27 @@
             </el-table-column>
             <el-table-column
                 prop="fire_time"
+                width="180"
                 label="时间">
             </el-table-column>
             <el-table-column
                 prop="price"
-                label="价格">
+                width="80"
+                label="触发价">
             </el-table-column>
             <el-table-column
                 prop="stop_lose_price"
+                width="80"
                 label="止损价">
             </el-table-column>
-            <el-table-column prop="stop_lose_rate" label="止损价">
+            <el-table-column
+                prop="stop_lose_rate"
+                width="80"
+                label="止损%"
+            >
                 <template slot-scope="scope">
                     <span nowrap>{{Math.round((scope.row.stop_lose_price-scope.row.price)/scope.row.price*10000)/100}}%</span>
                 </template>
-            </el-table-column>
-            <el-table-column
-                prop="remark"
-                label="备注">
             </el-table-column>
             <el-table-column
                 prop="category"
@@ -58,6 +72,10 @@
                 :filter-method="filterTags"
                 filter-placement="bottom-end"
             >
+            </el-table-column>
+            <el-table-column
+                prop="remark"
+                label="备注">
             </el-table-column>
         </el-table>
     </div>
@@ -110,13 +128,16 @@
                 return row.period === value
             },
             getSignalList (page) {
+                const thisC = this;
                 stockApi.getStockSignalList(page).then(res => {
                     this.signalList = res
                     this.loading = false
                 }).catch((error) => {
                     this.loading = false
                     console.log('获取股票信号列表失败:', error)
-                })
+                }).finally(() => {
+                    setTimeout(thisC.getSignalList(page), 15000);
+                });
             },
             jumpToKline (symbol, period) {
                 // 总控页面不关闭，开启新页面

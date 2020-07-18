@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import json
+import logging
 
 from et_stopwatch import Stopwatch
 from flask import Flask, request, Response
-from waitress import serve
 from func_timeout import func_timeout
+from waitress import serve
 
-from pychanlun.monitor.BusinessService import businessService
+import pychanlun.stock_service as stock_service
 from pychanlun.chanlun_service import get_data
+from pychanlun.monitor.BusinessService import businessService
 
 app = Flask(__name__)
 
@@ -189,11 +190,11 @@ def update_future_prejudge_list():
 # 获取股票信号列表
 @app.route('/api/get_stock_signal_list')
 def get_stock_signal_list():
-    page = int(request.args.get("page") or "1")
+    page = int(request.args.get("page", "1"))
     if page <= 0:
         page = 1
-    stockSignalList = func_timeout(30, businessService.get_stock_signal_list, args=(page,))
-    return Response(json.dumps(stockSignalList), mimetype='application/json')
+    signal_list = stock_service.get_stock_signal_list(page)
+    return Response(json.dumps(signal_list), mimetype='application/json')
 
 
 # 查询股票持仓列表

@@ -1,34 +1,28 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 import re
 import traceback
-import datetime
 
+import numpy as np
+import pandas as pd
+import pytz
+from func_timeout import func_set_timeout
 from loguru import logger
 
-import pandas as pd
-import numpy as np
-from et_stopwatch import Stopwatch
-import pytz
-
+import pychanlun.entanglement as entanglement
 from pychanlun import Duan
-
-from func_timeout import func_set_timeout
-
 from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData
-from pychanlun.config import config
 from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
 from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data
-import pychanlun.entanglement as entanglement
-
+from pychanlun.config import config
 
 tz = pytz.timezone('Asia/Shanghai')
 
 
 @func_set_timeout(60)
 def get_data(symbol, period, end_date=None):
-    # stopwatch = Stopwatch('get_data {} {}'.format(symbol, period))
     required_period_list = get_required_period_list(period)
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
     if match_stock is not None:
@@ -343,9 +337,6 @@ def get_data(symbol, period, end_date=None):
 
     resp['notLower'] = calcNotLower(list(kline_data["duan"]), list(kline_data["low"]))
     resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["low"]))
-
-    # stopwatch.stop()
-    # logger.info(stopwatch)
 
     return resp
 
