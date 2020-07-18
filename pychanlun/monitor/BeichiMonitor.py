@@ -533,7 +533,7 @@ async def monitorHuila(result, symbol, period, closePrice):
         above_ma5 = result['buy_zs_huila']['above_ma5'][-1]
         above_ma20 = result['buy_zs_huila']['above_ma20'][-1]
         stop_lose_price = result['buy_zs_huila']['stop_lose_price'][-1]
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
         # 大级别直接保存
         if period != '1m':
@@ -552,7 +552,7 @@ async def monitorHuila(result, symbol, period, closePrice):
         above_ma5 = result['sell_zs_huila']['above_ma5'][-1]
         above_ma20 = result['sell_zs_huila']['above_ma20'][-1]
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
         if period != "1m":
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
@@ -581,7 +581,7 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma5 = result['buy_zs_tupo']['above_ma5'][-1]
         above_ma20 = result['buy_zs_tupo']['above_ma20'][-1]
         direction = 'B'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if period != "1m":
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         else:
@@ -596,7 +596,7 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma5 = result['sell_zs_tupo']['above_ma5'][-1]
         above_ma20 = result['sell_zs_tupo']['above_ma20'][-1]
         direction = 'S'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if period != "1m":
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         else:
@@ -620,7 +620,7 @@ async def monitorVReverse(result, symbol, period, closePrice):
         above_ma5 = result['buy_v_reverse']['above_ma5'][-1]
         above_ma20 = result['buy_v_reverse']['above_ma20'][-1]
         direction = 'B'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if above_ma5:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
     if len(result['sell_v_reverse']['date']) > 0:
@@ -631,7 +631,7 @@ async def monitorVReverse(result, symbol, period, closePrice):
         above_ma5 = result['sell_v_reverse']['above_ma5'][-1]
         above_ma20 = result['sell_v_reverse']['above_ma20'][-1]
         direction = 'S'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if not above_ma5:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
@@ -651,7 +651,7 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         above_ma5 = result['buy_five_v_reverse']['above_ma5'][-1]
         above_ma20 = result['buy_five_v_reverse']['above_ma20'][-1]
         direction = 'B'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if above_ma5:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
     if len(result['sell_five_v_reverse']['date']) > 0:
@@ -662,7 +662,7 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         above_ma5 = result['sell_five_v_reverse']['above_ma5'][-1]
         above_ma20 = result['sell_five_v_reverse']['above_ma20'][-1]
         direction = 'S'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if not above_ma5:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
@@ -683,7 +683,7 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
         above_ma5 = result['buy_duan_break']['above_ma5'][-1]
         above_ma20 = result['buy_duan_break']['above_ma20'][-1]
         direction = 'B'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if above_ma5:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
     if len(result['sell_duan_break']['date']) > 0:
@@ -694,7 +694,7 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
         above_ma5 = result['sell_duan_break']['above_ma5'][-1]
         above_ma20 = result['sell_duan_break']['above_ma20'][-1]
         direction = 'S'
-        futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if not above_ma5:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
@@ -762,10 +762,10 @@ async def monitorFractal(result, symbol, period, closePrice):
             direction = 'S'
             # 顶分型的顶
             top_price = result['fractal'][0]['top_fractal']['top']
-            futureCalcObj = calMaxOrderCount(symbol, closePrice, top_price, period, signal)
+            futureCalcObj = await calMaxOrderCount(symbol, closePrice, top_price, period, signal)
             # 当前价格低于顶分型的底
             if closePrice <= price:
-                stopWinCount = calStopWinCount(symbol, period, positionInfoLong, closePrice)
+                stopWinCount = await calStopWinCount(symbol, period, positionInfoLong, closePrice)
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
                 # 保存动止时的价格
@@ -784,11 +784,11 @@ async def monitorFractal(result, symbol, period, closePrice):
             direction = 'HS'
             # 顶分型的顶
             top_price = result['fractal'][1]['top_fractal']['top']
-            futureCalcObj = calMaxOrderCount(symbol, closePrice, top_price, period, signal)
+            futureCalcObj = await calMaxOrderCount(symbol, closePrice, top_price, period, signal)
 
             # 当前价格低于顶分型的底
             if closePrice <= price:
-                stopWinCount = calStopWinCount(symbol, period, positionInfoLong, closePrice)
+                stopWinCount = await calStopWinCount(symbol, period, positionInfoLong, closePrice)
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
                 # 保存动止时的价格
@@ -808,11 +808,11 @@ async def monitorFractal(result, symbol, period, closePrice):
             direction = 'B'
             # 底分型的底部
             bottom_price = result['fractal'][0]['bottom_fractal']['bottom']
-            futureCalcObj = calMaxOrderCount(symbol, closePrice, bottom_price, period, signal)
+            futureCalcObj = await calMaxOrderCount(symbol, closePrice, bottom_price, period, signal)
 
             # 当前价格高于底分型的顶
             if closePrice >= price:
-                stopWinCount = calStopWinCount(symbol, period, positionInfoShort, closePrice)
+                stopWinCount = await calStopWinCount(symbol, period, positionInfoShort, closePrice)
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
                 # 保存动止时的价格
@@ -830,11 +830,11 @@ async def monitorFractal(result, symbol, period, closePrice):
             direction = 'HB'
             # 底分型的底部
             bottom_price = result['fractal'][1]['bottom_fractal']['bottom']
-            futureCalcObj = calMaxOrderCount(symbol, closePrice, bottom_price, period, signal)
+            futureCalcObj = await calMaxOrderCount(symbol, closePrice, bottom_price, period, signal)
 
             # 当前价格高于底分型的顶
             if closePrice >= price:
-                stopWinCount = calStopWinCount(symbol, period, positionInfoShort, closePrice)
+                stopWinCount = await calStopWinCount(symbol, period, positionInfoShort, closePrice)
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
                 # 保存动止时的价格
@@ -847,7 +847,7 @@ async def monitorFractal(result, symbol, period, closePrice):
 
 # 计算出开仓手数（止损系数，资金使用率双控）
 # 返回最大开仓手数，1手止损的金额，1手止损的百分比
-def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period, signal):
+async def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period, signal):
     # openPrice stopPrice等于历史行情某个stopPrice 会导致除0异常
     if openPrice == stopPrice:
         return -1
@@ -912,7 +912,7 @@ def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period, signal):
 
 # 计算动止手数（盈亏比大于2.3：1 动止30%才能保证不亏）
 # 主力合约，开仓价格，开仓数量，止损价格，止盈价格    用最新价来算回更准确，因为触发价可能会有滑点
-def calStopWinCount(symbol, period, positionInfo, closePrice):
+async def calStopWinCount(symbol, period, positionInfo, closePrice):
     # 兼容数字货币和外盘期货
     # if 'BTC' in symbol or symbol in config['global_future_symbol'] or symbol in config['global_stock_symbol']:
     #     return 0
