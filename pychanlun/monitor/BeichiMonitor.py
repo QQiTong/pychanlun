@@ -487,7 +487,6 @@ def monitor_futures_and_digitcoin(symbol_list, period_list):
                 task = asyncio.ensure_future(do_monitoring(symbol_list[i], period_list[j]))
                 tasks.append(task)
         loop.run_until_complete(asyncio.wait(tasks))
-        break
     loop.close()
 
 
