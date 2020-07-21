@@ -148,7 +148,7 @@ def calculate_chanlun_signal(code_period_obj):
                 stop_lose_price,
                 'BUY_LONG',
                 tags,
-                "",
+                "N/A",
                 True
             )
 

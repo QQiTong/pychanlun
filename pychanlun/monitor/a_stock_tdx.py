@@ -59,6 +59,8 @@ def monitoring_stock():
 
     api = TdxHq_API(heartbeat=True, auto_retry=True)
     global is_run
+    global is_loop
+    stop_watch = Stopwatch("monitoring_stock")
     with api.connect('119.147.212.81', 7709):
         while is_run:
             for stock in stocks:
@@ -79,6 +81,10 @@ def monitoring_stock():
                         break
                 if not is_run:
                     break
+            if not is_loop:
+                break
+    stop_watch.stop()
+    logger.info(stop_watch)
 
 
 @func_set_timeout(60)
@@ -192,7 +198,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
                 stop_lose_price,
                 'BUY_LONG',
                 tags,
-                "",
+                "N/A",
                 True
             )
 
