@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import logging
+from loguru import logger
 import click
 from pychanlun import server as api_server
 from pychanlun.monitor import BeichiMonitor
@@ -57,27 +57,28 @@ def download_global_future_data(**kwargs):
 def download_stock_data(**kwargs):
     source = kwargs.get("source")
     if source == "tdxlocal":
-        logging.info("从通达信下载股票数据 开始")
+        logger.info("从通达信下载股票数据 开始")
         tdx_local_downloader.run(**kwargs)
-        logging.info("从通达信下载股票数据 完成")
+        logger.info("从通达信下载股票数据 完成")
 
 
 @run.command()
 @click.option('--code', type=str)
 @click.option('--period', type=str)
 def select_a_stock(**kwargs):
-    logging.info("股票信号计算 开始")
+    logger.info("股票信号计算 开始")
     a_stock_signal.run(**kwargs)
-    logging.info("股票信号计算 结束")
+    logger.info("股票信号计算 结束")
 
 
 @run.command()
 @click.option('--code', type=str)
 @click.option('--period', type=str)
+@click.option('--loop/--no_loop', default=True)
 def monitoring_a_stock_tdx(**kwargs):
-    logging.info("股票监控 开始")
+    logger.info("股票监控 开始")
     stock_monitoring.run(**kwargs)
-    logging.info("股票监控 结束")
+    logger.info("股票监控 结束")
 
 
 if __name__ == '__main__':

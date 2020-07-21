@@ -58,6 +58,8 @@ def second_perfect(kline_data):
             if n == -1:
                 continue
             d0 = g0 + n
+            if low_list[d0] < min(low_list[d1], low_list[d2]):
+                continue
             for j in range(d0+1, count):
                 if high_list[j] > high_list[g0]:
                     # 找到买点
@@ -91,6 +93,8 @@ def second_perfect(kline_data):
             if n == -1:
                 continue
             g0 = d0 + n
+            if high_list[g0] > max(high_list[g1], high_list[g2]):
+                continue
             for j in range(g0+1, count):
                 if low_list[j] < low_list[d0]:
                     # 找到买点

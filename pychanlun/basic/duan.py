@@ -34,13 +34,11 @@ def CalcDuan(count, duan, bi, high, low):
                 # 遇到笔的低点
                 if low[i] < low[D1]:
                     # 笔低点反向直接破线段最低点了
-                    duan[G1] = 0
-                    duan[D1] = 0
                     duan[i] = -1
                 else:
                     # i1 反向的第一个低点
                     i1 = FindNextEq(bi, -1, G1 + 1, i)
-                    if i1 >= 0 and i > i1:
+                    if 0 <= i1 < i:
                         # 前面已出现了反向的第一个低点
                         if low[i] < low[i1]:
                             # 破坏了反向的第一个低点，直接确认线段成立了。
@@ -76,11 +74,9 @@ def CalcDuan(count, duan, bi, high, low):
                 else:
                     # i1 反向的第一个高点
                     i1 = FindNextEq(bi, 1, D1 + 1, i)
-                    if i1 >= 0 and i > i1:
+                    if 0 <= i1 < i:
                         if high[i] > high[i1]:
                             # 破坏反向的第一个高点。
-                            duan[G1] = 0
-                            duan[D1] = 0
                             duan[i] = 1
                         else:
                             # 没有破坏第一个高点的情况，如果最近的上下上符合线段条件，那么也确认线段的成立。

@@ -17,15 +17,15 @@ from loguru import logger
 from pytdx.hq import TdxHq_API
 
 from pychanlun import entanglement as entanglement
-from pychanlun.basic.comm import FindPrevEq, FindNextEq, FindPrevEntanglement
 from pychanlun.basic.kline_analyse import calculate_bi_duan
-from pychanlun.basic.pattern import DualEntangleForBuyLong, perfect_buy_long, buy_category
 from pychanlun.monitor.a_stock_common import save_a_stock_signal
 from pychanlun.pattern.second_perfect import second_perfect
 
 tz = pytz.timezone('Asia/Shanghai')
 
 is_run = True
+is_loop = True
+
 period_map = {
     '5m': 0,
     '15m': 1,
@@ -172,9 +172,6 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         "buy_five_v_reverse": "五浪V反上涨",
         "buy_second_perfect": "完备套上涨"
     }
-    signal_map = {
-        "buy_second_perfect": "完备套上涨"
-    }
     for signal_type in signal_map:
         signals = resp[signal_type]
         for idx in range(len(signals["date"])):
@@ -207,6 +204,8 @@ def signal_handler(signal_num, frame):
 
 
 def run(**kwargs):
+    global is_loop
+    is_loop = kwargs.get("loop")
     signal.signal(signal.SIGINT, signal_handler)
     thread_list = [threading.Thread(target=monitoring_stock)]
     for thread in thread_list:
