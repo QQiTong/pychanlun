@@ -27,6 +27,7 @@ is_run = True
 is_loop = True
 
 period_map = {
+    '1m': 7,
     '5m': 0,
     '15m': 1,
     '30m': 2,
@@ -61,6 +62,8 @@ def monitoring_stock():
     global is_run
     global is_loop
     stop_watch = Stopwatch("monitoring_stock")
+    monitoring_periods = os.environ.get("PYCHANLUN_STOCK_MONITORING_PERIODS") if os.environ.get(
+        "PYCHANLUN_STOCK_MONITORING_PERIODS") is not None else "5m,15m"
     with api.connect('119.147.212.81', 7709):
         while is_run:
             for stock in stocks:
@@ -72,7 +75,7 @@ def monitoring_stock():
                 elif market == 1:
                     sse = 'sh'
                     symbol = 'sh%s' % code
-                for period in ['5m', '15m']:
+                for period in monitoring_periods.split(","):
                     stopwatch = Stopwatch('%s %3s' % (symbol, period))
                     calculate_and_notify(api, market, sse, symbol, code, period)
                     stopwatch.stop()
@@ -89,9 +92,11 @@ def monitoring_stock():
 
 @func_set_timeout(60)
 def calculate_and_notify(api, market, sse, symbol, code, period):
-    if period not in ['5m', '15m']:
+    if period not in ['1m', '5m', '15m']:
         return
-    if period == '5m':
+    if period == '1m':
+        required_period_list = ['1m', '5m', '30m']
+    elif period == '5m':
         required_period_list = ['5m', '30m', '1d']
     elif period == '15m':
         required_period_list = ['15m', '60m', '1w']
