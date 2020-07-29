@@ -121,6 +121,7 @@ def calculate_chanlun_signal(code_period_obj):
     code = code_period_obj["code"]
     period = code_period_obj["period"]
     resp = get_data(symbol, period, datetime.now().strftime("%Y-%m-%d"))
+
     signal_map = {
         "buy_zs_huila": "回拉中枢看涨",
         "buy_zs_tupo": "突破中枢看涨",

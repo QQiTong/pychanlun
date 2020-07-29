@@ -101,7 +101,6 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
 
 @lru_cache(maxsize=128)
 def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")):
-    startTime = datetime.now()
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:
@@ -131,8 +130,9 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
             }) \
             .sort("_id", pymongo.ASCENDING)
         data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
         kline_data = pd.DataFrame(data_list)
-        print(kline_data)
         kline_data['time'] = kline_data['time_stamp']
     elif period == "3m":
         data_list = DBQuantAxis["stock_min"] \
@@ -144,6 +144,8 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
             }) \
             .sort("_id", pymongo.ASCENDING)
         data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
         kline_data = pd.DataFrame(data_list)
         kline_data['datetime'] = kline_data['datetime'].apply(lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
         kline_data = QA_data_stockmin_resample(kline_data, 3)
@@ -159,6 +161,8 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
             }) \
             .sort("_id", pymongo.ASCENDING)
         data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
         kline_data = pd.DataFrame(data_list)
         kline_data['time'] = kline_data['time_stamp']
     elif period == "15m":
@@ -171,6 +175,8 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
             }) \
             .sort("_id", pymongo.ASCENDING)
         data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
         kline_data = pd.DataFrame(data_list)
         kline_data['time'] = kline_data['time_stamp']
     elif period == "30m":
@@ -183,6 +189,8 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
             }) \
             .sort("_id", pymongo.ASCENDING)
         data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
         kline_data = pd.DataFrame(data_list)
         kline_data['time'] = kline_data['time_stamp']
     elif period == "60m":
@@ -195,6 +203,8 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
             }) \
             .sort("_id", pymongo.ASCENDING)
         data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
         kline_data = pd.DataFrame(data_list)
         kline_data['time'] = kline_data['time_stamp']
     elif period == "180m" or period == "240m" or period == "1d":
@@ -206,6 +216,8 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
             }) \
             .sort("_id", pymongo.ASCENDING)
         data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
         kline_data = pd.DataFrame(data_list)
         kline_data['time'] = kline_data['date_stamp']
     elif period == "3d":
@@ -217,6 +229,8 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
             }) \
             .sort("_id", pymongo.ASCENDING)
         data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
         kline_data = pd.DataFrame(data_list)
         kline_data['date'] = kline_data['date'].apply(
             lambda value: datetime.strptime(value, "%Y-%m-%d"))

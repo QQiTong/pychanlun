@@ -48,12 +48,14 @@ def monitoring_stock():
         with open(block_path, "r") as fo:
             lines = fo.readlines()
             stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
-    for x in range(0, 33):
+    for x in range(0, 32):
         block_path = os.path.join(TDX_HOME, "T0002\\blocknew\\CL%s.blk" % str(x).zfill(2))
         if os.path.exists(block_path):
             with open(block_path, "r") as fo:
                 lines = fo.readlines()
                 stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
+        if x == 0 and len(stocks) >= 100:
+            break
     stocks = pydash.uniq(stocks)
     random.shuffle(stocks)
     logger.info("监控股票数量: {}".format(len(stocks)))
