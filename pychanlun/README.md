@@ -32,11 +32,13 @@ MongoDB也要先安装成Windows服务模式，参考MongoDB文档。
 
 （管理员命令行模式）
 ```cmd
-nssm install pychanlun-api-service "pychanlun"
-nssm set pychanlun-api-service AppDirectory "D:/development/pychanlun"
+nssm install pychanlun-api-service C:/Users/Administrator/scoop/apps/python37/current/scripts/pychanlun.exe
+nssm set pychanlun-api-service AppDirectory D:/development/pychanlun
 nssm set pychanlun-api-service AppParameters "run-api-server --port 18888"
+nssm set pychanlun-api-service AppStdout E:/pychanlun.log
+nssm set pychanlun-api-service AppStderr E:/pychanlun.log
 nssm set pychanlun-api-service DependOnService MongoDB
-nssm start pychanlun-api-service
+net start pychanlun-api-service
 ```
 
 使用nssm部署外盘数据下载程序
@@ -74,7 +76,7 @@ npm run build
 ```cmd
 nssm install nginx "C:/Users/Administrator/scoop/shims/nginx.exe"
 nssm set nginx AppParameters "-p D:/development/pychanlun/nginx"
-nssm start nginx
+net start nginx
 ```
 
 这样的部署后只要输入<http://localhost>就可以访问系统了。

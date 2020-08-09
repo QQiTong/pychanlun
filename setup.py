@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
 
 setup(
-    entry_points = {
+    entry_points={
         "console_scripts": ["pychanlun = pychanlun.cli:run"]
     },
-    name = "pychanlun",
-    version = "1.0.0",
-    packages = find_packages(),
-    install_requires = [
+    name="pychanlun",
+    version="1.0.0",
+    packages=find_packages(),
+    install_requires=[
         "numpy",
         "flask",
         "pandas==0.24.2",
@@ -31,6 +31,8 @@ setup(
         "matplotlib",
         "prettytable",
         "tushare",
-        "pytz"
+        "pytz",
+        "colorama",
+        "matplotlib"
     ]
 )

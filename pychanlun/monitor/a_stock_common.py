@@ -13,7 +13,7 @@ from pychanlun.zerodegree.notify import send_ding_message
 tz = pytz.timezone('Asia/Shanghai')
 
 
-def save_a_stock_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category="", force_log=False):
+def save_a_stock_signal(sse, symbol, code, period, remark, fire_time, price, stop_lose_price, position, tags=[], category=""):
     # 股票只是BUY_LONG才记录
     if position == "BUY_LONG":
         stock_one = DBQuantAxis['stock_list'].find_one({"code": code, "sse": sse})
@@ -49,8 +49,5 @@ def save_a_stock_signal(sse, symbol, code, period, remark, fire_time, price, sto
                 content = content + "-" + category
             if tags is not None and len(",".join(tags).strip()) > 0:
                 content = content + "-" + ",".join(tags).strip()
-            if fire_time > datetime.datetime.now(tz=tz) - datetime.timedelta(hours=1):
-                logger.info(content)
-                send_ding_message(content)
-            elif force_log:
-                logger.info(content)
+            logger.info(content)
+            send_ding_message(content)
