@@ -7,6 +7,7 @@ import traceback
 import QUANTAXIS as QA
 import numpy as np
 import pandas as pd
+import pydash
 import pytz
 from func_timeout import func_set_timeout
 from loguru import logger
@@ -318,13 +319,15 @@ def get_data(symbol, period, end_date=None):
         )
         if fractal_region2 is not None:
             fractal_region2["period"] = data3["period"]
-
+    time_list = list(kline_data["time"])
+    time_list2 = list(kline_data2["time"])
+    big_level_idx = pydash.find_index(time_list2, lambda v: v >= time_list[0])
     resp = {
         "symbol": data["symbol"],
         "period": data["period"],
         "endDate": end_date,
         "date": list(kline_data["time_str"]),
-        "dateBigLevel": list(kline_data2["time_str"]),
+        "dateBigLevel": list(kline_data2["time_str"])[big_level_idx:],
         "open": list(kline_data["open"]),
         "high": list(kline_data["high"]),
         "low": list(kline_data["low"]),
@@ -332,9 +335,9 @@ def get_data(symbol, period, end_date=None):
         "diff": list(kline_data["diff"]),
         "dea": list(kline_data["dea"]),
         "macd": list(kline_data["macd"]),
-        "diffBigLevel": list(kline_data2["diff"]),
-        "deaBigLevel": list(kline_data2["dea"]),
-        "macdBigLevel": list(kline_data2["macd"]),
+        "diffBigLevel": list(kline_data2["diff"])[big_level_idx:],
+        "deaBigLevel": list(kline_data2["dea"])[big_level_idx:],
+        "macdBigLevel": list(kline_data2["macd"])[big_level_idx:],
         "bidata": bi_data,
         "duandata": duan_data,
         "higherDuanData": duan_data2,
