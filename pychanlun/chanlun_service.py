@@ -324,6 +324,7 @@ def get_data(symbol, period, end_date=None):
         "period": data["period"],
         "endDate": end_date,
         "date": list(kline_data["time_str"]),
+        "dateBigLevel": list(kline_data2["time_str"]),
         "open": list(kline_data["open"]),
         "high": list(kline_data["high"]),
         "low": list(kline_data["low"]),
