@@ -29,14 +29,14 @@ signalMap = {
 
 def calc_beichi_data(x_data, xx_data, bigLevel=False):
     divergence_down, divergence_up = calc_divergence(x_data, xx_data)
-    bi_series = x_data['bi']
-    duan_series = x_data['duan']
-    time_series = x_data['time']
-    high_series = x_data['high']
-    low_series = x_data['low']
-    open_series = x_data['open']
-    close_series = x_data['close']
-    diff_series = x_data['diff']
+    bi_series = list(x_data['bi'])
+    duan_series = list(x_data['duan'])
+    time_series = list(x_data['time'])
+    high_series = list(x_data['high'])
+    low_series = list(x_data['low'])
+    open_series = list(x_data['open'])
+    close_series = list(x_data['close'])
+    diff_series = list(x_data['diff'])
     return note(divergence_down, divergence_up, bi_series, duan_series, time_series, high_series, low_series,
                 open_series, close_series, diff_series, bigLevel)
 
@@ -48,20 +48,20 @@ def calc_divergence(x_data, xx_data):
     divergence_down = np.zeros(length)
     # 顶背驰信号
     divergence_up = np.zeros(length)
-    gold_cross = x_data['jc']
-    dead_cross = x_data['sc']
-    time_series = x_data['time']
-    diff_series = x_data['diff']
-    dea_series = x_data['dea']
-    duan_series = x_data['duan']
-    high_series = x_data['high']
-    low_series = x_data['low']
-    close_series = x_data['close']
+    gold_cross = list(x_data['jc'])
+    dead_cross = list(x_data['sc'])
+    time_series = list(x_data['time'])
+    diff_series = list(x_data['diff'])
+    dea_series = list(x_data['dea'])
+    duan_series = list(x_data['duan'])
+    high_series = list(x_data['high'])
+    low_series = list(x_data['low'])
+    close_series = list(x_data['close'])
     big_idx = 0
     for i in range(len(gold_cross)):
-        big_idx = pydash.find_index(xx_data['time'][big_idx:], lambda x: x >= time_series[i])
+        big_idx = pydash.find_index(time_series[big_idx:], lambda v: v >= time_series[i])
         big_direction = 0
-        if big_idx > 0 and xx_data['diff'][big_idx] < 0 and xx_data['dea'][big_idx] < 0:
+        if big_idx > 0 and diff_series[big_idx] < 0 and dea_series[big_idx] < 0:
             big_direction = -1
         else:
             big_direction = 1
@@ -109,9 +109,9 @@ def calc_divergence(x_data, xx_data):
                                 divergence_down[i] = 1
     big_idx = 0
     for i in range(len(dead_cross)):
-        big_idx = pydash.find_index(xx_data['time'][big_idx:], lambda x: x >= time_series[i])
+        big_idx = pydash.find_index(time_series[big_idx:], lambda x: x >= time_series[i])
         big_direction = 0
-        if big_idx > 0 and xx_data['diff'][big_idx] < 0 and xx_data['dea'][big_idx] < 0:
+        if big_idx > 0 and diff_series[big_idx] < 0 and dea_series[big_idx] < 0:
             big_direction = -1
         else:
             big_direction = 1
