@@ -12,7 +12,7 @@ from func_timeout import func_set_timeout
 from loguru import logger
 
 import pychanlun.entanglement as entanglement
-from pychanlun import Duan
+from pychanlun import Duan, divergence
 from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData
 from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
@@ -39,7 +39,8 @@ def get_data(symbol, period, end_date=None):
     data_list = []
     required_period_list.reverse()
     for period_one in required_period_list:
-        kline_data = get_instrument_data(symbol, period_one, end_date, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+        kline_data = get_instrument_data(symbol, period_one, end_date,
+                                         datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
         if kline_data is None or len(kline_data) == 0:
             continue
 
@@ -50,11 +51,11 @@ def get_data(symbol, period, end_date=None):
 
         # 加上MACD数据
         MACD = QA.MACD(kline_data['close'], 12, 26, 9)
-        kline_data['diff'] = MACD['DIFF']
-        kline_data['dea'] = MACD['DEA']
-        kline_data['macd'] = MACD['MACD']
-        kline_data['jc'] = QA.CROSS(MACD['DIFF'], MACD['DEA'])
-        kline_data['sc'] = QA.CROSS(MACD['DEA'], MACD['DIFF'])
+        kline_data['diff'] = MACD['DIFF'].fillna(0)
+        kline_data['dea'] = MACD['DEA'].fillna(0)
+        kline_data['macd'] = MACD['MACD'].fillna(0)
+        kline_data['jc'] = QA.CROSS(MACD['DIFF'], MACD['DEA']).fillna(0)
+        kline_data['sc'] = QA.CROSS(MACD['DEA'], MACD['DIFF']).fillna(0)
 
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
 
@@ -83,7 +84,7 @@ def get_data(symbol, period, end_date=None):
             data["kline_data"]["duan"] = duan_list
             data["kline_data"]["duan2"] = duan_list2
         elif idx == 1:
-            data2 = data_list[idx-1]
+            data2 = data_list[idx - 1]
             data = data_list[idx]
             count = len(data["kline_data"])
             bi_list = [0 for i in range(count)]
@@ -109,8 +110,8 @@ def get_data(symbol, period, end_date=None):
             data["kline_data"]["duan"] = duan_list
             data["kline_data"]["duan2"] = duan_list2
         else:
-            data3 = data_list[idx-2]
-            data2 = data_list[idx-1]
+            data3 = data_list[idx - 2]
+            data2 = data_list[idx - 1]
             data = data_list[idx]
             count = len(data["kline_data"])
             bi_list = [0 for i in range(count)]
@@ -278,11 +279,12 @@ def get_data(symbol, period, end_date=None):
     buy_duan_break = duan_pohuai['buy_duan_break']
     sell_duan_break = duan_pohuai['sell_duan_break']
 
-    buyMACDBCData = {'date': [], 'data': [], 'value': []}
-    sellMACDBCData = {'date': [], 'data': [], 'value': []}
+    beichiData = divergence.calc_beichi_data(kline_data, kline_data2)
+    buyMACDBCData = beichiData['buyMACDBCData']
+    sellMACDBCData = beichiData['sellMACDBCData']
 
-    buyHigherMACDBCData = {'date': [], 'data': [], 'value': []}
-    sellHigherMACDBCData = {'date': [], 'data': [], 'value': []}
+    buyHigherMACDBCData = {'date': [], 'data': [], 'value': [], "stop_lose_price": [], "stop_win_price": []}
+    sellHigherMACDBCData = {'date': [], 'data': [], 'value': [], "stop_lose_price": [], "stop_win_price": []}
 
     # 顶底分型
     fractal_region = None
@@ -303,7 +305,7 @@ def get_data(symbol, period, end_date=None):
 
     fractal_region2 = None
     if len(data_list) > 2:
-        data3= data_list[-3]
+        data3 = data_list[-3]
         kline_data3 = data3["kline_data"]
         fractal_region2 = FindLastFractalRegion(
             len(kline_data3),
