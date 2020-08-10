@@ -140,7 +140,7 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag, pric
         })
         if signal == 'fractal':
             print(symbol,period,futureCalcObj,perOrderStopRate)
-        if abs((date_created - fire_time).total_seconds()) < 60 * 4 and perOrderStopRate <= 0.2:
+        if abs((date_created - fire_time).total_seconds()) < 60 * 7 and perOrderStopRate <= 0.2:
             # 新增
             remind = saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                             stop_lose_price, futureCalcObj, True)
