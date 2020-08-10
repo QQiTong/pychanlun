@@ -4,6 +4,7 @@ import datetime
 import re
 import traceback
 
+import QUANTAXIS as QA
 import numpy as np
 import pandas as pd
 import pytz
@@ -46,6 +47,14 @@ def get_data(symbol, period, end_date=None):
         kline_data = pd.DataFrame(kline_data)
         kline_data["time_str"] = kline_data["time"] \
             .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
+
+        # 加上MACD数据
+        MACD = QA.MACD(kline_data['close'], 12, 26, 9)
+        kline_data['diff'] = MACD['DIFF']
+        kline_data['dea'] = MACD['DEA']
+        kline_data['macd'] = MACD['MACD']
+        kline_data['jc'] = QA.CROSS(MACD['DIFF'], MACD['DEA'])
+        kline_data['sc'] = QA.CROSS(MACD['DEA'], MACD['DIFF'])
 
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
 
@@ -142,8 +151,10 @@ def get_data(symbol, period, end_date=None):
     ma20 = np.round(pd.Series.rolling(daily_data["close"], window=20).mean(), 2)
 
     data = data_list[-1]
+    data2 = data_list[-2]
 
     kline_data = data["kline_data"]
+    kline_data2 = data2["kline_data"]
 
     # 计算笔中枢
     entanglement_list = entanglement.CalcEntanglements(
@@ -267,6 +278,12 @@ def get_data(symbol, period, end_date=None):
     buy_duan_break = duan_pohuai['buy_duan_break']
     sell_duan_break = duan_pohuai['sell_duan_break']
 
+    buyMACDBCData = {'date': [], 'data': [], 'value': []}
+    sellMACDBCData = {'date': [], 'data': [], 'value': []}
+
+    buyHigherMACDBCData = {'date': [], 'data': [], 'value': []}
+    sellHigherMACDBCData = {'date': [], 'data': [], 'value': []}
+
     # 顶底分型
     fractal_region = None
     if len(data_list) > 1:
@@ -309,6 +326,12 @@ def get_data(symbol, period, end_date=None):
         "high": list(kline_data["high"]),
         "low": list(kline_data["low"]),
         "close": list(kline_data["close"]),
+        "diff": list(kline_data["diff"]),
+        "dea": list(kline_data["dea"]),
+        "macd": list(kline_data["macd"]),
+        "diffBigLevel": list(kline_data2["diff"]),
+        "deaBigLevel": list(kline_data2["dea"]),
+        "macdBigLevel": list(kline_data2["macd"]),
         "bidata": bi_data,
         "duandata": duan_data,
         "higherDuanData": duan_data2,
@@ -329,6 +352,10 @@ def get_data(symbol, period, end_date=None):
         "sell_five_v_reverse": sell_five_v_reverse,
         "buy_duan_break": buy_duan_break,
         "sell_duan_break": sell_duan_break,
+        "buyMACDBCData": buyMACDBCData,
+        "sellMACDBCData": sellMACDBCData,
+        "buyHigherMACDBCData": buyHigherMACDBCData,
+        "sellHigherMACDBCData": sellHigherMACDBCData
     }
 
     fractal_region = {} if fractal_region is None else fractal_region

@@ -35,8 +35,8 @@ MongoDB也要先安装成Windows服务模式，参考MongoDB文档。
 nssm install pychanlun-api-service C:/Users/Administrator/scoop/apps/python37/current/scripts/pychanlun.exe
 nssm set pychanlun-api-service AppDirectory D:/development/pychanlun
 nssm set pychanlun-api-service AppParameters "run-api-server --port 18888"
-nssm set pychanlun-api-service AppStdout E:/pychanlun.log
-nssm set pychanlun-api-service AppStderr E:/pychanlun.log
+nssm set pychanlun-api-service AppStdout E:/logs/pychanlun.log
+nssm set pychanlun-api-service AppStderr E:/logs/pychanlun.log
 nssm set pychanlun-api-service DependOnService MongoDB
 net start pychanlun-api-service
 ```

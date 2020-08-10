@@ -19,7 +19,6 @@ from pytdx.hq import TdxHq_API
 from pychanlun import entanglement as entanglement
 from pychanlun.basic.kline_analyse import calculate_bi_duan
 from pychanlun.monitor.a_stock_common import save_a_stock_signal
-from pychanlun.pattern.second_perfect import second_perfect
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -152,8 +151,6 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
     ma5 = list(df['ma5'])
     ma20 = list(df['ma20'])
 
-    higher_duan_series = list(df['duan2'])
-
     entanglement_list = entanglement.CalcEntanglements(time_str_series, duan_series, bi_series, high_series, low_series)
     zs_huila = entanglement.la_hui(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
     zs_tupo = entanglement.tu_po(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
@@ -168,14 +165,12 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         ma5,
         ma20,
     )
-    second_perfect_data = second_perfect(df)
 
     resp = {
         "buy_zs_huila": zs_huila['buy_zs_huila'],
         "buy_zs_tupo": zs_tupo['buy_zs_tupo'],
         "buy_v_reverse": v_reverse['buy_v_reverse'],
         "buy_five_v_reverse": five_v_fan['buy_five_v_reverse'],
-        "buy_second_perfect": second_perfect_data['buy_second_perfect']
     }
 
     signal_map = {
@@ -183,7 +178,6 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         "buy_zs_tupo": "突破中枢上涨",
         "buy_v_reverse": "V反上涨",
         "buy_five_v_reverse": "五浪V反上涨",
-        "buy_second_perfect": "完备套上涨"
     }
     for signal_type in signal_map:
         signals = resp[signal_type]
