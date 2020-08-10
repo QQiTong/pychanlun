@@ -229,7 +229,7 @@ class BusinessService:
         conbinSymbolInfo = copy.deepcopy(dominantSymbolInfoList)
         #  把外盘 数字货币加进去
         conbinSymbolInfo.extend(config['global_future_symbol_info'])
-        conbinSymbolInfo.extend(config['digit_coin_symbol_info'])
+        # conbinSymbolInfo.extend(config['digit_coin_symbol_info'])
         return conbinSymbolInfo
 
     def getFutureSignalList(self, strategyType):
@@ -245,7 +245,7 @@ class BusinessService:
         #  把外盘加进去
         symbolList.extend(global_future_symbol)
         # symbolList.extend(global_stock_symbol)
-        symbolList.extend(digit_coin_symbol)
+        # symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]
@@ -506,8 +506,16 @@ class BusinessService:
         total = result.count()
         for x in result:
             x['_id'] = str(x['_id'])
-            x['fire_time'] = self.formatTime(x['fire_time'])
-            x['date_created'] = self.formatTime(x['date_created'])
+            if ('fire_time' in x and x['fire_time'] != ''):
+                x['fire_time'] = self.formatTime(x['fire_time'])
+            else:
+                x['fire_time'] = ''
+
+            if ('date_created' in x and x['date_created'] != ''):
+                x['date_created'] = self.formatTime(x['date_created'])
+            else:
+                x['date_created'] = ''
+
             if ('last_update_time' in x and x['last_update_time'] != ''):
                 x['last_update_time'] = self.formatTime(x['last_update_time'])
             else:
@@ -522,7 +530,8 @@ class BusinessService:
                 x['win_end_time'] = ''
             # 兼容老数据
             if ('total_margin' not in x or x['total_margin'] != ''):
-                x['total_margin'] = round(x['per_order_margin'] * x['amount'], 2)
+                if ('per_order_margin' in x and x['per_order_margin'] != ''):
+                    x['total_margin'] = round(x['per_order_margin'] * x['amount'], 2)
 
             if 'dynamicPositionList' in x:
                 for y in x['dynamicPositionList']:
@@ -590,6 +599,7 @@ class BusinessService:
         if item['symbol'] is 'BTC':
             marginLevel = 1 / (item['margin_rate'])
         else:
+            print(item['symbol'],item)
             marginLevel = 1 / (item['margin_rate'] + config['margin_rate_company'])
         if status == 'winEnd':
             winEndPercent = round(((float(close_price) - item['price']) / item['price']) * marginLevel, 2)

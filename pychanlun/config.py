@@ -129,8 +129,8 @@ config = {
         'NID': {'margin_rate': 0.1, 'contract_multiplier': 1},
         'ZSD': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'CP': {'margin_rate': 0.1, 'contract_multiplier': 1},
-        'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
-        'SB': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        # 'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        # 'SB': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # wshq
         'YM': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
         'ES': {'margin_rate': 0.086, 'contract_multiplier': 5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
@@ -160,8 +160,8 @@ config = {
     # 外盘期货品种
     # CL:原油; GC:黄金;SI:白银; CT:棉花;ZS:大豆;ZM:豆粕; ZL:豆油;NID:伦镍;
     # YM:道琼斯 CN:A50 CP:马棕榈
-    # wshq
-    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL','NID','ZSD','CT','SB'],
+    # wshq 'SB'
+    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL','NID','ZSD'],
     # 美国股票
     'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD'],
     # wshq
@@ -297,24 +297,24 @@ config = {
             'type': 'future',
             'feeRate': 0.012
         },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 0.1,
-            'order_book_id': 'CT',
-            'trading_hours': '7*24',
-            'type': 'future',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 1,
-            'exchange': '美国',
-            'margin_rate': 0.1,
-            'order_book_id': 'SB',
-            'trading_hours': '7*24',
-            'type': 'future',
-            'feeRate': 0.012
-        },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 0.1,
+        #     'order_book_id': 'CT',
+        #     'trading_hours': '7*24',
+        #     'type': 'future',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 1,
+        #     'exchange': '美国',
+        #     'margin_rate': 0.1,
+        #     'order_book_id': 'SB',
+        #     'trading_hours': '7*24',
+        #     'type': 'future',
+        #     'feeRate': 0.012
+        # },
         {
             'contract_multiplier': 50,
             'exchange': '美国',

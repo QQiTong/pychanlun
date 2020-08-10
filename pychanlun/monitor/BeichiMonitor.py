@@ -176,7 +176,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
 async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                  stop_lose_price, futureCalcObj, insert):
     # CT NID CP 老虎无法交易
-    if symbol == 'CT' or symbol == 'CP' or symbol == 'NID':
+    if symbol == 'CT' or symbol == 'CP':
         return False
 
     remind = False
@@ -731,7 +731,10 @@ temp = {
     }]
 }
 
-
+'''
+计算分型止损率的时候不能 使用 close_price 因为监控性能的问题 扫描到信号的时候 
+close_price 和触发价格 price 已经相差很多，此时计算的止损率会偏高 导致被信号过滤器给过滤掉
+'''
 async def monitorFractal(result, symbol, period, closePrice):
     # 将当前级别的的方向插入到数据库，用于前端展示当前级别的状态
     # 15m向上成笔，代表3F级别多， 15m向下成笔，代表3F级别空
@@ -761,7 +764,7 @@ async def monitorFractal(result, symbol, period, closePrice):
             direction = 'S'
             # 顶分型的顶
             top_price = result['fractal'][0]['top_fractal']['top']
-            futureCalcObj = await calMaxOrderCount(symbol, closePrice, top_price, period, signal)
+            futureCalcObj = await calMaxOrderCount(symbol, price, top_price, period, signal)
             # 当前价格低于顶分型的底
             if closePrice <= price:
                 stopWinCount = await calStopWinCount(symbol, period, positionInfoLong, closePrice)
@@ -783,7 +786,7 @@ async def monitorFractal(result, symbol, period, closePrice):
             direction = 'HS'
             # 顶分型的顶
             top_price = result['fractal'][1]['top_fractal']['top']
-            futureCalcObj = await calMaxOrderCount(symbol, closePrice, top_price, period, signal)
+            futureCalcObj = await calMaxOrderCount(symbol, price, top_price, period, signal)
 
             # 当前价格低于顶分型的底
             if closePrice <= price:
@@ -807,7 +810,7 @@ async def monitorFractal(result, symbol, period, closePrice):
             direction = 'B'
             # 底分型的底部
             bottom_price = result['fractal'][0]['bottom_fractal']['bottom']
-            futureCalcObj = await calMaxOrderCount(symbol, closePrice, bottom_price, period, signal)
+            futureCalcObj = await calMaxOrderCount(symbol, price, bottom_price, period, signal)
 
             # 当前价格高于底分型的顶
             if closePrice >= price:
@@ -829,7 +832,7 @@ async def monitorFractal(result, symbol, period, closePrice):
             direction = 'HB'
             # 底分型的底部
             bottom_price = result['fractal'][1]['bottom_fractal']['bottom']
-            futureCalcObj = await calMaxOrderCount(symbol, closePrice, bottom_price, period, signal)
+            futureCalcObj = await calMaxOrderCount(symbol, price, bottom_price, period, signal)
 
             # 当前价格高于底分型的顶
             if closePrice >= price:

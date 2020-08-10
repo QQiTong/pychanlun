@@ -343,9 +343,9 @@ def testRQ():
     # print(df.iloc[0, 3])
     end = datetime.now() + timedelta(1)
     start = datetime.now() + timedelta(-1)
-    df1d = rq.get_price('RB2010', frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-                        start_date='2020-07-07',end_date='2020-07-08')
-    print(df1d)
+    df = rq.get_price('L2009', frequency='30m', fields=['open', 'high', 'low', 'close', 'volume'],
+                        start_date='2020-06-24',end_date='2020-06-30')
+    print(df)
     # print(df1d.iloc[0,0])
     # print(df1d.iloc[0,1])
     # print(df1d.iloc[0,2])
@@ -894,13 +894,13 @@ def testSplit():
     print(b)
 
 def app():
-    testDingDing()
+    # testDingDing()
     # testBitmex()
     # testBeichiDb()
     # testHuila()
     # testChange()
     # testTQ()
-    # testRQ()
+    testRQ()
     # testMonitor()
     # testThread()
     # testHuobi()

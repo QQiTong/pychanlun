@@ -177,13 +177,13 @@ export default {
         this.getSignalList()
         // this.getLevelDirectionList()
         this.getPrejudgeList()
-        this.getBTCTicker()
+        // this.getBTCTicker()
         this.getGlobalFutureChangeList()
         setInterval(() => {
             this.getSignalList()
             this.getChangeiList()
             // this.getLevelDirectionList()
-            this.getBTCTicker()
+            // this.getBTCTicker()
             this.getGlobalFutureChangeList()
         }, 20000)
     },
