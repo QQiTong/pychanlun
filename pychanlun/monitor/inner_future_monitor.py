@@ -138,8 +138,8 @@ def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag, pric
             'per_order_stop_rate': round(perOrderStopRate, 3),
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if signal == 'fractal':
-            print(symbol,period,futureCalcObj,perOrderStopRate)
+        if signal == 'fractal' or signal == 'beichi':
+            print(signal,symbol,period,futureCalcObj,perOrderStopRate)
         if abs((date_created - fire_time).total_seconds()) < 60 * 7 and perOrderStopRate <= 0.2:
             # 新增
             remind = saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
@@ -289,8 +289,8 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
                 }, upsert=True)
         else:
             # 动止信号 不作为新的记录插入持仓表
-            # 线段破坏 不作为新的记录插入持仓表
-            if signal != 'fractal' and signal != 'break':
+            # 线段破坏 不作为新的记录插入持仓表 and signal != 'break'
+            if signal != 'fractal':
                 DBPyChanlun['future_auto_position'].insert_one({
                     'symbol': symbol,
                     'period': period,
@@ -551,6 +551,7 @@ def do_monitoring(symbol, period):
 
 def monitorBeichi(result, symbol, period, closePrice):
     signal = 'beichi'
+    # 使用notlower notHigher 过滤确保当前只做2买，完备，3买
     notLower = result['notLower']
     notHigher = result['notHigher']
     # 监控背驰
@@ -602,7 +603,8 @@ def monitorHuila(result, symbol, period, closePrice):
         direction = 'B'
         # 大级别直接保存
         # if period != '1m':
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        if above_ma5 or notLower:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
             # 小级别除非是双盘，否则一定要不破前低
             # if above_ma5 or notLower:
@@ -619,8 +621,9 @@ def monitorHuila(result, symbol, period, closePrice):
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
+        if not above_ma5 or notHigher:
         # if period != "1m":
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if not above_ma5 or notHigher:
         #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
@@ -645,11 +648,8 @@ def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['buy_zs_tupo']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if period != "1m":
+        if above_ma5 or notLower:
             saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        else:
-            if above_ma5 or notLower:
-                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
     if len(result['sell_zs_tupo']['date']) > 0:
         fire_time = result['sell_zs_tupo']['date'][-1]
@@ -660,11 +660,11 @@ def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['sell_zs_tupo']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if period != "1m":
+        if not above_ma5 or notHigher:
             saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        else:
-            if not above_ma5 or notHigher:
-                saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        # else:
+        #     if not above_ma5 or notHigher:
+        #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
 '''
 监控3买卖 V反

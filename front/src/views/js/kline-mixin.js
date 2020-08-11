@@ -76,19 +76,19 @@ export default {
                 multiPeriodGrid: [
                     {
                         left: '0%',
-                        right: '10%',
+                        right: '15%',
                         top: 50,
                         height: '57%',
                     },
                     {
                         left: '0%',
-                        right: '10%',
+                        right: '15%',
                         top: '65%',
                         height: '10%',
                     },
                     {
                         left: '0%',
-                        right: '10%',
+                        right: '15%',
                         top: '82%',
                         height: '20%',
                     }],
@@ -1172,11 +1172,11 @@ export default {
                             type: 'inside',
                             start: 55,
                             end: 100,
-                            top: '95%',
+                            // top: '95%',
                             minSpan: 10,
-                            textStyle: {
-                                color: '#8392A5'
-                            },
+                            // textStyle: {
+                            //     color: '#8392A5'
+                            // },
                             // dataBackground: {
                             //     areaStyle: {
                             //         color: '#8392A5'
@@ -2424,6 +2424,12 @@ export default {
                     case 10:
                         lastBeichi = jsonObj.sell_five_v_reverse
                         break
+                    case 11:
+                        lastBeichi = jsonObj.buyMACDBCData
+                        break
+                    case 12:
+                        lastBeichi = jsonObj.sellMACDBCData
+                        break
                 }
                 // 背驰时的价格
                 let beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
@@ -3049,8 +3055,8 @@ export default {
             // let sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
 
             // 背驰
-            // let buyMACDBCData = jsonObj.buyMACDBCData
-            // let sellMACDBCData = jsonObj.sellMACDBCData
+            let buyMACDBCData = jsonObj.buyMACDBCData
+            let sellMACDBCData = jsonObj.sellMACDBCData
 
             // 回拉
             let buy_zs_huila_stamp = 0
@@ -3076,8 +3082,8 @@ export default {
             let buy_five_v_reverse_stamp = 0
             let sell_five_v_reverse_stamp = 0
             // 背驰
-            // let buy_beichi_stamp = 0
-            // let sell_beichi_stamp = 0
+            let buy_beichi_stamp = 0
+            let sell_beichi_stamp = 0
 
             let buyTimeStr
             let higherBuyTimeStr
@@ -3161,14 +3167,14 @@ export default {
             }
 
             // 背驰
-            // if (buyMACDBCData.date.length > 0) {
-            //     buyTimeStr = buyMACDBCData.date[buyMACDBCData.date.length - 1]
-            //     buy_beichi_stamp = this.timeStrToStamp(buyTimeStr)
-            // }
-            // if (sellMACDBCData.date.length > 0) {
-            //     sellTimeStr = sellMACDBCData.date[sellMACDBCData.date.length - 1]
-            //     sell_beichi_stamp = this.timeStrToStamp(sellTimeStr)
-            // }
+            if (buyMACDBCData.date.length > 0) {
+                buyTimeStr = buyMACDBCData.date[buyMACDBCData.date.length - 1]
+                buy_beichi_stamp = this.timeStrToStamp(buyTimeStr)
+            }
+            if (sellMACDBCData.date.length > 0) {
+                sellTimeStr = sellMACDBCData.date[sellMACDBCData.date.length - 1]
+                sell_beichi_stamp = this.timeStrToStamp(sellTimeStr)
+            }
 
             // 当线段破坏和中枢突破时间相等的时候，使用中枢突破信号，因为中枢突破止损更小
             if (buy_zs_tupo_stamp === buy_duan_break_stamp) {
@@ -3188,7 +3194,9 @@ export default {
                 buy_duan_break_stamp, sell_duan_break_stamp,
                 buy_zs_tupo_stamp, sell_zs_tupo_stamp,
                 buy_v_reverse_stamp, sell_v_reverse_stamp,
-                buy_five_v_reverse_stamp, sell_five_v_reverse_stamp]
+                buy_five_v_reverse_stamp, sell_five_v_reverse_stamp,
+                buy_beichi_stamp,sell_beichi_stamp
+            ]
             let maxPos = 0
             let maxTime = timeArray[0]
             for (let i = 0; i < timeArray.length; i++) {
@@ -3202,7 +3210,8 @@ export default {
                 buy_duan_break_stamp === 0 && sell_duan_break_stamp === 0 &&
                 buy_zs_tupo_stamp === 0 && sell_zs_tupo_stamp === 0 &&
                 buy_v_reverse_stamp === 0 && sell_v_reverse_stamp === 0 &&
-                buy_five_v_reverse_stamp === 0 && sell_five_v_reverse_stamp === 0
+                buy_five_v_reverse_stamp === 0 && sell_five_v_reverse_stamp === 0 &&
+                buy_beichi_stamp && sell_beichi_stamp
             ) {
                 return 0
             } else {
