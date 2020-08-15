@@ -48,6 +48,7 @@ def calc_divergence(x_data, xx_data):
     divergence_down = np.zeros(length)
     # 顶背驰信号
     divergence_up = np.zeros(length)
+    bi_signal_list = list(x_data['bi'])
     gold_cross = list(x_data['jc'])
     dead_cross = list(x_data['sc'])
     time_list = list(x_data['time'])
@@ -58,12 +59,14 @@ def calc_divergence(x_data, xx_data):
     low_list = list(x_data['low'])
     close_list = list(x_data['close'])
     time_list_big = list(xx_data['time'])
+    diff_list_big = list(xx_data['diff'])
+    dea_list_big = list(xx_data['dea'])
     big_idx = 0
     for i in range(len(gold_cross)):
         if gold_cross[i] and diff_list[i] < 0:
-            big_idx = pydash.find_index(time_list_big[big_idx:], lambda value: value >= time_list[i])
-            big_direction = 0
-            if big_idx > 0 and diff_list[big_idx] < 0 and dea_list[big_idx] < 0:
+            k = pydash.find_index(time_list_big[big_idx:], lambda value: value >= time_list[i])
+            big_idx = big_idx + k
+            if big_idx > 0 and diff_list_big[big_idx] < 0 and dea_list_big[big_idx] < 0:
                 big_direction = -1
             else:
                 big_direction = 1
@@ -72,9 +75,11 @@ def calc_divergence(x_data, xx_data):
                 if info['duan_type'] == -1:
                     duan_start = info['duan_start']
                     duan_end = info['duan_end']
-                    down_bi_list = pydash.filter_(bi_list,
-                                                  lambda bi: bi["direction"] == -1 and bi["start"] <= duan_end and bi[
-                                                      "end"] >= duan_start)
+                    down_bi_list = pydash. \
+                        filter_(
+                            bi_list,
+                            lambda bi: bi["direction"] == -1 and bi["start"] <= duan_end and bi["end"] >= duan_start
+                        )
                     # 要创新低的向下笔
                     target_bi_list = []
                     for k in range(len(down_bi_list)):
@@ -105,14 +110,27 @@ def calc_divergence(x_data, xx_data):
                             # 要向下段后的第一次金叉
                             if info['duan_end'] == i:
                                 divergence_down[i] = 1
-                            elif len(pydash.filter_(gold_cross[info['duan_end']:i], lambda x: x == 1)) == 0:
+                            elif len(pydash.filter_(gold_cross[info['duan_end']:i], lambda value: value == 1)) == 0:
                                 divergence_down[i] = 1
+            # 查看有没有笔内背驰
+            if divergence_down[i] != 1:
+                if big_direction == 1:
+                    bi_e = pydash.find_last_index(bi_signal_list[:i + 1], lambda value: value == -1 or value == 1)
+                    if bi_e > 0 and bi_signal_list[bi_e] == -1:
+                        bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == 1)
+                        if bi_s >= 0:
+                            temp_idx = bi_e
+                            while temp_idx >= bi_s:
+                                k = pydash.find_last_index(gold_cross[bi_s:temp_idx], 1)
+                                if k >= 0 and diff_list[bi_s] < diff_list[bi_s + k]:
+                                    divergence_down[i] = 1
+                                temp_idx = bi_s + k
     big_idx = 0
     for i in range(len(dead_cross)):
         if dead_cross[i] and diff_list[i] > 0:
-            big_idx = pydash.find_index(time_list_big[big_idx:], lambda value: value >= time_list[i])
-            big_direction = 0
-            if big_idx > 0 and diff_list[big_idx] < 0 and dea_list[big_idx] < 0:
+            k = pydash.find_index(time_list_big[big_idx:], lambda value: value >= time_list[i])
+            big_idx = big_idx + k
+            if big_idx > 0 and diff_list_big[big_idx] < 0 and dea_list_big[big_idx] < 0:
                 big_direction = -1
             else:
                 big_direction = 1
@@ -121,9 +139,11 @@ def calc_divergence(x_data, xx_data):
                 if info['duan_type'] == 1:
                     duan_start = info['duan_start']
                     duan_end = info['duan_end']
-                    up_bi_list = pydash.filter_(bi_list,
-                                                lambda bi: bi["direction"] == 1 and bi["start"] <= duan_end and bi[
-                                                    "end"] >= duan_start)
+                    up_bi_list = pydash. \
+                        filter_(
+                            bi_list,
+                            lambda bi: bi["direction"] == 1 and bi["start"] <= duan_end and bi["end"] >= duan_start
+                        )
                     target_bi_list = []
                     for k in range(len(up_bi_list)):
                         if len(target_bi_list) == 0:
@@ -153,8 +173,21 @@ def calc_divergence(x_data, xx_data):
                             # 要向上段后的第一次死叉
                             if info['duan_end'] == i:
                                 divergence_up[i] = 1
-                            elif len(pydash.filter_(dead_cross[info['duan_end']:i], lambda x: x == 1)) == 0:
+                            elif len(pydash.filter_(dead_cross[info['duan_end']:i], lambda value: value == 1)) == 0:
                                 divergence_up[i] = 1
+            # 查看有没有笔内背驰
+            # if divergence_up[i] != 1:
+            if big_direction == -1:
+                bi_e = pydash.find_last_index(bi_signal_list[:i+1], lambda value: value == -1 or value == 1)
+                if bi_e > 0 and bi_signal_list[bi_e] == 1:
+                    bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == -1)
+                    if bi_s >= 0:
+                        temp_idx = bi_e
+                        while temp_idx >= bi_s:
+                            k = pydash.find_last_index(dead_cross[bi_s:temp_idx], lambda value: value == 1)
+                            if k >= 0 and diff_list[bi_s+k] > diff_list[i]:
+                                divergence_up[i] = 1
+                            temp_idx = bi_s + k
     return divergence_down, divergence_up
 
 
