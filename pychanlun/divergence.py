@@ -29,7 +29,7 @@ signalMap = {
 }
 
 
-def calc_beichi_data(x_data, xx_data, bigLevel=False):
+def calc_beichi_data(x_data, xx_data):
     divergence_down, divergence_up = calc_divergence(x_data, xx_data)
     bi_list = list(x_data['bi'])
     duan_list = list(x_data['duan'])
@@ -39,8 +39,10 @@ def calc_beichi_data(x_data, xx_data, bigLevel=False):
     open_list = list(x_data['open'])
     close_list = list(x_data['close'])
     diff_list = list(x_data['diff'])
+    ma5_list = list(x_data['ma5'])
+    ma20_list = list(x_data['ma20'])
     return note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_list, low_list,
-                open_list, close_list, diff_list, bigLevel)
+                open_list, close_list, diff_list, ma5_list, ma20_list)
 
 
 def calc_divergence(x_data, xx_data):
@@ -60,6 +62,7 @@ def calc_divergence(x_data, xx_data):
     high_list = list(x_data['high'])
     low_list = list(x_data['low'])
     close_list = list(x_data['close'])
+
     time_list_big = list(xx_data['time'])
     diff_list_big = list(xx_data['diff'])
     dea_list_big = list(xx_data['dea'])
@@ -194,13 +197,19 @@ def calc_divergence(x_data, xx_data):
 
 
 def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_list, low_list, open_list,
-         close_list, diff_list, bigLevel=False):
+         close_list, diff_list, ma5_list, ma20_list):
     data = {
         'buyMACDBCData': {
-            'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': []
+            'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': [],
+            'tag': [],
+            'above_ma5': [],
+            'above_ma20': []
         },
         'sellMACDBCData': {
-            'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': []
+            'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': [],
+            'tag': [],
+            'above_ma5': [],
+            'above_ma20': []
         },
     }
     for i in range(len(divergence_down)):
@@ -209,10 +218,7 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
                 datetime.datetime.fromtimestamp(time_list[i]).strftime('%Y-%m-%d %H:%M'))
             # data属性保持和其他信号统一使用触发背驰的价格 便于前端统一标出开仓横线
             data['buyMACDBCData']['data'].append(open_list[i])
-            if bigLevel:
-                data['buyMACDBCData']['value'].append(signalMap['高级别线底背'])
-            else:
-                data['buyMACDBCData']['value'].append(signalMap['线底背'])
+            data['buyMACDBCData']['value'].append(signalMap['线底背'])
             bottom_index = pydash.find_last_index(duan_list[:i + 1], lambda x: x == -1)
             if bottom_index > -1:
                 data['buyMACDBCData']['stop_lose_price'].append(low_list[bottom_index])
@@ -226,15 +232,15 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
                 data['buyMACDBCData']['stop_win_price'].append(high_list[bi_index])
             else:
                 data['buyMACDBCData']['stop_win_price'].append(0)
+            data['buyMACDBCData']['tag'].append('')
+            data['sellMACDBCData']['above_ma5'].append(close_list[i] > ma5_list[i])
+            data['sellMACDBCData']['above_ma20'].append(close_list[i] > ma20_list[i])
     for i in range(len(divergence_up)):
         if divergence_up[i] == 1:
             data['sellMACDBCData']['date'].append(
                 datetime.datetime.fromtimestamp(time_list[i]).strftime('%Y-%m-%d %H:%M'))
             data['sellMACDBCData']['data'].append(open_list[i])
-            if bigLevel:
-                data['sellMACDBCData']['value'].append(signalMap['高级别线顶背'])
-            else:
-                data['sellMACDBCData']['value'].append(signalMap['线顶背'])
+            data['sellMACDBCData']['value'].append(signalMap['线顶背'])
             top_index = pydash.find_last_index(duan_list[:i + 1], lambda x: x == 1)
             if top_index > -1:
                 data['sellMACDBCData']['stop_lose_price'].append(high_list[top_index])
@@ -248,4 +254,7 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
                 data['sellMACDBCData']['stop_win_price'].append(low_list[bi_index])
             else:
                 data['sellMACDBCData']['stop_win_price'].append(0)
+            data['sellMACDBCData']['tag'].append('')
+            data['sellMACDBCData']['above_ma5'].append(close_list[i] > ma5_list[i])
+            data['sellMACDBCData']['above_ma20'].append(close_list[i] > ma20_list[i])
     return data

@@ -122,11 +122,12 @@ def calculate_chanlun_signal(code_period_obj):
     resp = get_data(symbol, period, datetime.now().strftime("%Y-%m-%d"))
 
     signal_map = {
-        "buy_zs_huila": "回拉中枢看涨",
-        "buy_zs_tupo": "突破中枢看涨",
-        "buy_v_reverse": "V反看涨",
-        "buy_five_v_reverse": "五浪V反看涨",
-        "buy_duan_break": "线段破坏看涨"
+        "buy_zs_huila": "回拉中枢上涨",
+        "buy_zs_tupo": "突破中枢上涨",
+        "buy_v_reverse": "V反上涨",
+        "buy_five_v_reverse": "五浪V反上涨",
+        "buy_duan_break": "线段破坏上涨",
+        "buyMACDBCData": "底背驰"
     }
     for signal in signal_map:
         signals = resp[signal]

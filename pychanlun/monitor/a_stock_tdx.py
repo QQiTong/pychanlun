@@ -19,6 +19,7 @@ from pytdx.hq import TdxHq_API
 from pychanlun import entanglement as entanglement
 from pychanlun.basic.kline_analyse import calculate_bi_duan
 from pychanlun.monitor.a_stock_common import save_a_stock_signal
+from pychanlun.divergence import calc_beichi_data
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -124,6 +125,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         kline_data['datetime'] = kline_data['time_str'] \
             .apply(lambda value: datetime.datetime.strptime(value, '%Y-%m-%d %H:%M').replace(tzinfo=tz))
         kline_data['time_stamp'] = kline_data['datetime'].apply(lambda value: value.timestamp())
+        kline_data['time'] = kline_data['time_stamp']
 
         data_list.append({
             "sse": sse,
@@ -138,6 +140,8 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
 
     data = data_list[-1]
     df = data["kline_data"]
+    data2 = data_list[-2]
+    df2 = data2["kline_data"]
     # create_charts(df, page_title="%s %s" % (data["symbol"], data["period"]),
     #               file="E:\\charts\\%s-%s.html" % (data["symbol"], data["period"]))
 
@@ -156,28 +160,31 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
     zs_tupo = entanglement.tu_po(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
     v_reverse = entanglement.v_reverse(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
     five_v_fan = entanglement.five_v_fan(
-        list(kline_data["time_str"]),
-        list(kline_data["duan"]),
-        list(kline_data["bi"]),
-        list(kline_data["high"]),
-        list(kline_data["low"]),
-        list(kline_data["duan2"]),
+        time_str_series,
+        duan_series,
+        bi_series,
+        high_series,
+        low_series,
+        list(df["duan2"]),
         ma5,
         ma20,
     )
+    beichi = calc_beichi_data(df, df2)
 
     resp = {
         "buy_zs_huila": zs_huila['buy_zs_huila'],
         "buy_zs_tupo": zs_tupo['buy_zs_tupo'],
         "buy_v_reverse": v_reverse['buy_v_reverse'],
         "buy_five_v_reverse": five_v_fan['buy_five_v_reverse'],
+        "buyMACDBCData": beichi['buyMACDBCData']
     }
 
     signal_map = {
-        "buy_zs_huila": "回拉中枢看上涨",
+        "buy_zs_huila": "回拉中枢上涨",
         "buy_zs_tupo": "突破中枢上涨",
         "buy_v_reverse": "V反上涨",
         "buy_five_v_reverse": "五浪V反上涨",
+        "buyMACDBCData": "底背驰"
     }
     for signal_type in signal_map:
         signals = resp[signal_type]
