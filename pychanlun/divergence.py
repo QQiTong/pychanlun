@@ -29,16 +29,16 @@ signalMap = {
 
 def calc_beichi_data(x_data, xx_data, bigLevel=False):
     divergence_down, divergence_up = calc_divergence(x_data, xx_data)
-    bi_series = list(x_data['bi'])
-    duan_series = list(x_data['duan'])
-    time_series = list(x_data['time'])
-    high_series = list(x_data['high'])
-    low_series = list(x_data['low'])
-    open_series = list(x_data['open'])
-    close_series = list(x_data['close'])
-    diff_series = list(x_data['diff'])
-    return note(divergence_down, divergence_up, bi_series, duan_series, time_series, high_series, low_series,
-                open_series, close_series, diff_series, bigLevel)
+    bi_list = list(x_data['bi'])
+    duan_list = list(x_data['duan'])
+    time_list = list(x_data['time'])
+    high_list = list(x_data['high'])
+    low_list = list(x_data['low'])
+    open_list = list(x_data['open'])
+    close_list = list(x_data['close'])
+    diff_list = list(x_data['diff'])
+    return note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_list, low_list,
+                open_list, close_list, diff_list, bigLevel)
 
 
 def calc_divergence(x_data, xx_data):
@@ -50,24 +50,24 @@ def calc_divergence(x_data, xx_data):
     divergence_up = np.zeros(length)
     gold_cross = list(x_data['jc'])
     dead_cross = list(x_data['sc'])
-    time_series = list(x_data['time'])
-    diff_series = list(x_data['diff'])
-    dea_series = list(x_data['dea'])
-    duan_series = list(x_data['duan'])
-    high_series = list(x_data['high'])
-    low_series = list(x_data['low'])
-    close_series = list(x_data['close'])
+    time_list = list(x_data['time'])
+    diff_list = list(x_data['diff'])
+    dea_list = list(x_data['dea'])
+    duan_list = list(x_data['duan'])
+    high_list = list(x_data['high'])
+    low_list = list(x_data['low'])
+    close_list = list(x_data['close'])
+    time_list_big = list(xx_data['time'])
     big_idx = 0
     for i in range(len(gold_cross)):
-        big_idx = pydash.find_index(time_series[big_idx:], lambda v: v >= time_series[i])
-        big_direction = 0
-        if big_idx > 0 and diff_series[big_idx] < 0 and dea_series[big_idx] < 0:
-            big_direction = -1
-        else:
-            big_direction = 1
-
-        if gold_cross[i] and diff_series[i] < 0:
-            info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
+        if gold_cross[i] and diff_list[i] < 0:
+            big_idx = pydash.find_index(time_list_big[big_idx:], lambda value: value >= time_list[i])
+            big_direction = 0
+            if big_idx > 0 and diff_list[big_idx] < 0 and dea_list[big_idx] < 0:
+                big_direction = -1
+            else:
+                big_direction = 1
+            info = Duan.inspect(duan_list, high_list, low_list, close_list, diff_list, dea_list, i)
             if info is not None:
                 if info['duan_type'] == -1:
                     duan_start = info['duan_start']
@@ -80,7 +80,7 @@ def calc_divergence(x_data, xx_data):
                     for k in range(len(down_bi_list)):
                         if len(target_bi_list) == 0:
                             target_bi_list.append(down_bi_list[k])
-                        elif low_series[down_bi_list[k]['end']] < low_series[target_bi_list[-1]['end']]:
+                        elif low_list[down_bi_list[k]['end']] < low_list[target_bi_list[-1]['end']]:
                             target_bi_list.append(down_bi_list[k])
                     down_bi_list = target_bi_list
                     if len(down_bi_list) > 1:
@@ -94,12 +94,12 @@ def calc_divergence(x_data, xx_data):
                             if len(down_bi_list) < 3:
                                 continue
                             down_bi_list = down_bi_list[-3:]
-                        diff1 = np.amin(diff_series[down_bi_list[-1]['start']:i + 1])
+                        diff1 = np.amin(diff_list[down_bi_list[-1]['start']:i + 1])
                         x = down_bi_list[-2]['end']
                         for y in range(down_bi_list[-2]['end'], down_bi_list[-1]['start']):
                             if gold_cross[y]:
                                 x = y
-                        diff2 = np.amin(diff_series[down_bi_list[-2]['start']:x + 1])
+                        diff2 = np.amin(diff_list[down_bi_list[-2]['start']:x + 1])
                         if diff1 > diff2:
                             # 前面是向下段，才是背驰点
                             # 要向下段后的第一次金叉
@@ -109,14 +109,14 @@ def calc_divergence(x_data, xx_data):
                                 divergence_down[i] = 1
     big_idx = 0
     for i in range(len(dead_cross)):
-        big_idx = pydash.find_index(time_series[big_idx:], lambda x: x >= time_series[i])
-        big_direction = 0
-        if big_idx > 0 and diff_series[big_idx] < 0 and dea_series[big_idx] < 0:
-            big_direction = -1
-        else:
-            big_direction = 1
-        if dead_cross[i] and diff_series[i] > 0:
-            info = Duan.inspect(duan_series, high_series, low_series, close_series, diff_series, dea_series, i)
+        if dead_cross[i] and diff_list[i] > 0:
+            big_idx = pydash.find_index(time_list_big[big_idx:], lambda value: value >= time_list[i])
+            big_direction = 0
+            if big_idx > 0 and diff_list[big_idx] < 0 and dea_list[big_idx] < 0:
+                big_direction = -1
+            else:
+                big_direction = 1
+            info = Duan.inspect(duan_list, high_list, low_list, close_list, diff_list, dea_list, i)
             if info is not None:
                 if info['duan_type'] == 1:
                     duan_start = info['duan_start']
@@ -128,7 +128,7 @@ def calc_divergence(x_data, xx_data):
                     for k in range(len(up_bi_list)):
                         if len(target_bi_list) == 0:
                             target_bi_list.append(up_bi_list[k])
-                        elif high_series[up_bi_list[k]['end']] > high_series[target_bi_list[-1]['end']]:
+                        elif high_list[up_bi_list[k]['end']] > high_list[target_bi_list[-1]['end']]:
                             target_bi_list.append(up_bi_list[k])
                     up_bi_list = target_bi_list
                     if len(up_bi_list) > 1:
@@ -142,12 +142,12 @@ def calc_divergence(x_data, xx_data):
                             if len(up_bi_list) < 3:
                                 continue
                             up_bi_list = up_bi_list[-3:]
-                        diff1 = np.amax(diff_series[up_bi_list[-1]['start']:i + 1])
+                        diff1 = np.amax(diff_list[up_bi_list[-1]['start']:i + 1])
                         x = up_bi_list[-2]['end']
                         for y in range(up_bi_list[-2]['end'], up_bi_list[-1]['start']):
                             if dead_cross[y]:
                                 x = y
-                        diff2 = np.amax(diff_series[up_bi_list[-2]['start']:x + 1])
+                        diff2 = np.amax(diff_list[up_bi_list[-2]['start']:x + 1])
                         if diff1 < diff2:
                             # 前面是向上段，才是背驰点
                             # 要向上段后的第一次死叉
@@ -158,8 +158,8 @@ def calc_divergence(x_data, xx_data):
     return divergence_down, divergence_up
 
 
-def note(divergence_down, divergence_up, bi_series, duan_series, time_series, high_series, low_series, open_series,
-         close_series, diff_series, bigLevel=False):
+def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_list, low_list, open_list,
+         close_list, diff_list, bigLevel=False):
     data = {
         'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': []},
         'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [],
@@ -168,46 +168,46 @@ def note(divergence_down, divergence_up, bi_series, duan_series, time_series, hi
     for i in range(len(divergence_down)):
         if divergence_down[i] == 1:
             data['buyMACDBCData']['date'].append(
-                datetime.datetime.fromtimestamp(time_series[i]).strftime('%Y-%m-%d %H:%M'))
+                datetime.datetime.fromtimestamp(time_list[i]).strftime('%Y-%m-%d %H:%M'))
             # data属性保持和其他信号统一使用触发背驰的价格 便于前端统一标出开仓横线
-            data['buyMACDBCData']['data'].append(open_series[i])
+            data['buyMACDBCData']['data'].append(open_list[i])
             if bigLevel:
                 data['buyMACDBCData']['value'].append(signalMap['高级别线底背'])
             else:
                 data['buyMACDBCData']['value'].append(signalMap['线底背'])
-            bottom_index = pydash.find_last_index(duan_series[:i + 1], lambda x: x == -1)
+            bottom_index = pydash.find_last_index(duan_list[:i + 1], lambda x: x == -1)
             if bottom_index > -1:
-                data['buyMACDBCData']['stop_lose_price'].append(low_series[bottom_index])
+                data['buyMACDBCData']['stop_lose_price'].append(low_list[bottom_index])
             else:
                 data['buyMACDBCData']['stop_lose_price'].append(0)
-            data['buyMACDBCData']['diff'].append(diff_series[i])
+            data['buyMACDBCData']['diff'].append(diff_list[i])
 
             # 底背驰，往后找第一次成笔的位置
-            bi_index = pydash.find_index(bi_series[i:], lambda x: x == 1)
+            bi_index = pydash.find_index(bi_list[i:], lambda x: x == 1)
             if bi_index > -1:
-                data['buyMACDBCData']['stop_win_price'].append(high_series[bi_index])
+                data['buyMACDBCData']['stop_win_price'].append(high_list[bi_index])
             else:
                 data['buyMACDBCData']['stop_win_price'].append(0)
     for i in range(len(divergence_up)):
         if divergence_up[i] == 1:
             data['sellMACDBCData']['date'].append(
-                datetime.datetime.fromtimestamp(time_series[i]).strftime('%Y-%m-%d %H:%M'))
-            data['sellMACDBCData']['data'].append(open_series[i])
+                datetime.datetime.fromtimestamp(time_list[i]).strftime('%Y-%m-%d %H:%M'))
+            data['sellMACDBCData']['data'].append(open_list[i])
             if bigLevel:
                 data['sellMACDBCData']['value'].append(signalMap['高级别线顶背'])
             else:
                 data['sellMACDBCData']['value'].append(signalMap['线顶背'])
-            top_index = pydash.find_last_index(duan_series[:i + 1], lambda x: x == 1)
+            top_index = pydash.find_last_index(duan_list[:i + 1], lambda x: x == 1)
             if top_index > -1:
-                data['sellMACDBCData']['stop_lose_price'].append(high_series[top_index])
+                data['sellMACDBCData']['stop_lose_price'].append(high_list[top_index])
             else:
                 data['sellMACDBCData']['stop_lose_price'].append(0)
-            data['sellMACDBCData']['diff'].append(diff_series[i])
+            data['sellMACDBCData']['diff'].append(diff_list[i])
 
             # 顶背驰，往后找第一次成笔的位置
-            bi_index = pydash.find_index(bi_series[i:], lambda x: x == -1)
+            bi_index = pydash.find_index(bi_list[i:], lambda x: x == -1)
             if bi_index > -1:
-                data['sellMACDBCData']['stop_win_price'].append(low_series[bi_index])
+                data['sellMACDBCData']['stop_win_price'].append(low_list[bi_index])
             else:
                 data['sellMACDBCData']['stop_win_price'].append(0)
     return data
