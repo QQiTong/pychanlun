@@ -17,8 +17,10 @@ import datetime
 signalMap = {
     '高级别线底背': 'HXB',
     '线底背': 'XB',
+    '笔内线底背': 'BI-XB',
     '高级别线顶背': 'HXT',
     '线顶背': 'XS',
+    '笔内线顶背': 'BI-XS',
 
     '高级别积底背': 'HJB',
     '积底背': 'JB',
@@ -194,9 +196,12 @@ def calc_divergence(x_data, xx_data):
 def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_list, low_list, open_list,
          close_list, diff_list, bigLevel=False):
     data = {
-        'buyMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': []},
-        'sellMACDBCData': {'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [],
-                           'stop_win_price': []},
+        'buyMACDBCData': {
+            'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': []
+        },
+        'sellMACDBCData': {
+            'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': []
+        },
     }
     for i in range(len(divergence_down)):
         if divergence_down[i] == 1:
