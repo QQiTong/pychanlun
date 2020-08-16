@@ -124,7 +124,7 @@ def calc_divergence(x_data, xx_data):
                     if bi_e > 0 and bi_signal_list[bi_e] == -1:
                         bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == 1)
                         if bi_s >= 0:
-                            temp_idx = i
+                            temp_idx = bi_e
                             while temp_idx >= bi_s:
                                 k = pydash.find_last_index(gold_cross[bi_s:temp_idx], lambda value: value == 1)
                                 if k >= 0 and diff_list[bi_s + k] < diff_list[i]:
@@ -188,7 +188,7 @@ def calc_divergence(x_data, xx_data):
                     if bi_e > 0 and bi_signal_list[bi_e] == 1:
                         bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == -1)
                         if bi_s >= 0:
-                            temp_idx = i
+                            temp_idx = bi_e
                             while temp_idx >= bi_s:
                                 k = pydash.find_last_index(dead_cross[bi_s:temp_idx], lambda value: value == 1)
                                 if k >= 0 and diff_list[bi_s+k] > diff_list[i]:
