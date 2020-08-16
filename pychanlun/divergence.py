@@ -182,19 +182,19 @@ def calc_divergence(x_data, xx_data):
                             elif len(pydash.filter_(dead_cross[info['duan_end']:i], lambda value: value == 1)) == 0:
                                 divergence_up[i] = 1
             # 查看有没有笔内背驰
-            # if divergence_up[i] != 1:
-            if big_direction == -1:
-                bi_e = pydash.find_last_index(bi_signal_list[:i+1], lambda value: value == -1 or value == 1)
-                if bi_e > 0 and bi_signal_list[bi_e] == 1:
-                    bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == -1)
-                    if bi_s >= 0:
-                        temp_idx = i
-                        while temp_idx >= bi_s:
-                            k = pydash.find_last_index(dead_cross[bi_s:temp_idx], lambda value: value == 1)
-                            if k >= 0 and diff_list[bi_s+k] > diff_list[i]:
-                                divergence_up[i] = 1
-                                break
-                            temp_idx = bi_s + k
+            if divergence_up[i] != 1:
+                if big_direction == -1:
+                    bi_e = pydash.find_last_index(bi_signal_list[:i+1], lambda value: value == -1 or value == 1)
+                    if bi_e > 0 and bi_signal_list[bi_e] == 1:
+                        bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == -1)
+                        if bi_s >= 0:
+                            temp_idx = i
+                            while temp_idx >= bi_s:
+                                k = pydash.find_last_index(dead_cross[bi_s:temp_idx], lambda value: value == 1)
+                                if k >= 0 and diff_list[bi_s+k] > diff_list[i]:
+                                    divergence_up[i] = 1
+                                    break
+                                temp_idx = bi_s + k
     return divergence_down, divergence_up
 
 
