@@ -27,7 +27,7 @@ def run(**kwargs):
 
     periods = ['30m', '60m']
     symbol = kwargs.get('symbol')
-    period = kwargs.get('period')
+    input_period = kwargs.get('period')
     code_period_list = []
     code_list = []
     if symbol is None:
@@ -38,22 +38,21 @@ def run(**kwargs):
         for stock in stock_list:
             symbol = "%s%s" % (stock["sse"], stock["code"])
             code_list.append({"sse": stock["sse"], "symbol": symbol, "code": stock["code"]})
-            if period is None:
+            if input_period is None:
                 for period in periods:
                     code_period_list.append(
                         {"sse": stock["sse"], "symbol": symbol, "code": stock["code"], "period": period})
             else:
                 code_period_list.append(
-                    {"sse": stock["sse"], "symbol": symbol, "code": stock["code"], "period": period})
+                    {"sse": stock["sse"], "symbol": symbol, "code": stock["code"], "period": input_period})
     else:
         sse = symbol[:2]
         code = symbol[2:]
-        if period is None:
+        if input_period is None:
             for period in periods:
                 code_period_list.append({'sse': sse, 'symbol': symbol, 'code': code, 'period': period})
         else:
-            code_period_list.append({'sse': sse, 'symbol': symbol, 'code': code, 'period': period})
-
+            code_period_list.append({'sse': sse, 'symbol': symbol, 'code': code, 'period': input_period})
     for idx in range(len(code_list)):
         calculate_raising_limit(code_list[idx])
     for idx in range(len(code_period_list)):
