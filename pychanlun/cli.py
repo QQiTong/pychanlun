@@ -7,6 +7,7 @@ from pychanlun.monitor import BeichiMonitor
 from pychanlun.select import a_stock_signal
 from pychanlun.market_data import tdx_local_downloader, global_futures_downloader
 from pychanlun.monitor import a_stock_tdx as stock_monitoring
+from pychanlun.job import save_stock_and_shutdown_job
 
 
 @click.group()
@@ -79,6 +80,11 @@ def monitoring_a_stock_tdx(**kwargs):
     logger.info("股票监控 开始")
     stock_monitoring.run(**kwargs)
     logger.info("股票监控 结束")
+
+
+@run.command()
+def save_stock_and_shutdown(**kwargs):
+    save_stock_and_shutdown_job.run(**kwargs)
 
 
 if __name__ == '__main__':
