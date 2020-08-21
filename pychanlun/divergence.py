@@ -71,7 +71,7 @@ def calc_divergence(x_data, xx_data):
         if gold_cross[i] and diff_list[i] < 0:
             k = pydash.find_index(time_list_big[big_idx:], lambda value: value >= time_list[i])
             big_idx = big_idx + k
-            if big_idx > 0 and diff_list_big[big_idx] < 0 and dea_list_big[big_idx] < 0:
+            if big_idx > 0 and (diff_list_big[big_idx] < 0 or dea_list_big[big_idx] < 0):
                 big_direction = -1
             else:
                 big_direction = 1
@@ -122,21 +122,23 @@ def calc_divergence(x_data, xx_data):
                 if big_direction == 1:
                     bi_e = pydash.find_last_index(bi_signal_list[:i + 1], lambda value: value == -1 or value == 1)
                     if bi_e > 0 and bi_signal_list[bi_e] == -1:
-                        bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == 1)
-                        if bi_s >= 0:
-                            temp_idx = bi_e
-                            while temp_idx >= bi_s:
-                                k = pydash.find_last_index(gold_cross[bi_s:temp_idx], lambda value: value == 1)
-                                if k >= 0 and diff_list[bi_s + k] < diff_list[i]:
-                                    divergence_down[i] = 1
-                                    break
-                                temp_idx = bi_s + k
+                        if len(pydash.filter_(gold_cross[bi_e:i], lambda value: value == 1)) == 0:
+                            bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == 1)
+                            if bi_s >= 0:
+                                temp_idx = bi_e
+                                while temp_idx >= bi_s:
+                                    k = pydash.find_last_index(gold_cross[bi_s:temp_idx], lambda value: value == 1)
+                                    if k >= 0 and diff_list[bi_s + k] < diff_list[i]:
+                                        divergence_down[i] = 1
+                                        print("===============", diff_list_big[big_idx], dea_list_big[big_idx])
+                                        break
+                                    temp_idx = bi_s + k
     big_idx = 0
     for i in range(len(dead_cross)):
         if dead_cross[i] and diff_list[i] > 0:
             k = pydash.find_index(time_list_big[big_idx:], lambda value: value >= time_list[i])
             big_idx = big_idx + k
-            if big_idx > 0 and diff_list_big[big_idx] < 0 and dea_list_big[big_idx] < 0:
+            if big_idx > 0 and (diff_list_big[big_idx] < 0 or dea_list_big[big_idx] < 0):
                 big_direction = -1
             else:
                 big_direction = 1
@@ -186,15 +188,16 @@ def calc_divergence(x_data, xx_data):
                 if big_direction == -1:
                     bi_e = pydash.find_last_index(bi_signal_list[:i+1], lambda value: value == -1 or value == 1)
                     if bi_e > 0 and bi_signal_list[bi_e] == 1:
-                        bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == -1)
-                        if bi_s >= 0:
-                            temp_idx = bi_e
-                            while temp_idx >= bi_s:
-                                k = pydash.find_last_index(dead_cross[bi_s:temp_idx], lambda value: value == 1)
-                                if k >= 0 and diff_list[bi_s+k] > diff_list[i]:
-                                    divergence_up[i] = 1
-                                    break
-                                temp_idx = bi_s + k
+                        if len(pydash.filter_(dead_cross[bi_e:i], lambda value: value == 1)) == 0:
+                            bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == -1)
+                            if bi_s >= 0:
+                                temp_idx = bi_e
+                                while temp_idx >= bi_s:
+                                    k = pydash.find_last_index(dead_cross[bi_s:temp_idx], lambda value: value == 1)
+                                    if k >= 0 and diff_list[bi_s+k] > diff_list[i]:
+                                        divergence_up[i] = 1
+                                        break
+                                    temp_idx = bi_s + k
     return divergence_down, divergence_up
 
 

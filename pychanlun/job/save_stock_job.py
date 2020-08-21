@@ -14,7 +14,8 @@ def run(**kwargs):
     QA_SU_save_stock_min('tdx')
     a_stock_signal.run(**{})
     a_stock_tdx.run(**{"loop": False})
-    os.system("shutdown -s -f -t 60")
+    if kwargs.get("auto_shutdown", False):
+        os.system("shutdown -s -f -t 60")
 
 
 if __name__ == '__main__':
