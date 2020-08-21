@@ -30,7 +30,7 @@ signalMap = {
 
 
 def calc_beichi_data(x_data, xx_data):
-    divergence_down, divergence_up = calc_divergence(x_data, xx_data)
+    divergence_down, divergence_up, above_big_macd = calc_divergence(x_data, xx_data)
     bi_list = list(x_data['bi'])
     duan_list = list(x_data['duan'])
     time_list = list(x_data['time'])
@@ -42,7 +42,7 @@ def calc_beichi_data(x_data, xx_data):
     ma5_list = list(x_data['ma5'])
     ma20_list = list(x_data['ma20'])
     return note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_list, low_list,
-                open_list, close_list, diff_list, ma5_list, ma20_list)
+                open_list, close_list, diff_list, ma5_list, ma20_list, above_big_macd)
 
 
 def calc_divergence(x_data, xx_data):
@@ -52,6 +52,7 @@ def calc_divergence(x_data, xx_data):
     divergence_down = np.zeros(length)
     # 顶背驰信号
     divergence_up = np.zeros(length)
+    above_big_macd = np.zeros(length)
     bi_signal_list = list(x_data['bi'])
     gold_cross = list(x_data['jc'])
     dead_cross = list(x_data['sc'])
@@ -73,8 +74,10 @@ def calc_divergence(x_data, xx_data):
             big_idx = big_idx + k
             if big_idx > 0 and (diff_list_big[big_idx] < 0 or dea_list_big[big_idx] < 0):
                 big_direction = -1
+                above_big_macd[i] = False
             else:
                 big_direction = 1
+                above_big_macd[i] = True
             info = Duan.inspect(duan_list, high_list, low_list, close_list, diff_list, dea_list, i)
             if info is not None:
                 if info['duan_type'] == -1:
@@ -130,7 +133,6 @@ def calc_divergence(x_data, xx_data):
                                     k = pydash.find_last_index(gold_cross[bi_s:temp_idx], lambda value: value == 1)
                                     if k >= 0 and diff_list[bi_s + k] < diff_list[i]:
                                         divergence_down[i] = 1
-                                        print("===============", diff_list_big[big_idx], dea_list_big[big_idx])
                                         break
                                     temp_idx = bi_s + k
     big_idx = 0
@@ -140,8 +142,10 @@ def calc_divergence(x_data, xx_data):
             big_idx = big_idx + k
             if big_idx > 0 and (diff_list_big[big_idx] < 0 or dea_list_big[big_idx] < 0):
                 big_direction = -1
+                above_big_macd[i] = False
             else:
                 big_direction = 1
+                above_big_macd[i] = True
             info = Duan.inspect(duan_list, high_list, low_list, close_list, diff_list, dea_list, i)
             if info is not None:
                 if info['duan_type'] == 1:
@@ -198,23 +202,25 @@ def calc_divergence(x_data, xx_data):
                                         divergence_up[i] = 1
                                         break
                                     temp_idx = bi_s + k
-    return divergence_down, divergence_up
+    return divergence_down, divergence_up, above_big_macd
 
 
 def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_list, low_list, open_list,
-         close_list, diff_list, ma5_list, ma20_list):
+         close_list, diff_list, ma5_list, ma20_list, above_big_macd):
     data = {
         'buyMACDBCData': {
             'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': [],
             'tag': [],
             'above_ma5': [],
-            'above_ma20': []
+            'above_ma20': [],
+            'above_big_macd': []
         },
         'sellMACDBCData': {
             'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': [],
             'tag': [],
             'above_ma5': [],
-            'above_ma20': []
+            'above_ma20': [],
+            'above_big_macd': []
         },
     }
     for i in range(len(divergence_down)):
@@ -238,8 +244,9 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
             else:
                 data['buyMACDBCData']['stop_win_price'].append(0)
             data['buyMACDBCData']['tag'].append('')
-            data['sellMACDBCData']['above_ma5'].append(close_list[i] > ma5_list[i])
-            data['sellMACDBCData']['above_ma20'].append(close_list[i] > ma20_list[i])
+            data['buyMACDBCData']['above_ma5'].append(close_list[i] > ma5_list[i])
+            data['buyMACDBCData']['above_ma20'].append(close_list[i] > ma20_list[i])
+            data['buyMACDBCData']['above_big_macd'].append(above_big_macd[i])
     for i in range(len(divergence_up)):
         if divergence_up[i] == 1:
             data['sellMACDBCData']['date'].append(
@@ -262,4 +269,5 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
             data['sellMACDBCData']['tag'].append('')
             data['sellMACDBCData']['above_ma5'].append(close_list[i] > ma5_list[i])
             data['sellMACDBCData']['above_ma20'].append(close_list[i] > ma20_list[i])
+            data['sellMACDBCData']['above_big_macd'].append(above_big_macd[i])
     return data
