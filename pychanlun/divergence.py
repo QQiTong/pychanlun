@@ -52,7 +52,7 @@ def calc_divergence(x_data, xx_data):
     divergence_down = np.zeros(length)
     # 顶背驰信号
     divergence_up = np.zeros(length)
-    above_big_macd = np.zeros(length)
+    above_big_macd = [False for i in range(length)]
     bi_signal_list = list(x_data['bi'])
     gold_cross = list(x_data['jc'])
     dead_cross = list(x_data['sc'])
