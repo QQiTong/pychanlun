@@ -230,7 +230,7 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
             # data属性保持和其他信号统一使用触发背驰的价格 便于前端统一标出开仓横线
             data['buyMACDBCData']['data'].append(open_list[i])
             data['buyMACDBCData']['value'].append(signalMap['线底背'])
-            bottom_index = pydash.find_last_index(duan_list[:i + 1], lambda x: x == -1)
+            bottom_index = pydash.find_last_index(bi_list[:i + 1], lambda x: x == -1)
             if bottom_index > -1:
                 data['buyMACDBCData']['stop_lose_price'].append(low_list[bottom_index])
             else:
@@ -253,7 +253,7 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
                 datetime.datetime.fromtimestamp(time_list[i]).strftime('%Y-%m-%d %H:%M'))
             data['sellMACDBCData']['data'].append(open_list[i])
             data['sellMACDBCData']['value'].append(signalMap['线顶背'])
-            top_index = pydash.find_last_index(duan_list[:i + 1], lambda x: x == 1)
+            top_index = pydash.find_last_index(bi_list[:i + 1], lambda x: x == 1)
             if top_index > -1:
                 data['sellMACDBCData']['stop_lose_price'].append(high_list[top_index])
             else:
