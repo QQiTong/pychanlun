@@ -161,7 +161,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 离开中枢后的第一个笔结束
             leave = e.end
             for x in range(e.end + 1, len(high_series)):
-                if high_series[x] > e.zg and bi_series[x] == 1:
+                if high_series[x] > e.gg and bi_series[x] == 1:
                     leave = x
                     break
                 if duan_series[x] == -1:
@@ -185,7 +185,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     tags = []
                     result['sell_zs_huila']['idx'].append(r)
                     result['sell_zs_huila']['date'].append(time_series[r])
-                    result['sell_zs_huila']['data'].append(e.top)
+                    result['sell_zs_huila']['data'].append(e.gg)
                     top_index = pydash.find_last_index(duan_series[:r + 1], lambda a: a == 1)
                     if top_index > -1:
                         result['sell_zs_huila']['stop_lose_price'].append(high_series[top_index])
@@ -223,7 +223,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 下跌中枢，找第一次的拉回
             leave = e.end
             for x in range(e.end + 1, len(low_series)):
-                if low_series[x] < e.zd and bi_series[x] == -1:
+                if low_series[x] < e.dd and bi_series[x] == -1:
                     leave = x
                     break
                 if duan_series[x] == 1:
@@ -244,7 +244,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
                     tags = []
                     result['buy_zs_huila']['idx'].append(r)
                     result['buy_zs_huila']['date'].append(time_series[r])
-                    result['buy_zs_huila']['data'].append(e.bottom)
+                    result['buy_zs_huila']['data'].append(e.dd)
                     bottom_index = pydash.find_last_index(duan_series[:r + 1], lambda a: a == -1)
                     if bottom_index > -1:
                         result['buy_zs_huila']['stop_lose_price'].append(low_series[bottom_index])
