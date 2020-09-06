@@ -50,9 +50,6 @@ def get_data(symbol, period, end_date=None):
         kline_data["time_str"] = kline_data["time"] \
             .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
 
-        # MA5和MA20
-        kline_data['ma5'] = QA.MA(kline_data['close'], 5).fillna(0)
-        kline_data['ma20'] = QA.MA(kline_data['close'], 20).fillna(0)
         # 加上MACD数据
         MACD = QA.MACD(kline_data['close'], 12, 26, 9)
         kline_data['diff'] = MACD['DIFF'].fillna(0)
@@ -154,6 +151,10 @@ def get_data(symbol, period, end_date=None):
     daily_data = daily_data.set_index("time")
     ma5 = np.round(pd.Series.rolling(daily_data["close"], window=5).mean(), 2)
     ma20 = np.round(pd.Series.rolling(daily_data["close"], window=20).mean(), 2)
+
+    for x in range(len(data_list)):
+        data_list[x]['kline_data']['ma5'] = ma5
+        data_list[x]['kline_data']['ma20'] = ma20
 
     data = data_list[-1]
     data2 = data_list[-2]
