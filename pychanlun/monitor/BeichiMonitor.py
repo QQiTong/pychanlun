@@ -537,7 +537,7 @@ async def monitorBeichi(result, symbol, period, closePrice):
         stop_lose_price = result['buyMACDBCData']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
-        if notLower:
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sellMACDBCData']['date']) > 0:
         fire_time = result['sellMACDBCData']['date'][-1]
@@ -548,7 +548,7 @@ async def monitorBeichi(result, symbol, period, closePrice):
         stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
-        if notHigher:
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
@@ -576,7 +576,7 @@ async def monitorHuila(result, symbol, period, closePrice):
         direction = 'B'
         # 大级别直接保存
         # if period != '1m':
-        if notLower:
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     # 小级别除非是双盘，否则一定要不破前低
@@ -595,7 +595,7 @@ async def monitorHuila(result, symbol, period, closePrice):
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
         # if period != "1m":
-        if notHigher:
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if not above_ma5 or notHigher:
@@ -623,7 +623,7 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['buy_zs_tupo']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if notLower:
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if above_ma5:
@@ -638,7 +638,7 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['sell_zs_tupo']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if notHigher:
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if not above_ma5:
@@ -664,7 +664,7 @@ async def monitorVReverse(result, symbol, period, closePrice):
         above_ma20 = result['buy_v_reverse']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if notLower:
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
     if len(result['sell_v_reverse']['date']) > 0:
         fire_time = result['sell_v_reverse']['date'][-1]
@@ -675,7 +675,7 @@ async def monitorVReverse(result, symbol, period, closePrice):
         above_ma20 = result['sell_v_reverse']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if notHigher:
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
 
@@ -697,7 +697,7 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         above_ma20 = result['buy_five_v_reverse']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if notLower:
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
     if len(result['sell_five_v_reverse']['date']) > 0:
         fire_time = result['sell_five_v_reverse']['date'][-1]
@@ -708,7 +708,7 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         above_ma20 = result['sell_five_v_reverse']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if notHigher:
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
 
