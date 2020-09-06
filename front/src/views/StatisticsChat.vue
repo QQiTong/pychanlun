@@ -17,7 +17,86 @@
                 size="mini"
                 :picker-options="pickerOptions">
             </el-date-picker>
+
             <el-button @click="getStatisticList()" type="primary" size="mini" class="ml-5 primary-button">刷新</el-button>
+            <div class="signal-statistic">
+                <table class="item">
+                    <tr>
+                        <th>
+                            信号
+                        </th>
+                        <th>
+                            盈利数
+                        </th>
+                        <th>
+                            亏损数
+                        </th>
+                        <th>
+                            胜率
+                        </th>
+                        <th>
+                            盈亏比
+                        </th>
+                        <th>
+                            期望
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>背驰</td>
+                        <td>{{signal_result.beichi_win_count}}</td>
+                        <td>{{signal_result.beichi_lose_count}}</td>
+                        <td>{{signal_result.beichi_win_lose_count_rate}}%</td>
+                        <td>{{signal_result.beichi_win_lose_money_rate}}</td>
+                        <td>{{1/(1+signal_result.beichi_win_lose_money_rate) < signal_result.beichi_win_lose_count_rate ?"正":"负"}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>破坏</td>
+                        <td>{{signal_result.break_win_count}}</td>
+                        <td>{{signal_result.break_lose_count}}</td>
+                        <td>{{signal_result.break_win_lose_count_rate}}%</td>
+                        <td>{{signal_result.break_win_lose_money_rate}}</td>
+                        <!--                <td>{{signal_result.break_win_lose_count_rate*signal_result.break_win_money -(1-signal_result.break_win_lose_count_rate)*signal_result.break_lose_money }}</td>-->
+                        <td>{{1/(1+signal_result.break_win_lose_money_rate) < signal_result.break_win_lose_count_rate ?"正":"负"}}</td>
+                    </tr>
+                    <tr>
+                        <td>拉回</td>
+                        <td>{{signal_result.huila_win_count}}</td>
+                        <td>{{signal_result.huila_lose_count}}</td>
+                        <td>{{signal_result.huila_win_lose_count_rate}}%</td>
+                        <td>{{signal_result.huila_win_lose_money_rate}}</td>
+                        <!--                    <td>{{signal_result.huila_win_lose_count_rate*signal_result.huila_win_money -(1-signal_result.huila_win_lose_count_rate)*signal_result.huila_lose_money }}</td>-->
+                        <td>{{1/(1+signal_result.huila_win_lose_money_rate) < signal_result.huila_win_lose_count_rate ?"正":"负"}}</td>
+                    </tr>
+                    <tr>
+                        <td>突破</td>
+                        <td>{{signal_result.tupo_win_count}}</td>
+                        <td>{{signal_result.tupo_lose_count}}</td>
+                        <td>{{signal_result.tupo_win_lose_count_rate}}%</td>
+                        <td>{{signal_result.tupo_win_lose_money_rate}}</td>
+                        <!--                    <td>{{signal_result.tupo_win_lose_count_rate*signal_result.tupo_win_money -(1-signal_result.tupo_win_lose_count_rate)*signal_result.tupo_lose_money }}</td>-->
+                        <td>{{1/(1+signal_result.tupo_win_lose_money_rate) < signal_result.tupo_win_lose_count_rate ?"正":"负"}}</td>
+
+                    </tr>
+                    <tr>
+                        <td>V反</td>
+                        <td>{{signal_result.five_v_reverse_win_count}}</td>
+                        <td>{{signal_result.five_v_reverse_lose_count}}</td>
+                        <td>{{signal_result.five_v_reverse_win_lose_count_rate}}%</td>
+                        <td>{{signal_result.five_v_reverse_win_lose_money_rate}}</td>
+                        <!--                    <td>{{signal_result.five_v_reverse_win_lose_count_rate*signal_result.five_v_reverse_win_money-->
+                        <!--                        -(1-signal_result.five_v_reverse_win_lose_count_rate)*signal_result.five_v_reverse_lose_money }}-->
+                        <!--                    </td> -->
+                        <td>{{1/(1+signal_result.five_v_reverse_win_lose_money_rate) < signal_result.five_v_reverse_win_lose_count_rate ?"正":"负"}}</td>
+                    </tr>
+                </table>
+                <div class="item desc">
+                    <p>胜率： 盈利次数 / 亏损次数 + 盈利次数</p>
+                    <p>盈亏比： 盈利额 / 亏损额</p>
+                    <p>期望： 胜率 * 盈利额 - 败率 * 亏损额</p>
+                </div>
+            </div>
+
             <div class="statistic-echarts-list">
                 <div class="profit-chart" id="profit-chart-parent">
                     <div id="profit-chart"/>
@@ -47,10 +126,13 @@
         data() {
             return {
                 statisticList: null,
+                signal_result: {},
                 dateRange: [],
                 profitChart: null,
                 winPiechart: null,
                 losePieChart: null,
+                totalNetProfit: 0,
+                winloseRate: 0,
                 pickerOptions: {
                     shortcuts: [{
                         text: '最近一周',
@@ -106,6 +188,18 @@
                 futureApi.getStatisticList(this.dateRange).then(res => {
                     console.log('统计图表:', res)
                     this.statisticList = res
+                    this.signal_result = res.signal_result
+                    this.totalNetProfit = 0
+                    let totalWin = 0
+                    let totalLose = 0
+                    this.winloseRate = 0
+                    for (let i = 0; i < this.statisticList.net_profit_list.length - 1; i++) {
+                        let item = this.statisticList.net_profit_list[i]
+                        totalWin += this.statisticList.win_end_list[i]
+                        totalLose += this.statisticList.lose_end_list[i]
+                        this.totalNetProfit += item
+                    }
+                    this.winloseRate = Math.abs((totalWin / totalLose).toFixed(2))
                     this.processData()
                 }).catch((error) => {
                     console.log('获取统计图表失败:', error)
@@ -116,7 +210,7 @@
                 this.profitChart.setOption({
                     backgroundColor: '#12161c',
                     title: {
-                        text: '统计',
+                        text: '统计结果：净利润：' + this.totalNetProfit + ' 盈亏比:' + this.winloseRate,
                         x: '20',
                         top: '20',
                         textStyle: {
@@ -451,6 +545,27 @@
 
     .el-date-editor .el-range-input {
         color: white !important
+    }
+
+    .signal-statistic {
+        display flex
+        flex-direction row
+
+        .item {
+            flex 1
+            th, td {
+                width: 100px;
+                text-align: center
+                height: 50px;
+                line-height 50px;
+            }
+        }
+        .desc{
+            margin-top 10px;
+            line-height 30px;
+            height 30px;
+        }
+
     }
 
     .statistic-echarts-list {

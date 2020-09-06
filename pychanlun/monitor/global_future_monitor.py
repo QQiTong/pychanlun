@@ -290,7 +290,7 @@ def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag
         else:
             # 动止信号 不作为新的记录插入持仓表
             # 线段破坏 不作为新的记录插入持仓表 and signal != 'break'
-            if signal != 'fractal':
+            if signal != 'fractal' :
                 DBPyChanlun['future_auto_position'].insert_one({
                     'symbol': symbol,
                     'period': period,

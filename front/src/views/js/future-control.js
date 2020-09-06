@@ -45,7 +45,7 @@ export default {
                 // 资金使用率
                 accountUseRate: null,
                 // 最大资金使用率
-                maxAccountUseRate: 0.1,
+                maxAccountUseRate: 0.3,
                 // 止损系数
                 stopRate: 0.01,
                 // okex 手续费 0.05% 开仓加平仓就是0.1%
@@ -432,7 +432,7 @@ export default {
             } else {
                 this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
                 this.calcPosForm.account = this.calcPosForm.futureAccount
-                this.calcPosForm.maxAccountUseRate = 0.1
+                this.calcPosForm.maxAccountUseRate = 0.15
                 this.calcPosForm.stopRate = 0.01
             }
             this.calcPosForm.marginLevel = (1 / this.calcPosForm.currentMarginRate).toFixed(2)

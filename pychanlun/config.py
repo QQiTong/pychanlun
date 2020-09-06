@@ -40,6 +40,9 @@ config = {
         "JM",
         # 化工系
         "RU",
+        # 金属类
+        "NI",
+        "ZN",
         "FU",
         "BU",
         "MA",
@@ -57,21 +60,20 @@ config = {
         "A",
         "M",
         "RM",
+
+        "SP",
+        "CJ"
         # 食用油
         "OI",
         "P",
         "Y",
-        # 金属类
-        "NI",
         # "AU",
-        # "AG",
-        "ZN",
-        # "SP",
+        "AG",
         # "IC",
         # "IF",
         # "IH",
     ],
-    # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整
+    # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整 b
     'margin_rate_company': 0.01,
     # 商品期货保证金率一般固定，只有过节会变下。因为换合约期间需要拿到老合约保证金率，因此保存起来
     'futureConfig': {
@@ -85,14 +87,17 @@ config = {
         'AG': {'margin_rate': 0.12, 'contract_multiplier': 15},
         'NI': {'margin_rate': 0.1, 'contract_multiplier': 1},
         'ZN': {'margin_rate': 0.1, 'contract_multiplier': 5},
+        'SP': {'margin_rate': 0.08, 'contract_multiplier': 10},
+
         # 郑商所
         'MA': {'margin_rate': 0.07, 'contract_multiplier': 10},
         'TA': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'CF': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'SR': {'margin_rate': 0.05, 'contract_multiplier': 10},
-        'OI': {'margin_rate': 0.06, 'contract_multiplier': 10},
+        'OI': {'margin_rate': 0.06, 'contract_multiplier ': 10},
         'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        'CJ': {'margin_rate': 0.08, 'contract_multiplier': 5},
         # 大商所
         'J': {'margin_rate': 0.08, 'contract_multiplier': 100},
         'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
@@ -161,7 +166,7 @@ config = {
     # CL:原油; GC:黄金;SI:白银; CT:棉花;ZS:大豆;ZM:豆粕; ZL:豆油;NID:伦镍;
     # YM:道琼斯 CN:A50 CP:马棕榈
     # wshq 'SB'
-    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL','NID','ZSD'],
+    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL', 'NID', 'ZSD'],
     # 美国股票
     'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD'],
     # wshq
@@ -181,11 +186,11 @@ config = {
         'COZMA0': 'ZM',
         'COZLA0': 'ZL',
 
-        'IECTA0': 'CT', # 美棉花
-        'IESBA0': 'SB', # 美糖
+        'IECTA0': 'CT',  # 美棉花
+        'IESBA0': 'SB',  # 美糖
 
-        'LENID3M': 'NID', # 伦镍
-        'LEZSD3M': 'ZSD', # 伦锌
+        'LENID3M': 'NID',  # 伦镍
+        'LEZSD3M': 'ZSD',  # 伦锌
     },
     'digit_coin_symbol': ['BTC'],
     'digit_coin_symbol_info': [{
@@ -288,7 +293,7 @@ config = {
             'type': 'future',
             'feeRate': 0.012
         },
-       {
+        {
             'contract_multiplier': 1,
             'exchange': '伦敦',
             'margin_rate': 0.1,

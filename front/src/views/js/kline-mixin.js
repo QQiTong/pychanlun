@@ -289,6 +289,7 @@ export default {
         },
         quickSwitchSymbol(symbol) {
             this.switchSymbol(symbol, 'reload')
+            this.processMargin()
         },
         quickSwitchDay(type) {
             let tempDate = this.endDate.replace(/-/g, '/')
@@ -854,7 +855,7 @@ export default {
                 // console.log('更新', period)
                 option = that.refreshOption(currentChart, resultData, specialMA5, specialMA20)
             } else {
-                // console.log('重载', period)
+                console.log('重载', period)
                 option = {
                     animation: false,
                     backgroundColor: this.echartsConfig.bgColor,
@@ -1068,8 +1069,6 @@ export default {
                                 show: true
                             },
                             axisLine: {lineStyle: {color: '#8392A5'}}
-
-
                         },
                         {
                             type: 'category',
@@ -1118,9 +1117,6 @@ export default {
                         {
                             gridIndex: 2,
                             splitNumber: 2,
-                            axisLine: {
-                                onZero: false
-                            },
                             axisTick: {
                                 show: false
                             },
@@ -1130,7 +1126,8 @@ export default {
                             axisLabel: {
                                 show: true
                             },
-                            axisLine: {lineStyle: {color: '#8392A5'}},
+                            axisLine: {lineStyle: {color: '#8392A5'},
+                            onZero: false},
                         },
                         // 成交量
                         // {
@@ -2967,7 +2964,7 @@ export default {
                 this.perOrderStopMoney = Math.abs(openPrice - stopPrice) * this.contractMultiplier
                 // 1手止损的百分比
                 this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
-                this.maxAccountUseRate = 0.1
+                this.maxAccountUseRate = 0.3
                 this.stopRate = 0.01
             }
 
