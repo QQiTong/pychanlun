@@ -469,6 +469,7 @@ def getDominantSymbol():
 
 
 is_run = True
+is_loop = True
 
 
 def signal_hanlder(signalnum, frame):
@@ -480,6 +481,7 @@ def signal_hanlder(signalnum, frame):
 def monitor_futures_and_digitcoin(symbol_list, period_list):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+
     while is_run:
         tasks = []
         for i in range(len(symbol_list)):
@@ -487,6 +489,9 @@ def monitor_futures_and_digitcoin(symbol_list, period_list):
                 task = asyncio.ensure_future(do_monitoring(symbol_list[i], period_list[j]))
                 tasks.append(task)
         loop.run_until_complete(asyncio.wait(tasks))
+        if not is_loop:
+            break
+
     loop.close()
 
 
@@ -732,7 +737,7 @@ temp = {
 }
 
 '''
-计算分型止损率的时候不能 使用 close_price 因为监控性能的问题 扫描到信号的时候 
+计算分型止损率的时候不能 使用 close_price 因为监控性能的问题 扫描到信号的时候
 close_price 和触发价格 price 已经相差很多，此时计算的止损率会偏高 导致被信号过滤器给过滤掉
 '''
 async def monitorFractal(result, symbol, period, closePrice):
@@ -941,6 +946,8 @@ async def calStopWinCount(symbol, period, positionInfo, closePrice):
 
 
 def run(**kwargs):
+    global is_loop
+    is_loop = kwargs.get("loop")
     signal.signal(signal.SIGINT, signal_hanlder)
     symbol_list, dominantSymbolInfoList = getDominantSymbol()
     thread_list = []
@@ -952,8 +959,7 @@ def run(**kwargs):
     for chunk in chunks:
         thread_list.append(
             threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['3m', '5m', '15m', '30m', '60m'])))
-
-    stop_watch = Stopwatch("监控")
+    stop_watch = Stopwatch("总监控耗时")
     for thread in thread_list:
         thread.start()
     while True:
@@ -963,7 +969,7 @@ def run(**kwargs):
         else:
             break
     stop_watch.stop()
-    print(stop_watch)
+    logger.info(stop_watch)
 
 
 if __name__ == '__main__':

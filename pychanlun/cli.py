@@ -34,6 +34,7 @@ pychanlun monitoring
 
 
 @run.command()
+@click.option('--loop/--no_loop', default=True)
 def monitoring(**kwargs):
     """运行监控"""
     BeichiMonitor.run(**kwargs)

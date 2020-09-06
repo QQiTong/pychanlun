@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 from rqdatac import init
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
