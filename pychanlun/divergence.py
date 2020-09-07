@@ -29,7 +29,7 @@ signalMap = {
 }
 
 
-def calc_beichi_data(x_data, xx_data):
+def calc_beichi_data(x_data, xx_data, ma5 = None, ma20 = None):
     divergence_down, divergence_up, above_big_macd = calc_divergence(x_data, xx_data)
     bi_list = list(x_data['bi'])
     duan_list = list(x_data['duan'])
@@ -39,10 +39,8 @@ def calc_beichi_data(x_data, xx_data):
     open_list = list(x_data['open'])
     close_list = list(x_data['close'])
     diff_list = list(x_data['diff'])
-    ma5_list = list(x_data['ma5'])
-    ma20_list = list(x_data['ma20'])
     return note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_list, low_list,
-                open_list, close_list, diff_list, ma5_list, ma20_list, above_big_macd)
+                open_list, close_list, diff_list, ma5, ma20, above_big_macd)
 
 
 def calc_divergence(x_data, xx_data):
@@ -206,7 +204,7 @@ def calc_divergence(x_data, xx_data):
 
 
 def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_list, low_list, open_list,
-         close_list, diff_list, ma5_list, ma20_list, above_big_macd):
+         close_list, diff_list, ma5, ma20, above_big_macd):
     data = {
         'buyMACDBCData': {
             'date': [], 'data': [], 'value': [], 'stop_lose_price': [], 'diff': [], 'stop_win_price': [],
@@ -244,8 +242,20 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
             else:
                 data['buyMACDBCData']['stop_win_price'].append(0)
             data['buyMACDBCData']['tag'].append('')
-            data['buyMACDBCData']['above_ma5'].append(close_list[i] > ma5_list[i])
-            data['buyMACDBCData']['above_ma20'].append(close_list[i] > ma20_list[i])
+            above_ma5 = False
+            if ma5 is not None:
+                t = datetime.datetime.fromtimestamp(time_list[i])
+                t = t.replace(hour=0, minute=0).timestamp()
+                if t in ma5 and close_list[i] > ma5[t]:
+                    above_ma5 = True
+            data['buyMACDBCData']['above_ma5'].append(close_list[i] > above_ma5)
+            above_ma20 = False
+            if ma20 is not None:
+                t = datetime.datetime.fromtimestamp(time_list[i])
+                t = t.replace(hour=0, minute=0).timestamp()
+                if t in ma20 and close_list[i] > ma20[t]:
+                    above_ma20 = True
+            data['buyMACDBCData']['above_ma20'].append(above_ma20)
             data['buyMACDBCData']['above_big_macd'].append(above_big_macd[i])
     for i in range(len(divergence_up)):
         if divergence_up[i] == 1:
@@ -267,7 +277,19 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
             else:
                 data['sellMACDBCData']['stop_win_price'].append(0)
             data['sellMACDBCData']['tag'].append('')
-            data['sellMACDBCData']['above_ma5'].append(close_list[i] > ma5_list[i])
-            data['sellMACDBCData']['above_ma20'].append(close_list[i] > ma20_list[i])
+            above_ma5 = True
+            if ma5 is not None:
+                t = datetime.datetime.fromtimestamp(time_list[i])
+                t = t.replace(hour=0, minute=0).timestamp()
+                if t in ma5 and close_list[i] < ma5[t]:
+                    above_ma5 = False
+            data['sellMACDBCData']['above_ma5'].append(above_ma5)
+            above_ma20 = True
+            if ma20 is not None:
+                t = datetime.datetime.fromtimestamp(time_list[i])
+                t = t.replace(hour=0, minute=0).timestamp()
+                if t in ma20 and close_list[i] < ma20[t]:
+                    above_ma5 = False
+            data['sellMACDBCData']['above_ma20'].append(above_ma20)
             data['sellMACDBCData']['above_big_macd'].append(above_big_macd[i])
     return data
