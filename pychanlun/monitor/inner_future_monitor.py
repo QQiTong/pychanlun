@@ -37,7 +37,7 @@ periodList2 = ['1m', '3m', '5m', '15m', '30m', '60m']
 # 外盘期货
 periodList3 = ['3m', '5m', '15m', '30m', '60m']
 # 不监控60m了，换成1m 降低进场成本
-periodList4 = ['1m', '3m', '5m', '15m', '30m']
+periodList4 = ['1m', '3m', '5m', '15m']
 
 # 高级别 高高级别映射
 # 暂时用3d 3d
@@ -542,10 +542,10 @@ def do_monitoring(symbol, period):
         # if period != '1m' and period != '3m' and period != '5m':
         monitorBeichi(result, symbol, period, close_price)
         monitorHuila(result, symbol, period, close_price)
-        monitorTupo(result, symbol, period, close_price)
+        # monitorTupo(result, symbol, period, close_price)
         monitorVReverse(result, symbol, period, close_price)
         monitorFiveVReverse(result, symbol, period, close_price)
-        monitorDuanBreak(result, symbol, period, close_price)
+        # monitorDuanBreak(result, symbol, period, close_price)
         monitorFractal(result, symbol, period, close_price)
 
 
@@ -556,27 +556,27 @@ def monitorBeichi(result, symbol, period, closePrice):
     notHigher = result['notHigher']
     # 监控背驰
     if len(result['buyMACDBCData']['date']) > 0:
-        if not notLower:
-           return
         fire_time = result['buyMACDBCData']['date'][-1]
         price = result['buyMACDBCData']['data'][-1]
+        above_ma5 = result['buyMACDBCData']['above_ma5'][-1]
         # tag = result['buyMACDBCData']['tag'][-1]
         tag = ""
         stop_lose_price = result['buyMACDBCData']['stop_lose_price'][-1]
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if notLower:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sellMACDBCData']['date']) > 0:
-        if not notHigher:
-           return
         fire_time = result['sellMACDBCData']['date'][-1]
         price = result['sellMACDBCData']['data'][-1]
+        above_ma5 = result['sellMACDBCData']['above_ma5'][-1]
         # tag = result['sellMACDBCData']['tag'][-1]
         tag = ""
         stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
-        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if notHigher:
+            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -603,8 +603,8 @@ def monitorHuila(result, symbol, period, closePrice):
         direction = 'B'
         # 大级别直接保存
         # if period != '1m':
-        if above_ma5 or notLower:
-            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        # if above_ma5 or notLower:
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
             # 小级别除非是双盘，否则一定要不破前低
             # if above_ma5 or notLower:
@@ -621,9 +621,9 @@ def monitorHuila(result, symbol, period, closePrice):
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
-        if not above_ma5 or notHigher:
+        # if not above_ma5 or notHigher:
         # if period != "1m":
-            saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if not above_ma5 or notHigher:
         #         saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)

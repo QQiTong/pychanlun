@@ -59,8 +59,8 @@ digitCoinFee = 0.001
 digitCoinAccount = 60.80 / 10000
 # 外盘期货账户
 global_future_account = 6
-maxAccountUseRate = 0.1
-stopRate = 0.01
+maxAccountUseRate = 0.15
+stopRate = 0.005
 mail = Mail()
 dingMsg = DingMsg()
 
@@ -136,7 +136,9 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             'per_order_stop_rate': round(perOrderStopRate, 3),
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        if abs((date_created - fire_time).total_seconds()) < 60 * 3 and perOrderStopRate <= 0.2:
+        if signal == 'fractal' or signal == 'beichi':
+            print(signal,symbol,period,futureCalcObj,perOrderStopRate)
+        if abs((date_created - fire_time).total_seconds()) < 60 * 4 and perOrderStopRate <= 0.1:
             # 新增
             remind = await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                                   stop_lose_price, futureCalcObj, True)
@@ -159,6 +161,8 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 "close_price": close_price,
                 "tag": tag,
                 "per_order_stop_rate": round(perOrderStopRate, 3),
+                "above_ma5": above_ma5,
+                "above_ma20": above_ma20,
                 "remind": 'Ding'
             }
             # 简洁版
@@ -505,16 +509,47 @@ async def do_monitoring(symbol, period):
         result = await get_chanlun_data(symbol, period)
         if result is not None and result.get('close') is not None and len(result['close']) > 0:
             close_price = result['close'][-1]
+            await monitorBeichi(result, symbol, period, close_price)
             await monitorHuila(result, symbol, period, close_price)
             await monitorTupo(result, symbol, period, close_price)
             await monitorVReverse(result, symbol, period, close_price)
             await monitorFiveVReverse(result, symbol, period, close_price)
-            await monitorDuanBreak(result, symbol, period, close_price)
+            # await monitorDuanBreak(result, symbol, period, close_price)
             await monitorFractal(result, symbol, period, close_price)
     except BaseException as e:
         logger.error("Error Occurred: {0}".format(traceback.format_exc()))
     stop_watch.stop()
     logger.info(stop_watch)
+
+
+async def monitorBeichi(result, symbol, period, closePrice):
+    signal = 'beichi'
+    # 使用notlower notHigher 过滤确保当前只做2买，完备，3买
+    notLower = result['notLower']
+    notHigher = result['notHigher']
+    # 监控背驰
+    if len(result['buyMACDBCData']['date']) > 0:
+        fire_time = result['buyMACDBCData']['date'][-1]
+        price = result['buyMACDBCData']['data'][-1]
+        above_ma5 = result['buyMACDBCData']['above_ma5'][-1]
+        # tag = result['buyMACDBCData']['tag'][-1]
+        tag = ""
+        stop_lose_price = result['buyMACDBCData']['stop_lose_price'][-1]
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        direction = 'B'
+        if above_ma5 or notLower:
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+    if len(result['sellMACDBCData']['date']) > 0:
+        fire_time = result['sellMACDBCData']['date'][-1]
+        price = result['sellMACDBCData']['data'][-1]
+        above_ma5 = result['sellMACDBCData']['above_ma5'][-1]
+        # tag = result['sellMACDBCData']['tag'][-1]
+        tag = ""
+        stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        direction = 'S'
+        if not above_ma5 or notHigher:
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -540,12 +575,13 @@ async def monitorHuila(result, symbol, period, closePrice):
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
         # 大级别直接保存
-        if period != '1m':
+        # if period != '1m':
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        else:
-            # 小级别除非是双盘，否则一定要不破前低
-            if above_ma5 or notLower:
-                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        # else:
+        #     # 小级别除非是双盘，否则一定要不破前低
+        #     if above_ma5 or notLower:
+        #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
             # elif "双盘" in tag or "完备" in tag:
             #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj,above_ma5, above_ma20)
 
@@ -558,11 +594,12 @@ async def monitorHuila(result, symbol, period, closePrice):
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
-        if period != "1m":
+        # if period != "1m":
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        else:
-            if not above_ma5 or notHigher:
-                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        # else:
+        #     if not above_ma5 or notHigher:
+        #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
 
 '''
@@ -586,11 +623,11 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['buy_zs_tupo']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if period != "1m":
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        else:
-            if above_ma5:
-                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        # else:
+        #     if above_ma5:
+        #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
     if len(result['sell_zs_tupo']['date']) > 0:
         fire_time = result['sell_zs_tupo']['date'][-1]
@@ -601,11 +638,11 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['sell_zs_tupo']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if period != "1m":
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        else:
-            if not above_ma5:
-                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        # else:
+        #     if not above_ma5:
+        #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
 
 '''
@@ -615,6 +652,8 @@ async def monitorTupo(result, symbol, period, closePrice):
 
 async def monitorVReverse(result, symbol, period, closePrice):
     signal = 'v_reverse'
+    notLower = result['notLower']
+    notHigher = result['notHigher']
     # 监控V反
     if len(result['buy_v_reverse']['date']) > 0:
         fire_time = result['buy_v_reverse']['date'][-1]
@@ -625,7 +664,7 @@ async def monitorVReverse(result, symbol, period, closePrice):
         above_ma20 = result['buy_v_reverse']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if above_ma5:
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
     if len(result['sell_v_reverse']['date']) > 0:
         fire_time = result['sell_v_reverse']['date'][-1]
@@ -636,7 +675,7 @@ async def monitorVReverse(result, symbol, period, closePrice):
         above_ma20 = result['sell_v_reverse']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if not above_ma5:
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
 
@@ -647,6 +686,8 @@ async def monitorVReverse(result, symbol, period, closePrice):
 
 async def monitorFiveVReverse(result, symbol, period, closePrice):
     signal = 'five_v_reverse'
+    notLower = result['notLower']
+    notHigher = result['notHigher']
     if len(result['buy_five_v_reverse']['date']) > 0:
         fire_time = result['buy_five_v_reverse']['date'][-1]
         price = result['buy_five_v_reverse']['data'][-1]
@@ -656,7 +697,7 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         above_ma20 = result['buy_five_v_reverse']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if above_ma5:
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
     if len(result['sell_five_v_reverse']['date']) > 0:
         fire_time = result['sell_five_v_reverse']['date'][-1]
@@ -667,7 +708,7 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         above_ma20 = result['sell_five_v_reverse']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if not above_ma5:
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
 
@@ -678,6 +719,8 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
 
 async def monitorDuanBreak(result, symbol, period, closePrice):
     signal = 'break'
+    notLower = result['notLower']
+    notHigher = result['notHigher']
     # 监控线段破坏
     if len(result['buy_duan_break']['date']) > 0:
         fire_time = result['buy_duan_break']['date'][-1]
@@ -688,7 +731,7 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
         above_ma20 = result['buy_duan_break']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if above_ma5:
+        if above_ma5 or notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
     if len(result['sell_duan_break']['date']) > 0:
         fire_time = result['sell_duan_break']['date'][-1]
@@ -699,7 +742,7 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
         above_ma20 = result['sell_duan_break']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        if not above_ma5:
+        if not above_ma5 or notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
 
@@ -940,25 +983,25 @@ async def calStopWinCount(symbol, period, positionInfo, closePrice):
     # else:
     #     stopWinPosRate = 0.3
     stopWinCount = round(stopWinPosRate * open_pos_amount)
-    print("当前盈亏比", winLoseRate, "当前动止仓位百分比",
-          stopWinPosRate, "动止手数", stopWinCount)
+    print(symbol, period, "当前盈亏比", winLoseRate, "当前动止仓位百分比",
+          stopWinPosRate, "动止手数", stopWinCount, "持仓信息：", positionInfo)
     return stopWinCount
 
 
 def run(**kwargs):
-    global is_loop
-    is_loop = kwargs.get("loop")
+    # global is_loop
+    # is_loop = kwargs.get("loop")
     signal.signal(signal.SIGINT, signal_hanlder)
     symbol_list, dominantSymbolInfoList = getDominantSymbol()
     thread_list = []
     chunks = pydash.chunk(symbol_list, 10)
     for chunk in chunks:
         thread_list.append(
-            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['3m', '5m', '15m', '30m', '60m'])))
-    chunks = pydash.chunk(global_future_symbol, 10)
-    for chunk in chunks:
-        thread_list.append(
-            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['3m', '5m', '15m', '30m', '60m'])))
+            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m','3m', '5m', '15m'])))
+    # chunks = pydash.chunk(global_future_symbol, 10)
+    # for chunk in chunks:
+    #     thread_list.append(
+    #         threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['3m', '5m', '15m', '30m', '60m'])))
     stop_watch = Stopwatch("总监控耗时")
     for thread in thread_list:
         thread.start()

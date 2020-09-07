@@ -144,6 +144,108 @@ class BusinessService:
 
         # print(win_symbol_list, win_money_list)
         # print(lose_symbol_list, lose_money_list)
+
+        end = datetime.strptime(endDate, "%Y-%m-%d")
+        end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+        start = datetime.strptime(startDate, "%Y-%m-%d")
+        start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+        df_beichi_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "beichi"
+        }).sort("_id", pymongo.ASCENDING)))
+
+        df_beichi_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "beichi"
+        }).sort("_id", pymongo.ASCENDING)))
+
+        df_break_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "break"
+        }).sort("_id", pymongo.ASCENDING)))
+        df_break_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "break"
+        }).sort("_id", pymongo.ASCENDING)))
+
+        df_huila_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "huila"
+        }).sort("_id", pymongo.ASCENDING)))
+        df_huila_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "huila"
+        }).sort("_id", pymongo.ASCENDING)))
+
+        df_tupo_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "tupo"
+        }).sort("_id", pymongo.ASCENDING)))
+        df_tupo_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "tupo"
+        }).sort("_id", pymongo.ASCENDING)))
+
+        # df_v_reverse_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        #     "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "v_reverse"
+        # }).sort("_id", pymongo.ASCENDING)))
+        # df_v_reverse_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        #     "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "v_reverse"
+        # }).sort("_id", pymongo.ASCENDING)))
+
+        df_five_v_reverse_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "five_v_reverse"
+        }).sort("_id", pymongo.ASCENDING)))
+        df_five_v_reverse_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "five_v_reverse"
+        }).sort("_id", pymongo.ASCENDING)))
+
+        signal_result = {
+            "beichi_win_count": len(df_beichi_win),
+            "beichi_lose_count": len(df_beichi_lose),
+
+            "beichi_win_money": df_beichi_win['win_end_money'].sum(),
+            "beichi_lose_money": df_beichi_win['lose_end_money'].sum() if 'lose_end_money' in df_beichi_win else 0,
+
+            "huila_win_count": len(df_huila_win),
+            "huila_lose_count": len(df_huila_lose),
+
+            "huila_win_money": df_huila_win['win_end_money'].sum(),
+            "huila_lose_money": df_huila_win['lose_end_money'].sum() if 'lose_end_money' in df_huila_win else 0,
+
+            "break_win_count": len(df_break_win),
+            "break_lose_count": len(df_break_lose),
+
+            "break_win_money": df_break_win['win_end_money'].sum(),
+            "break_lose_money": df_break_win['lose_end_money'].sum() if 'lose_end_money' in df_break_win else 0,
+
+            "tupo_win_count": len(df_tupo_win),
+            "tupo_lose_count": len(df_tupo_lose),
+
+            "tupo_win_money": df_tupo_win['win_end_money'].sum(),
+            "tupo_lose_money": df_tupo_win['lose_end_money'].sum() if 'lose_end_money' in df_tupo_win else 0,
+
+            # "v_reverse_win_count": len(df_v_reverse_win),
+            # "v_reverse_lose_count": len(df_v_reverse_lose),
+            "five_v_reverse_win_count": len(df_five_v_reverse_win),
+            "five_v_reverse_lose_count": len(df_five_v_reverse_lose),
+
+            "five_v_reverse_win_money": df_five_v_reverse_win['win_end_money'].sum() if 'win_end_money' in df_five_v_reverse_win else 0,
+            "five_v_reverse_lose_money": df_five_v_reverse_win['lose_end_money'].sum() if 'lose_end_money' in df_five_v_reverse_win else 0,
+
+            "beichi_win_lose_count_rate": round(len(df_beichi_win) / (len(df_beichi_lose) + len(df_beichi_win)), 2) if len(df_beichi_lose) != 0 else 1,
+            "beichi_win_lose_money_rate": abs(round(df_beichi_win['win_end_money'].sum() / df_beichi_lose['lose_end_money'].sum(), 2)) if df_beichi_lose['lose_end_money'].sum() != 0 else 1,
+
+            "huila_win_lose_count_rate": round(len(df_huila_win) / (len(df_huila_lose) + len(df_huila_win)), 2) if len(df_huila_lose) != 0 else 1,
+            "huila_win_lose_money_rate": abs(round(df_huila_win['win_end_money'].sum() / df_huila_lose['lose_end_money'].sum(), 2)) if df_huila_lose['lose_end_money'].sum() != 0 else 1,
+
+            "break_win_lose_count_rate": round(len(df_break_win) / (len(df_break_lose) + len(df_break_win)), 2) if len(df_break_lose) != 0 else 1,
+            "break_win_lose_money_rate": abs(round(df_break_win['win_end_money'].sum() / df_break_lose['lose_end_money'].sum(), 2)) if df_break_lose['lose_end_money'].sum() != 0 else 1,
+
+            "tupo_win_lose_count_rate": round(len(df_tupo_win) / (len(df_tupo_lose) + len(df_tupo_win)), 2) if len(df_tupo_lose) != 0 else 1,
+            "tupo_win_lose_money_rate": abs(round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(), 2)) if df_tupo_lose['lose_end_money'].sum() != 0 else 1,
+
+            # "v_reverse_win_lose_count_rate": round(len(df_v_reverse_win) / len(df_v_reverse_lose),2) if len(df_v_reverse_lose) != 0 else 1,
+            # "v_reverse_win_lose_money_rate": round(df_v_reverse_win['win_end_money'].sum() / df_v_reverse_lose['lose_end_money'].sum(), 2) if df_v_reverse_lose['lose_end_money'].sum() != 0 else 1,
+            #
+            "five_v_reverse_win_lose_count_rate": round(len(df_five_v_reverse_win) / (len(df_five_v_reverse_lose) + len(df_five_v_reverse_win)), 2) if len(df_five_v_reverse_lose) != 0 else 1,
+            "five_v_reverse_win_lose_money_rate": abs(
+                round(df_five_v_reverse_win['win_end_money'].sum() / df_five_v_reverse_lose['lose_end_money'].sum(), 2)) if 'lose_end_money' in df_five_v_reverse_lose and df_five_v_reverse_lose[
+                'lose_end_money'].sum() != 0 else 1
+        }
+        print(signal_result)
         statisticList = {
             'date': dateList,
             'win_end_list': win_end_list,
@@ -152,7 +254,8 @@ class BusinessService:
             'win_money_list': win_money_list,
             'lose_money_list': lose_money_list,
             'win_symbol_list': win_symbol_list,
-            'lose_symbol_list': lose_symbol_list
+            'lose_symbol_list': lose_symbol_list,
+            'signal_result': signal_result
         }
         return statisticList
 
@@ -228,7 +331,7 @@ class BusinessService:
     def getDoinantSynmbol(self):
         conbinSymbolInfo = copy.deepcopy(dominantSymbolInfoList)
         #  把外盘 数字货币加进去
-        conbinSymbolInfo.extend(config['global_future_symbol_info'])
+        # conbinSymbolInfo.extend(config['global_future_symbol_info'])
         # conbinSymbolInfo.extend(config['digit_coin_symbol_info'])
         return conbinSymbolInfo
 
@@ -350,9 +453,9 @@ class BusinessService:
             resultItem = {'change': change, 'price': today}
             symbolChangeMap[item] = resultItem
         # print("涨跌幅信息", symbolChangeMap)
-        globalChangeList = self.getGlobalFutureChangeList()
-        conbineChangeList = dict(symbolChangeMap, **globalChangeList)
-        return conbineChangeList
+        # globalChangeList = self.getGlobalFutureChangeList()
+        # conbineChangeList = dict(symbolChangeMap, **globalChangeList)
+        return symbolChangeMap
 
     def calc_ma(self, close_list, day):
         ma = QA.MA(pd.Series(close_list), day)
@@ -599,7 +702,7 @@ class BusinessService:
         if item['symbol'] is 'BTC':
             marginLevel = 1 / (item['margin_rate'])
         else:
-            print(item['symbol'],item)
+            print(item['symbol'], item)
             marginLevel = 1 / (item['margin_rate'] + config['margin_rate_company'])
         if status == 'winEnd':
             winEndPercent = round(((float(close_price) - item['price']) / item['price']) * marginLevel, 2)

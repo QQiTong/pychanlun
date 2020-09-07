@@ -344,7 +344,7 @@ def testRQ():
     end = datetime.now() + timedelta(1)
     start = datetime.now() + timedelta(-1)
     df = rq.get_price('L2009', frequency='30m', fields=['open', 'high', 'low', 'close', 'volume'],
-                        start_date='2020-06-24',end_date='2020-06-30')
+                      start_date='2020-06-24', end_date='2020-06-30')
     print(df)
     # print(df1d.iloc[0,0])
     # print(df1d.iloc[0,1])
@@ -834,10 +834,11 @@ def testWind():
     print("消耗时间：", endTime)
 
 
-def calc_ma(close_list,day):
+def calc_ma(close_list, day):
     ma = ta.MA(np.array(close_list), day)
     result = np.nan_to_num(ma).round(decimals=2)
     return result
+
 
 def get_global_day_ma_list():
     global_future_symbol = config['global_future_symbol']
@@ -853,7 +854,7 @@ def get_global_day_ma_list():
             continue
         data_list.reverse()
         day_close_price_list = list(pd.DataFrame(data_list)['close'])
-        day_ma_20 = calc_ma(day_close_price_list,20)
+        day_ma_20 = calc_ma(day_close_price_list, 20)
         code = "%s_%s" % (item, '1m')
 
         # 查1分钟收盘价
@@ -868,6 +869,8 @@ def get_global_day_ma_list():
         print(item, '-> ', above_item)
         aboveList[item] = above_item
     return aboveList
+
+
 def testMA():
     symbol_ma_20_map = {}
     dominantSymbolList = getDominantSymbol()
@@ -880,7 +883,7 @@ def testMA():
         day_close = list(df1d['close'])
         df1m = rq.current_minute(item)
         current_price = df1m.iloc[0, 0]
-        day_ma_20 = calc_ma(day_close,20)[-1]
+        day_ma_20 = calc_ma(day_close, 20)[-1]
         result_item = {'above_ma_20': current_price >= day_ma_20}
         symbol_ma_20_map[item] = result_item
     global_day_ma_list = get_global_day_ma_list()
@@ -888,19 +891,105 @@ def testMA():
     print(conbine_day_ma_list)
     return conbine_day_ma_list
 
+
 def testSplit():
     a = [i for i in range(10)]
-    b  = [a[i:i + 5] for i in range(0, len(a), 5)]
+    b = [a[i:i + 5] for i in range(0, len(a), 5)]
     print(b)
 
+
+def testStatistic():
+    startDate = '2020-04-28'
+    endDate = '2020-08-13'
+    end = datetime.strptime(endDate, "%Y-%m-%d")
+    end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+    start = datetime.strptime(startDate, "%Y-%m-%d")
+    start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+    df_beichi_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "beichi"
+    }).sort("_id", pymongo.ASCENDING)))
+
+    df_beichi_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "beichi"
+    }).sort("_id", pymongo.ASCENDING)))
+
+    df_break_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "break"
+    }).sort("_id", pymongo.ASCENDING)))
+    df_break_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "break"
+    }).sort("_id", pymongo.ASCENDING)))
+
+    df_huila_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "huila"
+    }).sort("_id", pymongo.ASCENDING)))
+    df_huila_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "huila"
+    }).sort("_id", pymongo.ASCENDING)))
+
+    df_tupo_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "tupo"
+    }).sort("_id", pymongo.ASCENDING)))
+    df_tupo_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "tupo"
+    }).sort("_id", pymongo.ASCENDING)))
+
+    # df_v_reverse_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+    #     "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "v_reverse"
+    # }).sort("_id", pymongo.ASCENDING)))
+    # df_v_reverse_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+    #     "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "v_reverse"
+    # }).sort("_id", pymongo.ASCENDING)))
+
+    df_five_v_reverse_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "five_v_reverse"
+    }).sort("_id", pymongo.ASCENDING)))
+    df_five_v_reverse_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "five_v_reverse"
+    }).sort("_id", pymongo.ASCENDING)))
+
+    signal_result = {
+        "beichi_win_count": len(df_beichi_win),
+        "beichi_lose_count": len(df_beichi_lose),
+        "huila_win_count": len(df_huila_win),
+        "huila_lose_count": len(df_huila_lose),
+        "break_win_count": len(df_break_win),
+        "break_lose_count": len(df_break_lose),
+        "tupo_win_count": len(df_tupo_win),
+        "tupo_lose_count": len(df_tupo_lose),
+        # "v_reverse_win_count": len(df_v_reverse_win),
+        # "v_reverse_lose_count": len(df_v_reverse_lose),
+        "five_v_reverse_win_count": len(df_five_v_reverse_win),
+        "five_v_reverse_lose_count": len(df_five_v_reverse_lose),
+
+        "beichi_win_lose_count_rate": round(len(df_beichi_win) / len(df_beichi_lose), 2) if len(df_beichi_lose) != 0 else 1,
+        "beichi_win_lose_money_rate": round(df_beichi_win['win_end_money'].sum() / df_beichi_lose['lose_end_money'].sum(), 2) if df_beichi_lose['lose_end_money'].sum() != 0 else 1,
+
+        "huila_win_lose_count_rate": round(len(df_huila_win) / len(df_huila_lose), 2) if len(df_huila_lose) != 0 else 1,
+        "huila_win_lose_money_rate": round(df_huila_win['win_end_money'].sum() / df_huila_lose['lose_end_money'].sum(), 2) if df_huila_lose['lose_end_money'].sum() != 0 else 1,
+
+        "break_win_lose_count_rate": round(len(df_break_win) / len(df_break_lose), 2) if len(df_break_lose) != 0 else 1,
+        "break_win_lose_money_rate": round(df_break_win['win_end_money'].sum() / df_break_lose['lose_end_money'].sum(), 2) if df_break_lose['lose_end_money'].sum() != 0 else 1,
+
+        "tupo_win_lose_count_rate": round(len(df_tupo_win) / len(df_tupo_lose), 2) if len(df_tupo_lose) != 0 else 1,
+        "tupo_win_lose_money_rate": round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(), 2) if df_tupo_lose['lose_end_money'].sum() != 0 else 1,
+
+        # "v_reverse_win_lose_count_rate": round(len(df_v_reverse_win) / len(df_v_reverse_lose),2) if len(df_v_reverse_lose) != 0 else 1,
+        # "v_reverse_win_lose_money_rate": round(df_v_reverse_win['win_end_money'].sum() / df_v_reverse_lose['lose_end_money'].sum(), 2) if df_v_reverse_lose['lose_end_money'].sum() != 0 else 1,
+        #
+        "five_v_reverse_win_lose_count_rate": round(len(df_five_v_reverse_win) / len(df_five_v_reverse_lose),2) if len(df_five_v_reverse_lose) != 0 else 1,
+        "five_v_reverse_win_lose_money_rate": round(df_five_v_reverse_win['win_end_money'].sum() / df_five_v_reverse_lose['lose_end_money'].sum(), 2) if df_five_v_reverse_lose['lose_end_money'].sum() != 0 else 1
+    }
+    print(signal_result)
 def app():
+    testStatistic()
     # testDingDing()
     # testBitmex()
     # testBeichiDb()
     # testHuila()
     # testChange()
     # testTQ()
-    testRQ()
+    # testRQ()
     # testMonitor()
     # testThread()
     # testHuobi()

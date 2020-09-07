@@ -374,6 +374,17 @@
                 </template>
             </el-table-column>
 
+            <el-table-column label="止盈时间" align="center" :key="29"  v-if="positionQueryForm.status==='winEnd'">
+                <template slot-scope="{row}">
+                    <span>{{ row.win_end_time}}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="止损时间" align="center" :key="30"  v-if="positionQueryForm.status==='loseEnd'">
+                <template slot-scope="{row}">
+                    <span>{{ row.lose_end_time}}</span>
+                </template>
+            </el-table-column>
+
             <el-table-column label="信号" align="center" :key="4">
                 <template slot-scope="{row}">
                     <span :class="row.signal==='tupo'?'down-green':'up-red'">{{ row.signal| signalTypeFilter }}</span>
@@ -937,24 +948,34 @@
             handleJumpToKline(row) {
                 console.log(this.$parent);
                 // 夜盘交易，时间算第二天的
-                let date = new Date()
-                let nextDay = date.getTime() + 3600 * 1000 * 24
                 // this.$parent.jumpToKline(symbol)
                 // 结束状态 k线页面不获取持仓信息
-                // if (row.status !== "winEnd" && row.status !== "loseEnd") {
+                let date
+                let path
+                if (row.status === "winEnd" || row.status === "loseEnd") {
+                    let tempDate = row.date_created.replace(/-/g, '/')
+                    date = new Date(tempDate)
+                    path = 'kline-big'
+                } else {
+                    date = new Date()
+                    path = 'multi-period'
+                }
+                let nextDay = date.getTime() + 3600 * 1000 * 24
+                let endDate = CommonTool.parseTime(nextDay, '{y}-{m}-{d}')
+                console.log("结束日期：", endDate)
                 let routeUrl = this.$router.resolve({
-                    path: "/multi-period",
+                    path: path,
                     query: {
+                        period: row.period,
                         symbol: row.symbol,
                         isPosition: true, // 是否持过仓
                         positionPeriod: row.period, // 开仓周期
                         positionDirection: row.direction, // 持仓方向
                         positionStatus: row.status, // 当前状态
-                        endDate: CommonTool.parseTime(nextDay, '{y}-{m}-{d}')
+                        endDate: endDate
                     }
                 });
                 window.open(routeUrl.href, "_blank");
-                // }
             },
             getPositionList() {
                 // this.positionList = [];
