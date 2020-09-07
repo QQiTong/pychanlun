@@ -152,10 +152,6 @@ def get_data(symbol, period, end_date=None):
     ma5 = np.round(pd.Series.rolling(daily_data["close"], window=5).mean(), 2)
     ma20 = np.round(pd.Series.rolling(daily_data["close"], window=20).mean(), 2)
 
-    for x in range(len(data_list)):
-        data_list[x]['kline_data']['ma5'] = ma5
-        data_list[x]['kline_data']['ma20'] = ma20
-
     data = data_list[-1]
     data2 = data_list[-2]
 
@@ -284,7 +280,7 @@ def get_data(symbol, period, end_date=None):
     buy_duan_break = duan_pohuai['buy_duan_break']
     sell_duan_break = duan_pohuai['sell_duan_break']
 
-    beichiData = divergence.calc_beichi_data(kline_data, kline_data2)
+    beichiData = divergence.calc_beichi_data(kline_data, kline_data2, ma5, ma20)
     buyMACDBCData = beichiData['buyMACDBCData']
     sellMACDBCData = beichiData['sellMACDBCData']
 
