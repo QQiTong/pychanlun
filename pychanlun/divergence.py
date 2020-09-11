@@ -246,7 +246,6 @@ def note(divergence_down, divergence_up, bi_list, duan_list, time_list, high_lis
             if ma5 is not None:
                 t = datetime.datetime.fromtimestamp(time_list[i])
                 t = t.replace(hour=0, minute=0).timestamp()
-                print("======", close_list[i], ma5[t], t in ma5 and close_list[i] > ma5[t])
                 if t in ma5 and close_list[i] > ma5[t]:
                     above_ma5 = True
             data['buyMACDBCData']['above_ma5'].append(above_ma5)
