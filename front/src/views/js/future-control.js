@@ -432,8 +432,8 @@ export default {
             } else {
                 this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
                 this.calcPosForm.account = this.calcPosForm.futureAccount
-                this.calcPosForm.maxAccountUseRate = 0.15
-                this.calcPosForm.stopRate = 0.01
+                this.calcPosForm.maxAccountUseRate = this.$maxAccountUseRate
+                this.calcPosForm.stopRate = this.$stopRate
             }
             this.calcPosForm.marginLevel = (1 / this.calcPosForm.currentMarginRate).toFixed(2)
             this.calcPosForm.contractMultiplier = symbolInfo.contract_multiplier

@@ -12,6 +12,12 @@ let digitCoinLevel = 20
 // 'NID', 'CP', 'CT',
 let globalFutureSymbol = ['CL', 'GC', 'SI', 'ZS', 'ZM', 'ZL', 'YM', 'ES', 'NQ', 'CN']
 
+// 最大资金使用率
+let maxAccountUseRate = 0.10
+
+// 止损系数
+let stopRate = 0.004
+
 export default {
     install() {
         Vue.prototype.$futureAccount = futureAccount
@@ -20,5 +26,7 @@ export default {
         Vue.prototype.$digitCoinAccount = digitCoinAccount
         Vue.prototype.$digitCoinLevel = digitCoinLevel
         Vue.prototype.$globalFutureSymbol = globalFutureSymbol
+        Vue.prototype.$maxAccountUseRate = maxAccountUseRate
+        Vue.prototype.$stopRate = stopRate
     }
 }

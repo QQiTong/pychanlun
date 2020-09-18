@@ -51,12 +51,12 @@ def get_data(symbol, period, end_date=None):
             .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
 
         # 加上MACD数据
-        MACD = QA.MACD(kline_data['close'], 12, 26, 9)
-        kline_data['diff'] = MACD['DIFF'].fillna(0)
-        kline_data['dea'] = MACD['DEA'].fillna(0)
-        kline_data['macd'] = MACD['MACD'].fillna(0)
-        kline_data['jc'] = QA.CROSS(MACD['DIFF'], MACD['DEA']).fillna(0)
-        kline_data['sc'] = QA.CROSS(MACD['DEA'], MACD['DIFF']).fillna(0)
+        # MACD = QA.MACD(kline_data['close'], 12, 26, 9)
+        # kline_data['diff'] = MACD['DIFF'].fillna(0)
+        # kline_data['dea'] = MACD['DEA'].fillna(0)
+        # kline_data['macd'] = MACD['MACD'].fillna(0)
+        # kline_data['jc'] = QA.CROSS(MACD['DIFF'], MACD['DEA']).fillna(0)
+        # kline_data['sc'] = QA.CROSS(MACD['DEA'], MACD['DIFF']).fillna(0)
 
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
 
@@ -280,12 +280,12 @@ def get_data(symbol, period, end_date=None):
     buy_duan_break = duan_pohuai['buy_duan_break']
     sell_duan_break = duan_pohuai['sell_duan_break']
 
-    beichiData = divergence.calc_beichi_data(kline_data, kline_data2, ma5, ma20)
-    buyMACDBCData = beichiData['buyMACDBCData']
-    sellMACDBCData = beichiData['sellMACDBCData']
-
-    buyHigherMACDBCData = {'date': [], 'data': [], 'value': [], "stop_lose_price": [], "stop_win_price": []}
-    sellHigherMACDBCData = {'date': [], 'data': [], 'value': [], "stop_lose_price": [], "stop_win_price": []}
+    # beichiData = divergence.calc_beichi_data(kline_data, kline_data2, ma5, ma20)
+    # buyMACDBCData = beichiData['buyMACDBCData']
+    # sellMACDBCData = beichiData['sellMACDBCData']
+    #
+    # buyHigherMACDBCData = {'date': [], 'data': [], 'value': [], "stop_lose_price": [], "stop_win_price": []}
+    # sellHigherMACDBCData = {'date': [], 'data': [], 'value': [], "stop_lose_price": [], "stop_win_price": []}
 
     # 顶底分型
     fractal_region = None
@@ -332,12 +332,12 @@ def get_data(symbol, period, end_date=None):
         "high": list(kline_data["high"]),
         "low": list(kline_data["low"]),
         "close": list(kline_data["close"]),
-        "diff": list(kline_data["diff"]),
-        "dea": list(kline_data["dea"]),
-        "macd": list(kline_data["macd"]),
-        "diffBigLevel": list(kline_data2["diff"])[big_level_idx:],
-        "deaBigLevel": list(kline_data2["dea"])[big_level_idx:],
-        "macdBigLevel": list(kline_data2["macd"])[big_level_idx:],
+        # "diff": list(kline_data["diff"]),
+        # "dea": list(kline_data["dea"]),
+        # "macd": list(kline_data["macd"]),
+        # "diffBigLevel": list(kline_data2["diff"])[big_level_idx:],
+        # "deaBigLevel": list(kline_data2["dea"])[big_level_idx:],
+        # "macdBigLevel": list(kline_data2["macd"])[big_level_idx:],
         "bidata": bi_data,
         "duandata": duan_data,
         "higherDuanData": duan_data2,
@@ -358,10 +358,10 @@ def get_data(symbol, period, end_date=None):
         "sell_five_v_reverse": sell_five_v_reverse,
         "buy_duan_break": buy_duan_break,
         "sell_duan_break": sell_duan_break,
-        "buyMACDBCData": buyMACDBCData,
-        "sellMACDBCData": sellMACDBCData,
-        "buyHigherMACDBCData": buyHigherMACDBCData,
-        "sellHigherMACDBCData": sellHigherMACDBCData
+        # "buyMACDBCData": buyMACDBCData,
+        # "sellMACDBCData": sellMACDBCData,
+        # "buyHigherMACDBCData": buyHigherMACDBCData,
+        # "sellHigherMACDBCData": sellHigherMACDBCData
     }
 
     fractal_region = {} if fractal_region is None else fractal_region

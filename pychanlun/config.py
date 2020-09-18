@@ -94,7 +94,7 @@ config = {
         'TA': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'CF': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'SR': {'margin_rate': 0.05, 'contract_multiplier': 10},
-        'OI': {'margin_rate': 0.06, 'contract_multiplier ': 10},
+        'OI': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'CJ': {'margin_rate': 0.08, 'contract_multiplier': 5},

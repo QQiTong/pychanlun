@@ -28,16 +28,16 @@
                 </el-form-item>
                 <el-form-item label="最大资金使用率">
                     <el-select v-model="calcPosForm.maxAccountUseRate" class="select-input">
-                        <el-option label="10%" value="0.1"/>
+                        <el-option label="15%" value="0.15"/>
                         <el-option label="20%" value="0.2"/>
                         <el-option label="30%" value="0.3"/>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="止损系数">
                     <el-select v-model="calcPosForm.stopRate" class="select-input">
+                        <el-option label="0.5%" value="0.005"/>
                         <el-option label="1%" value="0.01"/>
-                        <el-option label="2%" value="0.02"/>
-                        <el-option label="3%" value="0.03"/>
+                        <el-option label="1.7%" value="0.017"/>
                     </el-select>
                 </el-form-item>
                 <el-form-item>

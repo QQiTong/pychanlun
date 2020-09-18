@@ -208,13 +208,13 @@ class BusinessService:
             "break_win_count": len(df_break_win),
             "break_lose_count": len(df_break_lose),
 
-            "break_win_money": df_break_win['win_end_money'].sum(),
+            "break_win_money": df_break_win['win_end_money'].sum() if 'win_end_money' in df_break_win else 0,
             "break_lose_money": df_break_win['lose_end_money'].sum() if 'lose_end_money' in df_break_win else 0,
 
             "tupo_win_count": len(df_tupo_win),
             "tupo_lose_count": len(df_tupo_lose),
 
-            "tupo_win_money": df_tupo_win['win_end_money'].sum(),
+            "tupo_win_money": df_tupo_win['win_end_money'].sum() if 'win_end_money' in df_tupo_win else 0,
             "tupo_lose_money": df_tupo_win['lose_end_money'].sum() if 'lose_end_money' in df_tupo_win else 0,
 
             # "v_reverse_win_count": len(df_v_reverse_win),
@@ -232,17 +232,17 @@ class BusinessService:
             "huila_win_lose_money_rate": abs(round(df_huila_win['win_end_money'].sum() / df_huila_lose['lose_end_money'].sum(), 2)) if df_huila_lose['lose_end_money'].sum() != 0 else 1,
 
             "break_win_lose_count_rate": round(len(df_break_win) / (len(df_break_lose) + len(df_break_win)), 2) if len(df_break_lose) != 0 else 1,
-            "break_win_lose_money_rate": abs(round(df_break_win['win_end_money'].sum() / df_break_lose['lose_end_money'].sum(), 2)) if df_break_lose['lose_end_money'].sum() != 0 else 1,
+            "break_win_lose_money_rate": abs(round(df_break_win['win_end_money'].sum() / df_break_lose['lose_end_money'].sum(), 2)) if ('lose_end_money' in df_break_lose) and df_break_lose['lose_end_money'].sum() != 0 else 1,
 
             "tupo_win_lose_count_rate": round(len(df_tupo_win) / (len(df_tupo_lose) + len(df_tupo_win)), 2) if len(df_tupo_lose) != 0 else 1,
-            "tupo_win_lose_money_rate": abs(round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(), 2)) if df_tupo_lose['lose_end_money'].sum() != 0 else 1,
+            "tupo_win_lose_money_rate": abs(round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(), 2)) if 'lose_end_money' in df_tupo_lose and df_tupo_lose['lose_end_money'].sum() != 0 else 1,
 
             # "v_reverse_win_lose_count_rate": round(len(df_v_reverse_win) / len(df_v_reverse_lose),2) if len(df_v_reverse_lose) != 0 else 1,
             # "v_reverse_win_lose_money_rate": round(df_v_reverse_win['win_end_money'].sum() / df_v_reverse_lose['lose_end_money'].sum(), 2) if df_v_reverse_lose['lose_end_money'].sum() != 0 else 1,
             #
             "five_v_reverse_win_lose_count_rate": round(len(df_five_v_reverse_win) / (len(df_five_v_reverse_lose) + len(df_five_v_reverse_win)), 2) if len(df_five_v_reverse_lose) != 0 else 1,
             "five_v_reverse_win_lose_money_rate": abs(
-                round(df_five_v_reverse_win['win_end_money'].sum() / df_five_v_reverse_lose['lose_end_money'].sum(), 2)) if 'lose_end_money' in df_five_v_reverse_lose and df_five_v_reverse_lose[
+                round(df_five_v_reverse_win['win_end_money'].sum() / df_five_v_reverse_lose['lose_end_money'].sum(), 2)) if 'lose_end_money' in df_five_v_reverse_lose and 'win_end_money' in df_five_v_reverse_win and df_five_v_reverse_lose[
                 'lose_end_money'].sum() != 0 else 1
         }
         print(signal_result)

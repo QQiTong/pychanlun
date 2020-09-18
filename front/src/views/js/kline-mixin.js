@@ -78,42 +78,43 @@ export default {
                         left: '0%',
                         right: '15%',
                         top: 50,
-                        height: '57%',
+                        height: '85%',
                     },
-                    {
-                        left: '0%',
-                        right: '15%',
-                        top: '65%',
-                        height: '10%',
-                    },
-                    {
-                        left: '0%',
-                        right: '15%',
-                        top: '82%',
-                        height: '20%',
-                    }],
+                    // {
+                    //     left: '0%',
+                    //     right: '15%',
+                    //     top: '65%',
+                    //     height: '10%',
+                    // },
+                    // {
+                    //     left: '0%',
+                    //     right: '15%',
+                    //     top: '82%',
+                    //     height: '20%',
+                    // }
+                    ],
                 klineBigGrid: [
                     {// 直角坐标系
                         left: '0%',
                         right: '10%',
                         top: 50,
-                        height: '57%',
+                        height: '85%',
 
                     },
-                    {
-                        left: '0%',
-                        right: '10%',
-                        top: '65%',
-                        height: '10%',
-
-                    },
-                    {
-                        left: '0%',
-                        right: '10%',
-                        top: '80%',
-                        height: '10%',
-
-                    },
+                    // {
+                    //     left: '0%',
+                    //     right: '10%',
+                    //     top: '65%',
+                    //     height: '10%',
+                    //
+                    // },
+                    // {
+                    //     left: '0%',
+                    //     right: '10%',
+                    //     top: '80%',
+                    //     height: '10%',
+                    //
+                    // },
 
                 ],
             },
@@ -165,9 +166,9 @@ export default {
             // 资金使用率
             accountUseRate: null,
             // 最大资金使用率
-            maxAccountUseRate: 0.1,
+            maxAccountUseRate: this.$maxAccountUseRate,
             // 止损系数
-            stopRate: 0.01,
+            stopRate: this.$stopRate,
             // 数字货币手续费 20倍杠杆 双向 0.05%*2
             digitCoinFee: 0.001,
             // okex 开仓起始杠杆
@@ -813,43 +814,66 @@ export default {
                     }
                 }
             } else {
+                // 4小时
+                let _4HourSymbolList = ['AP', 'CJ', 'UR', 'JD']
+                // 6小时
+                let _6HourSymbolList = []
+                // 8小时
+                let _8HourSymbolList = ['NI', 'ZN']
+                let _9_5HourSymbolList = ['AG', 'AU']
+
+                let simpleSymbol = this.symbol.replace(/[0-9]/g, '')
+                let baseHour = 6
+
+                let _5base = 5
+                let _20base = 20
+                if (_4HourSymbolList.indexOf(simpleSymbol) !== -1) {
+                    baseHour = 4
+                } else if (_8HourSymbolList.indexOf(simpleSymbol) !== -1) {
+                    baseHour = 8
+                } else if (_9_5HourSymbolList.indexOf(simpleSymbol) !== -1) {
+                    baseHour = 9.5
+                } else {
+                    baseHour = 6
+                }
                 switch (period) {
                     case '1m':
-                        specialMA5 = 1800
-                        specialMA20 = 7200
+                        specialMA5 = _5base * baseHour * 2 * 2 * 5 * 3
+                        specialMA20 = _20base * baseHour * 2 * 2 * 5 * 3
                         break
                     case '3m':
-                        specialMA5 = 600
-                        specialMA20 = 2400
+                        specialMA5 = _5base * baseHour * 2 * 2 * 5
+                        specialMA20 = _20base * baseHour * 2 * 2 * 5
                         break
                     case '5m':
-                        specialMA5 = 360
-                        specialMA20 = 1440
+                        specialMA5 = _5base * baseHour * 2 * 2 * 3
+                        specialMA20 = _20base * baseHour * 2 * 2 * 3
                         break
                     case '15m':
-                        specialMA5 = 120
-                        specialMA20 = 480
+                        specialMA5 = _5base * baseHour * 2 * 2
+                        specialMA20 = _20base * baseHour * 2 * 2
                         break
                     case '30m':
-                        // 20 *12 = 240
-                        // 5 * 12 = 60
-                        specialMA5 = 60
-                        specialMA20 = 240
+                        // 5 * 8 = 40
+                        // 20 *8 = 160
+                        specialMA5 = _5base * baseHour * 2
+                        specialMA20 = _20base * baseHour * 2
                         break
                     case '60m':
-                        // 20*6 = 120
-                        // 5*6 = 30
-                        specialMA5 = 30
-                        specialMA20 = 120
+                        // 5*4 = 20
+                        // 20*4 = 80
+                        specialMA5 = _5base * baseHour
+                        specialMA20 = _20base * baseHour
                         break
                     case '180m':
                         // 180
-                        specialMA5 = 10
-                        specialMA20 = 40
+                        specialMA5 = _5base / 3
+                        specialMA20 = _20base / 3
                         break
                 }
+
             }
-            console.log(period, specialMA5, specialMA20)
+            // console.log(period, specialMA5, specialMA20)
             let option
             if (update === 'update') {
                 // console.log('更新', period)
@@ -1021,18 +1045,18 @@ export default {
                             height: '57%',
                             top: 50,
                         },
-                        {
-                            top: '65%',
-                            height: '20%',
-                            left: '0%',
-                            right: '10%',
-                        },
-                        {
-                            top: '80%',
-                            height: '15%',
-                            left: '0%',
-                            right: '10%',
-                        },
+                        // {
+                        //     top: '65%',
+                        //     height: '20%',
+                        //     left: '0%',
+                        //     right: '10%',
+                        // },
+                        // {
+                        //     top: '80%',
+                        //     height: '15%',
+                        //     left: '0%',
+                        //     right: '10%',
+                        // },
                     ],
                     xAxis: [
                         {
@@ -1058,30 +1082,30 @@ export default {
                             //     }
                             // }
                         },
-                        {
-                            type: 'category',
-                            gridIndex: 1,
-                            data: resultData.date,
-                            axisTick: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {lineStyle: {color: '#8392A5'}}
-                        },
-                        {
-                            type: 'category',
-                            gridIndex: 2,
-                            data: resultData.dateBigLevel,
-                            axisTick: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: false
-                            },
-                            // axisLine: {lineStyle: {color: '#8392A5'}}
-                        },
+                        // {
+                        //     type: 'category',
+                        //     gridIndex: 1,
+                        //     data: resultData.date,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {lineStyle: {color: '#8392A5'}}
+                        // },
+                        // {
+                        //     type: 'category',
+                        //     gridIndex: 2,
+                        //     data: resultData.dateBigLevel,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: false
+                        //     },
+                        //     // axisLine: {lineStyle: {color: '#8392A5'}}
+                        // },
                     ],
                     yAxis: [
                         {
@@ -1099,36 +1123,38 @@ export default {
                             axisLine: {lineStyle: {color: this.echartsConfig.bgColor}},
                         },
                         // 本级别macd
-                        {
-                            gridIndex: 1,
-                            splitNumber: 2,
-                            axisTick: {
-                                show: false
-                            },
-                            splitLine: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
-                        },
+                        // {
+                        //     gridIndex: 1,
+                        //     splitNumber: 2,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     splitLine: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
+                        // },
                         // 大级别macd
-                        {
-                            gridIndex: 2,
-                            splitNumber: 2,
-                            axisTick: {
-                                show: false
-                            },
-                            splitLine: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: true
-                            },
-                            axisLine: {lineStyle: {color: '#8392A5'},
-                            onZero: false},
-                        },
+                        // {
+                        //     gridIndex: 2,
+                        //     splitNumber: 2,
+                        //     axisTick: {
+                        //         show: false
+                        //     },
+                        //     splitLine: {
+                        //         show: false
+                        //     },
+                        //     axisLabel: {
+                        //         show: true
+                        //     },
+                        //     axisLine: {
+                        //         lineStyle: {color: '#8392A5'},
+                        //         onZero: false
+                        //     },
+                        // },
                         // 成交量
                         // {
                         //     gridIndex: 3,
@@ -1157,41 +1183,41 @@ export default {
                             end: 100,
                             minSpan: 10,
                         },
-                        {
-                            type: 'inside',
-                            xAxisIndex: [0, 1],
-                            start: 55,
-                            end: 100,
-                            minSpan: 10,
-                        },
-                        {
-                            xAxisIndex: [0, 1, 2],
-                            type: 'inside',
-                            start: 55,
-                            end: 100,
-                            // top: '95%',
-                            minSpan: 10,
-                            // textStyle: {
-                            //     color: '#8392A5'
-                            // },
-                            // dataBackground: {
-                            //     areaStyle: {
-                            //         color: '#8392A5'
-                            //     },
-                            //     lineStyle: {
-                            //         opacity: 0.8,
-                            //         color: '#8392A5'
-                            //     }
-                            // },
-                            // handleStyle: {
-                            //     color: '#fff',
-                            //     shadowBlur: 3,
-                            //     shadowColor: 'rgba(0, 0, 0, 0.6)',
-                            //     shadowOffsetX: 2,
-                            //     shadowOffsetY: 2
-                            // }
-
-                        }
+                        // {
+                        //     type: 'inside',
+                        //     xAxisIndex: [0, 1],
+                        //     start: 55,
+                        //     end: 100,
+                        //     minSpan: 10,
+                        // },
+                        // {
+                        //     xAxisIndex: [0, 1, 2],
+                        //     type: 'inside',
+                        //     start: 55,
+                        //     end: 100,
+                        //     // top: '95%',
+                        //     minSpan: 10,
+                        //     // textStyle: {
+                        //     //     color: '#8392A5'
+                        //     // },
+                        //     // dataBackground: {
+                        //     //     areaStyle: {
+                        //     //         color: '#8392A5'
+                        //     //     },
+                        //     //     lineStyle: {
+                        //     //         opacity: 0.8,
+                        //     //         color: '#8392A5'
+                        //     //     }
+                        //     // },
+                        //     // handleStyle: {
+                        //     //     color: '#fff',
+                        //     //     shadowBlur: 3,
+                        //     //     shadowColor: 'rgba(0, 0, 0, 0.6)',
+                        //     //     shadowOffsetX: 2,
+                        //     //     shadowOffsetY: 2
+                        //     // }
+                        //
+                        // }
                     ],
                     series: [
                         // index 0
@@ -1278,158 +1304,158 @@ export default {
                             animation: false
                         },
                         // index 4
-                        {
-                            name: 'MACD',
-                            type: 'bar',
-                            xAxisIndex: 1,
-                            yAxisIndex: 1,
-                            data: resultData.macd,
-                            barWidth: 2,
-                            itemStyle: {
-                                normal: {
-                                    color: function (params) {
-                                        let colorList
-                                        if (params.data >= 0) {
-                                            if (params.data >= that.echartsConfig.macdUpLastValue) {
-                                                colorList = that.echartsConfig.macdUpDarkColor
-                                            } else {
-                                                colorList = that.echartsConfig.macdUpLightColor
-                                            }
-                                            that.echartsConfig.macdUpLastValue = params.data
-                                        } else {
-                                            if (params.data <= that.echartsConfig.macdDownLastValue) {
-                                                colorList = that.echartsConfig.macdDownDarkColor
-                                            } else {
-                                                colorList = that.echartsConfig.macdDownLightColor
-                                            }
-                                            that.echartsConfig.macdDownLastValue = params.data
-                                        }
-                                        return colorList
-                                    },
-                                }
-                            }
-                        },
+                        // {
+                        //     name: 'MACD',
+                        //     type: 'bar',
+                        //     xAxisIndex: 1,
+                        //     yAxisIndex: 1,
+                        //     data: resultData.macd,
+                        //     barWidth: 2,
+                        //     itemStyle: {
+                        //         normal: {
+                        //             color: function (params) {
+                        //                 let colorList
+                        //                 if (params.data >= 0) {
+                        //                     if (params.data >= that.echartsConfig.macdUpLastValue) {
+                        //                         colorList = that.echartsConfig.macdUpDarkColor
+                        //                     } else {
+                        //                         colorList = that.echartsConfig.macdUpLightColor
+                        //                     }
+                        //                     that.echartsConfig.macdUpLastValue = params.data
+                        //                 } else {
+                        //                     if (params.data <= that.echartsConfig.macdDownLastValue) {
+                        //                         colorList = that.echartsConfig.macdDownDarkColor
+                        //                     } else {
+                        //                         colorList = that.echartsConfig.macdDownLightColor
+                        //                     }
+                        //                     that.echartsConfig.macdDownLastValue = params.data
+                        //                 }
+                        //                 return colorList
+                        //             },
+                        //         }
+                        //     }
+                        // },
                         // index 5
 
-                        {
-                            name: 'DIFF',
-                            type: 'line',
-                            xAxisIndex: 1,
-                            yAxisIndex: 1,
-                            data: resultData.diff,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 1,
-                                    color: 'white'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false,
-                            markPoint: {
-                                data: resultData.bcMACDValues
-                            },
-                        },
+                        // {
+                        //     name: 'DIFF',
+                        //     type: 'line',
+                        //     xAxisIndex: 1,
+                        //     yAxisIndex: 1,
+                        //     data: resultData.diff,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'white'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false,
+                        //     markPoint: {
+                        //         data: resultData.bcMACDValues
+                        //     },
+                        // },
                         // index 6
 
-                        {
-                            name: 'DEA',
-                            type: 'line',
-                            xAxisIndex: 1,
-                            yAxisIndex: 1,
-                            data: resultData.dea,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 1,
-                                    color: 'yellow'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false,
-                            // markPoint: {
-                            //     data: resultData.macdAreaValues
-                            // },
-                        },
+                        // {
+                        //     name: 'DEA',
+                        //     type: 'line',
+                        //     xAxisIndex: 1,
+                        //     yAxisIndex: 1,
+                        //     data: resultData.dea,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'yellow'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false,
+                        //     // markPoint: {
+                        //     //     data: resultData.macdAreaValues
+                        //     // },
+                        // },
                         // index 7
                         // 大级别MACD
-                        {
-                            name: 'BigMACD',
-                            type: 'bar',
-                            xAxisIndex: 2,
-                            yAxisIndex: 2,
-                            data: resultData.macdBigLevel,
-                            barWidth: 3,
-                            itemStyle: {
-                                normal: {
-                                    color: function (params) {
-                                        var colorList;
-
-                                        if (params.data >= 0) {
-                                            if (params.data >= that.echartsConfig.bigMacdUpLastValue) {
-                                                colorList = that.echartsConfig.macdUpDarkColor
-                                            } else {
-                                                colorList = that.echartsConfig.macdUpLightColor
-                                            }
-                                            that.echartsConfig.bigMacdUpLastValue = params.data
-                                        } else {
-                                            if (params.data <= that.echartsConfig.bigMacdDownLastValue) {
-                                                colorList = that.echartsConfig.macdDownDarkColor
-                                            } else {
-                                                colorList = that.echartsConfig.macdDownLightColor
-                                            }
-                                            that.echartsConfig.bigMacdDownLastValue = params.data
-                                        }
-                                        return colorList;
-                                    },
-                                }
-                            }
-                        },
+                        // {
+                        //     name: 'BigMACD',
+                        //     type: 'bar',
+                        //     xAxisIndex: 2,
+                        //     yAxisIndex: 2,
+                        //     data: resultData.macdBigLevel,
+                        //     barWidth: 3,
+                        //     itemStyle: {
+                        //         normal: {
+                        //             color: function (params) {
+                        //                 var colorList;
+                        //
+                        //                 if (params.data >= 0) {
+                        //                     if (params.data >= that.echartsConfig.bigMacdUpLastValue) {
+                        //                         colorList = that.echartsConfig.macdUpDarkColor
+                        //                     } else {
+                        //                         colorList = that.echartsConfig.macdUpLightColor
+                        //                     }
+                        //                     that.echartsConfig.bigMacdUpLastValue = params.data
+                        //                 } else {
+                        //                     if (params.data <= that.echartsConfig.bigMacdDownLastValue) {
+                        //                         colorList = that.echartsConfig.macdDownDarkColor
+                        //                     } else {
+                        //                         colorList = that.echartsConfig.macdDownLightColor
+                        //                     }
+                        //                     that.echartsConfig.bigMacdDownLastValue = params.data
+                        //                 }
+                        //                 return colorList;
+                        //             },
+                        //         }
+                        //     }
+                        // },
                         // index 8
-                        {
-                            name: 'BIGDIFF',
-                            type: 'line',
-                            xAxisIndex: 2,
-                            yAxisIndex: 2,
-                            data: resultData.diffBigLevel,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 1,
-                                    color: 'white'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false,
-                            markPoint: {
-                                data: resultData.bigBcMACDValues
-                            },
-                        },
+                        // {
+                        //     name: 'BIGDIFF',
+                        //     type: 'line',
+                        //     xAxisIndex: 2,
+                        //     yAxisIndex: 2,
+                        //     data: resultData.diffBigLevel,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'white'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false,
+                        //     markPoint: {
+                        //         data: resultData.bigBcMACDValues
+                        //     },
+                        // },
                         // index 9
-                        {
-                            name: 'BIGDEA',
-                            type: 'line',
-                            xAxisIndex: 2,
-                            yAxisIndex: 2,
-                            data: resultData.deaBigLevel,
-                            smooth: true,
-                            lineStyle: {
-                                normal: {
-                                    opacity: 1,
-                                    type: 'solid',
-                                    width: 1,
-                                    color: 'yellow'
-                                },
-                            },
-                            symbol: 'none',
-                            animation: false
-                        },
+                        // {
+                        //     name: 'BIGDEA',
+                        //     type: 'line',
+                        //     xAxisIndex: 2,
+                        //     yAxisIndex: 2,
+                        //     data: resultData.deaBigLevel,
+                        //     smooth: true,
+                        //     lineStyle: {
+                        //         normal: {
+                        //             opacity: 1,
+                        //             type: 'solid',
+                        //             width: 1,
+                        //             color: 'yellow'
+                        //         },
+                        //     },
+                        //     symbol: 'none',
+                        //     animation: false
+                        // },
                         // index 10
                         {
                             name: 'MA5',
@@ -1542,17 +1568,17 @@ export default {
             option.series[2].data = resultData.duanValues
             option.series[2].markPoint.data = resultData.duanPriceValues
             option.series[3].data = resultData.higherDuanValues
-            option.series[4].data = resultData.macd
-            option.series[5].data = resultData.diff
-            option.series[5].markPoint.data = resultData.bcMACDValues
-            option.series[6].data = resultData.dea
+            // option.series[4].data = resultData.macd
+            // option.series[5].data = resultData.diff
+            // option.series[5].markPoint.data = resultData.bcMACDValues
+            // option.series[6].data = resultData.dea
 
-            option.series[7].data = resultData.macdBigLevel
-            option.series[8].data = resultData.diffBigLevel
-            option.series[8].markPoint.data = resultData.bigBcMACDValues
-            option.series[9].data = resultData.deaBigLevel
-            option.series[10].data = this.calculateMA(resultData, specialMA5);
-            option.series[11].data = this.calculateMA(resultData, specialMA20);
+            // option.series[7].data = resultData.macdBigLevel
+            // option.series[8].data = resultData.diffBigLevel
+            // option.series[8].markPoint.data = resultData.bigBcMACDValues
+            // option.series[9].data = resultData.deaBigLevel
+            option.series[4].data = this.calculateMA(resultData, specialMA5);
+            option.series[5].data = this.calculateMA(resultData, specialMA20);
             // option.series[11].data = resultData.volume;
             // console.log('更新的option', option)
             return option
@@ -2241,79 +2267,79 @@ export default {
             }
             // console.log("markline", markLineData)
 
-            let bcMACDValues = []
-            for (let i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.diff[i]],
-                    value: jsonObj.buyMACDBCData.value[i],
-                    symbolRotate: -180,
-                    symbol: 'pin',
-                    itemStyle: {
-                        normal: {color: 'red'}
-                    },
-                    label: {
-                        position: 'inside',
-                        offset: [0, 10],
-                        textBorderColor: 'red',
-                        textBorderWidth: 2,
-                        color: 'white',
-                    },
-                }
-                bcMACDValues.push(value)
-            }
-            for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.diff[i]],
-                    value: jsonObj.sellMACDBCData.value[i],
-                    symbolRotate: 0,
-                    symbol: 'pin',
-                    itemStyle: {
-                        normal: {color: 'green'}
-                    }
-                }
-                bcMACDValues.push(value)
-            }
-
-            let bigBcMACDValues = []
-            for (let i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.diff[i]],
-                    value: jsonObj.buyHigherMACDBCData.value[i],
-                    symbolRotate: -180,
-                    symbol: 'pin',
-                    itemStyle: {
-                        normal: {color: 'red'}
-                    },
-                    label: {
-                        position: 'inside',
-                        offset: [0, 10],
-                        textBorderColor: 'red',
-                        textBorderWidth: 2,
-                        color: 'white',
-                    },
-                }
-                bigBcMACDValues.push(value)
-            }
-            for (let i = 0; i < jsonObj.sellHigherMACDBCData.date.length; i++) {
-                let value = {
-                    coord: [jsonObj.sellHigherMACDBCData.date[i], jsonObj.sellHigherMACDBCData.diff[i]],
-                    value: jsonObj.sellHigherMACDBCData.value[i],
-                    symbolRotate: 0,
-                    symbol: 'pin',
-                    itemStyle: {
-                        normal: {color: 'green'}
-                    }
-                }
-                bigBcMACDValues.push(value)
-            }
-
-            const macddata = jsonObj.macd
-            const diffdata = jsonObj.diff
-            const deadata = jsonObj.dea
-            const dateBigLevel = jsonObj.dateBigLevel
-            const macdBigLevel = jsonObj.macdBigLevel
-            const diffBigLevel = jsonObj.diffBigLevel
-            const deaBigLevel = jsonObj.deaBigLevel
+            // let bcMACDValues = []
+            // for (let i = 0; i < jsonObj.buyMACDBCData.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.buyMACDBCData.date[i], jsonObj.buyMACDBCData.diff[i]],
+            //         value: jsonObj.buyMACDBCData.value[i],
+            //         symbolRotate: -180,
+            //         symbol: 'pin',
+            //         itemStyle: {
+            //             normal: {color: 'red'}
+            //         },
+            //         label: {
+            //             position: 'inside',
+            //             offset: [0, 10],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 2,
+            //             color: 'white',
+            //         },
+            //     }
+            //     bcMACDValues.push(value)
+            // }
+            // for (let i = 0; i < jsonObj.sellMACDBCData.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.sellMACDBCData.date[i], jsonObj.sellMACDBCData.diff[i]],
+            //         value: jsonObj.sellMACDBCData.value[i],
+            //         symbolRotate: 0,
+            //         symbol: 'pin',
+            //         itemStyle: {
+            //             normal: {color: 'green'}
+            //         }
+            //     }
+            //     bcMACDValues.push(value)
+            // }
+            //
+            // let bigBcMACDValues = []
+            // for (let i = 0; i < jsonObj.buyHigherMACDBCData.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.buyHigherMACDBCData.date[i], jsonObj.buyHigherMACDBCData.diff[i]],
+            //         value: jsonObj.buyHigherMACDBCData.value[i],
+            //         symbolRotate: -180,
+            //         symbol: 'pin',
+            //         itemStyle: {
+            //             normal: {color: 'red'}
+            //         },
+            //         label: {
+            //             position: 'inside',
+            //             offset: [0, 10],
+            //             textBorderColor: 'red',
+            //             textBorderWidth: 2,
+            //             color: 'white',
+            //         },
+            //     }
+            //     bigBcMACDValues.push(value)
+            // }
+            // for (let i = 0; i < jsonObj.sellHigherMACDBCData.date.length; i++) {
+            //     let value = {
+            //         coord: [jsonObj.sellHigherMACDBCData.date[i], jsonObj.sellHigherMACDBCData.diff[i]],
+            //         value: jsonObj.sellHigherMACDBCData.value[i],
+            //         symbolRotate: 0,
+            //         symbol: 'pin',
+            //         itemStyle: {
+            //             normal: {color: 'green'}
+            //         }
+            //     }
+            //     bigBcMACDValues.push(value)
+            // }
+            //
+            // const macddata = jsonObj.macd
+            // const diffdata = jsonObj.diff
+            // const deadata = jsonObj.dea
+            // const dateBigLevel = jsonObj.dateBigLevel
+            // const macdBigLevel = jsonObj.macdBigLevel
+            // const diffBigLevel = jsonObj.diffBigLevel
+            // const deaBigLevel = jsonObj.deaBigLevel
             // console.log('macd', macddata)
             // console.log('diffdata', diffdata)
             // console.log('deadata', deadata)
@@ -2332,15 +2358,15 @@ export default {
                 close: stockClose,
                 markLineData: markLineData,
                 huilaValues: huilaValues,
-                macd: macddata,
-                diff: diffdata,
-                dea: deadata,
-                dateBigLevel: dateBigLevel,
-                macdBigLevel: macdBigLevel,
-                diffBigLevel: diffBigLevel,
-                deaBigLevel: deaBigLevel,
-                bcMACDValues: bcMACDValues,
-                bigBcMACDValues: bigBcMACDValues,
+                // macd: macddata,
+                // diff: diffdata,
+                // dea: deadata,
+                // dateBigLevel: dateBigLevel,
+                // macdBigLevel: macdBigLevel,
+                // diffBigLevel: diffBigLevel,
+                // deaBigLevel: deaBigLevel,
+                // bcMACDValues: bcMACDValues,
+                // bigBcMACDValues: bigBcMACDValues,
 
             }
         },
@@ -2421,12 +2447,12 @@ export default {
                     case 10:
                         lastBeichi = jsonObj.sell_five_v_reverse
                         break
-                    case 11:
-                        lastBeichi = jsonObj.buyMACDBCData
-                        break
-                    case 12:
-                        lastBeichi = jsonObj.sellMACDBCData
-                        break
+                    // case 11:
+                    //     lastBeichi = jsonObj.buyMACDBCData
+                    //     break
+                    // case 12:
+                    //     lastBeichi = jsonObj.sellMACDBCData
+                    //     break
                 }
                 // 背驰时的价格
                 let beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
@@ -2469,10 +2495,16 @@ export default {
                 // 盈利额
                 currentProfit = ((this.maxOrderCount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
                 // 动止算法2     动止百分比 = 1/(1+盈亏比)
-                let dynamicWinCount = Math.ceil(this.maxOrderCount * (1 / (1 + currentPercent / targetPercent)))
+
+                let dynamicWinCount
+                if (currentPercent <= 0) {
+                    dynamicWinCount = 0
+                } else {
+                    dynamicWinCount = Math.ceil(this.maxOrderCount * (1 / (1 + currentPercent / targetPercent)))
+                }
                 // 跟据最新价格计算出来的信息
                 this.currentInfo = ' 率: ' + currentPercent + '% 额: ' + currentProfit + ' 万,盈亏比:' +
-                    (currentPercent / targetPercent).toFixed(1) + ' 新: ' + this.currentPrice.toFixed(2) +
+                    Math.abs((currentPercent / targetPercent).toFixed(1)) + ' 新: ' + this.currentPrice.toFixed(2) +
                     ' 动止: ' + dynamicWinCount
                 let markLineCurrent = {
                     yAxis: this.currentPrice,
@@ -2695,12 +2727,17 @@ export default {
             // 单位是万
             let currentProfit = ((openAmount * this.marginPrice * Number(currentPercent) / 100) / 10000).toFixed(2)
             // 动止算法2     动止百分比 = 1/(1+盈亏比)
-
-            let dynamicWinCount = Math.ceil(openAmount * (1 / (1 + currentPercent / targetPercent)))
+            let dynamicWinCount
+            if (currentPercent <= 0) {
+                dynamicWinCount = 0
+            } else {
+                dynamicWinCount = Math.ceil(openAmount * (1 / (1 + currentPercent / targetPercent)))
+            }
 
             this.currentInfo = ' 率: ' + currentPercent + '% 额: ' + currentProfit + ' 万,盈亏比:' +
-                (currentPercent / targetPercent).toFixed(1) + ' 新: ' + this.currentPrice.toFixed(2) +
-                ' 动止: ' + dynamicWinCount
+                Math.abs((currentPercent / targetPercent).toFixed(1)) + ' 新: ' + this.currentPrice.toFixed(2) +
+                ' 动止: ' + dynamicWinCount + ' 开仓时间：' + this.currentPosition.fire_time + ' ' + this.currentPosition.period + ' ' + this.currentPosition.signal
+
             let markLineCurrent = {
                 yAxis: this.currentPrice,
                 lineStyle: {
@@ -2932,7 +2969,7 @@ export default {
         // 计算开仓手数
         calcAccount(openPrice, stopPrice, period) {
             if (this.currentMarginRate == null) {
-                alert('请选择保证金系数，开仓价，止损价')
+                // alert('请选择保证金系数，开仓价，止损价')
                 return
             }
             if (this.symbol.indexOf('BTC') !== -1) {
@@ -2964,8 +3001,8 @@ export default {
                 this.perOrderStopMoney = Math.abs(openPrice - stopPrice) * this.contractMultiplier
                 // 1手止损的百分比
                 this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
-                this.maxAccountUseRate = 0.3
-                this.stopRate = 0.01
+                this.maxAccountUseRate = this.$maxAccountUseRate
+                this.stopRate = this.$stopRate
             }
 
             // 计算最大能使用的资金
@@ -3052,8 +3089,8 @@ export default {
             // let sell_v_reverse_higher = jsonObj.sell_v_reverse_higher
 
             // 背驰
-            let buyMACDBCData = jsonObj.buyMACDBCData
-            let sellMACDBCData = jsonObj.sellMACDBCData
+            // let buyMACDBCData = jsonObj.buyMACDBCData
+            // let sellMACDBCData = jsonObj.sellMACDBCData
 
             // 回拉
             let buy_zs_huila_stamp = 0
@@ -3164,14 +3201,14 @@ export default {
             }
 
             // 背驰
-            if (buyMACDBCData.date.length > 0) {
-                buyTimeStr = buyMACDBCData.date[buyMACDBCData.date.length - 1]
-                buy_beichi_stamp = this.timeStrToStamp(buyTimeStr)
-            }
-            if (sellMACDBCData.date.length > 0) {
-                sellTimeStr = sellMACDBCData.date[sellMACDBCData.date.length - 1]
-                sell_beichi_stamp = this.timeStrToStamp(sellTimeStr)
-            }
+            // if (buyMACDBCData.date.length > 0) {
+            //     buyTimeStr = buyMACDBCData.date[buyMACDBCData.date.length - 1]
+            //     buy_beichi_stamp = this.timeStrToStamp(buyTimeStr)
+            // }
+            // if (sellMACDBCData.date.length > 0) {
+            //     sellTimeStr = sellMACDBCData.date[sellMACDBCData.date.length - 1]
+            //     sell_beichi_stamp = this.timeStrToStamp(sellTimeStr)
+            // }
 
             // 当线段破坏和中枢突破时间相等的时候，使用中枢突破信号，因为中枢突破止损更小
             if (buy_zs_tupo_stamp === buy_duan_break_stamp) {
@@ -3192,7 +3229,7 @@ export default {
                 buy_zs_tupo_stamp, sell_zs_tupo_stamp,
                 buy_v_reverse_stamp, sell_v_reverse_stamp,
                 buy_five_v_reverse_stamp, sell_five_v_reverse_stamp,
-                buy_beichi_stamp,sell_beichi_stamp
+                // buy_beichi_stamp, sell_beichi_stamp
             ]
             let maxPos = 0
             let maxTime = timeArray[0]
@@ -3207,8 +3244,8 @@ export default {
                 buy_duan_break_stamp === 0 && sell_duan_break_stamp === 0 &&
                 buy_zs_tupo_stamp === 0 && sell_zs_tupo_stamp === 0 &&
                 buy_v_reverse_stamp === 0 && sell_v_reverse_stamp === 0 &&
-                buy_five_v_reverse_stamp === 0 && sell_five_v_reverse_stamp === 0 &&
-                buy_beichi_stamp && sell_beichi_stamp
+                buy_five_v_reverse_stamp === 0 && sell_five_v_reverse_stamp === 0
+                // && buy_beichi_stamp && sell_beichi_stamp
             ) {
                 return 0
             } else {
