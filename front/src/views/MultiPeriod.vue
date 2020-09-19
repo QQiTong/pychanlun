@@ -18,21 +18,20 @@
                 <div id="main60" class="echarts">
                 </div>
             </div>
-
-            <div class="echarts-item" id="main5Parent">
-                <div id="main5" class="echarts">
-                </div>
-            </div>
-            <div class="echarts-item" id="main30Parent">
-                <div id="main30" class="echarts">
-                </div>
-            </div>
             <div class="echarts-item" id="main240Parent" v-if="!isShow1Min">
                 <div id="main240" class="echarts">
                 </div>
             </div>
             <div class="echarts-item" id="main1Parent" v-else>
                 <div id="main1" class="echarts">
+                </div>
+            </div>
+            <div class="echarts-item" id="main5Parent">
+                <div id="main5" class="echarts">
+                </div>
+            </div>
+            <div class="echarts-item" id="main30Parent">
+                <div id="main30" class="echarts">
                 </div>
             </div>
             <!--   <div class="echarts-item">
