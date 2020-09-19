@@ -121,11 +121,17 @@ export default {
             // end仓位管理计算
             symbolSearch: '',
             // 内盘涨跌幅百分比
-            percentage: 0,
+            // percentage: 0,
             // 外盘盘涨跌幅百分比
             globalFuturePercentage: 0,
-            // 内外盘信号 多空
-            signalPercentage: 0,
+            // 强制刷新子组件
+            forceRefreshPercentage: 0,
+            // 版块涨跌幅多空
+            changePercentage: [0, 0, 0, 0, 0],
+            // 版块信号多空
+            signalPercentage: [0, 0, 0, 0, 0],
+            // 版块走势多空
+            directionPercentage: [0, 0, 0, 0, 0],
             globalSignalPercentage: 0,
             // 级别多空方向
             levelDirectionList: [],
@@ -145,7 +151,20 @@ export default {
             // history 历史状态 获取的不一定是主力合约 ，提交表格触发更新
             prejudgeTableStatus: 'current',
             prejudgeTableId: '',
-            globalFutureSymbol: this.$globalFutureSymbol
+            globalFutureSymbol: this.$globalFutureSymbol,
+            // 5大板块列表
+            groupList: [
+                // 有色板块
+                ['NI', 'ZN', 'AL', 'SN', 'PB'],
+                // 黑色板块
+                ['RB', 'HC', 'I', 'J', 'JM'],
+                // 原油板块
+                ['FU', 'BU', 'PG'],
+                // 化工板块
+                ['MA', 'TA', 'PP', 'EG', 'EB'],
+                // 油脂板块
+                ['Y', 'P', 'OI', 'M', 'RM']
+            ]
         }
     },
     computed: {
@@ -178,13 +197,13 @@ export default {
         // this.getLevelDirectionList()
         this.getPrejudgeList()
         // this.getBTCTicker()
-        this.getGlobalFutureChangeList()
+        // this.getGlobalFutureChangeList()
         setInterval(() => {
             this.getSignalList()
             this.getChangeiList()
             // this.getLevelDirectionList()
             // this.getBTCTicker()
-            this.getGlobalFutureChangeList()
+            // this.getGlobalFutureChangeList()
         }, 20000)
     },
     methods: {
@@ -229,18 +248,28 @@ export default {
 
         },
         processChangeList() {
-            // 计算多空分布
-            let long = 0
-            let short = 0
+            let that = this
+            // 计算版块涨跌幅
+            let changeLong = [0, 0, 0, 0, 0]
+            let changeShort = [0, 0, 0, 0, 0]
+
             for (let item in this.changeList) {
-                if (this.changeList[item]['change'] > 0) {
-                    long = long + 1
-                } else {
-                    short = short + 1
+                let simpleSymbol = item.replace(/[0-9]/g, '')
+                for (let i = 0; i < 5; i++) {
+                    if (this.groupList[i].indexOf(simpleSymbol) !== -1) {
+                        if (this.changeList[item]['change'] > 0) {
+                            changeLong[i] = changeLong[i] + 1
+                        } else {
+                            changeShort[i] = changeShort[i] + 1
+                        }
+                        // console.log('获取涨跌幅列表', simpleSymbol, changeLong[i], changeShort[i])
+                    }
+                    that.changePercentage[i] = parseInt(changeLong[i] / (changeLong[i] + changeShort[i]) * 100)
                 }
             }
-            this.percentage = parseInt(long / (long + short) * 100)
-            console.log('获取涨跌幅列表 计算百分比', this.changeList, this.percentage)
+            this.$nextTick(() => {
+                this.forceRefreshPercentage++
+            })
         },
         processGlobalFutureChangeList() {
             // 计算多空分布
@@ -288,7 +317,7 @@ export default {
             if (!requesting) {
                 this.$cache.set(`SIGNAL_LIST`, true, 60)
                 futureApi.getSignalList().then(res => {
-                    // console.log('获取背驰列表:', res)
+                    console.log('获取背驰列表:', res)
                     this.beichiList = res
                     this.processBeichiList()
                     if (this.firstRequestDominant) {
@@ -320,44 +349,48 @@ export default {
         },
 
         processBeichiList() {
-            let long = 0
-            let short = 0
-            let globalLong = 0
-            let globalShort = 0
+            let signalLong = [0, 0, 0, 0, 0]
+            let signalShort = [0, 0, 0, 0, 0]
+            let directionLong = [0, 0, 0, 0, 0]
+            let directionShort = [0, 0, 0, 0, 0]
+
+
             for (let symbol in this.beichiList) {
-                let count = 0
+                let direction_count = 0
+                let signal_count = 0
+
                 let item = this.beichiList[symbol]
-                // console.log("背驰item:", item, symbol)
-                for (let j in item) {
-                    let innerItem = item[j]
-                    if (innerItem !== '' && innerItem.indexOf('B') !== -1) {
-                        count++
+
+                let simpleSymbol = symbol.replace(/[0-9]/g, '')
+                for (let period in item) {
+                    let innerItem = item[period]
+                    let direction = innerItem['direction']
+                    let signal = innerItem['signal']
+                    if (signal.indexOf('B') !== -1) {
+                        signal_count++
                     }
-                    if (innerItem !== '' && innerItem.indexOf('多') !== -1) {
-                        count++
+                    if (direction.indexOf('多') !== -1) {
+                        direction_count++
                     }
                 }
-                // 外盘没有3分钟，多空比例需要提高一点
-                // if (this.globalFutureSymbol.indexOf(symbol) !== -1) {
-                //     item['percentage'] = count * 12.5
-                // } else {
-                item['percentage'] = count * 10
-                // }
-                // 外盘
-                if (this.globalFutureSymbol.indexOf(symbol) !== -1) {
-                    if (item['percentage'] >= 50) {
-                        globalLong++
-                    } else {
-                        globalShort++
+                item['signal_percentage'] = signal_count * 10
+                item['direction_percentage'] = direction_count * 10
+                item['combine_percentage'] = (item['signal_percentage'] + item['direction_percentage'])
+                for (let i = 0; i < 5; i++) {
+                    if (this.groupList[i].indexOf(simpleSymbol) !== -1) {
+                        if (item['signal_percentage'] >= 30) {
+                            signalLong[i]++
+                        } else {
+                            signalShort[i]++
+                        }
+                        if (item['direction_percentage'] >= 30) {
+                            directionLong[i]++
+                        } else {
+                            directionShort[i]++
+                        }
+                        this.signalPercentage[i] = parseInt(signalLong[i] / (signalLong[i] + signalShort[i]) * 100)
+                        this.directionPercentage[i] = parseInt(directionLong[i] / (directionLong[i] + directionShort[i]) * 100)
                     }
-                    this.globalSignalPercentage = parseInt(globalLong / (globalLong + globalShort) * 100)
-                } else {
-                    if (item['percentage'] >= 50) {
-                        long++
-                    } else {
-                        short++
-                    }
-                    this.signalPercentage = parseInt(long / (long + short) * 100)
                 }
             }
         },

@@ -92,7 +92,7 @@ export default {
                     //     top: '82%',
                     //     height: '20%',
                     // }
-                    ],
+                ],
                 klineBigGrid: [
                     {// 直角坐标系
                         left: '0%',
@@ -704,7 +704,7 @@ export default {
             const resultData = this.splitData(stockJsonData, period)
             let dataTitle = that.symbol + '  ' + period
             let subText = '杠杆: ' + this.marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
-                this.currentInfo
+                " 不破前高：" + resultData.notHigher + " 不破前低：" + resultData.notLower + this.currentInfo
             let currentChart
             // if (period === '1m') {
             //     currentChart = myChart1
@@ -2358,6 +2358,8 @@ export default {
                 close: stockClose,
                 markLineData: markLineData,
                 huilaValues: huilaValues,
+                notLower: jsonObj.notLower,
+                notHigher: jsonObj.notHigher
                 // macd: macddata,
                 // diff: diffdata,
                 // dea: deadata,
@@ -3245,7 +3247,7 @@ export default {
                 buy_zs_tupo_stamp === 0 && sell_zs_tupo_stamp === 0 &&
                 buy_v_reverse_stamp === 0 && sell_v_reverse_stamp === 0 &&
                 buy_five_v_reverse_stamp === 0 && sell_five_v_reverse_stamp === 0
-                // && buy_beichi_stamp && sell_beichi_stamp
+            // && buy_beichi_stamp && sell_beichi_stamp
             ) {
                 return 0
             } else {

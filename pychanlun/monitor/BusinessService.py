@@ -22,7 +22,7 @@ from pychanlun.db import DBPyChanlun
 tz = pytz.timezone('Asia/Shanghai')
 
 # periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
-periodList = ['3m', '5m', '15m', '30m', '60m']
+periodList = ['1m','3m', '5m', '15m', '30m']
 # 主力合约列表
 dominantSymbolList = []
 # 主力合约详细信息
@@ -335,18 +335,10 @@ class BusinessService:
         # conbinSymbolInfo.extend(config['digit_coin_symbol_info'])
         return conbinSymbolInfo
 
-    def getFutureSignalList(self, strategyType):
-        if strategyType == "0":
-            return self.getNormalSignalList()
-        elif strategyType == "3":
-            return self.getStrategy3BeichiList()
-        else:
-            return self.getStrategy4BeichiList()
-
-    def getNormalSignalList(self):
+    def getFutureSignalList(self):
         symbolList = copy.deepcopy(dominantSymbolList)
         #  把外盘加进去
-        symbolList.extend(global_future_symbol)
+        # symbolList.extend(global_future_symbol)
         # symbolList.extend(global_stock_symbol)
         # symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
@@ -355,7 +347,10 @@ class BusinessService:
             symbolListMap[symbol] = {}
             for j in range(len(periodList)):
                 period = periodList[j]
-                symbolListMap[symbol][period] = ""
+                symbolListMap[symbol][period] = {}
+                symbolListMap[symbol][period]["direction"] = ""
+                symbolListMap[symbol][period]["signal"] = ""
+
         future_signal_list = DBPyChanlun['future_signal'].find().sort(
             "fire_time", pymongo.ASCENDING)
         for signalItem in future_signal_list:
@@ -370,57 +365,15 @@ class BusinessService:
                 level_direction = signalItem['level_direction']
             else:
                 level_direction = ""
-            msg = "%s %s %s %s %s" % (level_direction, str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
-                                      str(signalItem.get('tag', '')))
+            # msg = "%s %s %s %s %s" % (level_direction, str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
+            #                           str(signalItem.get('tag', '')))
+            msg = "%s %s" % (str(signalItem['signal']), str(signalItem['direction']))
             if signalItem['symbol'] in symbolListMap:
-                symbolListMap[signalItem['symbol']][signalItem['period']] = msg
+                if signalItem['period'] == '60m':
+                    continue
+                symbolListMap[signalItem['symbol']][signalItem['period']]["direction"] = level_direction
+                symbolListMap[signalItem['symbol']][signalItem['period']]["signal"] = msg
         # print("期货信号列表", symbolListMap)
-        return symbolListMap
-
-    def getStrategy3BeichiList(self):
-        symbolList = copy.deepcopy(dominantSymbolList)
-
-        #  把外盘加进去
-        symbolList.extend(global_future_symbol)
-        # symbolList.extend(global_stock_symbol)
-        symbolList.extend(digit_coin_symbol)
-        symbolListMap = {}
-        for i in range(len(symbolList)):
-            symbol = symbolList[i]
-            symbolListMap[symbol] = {}
-
-            for j in range(len(periodList)):
-                period = periodList[j]
-                symbolListMap[symbol][period] = ""
-        beichi_log_list = DBPyChanlun['strategy3_log'].find()
-        for beichiItem in beichi_log_list:
-            msg = beichiItem['tag'], str(
-                round(beichiItem['price'], 2)), str(beichiItem['date_created'])
-            if beichiItem['symbol'] in symbolListMap:
-                symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
-        # print("背驰列表", symbolListMap)
-        return symbolListMap
-
-    def getStrategy4BeichiList(self):
-        symbolList = copy.deepcopy(dominantSymbolList)
-        #  把外盘加进去
-        symbolList.extend(global_future_symbol)
-        # symbolList.extend(global_stock_symbol)
-        symbolList.extend(digit_coin_symbol)
-        symbolListMap = {}
-        for i in range(len(symbolList)):
-            symbol = symbolList[i]
-            symbolListMap[symbol] = {}
-            for j in range(len(periodList)):
-                period = periodList[j]
-                symbolListMap[symbol][period] = ""
-        beichi_log_list = DBPyChanlun['strategy4_log'].find()
-        for beichiItem in beichi_log_list:
-            msg = beichiItem['tag'], str(
-                round(beichiItem['price'], 2)), str(beichiItem['date_created'])
-            if beichiItem['symbol'] in symbolListMap:
-                symbolListMap[beichiItem['symbol']][beichiItem['period']] = msg
-        # print("背驰列表", symbolListMap)
         return symbolListMap
 
     # 获取涨跌幅数据

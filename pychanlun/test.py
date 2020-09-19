@@ -23,11 +23,11 @@ from pychanlun.config import config
 import rqdatac as rq
 import requests
 from pychanlun.db import DBPyChanlun
-from tqsdk import TqApi
+# from tqsdk import TqApi
 from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
-from tqsdk import tafunc
+# from tqsdk import tafunc
 import re
 import pytz
 import string
@@ -981,8 +981,62 @@ def testStatistic():
         "five_v_reverse_win_lose_money_rate": round(df_five_v_reverse_win['win_end_money'].sum() / df_five_v_reverse_lose['lose_end_money'].sum(), 2) if df_five_v_reverse_lose['lose_end_money'].sum() != 0 else 1
     }
     print(signal_result)
+
+def testGetFutureSignalList():
+    symbolList = config['symbolList']
+    # 主力合约列表
+    dominantSymbolList = []
+    # 主力合约详细信息
+    dominantSymbolInfoList = {}
+    for i in range(len(symbolList)):
+        df = rq.futures.get_dominant(symbolList[i], start_date=None, end_date=None, rule=0)
+        dominantSymbol = df[-1]
+        dominantSymbolList.append(dominantSymbol)
+        dominantSymbolInfo = rq.instruments(dominantSymbol)
+        dominantSymbolInfoList[dominantSymbol] = dominantSymbolInfo.__dict__
+
+    print("当前主力合约:", dominantSymbolInfoList)
+    print("当前主力合约2:", dominantSymbolList)
+    symbolListMap = {}
+    periodList = ['1m','3m', '5m', '15m', '30m']
+    for i in range(len(dominantSymbolList)):
+        symbol = dominantSymbolList[i]
+        symbolListMap[symbol] = {}
+        for j in range(len(periodList)):
+            period = periodList[j]
+            symbolListMap[symbol][period] = {}
+            symbolListMap[symbol][period]["direction"] = ""
+            symbolListMap[symbol][period]["signal"] = ""
+
+    future_signal_list = DBPyChanlun['future_signal'].find().sort(
+        "fire_time", pymongo.DESCENDING)
+    print(future_signal_list.count())
+
+    for signalItem in future_signal_list:
+        # print("信号item:", signalItem)
+        # utc 转本地时间
+        date_created = signalItem['date_created'] + timedelta(hours=8)
+        date_created_str = date_created.strftime("%m-%d %H:%M")
+        fire_time = signalItem['fire_time'] + timedelta(hours=8)
+        fire_time_str = fire_time.strftime("%m-%d %H:%M")
+        # str(round(signalItem['price'], 2))
+        if 'level_direction' in signalItem:
+            level_direction = signalItem['level_direction']
+        else:
+            level_direction = ""
+        # msg = "%s %s %s %s" % (str(signalItem['signal']), str(signalItem['direction']), fire_time_str,
+        #                           str(signalItem.get('tag', '')))
+        msg = "%s %s" % (str(signalItem['signal']), str(signalItem['direction']))
+        if signalItem['symbol'] in symbolListMap:
+            if signalItem['period'] == '60m':
+                continue
+            symbolListMap[signalItem['symbol']][signalItem['period']]["direction"] = level_direction
+            symbolListMap[signalItem['symbol']][signalItem['period']]["signal"] = msg
+    print("期货信号列表", symbolListMap)
+    return symbolListMap
 def app():
-    testStatistic()
+    testGetFutureSignalList()
+    # testStatistic()
     # testDingDing()
     # testBitmex()
     # testBeichiDb()

@@ -52,7 +52,7 @@ dominantSymbolInfoList = {}
 # 期货公司在原有保证金基础上1%
 marginLevelCompany = 0.01
 # 期货账户
-futuresAccount = 60
+futuresAccount = 58
 # 数字货币手续费0.05% 开平仓0.1%
 digitCoinFee = 0.001
 # 数字货币账户
@@ -139,7 +139,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
         max_stop_rate = 0.1
         if signal == 'fractal':
             max_stop_rate = 0.3
-            print(signal,symbol,period,futureCalcObj,perOrderStopRate)
+            print(signal, symbol, period, futureCalcObj, perOrderStopRate)
 
         if abs((date_created - fire_time).total_seconds()) < 60 * 4.5 and perOrderStopRate <= max_stop_rate:
             # 新增
@@ -291,7 +291,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
         else:
             # 动止信号 不作为新的记录插入持仓表
             # 线段破坏 不作为新的记录插入持仓表 and signal != 'break'
-            if signal != 'fractal' :
+            if signal != 'fractal':
                 DBPyChanlun['future_auto_position'].insert_one({
                     'symbol': symbol,
                     'period': period,
@@ -319,18 +319,18 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                 })
                 remind = True
         # 将之前反方向的持仓止盈 当前为动止信号，不全部止盈
-        if signal != 'fractal' and different_last_fire is not None and last_fire is not None:
-            if last_fire['direction'] == 'long':
-                if different_last_fire['price'] >= last_fire['price']:
-                    status = 'winEnd'
-                else:
-                    status = 'loseEnd'
-            else:
-                if different_last_fire['price'] <= last_fire['price']:
-                    status = 'winEnd'
-                else:
-                    status = 'loseEnd'
-
+        if signal != 'fractal' and different_last_fire is not None and last_fire is None:
+            # if last_fire['direction'] == 'long':
+            #     if different_last_fire['price'] >= last_fire['price']:
+            #         status = 'winEnd'
+            #     else:
+            #         status = 'loseEnd'
+            # else:
+            #     if different_last_fire['price'] <= last_fire['price']:
+            #         status = 'winEnd'
+            #     else:
+            #         status = 'loseEnd'
+            status = 'winEnd'
             DBPyChanlun['future_auto_position'].find_one_and_update({
                 'symbol': symbol, 'direction': different_direction, 'status': status
             }, {
@@ -463,11 +463,16 @@ async def saveFutureDirection(symbol, period, direction):
 
 def getDominantSymbol():
     symbolList = config['symbolList']
+    # 将43个品种分成2组
+    firstGroup = symbolList[:28]
+    secondGroup = symbolList[-15:]
+    currentGroup = firstGroup
+
     # 主力合约列表
     dominantSymbolList = []
-    for i in range(len(symbolList)):
+    for i in range(len(currentGroup)):
         df = rq.futures.get_dominant(
-            symbolList[i], start_date=None, end_date=None, rule=0)
+            currentGroup[i], start_date=None, end_date=None, rule=0)
         dominantSymbol = df[-1]
         dominantSymbolList.append(dominantSymbol)
         dominantSymbolInfo = rq.instruments(dominantSymbol)
@@ -514,10 +519,10 @@ async def do_monitoring(symbol, period):
             close_price = result['close'][-1]
             # await monitorBeichi(result, symbol, period, close_price)
             await monitorHuila(result, symbol, period, close_price)
-            await monitorTupo(result, symbol, period, close_price)
+            # await monitorTupo(result, symbol, period, close_price)
             await monitorVReverse(result, symbol, period, close_price)
             await monitorFiveVReverse(result, symbol, period, close_price)
-            await monitorDuanBreak(result, symbol, period, close_price)
+            # await monitorDuanBreak(result, symbol, period, close_price)
             await monitorFractal(result, symbol, period, close_price)
     except BaseException as e:
         logger.error("Error Occurred: {0}".format(traceback.format_exc()))
@@ -583,15 +588,15 @@ async def monitorHuila(result, symbol, period, closePrice):
         direction = 'B'
         # 大级别直接保存
         # if period != '1m':
-        if above_ma5 or notLower:
+        # if above_ma5 or notLower:
         # if notLower:
-            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     # 小级别除非是双盘，否则一定要不破前低
         #     if above_ma5 or notLower:
         #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-            # elif "双盘" in tag or "完备" in tag:
-            #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj,above_ma5, above_ma20)
+        # elif "双盘" in tag or "完备" in tag:
+        #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj,above_ma5, above_ma20)
 
     if len(result['sell_zs_huila']['date']) > 0:
         fire_time = result['sell_zs_huila']['date'][-1]
@@ -603,9 +608,8 @@ async def monitorHuila(result, symbol, period, closePrice):
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
         # if period != "1m":
-        if not above_ma5 or notHigher:
         # if notHigher:
-            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if not above_ma5 or notHigher:
         #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
@@ -1006,15 +1010,15 @@ async def calStopWinCount(symbol, period, positionInfo, closePrice):
 
 
 def run(**kwargs):
-    # global is_loop
-    # is_loop = kwargs.get("loop")
+    global is_loop
+    is_loop = kwargs.get("loop")
     signal.signal(signal.SIGINT, signal_hanlder)
     symbol_list, dominantSymbolInfoList = getDominantSymbol()
     thread_list = []
     chunks = pydash.chunk(symbol_list, 10)
     for chunk in chunks:
         thread_list.append(
-            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m','3m', '5m', '15m','30m'])))
+            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m', '3m', '5m', '15m', '30m'])))
     # chunks = pydash.chunk(global_future_symbol, 10)
     # for chunk in chunks:
     #     thread_list.append(

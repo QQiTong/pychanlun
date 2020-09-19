@@ -15,8 +15,9 @@ class Config:
 
 
 class DevelopmentConfig(Config):
+    # 局域网2台电脑公用数据库
     MONGODB_SETTINGS = {
-        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://localhost:27017/pychanlun')
+        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://192.168.50.35:27017/pychanlun')
     }
     pass
 
@@ -32,17 +33,19 @@ config = {
     'default': DevelopmentConfig,
     'production': ProductionConfig,
     'symbolList': [
+        # 第一组  28个
         # 黑色系
         "RB",
         "HC",
         "I",
         "J",
         "JM",
-        # 化工系
-        "RU",
         # 金属类
+        "AG",
         "NI",
         "ZN",
+        # 化工系
+        "RU",
         "FU",
         "BU",
         "MA",
@@ -60,18 +63,31 @@ config = {
         "A",
         "M",
         "RM",
-
-        "SP",
-        "CJ",
         # 食用油
         "OI",
         "P",
         "Y",
         # "AU",
-        "AG",
         # "IC",
         # "IF",
         # "IH",
+
+    #   第二组 新增品种 15
+        "AL",
+        "SN",
+        "PB",
+        "SP",
+        "CJ",
+        "FG",
+        "SA",
+        "SM",
+        "UR",
+        "ZC",
+        "SF",
+        "B",
+        "C",
+        "CS",
+        "V",
     ],
     # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整 b
     'margin_rate_company': 0.01,
@@ -83,11 +99,19 @@ config = {
         'RU': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'FU': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'BU': {'margin_rate': 0.11, 'contract_multiplier': 10},
-        'AU': {'margin_rate': 0.08, 'contract_multiplier': 1000},
+        # 'AU': {'margin_rate': 0.08, 'contract_multiplier': 1000},
         'AG': {'margin_rate': 0.12, 'contract_multiplier': 15},
         'NI': {'margin_rate': 0.1, 'contract_multiplier': 1},
         'ZN': {'margin_rate': 0.1, 'contract_multiplier': 5},
         'SP': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        # 'CU': {'margin_rate': 0.1, 'contract_multiplier': 5},
+
+        # 沪铝
+        'AL': {'margin_rate': 0.1, 'contract_multiplier': 5},
+        # 沪锡
+        'SN': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        # 沪铅
+        'PB': {'margin_rate': 0.1, 'contract_multiplier': 5},
 
         # 郑商所
         'MA': {'margin_rate': 0.07, 'contract_multiplier': 10},
@@ -98,6 +122,19 @@ config = {
         'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'CJ': {'margin_rate': 0.08, 'contract_multiplier': 5},
+        # 玻璃
+        'FG': {'margin_rate': 0.06, 'contract_multiplier': 20},
+        # 纯碱
+        'SA': {'margin_rate': 0.06, 'contract_multiplier': 20},
+        # 锰硅
+        'SM': {'margin_rate': 0.07, 'contract_multiplier': 5},
+        # 尿素
+        'UR': {'margin_rate': 0.05, 'contract_multiplier': 20},
+        # 动力煤
+        'ZC': {'margin_rate': 0.05, 'contract_multiplier': 100},
+        # 硅铁
+        'SF': {'margin_rate': 0.07, 'contract_multiplier': 5},
+
         # 大商所
         'J': {'margin_rate': 0.08, 'contract_multiplier': 100},
         'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
@@ -114,32 +151,43 @@ config = {
         'Y': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'PG': {'margin_rate': 0.11, 'contract_multiplier': 20},
+        # 豆一
         'A': {'margin_rate': 0.08, 'contract_multiplier': 10},
-        'IC': {'margin_rate': 0.12, 'contract_multiplier': 200},
-        'IF': {'margin_rate': 0.10, 'contract_multiplier': 300},
-        'IH': {'margin_rate': 0.10, 'contract_multiplier': 300},
 
-        'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
+        # 豆二
+        'B': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        # 玉米
+        'C': {'margin_rate': 0.07, 'contract_multiplier': 10},
+        # 淀粉
+        'CS': {'margin_rate': 0.07, 'contract_multiplier': 10},
+        # 聚氯乙烯
+        'V': {'margin_rate': 0.09, 'contract_multiplier': 5},
+
+        # 'IC': {'margin_rate': 0.12, 'contract_multiplier': 200},
+        # 'IF': {'margin_rate': 0.10, 'contract_multiplier': 300},
+        # 'IH': {'margin_rate': 0.10, 'contract_multiplier': 300},
+
+        # 'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         # 外盘
-        'CL': {'margin_rate': 0.31, 'contract_multiplier': 500},  # 8:30 -14:00 0.1      其它时间 0.15       11756
-        'GC': {'margin_rate': 0.054, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
-        'SI': {'margin_rate': 0.13, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
+        # 'CL': {'margin_rate': 0.31, 'contract_multiplier': 500},  # 8:30 -14:00 0.1      其它时间 0.15       11756
+        # 'GC': {'margin_rate': 0.054, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
+        # 'SI': {'margin_rate': 0.13, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
 
-        'CN': {'margin_rate': 0.09, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06          1045
+        # 'CN': {'margin_rate': 0.09, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06          1045
 
-        'ZS': {'margin_rate': 0.056, 'contract_multiplier': 50},  # 2314
-        'ZM': {'margin_rate': 0.07, 'contract_multiplier': 100},  # 2062
-        'ZL': {'margin_rate': 0.06, 'contract_multiplier': 600},  # 935
+        # 'ZS': {'margin_rate': 0.056, 'contract_multiplier': 50},  # 2314
+        # 'ZM': {'margin_rate': 0.07, 'contract_multiplier': 100},  # 2062
+        # 'ZL': {'margin_rate': 0.06, 'contract_multiplier': 600},  # 935
 
-        'NID': {'margin_rate': 0.1, 'contract_multiplier': 1},
-        'ZSD': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        # 'NID': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        # 'ZSD': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'CP': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'SB': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # wshq
-        'YM': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
-        'ES': {'margin_rate': 0.086, 'contract_multiplier': 5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
-        'NQ': {'margin_rate': 0.086, 'contract_multiplier': 2},  # 18:30 -14:00 0.04   其它时间 0.06          13200
+        # 'YM': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
+        # 'ES': {'margin_rate': 0.086, 'contract_multiplier': 5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
+        # 'NQ': {'margin_rate': 0.086, 'contract_multiplier': 2},  # 18:30 -14:00 0.04   其它时间 0.06          13200
 
         # 'AAPL': {'margin_rate': 1, 'contract_multiplier': 1},
         # 'MSFT': {'margin_rate': 1, 'contract_multiplier': 1},

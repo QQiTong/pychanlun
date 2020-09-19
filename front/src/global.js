@@ -1,6 +1,6 @@
 import Vue from 'vue'
 // 期货账户
-let futureAccount = 75
+let futureAccount = 58
 // 股票账户
 let stockAccount = 3
 // 数字货币账户

@@ -137,13 +137,13 @@ export const futureApi = {
         })
     },
     // 获取级别多空方向
-    getLevelDirectionList () {
-        let url = `/api/get_future_level_direction_list`
-        return axios({
-            url: url,
-            method: 'get'
-        })
-    },
+    // getLevelDirectionList () {
+    //     let url = `/api/get_future_level_direction_list`
+    //     return axios({
+    //         url: url,
+    //         method: 'get'
+    //     })
+    // },
     // 创建预判
     createPrejudgeList (data) {
         let url = `/api/create_future_prejudge_list`

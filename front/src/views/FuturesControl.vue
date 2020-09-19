@@ -78,58 +78,95 @@
             :globalFutureSymbol="globalFutureSymbol"
         ></FuturePositionList>
         <el-divider content-position="center"> 多空分布</el-divider>
-        <el-row>
-            <el-col :span="2">
-                内盘涨跌幅：
-            </el-col>
-            <el-col :span="22">
-                <el-progress
-                    :percentage="percentage"
-                    :color="customColorMethod"
-                    :text-inside="true"
-                    :stroke-width="24"
-                ></el-progress>
+        <el-row type="flex" justify="space-around">
+            <el-col :span="4" v-for="(item,i) in 5" :key="i">
+                <el-divider content-position="center">
+                    <span v-if="i === 0">
+                        有色板块
+                    </span>
+                    <span v-else-if="i === 1">
+                        黑色板块
+                    </span>
+                    <span v-else-if="i === 2">
+                       原油板块
+                    </span>
+                    <span v-else-if="i === 3">
+                         化工板块
+                    </span>
+                    <span v-else-if="i === 4">
+                        油脂板块
+                    </span>
+
+                </el-divider>
+                <el-row class="mt-5">
+                    <el-col :span="6">
+                        走势多空(确立)：
+                    </el-col>
+                    <el-col :span="18">
+                        <el-progress
+                            :percentage="directionPercentage[i]"
+                            :color="customColorMethod"
+                            :text-inside="true"
+                            :stroke-width="24"
+                        ></el-progress>
+                    </el-col>
+                </el-row>
+                <el-row class="mt-5">
+                    <el-col :span="6">
+                        信号多空(预期)：
+                    </el-col>
+                    <el-col :span="18">
+                        <el-progress
+                            :percentage="signalPercentage[i]"
+                            :color="customColorMethod"
+                            :text-inside="true"
+                            :stroke-width="24"
+                        ></el-progress>
+                    </el-col>
+                </el-row>
+                 <el-row class="mt-5" :key="forceRefreshPercentage">
+                    <el-col :span="6">
+                        涨跌幅：
+                    </el-col>
+                    <el-col :span="18">
+                        <el-progress
+                            :percentage="changePercentage[i]"
+                            :color="customColorMethod"
+                            :text-inside="true"
+                            :stroke-width="24"
+                        ></el-progress>
+                    </el-col>
+                </el-row>
+
             </el-col>
         </el-row>
-        <el-row class="mt-5">
-            <el-col :span="2">
-                内盘信号多空：
-            </el-col>
-            <el-col :span="22">
-                <el-progress
-                    :percentage="signalPercentage"
-                    :color="customColorMethod"
-                    :text-inside="true"
-                    :stroke-width="24"
-                ></el-progress>
-            </el-col>
-        </el-row>
-        <el-row class="mt-5">
-            <el-col :span="2">
-                外盘涨跌幅：
-            </el-col>
-            <el-col :span="22">
-                <el-progress
-                    :percentage="globalFuturePercentage"
-                    :color="customColorMethod"
-                    :text-inside="true"
-                    :stroke-width="24"
-                ></el-progress>
-            </el-col>
-        </el-row>
-        <el-row class="mt-5">
-            <el-col :span="2">
-                外盘信号多空：
-            </el-col>
-            <el-col :span="22">
-                <el-progress
-                    :percentage="globalSignalPercentage"
-                    :color="customColorMethod"
-                    :text-inside="true"
-                    :stroke-width="24"
-                ></el-progress>
-            </el-col>
-        </el-row>
+
+        <!--        <el-row class="mt-5">-->
+        <!--            <el-col :span="2">-->
+        <!--                外盘涨跌幅：-->
+        <!--            </el-col>-->
+        <!--            <el-col :span="22">-->
+        <!--                <el-progress-->
+        <!--                    :percentage="globalFuturePercentage"-->
+        <!--                    :color="customColorMethod"-->
+        <!--                    :text-inside="true"-->
+        <!--                    :stroke-width="24"-->
+        <!--                ></el-progress>-->
+        <!--            </el-col>-->
+        <!--        </el-row>-->
+        <!--        <el-row class="mt-5">-->
+        <!--            <el-col :span="2">-->
+        <!--                外盘信号多空：-->
+        <!--            </el-col>-->
+        <!--            <el-col :span="22">-->
+        <!--                <el-progress-->
+        <!--                    :percentage="globalSignalPercentage"-->
+        <!--                    :color="customColorMethod"-->
+        <!--                    :text-inside="true"-->
+        <!--                    :stroke-width="24"-->
+        <!--                ></el-progress>-->
+        <!--            </el-col>-->
+        <!--        </el-row>-->
         <el-tabs v-model="activeTab" @tab-click="handleChangeTab" class="mt-5">
             <el-tab-pane label="最新行情" name="first">
                 <el-row>
@@ -206,16 +243,16 @@
                             </el-table-column>
                             <el-table-column label="最新价" width="70">
                                 <template slot-scope="scope">
-                    <span v-if="scope.row.order_book_id.indexOf('BTC')===-1">
-                        {{(changeList && changeList[scope.row.order_book_id]?
-                        changeList[scope.row.order_book_id]['price'] : 0)}}
-                    </span>
+                                    <span v-if="scope.row.order_book_id.indexOf('BTC')===-1">
+                                        {{(changeList && changeList[scope.row.order_book_id]?
+                                        changeList[scope.row.order_book_id]['price'] : 0)}}
+                                    </span>
                                     <span v-else>
-                        {{btcTicker.price}}
-                    </span>
+                                       {{btcTicker.price}}
+                                    </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="多空走势" width="100" align="center">
+                            <el-table-column label="日20均线" width="100" align="center">
                                 <template slot-scope="scope">
                                     <!--                                    <el-tag-->
                                     <!--                                        size="medium"-->
@@ -226,26 +263,51 @@
                                     <!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['3m']:''-->
                                     <!--                                        }}-->
                                     <!--                                    </el-tag>-->
-<!--                                    <el-progress-->
-<!--                                        :percentage="beichiList[scope.row.order_book_id].hasOwnProperty('percentage')?beichiList[scope.row.order_book_id]['percentage']:0"-->
-<!--                                        :color="customColorMethod"-->
-<!--                                        :text-inside="true"-->
-<!--                                        :stroke-width="24"-->
-<!--                                        class="mt-5"-->
-<!--                                    >-->
-<!--                                    </el-progress>-->
-                                   <span :class="dayMa20List && dayMa20List[scope.row.order_book_id] ? (dayMa20List[scope.row.order_book_id]['above_ma_20']===1 ?'up-red':'down-green'):'zero-gray'"
-                                          >
-                                         {{ dayMa20List && dayMa20List[scope.row.order_book_id] ?dayMa20List[scope.row.order_book_id]['above_ma_20'] ===1?'多':'空' : '--'}}
+                                    <!--                                    <el-progress-->
+                                    <!--                                        :percentage="beichiList[scope.row.order_book_id].hasOwnProperty('percentage')?beichiList[scope.row.order_book_id]['percentage']:0"-->
+                                    <!--                                        :color="customColorMethod"-->
+                                    <!--                                        :text-inside="true"-->
+                                    <!--                                        :stroke-width="24"-->
+                                    <!--                                        class="mt-5"-->
+                                    <!--                                    >-->
+                                    <!--                                    </el-progress>-->
+                                    <span :class="dayMa20List && dayMa20List[scope.row.order_book_id] ? (dayMa20List[scope.row.order_book_id]['above_ma_20']===1 ?'up-red':'down-green'):'zero-gray'"
+                                    >
+                                         {{ dayMa20List && dayMa20List[scope.row.order_book_id] ?dayMa20List[scope.row.order_book_id]['above_ma_20'] ===1?'上':'下' : '--'}}
                                     </span>
 
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="多空力度" align="center">
+                                <template slot-scope="scope">
+                                    <el-progress
+                                        :percentage="beichiList[scope.row.order_book_id]['combine_percentage']"
+                                        :color="customColorMethod"
+                                        :text-inside="true"
+                                        :stroke-width="24"
+                                    ></el-progress>
+
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="1m" align="center">
+                                <template slot-scope="scope">
+                                    <span
+                                        :class="beichiList[scope.row.order_book_id]['1m']&& beichiList[scope.row.order_book_id]['1m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
+                                    >{{ beichiList[scope.row.order_book_id]['1m']['direction'] }}
+                                    </span>
+                                    <span>
+                                     {{ beichiList[scope.row.order_book_id]['1m']['signal'] }}
+                                    </span>
                                 </template>
                             </el-table-column>
                             <el-table-column label="3m" align="center">
                                 <template slot-scope="scope">
                                     <span
-                                        :class="beichiList[scope.row.order_book_id]['3m'].indexOf('B')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['3m'] }}
+                                        :class="beichiList[scope.row.order_book_id]['3m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
+                                    >{{ beichiList[scope.row.order_book_id]['3m']['direction'] }}
+                                    </span>
+                                    <span>
+                                     {{ beichiList[scope.row.order_book_id]['3m']['signal'] }}
                                     </span>
                                 </template>
                             </el-table-column>
@@ -267,8 +329,11 @@
                             <el-table-column label="5m" align="center">
                                 <template slot-scope="scope">
                                     <span
-                                        :class="beichiList[scope.row.order_book_id]['5m'].indexOf('B')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['5m'] }}
+                                        :class="beichiList[scope.row.order_book_id]['5m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
+                                    >{{ beichiList[scope.row.order_book_id]['5m']['direction'] }}
+                                    </span>
+                                    <span>
+                                     {{ beichiList[scope.row.order_book_id]['5m']['signal'] }}
                                     </span>
                                 </template>
                             </el-table-column>
@@ -289,8 +354,11 @@
                             <el-table-column label="15m" align="center">
                                 <template slot-scope="scope">
                                     <span
-                                        :class="beichiList[scope.row.order_book_id]['15m'].indexOf('B')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['15m'] }}
+                                        :class="beichiList[scope.row.order_book_id]['15m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
+                                    >{{ beichiList[scope.row.order_book_id]['15m']['direction'] }}
+                                    </span>
+                                    <span>
+                                     {{ beichiList[scope.row.order_book_id]['15m']['signal'] }}
                                     </span>
                                 </template>
                             </el-table-column>
@@ -311,8 +379,11 @@
                             <el-table-column label="30m" align="center">
                                 <template slot-scope="scope">
                                     <span
-                                        :class="beichiList[scope.row.order_book_id]['30m'].indexOf('B')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['30m'] }}
+                                        :class="beichiList[scope.row.order_book_id]['30m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
+                                    >{{ beichiList[scope.row.order_book_id]['30m']['direction'] }}
+                                    </span>
+                                    <span>
+                                     {{ beichiList[scope.row.order_book_id]['30m']['signal'] }}
                                     </span>
                                 </template>
                             </el-table-column>
@@ -330,14 +401,7 @@
                             <!--                                    </el-tag>-->
                             <!--                                </template>-->
                             <!--                            </el-table-column>-->
-                            <el-table-column label="60m" align="center">
-                                <template slot-scope="scope">
-                                    <span
-                                        :class="beichiList[scope.row.order_book_id]['60m'].indexOf('B')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['60m'] }}
-                                    </span>
-                                </template>
-                            </el-table-column>
+
                         </el-table>
                     </div>
                 </el-row>

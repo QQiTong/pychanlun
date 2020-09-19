@@ -76,8 +76,7 @@ def dominant():
 # 获取所有背驰列表
 @app.route('/api/get_future_signal_list')
 def get_future_signal_list():
-    strategyType = request.args.get("strategyType") or "0"
-    futureSignalList = func_timeout(30, businessService.getFutureSignalList, args=(strategyType,))
+    futureSignalList = func_timeout(30, businessService.getFutureSignalList)
     return Response(json.dumps(futureSignalList), mimetype='application/json')
 
 
