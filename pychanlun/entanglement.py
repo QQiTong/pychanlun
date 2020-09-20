@@ -544,7 +544,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
             # 离开中枢后的第一段结束
             leave_end_index = -1
             for x in range(e.end+1, count):
-                if duan_series == 1:
+                if duan_series[x] == 1:
                     leave_end_index = x
                     break
                 if next_e is not None and x >= e.start:
@@ -602,7 +602,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
             # 离开中枢后的第一段结束
             leave_end_index = -1
             for x in range(e.end+1, count):
-                if duan_series == -1:
+                if duan_series[x] == -1:
                     leave_end_index = x
                     break
                 if next_e is not None and x >= e.start:
