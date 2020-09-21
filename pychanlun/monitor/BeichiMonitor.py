@@ -319,6 +319,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                 })
                 remind = True
         # 将之前反方向的持仓止盈 当前为动止信号，不全部止盈
+        print("反向仓：", different_last_fire, " 当前仓：", last_fire)
         if signal != 'fractal' and different_last_fire is not None and last_fire is None:
             # if last_fire['direction'] == 'long':
             #     if different_last_fire['price'] >= last_fire['price']:
@@ -547,8 +548,8 @@ async def monitorBeichi(result, symbol, period, closePrice):
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
         if above_ma5 or notLower:
-        # if notLower:
-            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj,above_ma5,above_ma20)
+            # if notLower:
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
     if len(result['sellMACDBCData']['date']) > 0:
         fire_time = result['sellMACDBCData']['date'][-1]
         price = result['sellMACDBCData']['data'][-1]
@@ -560,8 +561,8 @@ async def monitorBeichi(result, symbol, period, closePrice):
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
         if not above_ma5 or notHigher:
-        # if notHigher:
-            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj,above_ma5,above_ma20)
+            # if notHigher:
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
 
 
 '''
@@ -636,9 +637,9 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['buy_zs_tupo']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        # if above_ma5 or notLower:
+        if above_ma5 or notLower:
         # if notLower:
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if above_ma5:
         #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
@@ -652,9 +653,9 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['sell_zs_tupo']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        # if not above_ma5 or notHigher:
+        if not above_ma5 or notHigher:
         # if notHigher:
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if not above_ma5:
         #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
