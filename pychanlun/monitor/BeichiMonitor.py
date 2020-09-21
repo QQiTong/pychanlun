@@ -151,22 +151,36 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             # 把数据库的utc时间 转成本地时间
             fire_time_str = (fire_time + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
             date_created_str = (date_created + timedelta(hours=8)).strftime('%m-%d %H:%M:%S')
+
+            signalCN = ''
+            if signal == 'beichi':
+                signalCN = "背驰"
+            elif signal == 'huila':
+                signalCN = "拉回"
+            elif signal == 'tupo':
+                signalCN = "突破"
+            elif signal == 'break':
+                signalCN = "破坏"
+            elif signal == 'fractal':
+                signalCN = "分型动止"
+            elif signal == 'v_reverse' or signal == 'five_v_reverse':
+                signalCN = "V反"
+
             msg = {
-                "symbol": symbol,
-                "period": period,
-                "signal": signal,
-                "direction": direction,
-                "amount": amount,
-                "stop": stop_lose_price,
-                "fire_time": fire_time_str,
-                "price": price,
-                "date_created": date_created_str,
-                "close_price": close_price,
-                "tag": tag,
-                "per_order_stop_rate": round(perOrderStopRate, 3),
-                "above_ma5": above_ma5,
-                "above_ma20": above_ma20,
-                "remind": 'Ding'
+                "品种": 'RB2010',
+                "周期": '3m',
+                "信号": signalCN,
+                "方向": '买' if direction == 'B' else '卖',
+                "数量": amount,
+                "止损价": stop_lose_price,
+                "止损率": str(round(perOrderStopRate, 3) * 100) + '%',
+                "分类": "完备买",
+                "触发价格": price,
+                "触发时间": fire_time_str,
+                "提醒价格": close_price,
+                "提醒时间": date_created_str,
+                "5日线": '上' if above_ma5 else '下',
+                "20日线": '上' if above_ma20 else '下',
             }
             # 简洁版
             # msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
@@ -520,7 +534,7 @@ async def do_monitoring(symbol, period):
             close_price = result['close'][-1]
             # await monitorBeichi(result, symbol, period, close_price)
             await monitorHuila(result, symbol, period, close_price)
-            await monitorTupo(result, symbol, period, close_price)
+            # await monitorTupo(result, symbol, period, close_price)
             await monitorVReverse(result, symbol, period, close_price)
             await monitorFiveVReverse(result, symbol, period, close_price)
             # await monitorDuanBreak(result, symbol, period, close_price)
@@ -638,7 +652,7 @@ async def monitorTupo(result, symbol, period, closePrice):
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if above_ma5 or notLower:
-        # if notLower:
+            # if notLower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if above_ma5:
@@ -654,7 +668,7 @@ async def monitorTupo(result, symbol, period, closePrice):
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         if not above_ma5 or notHigher:
-        # if notHigher:
+            # if notHigher:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     if not above_ma5:
