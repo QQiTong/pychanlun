@@ -520,7 +520,7 @@ async def do_monitoring(symbol, period):
             close_price = result['close'][-1]
             # await monitorBeichi(result, symbol, period, close_price)
             await monitorHuila(result, symbol, period, close_price)
-            # await monitorTupo(result, symbol, period, close_price)
+            await monitorTupo(result, symbol, period, close_price)
             await monitorVReverse(result, symbol, period, close_price)
             await monitorFiveVReverse(result, symbol, period, close_price)
             # await monitorDuanBreak(result, symbol, period, close_price)
