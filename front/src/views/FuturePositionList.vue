@@ -284,10 +284,12 @@
             :row-style="tableRowStyle"
             header-cell-class-name="el-header-cell"
             cell-class-name="el-cell"
+            show-summary
+            :summary-method="getSummaries"
         >
             <!--                        show-summary
             -->
-            <!--                   :summary-method="getSummaries" -->
+
             <el-table-column type="expand" label="展开">
                 <template slot-scope="props" v-if="props.row.hasOwnProperty('dynamicPositionList')">
                     <el-table
@@ -419,7 +421,7 @@
                 :key="9"
             >
                 <template slot-scope="{row}">
-                    <span :class="row.current_profit_rate| percentTagFilter">{{(row.current_profit_rate*100).toFixed(2)}}%</span>
+                    <span :class="row.current_profit_rate| percentTagFilter">{{(row.current_profit_rate*100)}}%</span>
                 </template>
             </el-table-column>
 
@@ -431,42 +433,48 @@
                 :key="10"
             >
                 <template slot-scope="{row}">
-                    <span :class="row.current_profit| percentTagFilter">{{row.current_profit}}</span>
+                    <span :class="row.current_profit| percentTagFilter">{{parseInt(row.current_profit)}}</span>
                 </template>
             </el-table-column>
             <el-table-column label="保证金" width="80" align="center" :key="11">
                 <template slot-scope="{row}">{{row.total_margin}}</template>
             </el-table-column>
-            <el-table-column label="止损价" align="center" :key="12">
+            <el-table-column label="止损价" align="center" :key="12"
+                             v-if="positionQueryForm.status!=='winEnd'"
+            >
                 <template slot-scope="{row}">
                     <span class="primary-yellow">
                         {{row.stop_lose_price}}
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column label="止损率" width="80" align="center" :key="13">
-                <template slot-scope="{row}">-{{calcStopLoseRate(row).toFixed(2)}}%</template>
+            <el-table-column label="止损率" width="80" align="center" :key="13"
+                             v-if="positionQueryForm.status!=='winEnd'"
+            >
+                <template slot-scope="{row}">-{{calcStopLoseRate(row)}}%</template>
             </el-table-column>
-            <el-table-column label="预计止损额" prop="predict_stop_money" width="110" align="center" :key="14">
+            <el-table-column label="止损额" prop="predict_stop_money" width="110" align="center" :key="14"
+                             v-if="positionQueryForm.status!=='winEnd'"
+            >
                 <template slot-scope="{row}">
                     <span class="down-green">
                         {{row.predict_stop_money}}
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column label="止损价" prop="lose_end_price" width="110" align="center"
+            <el-table-column label="实际止损价" prop="lose_end_price" width="110" align="center"
                              v-if="positionQueryForm.status==='loseEnd'"
                              :key="15">
                 <template slot-scope="{row}">
                     {{row.status ==='loseEnd'?row.lose_end_price:0}}
                 </template>
             </el-table-column>
-            <el-table-column label="亏损额" width="110" align="center"
+            <el-table-column label="实际亏损额" width="110" align="center"
                              v-if="positionQueryForm.status==='loseEnd'"
                              :key="16">
                 <template slot-scope="{row}">
-                    <span class="primary-yellow">
-                        {{row.status ==='loseEnd'?row.lose_end_money:0}}
+                    <span class="down-green">
+                        {{row.status ==='loseEnd'?parseInt(row.lose_end_money):0}}
                     </span>
                 </template>
             </el-table-column>
@@ -491,7 +499,7 @@
                              :key="19">
                 <template slot-scope="{row}">
                     <span class="up-red">
-                        {{row.status ==='winEnd'?row.win_end_money:0}}
+                        {{row.status ==='winEnd'?parseInt(row.win_end_money):0}}
                     </span>
                 </template>
             </el-table-column>
@@ -567,28 +575,28 @@
         />
         <!--当前收益统计        -->
 
-        <el-row class="mt-10 sum-text">
-            <el-col :span="12">
-                外盘期货（$）
-                当前盈利：
-                <span :class="globalSumObj.currentProfitSum| percentTagFilter" class="sum-text">{{globalSumObj.currentProfitSum}}</span>
-                预计止损：{{(globalSumObj.predictStopSum)}}
-                已止盈：{{(globalSumObj.winEndSum)}}
-                已止损：{{(globalSumObj.loseEndSum)}}
-                保证金：{{(globalSumObj.marginSum)}}
-            </el-col>
+        <!--        <el-row class="mt-10 sum-text">-->
+        <!--            <el-col :span="12">-->
+        <!--                外盘期货（$）-->
+        <!--                当前盈利：-->
+        <!--                <span :class="globalSumObj.currentProfitSum| percentTagFilter" class="sum-text">{{globalSumObj.currentProfitSum}}</span>-->
+        <!--                预计止损：{{(globalSumObj.predictStopSum)}}-->
+        <!--                已止盈：{{(globalSumObj.winEndSum)}}-->
+        <!--                已止损：{{(globalSumObj.loseEndSum)}}-->
+        <!--                保证金：{{(globalSumObj.marginSum)}}-->
+        <!--            </el-col>-->
 
-            <el-col :span="12">
-                内盘期货(￥)
-                当前盈利：
-                <span :class="sumObj.currentProfitSum| percentTagFilter" class="sum-text">{{sumObj.currentProfitSum}}</span>
-                预计止损：{{(sumObj.predictStopSum)}}
-                已止盈：{{(sumObj.winEndSum)}}
-                已止损：{{(sumObj.loseEndSum)}}
-                保证金：{{(sumObj.marginSum)}}
+        <!--            <el-col :span="12">-->
+        <!--                内盘期货(￥)-->
+        <!--                当前盈利：-->
+        <!--                <span :class="sumObj.currentProfitSum| percentTagFilter" class="sum-text">{{sumObj.currentProfitSum}}</span>-->
+        <!--                预计止损：{{(sumObj.predictStopSum)}}-->
+        <!--                已止盈：{{(sumObj.winEndSum)}}-->
+        <!--                已止损：{{(sumObj.loseEndSum)}}-->
+        <!--                保证金：{{(sumObj.marginSum)}}-->
 
-            </el-col>
-        </el-row>
+        <!--            </el-col>-->
+        <!--        </el-row>-->
     </div>
 </template>
 
@@ -869,7 +877,7 @@
             },
             // 计算止损率
             calcStopLoseRate(row) {
-                return row.per_order_stop_rate * 100
+                return parseInt(row.per_order_stop_rate * 100)
             },
             // //  计算收益率
             // calcProfitRate(row) {
@@ -1010,7 +1018,7 @@
                             this.listQuery.total = res.total;
                             this.positionList = res.records;
                             this.processSum()
-                            console.log("后端返回的持仓列表", res);
+                            // console.log("后端返回的持仓列表", res);
                             this.$cache.del(`POSITION_LIST#${this.positionQueryForm.status}#${this.listQuery.current}#${this.listQuery.size}#${this.endDate}`)
                         })
                         .catch(error => {
@@ -1189,7 +1197,8 @@
                             this.sumObj.predictStopSum += Math.round(item.predict_stop_money, 0)
                         }
                         this.sumObj.winEndSum += Math.round(item.win_end_money, 0)
-                        this.sumObj.loseEndSum += Math.round(item.lose_end_money, 0)
+                        // 由于程序性能问题 实际扫描到止损的时候价格已经越过止损价了 因此这里使用预计止损额更准确
+                        this.sumObj.loseEndSum += Math.round(item.predict_stop_money, 0)
                         this.sumObj.marginSum += Math.round(item.total_margin, 0)
                     }
                 }
@@ -1209,33 +1218,36 @@
                     return sums
                 }
                 columns.forEach((column, index) => {
-                    if (index === 0) {
+                    let label = column.label
+                    if (label === '品种') {
                         sums[index] = '合计';
                         return;
                     }
                     // 累加 预计止损
-                    if (index === 14) {
+                    if (label === '止损额') {
                         data.forEach((item) => {
                             stopSum += item.predict_stop_money
                         })
-                        sums[14] = stopSum.toFixed(2)
-                    } else if (index === 16) {
+                        sums[index] = stopSum
+                    } else if (label === '实际亏损额') {
                         // 累加已止损
                         data.forEach((item) => {
                             if (item.status === 'loseEnd') {
                                 loseEndSum += item.lose_end_money
                             }
                         })
-                        sums[16] = loseEndSum.toFixed(2)
-                    } else if (index === 19) {
+                        sums[index] = parseInt(loseEndSum)
+                    } else if (label === '已盈利额') {
                         // 累加已盈利
                         data.forEach((item) => {
                             if (item.status === 'winEnd') {
                                 winEndSum += item.win_end_money
                             }
                         })
-                        sums[19] = winEndSum.toFixed(2)
-                    } else if (index === 10) {
+                        sums[index] = parseInt(winEndSum)
+                    } else if (label === '已盈利比率') {
+                        sums[index] = (this.sumObj.winEndSum / (this.$futureAccount * 10000) * 100).toFixed(1) + '%'
+                    } else if (label === '浮盈额') {
                         // 累加当前盈利
                         data.forEach((item) => {
                             // 只累加还在持仓中的
@@ -1243,19 +1255,23 @@
                                 currentProfitSum += item.current_profit
                             }
                         })
-                        sums[10] = currentProfitSum.toFixed(2)
-                    } else if (index === 11) {
+                        sums[index] = parseInt(currentProfitSum)
+                    } else if (label === '保证金') {
                         // 累加当前保证金
                         data.forEach((item) => {
                             // 只累加还在持仓中的
-                            if (item.status === 'holding') {
-                                // 兼容老数据
-                                if (item.total_margin) {
-                                    totalMargin += item.total_margin
-                                }
+                            // if (item.status === 'holding') {
+                            // 兼容老数据
+                            if (item.total_margin) {
+                                totalMargin += item.total_margin
                             }
+                            // }
                         })
-                        sums[11] = totalMargin.toFixed(2)
+                        sums[index] = totalMargin
+                    } else if (label === '浮盈率') {
+                        sums[index] = (this.sumObj.currentProfitSum / (this.$futureAccount * 10000) * 100).toFixed(1) + '%'
+                    } else if (label === '止损率') {
+                        sums[index] = (this.sumObj.loseEndSum / (this.$futureAccount * 10000) * 100).toFixed(1) + '%'
                     } else {
                         sums[index] = ''
                     }
@@ -1360,6 +1376,12 @@
 
         .el-table__empty-text {
             color: white
+        }
+
+        .el-table__footer-wrapper td {
+            background: #12161c
+            color: #D04949
+            border-top: #0B0E11
         }
 
         .form-input {
