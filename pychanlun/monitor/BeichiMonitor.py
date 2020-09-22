@@ -136,12 +136,12 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             'per_order_stop_rate': round(perOrderStopRate, 3),
             'update_count': 1,  # 这条背驰记录的更新次数
         })
-        max_stop_rate = 0.1
+        max_stop_rate = 0.15
         if signal == 'fractal':
             max_stop_rate = 0.3
             print(signal, symbol, period, futureCalcObj, perOrderStopRate)
 
-        if abs((date_created - fire_time).total_seconds()) < 60 * 4.5 and perOrderStopRate <= max_stop_rate:
+        if abs((date_created - fire_time).total_seconds()) < 60 * 4 and perOrderStopRate <= max_stop_rate:
             # 新增
             remind = await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                                   stop_lose_price, futureCalcObj, True)
@@ -167,8 +167,8 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 signalCN = "V反"
 
             msg = {
-                "品种": 'RB2010',
-                "周期": '3m',
+                "品种": symbol,
+                "周期": period,
                 "信号": signalCN,
                 "方向": '买' if direction == 'B' else '卖',
                 "数量": amount,
@@ -179,8 +179,8 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 "触发时间": fire_time_str,
                 "提醒价格": close_price,
                 "提醒时间": date_created_str,
-                "5日线": '上' if above_ma5 else '下',
-                "20日线": '上' if above_ma20 else '下',
+                "5日线": '上' if above_ma5 else '下' if above_ma5 == False else "",
+                "20日线": '上' if above_ma20 else '下' if above_ma20 == False else "",
             }
             # 简洁版
             # msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
@@ -819,6 +819,8 @@ temp = {
 计算分型止损率的时候不能 使用 close_price 因为监控性能的问题 扫描到信号的时候
 close_price 和触发价格 price 已经相差很多，此时计算的止损率会偏高 导致被信号过滤器给过滤掉
 '''
+
+
 async def monitorFractal(result, symbol, period, closePrice):
     # 将当前级别的的方向插入到数据库，用于前端展示当前级别的状态
     # 15m向上成笔，代表3F级别多， 15m向下成笔，代表3F级别空
@@ -1033,7 +1035,7 @@ def run(**kwargs):
     chunks = pydash.chunk(symbol_list, 10)
     for chunk in chunks:
         thread_list.append(
-            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m', '3m', '5m','15m'])))
+            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m', '3m', '5m', '15m'])))
     # chunks = pydash.chunk(global_future_symbol, 10)
     # for chunk in chunks:
     #     thread_list.append(

@@ -196,7 +196,7 @@ class BusinessService:
             "beichi_win_count": len(df_beichi_win),
             "beichi_lose_count": len(df_beichi_lose),
 
-            "beichi_win_money": df_beichi_win['win_end_money'].sum(),
+            "beichi_win_money": df_beichi_win['win_end_money'].sum() if 'win_end_money' in df_beichi_win else 0,
             "beichi_lose_money": df_beichi_win['lose_end_money'].sum() if 'lose_end_money' in df_beichi_win else 0,
 
             "huila_win_count": len(df_huila_win),
@@ -226,7 +226,7 @@ class BusinessService:
             "five_v_reverse_lose_money": df_five_v_reverse_win['lose_end_money'].sum() if 'lose_end_money' in df_five_v_reverse_win else 0,
 
             "beichi_win_lose_count_rate": round(len(df_beichi_win) / (len(df_beichi_lose) + len(df_beichi_win)), 2) if len(df_beichi_lose) != 0 else 1,
-            "beichi_win_lose_money_rate": abs(round(df_beichi_win['win_end_money'].sum() / df_beichi_lose['lose_end_money'].sum(), 2)) if df_beichi_lose['lose_end_money'].sum() != 0 else 1,
+            "beichi_win_lose_money_rate": abs(round(df_beichi_win['win_end_money'].sum() / df_beichi_lose['lose_end_money'].sum(), 2)) if 'lose_end_money' in df_beichi_lose and  df_beichi_lose['lose_end_money'].sum() != 0 else 1,
 
             "huila_win_lose_count_rate": round(len(df_huila_win) / (len(df_huila_lose) + len(df_huila_win)), 2) if len(df_huila_lose) != 0 else 1,
             "huila_win_lose_money_rate": abs(round(df_huila_win['win_end_money'].sum() / df_huila_lose['lose_end_money'].sum(), 2)) if df_huila_lose['lose_end_money'].sum() != 0 else 1,
