@@ -90,7 +90,11 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
     # 更新,实时更新持仓品种的价格
     await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                  stop_lose_price, futureCalcObj, False)
-    amount = futureCalcObj['maxOrderCount']
+
+    if signal == 'fractal':
+        amount = futureCalcObj['stop_win_count']
+    else:
+        amount = futureCalcObj['maxOrderCount']
     temp_fire_time = datetime.strptime(fire_time_str, "%Y-%m-%d %H:%M")
     # 触发时间转换成UTC时间
     fire_time = temp_fire_time - timedelta(hours=8)

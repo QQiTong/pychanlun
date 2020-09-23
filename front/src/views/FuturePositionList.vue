@@ -421,7 +421,7 @@
                 :key="9"
             >
                 <template slot-scope="{row}">
-                    <span :class="row.current_profit_rate| percentTagFilter">{{(row.current_profit_rate*100)}}%</span>
+                    <span :class="row.current_profit_rate| percentTagFilter">{{parseInt(row.current_profit_rate*100)}}%</span>
                 </template>
             </el-table-column>
 
