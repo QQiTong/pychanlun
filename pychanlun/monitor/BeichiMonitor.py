@@ -491,7 +491,6 @@ async def saveFutureDirection(symbol, period, direction):
 
 def getDominantSymbol():
     symbolList = config['symbolList']
-    symbolList = ['J']
     # 将43个品种分成2组
     firstGroup = symbolList[:28]
     secondGroup = symbolList[-15:]
