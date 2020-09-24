@@ -177,7 +177,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 "方向": '买' if direction == 'B' else '卖',
                 "数量": amount,
                 "止损价": stop_lose_price,
-                "止损率": str(int(perOrderStopRate*100)) + '%',
+                "止损率": str(int(perOrderStopRate * 100)) + '%',
                 "分类": tag,
                 "触发价格": price,
                 "触发时间": fire_time_str,
@@ -350,15 +350,24 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
             #     else:
             #         status = 'loseEnd'
             status = 'winEnd'
+            print("进入了反向仓 ：", different_direction, " 当前仓 ", last_fire)
+            # 计算之前的反向仓的盈利
+            win_end_money = different_last_fire['current_profit']
+            win_end_price = close_price
+            win_end_rate = different_last_fire['current_profit_rate']
             DBPyChanlun['future_auto_position'].find_one_and_update({
-                'symbol': symbol, 'direction': different_direction, 'status': status
+                'symbol': symbol, 'direction': different_direction, 'status': 'holding'
             }, {
                 '$set': {
                     'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
                     'last_update_time': date_created,  # 最后信号更新时间
                     'last_update_signal': signal,  # 最后更新的信号
                     'last_update_period': period,  # 最后更新的周期
-                    'status': status  # 将之前反方向的持仓状态改为止盈
+                    'status': status,  # 将之前反方向的持仓状态改为止盈
+                    'win_end_price': win_end_price,
+                    'win_end_money': win_end_money,
+                    'win_end_rate': win_end_rate,
+                    'win_end_time': date_created,
                 },
                 '$inc': {
                     'update_count': 1
@@ -482,6 +491,7 @@ async def saveFutureDirection(symbol, period, direction):
 
 def getDominantSymbol():
     symbolList = config['symbolList']
+    symbolList = ['J']
     # 将43个品种分成2组
     firstGroup = symbolList[:28]
     secondGroup = symbolList[-15:]
