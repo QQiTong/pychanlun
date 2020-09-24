@@ -397,7 +397,16 @@
                     <span>{{ row.tag }}</span>
                 </template>
             </el-table-column>
-
+            <el-table-column label="前低" align="center" :key="31">
+                <template slot-scope="{row}">
+                    <span>{{ row.not_lower === true ?"上":(row.not_lower === false?"下":"") }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="前高" align="center" :key="32">
+                <template slot-scope="{row}">
+                    <span>{{ row.not_higher === true ?"下":(row.not_higher === false?"上":"") }}</span>
+                </template>
+            </el-table-column>
             <el-table-column label="成本价" prop="price" align="center" :key="6"/>
             <el-table-column label="数量" prop="amount" align="center" :key="7"/>
             <!--            后台只更新持仓单的最新价，浮盈率，浮盈额. 老合约没必要继续更新最新价，因此这几个字段都不显示，但是列不能删除
@@ -449,7 +458,6 @@
                 </template>
             </el-table-column>
             <el-table-column label="止损率" width="80" align="center" :key="13"
-                             v-if="positionQueryForm.status!=='winEnd'"
             >
                 <template slot-scope="{row}">-{{calcStopLoseRate(row)}}%</template>
             </el-table-column>
