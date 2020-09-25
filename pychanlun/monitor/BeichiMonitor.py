@@ -19,7 +19,7 @@ from pychanlun.chanlun_service import get_data
 from pychanlun.config import config
 from pychanlun.db import DBPyChanlun
 from pychanlun.monitor.BusinessService import businessService
-
+import math
 tz = pytz.timezone('Asia/Shanghai')
 
 '''
@@ -432,7 +432,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                         current_profit_rate = round(((last_fire['price'] - close_price) / last_fire['price']) * marginLevel, 2)
                         # print("short",current_profit_rate)
                         # 未实现盈亏
-                    current_profit = round(last_fire['per_order_margin'] * last_fire['amount'] * current_profit_rate, 2)
+                    current_profit = int(last_fire['per_order_margin'] * last_fire['amount'] * current_profit_rate)
                     # print("持有中", direction, close_price, last_fire['stop_lose_price'])
                     status = 'holding'
 
@@ -1085,7 +1085,8 @@ async def calStopWinCount(symbol, period, positionInfo, closePrice):
     stopWinPosRate = round(1 / (winLoseRate + 1), 2)
     # else:
     #     stopWinPosRate = 0.3
-    stopWinCount = round(stopWinPosRate * open_pos_amount)
+    # 避免出现动止手数为0的情况
+    stopWinCount = math.ceil(stopWinPosRate * open_pos_amount)
     print(symbol, period, "当前盈亏比", winLoseRate, "当前动止仓位百分比",
           stopWinPosRate, "动止手数", stopWinCount, "持仓信息：", positionInfo)
     return stopWinCount

@@ -286,7 +286,7 @@
             cell-class-name="el-cell"
             show-summary
             :summary-method="getSummaries"
-            :default-sort = "{prop: 'current_profit', order: 'aescending'}"
+            :default-sort="{prop: 'current_profit', order: 'aescending'}"
         >
             <!--                        show-summary
             -->
@@ -300,21 +300,27 @@
                         header-cell-class-name="el-header-cell"
                         cell-class-name="el-cell"
                     >
-                        <el-table-column label="动态操作时间" align="center">
+                        <el-table-column label="动止时间" align="center">
                             <template slot-scope="{row}">
                                 <span>{{ row.date_created | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="动态操作价格" prop="stop_win_price" align="center"/>
-                        <el-table-column label="动态操作数量" prop="stop_win_count" align="center"/>
-                        <el-table-column label="动态操作盈利" prop="stop_win_money" align="center"/>
+                        <el-table-column label="动止价格" prop="stop_win_price" align="center"/>
+                        <el-table-column label="动止数量" prop="stop_win_count" align="center"/>
+                        <el-table-column label="动止盈利" prop="stop_win_money" align="center"/>
                         <el-table-column label="分型价格" prop="fractal_price" align="center"/>
                         <el-table-column label="滑点" prop="direction" align="center">
                             <template slot-scope="{row}">
                                 <span>{{ Math.abs(row.stop_win_price-row.fractal_price).toFixed(1)}}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="动态操作方向" prop="direction" align="center"/>
+                        <el-table-column label="动止方向" prop="direction" align="center">
+                            <template slot-scope="{row}">
+                        <span :class="row.direction | directionTagFilter">
+                            <span>{{ row.direction | directionFilter }}</span>
+                        </span>
+                            </template>
+                        </el-table-column>
                     </el-table>
                 </template>
             </el-table-column>
@@ -584,28 +590,35 @@
         />
         <!--当前收益统计        -->
 
-        <!--        <el-row class="mt-10 sum-text">-->
-        <!--            <el-col :span="12">-->
-        <!--                外盘期货（$）-->
-        <!--                当前盈利：-->
-        <!--                <span :class="globalSumObj.currentProfitSum| percentTagFilter" class="sum-text">{{globalSumObj.currentProfitSum}}</span>-->
-        <!--                预计止损：{{(globalSumObj.predictStopSum)}}-->
-        <!--                已止盈：{{(globalSumObj.winEndSum)}}-->
-        <!--                已止损：{{(globalSumObj.loseEndSum)}}-->
-        <!--                保证金：{{(globalSumObj.marginSum)}}-->
-        <!--            </el-col>-->
+        <el-row class="mt-10 sum-text">
+            <!--            <el-col :span="12">-->
+            <!--                外盘期货（$）-->
+            <!--                当前盈利：-->
+            <!--                <span :class="globalSumObj.currentProfitSum| percentTagFilter" class="sum-text">{{globalSumObj.currentProfitSum}}</span>-->
+            <!--                预计止损：{{(globalSumObj.predictStopSum)}}-->
+            <!--                已止盈：{{(globalSumObj.winEndSum)}}-->
+            <!--                已止损：{{(globalSumObj.loseEndSum)}}-->
+            <!--                保证金：{{(globalSumObj.marginSum)}}-->
+            <!--            </el-col>-->
 
-        <!--            <el-col :span="12">-->
-        <!--                内盘期货(￥)-->
-        <!--                当前盈利：-->
-        <!--                <span :class="sumObj.currentProfitSum| percentTagFilter" class="sum-text">{{sumObj.currentProfitSum}}</span>-->
-        <!--                预计止损：{{(sumObj.predictStopSum)}}-->
-        <!--                已止盈：{{(sumObj.winEndSum)}}-->
-        <!--                已止损：{{(sumObj.loseEndSum)}}-->
-        <!--                保证金：{{(sumObj.marginSum)}}-->
+            <el-col :span="24">
+                内盘期货(￥)
 
-        <!--            </el-col>-->
-        <!--        </el-row>-->
+                <span :class="sumObj.currentProfitSum| percentTagFilter" class="sum-text"
+                      v-if="positionQueryForm.status ==='holding'">当前盈利：{{sumObj.currentProfitSum}}
+                     占比：{{sumObj.currentProfitSumRate}}
+                     预计止损：{{(sumObj.predictStopSum)}}
+                </span>
+
+                <span v-if="positionQueryForm.status ==='winEnd'">
+                    已止盈：{{(sumObj.winEndSum)}}
+                占比：{{sumObj.winEndSumRate}}</span>
+                <span v-if="positionQueryForm.status ==='loseEnd'">已止损：{{(sumObj.loseEndSum)}}</span>
+                保证金：{{(sumObj.marginSum)}}
+                占比：{{sumObj.marginSumRate}}
+
+            </el-col>
+        </el-row>
     </div>
 </template>
 
@@ -734,14 +747,21 @@
                 sumObj: {
                     // 当前盈利
                     'currentProfitSum': 0,
+                    // 当前盈利占总账户比例
+                    'currentProfitSumRate': 0,
                     // 保证金
                     'marginSum': 0,
                     // 已盈利
                     'winEndSum': 0,
+                    // 已盈利占总账户比例
+                    'winEndSumRate': 0,
+
                     // 已止损
                     'loseEndSum': 0,
                     // 预计止损
                     'predictStopSum': 0,
+                    // 保证金占用总账户比例
+                    'marginSumRate': 0,
                 },
                 endDate: CommonTool.dateFormat('yyyy-MM-dd'),
                 futureConfig: {},
@@ -1179,14 +1199,21 @@
                 this.sumObj = {
                     // 当前盈利
                     'currentProfitSum': 0,
+                    // 当前盈利占总账户比例
+                    'currentProfitSumRate': 0,
                     // 保证金
                     'marginSum': 0,
                     // 已盈利
                     'winEndSum': 0,
+                    // 已盈利占总账户比例
+                    'winEndSumRate': 0,
+
                     // 已止损
                     'loseEndSum': 0,
                     // 预计止损
                     'predictStopSum': 0,
+                    // 保证金占用总账户比例
+                    'marginSumRate': 0,
                 }
                 for (let i = 0; i < this.positionList.length; i++) {
                     let item = this.positionList[i]
@@ -1206,9 +1233,21 @@
                             this.sumObj.predictStopSum += Math.round(item.predict_stop_money, 0)
                         }
                         this.sumObj.winEndSum += Math.round(item.win_end_money, 0)
+                        // 判断是否 动止过，如果动止 盈利 = 当前浮盈+ 已动止的盈利
+                        if (item.hasOwnProperty('dynamicPositionList') && item.dynamicPositionList.length !== 0) {
+                            let dynamicWinSum = 0
+                            for (let j = 0; j < item.dynamicPositionList.length; j++) {
+                                dynamicWinSum += item.dynamicPositionList[j].stop_win_money
+                            }
+                            this.sumObj.winEndSum += dynamicWinSum
+                            console.log(item.symbol, dynamicWinSum)
+                        }
                         // 由于程序性能问题 实际扫描到止损的时候价格已经越过止损价了 因此这里使用预计止损额更准确
                         this.sumObj.loseEndSum += Math.round(item.predict_stop_money, 0)
                         this.sumObj.marginSum += Math.round(item.total_margin, 0)
+                        this.sumObj.marginSumRate = (this.sumObj.marginSum / (this.$futureAccount * 10000) * 100).toFixed(1) + "%"
+                        this.sumObj.winEndSumRate = (this.sumObj.winEndSum / (this.$futureAccount * 10000) * 100).toFixed(1) + "%"
+                        this.sumObj.currentProfitSumRate = (this.sumObj.currentProfitSum / (this.$futureAccount * 10000) * 100).toFixed(1) + "%"
                     }
                 }
             },
