@@ -252,6 +252,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                 stop_win_count = futureCalcObj['stop_win_count']
                 stop_win_price = futureCalcObj['stop_win_price']
                 fractal_price = futureCalcObj['fractal_price']
+                fractal_period = tag
                 #
                 # 取出动止数组，更新动止数组的最后一项，然后再插入到表中
                 if last_fire['symbol'] == 'BTC':
@@ -280,7 +281,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                         'last_update_time': date_created,  # 最后信号更新时间
                         'last_update_signal': signal,  # 最后更新的信号
                         'last_update_period': period,  # 最后更新的周期
-                        # 'amount':last_fire['amount'] - stop_win_count # 持仓的数量减去动止的数量
+                        'amount':last_fire['amount'] - stop_win_count # 持仓的数量减去动止的数量
                     },
                     # $addToSet 重复的记录不会插入，只有不同的动止对象才会插入， $push 每次都会插入，  但是date_created 这个时间字段每次都不同，都会作为新纪录插入
                     '$addToSet': {
@@ -290,7 +291,8 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                             'stop_win_price': stop_win_price,  # 动止时的价格
                             'stop_win_money': stop_win_money,  # 动止时的盈利
                             'fractal_price': fractal_price,  # 分型的价格
-                            'direction': 'long' if direction == 'short' else 'short'
+                            'direction': 'long' if direction == 'short' else 'short',
+                            'fractal_period': fractal_period  # 大级别分型周期
                         }
                     },
                     '$inc': {
