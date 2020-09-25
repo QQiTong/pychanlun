@@ -286,8 +286,8 @@
             cell-class-name="el-cell"
             show-summary
             :summary-method="getSummaries"
-            :default-sort="{prop: 'current_profit', order: 'aescending'}"
         >
+            <!--            :default-sort="{prop: 'current_profit', order: 'ascending'}"-->
             <!--                        show-summary
             -->
 

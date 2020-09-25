@@ -20,6 +20,7 @@ from pychanlun.config import config
 from pychanlun.db import DBPyChanlun
 from pychanlun.monitor.BusinessService import businessService
 import math
+
 tz = pytz.timezone('Asia/Shanghai')
 
 '''
@@ -88,6 +89,24 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
     perOrderStopRate = futureCalcObj['perOrderStopRate']
     not_lower = futureCalcObj['not_lower']
     not_higher = futureCalcObj['not_higher']
+    fractal = ""
+    if 'fractal' in futureCalcObj:
+        fractal = futureCalcObj['fractal']
+    power = futureCalcObj['power']
+    fractal_format = ""
+    # 有分型字段  并且当前信号不是分型动止信号
+    if fractal != "" and signal != 'fractal':
+        if fractal:
+            if direction == 'B':
+                fractal_format = '上'
+            else:
+                fractal_format = '下'
+        else:
+            if direction == 'S':
+                fractal_format = '上'
+            else:
+                fractal_format = '下'
+
     # 更新,实时更新持仓品种的价格
     await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                  stop_lose_price, futureCalcObj, False)
@@ -141,7 +160,9 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             'per_order_stop_rate': round(perOrderStopRate, 3),
             'update_count': 1,  # 这条背驰记录的更新次数
             'not_lower': not_lower,
-            'not_higher': not_higher
+            'not_higher': not_higher,
+            "fractal": fractal_format,  # 信号触发时是否在大级别分型确立
+            "power": power  # 5个指标综合判断当前信号强度
         })
         max_stop_rate = 0.1
         if signal == 'fractal':
@@ -190,6 +211,8 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 "20日线": '上' if above_ma20 else '下' if above_ma20 == False else "",
                 '线段前低': '上' if not_lower else '下' if not_lower == False else "",
                 '线段前高': '下' if not_higher else '上' if not_higher == False else "",
+                "大级别分型": fractal_format,
+                "动力": str(power) + "%"
             }
             # 简洁版
             # msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
@@ -281,7 +304,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                         'last_update_time': date_created,  # 最后信号更新时间
                         'last_update_signal': signal,  # 最后更新的信号
                         'last_update_period': period,  # 最后更新的周期
-                        'amount':last_fire['amount'] - stop_win_count # 持仓的数量减去动止的数量
+                        'amount': last_fire['amount'] - stop_win_count  # 持仓的数量减去动止的数量
                     },
                     # $addToSet 重复的记录不会插入，只有不同的动止对象才会插入， $push 每次都会插入，  但是date_created 这个时间字段每次都不同，都会作为新纪录插入
                     '$addToSet': {
@@ -558,8 +581,8 @@ async def do_monitoring(symbol, period):
             # await monitorBeichi(result, symbol, period, close_price)
             await monitorHuila(result, symbol, period, close_price)
             # await monitorTupo(result, symbol, period, close_price)
-            await monitorVReverse(result, symbol, period, close_price)
-            await monitorFiveVReverse(result, symbol, period, close_price)
+            # await monitorVReverse(result, symbol, period, close_price)
+            # await monitorFiveVReverse(result, symbol, period, close_price)
             # await monitorDuanBreak(result, symbol, period, close_price)
             await monitorFractal(result, symbol, period, close_price)
     except BaseException as e:
@@ -628,12 +651,36 @@ async def monitorHuila(result, symbol, period, closePrice):
         stop_lose_price = result['buy_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
+        fractal = ""
+        # 借助大级别分型信号进行过滤
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+            # 底分型的顶部
+            top_price = result['fractal'][0]['bottom_fractal']['top']
+            fractal = closePrice >= top_price
+
+        # 计算动力
+        power = 0
+        if above_ma5:
+            power = power + 1
+        if above_ma20:
+            power = power + 1
+        if not_lower:
+            power = power + 1
+        if not not_higher:
+            power = power + 1
+        if fractal != "" and fractal:
+            power = power + 1
+        power = power * 20
+
         # 大级别直接保存
         # if period != '1m':
         # if above_ma5 or notLower:
         # if notLower:
         futureCalcObj['not_lower'] = not_lower
         futureCalcObj['not_higher'] = not_higher
+        futureCalcObj['fractal'] = fractal
+        futureCalcObj['power'] = power
+
         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
         # else:
         #     # 小级别除非是双盘，否则一定要不破前低
@@ -650,8 +697,30 @@ async def monitorHuila(result, symbol, period, closePrice):
         above_ma20 = result['sell_zs_huila']['above_ma20'][-1]
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        fractal = ""
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+            # 顶分型的底部
+            bottom_price = result['fractal'][0]['top_fractal']['bottom']
+            fractal = closePrice <= bottom_price
+        # 计算动力
+        power = 0
+        if not above_ma5:
+            power = power + 1
+        if not above_ma20:
+            power = power + 1
+        if not not_lower:
+            power = power + 1
+        if not_higher:
+            power = power + 1
+        if fractal != "" and fractal:
+            power = power + 1
+        power = power * 20
+
         futureCalcObj['not_lower'] = not_lower
         futureCalcObj['not_higher'] = not_higher
+        futureCalcObj['fractal'] = fractal
+        futureCalcObj['power'] = power
+
         direction = 'S'
         # if period != "1m":
         # if notHigher:
@@ -905,7 +974,7 @@ async def monitorFractal(result, symbol, period, closePrice):
                 stopWinCount = await calStopWinCount(symbol, period, positionInfoLong, closePrice)
 
                 if stopWinCount == 0:
-                    print(symbol,period,"动止手数为0")
+                    print(symbol, period, "动止手数为0")
                     return
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
@@ -932,7 +1001,7 @@ async def monitorFractal(result, symbol, period, closePrice):
             if closePrice <= price:
                 stopWinCount = await calStopWinCount(symbol, period, positionInfoLong, closePrice)
                 if stopWinCount == 0:
-                    print(symbol,period,"动止手数为0")
+                    print(symbol, period, "动止手数为0")
                     return
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
@@ -960,7 +1029,7 @@ async def monitorFractal(result, symbol, period, closePrice):
             if closePrice >= price:
                 stopWinCount = await calStopWinCount(symbol, period, positionInfoShort, closePrice)
                 if stopWinCount == 0:
-                    print(symbol,period,"动止手数为0")
+                    print(symbol, period, "动止手数为0")
                     return
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
@@ -986,7 +1055,7 @@ async def monitorFractal(result, symbol, period, closePrice):
             if closePrice >= price:
                 stopWinCount = await calStopWinCount(symbol, period, positionInfoShort, closePrice)
                 if stopWinCount == 0:
-                    print(symbol,period,"动止手数为0")
+                    print(symbol, period, "动止手数为0")
                     return
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
