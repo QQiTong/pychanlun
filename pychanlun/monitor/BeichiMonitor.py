@@ -271,7 +271,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                     stop_win_profit_rate = round(((last_fire['price'] - stop_win_price) / last_fire['price']) * marginLevel, 2)
                     # print("short",stop_win_profit_rate)
                 # 动止盈利
-                stop_win_money = round(last_fire['per_order_margin'] * stop_win_count * stop_win_profit_rate, 2)
+                stop_win_money = int(last_fire['per_order_margin'] * stop_win_count * stop_win_profit_rate)
 
                 DBPyChanlun['future_auto_position'].find_one_and_update({
                     'symbol': symbol, 'direction': direction, 'status': status
@@ -903,6 +903,10 @@ async def monitorFractal(result, symbol, period, closePrice):
             # 当前价格低于顶分型的底
             if closePrice <= price:
                 stopWinCount = await calStopWinCount(symbol, period, positionInfoLong, closePrice)
+
+                if stopWinCount == 0:
+                    print(symbol,period,"动止手数为0")
+                    return
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
                 # 保存动止时的价格
@@ -927,6 +931,9 @@ async def monitorFractal(result, symbol, period, closePrice):
             # 当前价格低于顶分型的底
             if closePrice <= price:
                 stopWinCount = await calStopWinCount(symbol, period, positionInfoLong, closePrice)
+                if stopWinCount == 0:
+                    print(symbol,period,"动止手数为0")
+                    return
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
                 # 保存动止时的价格
@@ -952,6 +959,9 @@ async def monitorFractal(result, symbol, period, closePrice):
             # 当前价格高于底分型的顶
             if closePrice >= price:
                 stopWinCount = await calStopWinCount(symbol, period, positionInfoShort, closePrice)
+                if stopWinCount == 0:
+                    print(symbol,period,"动止手数为0")
+                    return
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
                 # 保存动止时的价格
@@ -975,6 +985,9 @@ async def monitorFractal(result, symbol, period, closePrice):
             # 当前价格高于底分型的顶
             if closePrice >= price:
                 stopWinCount = await calStopWinCount(symbol, period, positionInfoShort, closePrice)
+                if stopWinCount == 0:
+                    print(symbol,period,"动止手数为0")
+                    return
                 # 保存动止手数
                 futureCalcObj['stop_win_count'] = stopWinCount
                 # 保存动止时的价格

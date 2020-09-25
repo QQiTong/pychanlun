@@ -286,6 +286,7 @@
             cell-class-name="el-cell"
             show-summary
             :summary-method="getSummaries"
+            :default-sort = "{prop: 'current_profit', order: 'aescending'}"
         >
             <!--                        show-summary
             -->
@@ -347,7 +348,7 @@
                     >
                         {{row.symbol}}
                         <span class="up-red">外 </span>
-                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 动</span>
+                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 已动止</span>
                     </el-link>
                     <el-link
                         type="primary"
@@ -356,7 +357,7 @@
                         v-else
                     >
                         {{row.symbol}}
-                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 动</span>
+                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 已动止</span>
                     </el-link>
                     <!-- todo                      @click="handleJumpToKline(row)"-->
                 </template>
