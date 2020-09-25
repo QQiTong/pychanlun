@@ -90,9 +90,11 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
     not_lower = futureCalcObj['not_lower']
     not_higher = futureCalcObj['not_higher']
     fractal = ""
+    power = ""
     if 'fractal' in futureCalcObj:
         fractal = futureCalcObj['fractal']
-    power = futureCalcObj['power']
+    if 'power' in futureCalcObj:
+        power = futureCalcObj['power']
     fractal_format = ""
     # 有分型字段  并且当前信号不是分型动止信号
     if fractal != "" and signal != 'fractal':
@@ -212,7 +214,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 '线段前低': '上' if not_lower else '下' if not_lower == False else "",
                 '线段前高': '下' if not_higher else '上' if not_higher == False else "",
                 "大级别分型": fractal_format,
-                "动力": str(power) + "%"
+                "动力": (str(power) + "%") if power != "" else ""
             }
             # 简洁版
             # msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
