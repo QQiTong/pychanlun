@@ -309,6 +309,7 @@
                         <el-table-column label="动止数量" prop="stop_win_count" align="center"/>
                         <el-table-column label="动止盈利" prop="stop_win_money" align="center"/>
                         <el-table-column label="分型价格" prop="fractal_price" align="center"/>
+                        <el-table-column label="大级别" prop="fractal_period" align="center"/>
                         <el-table-column label="滑点" prop="direction" align="center">
                             <template slot-scope="{row}">
                                 <span>{{ Math.abs(row.stop_win_price-row.fractal_price).toFixed(1)}}</span>
@@ -354,7 +355,7 @@
                     >
                         {{row.symbol}}
                         <span class="up-red">外 </span>
-                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 已动止</span>
+                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 动</span>
                     </el-link>
                     <el-link
                         type="primary"
@@ -363,7 +364,7 @@
                         v-else
                     >
                         {{row.symbol}}
-                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 已动止</span>
+                        <span v-if="row.dynamicPositionList&&row.dynamicPositionList.length>0" class="down-green"> 动</span>
                     </el-link>
                     <!-- todo                      @click="handleJumpToKline(row)"-->
                 </template>
@@ -404,16 +405,38 @@
                     <span>{{ row.tag }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="前低" align="center" :key="31">
+            <el-table-column label="MA5" prop="above_ma5" align="center" :key="31">
                 <template slot-scope="{row}">
-                    <span>{{ row.not_lower === true ?"上":(row.not_lower === false?"下":"") }}</span>
+                    <span :class="row.above_ma5==='下'?'down-green':'up-red'">{{ row.above_ma5 }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="前高" align="center" :key="32">
+            <el-table-column label="MA20" prop="above_ma20" align="center" :key="32">
                 <template slot-scope="{row}">
-                    <span>{{ row.not_higher === true ?"下":(row.not_higher === false?"上":"") }}</span>
+                    <span :class="row.above_ma20==='下'?'down-green':'up-red'">{{ row.above_ma20 }}</span>
                 </template>
             </el-table-column>
+            <el-table-column label="前低" prop="not_lower" align="center" :key="33">
+                <template slot-scope="{row}">
+                    <span :class="row.not_lower==='下'?'down-green':'up-red'">{{ row.not_lower }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="前高" prop="not_higher" align="center" :key="34">
+                <template slot-scope="{row}">
+                    <span :class="row.not_higher==='下'?'down-green':'up-red'">{{ row.not_higher }}</span>
+                </template>
+            </el-table-column>
+
+            <el-table-column label="分型" prop="fractal" align="center" :key="35">
+                <template slot-scope="{row}">
+                    <span :class="row.fractal==='下'?'down-green':'up-red'">{{ row.fractal }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="动力" prop="power" align="center" :key="36">
+                <template slot-scope="{row}">
+                    <span :class="row.power>50?'primary-yellow':'white'">{{ row.power }}</span>
+                </template>
+            </el-table-column>
+
             <el-table-column label="成本价" prop="price" align="center" :key="6"/>
             <el-table-column label="数量" prop="amount" align="center" :key="7"/>
             <!--            后台只更新持仓单的最新价，浮盈率，浮盈额. 老合约没必要继续更新最新价，因此这几个字段都不显示，但是列不能删除

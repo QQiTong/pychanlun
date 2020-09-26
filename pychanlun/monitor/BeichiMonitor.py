@@ -68,47 +68,16 @@ dingMsg = DingMsg()
 filter_tag = ['双盘', '完备买', '完备卖', '扩展完备买', '扩展完备卖', '一类买', '一类卖', '二类买', '二类卖', '三类买', '三类卖', '准三买', '准三卖']
 
 
-# 初始化业务对象
-# businessService = BusinessService()
-
-# 改成钉钉发送
-def sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price, date_created_str,
-              close_price, tag):
-    print(msg)
-    dingMsg.send(msg)
-
-
 # price 信号触发的价格， close_price 提醒时的收盘价 direction 多B 空S amount 开仓数量
 async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
-                           stop_lose_price, futureCalcObj, above_ma5=None, above_ma20=None):
+                           stop_lose_price, futureCalcObj):
     #  后面的存储的数据依赖 futureCalcObj
     if futureCalcObj == -1:
         print("symbol ->", symbol, " period->", period)
         return
     # perOrderStopRate 的止损率大于0.3 的信号只保存不再提醒出来，也就是不做止损较大的单子
     perOrderStopRate = futureCalcObj['perOrderStopRate']
-    not_lower = futureCalcObj['not_lower']
-    not_higher = futureCalcObj['not_higher']
-    fractal = ""
-    power = ""
-    if 'fractal' in futureCalcObj:
-        fractal = futureCalcObj['fractal']
-    if 'power' in futureCalcObj:
-        power = futureCalcObj['power']
-    fractal_format = ""
-    # 有分型字段  并且当前信号不是分型动止信号
-    if fractal != "" and signal != 'fractal':
-        if fractal:
-            if direction == 'B':
-                fractal_format = '上'
-            else:
-                fractal_format = '下'
-        else:
-            if direction == 'S':
-                fractal_format = '上'
-            else:
-                fractal_format = '下'
-
+    above_ma5, above_ma20, not_lower, not_higher, fractal, power = await getFormatNotifyMsg(direction, signal, futureCalcObj)
     # 更新,实时更新持仓品种的价格
     await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                  stop_lose_price, futureCalcObj, False)
@@ -161,9 +130,11 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             'stop_lose_price': stop_lose_price,  # 当前信号的止损价
             'per_order_stop_rate': round(perOrderStopRate, 3),
             'update_count': 1,  # 这条背驰记录的更新次数
+            'above_ma5': above_ma5,
+            'above_ma20': above_ma20,
             'not_lower': not_lower,
             'not_higher': not_higher,
-            "fractal": fractal_format,  # 信号触发时是否在大级别分型确立
+            "fractal": fractal,  # 信号触发时是否在大级别分型确立
             "power": power  # 5个指标综合判断当前信号强度
         })
         max_stop_rate = 0.1
@@ -209,22 +180,64 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 "触发时间": fire_time_str,
                 "提醒价格": close_price,
                 "提醒时间": date_created_str,
-                "5日线": '上' if above_ma5 else '下' if above_ma5 == False else "",
-                "20日线": '上' if above_ma20 else '下' if above_ma20 == False else "",
-                '线段前低': '上' if not_lower else '下' if not_lower == False else "",
-                '线段前高': '下' if not_higher else '上' if not_higher == False else "",
-                "大级别分型": fractal_format,
+                "5日线": above_ma5,
+                "20日线": above_ma20,
+                '线段前低': not_lower,
+                '线段前高': not_higher,
+                "大级别分型": fractal,
                 "动力": (str(power) + "%") if power != "" else ""
             }
-            # 简洁版
-            # msg = "%s %s %s %s %s %s %s %s %s %s %s" % (
-            #     symbol, period, signal, direction + ' ', " [amount]: " + str(amount),这个也怪我
-            #     " [stop]: " + str(stop_lose_price), " [fire]: " + fire_time_str, " [price]: " + str(price),
-            #     " [create]: " + date_created_str,
-            #     str(close_price), tag)
-            sendEmail(msg, symbol, period, signal, direction, amount, stop_lose_price, fire_time_str, price,
-                      date_created_str,
-                      close_price, tag)
+            dingMsg.send(msg)
+
+# 获取格式化后的指标
+async def getFormatNotifyMsg(direction, signal, futureCalcObj):
+    not_lower = futureCalcObj['not_lower']
+    if not_lower:
+        not_lower = '上'
+    else:
+        not_lower = '下'
+
+    not_higher = futureCalcObj['not_higher']
+    if not_higher:
+        not_higher = '下'
+    else:
+        not_higher = '上'
+
+    # 分型信号 这两个值为空
+    above_ma5 = ""
+    above_ma20 = ""
+    if 'above_ma5' in futureCalcObj:
+        above_ma5 = futureCalcObj['above_ma5']
+        if above_ma5:
+            above_ma5 = '上'
+        else:
+            above_ma5 = '下'
+    if 'above_ma20' in futureCalcObj:
+        above_ma20 = futureCalcObj['above_ma20']
+        if above_ma20:
+            above_ma20 = '上'
+        else:
+            above_ma20 = '下'
+    # 分型信号 这两个值为空
+    fractal = ""
+    power = ""
+    if 'fractal' in futureCalcObj:
+        fractal = futureCalcObj['fractal']
+    if 'power' in futureCalcObj:
+        power = futureCalcObj['power']
+    # 有分型字段  并且当前信号不是分型动止信号
+    if fractal != "" and signal != 'fractal':
+        if fractal:
+            if direction == 'B':
+                fractal = '上'
+            else:
+                fractal = '下'
+        else:
+            if direction == 'S':
+                fractal = '上'
+            else:
+                fractal = '下'
+    return above_ma5, above_ma20, not_lower, not_higher, fractal, power
 
 
 # 自动录入持仓列表  新增 status(holding,winEnd,loseEnd 状态) profit(盈利) profit_rate(盈利率)
@@ -241,6 +254,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
     # 查找自动持仓表中状态为holding的， 因为 止盈和止损的单子 还是有可能继续开仓的
     status = 'holding'
     date_created = datetime.utcnow()
+    above_ma5, above_ma20, not_lower, not_higher, fractal, power = await getFormatNotifyMsg(direction, signal, futureCalcObj)
     # 如果持仓表中这条记录 那么更新最新价格，如果没有新增
 
     different_direction = ""
@@ -250,8 +264,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
     else:
         direction = 'long'
         different_direction = 'short'
-    not_lower = futureCalcObj['not_lower']
-    not_higher = futureCalcObj['not_higher']
+
     # 如果是分型动止，方向需要反过来
     if signal == 'fractal':
         # fix bug 一个月才发现这个bug！！！！！导致空单一直无法动止，只有多单提醒了动止
@@ -297,33 +310,64 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                     # print("short",stop_win_profit_rate)
                 # 动止盈利
                 stop_win_money = int(last_fire['per_order_margin'] * stop_win_count * stop_win_profit_rate)
+                # 动止后剩下的数量
+                available_amount = last_fire['amount'] - stop_win_count
+                if available_amount > 0:
 
-                DBPyChanlun['future_auto_position'].find_one_and_update({
-                    'symbol': symbol, 'direction': direction, 'status': status
-                }, {
-                    '$set': {
-                        'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
-                        'last_update_time': date_created,  # 最后信号更新时间
-                        'last_update_signal': signal,  # 最后更新的信号
-                        'last_update_period': period,  # 最后更新的周期
-                        'amount': last_fire['amount'] - stop_win_count  # 持仓的数量减去动止的数量
-                    },
-                    # $addToSet 重复的记录不会插入，只有不同的动止对象才会插入， $push 每次都会插入，  但是date_created 这个时间字段每次都不同，都会作为新纪录插入
-                    '$addToSet': {
-                        'dynamicPositionList': {
-                            'date_created': date_created,  # 动止时间
-                            'stop_win_count': stop_win_count,  # 动止的数量
-                            'stop_win_price': stop_win_price,  # 动止时的价格
-                            'stop_win_money': stop_win_money,  # 动止时的盈利
-                            'fractal_price': fractal_price,  # 分型的价格
-                            'direction': 'long' if direction == 'short' else 'short',
-                            'fractal_period': fractal_period  # 大级别分型周期
+                    DBPyChanlun['future_auto_position'].find_one_and_update({
+                        'symbol': symbol, 'direction': direction, 'status': status
+                    }, {
+                        '$set': {
+                            'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                            'last_update_time': date_created,  # 最后信号更新时间
+                            'last_update_signal': signal,  # 最后更新的信号
+                            'last_update_period': period,  # 最后更新的周期
+                            'amount': available_amount  # 持仓的数量减去动止的数量
+                        },
+                        # $addToSet 重复的记录不会插入，只有不同的动止对象才会插入， $push 每次都会插入，  但是date_created 这个时间字段每次都不同，都会作为新纪录插入
+                        '$addToSet': {
+                            'dynamicPositionList': {
+                                'date_created': date_created,  # 动止时间
+                                'stop_win_count': stop_win_count,  # 动止的数量
+                                'stop_win_price': stop_win_price,  # 动止时的价格
+                                'stop_win_money': stop_win_money,  # 动止时的盈利
+                                'fractal_price': fractal_price,  # 分型的价格
+                                'direction': 'long' if direction == 'short' else 'short',
+                                'fractal_period': fractal_period  # 大级别分型周期
+                            }
+                        },
+                        '$inc': {
+                            'update_count': 1
                         }
-                    },
-                    '$inc': {
-                        'update_count': 1
-                    }
-                }, upsert=True)
+                    }, upsert=True)
+                else:
+                    # 如果 动止后 剩余数量 小于1手，将持仓状态设置为止盈
+                    print(symbol, period, "动止后数量为小于1直接止盈")
+                    winEndPercent = round(((float(close_price) - last_fire['price']) / last_fire['price']) * marginLevel, 2)
+                    # 止盈已实现盈亏
+                    win_end_money = round(last_fire['per_order_margin'] * last_fire['amount'] * winEndPercent, 2)
+                    # 止盈比率
+                    win_end_rate = round(winEndPercent, 2)
+
+                    DBPyChanlun['future_auto_position'].find_one_and_update({
+                        'symbol': symbol, 'direction': direction, 'status': status
+                    }, {
+                        '$set': {
+                            'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                            'last_update_time': date_created,  # 最后信号更新时间
+                            'last_update_signal': signal,  # 最后更新的信号
+                            'last_update_period': period,  # 最后更新的周期
+                            'status': 'winEnd',  # 将之前反方向的持仓状态改为止盈
+                            'win_end_price': close_price,
+                            'win_end_money': win_end_money,
+                            'win_end_rate': win_end_rate,
+                            'win_end_time': date_created,
+                        },
+                        '$inc': {
+                            'update_count': 1
+                        }
+                    }, upsert=True)
+                # 提醒
                 remind = True
             else:
                 DBPyChanlun['future_auto_position'].find_one_and_update({
@@ -366,24 +410,17 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                     'last_update_time': '',
                     'last_update_signal': '',
                     'last_update_period': '',
+                    'above_ma5': above_ma5,
+                    'above_ma20': above_ma20,
                     'not_lower': not_lower,
-                    'not_higher': not_higher
-
+                    'not_higher': not_higher,
+                    'fractal': fractal,
+                    'power': power
                 })
                 remind = True
         # 将之前反方向的持仓止盈 当前为动止信号，不全部止盈
         print("反向仓：", different_last_fire, " 当前仓：", last_fire)
         if signal != 'fractal' and different_last_fire is not None and last_fire is None:
-            # if last_fire['direction'] == 'long':
-            #     if different_last_fire['price'] >= last_fire['price']:
-            #         status = 'winEnd'
-            #     else:
-            #         status = 'loseEnd'
-            # else:
-            #     if different_last_fire['price'] <= last_fire['price']:
-            #         status = 'winEnd'
-            #     else:
-            #         status = 'loseEnd'
             status = 'winEnd'
             print("进入了反向仓 ：", different_direction, " 当前仓 ", last_fire)
             # 计算之前的反向仓的盈利
@@ -425,6 +462,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                 marginLevel = 1 / (last_fire['margin_rate'] + config['margin_rate_company'])
             # 之后价格再涨上来，status又会变成holding ,因此已经被止损的持仓不要再更新状态了
             if last_fire['status'] == 'holding':
+
                 if (direction == 'long' and close_price <= last_fire['stop_lose_price']) or (direction == 'short' and close_price >= last_fire['stop_lose_price']):
                     # print("止损了",direction,close_price,last_fire['stop_lose_price'])
                     # 为了方便后面统计，在这里计算止损总额，如果性能降低就移出去
@@ -461,40 +499,6 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                     # print("持有中", direction, close_price, last_fire['stop_lose_price'])
                     status = 'holding'
 
-                    # 如果有动止 ，计算动止的收益
-
-                    # if signal == 'fractal':
-                    #     stop_win_count = futureCalcObj['stop_win_count']
-                    #     stop_win_price = futureCalcObj['stop_win_price']
-                    #
-                    #     if last_fire['direction'] == "long":
-                    #         stop_win_profit_rate = round(((stop_win_price - last_fire['price']) / last_fire['price']) * marginLevel, 2)
-                    #         # print("long",stop_win_profit_rate)
-                    #     else:
-                    #         stop_win_profit_rate = round(((last_fire['price'] - stop_win_price) / last_fire['price']) * marginLevel, 2)
-                    #         # print("short",stop_win_profit_rate)
-                    #         # 未实现盈亏
-                    #     stop_win_money = round(last_fire['per_order_margin'] * stop_win_count * stop_win_profit_rate, 2)
-                    #
-                    #     DBPyChanlun['future_auto_position'].find_one_and_update({
-                    #         'symbol': symbol, 'direction': direction, 'status': status
-                    #     }, {
-                    #         '$set': {
-                    #             'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
-                    #             'status': status,
-                    #             'current_profit_rate': current_profit_rate,  # 当前浮盈比例
-                    #             'current_profit': current_profit,  # 当前浮盈额
-                    #             'stop_win_money': stop_win_money,  # 动止的收益
-                    #             'stop_win_count': stop_win_count,  # 动止数量
-                    #             'stop_win_price': stop_win_price,  # 动止价格
-                    #
-                    #         },
-                    #         '$inc': {
-                    #             'update_count': 1
-                    #         }
-                    #     }, upsert=True)
-                    # else:
-                    # 没有动止 就不要更新 stop_win_money 字段了
                     DBPyChanlun['future_auto_position'].find_one_and_update({
                         'symbol': symbol, 'direction': direction, 'status': status
                     }, {
@@ -593,6 +597,44 @@ async def do_monitoring(symbol, period):
     logger.info(stop_watch)
 
 
+# 组合综合指标
+async def combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj):
+    if futureCalcObj == -1:
+        return -1
+    # 计算动力
+    power = 0
+    if direction == 'B':
+        if above_ma5:
+            power = power + 1
+        if above_ma20:
+            power = power + 1
+        if not_lower:
+            power = power + 1
+        if not not_higher:
+            power = power + 1
+        if fractal != "" and fractal:
+            power = power + 1
+    else:
+        if not above_ma5:
+            power = power + 1
+        if not above_ma20:
+            power = power + 1
+        if not not_lower:
+            power = power + 1
+        if not_higher:
+            power = power + 1
+        if fractal != "" and fractal:
+            power = power + 1
+    power = power * 20
+    futureCalcObj['above_ma5'] = above_ma5
+    futureCalcObj['above_ma20'] = above_ma20
+    futureCalcObj['not_lower'] = not_lower
+    futureCalcObj['not_higher'] = not_higher
+    futureCalcObj['fractal'] = fractal
+    futureCalcObj['power'] = power
+    return futureCalcObj
+
+
 async def monitorBeichi(result, symbol, period, closePrice):
     signal = 'beichi'
     # 使用notlower notHigher 过滤确保当前只做2买，完备，3买
@@ -606,14 +648,19 @@ async def monitorBeichi(result, symbol, period, closePrice):
         above_ma20 = result['buyMACDBCData']['above_ma20'][-1]
         # tag = result['buyMACDBCData']['tag'][-1]
         tag = ""
+        direction = 'B'
         stop_lose_price = result['buyMACDBCData']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        direction = 'B'
+
+        fractal = ""
+        # 借助大级别分型信号进行过滤
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+            # 底分型的顶部
+            top_price = result['fractal'][0]['bottom_fractal']['top']
+            fractal = True if closePrice >= top_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
         if above_ma5 or not_lower:
-            # if notLower:
-            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sellMACDBCData']['date']) > 0:
         fire_time = result['sellMACDBCData']['date'][-1]
         price = result['sellMACDBCData']['data'][-1]
@@ -621,14 +668,18 @@ async def monitorBeichi(result, symbol, period, closePrice):
         above_ma20 = result['sellMACDBCData']['above_ma20'][-1]
         # tag = result['sellMACDBCData']['tag'][-1]
         tag = ""
+        direction = 'S'
         stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        direction = 'S'
+        fractal = ""
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+            # 顶分型的底部
+            bottom_price = result['fractal'][0]['top_fractal']['bottom']
+            fractal = True if closePrice <= bottom_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+
         if not above_ma5 or not_higher:
-            # if notHigher:
-            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -639,10 +690,8 @@ async def monitorBeichi(result, symbol, period, closePrice):
 # 为提高胜率 小级别 一定要 不破前高和 不破前低才能进场
 async def monitorHuila(result, symbol, period, closePrice):
     signal = 'huila'
-    # big_period = period != '1m' and period != '3m' and period != '5m'
     not_lower = result['notLower']
     not_higher = result['notHigher']
-
     # 监控回拉
     if len(result['buy_zs_huila']['date']) > 0:
         fire_time = result['buy_zs_huila']['date'][-1]
@@ -658,38 +707,9 @@ async def monitorHuila(result, symbol, period, closePrice):
         if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
             # 底分型的顶部
             top_price = result['fractal'][0]['bottom_fractal']['top']
-            fractal = closePrice >= top_price
-
-        # 计算动力
-        power = 0
-        if above_ma5:
-            power = power + 1
-        if above_ma20:
-            power = power + 1
-        if not_lower:
-            power = power + 1
-        if not not_higher:
-            power = power + 1
-        if fractal != "" and fractal:
-            power = power + 1
-        power = power * 20
-
-        # 大级别直接保存
-        # if period != '1m':
-        # if above_ma5 or notLower:
-        # if notLower:
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        futureCalcObj['fractal'] = fractal
-        futureCalcObj['power'] = power
-
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        # else:
-        #     # 小级别除非是双盘，否则一定要不破前低
-        #     if above_ma5 or notLower:
-        #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        # elif "双盘" in tag or "完备" in tag:
-        #     saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj,above_ma5, above_ma20)
+            fractal = True if closePrice >= top_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_zs_huila']['date']) > 0:
         fire_time = result['sell_zs_huila']['date'][-1]
@@ -699,37 +719,14 @@ async def monitorHuila(result, symbol, period, closePrice):
         above_ma20 = result['sell_zs_huila']['above_ma20'][-1]
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        direction = 'S'
         fractal = ""
         if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
-            fractal = closePrice <= bottom_price
-        # 计算动力
-        power = 0
-        if not above_ma5:
-            power = power + 1
-        if not above_ma20:
-            power = power + 1
-        if not not_lower:
-            power = power + 1
-        if not_higher:
-            power = power + 1
-        if fractal != "" and fractal:
-            power = power + 1
-        power = power * 20
-
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        futureCalcObj['fractal'] = fractal
-        futureCalcObj['power'] = power
-
-        direction = 'S'
-        # if period != "1m":
-        # if notHigher:
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        # else:
-        #     if not above_ma5 or notHigher:
-        #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+            fractal = True if closePrice <= bottom_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -753,14 +750,15 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['buy_zs_tupo']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
+        fractal = ""
+        # 借助大级别分型信号进行过滤
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+            # 底分型的顶部
+            top_price = result['fractal'][0]['bottom_fractal']['top']
+            fractal = True if closePrice >= top_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
         if above_ma5 or not_lower:
-            # if notLower:
-            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        # else:
-        #     if above_ma5:
-        #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_zs_tupo']['date']) > 0:
         fire_time = result['sell_zs_tupo']['date'][-1]
@@ -771,14 +769,14 @@ async def monitorTupo(result, symbol, period, closePrice):
         above_ma20 = result['sell_zs_tupo']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
+        fractal = ""
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+            # 顶分型的底部
+            bottom_price = result['fractal'][0]['top_fractal']['bottom']
+            fractal = True if closePrice <= bottom_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
         if not above_ma5 or not_higher:
-            # if notHigher:
-            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
-        # else:
-        #     if not above_ma5:
-        #         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -800,11 +798,16 @@ async def monitorVReverse(result, symbol, period, closePrice):
         above_ma20 = result['buy_v_reverse']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        # if above_ma5 or notLower:
-        # if notLower:
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        fractal = ""
+        # 借助大级别分型信号进行过滤
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+            # 底分型的顶部
+            top_price = result['fractal'][0]['bottom_fractal']['top']
+            fractal = True if closePrice >= top_price else False
+        # else 大级别已经向上成笔，说明该级别走势已经完美
+
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_v_reverse']['date']) > 0:
         fire_time = result['sell_v_reverse']['date'][-1]
         price = result['sell_v_reverse']['data'][-1]
@@ -814,11 +817,13 @@ async def monitorVReverse(result, symbol, period, closePrice):
         above_ma20 = result['sell_v_reverse']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        # if not above_ma5 or notHigher:
-        # if notHigher:
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        fractal = ""
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+            # 顶分型的底部
+            bottom_price = result['fractal'][0]['top_fractal']['bottom']
+            fractal = True if closePrice <= bottom_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -839,11 +844,14 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         above_ma20 = result['buy_five_v_reverse']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        # if above_ma5 or notLower:
-        # if notLower:
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        fractal = ""
+        # 借助大级别分型信号进行过滤
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+            # 底分型的顶部
+            top_price = result['fractal'][0]['bottom_fractal']['top']
+            fractal = True if closePrice >= top_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_five_v_reverse']['date']) > 0:
         fire_time = result['sell_five_v_reverse']['date'][-1]
         price = result['sell_five_v_reverse']['data'][-1]
@@ -853,11 +861,14 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         above_ma20 = result['sell_five_v_reverse']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        # if not above_ma5 or notHigher:
-        # if notHigher:
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        fractal = ""
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+            # 顶分型的底部
+            bottom_price = result['fractal'][0]['top_fractal']['bottom']
+            fractal = True if closePrice <= bottom_price else False
+
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -879,11 +890,14 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
         above_ma20 = result['buy_duan_break']['above_ma20'][-1]
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        # if above_ma5 or notLower:
-        # if notLower:
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        fractal = ""
+        # 借助大级别分型信号进行过滤
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+            # 底分型的顶部
+            top_price = result['fractal'][0]['bottom_fractal']['top']
+            fractal = True if closePrice >= top_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_duan_break']['date']) > 0:
         fire_time = result['sell_duan_break']['date'][-1]
         price = result['sell_duan_break']['data'][-1]
@@ -893,11 +907,13 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
         above_ma20 = result['sell_duan_break']['above_ma20'][-1]
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = not_lower
-        futureCalcObj['not_higher'] = not_higher
-        # if not above_ma5 or notHigher:
-        # if notHigher:
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj, above_ma5, above_ma20)
+        fractal = ""
+        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+            # 顶分型的底部
+            bottom_price = result['fractal'][0]['top_fractal']['bottom']
+            fractal = True if closePrice <= bottom_price else False
+        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -985,8 +1001,7 @@ async def monitorFractal(result, symbol, period, closePrice):
                 # 保存分型的价格
                 futureCalcObj['fractal_price'] = price
 
-                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
-                                       stop_lose_price, futureCalcObj)
+                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         # 高高级别
         if result['fractal'][1] != {} and result['fractal'][1]['direction'] == 1:
             fire_time = result['fractal'][1]['top_fractal']['date']
@@ -1011,8 +1026,7 @@ async def monitorFractal(result, symbol, period, closePrice):
                 futureCalcObj['stop_win_price'] = closePrice
                 # 保存分型的价格
                 futureCalcObj['fractal_price'] = price
-                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
-                                       stop_lose_price, futureCalcObj)
+                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if positionInfoShort != -1:
         # 空单查找向下笔的底分型
         # 高级别
@@ -1039,8 +1053,7 @@ async def monitorFractal(result, symbol, period, closePrice):
                 futureCalcObj['stop_win_price'] = closePrice
                 # 保存分型的价格
                 futureCalcObj['fractal_price'] = price
-                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
-                                       stop_lose_price, futureCalcObj)
+                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
         # 高高级别
         if result['fractal'][1] != {} and result['fractal'][1]['direction'] == -1:
             fire_time = result['fractal'][1]['bottom_fractal']['date']
@@ -1065,8 +1078,7 @@ async def monitorFractal(result, symbol, period, closePrice):
                 futureCalcObj['stop_win_price'] = closePrice
                 # 保存分型的价格
                 futureCalcObj['fractal_price'] = price
-                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
-                                       stop_lose_price, futureCalcObj)
+                await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 # 计算出开仓手数（止损系数，资金使用率双控）
@@ -1172,7 +1184,7 @@ def run(**kwargs):
     chunks = pydash.chunk(symbol_list, 10)
     for chunk in chunks:
         thread_list.append(
-            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m', '3m', '5m', '15m'])))
+            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m'])))
     # chunks = pydash.chunk(global_future_symbol, 10)
     # for chunk in chunks:
     #     thread_list.append(

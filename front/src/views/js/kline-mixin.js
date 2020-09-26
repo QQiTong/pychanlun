@@ -704,7 +704,7 @@ export default {
             const resultData = this.splitData(stockJsonData, period)
             let dataTitle = that.symbol + '  ' + period
             let subText = '杠杆: ' + this.marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
-                " 不破前高：" + resultData.notHigher + " 不破前低：" + resultData.notLower + this.currentInfo
+                " 线段前高：" + (resultData.notHigher ? "下" : "上") + " 线段前低：" + (resultData.notLower ? "上" : "下") + this.currentInfo
             let currentChart
             // if (period === '1m') {
             //     currentChart = myChart1
