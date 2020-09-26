@@ -1243,8 +1243,8 @@
                     // 外盘期货
                     if (this.globalFutureSymbol.indexOf(item.symbol) !== -1) {
                         if (item.status === 'holding') {
-                            this.globalSumObj.currentProfitSum += Math.round(item.current_profit, 0)
-                            this.globalSumObj.predictStopSum += Math.round(item.predict_stop_money, 0)
+                            this.globalSumObj.currentProfitSum += parseInt(item.current_profit)
+                            this.globalSumObj.predictStopSum += parseInt(item.predict_stop_money)
                         }
                         this.globalSumObj.winEndSum += Math.round(item.win_end_money, 0)
                         this.globalSumObj.loseEndSum += Math.round(item.lose_end_money, 0)
@@ -1252,17 +1252,17 @@
                     } else {
                         // 内盘期货
                         if (item.status === 'holding') {
-                            this.sumObj.currentProfitSum += Math.round(item.current_profit, 0)
-                            this.sumObj.predictStopSum += Math.round(item.predict_stop_money, 0)
+                            this.sumObj.currentProfitSum += parseInt(item.current_profit)
+                            this.sumObj.predictStopSum += parseInt(item.predict_stop_money)
                         }
-                        this.sumObj.winEndSum += Math.round(item.win_end_money, 0)
+                        this.sumObj.winEndSum += parseInt(item.win_end_money)
                         // 判断是否 动止过，如果动止 盈利 = 当前浮盈+ 已动止的盈利
                         if (item.hasOwnProperty('dynamicPositionList') && item.dynamicPositionList.length !== 0) {
                             let dynamicWinSum = 0
                             for (let j = 0; j < item.dynamicPositionList.length; j++) {
                                 dynamicWinSum += item.dynamicPositionList[j].stop_win_money
                             }
-                            this.sumObj.winEndSum += dynamicWinSum
+                            this.sumObj.winEndSum += parseInt(dynamicWinSum)
                             console.log(item.symbol, dynamicWinSum)
                         }
                         // 由于程序性能问题 实际扫描到止损的时候价格已经越过止损价了 因此这里使用预计止损额更准确

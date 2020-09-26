@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import math
 import requests
 import json
 import time
@@ -977,10 +977,12 @@ def testStatistic():
         # "v_reverse_win_lose_count_rate": round(len(df_v_reverse_win) / len(df_v_reverse_lose),2) if len(df_v_reverse_lose) != 0 else 1,
         # "v_reverse_win_lose_money_rate": round(df_v_reverse_win['win_end_money'].sum() / df_v_reverse_lose['lose_end_money'].sum(), 2) if df_v_reverse_lose['lose_end_money'].sum() != 0 else 1,
         #
-        "five_v_reverse_win_lose_count_rate": round(len(df_five_v_reverse_win) / len(df_five_v_reverse_lose),2) if len(df_five_v_reverse_lose) != 0 else 1,
-        "five_v_reverse_win_lose_money_rate": round(df_five_v_reverse_win['win_end_money'].sum() / df_five_v_reverse_lose['lose_end_money'].sum(), 2) if df_five_v_reverse_lose['lose_end_money'].sum() != 0 else 1
+        "five_v_reverse_win_lose_count_rate": round(len(df_five_v_reverse_win) / len(df_five_v_reverse_lose), 2) if len(df_five_v_reverse_lose) != 0 else 1,
+        "five_v_reverse_win_lose_money_rate": round(df_five_v_reverse_win['win_end_money'].sum() / df_five_v_reverse_lose['lose_end_money'].sum(), 2) if df_five_v_reverse_lose[
+                                                                                                                                                             'lose_end_money'].sum() != 0 else 1
     }
     print(signal_result)
+
 
 def testGetFutureSignalList():
     symbolList = config['symbolList']
@@ -998,7 +1000,7 @@ def testGetFutureSignalList():
     print("当前主力合约:", dominantSymbolInfoList)
     print("当前主力合约2:", dominantSymbolList)
     symbolListMap = {}
-    periodList = ['1m','3m', '5m', '15m', '30m']
+    periodList = ['1m', '3m', '5m', '15m', '30m']
     for i in range(len(dominantSymbolList)):
         symbol = dominantSymbolList[i]
         symbolListMap[symbol] = {}
@@ -1034,8 +1036,113 @@ def testGetFutureSignalList():
             symbolListMap[signalItem['symbol']][signalItem['period']]["signal"] = msg
     print("期货信号列表", symbolListMap)
     return symbolListMap
+
+
+def testDynamicProfit():
+    statisticList = {}
+    startDate = '2020-09-19'
+    endDate = '2020-09-26'
+    end = datetime.strptime(endDate, "%Y-%m-%d")
+    end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+    start = datetime.strptime(startDate, "%Y-%m-%d")
+    start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+    data_list = DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+        "date_created": {"$gte": start, "$lte": end}
+    }).sort("_id", pymongo.ASCENDING)
+    print(data_list.count())
+    df = pd.DataFrame(list(data_list))
+    # 当持仓表中没有 单子止盈过的的时候 win_end_money字段为空
+    if len(df) == 0 or 'win_end_money' not in df.columns.values or 'lose_end_money' not in df.columns.values:
+        return {
+            'date': [],
+            'win_end_list': [],
+            'lose_end_list': [],
+            'net_profit_list': [],
+            'win_money_list': [],
+            'lose_money_list': [],
+            'win_symbol_list': [],
+            'lose_symbol_list': []
+        }
+    for idx, row in df.iterrows():
+        # 根据日期分组
+        date_created = df.loc[idx, 'date_created']
+        date_created_str = formatTime(date_created)
+        # 新增 格式化后的 日期列 2020-09-21
+        df.loc[idx, 'new_date_created'] = date_created_str
+        # 根据symbol分组 查询盈利品种排行和亏损品种排行
+        symbol = df.loc[idx, 'symbol']
+        # RB2010 -> RB
+        simple_symbol = symbol.rstrip(string.digits)
+        # 新增格式化后的 品种简称列
+        df.loc[idx, 'simple_symbol'] = simple_symbol
+
+    win_end_group_by_date = df['win_end_money'][df.status != 'exception'].groupby(df['new_date_created'])
+    lose_end_group_by_date = df['lose_end_money'][df.status != 'exception'].groupby(df['new_date_created'])
+    #
+    win_end_group_by_symbol = df['win_end_money'][df.status != 'exception'].groupby(df['simple_symbol'])
+    lose_end_group_by_symbol = df['lose_end_money'][df.status != 'exception'].groupby(df['simple_symbol'])
+    # 查询 动止列表不为空的记录
+    # win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception') & (df.dynamicPositionList.notnull())].groupby(df['new_date_created'])
+    win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception')].groupby(df['new_date_created'])
+    # 转化为list
+    win_end_group_by_date_dynamic_list = list(win_end_group_by_date_dynamic)
+    # 按日期记录每天的动止盈利
+    dynamic_win_list = []
+    for i in range(len(win_end_group_by_date_dynamic_list)):
+        dynamic_win_sum = 0
+        item = list(win_end_group_by_date_dynamic_list[i][1])
+        for j in range(len(item)):
+            if isinstance(item[j],list):
+                for k in range(len(item[j])):
+                    dynamic_win_sum = dynamic_win_sum + item[j][k]['stop_win_money']
+        dynamic_win_list.append(int(dynamic_win_sum))
+    print(dynamic_win_list)
+    # print(win_end_group_by_symbol.sum())
+    # print(lose_end_group_by_symbol.sum())
+
+    print(win_end_group_by_date.sum())
+    print(lose_end_group_by_date.sum())
+    # 日期列表
+    dateList = []
+    # 当日盈利累加
+    win_end_list = []
+    # 每天亏损累加
+    lose_end_list = []
+    # 净盈亏
+    net_profit_list = []
+    # 保存日期
+    for name, group in win_end_group_by_date:
+        dateList.append(name)
+    # 保存品种简称
+    for i in range(len(win_end_group_by_date.sum())):
+        # 止盈的盈利和 动止的盈利 累加
+        win_end_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_list[i])
+        lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
+        net_profit_list.append(int(win_end_group_by_date.sum()[i]) + int(lose_end_group_by_date.sum()[i]))
+
+    sorted_win_money_list = win_end_group_by_symbol.mean().sort_values(ascending=False)
+    sorted_lose_money_list = lose_end_group_by_symbol.mean().sort_values(ascending=True)
+
+    win_symbol_list = list(sorted_win_money_list.index)
+    lose_symbol_list = list(sorted_lose_money_list.index)
+
+    # 取整数
+    win_money_list = list(sorted_win_money_list.dropna(axis=0))
+    lose_money_list = list(sorted_lose_money_list.dropna(axis=0))
+    for i in range(len(win_money_list)):
+        win_money_list[i] = int(win_money_list[i])
+    for i in range(len(lose_money_list)):
+        lose_money_list[i] = int(lose_money_list[i])
+
+    # print(win_symbol_list, win_money_list)
+    # print(lose_symbol_list, lose_money_list)
+    print(win_end_list)
+
+
+
 def app():
-    testGetFutureSignalList()
+    testDynamicProfit()
+    # testGetFutureSignalList()
     # testStatistic()
     # testDingDing()
     # testBitmex()
@@ -1065,5 +1172,7 @@ def app():
     # testWind()
     # testMA()
     # testSplit()
+
+
 if __name__ == '__main__':
     app()

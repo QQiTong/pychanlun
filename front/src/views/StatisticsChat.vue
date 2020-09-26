@@ -193,7 +193,7 @@
                     let totalWin = 0
                     let totalLose = 0
                     this.winloseRate = 0
-                    for (let i = 0; i < this.statisticList.net_profit_list.length - 1; i++) {
+                    for (let i = 0; i < this.statisticList.net_profit_list.length; i++) {
                         let item = this.statisticList.net_profit_list[i]
                         totalWin += this.statisticList.win_end_list[i]
                         totalLose += this.statisticList.lose_end_list[i]
