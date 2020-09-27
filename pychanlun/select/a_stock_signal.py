@@ -126,7 +126,7 @@ def calculate_chanlun_signal(code_period_obj):
         "buy_v_reverse": "V反上涨",
         "buy_five_v_reverse": "五浪V反上涨",
         "buy_duan_break": "线段破坏上涨",
-        "buyMACDBCData": "底背驰"
+        # "buyMACDBCData": "底背驰"
     }
     for signal in signal_map:
         signals = resp[signal]
