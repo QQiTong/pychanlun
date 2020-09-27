@@ -485,7 +485,7 @@ class StrategyEngine(BaseEngine):
         Load strategy class from source code.
         """
         path1 = Path(__file__).parent.joinpath("strategies")
-        self.load_strategy_class_from_folder(path1, "vnpy.app.portfolio_strategy.strategies")
+        self.load_strategy_class_from_folder(path1, "vnpy.vnpy.app.portfolio_strategy.strategies")
 
         path2 = Path.cwd().joinpath("strategies")
         self.load_strategy_class_from_folder(path2, "strategies")

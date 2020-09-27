@@ -378,18 +378,18 @@
             </el-table-column>
             <el-table-column label="周期" prop="period" align="center"
                              :key="2"/>
-            <el-table-column label="入场时间" align="center" :key="3">
+            <el-table-column label="入场时间" align="center" :key="3" width="150">
                 <template slot-scope="{row}">
                     <span>{{ row.date_created}}</span>
                 </template>
             </el-table-column>
 
-            <el-table-column label="止盈时间" align="center" :key="29" v-if="positionQueryForm.status==='winEnd'">
+            <el-table-column label="止盈时间" align="center" :key="29" v-if="positionQueryForm.status==='winEnd'" width="150">
                 <template slot-scope="{row}">
                     <span>{{ row.win_end_time}}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="止损时间" align="center" :key="30" v-if="positionQueryForm.status==='loseEnd'">
+            <el-table-column label="止损时间" align="center" :key="30" v-if="positionQueryForm.status==='loseEnd'" width="150">
                 <template slot-scope="{row}">
                     <span>{{ row.lose_end_time}}</span>
                 </template>
@@ -479,7 +479,6 @@
                 <template slot-scope="{row}">{{row.total_margin}}</template>
             </el-table-column>
             <el-table-column label="止损价" align="center" :key="12"
-                             v-if="positionQueryForm.status!=='winEnd'"
             >
                 <template slot-scope="{row}">
                     <span class="primary-yellow">
@@ -591,7 +590,7 @@
 
             <!--      <el-table-column label="入场逻辑" prop="enterReason" align="center" width="300" />-->
             <!-- <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300" /> -->
-            <el-table-column label="最后更新时间" prop="last_update_time" align="center" :key="25"/>
+            <el-table-column label="最后更新时间" prop="last_update_time" align="center" :key="25" width="150"/>
             <el-table-column label="最后信号" prop="last_update_signal" align="center" width="80" :key="26"/>
             <el-table-column label="最后周期" prop="last_update_period" align="center" width="80" :key="27"/>
 
@@ -1021,13 +1020,24 @@
                 if (row.status === "winEnd" || row.status === "loseEnd") {
                     let tempDate = row.date_created.replace(/-/g, '/')
                     date = new Date(tempDate)
-                    path = 'kline-big'
+                    path = 'multi-period'
                     let nextDay = date.getTime() + 3600 * 1000 * 24
                     let endDate = CommonTool.parseTime(nextDay, '{y}-{m}-{d}')
+                    // routeUrl = this.$router.resolve({
+                    //     path: path,
+                    //     query: {
+                    //         period: row.period,
+                    //         symbol: row.symbol,
+                    //         isPosition: true, // 是否持过仓
+                    //         positionPeriod: row.period, // 开仓周期
+                    //         positionDirection: row.direction, // 持仓方向
+                    //         positionStatus: row.status, // 当前状态
+                    //         endDate: endDate
+                    //     }
+                    // });
                     routeUrl = this.$router.resolve({
                         path: path,
                         query: {
-                            period: row.period,
                             symbol: row.symbol,
                             isPosition: true, // 是否持过仓
                             positionPeriod: row.period, // 开仓周期
@@ -1263,7 +1273,7 @@
                                 dynamicWinSum += item.dynamicPositionList[j].stop_win_money
                             }
                             this.sumObj.winEndSum += parseInt(dynamicWinSum)
-                            console.log(item.symbol, dynamicWinSum)
+                            // console.log(item.symbol, dynamicWinSum)
                         }
                         // 由于程序性能问题 实际扫描到止损的时候价格已经越过止损价了 因此这里使用预计止损额更准确
                         this.sumObj.loseEndSum += Math.round(item.predict_stop_money, 0)

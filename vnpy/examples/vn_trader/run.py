@@ -42,7 +42,7 @@ from vnpy.vnpy.gateway.ctp import CtpGateway
 # from vnpy.vnpy.app.cta_strategy import CtaStrategyApp
 # from vnpy.vnpy.app.csv_loader import CsvLoaderApp
 # from vnpy.vnpy.app.algo_trading import AlgoTradingApp
-# from vnpy.vnpy.app.cta_backtester import CtaBacktesterApp
+from vnpy.vnpy.app.cta_backtester import CtaBacktesterApp
 # from vnpy.vnpy.app.data_recorder import DataRecorderApp
 # from vnpy.vnpy.app.risk_manager import RiskManagerApp
 # from vnpy.vnpy.app.script_trader import ScriptTraderApp
@@ -100,7 +100,7 @@ def main():
     # main_engine.add_gateway(Mt5Gateway)
 
     # main_engine.add_app(CtaStrategyApp)
-    # main_engine.add_app(CtaBacktesterApp)
+    main_engine.add_app(CtaBacktesterApp)
     # main_engine.add_app(CsvLoaderApp)
     # main_engine.add_app(AlgoTradingApp)
     # main_engine.add_app(DataRecorderApp)

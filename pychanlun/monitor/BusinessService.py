@@ -248,7 +248,7 @@ class BusinessService:
                 'lose_end_money'].sum() != 0 else 1,
 
             "tupo_win_lose_count_rate": round(len(df_tupo_win) / (len(df_tupo_lose) + len(df_tupo_win)), 2) if len(df_tupo_lose) != 0 else 1,
-            "tupo_win_lose_money_rate": abs(round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(), 2)) if 'lose_end_money' in df_tupo_lose and df_tupo_lose[
+            "tupo_win_lose_money_rate": abs(round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(), 2)) if 'win_end_money' in df_tupo_win and 'lose_end_money' in df_tupo_lose and df_tupo_lose[
                 'lose_end_money'].sum() != 0 else 1,
 
             # "v_reverse_win_lose_count_rate": round(len(df_v_reverse_win) / len(df_v_reverse_lose),2) if len(df_v_reverse_lose) != 0 else 1,

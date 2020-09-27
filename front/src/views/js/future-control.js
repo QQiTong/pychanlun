@@ -536,9 +536,10 @@ export default {
             if (this.calcPosForm.dynamicWinPrice != null) {
                 this.calcPosForm.dynamicWinCount = Math.ceil(this.calcPosForm.maxOrderCount * this.calcPosForm.perOrderStopMoney / (Math.abs(Number(this.calcPosForm.dynamicWinPrice) - Number(this.calcPosForm.openPrice)) * Number(this.calcPosForm.contractMultiplier) + Number(this.calcPosForm.perOrderStopMoney)))
             }
-            console.log('maxAccountUse:', maxAccountUse, ' maxStopMoney :', maxStopMoney, ' perOrderMargin:',
-                this.calcPosForm.perOrderMargin, ' maxOrderCount:', this.calcPosForm.maxOrderCount, ' maxOrderCount2:', maxOrderCount2, ' perOrderStopMoney:', this.calcPosForm.perOrderStopMoney,
-                ' accountUseRate:', this.calcPosForm.accountUseRate, ' perOrderStopRate:', this.calcPosForm.perOrderStopRate)
+            let maxOrderCount1AccoutUseRate = ((maxOrderCount1 * this.calcPosForm.perOrderMargin / (this.calcPosForm.account * 10000))*100).toFixed(2)  + "%"
+            console.log('最大账户使用率:', maxAccountUse, ' 最大止损 :', maxStopMoney, ' 一手保证金:',
+                this.calcPosForm.perOrderMargin, ' 根据最大止损算的开仓手数:', maxOrderCount1,"根据最大止损开仓占用使用率",maxOrderCount1AccoutUseRate, ' 根据最大仓位算的开仓手数:', maxOrderCount2, ' 一手止损金额:', this.calcPosForm.perOrderStopMoney,
+                ' 账户使用率:', this.calcPosForm.accountUseRate, ' 1手止损率:', this.calcPosForm.perOrderStopRate)
         },
         customColorMethod(percentage) {
             if (percentage < 50) {

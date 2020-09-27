@@ -77,7 +77,7 @@ class BacktesterEngine(BaseEngine):
         app_path = Path(__file__).parent.parent
         path1 = app_path.joinpath("cta_strategy", "strategies")
         self.load_strategy_class_from_folder(
-            path1, "vnpy.app.cta_strategy.strategies")
+            path1, "vnpy.vnpy.app.cta_strategy.strategies")
 
         path2 = Path.cwd().joinpath("strategies")
         self.load_strategy_class_from_folder(path2, "strategies")
