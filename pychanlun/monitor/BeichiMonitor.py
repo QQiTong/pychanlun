@@ -343,7 +343,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                 else:
                     # 如果 动止后 剩余数量 小于1手，将持仓状态设置为止盈
                     print(symbol, period, "动止后数量为小于1直接止盈")
-                    winEndPercent = round(((float(close_price) - last_fire['price']) / last_fire['price']) * marginLevel, 2)
+                    winEndPercent = abs(round(((float(close_price) - last_fire['price']) / last_fire['price']) * marginLevel, 2))
                     # 止盈已实现盈亏
                     win_end_money = round(last_fire['per_order_margin'] * last_fire['amount'] * winEndPercent, 2)
                     # 止盈比率
