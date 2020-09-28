@@ -49,7 +49,7 @@ class MergedStick:
     high_high_price: float
     high_price: float
     direction: DirectionType
-    sticks: List[Stick]
+    sticks: List[Stick] = []
 
     def __int__(self, stick: Stick, direction: DirectionType):
         self.sticks = [stick]
@@ -67,6 +67,7 @@ class MergedStick:
         self.low_price = min(self.low_price, stick.low_price) if self.direction == DirectionType.DOWN else max(self.low_price, stick.low_price)
         self.high_high_price = max(self.high_high_price, stick.high_price)
         self.high_price = max(self.high_price, stick.high_price) if self.direction == DirectionType.UP else min(self.high_price, stick.high_price)
+        self.sticks.append(stick)
 
 
 # 分型
@@ -78,7 +79,7 @@ class Fractal:
     high_high_price: float
     high_price: float
     fractal_type: FractalType
-    merged_sticks = List[MergedStick]
+    merged_sticks: List[MergedStick] = []
 
     def __init__(self, stick1: MergedStick, stick2: MergedStick, stick3: MergedStick, fractal_type: FractalType):
         self.merged_sticks = [stick1, stick2, stick3]
@@ -87,3 +88,30 @@ class Fractal:
         self.high_high_price = max(stick1.high_high_price, stick2.high_high_price, stick3.high_high_price)
         self.high_price = max(stick1.high_price, stick2.high_price, stick3.high_price)
         self.fractal_type = fractal_type
+
+
+# 笔
+class Bi:
+    fractal_start: Fractal
+    fractal_connection: MergedStick = []
+    fractal_end: Fractal
+
+
+class ChanlunData:
+    sticks: List[Stick] = []
+    merged_sticks: List[MergedStick] = []
+
+    def on_stick(self, dt: int, open_price: float, close_price: float, low_price: float, high_price: float, volume: float, amount: float):
+        stick = Stick(dt, open_price, close_price, low_price, high_price, volume, amount)
+        self.sticks.append(stick)
+        # 合并K线计算
+        if len(self.merged_sticks) == 0:
+            self.merged_sticks.append(MergedStick(stick, DirectionType.UP))
+        else:
+            last_merged_stick = self.merged_sticks[-1]
+            if stick.high_price > last_merged_stick and stick.low_price > last_merged_stick.low_price:
+                self.merged_sticks.append(MergedStick(stick, DirectionType.UP))
+            elif stick.high_price < last_merged_stick.high_price and stick.low_price < last_merged_stick.low_price:
+                self.merged_sticks.append(MergedStick(stick, DirectionType.DOWN))
+            else:
+                last_merged_stick.add(stick)
