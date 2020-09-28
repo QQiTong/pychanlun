@@ -1184,7 +1184,7 @@ def run(**kwargs):
     chunks = pydash.chunk(symbol_list, 10)
     for chunk in chunks:
         thread_list.append(
-            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m'])))
+            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m','3m', '5m', '15m'])))
     # chunks = pydash.chunk(global_future_symbol, 10)
     # for chunk in chunks:
     #     thread_list.append(

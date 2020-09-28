@@ -1040,8 +1040,8 @@ def testGetFutureSignalList():
 
 def testDynamicProfit():
     statisticList = {}
-    startDate = '2020-09-19'
-    endDate = '2020-09-26'
+    startDate = '2020-09-21'
+    endDate = '2020-09-28'
     end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     start = datetime.strptime(startDate, "%Y-%m-%d")
@@ -1077,6 +1077,8 @@ def testDynamicProfit():
         df.loc[idx, 'simple_symbol'] = simple_symbol
 
     win_end_group_by_date = df['win_end_money'][df.status != 'exception'].groupby(df['new_date_created'])
+    per_order_margin_group_by_date = df['per_order_margin'][df.status != 'exception'].groupby(df['new_date_created'])
+    per_order_amount_group_by_date = df['amount'][df.status != 'exception'].groupby(df['new_date_created'])
     lose_end_group_by_date = df['lose_end_money'][df.status != 'exception'].groupby(df['new_date_created'])
     #
     win_end_group_by_symbol = df['win_end_money'][df.status != 'exception'].groupby(df['simple_symbol'])
@@ -1096,12 +1098,27 @@ def testDynamicProfit():
                 for k in range(len(item[j])):
                     dynamic_win_sum = dynamic_win_sum + item[j][k]['stop_win_money']
         dynamic_win_list.append(int(dynamic_win_sum))
-    print(dynamic_win_list)
+    # print(dynamic_win_list)
     # print(win_end_group_by_symbol.sum())
     # print(lose_end_group_by_symbol.sum())
 
-    print(win_end_group_by_date.sum())
-    print(lose_end_group_by_date.sum())
+    # print(win_end_group_by_date.sum())
+    # print(lose_end_group_by_date.sum())
+    # print(list(per_order_margin_group_by_date))
+    # print(list(per_order_amount_group_by_date))
+    per_order_margin_group_by_date_list = list(per_order_margin_group_by_date)
+    per_order_amount_group_by_date_list = list(per_order_amount_group_by_date)
+    # 总保证金
+    total_margin_list = []
+
+    for i in range(len(per_order_margin_group_by_date_list)):
+        item_margin = per_order_margin_group_by_date_list[i][1]
+        item_amount = per_order_amount_group_by_date_list[i][1]
+        total_margin_sum = item_margin * item_amount
+        # print("保证金\n",item_margin,"数量\n" ,item_amount,"总保证金\n",total_margin_sum.sum())
+        total_margin_list.append(int(total_margin_sum.sum()))
+    print(total_margin_list)
+
     # 日期列表
     dateList = []
     # 当日盈利累加
@@ -1137,7 +1154,18 @@ def testDynamicProfit():
     # print(win_symbol_list, win_money_list)
     # print(lose_symbol_list, lose_money_list)
     print(win_end_list)
-
+    statisticList = {
+        'date': dateList,
+        'win_end_list': win_end_list,
+        'lose_end_list': lose_end_list,
+        'net_profit_list': net_profit_list,
+        'win_money_list': win_money_list,
+        'lose_money_list': lose_money_list,
+        'win_symbol_list': win_symbol_list,
+        'lose_symbol_list': lose_symbol_list,
+        'total_margin_list': total_margin_list
+    }
+    print(statisticList)
 
 
 def app():

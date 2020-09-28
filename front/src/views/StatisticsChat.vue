@@ -100,6 +100,11 @@
             <div class="statistic-echarts-list">
                 <div class="profit-chart" id="profit-chart-parent">
                     <div id="profit-chart"/>
+
+                </div>
+                <div class="margin-chart" id="margin-chart-parent">
+                    <div id="margin-chart"/>
+
                 </div>
                 <div class="pie-chart-list">
                     <div id="win-pie-chart-parent" class="pie-chart">
@@ -131,6 +136,7 @@
                 profitChart: null,
                 winPiechart: null,
                 losePieChart: null,
+                marginChart: null,
                 totalNetProfit: 0,
                 winloseRate: 0,
                 pickerOptions: {
@@ -206,6 +212,7 @@
                 })
             },
             processData() {
+                let that = this
                 // 盈利列表
                 this.profitChart.setOption({
                     backgroundColor: '#12161c',
@@ -246,7 +253,7 @@
                         textStyle: {
                             color: '#fff'
                         },
-                        data: ['盈利', '亏损', '净盈利']
+                        data: ['盈利', '亏损', '净盈利', '总保证金']
                     },
                     calculable: true,
                     xAxis: [{
@@ -383,6 +390,146 @@
                         }
                     ]
                 })
+                // 保证金列表
+                this.marginChart.setOption({
+                    backgroundColor: '#12161c',
+                    title: {
+                        text: '每日保证金占用（最大仓位）',
+                        x: '20',
+                        top: '20',
+                        textStyle: {
+                            color: '#fff',
+                            fontSize: '22'
+                        },
+                        subtextStyle: {
+                            color: '#fff',
+                            fontSize: '16'
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            textStyle: {
+                                color: '#fff'
+                            }
+                        }
+                    },
+                    grid: {
+                        left: '8%',
+                        right: '5%',
+                        borderWidth: 0,
+                        top: 150,
+                        bottom: 95,
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    legend: {
+                        x: '5%',
+                        top: '10%',
+                        textStyle: {
+                            color: '#fff'
+                        },
+                        data: ['总保证金']
+                    },
+                    calculable: true,
+                    xAxis: [{
+                        type: 'category',
+                        axisLine: {
+                            lineStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        splitLine: {
+                            show: false
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        splitArea: {
+                            show: false
+                        },
+                        axisLabel: {
+                            interval: 0
+
+                        },
+                        data: this.statisticList.date
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        splitLine: {
+                            show: false
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        axisLabel: {
+                            interval: 0
+                        },
+                        splitArea: {
+                            show: false
+                        }
+                    }],
+                    dataZoom: [{
+                        show: true,
+                        height: 30,
+                        xAxisIndex: [
+                            0
+                        ],
+                        bottom: 30,
+                        start: 10,
+                        end: 80,
+                        handleIcon: 'path://M306.1,413c0,2.2-1.8,4-4,4h-59.8c-2.2,0-4-1.8-4-4V200.8c0-2.2,1.8-4,4-4h59.8c2.2,0,4,1.8,4,4V413z',
+                        handleSize: '110%',
+                        handleStyle: {
+                            color: '#d3dee5'
+
+                        },
+                        textStyle: {
+                            color: '#fff'
+                        },
+                        borderColor: '#fff'
+
+                    }, {
+                        type: 'inside',
+                        show: true,
+                        height: 15,
+                        start: 1,
+                        end: 35
+                    }],
+                    series: [{
+                        name: '保证金占用',
+                        type: 'bar',
+                        stack: 'total',
+                        barMaxWidth: 35,
+                        barGap: '10%',
+                        itemStyle: {
+                            normal: {
+                                color:
+                                    function (params) {
+                                        return parseInt((params.data / (that.$futureAccount * 10000)) * 100) > 50 ? 'rgba(255,144,128,1)' : 'rgba(0,191,183,1)'
+                                    },
+                                label: {
+                                    show: true,
+                                    textStyle: {
+                                        color: '#fff'
+                                    },
+                                    position: 'top',
+                                    formatter(p) {
+                                        return p.value + "\n\n占比" + parseInt((p.value / (that.$futureAccount * 10000)) * 100) + "%"
+                                    }
+                                }
+                            }
+                        },
+                        data: this.statisticList.total_margin
+                    }
+                    ]
+                })
 
                 // 盈利品种列表
                 this.winPiechart.setOption({
@@ -484,21 +631,27 @@
             },
             initChart() {
                 this.profitChart = this.$echarts.init(document.getElementById('profit-chart'))
+                this.marginChart = this.$echarts.init(document.getElementById('margin-chart'))
                 this.winPiechart = this.$echarts.init(document.getElementById('win-pie-chart'))
                 this.losePieChart = this.$echarts.init(document.getElementById('lose-pie-chart'))
 
                 this.chartssize(document.getElementById('profit-chart-parent'),
                     document.getElementById('profit-chart'));
+                this.chartssize(document.getElementById('margin-chart-parent'),
+                    document.getElementById('margin-chart'));
+
                 this.chartssize(document.getElementById('win-pie-chart-parent'),
                     document.getElementById('win-pie-chart'));
                 this.chartssize(document.getElementById('lose-pie-chart-parent'),
                     document.getElementById('lose-pie-chart'));
                 this.profitChart.resize()
+                this.marginChart.resize()
                 this.winPiechart.resize()
                 this.losePieChart.resize()
 
                 window.addEventListener('resize', () => {
                     this.profitChart.resize()
+                    this.marginChart.resize()
                     this.winPiechart.resize()
                     this.losePieChart.resize()
                 })
@@ -553,6 +706,7 @@
 
         .item {
             flex 1
+
             th, td {
                 width: 100px;
                 text-align: center
@@ -560,7 +714,8 @@
                 line-height 50px;
             }
         }
-        .desc{
+
+        .desc {
             margin-top 10px;
             line-height 30px;
             height 30px;
@@ -577,6 +732,11 @@
         margin-top 10px;
 
         .profit-chart {
+            height: 500px
+            width: 1000px
+        }
+
+        .margin-chart {
             height: 500px
             width: 1000px
         }

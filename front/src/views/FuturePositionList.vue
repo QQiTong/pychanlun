@@ -378,18 +378,18 @@
             </el-table-column>
             <el-table-column label="周期" prop="period" align="center"
                              :key="2"/>
-            <el-table-column label="入场时间" align="center" :key="3" width="150">
+            <el-table-column label="入场时间" align="center" :key="3" width="140">
                 <template slot-scope="{row}">
                     <span>{{ row.date_created}}</span>
                 </template>
             </el-table-column>
 
-            <el-table-column label="止盈时间" align="center" :key="29" v-if="positionQueryForm.status==='winEnd'" width="150">
+            <el-table-column label="止盈时间" align="center" :key="29" v-if="positionQueryForm.status==='winEnd'" width="140">
                 <template slot-scope="{row}">
                     <span>{{ row.win_end_time}}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="止损时间" align="center" :key="30" v-if="positionQueryForm.status==='loseEnd'" width="150">
+            <el-table-column label="止损时间" align="center" :key="30" v-if="positionQueryForm.status==='loseEnd'" width="140">
                 <template slot-scope="{row}">
                     <span>{{ row.lose_end_time}}</span>
                 </template>
@@ -590,7 +590,7 @@
 
             <!--      <el-table-column label="入场逻辑" prop="enterReason" align="center" width="300" />-->
             <!-- <el-table-column label="持仓逻辑" prop="holdReason" align="center" width="300" /> -->
-            <el-table-column label="最后更新时间" prop="last_update_time" align="center" :key="25" width="150"/>
+            <el-table-column label="最后更新时间" prop="last_update_time" align="center" :key="25" width="140"/>
             <el-table-column label="最后信号" prop="last_update_signal" align="center" width="80" :key="26"/>
             <el-table-column label="最后周期" prop="last_update_period" align="center" width="80" :key="27"/>
 

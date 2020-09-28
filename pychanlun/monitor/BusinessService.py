@@ -103,6 +103,10 @@ class BusinessService:
         win_end_group_by_symbol = df['win_end_money'][df.status != 'exception'].groupby(df['simple_symbol'])
         lose_end_group_by_symbol = df['lose_end_money'][df.status != 'exception'].groupby(df['simple_symbol'])
 
+        per_order_margin_group_by_date = df['per_order_margin'][df.status != 'exception'].groupby(df['new_date_created'])
+        per_order_amount_group_by_date = df['amount'][df.status != 'exception'].groupby(df['new_date_created'])
+
+
         # 查询 动止列表不为空的记录
         win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception')].groupby(df['new_date_created'])
         # 转化为list
@@ -118,6 +122,20 @@ class BusinessService:
                         dynamic_win_sum = dynamic_win_sum + item[j][k]['stop_win_money']
             dynamic_win_list.append(int(dynamic_win_sum))
         print(dynamic_win_list)
+
+        # 总保证金
+        total_margin_list = []
+        per_order_margin_group_by_date_list = list(per_order_margin_group_by_date)
+        per_order_amount_group_by_date_list = list(per_order_amount_group_by_date)
+        for i in range(len(per_order_margin_group_by_date_list)):
+            item_margin = per_order_margin_group_by_date_list[i][1]
+            item_amount = per_order_amount_group_by_date_list[i][1]
+            total_margin_sum = item_margin * item_amount
+            # print("保证金\n",item_margin,"数量\n" ,item_amount,"总保证金\n",total_margin_sum.sum())
+            total_margin_list.append(int(total_margin_sum.sum()))
+        print(total_margin_list)
+
+
         # print(win_end_group_by_symbol.sum())
         # print(lose_end_group_by_symbol.sum())
         # print(win_end_group_by_date.sum())
@@ -260,12 +278,13 @@ class BusinessService:
                       2)) if 'lose_end_money' in df_five_v_reverse_lose and 'win_end_money' in df_five_v_reverse_win and df_five_v_reverse_lose[
                 'lose_end_money'].sum() != 0 else 1
         }
-        print(signal_result)
+        # print(signal_result)
         statisticList = {
             'date': dateList,
             'win_end_list': win_end_list,
             'lose_end_list': lose_end_list,
             'net_profit_list': net_profit_list,
+            'total_margin': total_margin_list,
             'win_money_list': win_money_list,
             'lose_money_list': lose_money_list,
             'win_symbol_list': win_symbol_list,
