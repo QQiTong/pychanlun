@@ -71,7 +71,7 @@ class BusinessService:
         start = datetime.strptime(startDate, "%Y-%m-%d")
         start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
         data_list = DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-            "date_created": {"$gte": start, "$lte": end}
+            "date_created": {"$gte": start, "$lte": end},"status":{'$ne':'exception'}
         }).sort("_id", pymongo.ASCENDING)
         df = pd.DataFrame(list(data_list))
         # 当持仓表中没有 单子止盈过的的时候 win_end_money字段为空
@@ -98,13 +98,13 @@ class BusinessService:
             simple_symbol = symbol.rstrip(string.digits)
             df.loc[idx, 'simple_symbol'] = simple_symbol
 
-        win_end_group_by_date = df['win_end_money'][df.status != 'exception'].groupby(df['new_date_created'])
-        lose_end_group_by_date = df['lose_end_money'][df.status != 'exception'].groupby(df['new_date_created'])
-        win_end_group_by_symbol = df['win_end_money'][df.status != 'exception'].groupby(df['simple_symbol'])
-        lose_end_group_by_symbol = df['lose_end_money'][df.status != 'exception'].groupby(df['simple_symbol'])
+        win_end_group_by_date = df['win_end_money'].groupby(df['new_date_created'])
+        lose_end_group_by_date = df['lose_end_money'].groupby(df['new_date_created'])
+        win_end_group_by_symbol = df['win_end_money'].groupby(df['simple_symbol'])
+        lose_end_group_by_symbol = df['lose_end_money'].groupby(df['simple_symbol'])
 
-        per_order_margin_group_by_date = df['per_order_margin'][df.status != 'exception'].groupby(df['new_date_created'])
-        per_order_amount_group_by_date = df['amount'][df.status != 'exception'].groupby(df['new_date_created'])
+        per_order_margin_group_by_date = df['per_order_margin'].groupby(df['new_date_created'])
+        per_order_amount_group_by_date = df['amount'].groupby(df['new_date_created'])
 
 
         # 查询 动止列表不为空的记录
@@ -156,7 +156,7 @@ class BusinessService:
             # 止盈的盈利和 动止的盈利 累加
             win_end_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_list[i])
             lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
-            net_profit_list.append(int(win_end_group_by_date.sum()[i]) + int(lose_end_group_by_date.sum()[i]))
+            net_profit_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_list[i] + int(lose_end_group_by_date.sum()[i]))
 
         sorted_win_money_list = win_end_group_by_symbol.mean().sort_values(ascending=False)
         sorted_lose_money_list = lose_end_group_by_symbol.mean().sort_values(ascending=True)
