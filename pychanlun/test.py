@@ -1040,16 +1040,16 @@ def testGetFutureSignalList():
 
 def testDynamicProfit():
     statisticList = {}
-    startDate = '2020-09-27'
-    endDate = '2020-09-28'
+    startDate = '2020-09-23'
+    endDate = '2020-09-24'
     end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     start = datetime.strptime(startDate, "%Y-%m-%d")
     start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     data_list = DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end},"status":{'$ne':'exception'}
+        "date_created": {"$gte": start, "$lte": end}, "status": {'$ne': 'exception'}
     }).sort("_id", pymongo.ASCENDING)
-    print(data_list.count())
+    # print(data_list.count())
     df = pd.DataFrame(list(data_list))
     # 当持仓表中没有 单子止盈过的的时候 win_end_money字段为空
     if len(df) == 0 or 'win_end_money' not in df.columns.values or 'lose_end_money' not in df.columns.values:
@@ -1085,7 +1085,7 @@ def testDynamicProfit():
     lose_end_group_by_symbol = df['lose_end_money'].groupby(df['simple_symbol'])
     # 查询 动止列表不为空的记录
     # win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception') & (df.dynamicPositionList.notnull())].groupby(df['new_date_created'])
-    win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception')].groupby(df['new_date_created'])
+    win_end_group_by_date_dynamic =  df['dynamicPositionList'][(df.status != 'exception')].groupby(df['new_date_created']) if 'dynamicPositionList' in df else []
     # 转化为list
     win_end_group_by_date_dynamic_list = list(win_end_group_by_date_dynamic)
     # 按日期记录每天的动止盈利
@@ -1094,7 +1094,7 @@ def testDynamicProfit():
         dynamic_win_sum = 0
         item = list(win_end_group_by_date_dynamic_list[i][1])
         for j in range(len(item)):
-            if isinstance(item[j],list):
+            if isinstance(item[j], list):
                 for k in range(len(item[j])):
                     dynamic_win_sum = dynamic_win_sum + item[j][k]['stop_win_money']
         dynamic_win_list.append(int(dynamic_win_sum))
@@ -1117,7 +1117,7 @@ def testDynamicProfit():
         total_margin_sum = item_margin * item_amount
         # print("保证金\n",item_margin,"数量\n" ,item_amount,"总保证金\n",total_margin_sum.sum())
         total_margin_list.append(int(total_margin_sum.sum()))
-    print(total_margin_list)
+    # print(total_margin_list)
 
     # 日期列表
     dateList = []
@@ -1127,21 +1127,81 @@ def testDynamicProfit():
     lose_end_list = []
     # 净盈亏
     net_profit_list = []
+
+    # 盈利次数 列表
+    win_end_count_list = []
+    # 亏损次数 列表
+    lose_end_count_list = []
+    # 胜率 列表
+    win_lose_count_rate = []
+    # 盈亏比 列表
+    win_lose_money_rate = []
+
+    # 盈利单持仓天数
+    win_end_holding_day_list = []
+    # 亏损单持仓天数
+    lose_end_holding_day_list = []
+
     # 保存日期
     for name, group in win_end_group_by_date:
         dateList.append(name)
     # 保存品种简称
     for i in range(len(win_end_group_by_date.sum())):
         # 止盈的盈利和 动止的盈利 累加
-        win_end_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_list[i])
-        lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
-        net_profit_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_list[i] + int(lose_end_group_by_date.sum()[i]))
+        dynamic_win_money = 0
+        if len(dynamic_win_list)>0:
+            dynamic_win_money = dynamic_win_list[i]
 
-    sorted_win_money_list = win_end_group_by_symbol.mean().sort_values(ascending=False)
-    sorted_lose_money_list = lose_end_group_by_symbol.mean().sort_values(ascending=True)
+        win_end_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_money)
+        lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
+        net_profit_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_money + int(lose_end_group_by_date.sum()[i]))
+
+        win_lose_money_rate.append(abs(round((int(win_end_group_by_date.sum()[i]) + dynamic_win_money) /
+                                             (int(lose_end_group_by_date.sum()[i])), 2)))
+
+        win_end_count_list.append(int(win_end_group_by_date.count()[i]))
+        lose_end_count_list.append(int(lose_end_group_by_date.count()[i]))
+        win_lose_count_rate.append(round(int(win_end_group_by_date.count()[i]) /
+                                         (int(lose_end_group_by_date.count()[i]) + int(win_end_group_by_date.count()[i])), 2))
+
+    sorted_win_money_list = win_end_group_by_symbol.max().sort_values(ascending=False).dropna(axis=0)
+    sorted_lose_money_list = lose_end_group_by_symbol.max().sort_values(ascending=True).dropna(axis=0)
 
     win_symbol_list = list(sorted_win_money_list.index)
     lose_symbol_list = list(sorted_lose_money_list.index)
+
+    # print(len(win_symbol_list))
+    for i in range(len(win_symbol_list)):
+        item_list = df[(df['simple_symbol'] == win_symbol_list[i]) & (df['status'] == 'winEnd')]
+        count = 0
+        for idx, row in item_list.iterrows():
+            # 保存前一个 如果下一个 品种相同 就累加持仓天数
+            start_date = row['date_created']
+            end_date = row['win_end_time']
+            delta_days = abs((end_date - start_date).days)
+            if count == 0:
+                win_end_holding_day_list.append(delta_days)
+                print("symbol:", win_symbol_list[i], count, delta_days,i)
+            else:
+                win_end_holding_day_list[i] = (win_end_holding_day_list[i] + delta_days)
+                print("symbol:", win_symbol_list[i], count, delta_days,i)
+            count = count + 1
+    for i in range(len(lose_symbol_list)):
+        # print(win_symbol_list[i])
+        item_list = df[(df['simple_symbol'] == lose_symbol_list[i]) & (df['status'] == 'loseEnd')]
+        count = 0
+        for idx, row in item_list.iterrows():
+            start_date = row['date_created']
+            end_date = row['lose_end_time']
+            delta_days = abs((end_date - start_date).days)
+            if count == 0:
+                lose_end_holding_day_list.append(delta_days)
+                print("symbol:", lose_symbol_list[i], count, delta_days)
+            else:
+                lose_end_holding_day_list[i] = lose_end_holding_day_list[i] + delta_days
+                print("symbol:", lose_symbol_list[i], count, delta_days)
+            count = count + 1
+    print(win_end_holding_day_list, lose_end_holding_day_list)
 
     # 取整数
     win_money_list = list(sorted_win_money_list.dropna(axis=0))
@@ -1153,7 +1213,16 @@ def testDynamicProfit():
 
     # print(win_symbol_list, win_money_list)
     # print(lose_symbol_list, lose_money_list)
-    print(win_end_list)
+    # print(win_end_list)
+    # print(lose_end_list)
+    # print(win_end_count_list)
+    # print(lose_end_count_list)
+    # print(win_lose_count_rate)
+    # print(win_lose_money_rate)
+    # print(sorted_win_money_list)
+
+    # print(list(win_end_group_by_symbol))
+
     statisticList = {
         'date': dateList,
         'win_end_list': win_end_list,
@@ -1165,7 +1234,9 @@ def testDynamicProfit():
         'lose_symbol_list': lose_symbol_list,
         'total_margin_list': total_margin_list
     }
-    print(statisticList)
+    print(win_symbol_list)
+    print(lose_symbol_list)
+    # print(lose_money_list)
 
 
 def app():

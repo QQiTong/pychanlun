@@ -71,7 +71,7 @@ class BusinessService:
         start = datetime.strptime(startDate, "%Y-%m-%d")
         start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
         data_list = DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-            "date_created": {"$gte": start, "$lte": end},"status":{'$ne':'exception'}
+            "date_created": {"$gte": start, "$lte": end}, "status": {'$ne': 'exception'}
         }).sort("_id", pymongo.ASCENDING)
         df = pd.DataFrame(list(data_list))
         # 当持仓表中没有 单子止盈过的的时候 win_end_money字段为空
@@ -106,9 +106,8 @@ class BusinessService:
         per_order_margin_group_by_date = df['per_order_margin'].groupby(df['new_date_created'])
         per_order_amount_group_by_date = df['amount'].groupby(df['new_date_created'])
 
-
         # 查询 动止列表不为空的记录
-        win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception')].groupby(df['new_date_created'])
+        win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception')].groupby(df['new_date_created']) if 'dynamicPositionList' in df else []
         # 转化为list
         win_end_group_by_date_dynamic_list = list(win_end_group_by_date_dynamic)
         # 按日期记录每天的动止盈利
@@ -135,7 +134,6 @@ class BusinessService:
             total_margin_list.append(int(total_margin_sum.sum()))
         print(total_margin_list)
 
-
         # print(win_end_group_by_symbol.sum())
         # print(lose_end_group_by_symbol.sum())
         # print(win_end_group_by_date.sum())
@@ -148,21 +146,78 @@ class BusinessService:
         lose_end_list = []
         # 净盈亏
         net_profit_list = []
+
+        # 盈利次数 列表
+        win_end_count_list = []
+        # 亏损次数 列表
+        lose_end_count_list = []
+        # 胜率 列表
+        win_lose_count_rate = []
+        # 盈亏比 列表
+        win_lose_money_rate = []
+
+        # 盈利单持仓天数
+        win_end_holding_day_list = []
+        # 亏损单持仓天数
+        lose_end_holding_day_list = []
+
         # 保存日期
         for name, group in win_end_group_by_date:
             dateList.append(name)
         # 保存品种简称
         for i in range(len(win_end_group_by_date.sum())):
             # 止盈的盈利和 动止的盈利 累加
-            win_end_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_list[i])
-            lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
-            net_profit_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_list[i] + int(lose_end_group_by_date.sum()[i]))
 
-        sorted_win_money_list = win_end_group_by_symbol.mean().sort_values(ascending=False)
-        sorted_lose_money_list = lose_end_group_by_symbol.mean().sort_values(ascending=True)
+            dynamic_win_money = 0
+            if len(dynamic_win_list) > 0:
+                dynamic_win_money = dynamic_win_list[i]
+
+            win_end_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_money)
+            lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
+            net_profit_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_money + int(lose_end_group_by_date.sum()[i]))
+
+            win_lose_money_rate.append(abs(round((int(win_end_group_by_date.sum()[i]) + dynamic_win_money) /
+                                                 (int(lose_end_group_by_date.sum()[i])), 2)))
+
+            win_end_count_list.append(int(win_end_group_by_date.count()[i]))
+            lose_end_count_list.append(int(lose_end_group_by_date.count()[i]))
+            win_lose_count_rate.append(round(int(win_end_group_by_date.count()[i]) /
+                                             (int(lose_end_group_by_date.count()[i]) + int(win_end_group_by_date.count()[i])), 2))
+
+        sorted_win_money_list = win_end_group_by_symbol.max().sort_values(ascending=False).dropna(axis=0)
+        sorted_lose_money_list = lose_end_group_by_symbol.max().sort_values(ascending=True).dropna(axis=0)
 
         win_symbol_list = list(sorted_win_money_list.index)
         lose_symbol_list = list(sorted_lose_money_list.index)
+
+        for i in range(len(win_symbol_list)):
+            item_list = df[(df['simple_symbol'] == win_symbol_list[i]) & (df['status'] == 'winEnd')]
+            count = 0
+            for idx, row in item_list.iterrows():
+                # 保存前一个 如果下一个 品种相同 就累加持仓天数
+                start_date = row['date_created']
+                end_date = row['win_end_time']
+                delta_days = abs((end_date - start_date).days)
+                if count == 0:
+                    win_end_holding_day_list.append(delta_days)
+                else:
+                    win_end_holding_day_list[i] = win_end_holding_day_list[i] + delta_days
+                count = count + 1
+
+        for i in range(len(lose_symbol_list)):
+            # print(win_symbol_list[i])
+            item_list = df[(df['simple_symbol'] == lose_symbol_list[i]) & (df['status'] == 'loseEnd')]
+            count = 0
+            for idx, row in item_list.iterrows():
+                start_date = row['date_created']
+                end_date = row['lose_end_time']
+                delta_days = abs((end_date - start_date).days)
+                if count == 0:
+                    lose_end_holding_day_list.append(delta_days)
+                else:
+                    lose_end_holding_day_list[i] = lose_end_holding_day_list[i] + delta_days
+                count = count + 1
+        print(win_end_holding_day_list, lose_end_holding_day_list)
 
         # 取整数
         win_money_list = list(sorted_win_money_list.dropna(axis=0))
@@ -266,7 +321,8 @@ class BusinessService:
                 'lose_end_money'].sum() != 0 else 1,
 
             "tupo_win_lose_count_rate": round(len(df_tupo_win) / (len(df_tupo_lose) + len(df_tupo_win)), 2) if len(df_tupo_lose) != 0 else 1,
-            "tupo_win_lose_money_rate": abs(round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(), 2)) if 'win_end_money' in df_tupo_win and 'lose_end_money' in df_tupo_lose and df_tupo_lose[
+            "tupo_win_lose_money_rate": abs(
+                round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(), 2)) if 'win_end_money' in df_tupo_win and 'lose_end_money' in df_tupo_lose and df_tupo_lose[
                 'lose_end_money'].sum() != 0 else 1,
 
             # "v_reverse_win_lose_count_rate": round(len(df_v_reverse_win) / len(df_v_reverse_lose),2) if len(df_v_reverse_lose) != 0 else 1,
@@ -289,7 +345,13 @@ class BusinessService:
             'lose_money_list': lose_money_list,
             'win_symbol_list': win_symbol_list,
             'lose_symbol_list': lose_symbol_list,
-            'signal_result': signal_result
+            'signal_result': signal_result,
+            'win_end_count_list': win_end_count_list,
+            'lose_end_count_list': lose_end_count_list,
+            'win_lose_count_rate': win_lose_count_rate,
+            'win_lose_money_rate': win_lose_money_rate,
+            'win_end_holding_day_list': win_end_holding_day_list,
+            'lose_end_holding_day_list': lose_end_holding_day_list
         }
         return statisticList
 

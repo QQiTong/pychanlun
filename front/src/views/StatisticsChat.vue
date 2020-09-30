@@ -102,6 +102,9 @@
                     <div id="profit-chart"/>
 
                 </div>
+                <div class="common-chart" id="win-lose-count-rate-chart-parent">
+                    <div id="win-lose-count-rate-chart"/>
+                </div>
                 <div class="margin-chart" id="margin-chart-parent">
                     <div id="margin-chart"/>
 
@@ -131,14 +134,19 @@
         data() {
             return {
                 statisticList: null,
+                loseEndCountListNegative: [], // 将亏损数目取反用于图表显示
                 signal_result: {},
                 dateRange: [],
                 profitChart: null,
                 winPiechart: null,
                 losePieChart: null,
                 marginChart: null,
+                winLoseCountRateChart: null,
                 totalNetProfit: 0,
-                winloseRate: 0,
+                totalExchangeCount: 0, // 交易频数
+                winLoseCountRate: 0, // 胜率
+                evWinLoseCountRate: [0, 0], // 根据胜率计算出正期望的盈亏比,根据盈亏比计算出正期望的胜率
+                winloseRate: 0, // 当前盈亏比
                 pickerOptions: {
                     shortcuts: [{
                         text: '最近一周',
@@ -196,16 +204,32 @@
                     this.statisticList = res
                     this.signal_result = res.signal_result
                     this.totalNetProfit = 0
+                    this.totalExchangeCount = 0
                     let totalWin = 0
                     let totalLose = 0
+
                     this.winloseRate = 0
                     for (let i = 0; i < this.statisticList.net_profit_list.length; i++) {
                         let item = this.statisticList.net_profit_list[i]
                         totalWin += this.statisticList.win_end_list[i]
                         totalLose += this.statisticList.lose_end_list[i]
                         this.totalNetProfit += item
+                        this.totalExchangeCount += this.statisticList.win_end_count_list[i] + this.statisticList.lose_end_count_list[i]
                     }
-                    this.winloseRate = Math.abs((totalWin / totalLose).toFixed(2))
+                    let win_end_count = this.statisticList.win_end_count_list.reduce((sum, number) => {
+                        return sum + number;
+                    })
+                    let lose_end_count = this.statisticList.lose_end_count_list.reduce((sum, number) => {
+                        return sum + number;
+                    })
+                    this.loseEndCountListNegative = this.statisticList.lose_end_count_list.map(item => -item)
+                    console.log(this.loseEndCountListNegative)
+
+                    this.winLoseCountRate = win_end_count / (win_end_count + lose_end_count)
+                    this.winloseRate = Math.abs((totalWin / totalLose).toFixed(1))
+
+                    this.evWinLoseCountRate[0] = 1 / (1 + this.winloseRate)
+                    this.evWinLoseCountRate[1] = Math.abs(1 - (1 / this.winLoseCountRate))
                     this.processData()
                 }).catch((error) => {
                     console.log('获取统计图表失败:', error)
@@ -217,7 +241,7 @@
                 this.profitChart.setOption({
                     backgroundColor: '#12161c',
                     title: {
-                        text: '统计结果：净利润：' + this.totalNetProfit + ' 盈亏比:' + this.winloseRate,
+                        text: '净盈利：' + this.totalNetProfit + '    盈亏比:  ' + this.winloseRate + "    正期望胜率需 > " + (this.evWinLoseCountRate[0] * 100).toFixed(1) + "%",
                         x: '20',
                         top: '20',
                         textStyle: {
@@ -253,7 +277,7 @@
                         textStyle: {
                             color: '#fff'
                         },
-                        data: ['盈利', '亏损', '净盈利', '总保证金']
+                        data: ['盈利', '亏损', '净盈利']
                     },
                     calculable: true,
                     xAxis: [{
@@ -305,8 +329,8 @@
                             0
                         ],
                         bottom: 30,
-                        start: 10,
-                        end: 80,
+                        start: 0,
+                        end: 100,
                         handleIcon: 'path://M306.1,413c0,2.2-1.8,4-4,4h-59.8c-2.2,0-4-1.8-4-4V200.8c0-2.2,1.8-4,4-4h59.8c2.2,0,4,1.8,4,4V413z',
                         handleSize: '110%',
                         handleStyle: {
@@ -329,7 +353,7 @@
                         name: '盈利',
                         type: 'bar',
                         stack: 'total',
-                        barMaxWidth: 35,
+                        barMaxWidth: 40,
                         barGap: '10%',
                         itemStyle: {
                             normal: {
@@ -353,16 +377,17 @@
                             name: '亏损',
                             type: 'bar',
                             stack: 'total',
+                            barMaxWidth: 40,
                             itemStyle: {
                                 normal: {
                                     color: 'rgba(0,191,183,1)',
                                     barBorderRadius: 0,
                                     label: {
                                         show: true,
-                                        position: 'top',
-                                        formatter(p) {
-                                            return p.value > 0 ? p.value : ''
-                                        }
+                                        textStyle: {
+                                            color: '#fff'
+                                        },
+                                        position: 'insideTop',
                                     }
                                 }
                             },
@@ -380,9 +405,10 @@
                                     label: {
                                         show: true,
                                         position: 'top',
-                                        // formatter(p) {
-                                        //     return p.value > 0 ? p.value : p.value
-                                        // }
+                                        formatter(p) {
+                                            return that.statisticList.win_end_list[p.dataIndex] - that.statisticList.lose_end_list[p.dataIndex] +
+                                                "\n\n 盈亏比" + Math.abs((that.statisticList.win_end_list[p.dataIndex] / that.statisticList.lose_end_list[p.dataIndex])).toFixed(1)
+                                        }
                                     }
                                 }
                             },
@@ -390,11 +416,191 @@
                         }
                     ]
                 })
+                // 胜率列表
+
+                this.winLoseCountRateChart.setOption({
+                    backgroundColor: '#12161c',
+                    title: {
+                        text: '交易频数：' + this.totalExchangeCount + '   胜率:  ' + (this.winLoseCountRate * 100).toFixed(1) +
+                            "%  正期望盈亏比需 >" + this.evWinLoseCountRate[1].toFixed(1),
+                        x: '20',
+                        top: '20',
+                        textStyle: {
+                            color: '#fff',
+                            fontSize: '22'
+                        },
+                        subtextStyle: {
+                            color: '#fff',
+                            fontSize: '16'
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            textStyle: {
+                                color: '#fff'
+                            }
+                        }
+                    },
+                    grid: {
+                        left: '5%',
+                        right: '5%',
+                        borderWidth: 0,
+                        top: 150,
+                        bottom: 95,
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    legend: {
+                        x: '5%',
+                        top: '10%',
+                        textStyle: {
+                            color: '#fff'
+                        },
+                        data: ['盈利次数', '亏损次数', '胜率']
+                    },
+                    calculable: true,
+                    xAxis: [{
+                        type: 'category',
+                        axisLine: {
+                            lineStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        splitLine: {
+                            show: false
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        splitArea: {
+                            show: false
+                        },
+                        axisLabel: {
+                            interval: 0
+
+                        },
+                        data: this.statisticList.date
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        splitLine: {
+                            show: false
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        axisLabel: {
+                            interval: 0
+                        },
+                        splitArea: {
+                            show: false
+                        }
+                    }],
+                    dataZoom: [{
+                        show: true,
+                        height: 30,
+                        xAxisIndex: [
+                            0
+                        ],
+                        bottom: 30,
+                        start: 0,
+                        end: 100,
+                        handleIcon: 'path://M306.1,413c0,2.2-1.8,4-4,4h-59.8c-2.2,0-4-1.8-4-4V200.8c0-2.2,1.8-4,4-4h59.8c2.2,0,4,1.8,4,4V413z',
+                        handleSize: '110%',
+                        handleStyle: {
+                            color: '#d3dee5'
+
+                        },
+                        textStyle: {
+                            color: '#fff'
+                        },
+                        borderColor: '#fff'
+
+                    }, {
+                        type: 'inside',
+                        show: true,
+                        height: 15,
+                        start: 1,
+                        end: 35
+                    }],
+                    series: [{
+                        name: '盈利次数',
+                        type: 'bar',
+                        stack: 'total',
+                        barMaxWidth: 40,
+                        barGap: '10%',
+                        itemStyle: {
+                            normal: {
+                                color: 'rgba(255,144,128,1)',
+                                label: {
+                                    show: true,
+                                    textStyle: {
+                                        color: '#fff'
+                                    },
+                                    position: 'insideTop',
+                                    formatter(p) {
+                                        return p.value > 0 ? p.value : ''
+                                    }
+                                }
+                            }
+                        },
+                        data: this.statisticList.win_end_count_list
+                    },
+
+                        {
+                            name: '亏损次数',
+                            type: 'bar',
+                            stack: 'total',
+                            itemStyle: {
+                                normal: {
+                                    color: 'rgba(0,191,183,1)',
+                                    barBorderRadius: 0,
+                                    label: {
+                                        show: true,
+                                        position: 'insideTop',
+                                        formatter(p) {
+                                            return p.value
+                                        }
+                                    }
+                                }
+                            },
+                            data: this.loseEndCountListNegative
+                        }, {
+                            name: '胜率',
+                            type: 'line',
+                            stack: 'total',
+                            symbolSize: 10,
+                            symbol: 'circle',
+                            itemStyle: {
+                                normal: {
+                                    color: 'rgba(252,230,48,1)',
+                                    barBorderRadius: 0,
+                                    label: {
+                                        show: true,
+                                        position: 'top',
+                                        formatter(p) {
+                                            return p.value * 100 + "%"
+                                        }
+                                    }
+                                }
+                            },
+                            data: this.statisticList.win_lose_count_rate
+                        }
+                    ]
+                })
+
                 // 保证金列表
                 this.marginChart.setOption({
                     backgroundColor: '#12161c',
                     title: {
-                        text: '每日保证金占用（最大仓位）',
+                        text: '保证金占用（最大仓位）',
                         x: '20',
                         top: '20',
                         textStyle: {
@@ -482,8 +688,8 @@
                             0
                         ],
                         bottom: 30,
-                        start: 10,
-                        end: 80,
+                        start: 0,
+                        end: 100,
                         handleIcon: 'path://M306.1,413c0,2.2-1.8,4-4,4h-59.8c-2.2,0-4-1.8-4-4V200.8c0-2.2,1.8-4,4-4h59.8c2.2,0,4,1.8,4,4V413z',
                         handleSize: '110%',
                         handleStyle: {
@@ -506,7 +712,7 @@
                         name: '保证金占用',
                         type: 'bar',
                         stack: 'total',
-                        barMaxWidth: 35,
+                        barMaxWidth: 40,
                         barGap: '10%',
                         itemStyle: {
                             normal: {
@@ -534,7 +740,7 @@
                 // 盈利品种列表
                 this.winPiechart.setOption({
                     title: {
-                        text: '平均盈利排行',
+                        text: '品种盈利排行及持仓天数',
                         top: '2%',
                         textStyle: {
                             color: 'white'
@@ -573,8 +779,16 @@
                                 normal: {
                                     color: function (params) {
                                         return '#EF5350'
+                                    },
+                                    label: {
+                                        color: "#fff",
+                                        show: true,
+                                        position: 'top',
+                                        formatter(p) {
+                                            return that.statisticList.win_end_holding_day_list[p.dataIndex] + "天"
+                                        }
                                     }
-                                }
+                                },
                             },
                         }
                     ]
@@ -582,7 +796,7 @@
                 // 亏损品种列表
                 this.losePieChart.setOption({
                     title: {
-                        text: '平均亏损排行',
+                        text: '品种亏损排行及持仓天数',
                         top: '2%',
                         textStyle: {
                             color: 'white'
@@ -613,7 +827,7 @@
                     },
                     series: [
                         {
-                            name: '亏损占比',
+                            name: '亏损排行',
                             type: 'bar',
                             data: this.statisticList.lose_money_list,
                             animationEasing: 'cubicInOut',
@@ -622,8 +836,17 @@
                                 normal: {
                                     color: function (params) {
                                         return '#26A69A'
+                                    },
+                                    label: {
+                                        color: '#fff',
+                                        show: true,
+                                        position: 'top',
+                                        formatter(p) {
+                                            return that.statisticList.lose_end_holding_day_list[p.dataIndex] + "天"
+                                        }
                                     }
-                                }
+                                },
+
                             },
                         }
                     ]
@@ -635,25 +858,34 @@
                 this.winPiechart = this.$echarts.init(document.getElementById('win-pie-chart'))
                 this.losePieChart = this.$echarts.init(document.getElementById('lose-pie-chart'))
 
+                this.winLoseCountRateChart = this.$echarts.init(document.getElementById('win-lose-count-rate-chart'))
+
                 this.chartssize(document.getElementById('profit-chart-parent'),
                     document.getElementById('profit-chart'));
                 this.chartssize(document.getElementById('margin-chart-parent'),
                     document.getElementById('margin-chart'));
 
+                this.chartssize(document.getElementById('win-lose-count-rate-chart-parent'),
+                    document.getElementById('win-lose-count-rate-chart'));
+
                 this.chartssize(document.getElementById('win-pie-chart-parent'),
                     document.getElementById('win-pie-chart'));
                 this.chartssize(document.getElementById('lose-pie-chart-parent'),
                     document.getElementById('lose-pie-chart'));
+
                 this.profitChart.resize()
                 this.marginChart.resize()
                 this.winPiechart.resize()
                 this.losePieChart.resize()
+                this.winLoseCountRateChart.resize()
 
                 window.addEventListener('resize', () => {
                     this.profitChart.resize()
                     this.marginChart.resize()
                     this.winPiechart.resize()
                     this.losePieChart.resize()
+                    this.winLoseCountRateChart.resize()
+
                 })
             },
             // 计算echarts 高度
@@ -733,12 +965,17 @@
 
         .profit-chart {
             height: 500px
-            width: 1000px
+            width: 1200px
         }
 
         .margin-chart {
             height: 500px
-            width: 1000px
+            width: 1200px
+        }
+
+        .common-chart {
+            height: 500px
+            width: 1200px
         }
 
         .pie-chart-list {
