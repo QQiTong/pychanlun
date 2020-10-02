@@ -49,10 +49,12 @@ def get_data_v2(symbol, period, end_date=None):
         length = len(data_list)
         higher_chanlun_data = data_list[-1] if length > 0 else None
         pre_duan_data = higher_chanlun_data['chanlun_data'].bi_data if higher_chanlun_data is not None else None
+        pre_higher_duan_data = higher_chanlun_data['chanlun_data'].duan_data if higher_chanlun_data is not None else None
         chanlunData = ChanlunData(kline_data.time.to_list(), kline_data.open.to_list(), kline_data.close.to_list(),
-                                  kline_data.low.to_list(), kline_data.high.to_list(), pre_duan_data)
+                                  kline_data.low.to_list(), kline_data.high.to_list(), pre_duan_data, pre_higher_duan_data)
         kline_data['bi'] = chanlunData.bi_signal_list
         kline_data['duan'] = chanlunData.duan_signal_list
+        kline_data['duan2'] = chanlunData.higher_duan_signal_list
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data, "chanlun_data": chanlunData})
     if len(data_list) == 0:
         return None
@@ -62,6 +64,7 @@ def get_data_v2(symbol, period, end_date=None):
 
     bi_data = {'date': list(map(str_from_timestamp, chanlunData.bi_data['dt'])), 'data': chanlunData.bi_data['data']}
     duan_data = {'date': list(map(str_from_timestamp, chanlunData.duan_data['dt'])), 'data': chanlunData.duan_data['data']}
+    higher_chanlun_data = {'date': list(map(str_from_timestamp, chanlunData.higher_duan_data['dt'])), 'data': chanlunData.higher_duan_data['data']}
 
     # 计算笔中枢
     entanglement_list = entanglement.CalcEntanglements(
@@ -72,6 +75,17 @@ def get_data_v2(symbol, period, end_date=None):
         list(kline_data["low"])
     )
     zs_data, zs_flag = get_zhong_shu_data(entanglement_list)
+
+    # 计算段中枢
+    if "duan2" in kline_data.columns:
+        entanglement_list2 = entanglement.CalcEntanglements(
+            list(kline_data["time_str"]),
+            list(kline_data["duan2"]),
+            list(kline_data["duan"]),
+            list(kline_data["high"]),
+            list(kline_data["low"])
+        )
+    zs_data2, zs_flag2 = get_zhong_shu_data(entanglement_list2)
 
     resp = {
         "symbol": symbol,
@@ -85,12 +99,12 @@ def get_data_v2(symbol, period, end_date=None):
         "close": kline_data.close.to_list(),
         "bidata": bi_data,
         "duandata": duan_data,
-        "higherDuanData": placeholder.higherDuanData,
+        "higherDuanData": higher_chanlun_data,
         "higherHigherDuanData": placeholder.higherHigherDuanData,
         "zsdata": zs_data,
         "zsflag": zs_flag,
-        "duan_zsdata": placeholder.duan_zsdata,
-        "duan_zsflag": placeholder.duan_zsflag,
+        "duan_zsdata": zs_data2,
+        "duan_zsflag": zs_flag2,
         "higher_duan_zsdata": [],
         "higher_duan_zsflag": [],
         "buy_zs_huila": placeholder.buy_zs_huila,
