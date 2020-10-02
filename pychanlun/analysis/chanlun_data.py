@@ -1,58 +1,35 @@
 # -*- coding: utf-8 -*-
 
-from enum import Enum
 from typing import List
+from pydash import flat_map, find
+from pychanlun.constant import Constant
 
-
-# 方向枚举
-class DirectionType(Enum):
-    # 向上方向
-    UP = 1
-    # 向下方向
-    DOWN = -1
-
-
-# 分型类型
-class FractalType(Enum):
-    # 顶分型
-    Top = 1
-    # 底分型
-    Bottom = -1
+CONSTANT = Constant()
+CONSTANT.DIRECTION_UP = 1
+CONSTANT.DIRECTION_DOWN = -1
+CONSTANT.FRACTAL_TOP = 1
+CONSTANT.FRACTAL_BOTTOM = -1
+CONSTANT.VERTEX_TOP = 1
+CONSTANT.VERTEX_BOTTOM = -1
+CONSTANT.VERTEX_NONE = 0
 
 
 # K线数据结构
 class Stick:
-    dt: int
-    open_price: float
-    close_price: float
-    low_price: float
-    high_price: float
-    volume: float
-    amount: float
 
-    def __int__(self, dt: int, open_price: float, close_price: float, low_price: float, high_price: float, volume: float, amount: float):
+    def __init__(self, idx: int, dt: int, open_price: float, close_price: float, low_price: float, high_price: float):
+        self.idx = idx
         self.dt = dt
         self.open_price = open_price
         self.close_price = close_price
         self.low_price = low_price
         self.high_price = high_price
-        self.volume = volume
-        self.amount = amount
 
 
 # 合并K线数据结构
 class MergedStick:
-    dt_start: int
-    dt_end: int
-    low_low_price: float
-    low_price: float
-    high_high_price: float
-    high_price: float
-    direction: DirectionType
-    sticks: List[Stick] = []
 
-    def __int__(self, stick: Stick, direction: DirectionType):
-        self.sticks = [stick]
+    def __init__(self, stick: Stick, direction: int):
         self.dt_start = stick.dt
         self.dt_end = stick.dt
         self.low_low_price = stick.low_price
@@ -60,58 +37,157 @@ class MergedStick:
         self.high_high_price = stick.high_price
         self.high_price = stick.high_price
         self.direction = direction
+        self.stick_list = [stick]
 
-    def add(self, stick: Stick):
+    def add_stick(self, stick: Stick):
         self.dt_end = stick.dt
         self.low_low_price = min(self.low_low_price, stick.low_price)
-        self.low_price = min(self.low_price, stick.low_price) if self.direction == DirectionType.DOWN else max(self.low_price, stick.low_price)
+        self.low_price = min(self.low_price, stick.low_price) if self.direction == CONSTANT.DIRECTION_DOWN else max(self.low_price, stick.low_price)
         self.high_high_price = max(self.high_high_price, stick.high_price)
-        self.high_price = max(self.high_price, stick.high_price) if self.direction == DirectionType.UP else min(self.high_price, stick.high_price)
-        self.sticks.append(stick)
+        self.high_price = max(self.high_price, stick.high_price) if self.direction == CONSTANT.DIRECTION_UP else min(self.high_price, stick.high_price)
+        self.stick_list.append(stick)
 
 
 # 分型
 class Fractal:
-    dt_start: int
-    dt_end: int
-    low_low_price: float
-    low_price: float
-    high_high_price: float
-    high_price: float
-    fractal_type: FractalType
-    merged_sticks: List[MergedStick] = []
 
-    def __init__(self, stick1: MergedStick, stick2: MergedStick, stick3: MergedStick, fractal_type: FractalType):
-        self.merged_sticks = [stick1, stick2, stick3]
+    def __init__(self, stick1: MergedStick, stick2: MergedStick, stick3: MergedStick, fractal_type: int):
+        self.dt_start = stick1.dt_start
+        self.dt_end = stick3.dt_end
         self.low_low_price = min(stick1.low_low_price, stick2.low_low_price, stick3.low_low_price)
         self.low_price = min(stick1.low_price, stick2.low_price, stick3.low_price)
         self.high_high_price = max(stick1.high_high_price, stick2.high_high_price, stick3.high_high_price)
         self.high_price = max(stick1.high_price, stick2.high_price, stick3.high_price)
         self.fractal_type = fractal_type
+        self.merged_stick_list = [stick1, stick2, stick3]
+        stick_list = stick1.stick_list + stick2.stick_list + stick3.stick_list
+        vertex_stick = stick_list[0]
+        for i in range(1, len(stick_list)):
+            if fractal_type == CONSTANT.FRACTAL_BOTTOM:
+                if stick_list[i].low_price < vertex_stick.low_price:
+                    vertex_stick = stick_list[i]
+            else:
+                if stick_list[i].high_price > vertex_stick.high_price:
+                    vertex_stick = stick_list[i]
+        self.vertex_stick = vertex_stick
 
 
 # 笔
 class Bi:
-    fractal_start: Fractal
-    fractal_connection: MergedStick = []
-    fractal_end: Fractal
+
+    def __init__(self):
+        self.fractal_start = None
+        self.connections = []
+        self.fractal_end = None
+        self.concrete = False
 
 
 class ChanlunData:
-    sticks: List[Stick] = []
-    merged_sticks: List[MergedStick] = []
 
-    def on_stick(self, dt: int, open_price: float, close_price: float, low_price: float, high_price: float, volume: float, amount: float):
-        stick = Stick(dt, open_price, close_price, low_price, high_price, volume, amount)
-        self.sticks.append(stick)
-        # 合并K线计算
-        if len(self.merged_sticks) == 0:
-            self.merged_sticks.append(MergedStick(stick, DirectionType.UP))
-        else:
-            last_merged_stick = self.merged_sticks[-1]
-            if stick.high_price > last_merged_stick and stick.low_price > last_merged_stick.low_price:
-                self.merged_sticks.append(MergedStick(stick, DirectionType.UP))
-            elif stick.high_price < last_merged_stick.high_price and stick.low_price < last_merged_stick.low_price:
-                self.merged_sticks.append(MergedStick(stick, DirectionType.DOWN))
+    def __init__(self, dt_list: List[int], open_price_list: List[float], close_price_list: List[float],
+                 low_price_list: List[float], high_price_list: List[float]):
+        self.stick_list = []
+        self.merged_stick_list = []
+        self.bi_list = []
+        self.bi_signal_list = []
+
+        length = len(dt_list)
+        assert len(open_price_list) == length and len(close_price_list) == length and len(low_price_list) == length and \
+            len(high_price_list) == length, "数据长度不一致"
+
+        # K线和合并K线
+        for i in range(length):
+            stick = Stick(i, dt_list[i], open_price_list[i], close_price_list[i], low_price_list[i], high_price_list[i])
+            self.stick_list.append(stick)
+            if len(self.merged_stick_list) == 0:
+                merged_stick = MergedStick(stick, CONSTANT.DIRECTION_UP)
+                self.merged_stick_list.append(merged_stick)
             else:
-                last_merged_stick.add(stick)
+                last_merged_stick = self.merged_stick_list[-1]
+                if stick.high_price > last_merged_stick.high_price and stick.low_price > last_merged_stick.low_price:
+                    # 新的向上合并K线
+                    self.merged_stick_list.append(MergedStick(stick, CONSTANT.DIRECTION_UP))
+                elif stick.high_price < last_merged_stick.high_price and stick.low_price < last_merged_stick.low_price:
+                    # 新的向下合并K线
+                    self.merged_stick_list.append(MergedStick(stick, CONSTANT.DIRECTION_DOWN))
+                else:
+                    # 有合并关系
+                    last_merged_stick.add_stick(stick)
+
+        # 遍历合并K线，生成笔
+        if len(self.merged_stick_list) > 5:
+            for i in range(2, len(self.merged_stick_list)):
+                merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[i-2:i+1]
+                # 有分型产生
+                if merged_stick3.direction != merged_stick2.direction:
+                    fractal_type = CONSTANT.FRACTAL_BOTTOM if merged_stick3.direction == CONSTANT.DIRECTION_UP else CONSTANT.FRACTAL_TOP
+                    fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, fractal_type)
+                    self.__on_fractal(fractal)
+                # 没有分型产生
+                else:
+                    self.__on_connect(merged_stick3)
+
+        bi_signal_list = [CONSTANT.VERTEX_NONE for i in range(length)]
+
+        for i in range(len(self.bi_list)):
+            bi = self.bi_list[i]
+            if i == 0:
+                vertex_stick = bi.fractal_start.vertex_stick
+                bi_signal_list[vertex_stick.idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
+            if bi.fractal_end is not None:
+                vertex_stick = bi.fractal_end.vertex_stick
+                bi_signal_list[vertex_stick.idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
+        self.bi_signal_list = bi_signal_list
+
+    # 分型部分
+    def __on_fractal(self, fractal: Fractal):
+        length = len(self.bi_list)
+        if length == 0:
+            bi = Bi()
+            bi.fractal_start = fractal
+            self.bi_list.append(bi)
+        else:
+            last_last_bi = self.bi_list[-2] if length > 1 else None
+            last_bi = self.bi_list[-1]
+            if last_bi.fractal_start.fractal_type == fractal.fractal_type:
+                if fractal.low_low_price < last_bi.fractal_start.low_low_price if \
+                        fractal.fractal_type == CONSTANT.FRACTAL_BOTTOM else  \
+                        fractal.high_high_price > last_bi.fractal_start.high_high_price:
+                    if last_last_bi is not None:
+                        last_last_bi.connections = last_last_bi.connections + last_bi.fractal_start.merged_stick_list + \
+                            last_bi.connections[:-2]
+                        last_last_bi.fractal_end = fractal
+
+                    bi = Bi()
+                    bi.fractal_start = fractal
+                    self.bi_list.pop()
+                    self.bi_list.append(bi)
+
+                else:
+                    last_bi.connections.append(fractal.merged_stick_list[-1])
+            else:
+                connections = last_bi.connections[:-2]
+                stick_list = flat_map(connections, lambda x: x.stick_list)
+                fractal_start = last_bi.fractal_start
+                fractal_end = fractal
+
+                # 计算是否有独立隔离K线的函数
+                def isolation_func(s: Stick):
+                    return s.high_price <= fractal_start.low_low_price and s.low_price >= fractal_end.high_high_price if \
+                            fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
+                            s.low_price >= fractal_start.high_high_price and s.high_price <= fractal_end.high_high_price
+                isolation = find(stick_list, isolation_func)
+                if isolation is not None:
+                    last_bi.fractal_end = fractal
+                    last_bi.connections = connections
+                    last_bi.concrete = True
+                    # 一笔结束也是一笔的开始
+                    bi = Bi()
+                    bi.fractal_start = fractal
+                    self.bi_list.append(bi)
+
+    # 分型之间的连接部分
+    def __on_connect(self, merged_stick: MergedStick):
+        length = len(self.bi_list)
+        if length > 0:
+            self.bi_list[-1].connections.append(merged_stick)

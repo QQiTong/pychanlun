@@ -19,8 +19,92 @@ from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
 from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data
 from pychanlun.config import config
+from pychanlun.analysis.chanlun_data import ChanlunData
+import pychanlun.placeholder as placeholder
 
 tz = pytz.timezone('Asia/Shanghai')
+
+
+@func_set_timeout(60)
+def get_data_v2(symbol, period, end_date=None):
+    required_period_list = get_required_period_list(period)
+    match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
+    if match_stock is not None:
+        get_instrument_data = getStockData
+    elif symbol in config['global_future_symbol'] or symbol in config['global_stock_symbol']:
+        get_instrument_data = getGlobalFutureData
+    elif 'BTC' in symbol:
+        get_instrument_data = getDigitCoinData
+    else:
+        get_instrument_data = getFutureData
+
+    data_list = []
+    required_period_list.reverse()
+    for period_one in required_period_list:
+        kline_data = get_instrument_data(symbol, period_one, end_date, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+        if kline_data is None or len(kline_data) == 0:
+            continue
+        kline_data["time_str"] = kline_data["time"] \
+            .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
+        chanlunData = ChanlunData(kline_data.time.to_list(), kline_data.open.to_list(), kline_data.close.to_list(),
+                                  kline_data.low.to_list(), kline_data.high.to_list())
+        bi_signal_list = chanlunData.bi_signal_list
+        print(bi_signal_list)
+        kline_data['bi'] = bi_signal_list
+        data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
+    if len(data_list) == 0:
+        return None
+
+    data = data_list[-1]
+    kline_data = data['kline_data']
+
+    bi_data = get_Line_data(
+        list(kline_data["time_str"]),
+        list(kline_data["bi"]),
+        list(kline_data["high"]),
+        list(kline_data["low"])
+    )
+
+    resp = {
+        "symbol": symbol,
+        "period": period,
+        "endDate": end_date,
+        "dateBigLevel": [],
+        "date": kline_data.time_str.to_list(),
+        "open": kline_data.open.to_list(),
+        "high": kline_data.high.to_list(),
+        "low": kline_data.low.to_list(),
+        "close": kline_data.close.to_list(),
+        "bidata": bi_data,
+        "duandata": placeholder.duandata,
+        "higherDuanData": placeholder.higherDuanData,
+        "higherHigherDuanData": placeholder.higherHigherDuanData,
+        "zsdata": placeholder.zsdata,
+        "zsflag": placeholder.zsflag,
+        "duan_zsdata": placeholder.duan_zsdata,
+        "duan_zsflag": placeholder.duan_zsflag,
+        "higher_duan_zsdata": [],
+        "higher_duan_zsflag": [],
+        "buy_zs_huila": placeholder.buy_zs_huila,
+        "sell_zs_huila": placeholder.sell_zs_huila,
+        "buy_zs_tupo": placeholder.buy_zs_tupo,
+        "sell_zs_tupo": placeholder.sell_zs_tupo,
+        "buy_v_reverse": placeholder.buy_v_reverse,
+        "sell_v_reverse": placeholder.sell_v_reverse,
+        "buy_five_v_reverse": placeholder.buy_five_v_reverse,
+        "sell_five_v_reverse": placeholder.sell_five_v_reverse,
+        "buy_duan_break": placeholder.buy_duan_break,
+        "sell_duan_break": placeholder.sell_duan_break,
+        'fractal': placeholder.fractal
+    }
+
+    # fractal_region = {} if fractal_region is None else fractal_region
+    # fractal_region2 = {} if fractal_region2 is None else fractal_region2
+    # resp['fractal'] = [fractal_region, fractal_region2]
+    # resp['notLower'] = calcNotLower(list(kline_data["duan"]), list(kline_data["low"]))
+    # resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["low"]))
+
+    return resp
 
 
 @func_set_timeout(60)

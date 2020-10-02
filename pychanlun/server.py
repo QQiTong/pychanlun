@@ -9,7 +9,7 @@ from func_timeout import func_timeout
 from waitress import serve
 
 import pychanlun.stock_service as stock_service
-from pychanlun.chanlun_service import get_data
+from pychanlun.chanlun_service import get_data, get_data_v2
 from pychanlun.monitor.BusinessService import businessService
 
 app = Flask(__name__)
@@ -26,6 +26,17 @@ def stock_data():
     logging.info(stopwatch)
     return Response(json.dumps(result), mimetype='application/json')
 
+
+@app.route('/api/stock_data_v2')
+def stock_data_v2():
+    period = request.args.get("period")
+    symbol = request.args.get("symbol")
+    end_date = request.args.get("endDate")
+    stopwatch = Stopwatch('/api/stock_data_v2 {} {}'.format(symbol, period, end_date))
+    result = get_data_v2(symbol, period, end_date)
+    stopwatch.stop()
+    logging.info(stopwatch)
+    return Response(json.dumps(result), mimetype='application/json')
 # --------------------------------数字货币部分------------------------------------
 
 
