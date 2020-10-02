@@ -86,18 +86,29 @@ class ChanlunData:
 
     def __init__(self, dt_list: List[int], open_price_list: List[float], close_price_list: List[float],
                  low_price_list: List[float], high_price_list: List[float]):
+
+        length = len(dt_list)
+        assert len(open_price_list) == length and len(close_price_list) == length and len(low_price_list) == length and \
+            len(high_price_list) == length, "数据长度不一致"
+        self.dt_list = dt_list
+        self.open_price_list = open_price_list
+        self.close_price_list = close_price_list
+        self.low_price_list = low_price_list
+        self.high_price_list = high_price_list
         self.stick_list = []
         self.merged_stick_list = []
         self.bi_list = []
         self.bi_signal_list = []
 
-        length = len(dt_list)
-        assert len(open_price_list) == length and len(close_price_list) == length and len(low_price_list) == length and \
-            len(high_price_list) == length, "数据长度不一致"
+        self.__prepare_sticks()
+        self.__find_bi()
 
+    # 准备K线
+    def __prepare_sticks(self):
+        length = len(self.dt_list)
         # K线和合并K线
         for i in range(length):
-            stick = Stick(i, dt_list[i], open_price_list[i], close_price_list[i], low_price_list[i], high_price_list[i])
+            stick = Stick(i, self.dt_list[i], self.open_price_list[i], self.close_price_list[i], self.low_price_list[i], self.high_price_list[i])
             self.stick_list.append(stick)
             if len(self.merged_stick_list) == 0:
                 merged_stick = MergedStick(stick, CONSTANT.DIRECTION_UP)
@@ -114,10 +125,13 @@ class ChanlunData:
                     # 有合并关系
                     last_merged_stick.add_stick(stick)
 
+    # 计算笔
+    def __find_bi(self):
+        length = len(self.dt_list)
         # 遍历合并K线，生成笔
         if len(self.merged_stick_list) > 5:
             for i in range(2, len(self.merged_stick_list)):
-                merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[i-2:i+1]
+                merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[i - 2:i + 1]
                 # 有分型产生
                 if merged_stick3.direction != merged_stick2.direction:
                     fractal_type = CONSTANT.FRACTAL_BOTTOM if merged_stick3.direction == CONSTANT.DIRECTION_UP else CONSTANT.FRACTAL_TOP
