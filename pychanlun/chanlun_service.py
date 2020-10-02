@@ -46,11 +46,12 @@ def get_data_v2(symbol, period, end_date=None):
             continue
         kline_data["time_str"] = kline_data["time"] \
             .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
+        length = len(data_list)
+        higher_chanlun_data = data_list[-1] if length > 0 else None
+        pre_duan_data = higher_chanlun_data['chanlun_data'].bi_data if higher_chanlun_data is not None else None
         chanlunData = ChanlunData(kline_data.time.to_list(), kline_data.open.to_list(), kline_data.close.to_list(),
-                                  kline_data.low.to_list(), kline_data.high.to_list())
-        bi_signal_list = chanlunData.bi_signal_list
-        kline_data['bi'] = bi_signal_list
-        data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
+                                  kline_data.low.to_list(), kline_data.high.to_list(), pre_duan_data)
+        data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data, "chanlun_data": chanlunData})
     if len(data_list) == 0:
         return None
 
@@ -58,6 +59,7 @@ def get_data_v2(symbol, period, end_date=None):
     kline_data = data['kline_data']
 
     bi_data = {'date': list(map(str_from_timestamp, chanlunData.bi_data['dt'])), 'data': chanlunData.bi_data['data']}
+    duan_data = {'date': list(map(str_from_timestamp, chanlunData.duan_data['dt'])), 'data': chanlunData.duan_data['data']}
 
     resp = {
         "symbol": symbol,
@@ -70,7 +72,7 @@ def get_data_v2(symbol, period, end_date=None):
         "low": kline_data.low.to_list(),
         "close": kline_data.close.to_list(),
         "bidata": bi_data,
-        "duandata": placeholder.duandata,
+        "duandata": duan_data,
         "higherDuanData": placeholder.higherDuanData,
         "higherHigherDuanData": placeholder.higherHigherDuanData,
         "zsdata": placeholder.zsdata,
