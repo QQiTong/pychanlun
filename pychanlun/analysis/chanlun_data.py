@@ -225,6 +225,11 @@ class ChanlunData:
                 fractal_start = last_bi.fractal_start
                 fractal_end = fractal
 
+                # # 顶底波动区间不能接触
+                if min(fractal_start.high_high_price, fractal_end.high_high_price) >= max(fractal_start.low_low_price, fractal_end.low_low_price):
+                    last_bi.connections.append(fractal.merged_stick_list[-1])
+                    return
+
                 # 是不是低点
                 if len(connections) > 0:
                     if fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM:
