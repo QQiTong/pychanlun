@@ -149,7 +149,8 @@ class ChanlunData:
         else:
             last_last_bi = self.bi_list[-2] if length > 1 else None
             last_bi = self.bi_list[-1]
-            if last_bi.fractal_start.fractal_type == fractal.fractal_type:
+            if fractal.fractal_type == last_bi.fractal_start.fractal_type:
+                # 最后正式的笔继续延伸
                 if fractal.low_low_price < last_bi.fractal_start.low_low_price if \
                         fractal.fractal_type == CONSTANT.FRACTAL_BOTTOM else  \
                         fractal.high_high_price > last_bi.fractal_start.high_high_price:
@@ -162,10 +163,22 @@ class ChanlunData:
                     bi.fractal_start = fractal
                     self.bi_list.pop()
                     self.bi_list.append(bi)
-
+                # 新的笔酝酿中
                 else:
                     last_bi.connections.append(fractal.merged_stick_list[-1])
             else:
+                # 破坏了前一笔了，也看成是新的一笔产生了（特殊处理）
+                if last_last_bi is not None:
+                    if fractal.low_low_price < last_last_bi.fractal_start.low_low_price if fractal.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
+                            fractal.high_high_price > last_last_bi.fractal_start.high_high_price:
+                        last_bi.fractal_end = fractal
+                        last_bi.connections = last_bi.connections[:-2]
+                        last_bi.concrete = True
+                        bi = Bi()
+                        bi.fractal_start = fractal
+                        self.bi_list.append(bi)
+                        return
+                # 正常处理
                 connections = last_bi.connections[:-2]
                 stick_list = flat_map(connections, lambda x: x.stick_list)
                 fractal_start = last_bi.fractal_start
@@ -175,7 +188,7 @@ class ChanlunData:
                 def isolation_func(s: Stick):
                     return s.high_price <= fractal_start.low_low_price and s.low_price >= fractal_end.high_high_price if \
                             fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
-                            s.low_price >= fractal_start.high_high_price and s.high_price <= fractal_end.high_high_price
+                            s.low_price >= fractal_start.high_high_price and s.high_price <= fractal_end.low_low_price
                 isolation = find(stick_list, isolation_func)
                 if isolation is not None:
                     last_bi.fractal_end = fractal
@@ -185,6 +198,8 @@ class ChanlunData:
                     bi = Bi()
                     bi.fractal_start = fractal
                     self.bi_list.append(bi)
+                else:
+                    last_bi.connections.append(fractal.merged_stick_list[-1])
 
     # 分型之间的连接部分
     def __on_connect(self, merged_stick: MergedStick):

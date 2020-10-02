@@ -49,7 +49,6 @@ def get_data_v2(symbol, period, end_date=None):
         chanlunData = ChanlunData(kline_data.time.to_list(), kline_data.open.to_list(), kline_data.close.to_list(),
                                   kline_data.low.to_list(), kline_data.high.to_list())
         bi_signal_list = chanlunData.bi_signal_list
-        print(bi_signal_list)
         kline_data['bi'] = bi_signal_list
         data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data})
     if len(data_list) == 0:
