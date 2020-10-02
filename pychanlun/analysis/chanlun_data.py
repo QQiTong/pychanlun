@@ -244,9 +244,15 @@ class ChanlunData:
 
                 # 计算是否有独立隔离K线的函数
                 def isolation_func(s: Stick):
-                    return s.high_price <= fractal_start.low_low_price and s.low_price >= fractal_end.high_high_price if \
+                    return s.high_price <= fractal_start.low_price and s.low_price >= fractal_end.high_price if \
                             fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
-                            s.low_price >= fractal_start.high_high_price and s.high_price <= fractal_end.low_low_price
+                            s.low_price >= fractal_start.high_price and s.high_price <= fractal_end.low_price
+
+                def isolation_func2(s: MergedStick):
+                    return s.high_price <= fractal_start.low_price and s.low_price >= fractal_end.high_price if \
+                            fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
+                            s.low_price >= fractal_start.high_price and s.high_price <= fractal_end.low_price
+
                 isolation = find(stick_list, isolation_func)
                 if isolation is not None:
                     last_bi.fractal_end = fractal
@@ -257,7 +263,17 @@ class ChanlunData:
                     bi.fractal_start = fractal
                     self.bi_list.append(bi)
                 else:
-                    last_bi.connections.append(fractal.merged_stick_list[-1])
+                    isolation2 = find(connections, isolation_func2)
+                    if isolation2 is not None:
+                        last_bi.fractal_end = fractal
+                        last_bi.connections = connections
+                        last_bi.concrete = True
+                        # 一笔结束也是一笔的开始
+                        bi = Bi()
+                        bi.fractal_start = fractal
+                        self.bi_list.append(bi)
+                    else:
+                        last_bi.connections.append(fractal.merged_stick_list[-1])
 
     # 分型之间的连接部分
     def __on_connect(self, merged_stick: MergedStick):
