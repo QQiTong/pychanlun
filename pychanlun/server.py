@@ -22,6 +22,7 @@ def stock_data():
     end_date = request.args.get("endDate")
     stopwatch = Stopwatch('/api/stock_data {} {}'.format(symbol, period, end_date))
     result = get_data(symbol, period, end_date)
+    # result = get_data_v2(symbol, period, end_date)
     stopwatch.stop()
     logging.info(stopwatch)
     return Response(json.dumps(result), mimetype='application/json')

@@ -243,7 +243,7 @@ class ChanlunData:
         if self.pre_duan_data is not None:
             self.__find_duan_with_pre_duan()
         else:
-            pass
+            self.__find_duan_normal()
 
     # 高级别的笔作为本级别的段的画法
     def __find_duan_with_pre_duan(self):
@@ -275,3 +275,7 @@ class ChanlunData:
                 self.duan_data['dt'].append(self.dt_list[i])
                 self.duan_data['data'].append(self.high_price_list[i])
                 self.duan_data['vertex_type'].append(duan_signal_list[i])
+
+    def __find_duan_normal(self):
+        duan_signal_list = [CONSTANT.VERTEX_NONE for i in range(len(self.dt_list))]
+        self.duan_signal_list = duan_signal_list
