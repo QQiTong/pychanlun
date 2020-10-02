@@ -15,7 +15,7 @@ from loguru import logger
 
 from pychanlun.DingMsg import DingMsg
 from pychanlun.Mail import Mail
-from pychanlun.chanlun_service import get_data
+from pychanlun.chanlun_service import get_data_v2
 from pychanlun.config import config
 from pychanlun.db import DBPyChanlun
 from pychanlun.monitor.BusinessService import businessService
@@ -575,7 +575,7 @@ def monitor_futures_and_digitcoin(symbol_list, period_list):
 
 
 async def get_chanlun_data(symbol, period):
-    return get_data(symbol, period)
+    return get_data_v2(symbol, period)
 
 
 async def do_monitoring(symbol, period):
