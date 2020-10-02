@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import List
-from pydash import flat_map, find, key_by
+from pydash import flat_map, find, min_by, max_by
 from pychanlun.constant import Constant
 
 CONSTANT = Constant()
@@ -224,6 +224,23 @@ class ChanlunData:
                 stick_list = flat_map(connections, lambda x: x.stick_list)
                 fractal_start = last_bi.fractal_start
                 fractal_end = fractal
+
+                # 是不是低点
+                if len(connections) > 0:
+                    if fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM:
+                        e = min_by(connections, 'low_low_price')
+                        # 不是笔中的低点，不会成立笔
+                        if fractal.low_low_price > e.low_low_price:
+                            last_bi.connections.append(fractal.merged_stick_list[-1])
+                            return
+                    else:
+                        e = max_by(connections, 'high_high_price')
+                        if fractal.high_high_price < e.high_high_price:
+                            last_bi.connections.append(fractal.merged_stick_list[-1])
+                            return
+                else:
+                    last_bi.connections.append(fractal.merged_stick_list[-1])
+                    return
 
                 # 计算是否有独立隔离K线的函数
                 def isolation_func(s: Stick):

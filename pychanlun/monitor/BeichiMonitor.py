@@ -1181,6 +1181,7 @@ def run(**kwargs):
     signal.signal(signal.SIGINT, signal_hanlder)
     symbol_list, dominantSymbolInfoList = getDominantSymbol()
     thread_list = []
+    logger.info("监控标的数量: {}".format(len(symbol_list)))
     chunks = pydash.chunk(symbol_list, 10)
     for chunk in chunks:
         thread_list.append(
