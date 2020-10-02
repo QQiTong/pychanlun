@@ -1,6 +1,9 @@
 import pydash
+import pytz
+import datetime
 
 PERIODS = ["1m", "3m", "5m", "15m", "30m", "60m", "180m", "1d", "3d"]
+TZ = pytz.timezone('Asia/Shanghai')
 
 
 def get_required_period_list(period):
@@ -32,3 +35,7 @@ def get_zhong_shu_data(entanglement_list):
             zs_flag.append(1)
             zs_data.append([[e.startTime, e.bottom], [e.endTime, e.top]])
     return zs_data, zs_flag
+
+
+def str_from_timestamp(t):
+    return datetime.datetime.fromtimestamp(t, tz=TZ).strftime("%Y-%m-%d %H:%M")

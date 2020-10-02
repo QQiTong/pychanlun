@@ -85,7 +85,7 @@ class Bi:
 class ChanlunData:
 
     def __init__(self, dt_list: List[int], open_price_list: List[float], close_price_list: List[float],
-                 low_price_list: List[float], high_price_list: List[float]):
+                 low_price_list: List[float], high_price_list: List[float], pre_duan_data: List[int] = None):
 
         length = len(dt_list)
         assert len(open_price_list) == length and len(close_price_list) == length and len(low_price_list) == length and \
@@ -95,10 +95,17 @@ class ChanlunData:
         self.close_price_list = close_price_list
         self.low_price_list = low_price_list
         self.high_price_list = high_price_list
+        self.pre_duan_data = pre_duan_data
         self.stick_list = []
         self.merged_stick_list = []
         self.bi_list = []
         self.bi_signal_list = []
+        # 笔数据
+        self.bi_data = {"dt": [], "data": [], "type": []}
+        # 段数据
+        self.duan_data = {"dt": [], "data": [], "type": []}
+        # 高级别段数据
+        self.higher_duan_data = {"dt": [], "data": [], "type": []}
 
         self.__prepare_sticks()
         self.__find_bi()
@@ -152,6 +159,16 @@ class ChanlunData:
                 vertex_stick = bi.fractal_end.vertex_stick
                 bi_signal_list[vertex_stick.idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
         self.bi_signal_list = bi_signal_list
+
+        for i in range(length):
+            if bi_signal_list[i] == -1:
+                self.bi_data['dt'].append(self.dt_list[i])
+                self.bi_data['data'].append(self.low_price_list[i])
+                self.bi_data['type'].append(bi_signal_list[i])
+            elif bi_signal_list[i] == 1:
+                self.bi_data['dt'].append(self.dt_list[i])
+                self.bi_data['data'].append(self.high_price_list[i])
+                self.bi_data['type'].append(bi_signal_list[i])
 
     # 分型部分
     def __on_fractal(self, fractal: Fractal):

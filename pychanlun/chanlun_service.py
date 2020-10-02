@@ -4,7 +4,6 @@ import datetime
 import re
 import traceback
 
-import QUANTAXIS as QA
 import numpy as np
 import pandas as pd
 import pydash
@@ -21,6 +20,7 @@ from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zh
 from pychanlun.config import config
 from pychanlun.analysis.chanlun_data import ChanlunData
 import pychanlun.placeholder as placeholder
+from pychanlun.basic.util import str_from_timestamp
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -57,12 +57,7 @@ def get_data_v2(symbol, period, end_date=None):
     data = data_list[-1]
     kline_data = data['kline_data']
 
-    bi_data = get_Line_data(
-        list(kline_data["time_str"]),
-        list(kline_data["bi"]),
-        list(kline_data["high"]),
-        list(kline_data["low"])
-    )
+    bi_data = {'date': list(map(str_from_timestamp, chanlunData.bi_data['dt'])), 'data': chanlunData.bi_data['data']}
 
     resp = {
         "symbol": symbol,
