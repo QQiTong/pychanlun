@@ -68,24 +68,144 @@ def get_data_v2(symbol, period, end_date=None):
 
     # 计算笔中枢
     entanglement_list = entanglement.CalcEntanglements(
-        list(kline_data["time_str"]),
-        list(kline_data["duan"]),
-        list(kline_data["bi"]),
-        list(kline_data["high"]),
-        list(kline_data["low"])
+        kline_data.time_str.to_list(),
+        kline_data.duan.to_list(),
+        kline_data.bi.to_list(),
+        kline_data.high.to_list(),
+        kline_data.low.to_list()
     )
     zs_data, zs_flag = get_zhong_shu_data(entanglement_list)
 
     # 计算段中枢
     if "duan2" in kline_data.columns:
         entanglement_list2 = entanglement.CalcEntanglements(
-            list(kline_data["time_str"]),
-            list(kline_data["duan2"]),
-            list(kline_data["duan"]),
-            list(kline_data["high"]),
-            list(kline_data["low"])
+            kline_data.time_str.to_list(),
+            kline_data.duan2.to_list(),
+            kline_data.duan.to_list(),
+            kline_data.high.to_list(),
+            kline_data.low.to_list()
         )
     zs_data2, zs_flag2 = get_zhong_shu_data(entanglement_list2)
+
+    daily_data = get_instrument_data(symbol, "1d", end_date)
+    daily_data = pd.DataFrame(daily_data)
+    daily_data = daily_data.set_index("time")
+    ma5 = np.round(pd.Series.rolling(daily_data["close"], window=5).mean(), 2)
+    ma20 = np.round(pd.Series.rolling(daily_data["close"], window=20).mean(), 2)
+
+    # 计算买卖预警信号
+    hui_la = entanglement.la_hui(
+        entanglement_list,
+        kline_data.time_str.to_list(),
+        kline_data.high.to_list(),
+        kline_data.low.to_list(),
+        kline_data.open.to_list(),
+        kline_data.close.to_list(),
+        kline_data.bi.to_list(),
+        kline_data.duan.to_list(),
+        kline_data.duan2.to_list(),
+        ma5,
+        ma20
+    )
+    buy_zs_huila = hui_la['buy_zs_huila']
+    sell_zs_huila = hui_la['sell_zs_huila']
+
+    tu_po = entanglement.tu_po(
+        entanglement_list,
+        kline_data.time_str.to_list(),
+        kline_data.high.to_list(),
+        kline_data.low.to_list(),
+        kline_data.open.to_list(),
+        kline_data.close.to_list(),
+        kline_data.bi.to_list(),
+        kline_data.duan.to_list(),
+        kline_data.duan2.to_list(),
+        ma5,
+        ma20
+    )
+
+    buy_zs_tupo = tu_po['buy_zs_tupo']
+    sell_zs_tupo = tu_po['sell_zs_tupo']
+
+    v_reverse = entanglement.v_reverse(
+        entanglement_list,
+        kline_data.time_str.to_list(),
+        kline_data.high.to_list(),
+        kline_data.low.to_list(),
+        kline_data.open.to_list(),
+        kline_data.close.to_list(),
+        kline_data.bi.to_list(),
+        kline_data.duan.to_list(),
+        kline_data.duan2.to_list(),
+        ma5,
+        ma20
+    )
+
+    buy_v_reverse = v_reverse['buy_v_reverse']
+    sell_v_reverse = v_reverse['sell_v_reverse']
+
+    five_v_fan = entanglement.five_v_fan(
+        kline_data.time_str.to_list(),
+        kline_data.duan.to_list(),
+        kline_data.bi.to_list(),
+        kline_data.high.to_list(),
+        kline_data.low.to_list(),
+        kline_data.duan2.to_list(),
+        ma5,
+        ma20,
+    )
+
+    buy_five_v_reverse = five_v_fan['buy_five_v_reverse']
+    sell_five_v_reverse = five_v_fan['sell_five_v_reverse']
+
+    duan_pohuai = entanglement.po_huai(
+        kline_data.time_str.to_list(),
+        kline_data.high.to_list(),
+        kline_data.low.to_list(),
+        kline_data.open.to_list(),
+        kline_data.close.to_list(),
+        kline_data.bi.to_list(),
+        kline_data.duan.to_list(),
+        kline_data.duan2.to_list(),
+        ma5,
+        ma20
+    )
+
+    buy_duan_break = duan_pohuai['buy_duan_break']
+    sell_duan_break = duan_pohuai['sell_duan_break']
+
+    # 顶底分型
+    fractal_region = None
+    if len(data_list) > 1:
+        data2 = data_list[-2]
+        kline_data2 = data2["kline_data"]
+        fractal_region = FindLastFractalRegion(
+            len(kline_data2),
+            kline_data2.bi.to_list(),
+            kline_data2.time_str.to_list(),
+            kline_data2.high.to_list(),
+            kline_data2.low.to_list(),
+            kline_data2.open.to_list(),
+            kline_data2.close.to_list()
+        )
+        if fractal_region is not None:
+            fractal_region["period"] = data2["period"]
+
+    fractal_region2 = None
+    if len(data_list) > 2:
+        data3 = data_list[-3]
+        kline_data3 = data3["kline_data"]
+        fractal_region2 = FindLastFractalRegion(
+            len(kline_data3),
+            kline_data3.bi.to_list(),
+            kline_data3.time_str.to_list(),
+            kline_data3.high.to_list(),
+            kline_data3.low.to_list(),
+            kline_data3.open.to_list(),
+            kline_data3.close.to_list()
+        )
+        if fractal_region2 is not None:
+            fractal_region2["period"] = data3["period"]
 
     resp = {
         "symbol": symbol,
@@ -107,24 +227,24 @@ def get_data_v2(symbol, period, end_date=None):
         "duan_zsflag": zs_flag2,
         "higher_duan_zsdata": [],
         "higher_duan_zsflag": [],
-        "buy_zs_huila": placeholder.buy_zs_huila,
-        "sell_zs_huila": placeholder.sell_zs_huila,
-        "buy_zs_tupo": placeholder.buy_zs_tupo,
-        "sell_zs_tupo": placeholder.sell_zs_tupo,
-        "buy_v_reverse": placeholder.buy_v_reverse,
-        "sell_v_reverse": placeholder.sell_v_reverse,
-        "buy_five_v_reverse": placeholder.buy_five_v_reverse,
-        "sell_five_v_reverse": placeholder.sell_five_v_reverse,
-        "buy_duan_break": placeholder.buy_duan_break,
-        "sell_duan_break": placeholder.sell_duan_break,
+        "buy_zs_huila": buy_zs_huila,
+        "sell_zs_huila": sell_zs_huila,
+        "buy_zs_tupo": buy_zs_tupo,
+        "sell_zs_tupo": sell_zs_tupo,
+        "buy_v_reverse": buy_v_reverse,
+        "sell_v_reverse": sell_v_reverse,
+        "buy_five_v_reverse": buy_five_v_reverse,
+        "sell_five_v_reverse": sell_five_v_reverse,
+        "buy_duan_break": buy_duan_break,
+        "sell_duan_break": sell_duan_break,
         'fractal': placeholder.fractal
     }
 
-    # fractal_region = {} if fractal_region is None else fractal_region
-    # fractal_region2 = {} if fractal_region2 is None else fractal_region2
-    # resp['fractal'] = [fractal_region, fractal_region2]
-    # resp['notLower'] = calcNotLower(list(kline_data["duan"]), list(kline_data["low"]))
-    # resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["low"]))
+    fractal_region = {} if fractal_region is None else fractal_region
+    fractal_region2 = {} if fractal_region2 is None else fractal_region2
+    resp['fractal'] = [fractal_region, fractal_region2]
+    resp['notLower'] = calcNotLower(kline_data.duan.to_list(), kline_data.low.to_list())
+    resp['notHigher'] = calcNotHigher(kline_data.duan.to_list(), kline_data.low.to_list())
 
     return resp
 

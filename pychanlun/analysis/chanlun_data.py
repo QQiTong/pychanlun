@@ -86,7 +86,6 @@ class ChanlunData:
 
     def __init__(self, dt_list: List[int], open_price_list: List[float], close_price_list: List[float],
                  low_price_list: List[float], high_price_list: List[float], pre_duan_data=None, pre_higher_duan_data=None):
-
         length = len(dt_list)
         assert len(open_price_list) == length and len(close_price_list) == length and len(low_price_list) == length and \
             len(high_price_list) == length, "数据长度不一致"
