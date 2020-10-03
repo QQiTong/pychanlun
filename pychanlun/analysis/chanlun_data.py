@@ -216,9 +216,30 @@ class ChanlunData:
                         fractal.fractal_type == CONSTANT.FRACTAL_BOTTOM else  \
                         fractal.high_high_price > last_bi.fractal_start.high_high_price:
                     if last_last_bi is not None:
+                        concrete = last_last_bi.concrete
                         last_last_bi.connections = last_last_bi.connections + last_bi.fractal_start.merged_stick_list + \
                             last_bi.connections[:-2]
+                        if not concrete:
+                            concrete = self.__is_concrete_bi(last_last_bi, fractal)
                         last_last_bi.fractal_end = fractal
+                        last_last_bi.concrete = concrete
+                        if len(self.bi_list) > 4 and concrete and not self.bi_list[-3].concrete:
+                            pre_bi1 = self.bi_list[-5]
+                            pre_bi2 = self.bi_list[-3]
+                            # 向下笔
+                            if pre_bi2.fractal_start.fractal_type == CONSTANT.FRACTAL_TOP:
+                                if pre_bi1.fractal_start.high_high_price >= pre_bi2.fractal_start.high_high_price:
+                                    # 需要做合并
+                                    self.bi_list.pop(-3)
+                                    self.bi_list.pop(-3)
+                                    pre_bi1.fractal_end = last_last_bi.fractal_start
+                            # 向上笔
+                            else:
+                                if pre_bi1.fractal_start.low_low_price <= pre_bi2.fractal_start.low_low_price:
+                                    # 需要做合并
+                                    self.bi_list.pop(-3)
+                                    self.bi_list.pop(-3)
+                                    pre_bi1.fractal_end = last_last_bi.fractal_start
 
                     bi = Bi()
                     bi.fractal_start = fractal
@@ -234,77 +255,93 @@ class ChanlunData:
                             fractal.high_high_price > last_last_bi.fractal_start.high_high_price:
                         last_bi.fractal_end = fractal
                         last_bi.connections = last_bi.connections[:-2]
-                        last_bi.concrete = True
+                        last_bi.concrete = self.__is_concrete_bi(last_bi, fractal)
                         bi = Bi()
                         bi.fractal_start = fractal
                         self.bi_list.append(bi)
                         return
-                # 正常处理
-                connections = last_bi.connections[:-2]
-                stick_list = flat_map(connections, lambda x: x.stick_list)
-                fractal_start = last_bi.fractal_start
-                fractal_end = fractal
 
-                # # 顶底波动区间不能接触
-                if min(fractal_start.high_high_price, fractal_end.high_high_price) >= max(fractal_start.low_low_price, fractal_end.low_low_price):
-                    last_bi.connections.append(fractal.merged_stick_list[-1])
-                    return
-
-                # 是不是低点
-                if len(connections) > 0:
-                    if fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM:
-                        e = min_by(connections, 'low_low_price')
-                        # 不是笔中的低点，不会成立笔
-                        if fractal.low_low_price > e.low_low_price:
-                            last_bi.connections.append(fractal.merged_stick_list[-1])
-                            return
-                    else:
-                        e = max_by(connections, 'high_high_price')
-                        if fractal.high_high_price < e.high_high_price:
-                            last_bi.connections.append(fractal.merged_stick_list[-1])
-                            return
-                else:
-                    last_bi.connections.append(fractal.merged_stick_list[-1])
-                    return
-
-                # 计算是否有独立隔离K线的函数
-                def isolation_func(s: Stick):
-                    return s.high_price <= fractal_start.low_price and s.low_price >= fractal_end.high_price if \
-                            fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
-                            s.low_price >= fractal_start.high_price and s.high_price <= fractal_end.low_price
-
-                def isolation_func2(s: MergedStick):
-                    return s.high_price <= fractal_start.low_price and s.low_price >= fractal_end.high_price if \
-                            fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
-                            s.low_price >= fractal_start.high_price and s.high_price <= fractal_end.low_price
-
-                isolation = find(stick_list, isolation_func)
-                if isolation is not None:
+                if self.__is_concrete_bi(last_bi, fractal):
+                    if last_last_bi is not None and not last_last_bi.concrete:
+                        if len(self.bi_list) > 3:
+                            pre_bi1 = self.bi_list[-4]
+                            pre_bi2 = self.bi_list[-2]
+                            # 向下笔
+                            if pre_bi2.fractal_start.fractal_type == CONSTANT.FRACTAL_TOP:
+                                if pre_bi1.fractal_start.high_high_price >= pre_bi2.fractal_start.high_high_price:
+                                    # 需要做合并
+                                    self.bi_list.pop(-2)
+                                    self.bi_list.pop(-2)
+                                    pre_bi1.fractal_end = last_bi.fractal_start
+                            # 向上笔
+                            else:
+                                if pre_bi1.fractal_start.low_low_price <= pre_bi2.fractal_start.low_low_price:
+                                    # 需要做合并
+                                    self.bi_list.pop(-2)
+                                    self.bi_list.pop(-2)
+                                    pre_bi1.fractal_end = last_bi.fractal_start
                     last_bi.fractal_end = fractal
-                    last_bi.connections = connections
+                    last_bi.connections = last_bi.connections[:-2]
                     last_bi.concrete = True
                     # 一笔结束也是一笔的开始
                     bi = Bi()
                     bi.fractal_start = fractal
                     self.bi_list.append(bi)
                 else:
-                    isolation2 = find(connections, isolation_func2)
-                    if isolation2 is not None:
-                        last_bi.fractal_end = fractal
-                        last_bi.connections = connections
-                        last_bi.concrete = True
-                        # 一笔结束也是一笔的开始
-                        bi = Bi()
-                        bi.fractal_start = fractal
-                        self.bi_list.append(bi)
-                    else:
-                        last_bi.connections.append(fractal.merged_stick_list[-1])
+                    last_bi.connections.append(fractal.merged_stick_list[-1])
 
     # 分型之间的连接部分
     def __on_connect(self, merged_stick: MergedStick):
         length = len(self.bi_list)
         if length > 0:
             self.bi_list[-1].connections.append(merged_stick)
+
+    @staticmethod
+    def __is_concrete_bi(last_bi: Bi, fractal: Fractal):
+        connections = last_bi.connections[:-2]
+        stick_list = flat_map(connections, lambda x: x.stick_list)
+        fractal_start = last_bi.fractal_start
+        fractal_end = fractal
+
+        # # 顶底波动区间不能接触
+        if min(fractal_start.high_high_price, fractal_end.high_high_price) >= max(fractal_start.low_low_price, fractal_end.low_low_price):
+            return False
+
+        # 是不是低点
+        if len(connections) > 0:
+            if fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM:
+                e = min_by(connections, 'low_low_price')
+                # 不是笔中的低点，不会成立笔
+                if fractal.low_low_price > e.low_low_price:
+                    return False
+            else:
+                e = max_by(connections, 'high_high_price')
+                if fractal.high_high_price < e.high_high_price:
+                    last_bi.connections.append(fractal.merged_stick_list[-1])
+                    return False
+        else:
+            return False
+
+        # 计算是否有独立隔离K线的函数
+        def isolation_func(s: Stick):
+            return s.high_price <= fractal_start.low_price and s.low_price >= fractal_end.high_price if \
+                fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
+                s.low_price >= fractal_start.high_price and s.high_price <= fractal_end.low_price
+
+        def isolation_func2(s: MergedStick):
+            return s.high_price <= fractal_start.low_price and s.low_price >= fractal_end.high_price if \
+                fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
+                s.low_price >= fractal_start.high_price and s.high_price <= fractal_end.low_price
+
+        isolation = find(stick_list, isolation_func)
+        if isolation is not None:
+            return True
+        else:
+            isolation2 = find(connections, isolation_func2)
+            if isolation2 is not None:
+                return True
+            else:
+                return False
 
     def __find_duan(self):
         if self.pre_duan_data is not None:
