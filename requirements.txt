@@ -10,7 +10,6 @@ ratelimit
 waitress
 click
 pytdx
-tqsdk
 pyecharts
 scipy==1.1.0
 matplotlib

@@ -551,8 +551,8 @@ def getDominantSymbol():
 is_run = True
 
 
-def signal_hanlder(signalnum, frame):
-    logger.info("正在停止程序。")
+def signal_handler(signalnum, frame):
+    logger.info("正在停止程序。", signalnum, frame)
     global is_run
     is_run = False
 
@@ -1174,7 +1174,8 @@ async def calStopWinCount(symbol, period, positionInfo, closePrice):
 def run(**kwargs):
     global dominant_symbol_info_list
     is_loop = kwargs.get("loop")
-    signal.signal(signal.SIGINT, signal_hanlder)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     symbol_list, dominant_symbol_info_list = getDominantSymbol()
 
     logger.info("监控标的数量: {}".format(len(symbol_list)))
@@ -1205,6 +1206,7 @@ def run(**kwargs):
         threading.Thread(target=worker).start()
 
     q.join()
+
     stop_watch.stop()
     logger.info(stop_watch)
 
