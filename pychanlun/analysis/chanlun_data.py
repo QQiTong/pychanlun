@@ -172,6 +172,11 @@ class ChanlunData:
                             last_bi.connections = []
                             last_last_bi.fractal_end = dummy_fractal
 
+        for i in range(len(self.bi_list) - 1, 0, -1):
+            if self.bi_list[i].concrete:
+                break
+            self.bi_list.pop()
+
         bi_signal_list = [CONSTANT.VERTEX_NONE for i in range(length)]
 
         for i in range(len(self.bi_list)):
