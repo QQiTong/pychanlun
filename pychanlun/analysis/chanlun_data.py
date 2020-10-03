@@ -151,6 +151,23 @@ class ChanlunData:
                 # 没有分型产生
                 else:
                     self.__on_connect(merged_stick3)
+            # 处理最后一笔不会延伸到顶点的问题
+            if len(self.bi_list) > 1:
+                last_last_bi, last_bi = self.bi_list[-2:]
+                if last_bi.fractal_end is None:
+                    if last_bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM:
+                        if self.merged_stick_list[-1].low_low_price < last_bi.fractal_start.low_low_price:
+                            merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[-3:]
+                            dummy_fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, CONSTANT.FRACTAL_BOTTOM)
+                            last_bi.fractal_start = dummy_fractal
+                            last_last_bi.fractal_end = dummy_fractal
+                    else:
+                        if self.merged_stick_list[-1].high_high_price > last_bi.fractal_start.high_high_price:
+                            merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[-3:]
+                            dummy_fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, CONSTANT.FRACTAL_TOP)
+                            last_bi.fractal_start = dummy_fractal
+                            last_bi.connections = []
+                            last_last_bi.fractal_end = dummy_fractal
 
         bi_signal_list = [CONSTANT.VERTEX_NONE for i in range(length)]
 

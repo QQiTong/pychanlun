@@ -22,4 +22,3 @@ et_stopwatch
 func_timeout
 pytz
 colorama
-matplotlib
