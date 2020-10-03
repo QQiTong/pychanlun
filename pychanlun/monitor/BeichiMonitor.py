@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+import math
+import queue
 import signal
 import threading
 import traceback
@@ -19,7 +21,6 @@ from pychanlun.chanlun_service import get_data_v2
 from pychanlun.config import config
 from pychanlun.db import DBPyChanlun
 from pychanlun.monitor.BusinessService import businessService
-import math
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -48,7 +49,7 @@ futureLevelMap = {
     '60m': ['1d', '3d'],
     '180m': ['3d', '3d'],
 }
-dominantSymbolInfoList = {}
+dominant_symbol_info_list = {}
 
 # 期货公司在原有保证金基础上1%
 marginLevelCompany = 0.01
@@ -543,12 +544,11 @@ def getDominantSymbol():
         dominantSymbol = df[-1]
         dominantSymbolList.append(dominantSymbol)
         dominantSymbolInfo = rq.instruments(dominantSymbol)
-        dominantSymbolInfoList[dominantSymbol] = dominantSymbolInfo.__dict__
-    return dominantSymbolList, dominantSymbolInfoList
+        dominant_symbol_info_list[dominantSymbol] = dominantSymbolInfo.__dict__
+    return dominantSymbolList, dominant_symbol_info_list
 
 
 is_run = True
-is_loop = True
 
 
 def signal_hanlder(signalnum, frame):
@@ -561,16 +561,12 @@ def monitor_futures_and_digitcoin(symbol_list, period_list):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    while is_run:
-        tasks = []
-        for i in range(len(symbol_list)):
-            for j in range(len(period_list)):
-                task = asyncio.ensure_future(do_monitoring(symbol_list[i], period_list[j]))
-                tasks.append(task)
-        loop.run_until_complete(asyncio.wait(tasks))
-        if not is_loop:
-            break
-
+    tasks = []
+    for i in range(len(symbol_list)):
+        for j in range(len(period_list)):
+            task = asyncio.ensure_future(do_monitoring(symbol_list[i], period_list[j]))
+            tasks.append(task)
+    loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
 
 
@@ -1115,8 +1111,8 @@ async def calMaxOrderCount(dominantSymbol, openPrice, stopPrice, period, signal)
     # 内盘期货
     else:
         account = futuresAccount
-        margin_rate = dominantSymbolInfoList[dominantSymbol]['margin_rate']
-        contract_multiplier = dominantSymbolInfoList[dominantSymbol]['contract_multiplier']
+        margin_rate = dominant_symbol_info_list[dominantSymbol]['margin_rate']
+        contract_multiplier = dominant_symbol_info_list[dominantSymbol]['contract_multiplier']
         # 计算1手需要的保证金
         perOrderMargin = int(openPrice * contract_multiplier * (margin_rate + marginLevelCompany))
         # 1手止损的金额
@@ -1176,29 +1172,39 @@ async def calStopWinCount(symbol, period, positionInfo, closePrice):
 
 
 def run(**kwargs):
-    global is_loop
+    global dominant_symbol_info_list
     is_loop = kwargs.get("loop")
     signal.signal(signal.SIGINT, signal_hanlder)
-    symbol_list, dominantSymbolInfoList = getDominantSymbol()
-    thread_list = []
+    symbol_list, dominant_symbol_info_list = getDominantSymbol()
+
     logger.info("监控标的数量: {}".format(len(symbol_list)))
-    chunks = pydash.chunk(symbol_list, 10)
-    for chunk in chunks:
-        thread_list.append(
-            threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['1m','3m', '5m', '15m'])))
-    # chunks = pydash.chunk(global_future_symbol, 10)
-    # for chunk in chunks:
-    #     thread_list.append(
-    #         threading.Thread(target=monitor_futures_and_digitcoin, args=(chunk, ['3m', '5m', '15m', '30m', '60m'])))
+
     stop_watch = Stopwatch("总监控耗时")
-    for thread in thread_list:
-        thread.start()
-    while True:
-        for thread in thread_list:
-            if thread.is_alive():
-                break
-        else:
-            break
+
+    length = len(symbol_list)
+    maxsize = 100 if length > 100 else length
+
+    q = queue.Queue(length)
+    for i in range(length):
+        q.put(symbol_list[i])
+
+    def worker():
+        while is_run:
+            symbol_item = q.get()
+            monitor_futures_and_digitcoin([symbol_item], ['1m', '3m', '5m', '15m'])
+            q.task_done()
+
+    def dispatcher():
+        while is_run:
+            for j in range(len(symbol_list)):
+                q.put(symbol_list[j])
+
+    if is_loop:
+        threading.Thread(target=dispatcher).start()
+    for i in range(maxsize):
+        threading.Thread(target=worker).start()
+
+    q.join()
     stop_watch.stop()
     logger.info(stop_watch)
 
