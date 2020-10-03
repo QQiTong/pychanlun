@@ -8,7 +8,7 @@ import threading
 import traceback
 from datetime import datetime, timedelta
 
-import pydash
+import time
 import pymongo
 import pytz
 import rqdatac as rq
@@ -1208,6 +1208,9 @@ def run(**kwargs):
         t = threading.Thread(target=worker)
         t.setDaemon(True)
         t.start()
+
+    while is_run:
+        time.sleep(3)
 
     q.join()
 
