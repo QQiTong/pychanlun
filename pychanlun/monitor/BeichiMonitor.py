@@ -1201,9 +1201,13 @@ def run(**kwargs):
                 q.put(symbol_list[j])
 
     if is_loop:
-        threading.Thread(target=dispatcher).start()
+        t = threading.Thread(target=dispatcher)
+        t.setDaemon(True)
+        t.start()
     for i in range(maxsize):
-        threading.Thread(target=worker).start()
+        t = threading.Thread(target=worker)
+        t.setDaemon(True)
+        t.start()
 
     q.join()
 
