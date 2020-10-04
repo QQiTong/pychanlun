@@ -1209,8 +1209,9 @@ def run(**kwargs):
         t.setDaemon(True)
         t.start()
 
-    while is_run:
-        time.sleep(3)
+    if is_loop:
+        while is_run:
+            time.sleep(3)
 
     q.join()
 
