@@ -52,9 +52,9 @@ class MergedStick:
 # 分型
 class Fractal:
 
-    def __init__(self, stick1: MergedStick, stick2: MergedStick, stick3: MergedStick, fractal_type: int):
+    def __init__(self, merged_stick_list: List[MergedStick], fractal_type: int):
         self.fractal_type = fractal_type
-        self.merged_stick_list = [stick1, stick2, stick3]
+        self.merged_stick_list = merged_stick_list
 
         self.low_low_price = min_by(self.merged_stick_list, 'low_low_price').low_low_price
         self.high_high_price = max_by(self.merged_stick_list, 'high_high_price').high_high_price
@@ -76,13 +76,16 @@ class Fractal:
                     vertex_stick = stick_list[i]
         self.vertex_stick = vertex_stick
 
-    def add_additional_stick_list(self, stick_list: List[MergedStick]):
-        self.merged_stick_list = self.merged_stick_list = stick_list
+    def add_additional_stick_list(self, stick_list: List[MergedStick], before=False):
+        self.merged_stick_list = (self.merged_stick_list + stick_list) if not before else (stick_list + self.merged_stick_list)
         self.__find_vertex_stick()
         if self.fractal_type == CONSTANT.FRACTAL_BOTTOM:
             self.low_low_price = self.vertex_stick.low_price
         else:
             self.high_high_price = self.vertex_stick.high_price
+
+    def is_non_standard(self):
+        return len(self.merged_stick_list) > 3
 
 
 # 笔
@@ -167,7 +170,7 @@ class ChanlunData:
                 # 有分型产生
                 if merged_stick3.direction != merged_stick2.direction:
                     fractal_type = CONSTANT.FRACTAL_BOTTOM if merged_stick3.direction == CONSTANT.DIRECTION_UP else CONSTANT.FRACTAL_TOP
-                    fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, fractal_type)
+                    fractal = Fractal([merged_stick1, merged_stick2, merged_stick3], fractal_type)
                     self.__on_fractal(fractal)
                 else:
                     if len(self.bi_list) > 0:
@@ -196,13 +199,13 @@ class ChanlunData:
                     if last_bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM:
                         if self.merged_stick_list[-1].low_low_price < last_bi.fractal_start.low_low_price:
                             merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[-3:]
-                            dummy_fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, CONSTANT.FRACTAL_BOTTOM)
+                            dummy_fractal = Fractal([merged_stick1, merged_stick2, merged_stick3], CONSTANT.FRACTAL_BOTTOM)
                             last_bi.fractal_start = dummy_fractal
                             last_last_bi.fractal_end = dummy_fractal
                     else:
                         if self.merged_stick_list[-1].high_high_price > last_bi.fractal_start.high_high_price:
                             merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[-3:]
-                            dummy_fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, CONSTANT.FRACTAL_TOP)
+                            dummy_fractal = Fractal([merged_stick1, merged_stick2, merged_stick3], CONSTANT.FRACTAL_TOP)
                             last_bi.fractal_start = dummy_fractal
                             last_last_bi.fractal_end = dummy_fractal
 
@@ -225,7 +228,6 @@ class ChanlunData:
                 self.bi_data['dt'].append(self.dt_list[idx])
                 self.bi_data['data'].append(self.low_price_list[idx] if bi_signal_list[idx] == CONSTANT.VERTEX_BOTTOM else self.high_price_list[idx])
                 self.bi_data['vertex_type'].append(bi_signal_list[idx])
-                # self.bi_data['dt_range'].append([bi.fractal_start.dt_start, bi.fractal_start.dt_end])
                 s = self.dt_list[idx - 1] if idx - 1 >= 0 else self.dt_list[idx]
                 e = self.dt_list[idx + 1] if idx + 1 < length else self.dt_list[idx]
                 self.bi_data['dt_range'].append([s, e])
@@ -236,7 +238,6 @@ class ChanlunData:
                 self.bi_data['dt'].append(self.dt_list[idx])
                 self.bi_data['data'].append(self.low_price_list[idx] if bi_signal_list[idx] == CONSTANT.VERTEX_BOTTOM else self.high_price_list[idx])
                 self.bi_data['vertex_type'].append(bi_signal_list[idx])
-                # self.bi_data['dt_range'].append([bi.fractal_end.dt_start, bi.fractal_end.dt_end])
                 s = self.dt_list[idx - 1] if idx - 1 >= 0 else self.dt_list[idx]
                 e = self.dt_list[idx + 1] if idx + 1 < length else self.dt_list[idx]
                 self.bi_data['dt_range'].append([s, e])
@@ -267,6 +268,29 @@ class ChanlunData:
                     bi.fractal_start = fractal
                     self.bi_list.pop()
                     self.bi_list.append(bi)
+                elif last_bi.fractal_start.is_non_standard():
+                    if last_bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM:
+                        if fractal.high_high_price < last_bi.fractal_start.high_high_price:
+                            s_index = min_by(last_bi.fractal_start.merged_stick_list, 'low_low_price').idx
+                            e_index = fractal.merged_stick_list[0].idx
+                            additional_sticks = self.merged_stick_list[s_index:e_index]
+                            fractal.add_additional_stick_list(additional_sticks, before=True)
+                            last_bi.fractal_end = fractal
+                            bi = Bi()
+                            bi.fractal_start = fractal
+                            self.bi_list.pop()
+                            self.bi_list.append(bi)
+                    else:
+                        if fractal.low_low_price > last_bi.fractal_start.low_low_price:
+                            s_index = max_by(last_bi.fractal_start.merged_stick_list, 'high_high_price').idx
+                            e_index = fractal.merged_stick_list[0].idx
+                            additional_sticks = self.merged_stick_list[s_index:e_index]
+                            fractal.add_additional_stick_list(additional_sticks, before=True)
+                            last_bi.fractal_end = fractal
+                            bi = Bi()
+                            bi.fractal_start = fractal
+                            self.bi_list.pop()
+                            self.bi_list.append(bi)
             else:
                 # 破坏了前一笔了，也看成是新的一笔产生了（特殊处理）
                 if last_last_bi is not None:
