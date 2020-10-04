@@ -281,7 +281,7 @@ class ChanlunData:
                                 break
                         else:
                             if bi1.fractal_start.low_low_price <= bi3.fractal_start.low_low_price and bi1.fractal_end.high_high_price <= bi3.fractal_end.high_high_price:
-                                bi1.fractal_end = bi2.fractal_end
+                                bi1.fractal_end = bi3.fractal_end
                                 self.bi_list.pop(i)
                                 self.bi_list.pop(i-1)
                                 self.__filter_bi()
