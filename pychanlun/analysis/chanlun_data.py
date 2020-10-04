@@ -29,7 +29,8 @@ class Stick:
 # 合并K线数据结构
 class MergedStick:
 
-    def __init__(self, stick: Stick, direction: int):
+    def __init__(self, idx: int, stick: Stick, direction: int):
+        self.idx = idx
         self.dt_start = stick.dt
         self.dt_end = stick.dt
         self.low_low_price = stick.low_price
@@ -39,7 +40,7 @@ class MergedStick:
         self.direction = direction
         self.stick_list = [stick]
 
-    def add_stick(self, stick: Stick):
+    def merge_stick(self, stick: Stick):
         self.dt_end = stick.dt
         self.low_low_price = min(self.low_low_price, stick.low_price)
         self.low_price = min(self.low_price, stick.low_price) if self.direction == CONSTANT.DIRECTION_DOWN else max(self.low_price, stick.low_price)
@@ -77,11 +78,11 @@ class Bi:
 
     def __init__(self):
         self.fractal_start = None
-        self.connections = []
         self.fractal_end = None
         self.concrete = False
 
 
+# 缠论分析
 class ChanlunData:
 
     def __init__(self, dt_list: List[int], open_price_list: List[float], close_price_list: List[float],
@@ -89,6 +90,7 @@ class ChanlunData:
         length = len(dt_list)
         assert len(open_price_list) == length and len(close_price_list) == length and len(low_price_list) == length and \
             len(high_price_list) == length, "数据长度不一致"
+
         self.dt_list = dt_list
         self.open_price_list = open_price_list
         self.close_price_list = close_price_list
@@ -96,12 +98,14 @@ class ChanlunData:
         self.high_price_list = high_price_list
         self.pre_duan_data = pre_duan_data
         self.pre_higher_duan_data = pre_higher_duan_data
+
         self.stick_list = []
         self.merged_stick_list = []
         self.bi_list = []
         self.bi_signal_list = []
         self.duan_signal_list = []
         self.higher_duan_signal_list = []
+
         # 笔数据
         self.bi_data = {"dt": [], "data": [], "vertex_type": [], "dt_range": []}
         # 段数据
@@ -121,36 +125,39 @@ class ChanlunData:
         for i in range(length):
             stick = Stick(i, self.dt_list[i], self.open_price_list[i], self.close_price_list[i], self.low_price_list[i], self.high_price_list[i])
             self.stick_list.append(stick)
-            if len(self.merged_stick_list) == 0:
-                merged_stick = MergedStick(stick, CONSTANT.DIRECTION_UP)
+            merged_sticks_len = len(self.merged_stick_list)
+            if merged_sticks_len == 0:
+                merged_stick = MergedStick(merged_sticks_len, stick, CONSTANT.DIRECTION_UP)
                 self.merged_stick_list.append(merged_stick)
             else:
                 last_merged_stick = self.merged_stick_list[-1]
                 if stick.high_price > last_merged_stick.high_price and stick.low_price > last_merged_stick.low_price:
                     # 新的向上合并K线
-                    self.merged_stick_list.append(MergedStick(stick, CONSTANT.DIRECTION_UP))
+                    merged_stick = MergedStick(merged_sticks_len, stick, CONSTANT.DIRECTION_UP)
+                    self.merged_stick_list.append(merged_stick)
                 elif stick.high_price < last_merged_stick.high_price and stick.low_price < last_merged_stick.low_price:
                     # 新的向下合并K线
-                    self.merged_stick_list.append(MergedStick(stick, CONSTANT.DIRECTION_DOWN))
+                    merged_stick = MergedStick(merged_sticks_len, stick, CONSTANT.DIRECTION_DOWN)
+                    self.merged_stick_list.append(merged_stick)
                 else:
                     # 有合并关系
-                    last_merged_stick.add_stick(stick)
+                    last_merged_stick.merge_stick(stick)
 
     # 计算笔
     def __find_bi(self):
         length = len(self.dt_list)
         # 遍历合并K线，生成笔
-        if len(self.merged_stick_list) > 5:
-            for i in range(2, len(self.merged_stick_list)):
+        merged_sticks_len = len(self.merged_stick_list)
+        # 有5根以上合并K线我们才分析笔
+        if merged_sticks_len > 5:
+            for i in range(2, merged_sticks_len):
                 merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[i - 2:i + 1]
                 # 有分型产生
                 if merged_stick3.direction != merged_stick2.direction:
                     fractal_type = CONSTANT.FRACTAL_BOTTOM if merged_stick3.direction == CONSTANT.DIRECTION_UP else CONSTANT.FRACTAL_TOP
                     fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, fractal_type)
                     self.__on_fractal(fractal)
-                # 没有分型产生
-                else:
-                    self.__on_connect(merged_stick3)
+
             # 处理最后一笔不会延伸到顶点的问题
             if len(self.bi_list) > 1:
                 last_last_bi, last_bi = self.bi_list[-2:]
@@ -172,6 +179,9 @@ class ChanlunData:
                             last_bi.connections = []
                             last_last_bi.fractal_end = dummy_fractal
 
+        self.__filter_bi()
+
+        # 去掉尾部的非正式笔
         for i in range(len(self.bi_list) - 1, 0, -1):
             if self.bi_list[i].concrete:
                 break
@@ -222,91 +232,87 @@ class ChanlunData:
                         fractal.high_high_price > last_bi.fractal_start.high_high_price:
                     if last_last_bi is not None:
                         concrete = last_last_bi.concrete
-                        last_last_bi.connections = last_last_bi.connections + last_bi.fractal_start.merged_stick_list + \
-                            last_bi.connections[:-2]
                         if not concrete:
-                            concrete = self.__is_concrete_bi(last_last_bi, fractal)
+                            concrete = self.__is_concrete_bi(last_last_bi.fractal_start, fractal)
                         last_last_bi.fractal_end = fractal
                         last_last_bi.concrete = concrete
-                        if len(self.bi_list) > 4 and concrete and not self.bi_list[-3].concrete:
-                            pre_bi1 = self.bi_list[-5]
-                            pre_bi2 = self.bi_list[-3]
-                            # 向下笔
-                            if pre_bi2.fractal_start.fractal_type == CONSTANT.FRACTAL_TOP:
-                                if pre_bi1.fractal_start.high_high_price >= pre_bi2.fractal_start.high_high_price:
-                                    # 需要做合并
-                                    self.bi_list.pop(-3)
-                                    self.bi_list.pop(-3)
-                                    pre_bi1.fractal_end = last_last_bi.fractal_start
-                            # 向上笔
-                            else:
-                                if pre_bi1.fractal_start.low_low_price <= pre_bi2.fractal_start.low_low_price:
-                                    # 需要做合并
-                                    self.bi_list.pop(-3)
-                                    self.bi_list.pop(-3)
-                                    pre_bi1.fractal_end = last_last_bi.fractal_start
-
                     bi = Bi()
                     bi.fractal_start = fractal
                     self.bi_list.pop()
                     self.bi_list.append(bi)
-                # 新的笔酝酿中
-                else:
-                    last_bi.connections.append(fractal.merged_stick_list[-1])
             else:
                 # 破坏了前一笔了，也看成是新的一笔产生了（特殊处理）
                 if last_last_bi is not None:
                     if fractal.low_low_price < last_last_bi.fractal_start.low_low_price if fractal.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
                             fractal.high_high_price > last_last_bi.fractal_start.high_high_price:
                         last_bi.fractal_end = fractal
-                        last_bi.connections = last_bi.connections[:-2]
-                        last_bi.concrete = self.__is_concrete_bi(last_bi, fractal)
                         bi = Bi()
                         bi.fractal_start = fractal
                         self.bi_list.append(bi)
                         return
 
-                if self.__is_concrete_bi(last_bi, fractal):
-                    if last_last_bi is not None and not last_last_bi.concrete:
-                        if len(self.bi_list) > 3:
-                            pre_bi1 = self.bi_list[-4]
-                            pre_bi2 = self.bi_list[-2]
-                            # 向下笔
-                            if pre_bi2.fractal_start.fractal_type == CONSTANT.FRACTAL_TOP:
-                                if pre_bi1.fractal_start.high_high_price >= pre_bi2.fractal_start.high_high_price:
-                                    # 需要做合并
-                                    self.bi_list.pop(-2)
-                                    self.bi_list.pop(-2)
-                                    pre_bi1.fractal_end = last_bi.fractal_start
-                            # 向上笔
-                            else:
-                                if pre_bi1.fractal_start.low_low_price <= pre_bi2.fractal_start.low_low_price:
-                                    # 需要做合并
-                                    self.bi_list.pop(-2)
-                                    self.bi_list.pop(-2)
-                                    pre_bi1.fractal_end = last_bi.fractal_start
+                if self.__is_concrete_bi(last_bi.fractal_start, fractal):
                     last_bi.fractal_end = fractal
-                    last_bi.connections = last_bi.connections[:-2]
                     last_bi.concrete = True
                     # 一笔结束也是一笔的开始
                     bi = Bi()
                     bi.fractal_start = fractal
                     self.bi_list.append(bi)
-                else:
-                    last_bi.connections.append(fractal.merged_stick_list[-1])
 
-    # 分型之间的连接部分
-    def __on_connect(self, merged_stick: MergedStick):
+    def __filter_bi(self):
         length = len(self.bi_list)
-        if length > 0:
-            self.bi_list[-1].connections.append(merged_stick)
+        for i in range(length):
+            if self.bi_list[i].fractal_start is None or self.bi_list[i].fractal_end is None:
+                break
+            if not self.bi_list[i].concrete:
+                concrete = self.__is_concrete_bi(self.bi_list[i].fractal_start, self.bi_list[i].fractal_end)
+                if concrete:
+                    self.bi_list[i].concrete = True
+                    continue
+                if i >= 2:
+                    bi1, bi2, bi3 = self.bi_list[i-2:i+1]
+                    if bi1.fractal_end is not None and bi3.fractal_end is not None:
+                        if bi1.fractal_start.fractal_type == CONSTANT.FRACTAL_TOP:
+                            if bi1.fractal_start.high_high_price >= bi3.fractal_start.high_high_price and bi1.fractal_end.low_low_price >= bi3.fractal_end.low_low_price:
+                                bi1.fractal_end = bi3.fractal_end
+                                self.bi_list.pop(i)
+                                self.bi_list.pop(i-1)
+                                self.__filter_bi()
+                                break
+                        else:
+                            if bi1.fractal_start.low_low_price <= bi3.fractal_start.low_low_price and bi1.fractal_end.high_high_price <= bi3.fractal_end.high_high_price:
+                                bi1.fractal_end = bi2.fractal_end
+                                self.bi_list.pop(i)
+                                self.bi_list.pop(i-1)
+                                self.__filter_bi()
+                                break
+                if 1 <= i < length - 1:
+                    bi1, bi2, bi3 = self.bi_list[i-1:i+2]
+                    if bi1.fractal_end is not None and bi3.fractal_end is not None:
+                        if bi1.fractal_start.fractal_type == CONSTANT.FRACTAL_TOP:
+                            if bi1.fractal_start.high_high_price >= bi3.fractal_start.high_high_price and bi1.fractal_end.low_low_price >= bi3.fractal_end.low_low_price:
+                                bi1.fractal_end = bi3.fractal_end
+                                self.bi_list.pop(i+1)
+                                self.bi_list.pop(i)
+                                self.__filter_bi()
+                                break
+                        else:
+                            if bi1.fractal_start.low_low_price <= bi3.fractal_start.low_low_price and bi1.fractal_end.high_high_price <= bi3.fractal_end.high_high_price:
+                                bi1.fractal_end = bi3.fractal_end
+                                self.bi_list.pop(i+1)
+                                self.bi_list.pop(i)
+                                self.__filter_bi()
+                                break
 
-    @staticmethod
-    def __is_concrete_bi(last_bi: Bi, fractal: Fractal):
-        connections = last_bi.connections[:-2]
+    def __is_concrete_bi(self, fractal_start: Fractal, fractal_end: Fractal):
+        if fractal_start.fractal_type == fractal_end.fractal_type:
+            return False
+        s_index = fractal_start.merged_stick_list[-1].idx + 1
+        e_index = fractal_end.merged_stick_list[0].idx
+        if s_index >= e_index:
+            return False
+        connections = self.merged_stick_list[s_index:e_index]
         stick_list = flat_map(connections, lambda x: x.stick_list)
-        fractal_start = last_bi.fractal_start
-        fractal_end = fractal
 
         # # 顶底波动区间不能接触
         if min(fractal_start.high_high_price, fractal_end.high_high_price) >= max(fractal_start.low_low_price, fractal_end.low_low_price):
@@ -317,12 +323,11 @@ class ChanlunData:
             if fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM:
                 e = min_by(connections, 'low_low_price')
                 # 不是笔中的低点，不会成立笔
-                if fractal.low_low_price > e.low_low_price:
+                if fractal_end.low_low_price > e.low_low_price:
                     return False
             else:
                 e = max_by(connections, 'high_high_price')
-                if fractal.high_high_price < e.high_high_price:
-                    last_bi.connections.append(fractal.merged_stick_list[-1])
+                if fractal_end.high_high_price < e.high_high_price:
                     return False
         else:
             return False
