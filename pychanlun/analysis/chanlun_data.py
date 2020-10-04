@@ -254,9 +254,9 @@ class ChanlunData:
             last_bi = self.bi_list[-1]
             if fractal.fractal_type == last_bi.fractal_start.fractal_type:
                 # 最后正式的笔继续延伸
-                if fractal.low_low_price < last_bi.fractal_start.low_low_price if \
+                if fractal.low_low_price <= last_bi.fractal_start.low_low_price if \
                         fractal.fractal_type == CONSTANT.FRACTAL_BOTTOM else  \
-                        fractal.high_high_price > last_bi.fractal_start.high_high_price:
+                        fractal.high_high_price >= last_bi.fractal_start.high_high_price:
                     if last_last_bi is not None:
                         concrete = last_last_bi.concrete
                         if not concrete:
