@@ -53,24 +53,36 @@ class MergedStick:
 class Fractal:
 
     def __init__(self, stick1: MergedStick, stick2: MergedStick, stick3: MergedStick, fractal_type: int):
-        self.dt_start = stick1.dt_start
-        self.dt_end = stick3.dt_end
-        self.low_low_price = min(stick1.low_low_price, stick2.low_low_price, stick3.low_low_price)
-        self.low_price = min(stick1.low_price, stick2.low_price, stick3.low_price)
-        self.high_high_price = max(stick1.high_high_price, stick2.high_high_price, stick3.high_high_price)
-        self.high_price = max(stick1.high_price, stick2.high_price, stick3.high_price)
         self.fractal_type = fractal_type
         self.merged_stick_list = [stick1, stick2, stick3]
-        stick_list = stick1.stick_list + stick2.stick_list + stick3.stick_list
+
+        self.low_low_price = min_by(self.merged_stick_list, 'low_low_price').low_low_price
+        self.high_high_price = max_by(self.merged_stick_list, 'high_high_price').high_high_price
+        self.low_price = min_by(self.merged_stick_list, 'low_price').low_price
+        self.high_price = max_by(self.merged_stick_list, 'low_price').high_price
+        self.__find_vertex_stick()
+
+    def __find_vertex_stick(self):
+        stick_list = flat_map(self.merged_stick_list, lambda x: x.stick_list)
+        self.dt_start = stick_list[0].dt
+        self.dt_end = stick_list[-1].dt
         vertex_stick = stick_list[0]
         for i in range(1, len(stick_list)):
-            if fractal_type == CONSTANT.FRACTAL_BOTTOM:
+            if self.fractal_type == CONSTANT.FRACTAL_BOTTOM:
                 if stick_list[i].low_price < vertex_stick.low_price:
                     vertex_stick = stick_list[i]
             else:
                 if stick_list[i].high_price > vertex_stick.high_price:
                     vertex_stick = stick_list[i]
         self.vertex_stick = vertex_stick
+
+    def add_additional_stick_list(self, stick_list: List[MergedStick]):
+        self.merged_stick_list = self.merged_stick_list = stick_list
+        self.__find_vertex_stick()
+        if self.fractal_type == CONSTANT.FRACTAL_BOTTOM:
+            self.low_low_price = self.vertex_stick.low_price
+        else:
+            self.high_high_price = self.vertex_stick.high_price
 
 
 # 笔
@@ -151,12 +163,31 @@ class ChanlunData:
         # 有5根以上合并K线我们才分析笔
         if merged_sticks_len > 5:
             for i in range(2, merged_sticks_len):
-                merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[i - 2:i + 1]
+                merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[i-2:i+1]
                 # 有分型产生
                 if merged_stick3.direction != merged_stick2.direction:
                     fractal_type = CONSTANT.FRACTAL_BOTTOM if merged_stick3.direction == CONSTANT.DIRECTION_UP else CONSTANT.FRACTAL_TOP
                     fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, fractal_type)
                     self.__on_fractal(fractal)
+                else:
+                    if len(self.bi_list) > 0:
+                        last_bi = self.bi_list[-1]
+                        if last_bi.fractal_start.fractal_type == CONSTANT.FRACTAL_TOP:
+                            if merged_stick3.high_high_price > last_bi.fractal_start.high_high_price:
+                                if merged_stick3.direction == CONSTANT.DIRECTION_DOWN:
+                                    # 分型要进行延伸处理
+                                    s_index = last_bi.fractal_start.merged_stick_list[-1].idx + 1
+                                    e_index = merged_stick3.idx + 1
+                                    addition_merged_sticks = self.merged_stick_list[s_index:e_index]
+                                    last_bi.fractal_start.add_additional_stick_list(addition_merged_sticks)
+                        else:
+                            if merged_stick3.low_low_price < last_bi.fractal_start.low_low_price:
+                                if merged_stick3.direction == CONSTANT.DIRECTION_UP:
+                                    # 分型要进行延伸处理
+                                    s_index = last_bi.fractal_start.merged_stick_list[-1].idx + 1
+                                    e_index = merged_stick3.idx + 1
+                                    addition_merged_sticks = self.merged_stick_list[s_index:e_index]
+                                    last_bi.fractal_start.add_additional_stick_list(addition_merged_sticks)
 
             # 处理最后一笔不会延伸到顶点的问题
             if len(self.bi_list) > 1:
@@ -166,17 +197,13 @@ class ChanlunData:
                         if self.merged_stick_list[-1].low_low_price < last_bi.fractal_start.low_low_price:
                             merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[-3:]
                             dummy_fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, CONSTANT.FRACTAL_BOTTOM)
-                            # TODO: connections没有合并，暂时也不会有问题
                             last_bi.fractal_start = dummy_fractal
-                            last_bi.connections = []
                             last_last_bi.fractal_end = dummy_fractal
                     else:
                         if self.merged_stick_list[-1].high_high_price > last_bi.fractal_start.high_high_price:
                             merged_stick1, merged_stick2, merged_stick3 = self.merged_stick_list[-3:]
                             dummy_fractal = Fractal(merged_stick1, merged_stick2, merged_stick3, CONSTANT.FRACTAL_TOP)
-                            # TODO: connections没有合并，暂时也不会有问题
                             last_bi.fractal_start = dummy_fractal
-                            last_bi.connections = []
                             last_last_bi.fractal_end = dummy_fractal
 
         self.__filter_bi()
