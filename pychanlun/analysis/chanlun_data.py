@@ -69,10 +69,10 @@ class Fractal:
         vertex_stick = stick_list[0]
         for i in range(1, len(stick_list)):
             if self.fractal_type == CONSTANT.FRACTAL_BOTTOM:
-                if stick_list[i].low_price < vertex_stick.low_price:
+                if stick_list[i].low_price <= vertex_stick.low_price:
                     vertex_stick = stick_list[i]
             else:
-                if stick_list[i].high_price > vertex_stick.high_price:
+                if stick_list[i].high_price >= vertex_stick.high_price:
                     vertex_stick = stick_list[i]
         self.vertex_stick = vertex_stick
 
