@@ -59,7 +59,7 @@ class Fractal:
         self.low_low_price = min_by(self.merged_stick_list, 'low_low_price').low_low_price
         self.high_high_price = max_by(self.merged_stick_list, 'high_high_price').high_high_price
         self.low_price = min_by(self.merged_stick_list, 'low_price').low_price
-        self.high_price = max_by(self.merged_stick_list, 'low_price').high_price
+        self.high_price = max_by(self.merged_stick_list, 'high_price').high_price
         self.__find_vertex_stick()
 
     def __find_vertex_stick(self):
