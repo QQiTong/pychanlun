@@ -32,37 +32,15 @@ MongoDB也要先安装成Windows服务模式，参考MongoDB文档。
 
 （管理员命令行模式）
 ```cmd
-nssm install pychanlun-api-service C:/Users/Administrator/scoop/apps/python37/current/scripts/pychanlun.exe
-nssm set pychanlun-api-service AppDirectory D:/development/pychanlun
+nssm install pychanlun-api-service C:\Users\Administrator\scoop\apps\python37\current\scripts\pychanlun.exe
+nssm set pychanlun-api-service AppDirectory D:\development\pychanlun
 nssm set pychanlun-api-service AppParameters "run-api-server --port 18888"
-nssm set pychanlun-api-service AppStdout E:/logs/pychanlun.log
-nssm set pychanlun-api-service AppStderr E:/logs/pychanlun.log
+nssm set pychanlun-api-service AppEnvironmentExtra PATH=C:\Windows\System32;C:\Windows PYCHANLUN_MONGO_URL=mongodb://localhost:27017/pychanlun
+nssm set pychanlun-api-service AppStdout D:\logs\pychanlun.log
+nssm set pychanlun-api-service AppStderr D:\logs\pychanlun.log
 nssm set pychanlun-api-service DependOnService MongoDB
 net start pychanlun-api-service
 ```
-
-使用nssm部署外盘数据下载程序
-
-（管理员命令行模式）
-
-```cmd
-nssm install global-futures-downloader "pychanlun"
-nssm set global-futures-downloader AppParameters "download-global-future-data"
-nssm set global-futures-downloader DependOnService MongoDB
-nssm start global-futures-downloader
-```
-使用nssm部署okex数据下载程序
-
-（管理员命令行模式）
-
-```cmd
-nssm install global-futures-downloader "pychanlun"
-nssm set global-futures-downloader AppDirectory "D:/development/pychanlun"
-nssm set global-futures-downloader AppParameters "download-global-future-data"
-nssm set global-futures-downloader DependOnService MongoDB
-nssm start global-futures-downloader
-```
-
 
 使用nssm部署NGINX服务。
 
@@ -74,8 +52,9 @@ npm run build
 ```
 
 ```cmd
-nssm install nginx "C:/Users/Administrator/scoop/shims/nginx.exe"
-nssm set nginx AppParameters "-p D:/development/pychanlun/nginx"
+nssm install nginx "D:\scoop\shims\nginx.exe"
+nssm set nginx AppParameters "-p D:\development\pychanlun\nginx"
+nssm set nginx AppEnvironmentExtra PATH=C:\Windows\System32;C:\Windows
 net start nginx
 ```
 
