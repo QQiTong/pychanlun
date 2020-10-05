@@ -309,6 +309,14 @@ class ChanlunData:
                         bi.fractal_start = fractal
                         self.bi_list.append(bi)
                         return
+                    elif fractal.low_low_price == last_last_bi.fractal_start.low_low_price if fractal.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
+                            fractal.high_high_price == last_last_bi.fractal_start.high_high_price:
+                        if self.duan_signal_list[fractal.vertex_stick.idx] != CONSTANT.VERTEX_NONE:
+                            if len(self.bi_list) > 2:
+                                self.bi_list[-3].fractal_end = fractal
+                                self.bi_list.pop()
+                                self.bi_list.pop()
+                                return
 
                 if self.__is_concrete_bi(last_bi.fractal_start, fractal):
                     last_bi.fractal_end = fractal
