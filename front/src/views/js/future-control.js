@@ -139,11 +139,19 @@ export default {
             // 结束日期
             endDate: CommonTool.dateFormat('yyyy-MM-dd'),
             prejudgeFormMap: '',
+            // 当前多预期
+            prejudgeFormShortMap: '',
+            // 当前空预期
+            prejudgeFormLongMap: '',
             // 保存新增预判数据
             prejudgeFormList: [],
             // 保存历史预判数据
             historyPrejudgeList: [],
             historyPrejudgeMap: {},
+            // 历史多预期
+            historyPrejudgeLongMap: {},
+            // 历史空预期
+            historyPrejudgeShortMap: {},
             // 显示更新还是新增按钮
             prejudgeCreateFlag: true,
             btnPrejudgeLoading: false,
@@ -312,6 +320,22 @@ export default {
                 this.firstRequestDominant = false
             })
         },
+        createPrejudgeMap() {
+            this.prejudgeFormMap = {}
+            this.prejudgeFormLongMap = {}
+            this.prejudgeFormShortMap = {}
+            // console.log("111", this.futureSymbolList)
+            for (let i = 0; i < this.futureSymbolList.length - 1; i++) {
+                let symbolItem = this.futureSymbolList[i]
+                this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
+                this.prejudgeFormShortMap[symbolItem.order_book_id] = ''
+                this.prejudgeFormLongMap[symbolItem.order_book_id] = ''
+                this.prejudgeFormMap = {
+                    'long': this.prejudgeFormLongMap,
+                    'short': this.prejudgeFormShortMap
+                }
+            }
+        },
         getSignalList() {
             const requesting = this.$cache.get(`SIGNAL_LIST`)
             if (!requesting) {
@@ -329,13 +353,7 @@ export default {
                             this.futureSymbolList = JSON.parse(symbolList)
                             this.prejudgeFormList = JSON.parse(symbolList)
                             this.futureSymbolMap = {}
-                            this.prejudgeFormMap = {}
-                            // console.log("111", this.futureSymbolList)
-                            for (var i = 0; i < this.futureSymbolList.length - 1; i++) {
-                                let symbolItem = this.futureSymbolList[i]
-                                this.futureSymbolMap[symbolItem.order_book_id] = symbolItem
-                                this.prejudgeFormMap[symbolItem.order_book_id] = ''
-                            }
+                            this.createPrejudgeMap();
                             // 创建预判表单对象
                         }
                         // 静默更新主力合约
@@ -536,9 +554,9 @@ export default {
             if (this.calcPosForm.dynamicWinPrice != null) {
                 this.calcPosForm.dynamicWinCount = Math.ceil(this.calcPosForm.maxOrderCount * this.calcPosForm.perOrderStopMoney / (Math.abs(Number(this.calcPosForm.dynamicWinPrice) - Number(this.calcPosForm.openPrice)) * Number(this.calcPosForm.contractMultiplier) + Number(this.calcPosForm.perOrderStopMoney)))
             }
-            let maxOrderCount1AccoutUseRate = ((maxOrderCount1 * this.calcPosForm.perOrderMargin / (this.calcPosForm.account * 10000))*100).toFixed(2)  + "%"
+            let maxOrderCount1AccoutUseRate = ((maxOrderCount1 * this.calcPosForm.perOrderMargin / (this.calcPosForm.account * 10000)) * 100).toFixed(2) + "%"
             console.log('最大账户使用率:', maxAccountUse, ' 最大止损 :', maxStopMoney, ' 一手保证金:',
-                this.calcPosForm.perOrderMargin, ' 根据最大止损算的开仓手数:', maxOrderCount1,"根据最大止损开仓占用使用率",maxOrderCount1AccoutUseRate, ' 根据最大仓位算的开仓手数:', maxOrderCount2, ' 一手止损金额:', this.calcPosForm.perOrderStopMoney,
+                this.calcPosForm.perOrderMargin, ' 根据最大止损算的开仓手数:', maxOrderCount1, "根据最大止损开仓占用使用率", maxOrderCount1AccoutUseRate, ' 根据最大仓位算的开仓手数:', maxOrderCount2, ' 一手止损金额:', this.calcPosForm.perOrderStopMoney,
                 ' 账户使用率:', this.calcPosForm.accountUseRate, ' 1手止损率:', this.calcPosForm.perOrderStopRate)
         },
         customColorMethod(percentage) {
@@ -598,19 +616,20 @@ export default {
         getPrejudgeList() {
             // 如果这个日期是有数据的，就显示更新按钮，否则显示新增按钮
             futureApi.getPrejudgeList(this.endDate).then(res => {
-                if (res == -1) {
-                    // this.prejudgeCreateFlag = true
+                if (res === -1) {
                     this.prejudgeTableStatus = 'current'
+                    this.createPrejudgeMap()
                 } else {
-                    // this.prejudgeCreateFlag = false
-
                     this.prejudgeTableStatus = 'history'
-                    this.historyPrejudgeMap = res.prejudgeList
                     this.prejudgeTableId = res._id
                     this.historyPrejudgeList = []
-                    for (let x in res.prejudgeList) {
+                    for (let x in res.prejudgeList['long']) {
                         this.historyPrejudgeList.push(x)
                     }
+                    this.historyPrejudgeLongMap = res.prejudgeList['long']
+                    this.historyPrejudgeShortMap = res.prejudgeList['short']
+                    this.historyPrejudgeMap['long'] = this.historyPrejudgeLongMap
+                    this.historyPrejudgeMap['short'] = this.historyPrejudgeShortMap
                     console.log('获取预判成功:', res)
                 }
             }).catch(() => {

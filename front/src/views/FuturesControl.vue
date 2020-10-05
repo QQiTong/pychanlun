@@ -477,11 +477,21 @@
                                     </el-button>
 
                                 </el-table-column>
-                                <el-table-column label="走势预判">
+                                <el-table-column label="走势预判多">
                                     <template slot-scope="scope">
                                         <input
                                             type="text"
-                                            v-model="prejudgeFormMap[scope.row.order_book_id]"
+                                            v-model="prejudgeFormLongMap[scope.row.order_book_id]"
+                                            class="prejudge-input"
+                                            @keyup.enter="onInputChange"
+                                        />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="走势预判空">
+                                    <template slot-scope="scope">
+                                        <input
+                                            type="text"
+                                            v-model="prejudgeFormShortMap[scope.row.order_book_id]"
                                             class="prejudge-input"
                                             @keyup.enter="onInputChange"
                                         />
@@ -527,7 +537,18 @@
                                         <!-- {{historyPrejudgeMap[scope.row]}} -->
                                         <input
                                             type="text"
-                                            v-model="historyPrejudgeMap[scope.row]"
+                                            v-model="historyPrejudgeLongMap[scope.row]"
+                                            class="prejudge-input"
+                                            @keyup.enter="onInputChange"
+                                        />
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="历史走势预判">
+                                    <template slot-scope="scope">
+                                        <!-- {{historyPrejudgeMap[scope.row]}} -->
+                                        <input
+                                            type="text"
+                                            v-model="historyPrejudgeShortMap[scope.row]"
                                             class="prejudge-input"
                                             @keyup.enter="onInputChange"
                                         />
