@@ -117,9 +117,9 @@ class ChanlunData:
         self.stick_list = []
         self.merged_stick_list = []
         self.bi_list = []
-        self.bi_signal_list = []
-        self.duan_signal_list = []
-        self.higher_duan_signal_list = []
+        self.bi_signal_list = [CONSTANT.VERTEX_NONE for i in range(length)]
+        self.duan_signal_list = [CONSTANT.VERTEX_NONE for i in range(length)]
+        self.higher_duan_signal_list = [CONSTANT.VERTEX_NONE for i in range(length)]
 
         # 笔数据
         self.bi_data = {"dt": [], "data": [], "vertex_type": [], "dt_range": []}
@@ -217,31 +217,28 @@ class ChanlunData:
                 break
             self.bi_list.pop()
 
-        bi_signal_list = [CONSTANT.VERTEX_NONE for i in range(length)]
-
         for i in range(len(self.bi_list)):
             bi = self.bi_list[i]
             if i == 0:
                 vertex_stick = bi.fractal_start.vertex_stick
                 idx = vertex_stick.idx
-                bi_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
+                self.bi_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
                 self.bi_data['dt'].append(self.dt_list[idx])
-                self.bi_data['data'].append(self.low_price_list[idx] if bi_signal_list[idx] == CONSTANT.VERTEX_BOTTOM else self.high_price_list[idx])
-                self.bi_data['vertex_type'].append(bi_signal_list[idx])
+                self.bi_data['data'].append(self.low_price_list[idx] if self.bi_signal_list[idx] == CONSTANT.VERTEX_BOTTOM else self.high_price_list[idx])
+                self.bi_data['vertex_type'].append(self.bi_signal_list[idx])
                 s = self.dt_list[idx - 1] if idx - 1 >= 0 else self.dt_list[idx]
                 e = self.dt_list[idx + 1] if idx + 1 < length else self.dt_list[idx]
                 self.bi_data['dt_range'].append([s, e])
             if bi.fractal_end is not None:
                 vertex_stick = bi.fractal_end.vertex_stick
                 idx = vertex_stick.idx
-                bi_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
+                self.bi_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
                 self.bi_data['dt'].append(self.dt_list[idx])
-                self.bi_data['data'].append(self.low_price_list[idx] if bi_signal_list[idx] == CONSTANT.VERTEX_BOTTOM else self.high_price_list[idx])
-                self.bi_data['vertex_type'].append(bi_signal_list[idx])
+                self.bi_data['data'].append(self.low_price_list[idx] if self.bi_signal_list[idx] == CONSTANT.VERTEX_BOTTOM else self.high_price_list[idx])
+                self.bi_data['vertex_type'].append(self.bi_signal_list[idx])
                 s = self.dt_list[idx - 1] if idx - 1 >= 0 else self.dt_list[idx]
                 e = self.dt_list[idx + 1] if idx + 1 < length else self.dt_list[idx]
                 self.bi_data['dt_range'].append([s, e])
-        self.bi_signal_list = bi_signal_list
 
     # 分型部分
     def __on_fractal(self, fractal: Fractal):
@@ -412,7 +409,6 @@ class ChanlunData:
 
     # 高级别的笔作为本级别的段的画法
     def __find_duan_with_pre_duan(self):
-        duan_signal_list = [CONSTANT.VERTEX_NONE for i in range(len(self.dt_list))]
         i = 0
         for j in range(len(self.pre_duan_data['dt'])):
             dt_range = self.pre_duan_data['dt_range'][j]
@@ -421,10 +417,10 @@ class ChanlunData:
                 if dt_range[0] <= bi.fractal_start.vertex_stick.dt <= dt_range[1]:
                     vertex_stick = bi.fractal_start.vertex_stick
                     idx = vertex_stick.idx
-                    duan_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
+                    self.duan_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
                     self.duan_data['dt'].append(self.dt_list[idx])
-                    self.duan_data['data'].append(self.low_price_list[idx] if duan_signal_list[idx] == CONSTANT.FRACTAL_BOTTOM else self.high_price_list[idx])
-                    self.duan_data['vertex_type'].append(duan_signal_list[idx])
+                    self.duan_data['data'].append(self.low_price_list[idx] if self.duan_signal_list[idx] == CONSTANT.FRACTAL_BOTTOM else self.high_price_list[idx])
+                    self.duan_data['vertex_type'].append(self.duan_signal_list[idx])
                     s = self.dt_list[idx - 1] if idx - 1 >= 0 else self.dt_list[idx]
                     e = self.dt_list[idx + 1] if idx + 1 < len(self.dt_list) else self.dt_list[idx]
                     self.duan_data['dt_range'].append([s, e])
@@ -434,20 +430,18 @@ class ChanlunData:
                     if dt_range[0] <= bi.fractal_end.vertex_stick.dt <= dt_range[1]:
                         vertex_stick = bi.fractal_end.vertex_stick
                         idx = vertex_stick.idx
-                        duan_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
+                        self.duan_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
                         self.duan_data['dt'].append(self.dt_list[idx])
-                        self.duan_data['data'].append(self.low_price_list[idx] if duan_signal_list[idx] == CONSTANT.FRACTAL_BOTTOM else self.high_price_list[idx])
-                        self.duan_data['vertex_type'].append(duan_signal_list[idx])
+                        self.duan_data['data'].append(self.low_price_list[idx] if self.duan_signal_list[idx] == CONSTANT.FRACTAL_BOTTOM else self.high_price_list[idx])
+                        self.duan_data['vertex_type'].append(self.duan_signal_list[idx])
                         s = self.dt_list[idx - 1] if idx - 1 >= 0 else self.dt_list[idx]
                         e = self.dt_list[idx + 1] if idx + 1 < len(self.dt_list) else self.dt_list[idx]
                         self.duan_data['dt_range'].append([s, e])
                         i = k + 1
                         break
-        self.duan_signal_list = duan_signal_list
 
     def __find_duan_normal(self):
-        duan_signal_list = [CONSTANT.VERTEX_NONE for i in range(len(self.dt_list))]
-        self.duan_signal_list = duan_signal_list
+        pass
 
     def __find_higher_duan(self):
         if self.pre_higher_duan_data is not None:
@@ -456,7 +450,6 @@ class ChanlunData:
             self.__find_higher_duan_normal()
 
     def __find_higher_duan_with_pre_higher_duan(self):
-        higher_duan_signal_list = [CONSTANT.VERTEX_NONE for i in range(len(self.dt_list))]
         i = 0
         for j in range(len(self.pre_higher_duan_data['dt'])):
             dt_range = self.pre_higher_duan_data['dt_range'][j]
@@ -465,10 +458,10 @@ class ChanlunData:
                 if dt_range[0] <= bi.fractal_start.vertex_stick.dt <= dt_range[1]:
                     vertex_stick = bi.fractal_start.vertex_stick
                     idx = vertex_stick.idx
-                    higher_duan_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
+                    self.higher_duan_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
                     self.higher_duan_data['dt'].append(self.dt_list[idx])
-                    self.higher_duan_data['data'].append(self.low_price_list[idx] if higher_duan_signal_list[idx] == CONSTANT.FRACTAL_BOTTOM else self.high_price_list[idx])
-                    self.higher_duan_data['vertex_type'].append(higher_duan_signal_list[idx])
+                    self.higher_duan_data['data'].append(self.low_price_list[idx] if self.higher_duan_signal_list[idx] == CONSTANT.FRACTAL_BOTTOM else self.high_price_list[idx])
+                    self.higher_duan_data['vertex_type'].append(self.higher_duan_signal_list[idx])
                     s = self.dt_list[idx - 1] if idx - 1 >= 0 else self.dt_list[idx]
                     e = self.dt_list[idx + 1] if idx + 1 < len(self.dt_list) else self.dt_list[idx]
                     self.higher_duan_data['dt_range'].append([s, e])
@@ -478,17 +471,15 @@ class ChanlunData:
                     if dt_range[0] <= bi.fractal_end.vertex_stick.dt <= dt_range[1]:
                         vertex_stick = bi.fractal_end.vertex_stick
                         idx = vertex_stick.idx
-                        higher_duan_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
+                        self.higher_duan_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
                         self.higher_duan_data['dt'].append(self.dt_list[idx])
-                        self.higher_duan_data['data'].append(self.low_price_list[idx] if higher_duan_signal_list[idx] == CONSTANT.FRACTAL_BOTTOM else self.high_price_list[idx])
-                        self.higher_duan_data['vertex_type'].append(higher_duan_signal_list[idx])
+                        self.higher_duan_data['data'].append(self.low_price_list[idx] if self.higher_duan_signal_list[idx] == CONSTANT.FRACTAL_BOTTOM else self.high_price_list[idx])
+                        self.higher_duan_data['vertex_type'].append(self.higher_duan_signal_list[idx])
                         s = self.dt_list[idx - 1] if idx - 1 >= 0 else self.dt_list[idx]
                         e = self.dt_list[idx + 1] if idx + 1 < len(self.dt_list) else self.dt_list[idx]
                         self.higher_duan_data['dt_range'].append([s, e])
                         i = k + 1
                         break
-        self.higher_duan_signal_list = higher_duan_signal_list
 
     def __find_higher_duan_normal(self):
-        higher_duan_signal_list = [CONSTANT.VERTEX_NONE for i in range(len(self.dt_list))]
-        self.higher_duan_signal_list = higher_duan_signal_list
+        pass
