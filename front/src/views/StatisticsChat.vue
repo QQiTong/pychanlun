@@ -216,13 +216,19 @@
                         this.totalNetProfit += item
                         this.totalExchangeCount += this.statisticList.win_end_count_list[i] + this.statisticList.lose_end_count_list[i]
                     }
-                    let win_end_count = this.statisticList.win_end_count_list.reduce((sum, number) => {
-                        return sum + number;
-                    })
-                    let lose_end_count = this.statisticList.lose_end_count_list.reduce((sum, number) => {
-                        return sum + number;
-                    })
-                    this.loseEndCountListNegative = this.statisticList.lose_end_count_list.map(item => -item)
+                    let win_end_count = 0
+                    if (this.statisticList.win_end_count_list.length !== 0) {
+                        win_end_count = this.statisticList.win_end_count_list.reduce((sum, number) => {
+                            return sum + number;
+                        })
+                    }
+                    let lose_end_count = 0
+                    if (this.statisticList.lose_end_count_list.length !== 0) {
+                        lose_end_count = this.statisticList.lose_end_count_list.reduce((sum, number) => {
+                            return sum + number;
+                        })
+                        this.loseEndCountListNegative = this.statisticList.lose_end_count_list.map(item => -item)
+                    }
                     console.log(this.loseEndCountListNegative)
 
                     this.winLoseCountRate = win_end_count / (win_end_count + lose_end_count)

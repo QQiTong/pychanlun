@@ -84,7 +84,10 @@ class BusinessService:
                 'win_money_list': [],
                 'lose_money_list': [],
                 'win_symbol_list': [],
-                'lose_symbol_list': []
+                'lose_symbol_list': [],
+                'win_end_count_list': [],
+                'lose_end_count_list': [],
+                'signal_result': []
             }
 
         for idx, row in df.iterrows():
@@ -177,7 +180,7 @@ class BusinessService:
             net_profit_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_money + int(lose_end_group_by_date.sum()[i]))
 
             win_lose_money_rate.append(abs(round((int(win_end_group_by_date.sum()[i]) + dynamic_win_money) /
-                                                 (int(lose_end_group_by_date.sum()[i])), 2)) if lose_end_group_by_date.sum()[i] !=0 else 0)
+                                                 (int(lose_end_group_by_date.sum()[i])), 2)) if lose_end_group_by_date.sum()[i] != 0 else 0)
 
             win_end_count_list.append(int(win_end_group_by_date.count()[i]))
             lose_end_count_list.append(int(lose_end_group_by_date.count()[i]))
