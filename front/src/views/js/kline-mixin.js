@@ -2387,6 +2387,115 @@ export default {
                 this.marginPrice = (this.contractMultiplier * this.currentPrice / this.marginLevel).toFixed(2)
             }
 
+            let higherBottomPrice = 0
+            let higherHigherBottomPrice = 0
+            let higherTopPrice = 0
+            let higherHigherTopPrice = 0
+            if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === 1) {
+                higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
+                // 高级别分型线
+                let markLineFractal = {
+                    yAxis: higherBottomPrice,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'dashed',
+                            width: 1,
+                            color: this.echartsConfig.higherColor
+                        },
+                    },
+                    symbol: 'circle',
+                    symbolSize: 1,
+                    label: {
+                        normal: {
+                            color: this.echartsConfig.higherColor,
+                            formatter: '顶: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
+                            position: 'insideMiddleTop'
+                        },
+                    },
+                }
+                markLineData.push(markLineFractal)
+            }
+            if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === 1) {
+                higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
+                // 高高级别分型线
+                let markLineFractal = {
+                    yAxis: higherHigherBottomPrice,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'dashed',
+                            width: 1,
+                            color: this.echartsConfig.higherHigherColor
+                        },
+                    },
+                    symbol: 'circle',
+                    symbolSize: 1,
+                    label: {
+                        normal: {
+                            color: this.echartsConfig.higherHigherColor,
+                            formatter: '顶: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
+                            position: 'insideMiddleBottom'
+                        },
+
+                    },
+                }
+                markLineData.push(markLineFractal)
+            }
+
+            // 空单查找底分型
+            if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === -1) {
+                higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
+                // 高级别分型线
+                let markLineFractal = {
+                    yAxis: higherTopPrice,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'dashed',
+                            width: 1,
+                            color: this.echartsConfig.higherColor
+                        },
+                    },
+                    symbol: 'circle',
+                    symbolSize: 1,
+                    label: {
+                        normal: {
+                            color: this.echartsConfig.higherColor,
+                            formatter: '底: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
+                            position: 'insideMiddleBottom'
+                        },
+
+                    },
+                }
+                markLineData.push(markLineFractal)
+            }
+            if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === -1) {
+                higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
+                // 高高级别分型线
+                let markLineFractal = {
+                    yAxis: higherHigherTopPrice,
+                    lineStyle: {
+                        normal: {
+                            opacity: 1,
+                            type: 'dashed',
+                            width: 1,
+                            color: this.echartsConfig.higherHigherColor
+                        },
+                    },
+                    symbol: 'circle',
+                    symbolSize: 1,
+                    label: {
+                        normal: {
+                            color: this.echartsConfig.higherHigherColor,
+                            formatter: '底: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
+                            position: 'insideMiddleTop'
+
+                        },
+                    },
+                }
+                markLineData.push(markLineFractal)
+            }
             // console.log("最后的背驰:", period, lastBeichiType)
             if (lastBeichiType !== 0) {
                 switch (lastBeichiType) {
@@ -2574,120 +2683,6 @@ export default {
                         },
                     }
                     markLineData.push(markLineStop)
-                }
-                // 兼容股票
-                if (!jsonObj['fractal']) {
-                    return markLineData
-                }
-
-                let higherBottomPrice = 0
-                let higherHigherBottomPrice = 0
-                let higherTopPrice = 0
-                let higherHigherTopPrice = 0
-                if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === 1) {
-                    higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
-                    // 高级别分型线
-                    let markLineFractal = {
-                        yAxis: higherBottomPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dashed',
-                                width: 1,
-                                color: this.echartsConfig.higherColor
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: this.echartsConfig.higherColor,
-                                formatter: '顶: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
-                                position: 'insideMiddleTop'
-                            },
-                        },
-                    }
-                    markLineData.push(markLineFractal)
-                }
-                if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === 1) {
-                    higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
-                    // 高高级别分型线
-                    let markLineFractal = {
-                        yAxis: higherHigherBottomPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dashed',
-                                width: 1,
-                                color: this.echartsConfig.higherHigherColor
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: this.echartsConfig.higherHigherColor,
-                                formatter: '顶: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
-                                position: 'insideMiddleBottom'
-                            },
-
-                        },
-                    }
-                    markLineData.push(markLineFractal)
-                }
-
-                // 空单查找底分型
-                if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === -1) {
-                    higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
-                    // 高级别分型线
-                    let markLineFractal = {
-                        yAxis: higherTopPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dashed',
-                                width: 1,
-                                color: this.echartsConfig.higherColor
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: this.echartsConfig.higherColor,
-                                formatter: '底分: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
-                                position: 'insideMiddleTop'
-                            },
-
-                        },
-                    }
-                    markLineData.push(markLineFractal)
-                }
-                if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === -1) {
-                    higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
-                    // 高高级别分型线
-                    let markLineFractal = {
-                        yAxis: higherHigherTopPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dashed',
-                                width: 1,
-                                color: this.echartsConfig.higherHigherColor
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: this.echartsConfig.higherHigherColor,
-                                formatter: '底分: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
-                                position: 'insideMiddleTop'
-
-                            },
-                        },
-                    }
-                    markLineData.push(markLineFractal)
                 }
             }
             return markLineData
