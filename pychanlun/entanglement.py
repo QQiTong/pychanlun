@@ -37,7 +37,7 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
         if duan_serial[i] == -1:
             # i是线段低点
             j = FindPrevEq(duan_serial, 1, i)
-            if j >= 0 and j < i:
+            if 0 <= j < i:
                 # j是线段高点
                 e_down_list = []
                 for x in range(j, i):
@@ -58,8 +58,7 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
                         e_down_list[-1].gg = high_serial[x]
                         if len(e_down_list) > 1:
                             # 看是否有重叠区间
-                            if e_down_list[-1].top >= e_down_list[-2].bottom and e_down_list[-1].bottom <= e_down_list[
-                                -2].top:
+                            if e_down_list[-1].top >= e_down_list[-2].bottom and e_down_list[-1].bottom <= e_down_list[-2].top:
                                 # 有重叠区间
                                 if not e_down_list[-2].formal:
                                     e_down_list[-2].top = min(e_down_list[-1].top, e_down_list[-2].top)
@@ -83,7 +82,7 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
         if duan_serial[i] == 1:
             # i是线段高点
             j = FindPrevEq(duan_serial, -1, i)
-            if j >= 0 and j < i:
+            if 0 <= j < i:
                 # j是线段低点
                 e_up_list = []
                 for x in range(j, i):
