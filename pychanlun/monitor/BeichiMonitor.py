@@ -190,6 +190,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             }
             dingMsg.send(msg)
 
+
 # 获取格式化后的指标
 async def getFormatNotifyMsg(direction, signal, futureCalcObj):
     not_lower = futureCalcObj['not_lower']
@@ -532,9 +533,9 @@ async def saveFutureDirection(symbol, period, direction):
 def getDominantSymbol():
     symbolList = config['symbolList']
     # 将43个品种分成2组
-    firstGroup = symbolList[:28]
-    secondGroup = symbolList[-15:]
-    currentGroup = firstGroup
+    # firstGroup = symbolList[:28]
+    # secondGroup = symbolList[-15:]
+    currentGroup = symbolList
 
     # 主力合约列表
     dominantSymbolList = []
@@ -1192,7 +1193,7 @@ def run(**kwargs):
     def worker():
         while is_run:
             symbol_item = q.get()
-            monitor_futures_and_digitcoin([symbol_item], ['1m', '3m', '5m', '15m'])
+            monitor_futures_and_digitcoin([symbol_item], ['1m', '3m', '5m', '15m', '30m'])
             q.task_done()
 
     def dispatcher():

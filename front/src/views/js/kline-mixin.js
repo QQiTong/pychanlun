@@ -2603,7 +2603,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherColor,
                                 formatter: '顶: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
-                                position: 'insideMiddleBottom'
+                                position: 'insideMiddleTop'
                             },
                         },
                     }
