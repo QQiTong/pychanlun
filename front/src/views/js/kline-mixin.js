@@ -736,6 +736,7 @@ export default {
             // }
             let specialMA5 = 5
             let specialMA20 = 20
+            let specialMA60 = 60
             // 5日  20日 均线
             // 内盘 每天交易时间 6小时， 外盘交易时间24小时  ,
             if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
@@ -827,6 +828,7 @@ export default {
 
                 let _5base = 5
                 let _20base = 20
+                let _60base = 60
                 if (_4HourSymbolList.indexOf(simpleSymbol) !== -1) {
                     baseHour = 4
                 } else if (_8HourSymbolList.indexOf(simpleSymbol) !== -1) {
@@ -840,35 +842,42 @@ export default {
                     case '1m':
                         specialMA5 = _5base * baseHour * 2 * 2 * 5 * 3
                         specialMA20 = _20base * baseHour * 2 * 2 * 5 * 3
+                        specialMA60 = _60base * baseHour * 2 * 2 * 5 * 3
                         break
                     case '3m':
                         specialMA5 = _5base * baseHour * 2 * 2 * 5
                         specialMA20 = _20base * baseHour * 2 * 2 * 5
+                        specialMA60 = _60base * baseHour * 2 * 2 * 5
                         break
                     case '5m':
                         specialMA5 = _5base * baseHour * 2 * 2 * 3
                         specialMA20 = _20base * baseHour * 2 * 2 * 3
+                        specialMA60 = _60base * baseHour * 2 * 2 * 3
                         break
                     case '15m':
                         specialMA5 = _5base * baseHour * 2 * 2
                         specialMA20 = _20base * baseHour * 2 * 2
+                        specialMA60 = _60base * baseHour * 2 * 2
                         break
                     case '30m':
                         // 5 * 8 = 40
                         // 20 *8 = 160
                         specialMA5 = _5base * baseHour * 2
                         specialMA20 = _20base * baseHour * 2
+                        specialMA60 = _60base * baseHour * 2
                         break
                     case '60m':
                         // 5*4 = 20
                         // 20*4 = 80
                         specialMA5 = _5base * baseHour
                         specialMA20 = _20base * baseHour
+                        specialMA60 = _60base * baseHour
                         break
                     case '180m':
                         // 180
                         specialMA5 = _5base / 3
                         specialMA20 = _20base / 3
+                        specialMA60 = _60base / 3
                         break
                 }
 
@@ -877,7 +886,7 @@ export default {
             let option
             if (update === 'update') {
                 // console.log('更新', period)
-                option = that.refreshOption(currentChart, resultData, specialMA5, specialMA20)
+                option = that.refreshOption(currentChart, resultData, specialMA5, specialMA20, specialMA60)
             } else {
                 console.log('重载', period)
                 option = {
@@ -1028,8 +1037,7 @@ export default {
                             '高级别段': true,
                             'MA5': true,
                             'MA20': true,
-                            'MA30': false,
-                            'MA60': false,
+                            'MA60': true,
                             // 'markline': true
                         },
                         top: 10,
@@ -1491,22 +1499,22 @@ export default {
                             animation: false
                         },
                         // // index 12
-                        // {
-                        //     name: 'MA20',
-                        //     type: 'line',
-                        //     data: that.calculateMA(resultData, 20),
-                        //     smooth: true,
-                        //     lineStyle: {
-                        //         normal: {
-                        //             opacity: 0.9,
-                        //             type: 'solid',
-                        //             width: 2,
-                        //             color: "green"
-                        //         },
-                        //     },
-                        //     symbol: 'none',
-                        //     animation: false
-                        // },
+                        {
+                            name: 'MA60',
+                            type: 'line',
+                            data: that.calculateMA(resultData, specialMA60),
+                            smooth: true,
+                            lineStyle: {
+                                normal: {
+                                    opacity: 0.9,
+                                    type: 'solid',
+                                    width: 2,
+                                    color: "red"
+                                },
+                            },
+                            symbol: 'none',
+                            animation: false
+                        },
                         // // index 13
                         // {
                         //     name: 'MA30',
@@ -1556,7 +1564,7 @@ export default {
             }
             currentChart.setOption(option)
         },
-        refreshOption(chart, resultData, specialMA5, specialMA20) {
+        refreshOption(chart, resultData, specialMA5, specialMA20, specialMA60) {
             let option = chart.getOption()
             option.series[0].data = resultData.values
             option.xAxis[0].data = resultData.date
@@ -1579,6 +1587,7 @@ export default {
             // option.series[9].data = resultData.deaBigLevel
             option.series[4].data = this.calculateMA(resultData, specialMA5);
             option.series[5].data = this.calculateMA(resultData, specialMA20);
+            option.series[6].data = this.calculateMA(resultData, specialMA60);
             // option.series[11].data = resultData.volume;
             // console.log('更新的option', option)
             return option
@@ -2821,7 +2830,7 @@ export default {
                                 color: this.echartsConfig.dynamicOpertionColor,
                                 formatter: '动止: ' + CommonTool.formatDate(dynamicItem.date_created, 'MM-dd HH:mm') + " " + dynamicItem.stop_win_price + ' ' + direction + ' ' + stop_win_count + '手' +
                                     ' 额：' + dynamicItem.stop_win_money,
-                                position: 'insideMiddleTop'
+                                position: 'insideEndTop'
                             }
                         },
                         symbol: 'circle',
@@ -2829,10 +2838,6 @@ export default {
                     }
                     markLineData.push(markLineObj)
                 }
-            }
-            // 兼容股票  111
-            if (!jsonObj['fractal']) {
-                return markLineData
             }
             let higherBottomPrice = 0
             let higherHigherBottomPrice = 0
@@ -2859,7 +2864,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherColor,
                                 formatter: '顶: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
-                                position: 'insideEndTop'
+                                position: 'insideMiddleTop'
 
                             },
                         },
@@ -2885,7 +2890,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
                                 formatter: '顶: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
-                                position: 'insideEndTop'
+                                position: 'insideMiddleBottom'
 
                             },
                         },
@@ -2913,7 +2918,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherColor,
                                 formatter: '底: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
-                                position: 'insideEndTop'
+                                position: 'insideMiddleBottom'
 
                             },
                         },
@@ -2939,7 +2944,7 @@ export default {
                             normal: {
                                 color: this.echartsConfig.higherHigherColor,
                                 formatter: '底: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
-                                position: 'insideEndTop'
+                                position: 'insideMiddleTop'
 
                             },
                         },
