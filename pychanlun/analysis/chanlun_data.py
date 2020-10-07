@@ -123,6 +123,7 @@ class ChanlunData:
 
         # 笔数据
         self.bi_data = {"dt": [], "data": [], "vertex_type": [], "dt_range": []}
+
         # 段数据
         self.duan_data = {"dt": [], "data": [], "vertex_type": [], "dt_range": []}
         # 高级别段数据
@@ -182,6 +183,7 @@ class ChanlunData:
                     fractal_type = CONSTANT.FRACTAL_BOTTOM if merged_stick3.direction == CONSTANT.DIRECTION_UP else CONSTANT.FRACTAL_TOP
                     fractal = Fractal([merged_stick1, merged_stick2, merged_stick3], fractal_type)
                     self.__on_fractal(fractal)
+                # 没有分型产生
                 else:
                     if len(self.bi_list) > 0:
                         last_bi = self.bi_list[-1]
@@ -234,16 +236,30 @@ class ChanlunData:
                 vertex_stick = bi.fractal_start.vertex_stick
                 idx = vertex_stick.idx
                 self.bi_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_start.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
-                self.bi_data['dt'].append(self.dt_list[idx])
-                self.bi_data['data'].append(self.low_price_list[idx] if self.bi_signal_list[idx] == CONSTANT.VERTEX_BOTTOM else self.high_price_list[idx])
-                self.bi_data['vertex_type'].append(self.bi_signal_list[idx])
-                s = self.dt_list[idx - 1] if idx - 1 >= 0 else self.dt_list[idx]
-                e = self.dt_list[idx + 1] if idx + 1 < length else self.dt_list[idx]
-                self.bi_data['dt_range'].append([s, e])
             if bi.fractal_end is not None:
                 vertex_stick = bi.fractal_end.vertex_stick
                 idx = vertex_stick.idx
                 self.bi_signal_list[idx] = CONSTANT.VERTEX_BOTTOM if bi.fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else CONSTANT.VERTEX_TOP
+
+        # 极特殊情况下，段端点和笔端点不能重合的情况下，把笔的端点调整到段的端点
+        for i in range(length):
+            if self.duan_signal_list[i] == CONSTANT.VERTEX_BOTTOM and self.bi_signal_list[i] == CONSTANT.VERTEX_NONE:
+                for j in range(i, 0, -1):
+                    if self.bi_signal_list[j] == CONSTANT.VERTEX_TOP:
+                        break
+                    if self.bi_signal_list[j] == CONSTANT.VERTEX_BOTTOM:
+                        if self.low_price_list[i] <= self.low_price_list[j]:
+                            self.bi_signal_list[j] = CONSTANT.VERTEX_NONE
+                            self.bi_signal_list[i] = CONSTANT.VERTEX_BOTTOM
+                        else:
+                            self.duan_signal_list[i] = CONSTANT.VERTEX_NONE
+                            self.duan_signal_list[j] = CONSTANT.VERTEX_BOTTOM
+                        break
+            elif self.duan_signal_list[i] == CONSTANT.VERTEX_TOP and self.bi_signal_list[i] == CONSTANT.VERTEX_NONE:
+                pass
+
+        for idx in range(length):
+            if self.bi_signal_list[idx] != CONSTANT.VERTEX_NONE:
                 self.bi_data['dt'].append(self.dt_list[idx])
                 self.bi_data['data'].append(self.low_price_list[idx] if self.bi_signal_list[idx] == CONSTANT.VERTEX_BOTTOM else self.high_price_list[idx])
                 self.bi_data['vertex_type'].append(self.bi_signal_list[idx])

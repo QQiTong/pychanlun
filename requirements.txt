@@ -10,7 +10,7 @@ ratelimit
 waitress
 click
 pytdx
-pyecharts
+pyecharts==0.5.11
 scipy==1.1.0
 matplotlib
 prettytable
