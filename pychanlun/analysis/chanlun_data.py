@@ -400,7 +400,7 @@ class ChanlunData:
         stick_list = flat_map(connections, lambda x: x.stick_list)
 
         # # 顶底波动区间不能接触
-        if min(fractal_start.high_high_price, fractal_end.high_high_price) >= max(fractal_start.low_low_price, fractal_end.low_low_price):
+        if min(fractal_start.high_price, fractal_end.high_price) >= max(fractal_start.low_price, fractal_end.low_price):
             return False
 
         # 是不是低点
