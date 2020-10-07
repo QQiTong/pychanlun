@@ -41,7 +41,7 @@ def get_data_v2(symbol, period, end_date=None):
     data_list = []
     required_period_list.reverse()
     for period_one in required_period_list:
-        kline_data = get_instrument_data(symbol, period_one, end_date, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+        kline_data = get_instrument_data(symbol, period_one, end_date)
         if kline_data is None or len(kline_data) == 0:
             continue
         kline_data["time_str"] = kline_data["time"] \
