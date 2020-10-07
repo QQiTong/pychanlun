@@ -54,17 +54,16 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
     timeDeltaMap = {
         '1m': -10,
         '3m': -41,
-        '5m': -60,
-        '15m': -180,
-        '30m': -360,
-        '60m': -720,
-        '180m': -2000,
+        '5m': -35,
+        '15m': -105,
+        '30m': -210,
+        '60m': -420,
+        '180m': -1000,
         '1d': -1000,
         '3d': -1000
     }
     start_date = end + timedelta(timeDeltaMap[period])
     df = rq.get_price(symbol, frequency=period, fields=['open', 'high', 'low', 'close', 'volume'], start_date=start_date, end_date=end)
-    df = df[-2000:]
     df['time'] = df.index.to_series().apply(lambda value: value.replace(tzinfo=tz).timestamp())
     df.fillna(0, inplace=True)
     return df
