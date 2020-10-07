@@ -22,7 +22,7 @@ okexUrl = "https://www.okex.me/v2/perpetual/pc/public/instruments/BTC-USDT-SWAP/
 
 
 @lru_cache(maxsize=128)
-def getDigitCoinData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")):
+def getDigitCoinData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M")):
     t = time.time()
     timeStamp = int(round(t * 1000))
     headers = {
@@ -45,22 +45,22 @@ def getDigitCoinData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-
 
 
 @lru_cache(maxsize=128)
-def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")):
+def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M")):
     # 聚宽数据源
     if endDate is None:
         end = datetime.now().replace(hour=23, minute=59, second=59)
     else:
         end = datetime.strptime(endDate, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
     timeDeltaMap = {
-        '1m': -15,
+        '1m': -10,
         '3m': -41,
         '5m': -60,
         '15m': -180,
         '30m': -360,
         '60m': -720,
         '180m': -2000,
-        '1d': -2000,
-        '3d': -6000
+        '1d': -1000,
+        '3d': -1000
     }
     start_date = end + timedelta(timeDeltaMap[period])
     df = rq.get_price(symbol, frequency=period, fields=['open', 'high', 'low', 'close', 'volume'], start_date=start_date, end_date=end)
@@ -71,7 +71,7 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
 
 
 @lru_cache(maxsize=128)
-def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")):
+def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M")):
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:
@@ -213,7 +213,7 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
 
 
 @lru_cache(maxsize=128)
-def getGlobalFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")):
+def getGlobalFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M")):
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:
@@ -242,8 +242,3 @@ def getGlobalFutureData(symbol, period, endDate, stamp=datetime.now().strftime("
     kline_data['time'] = kline_data['_id'].apply(lambda value: value.timestamp())
     kline_data.fillna(0, inplace=True)
     return kline_data
-
-
-if __name__ == '__main__':
-    data = getStockData("sh000001", "3m", "2020-07-11")
-    print(data)
