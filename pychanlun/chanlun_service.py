@@ -25,7 +25,7 @@ from pychanlun.basic.util import str_from_timestamp
 tz = pytz.timezone('Asia/Shanghai')
 
 
-@func_set_timeout(60)
+@func_set_timeout(120)
 def get_data_v2(symbol, period, end_date=None):
     required_period_list = get_required_period_list(period)
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
