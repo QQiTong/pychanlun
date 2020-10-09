@@ -546,7 +546,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                 if duan_series[x] == 1:
                     leave_end_index = x
                     break
-                if next_e is not None and x >= e.start:
+                if next_e is not None and x >= next_e.start:
                     break
             if leave_end_index >= 0:
                 # 存在强3买
@@ -604,7 +604,7 @@ def v_reverse(e_list, time_series, high_series, low_series, open_series, close_s
                 if duan_series[x] == -1:
                     leave_end_index = x
                     break
-                if next_e is not None and x >= e.start:
+                if next_e is not None and x >= next_e.start:
                     break
             if leave_end_index >= 0:
                 # 存在3卖
