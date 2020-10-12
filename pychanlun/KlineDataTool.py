@@ -54,7 +54,7 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
     timeDeltaMap = {
         '1m': -10,
         '3m': -41,
-        '5m': -35,
+        '5m': -41,
         '15m': -105,
         '30m': -210,
         '60m': -420,

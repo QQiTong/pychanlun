@@ -592,7 +592,7 @@
                                         show: true,
                                         position: 'top',
                                         formatter(p) {
-                                            return p.value * 100 + "%"
+                                            return parseInt(p.value * 100) + "%"
                                         }
                                     }
                                 }

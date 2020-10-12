@@ -61,7 +61,7 @@ digitCoinFee = 0.001
 digitCoinAccount = 60.80 / 10000
 # 外盘期货账户
 global_future_account = 6
-maxAccountUseRate = 0.10
+maxAccountUseRate = 0.15
 stopRate = 0.004
 mail = Mail()
 dingMsg = DingMsg()
@@ -584,8 +584,8 @@ async def do_monitoring(symbol, period):
             # await monitorBeichi(result, symbol, period, close_price)
             await monitorHuila(result, symbol, period, close_price)
             # await monitorTupo(result, symbol, period, close_price)
-            # await monitorVReverse(result, symbol, period, close_price)
-            # await monitorFiveVReverse(result, symbol, period, close_price)
+            await monitorVReverse(result, symbol, period, close_price)
+            await monitorFiveVReverse(result, symbol, period, close_price)
             # await monitorDuanBreak(result, symbol, period, close_price)
             await monitorFractal(result, symbol, period, close_price)
     except BaseException as e:
@@ -863,7 +863,6 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
-
         futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
@@ -1193,7 +1192,7 @@ def run(**kwargs):
     def worker():
         while is_run:
             symbol_item = q.get()
-            monitor_futures_and_digitcoin([symbol_item], ['1m', '3m', '5m', '15m', '30m'])
+            monitor_futures_and_digitcoin([symbol_item], [ '1m','3m', '5m', '15m', '30m'])
             q.task_done()
 
     def dispatcher():
