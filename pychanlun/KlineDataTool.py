@@ -48,7 +48,7 @@ def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().tim
 def getFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
     # 聚宽数据源
     if endDate is None:
-        end = datetime.now().replace(hour=23, minute=59, second=59)
+        end = (datetime.now() + timedelta(days=1)).replace(hour=23, minute=59, second=59)
     else:
         end = datetime.strptime(endDate, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
     timeDeltaMap = {
