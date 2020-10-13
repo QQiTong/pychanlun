@@ -39,3 +39,20 @@ def get_zhong_shu_data(entanglement_list):
 
 def str_from_timestamp(t):
     return datetime.datetime.fromtimestamp(t, tz=TZ).strftime("%Y-%m-%d %H:%M")
+
+
+def get_period_cache_stamp(period):
+    if period == '1m':
+        return int(int(datetime.datetime.now().timestamp()) / 10)
+    elif period == '3m':
+        return int(int(datetime.datetime.now().timestamp()) / 15)
+    elif period == '5m':
+        return int(int(datetime.datetime.now().timestamp()) / 30)
+    elif period == '15m':
+        return int(int(datetime.datetime.now().timestamp()) / 60)
+    elif period == '30m':
+        return int(int(datetime.datetime.now().timestamp()) / 60)
+    elif period == '60m':
+        return int(int(datetime.datetime.now().timestamp()) / 180)
+    else:
+        return int(int(datetime.datetime.now().timestamp()) / 3600)
