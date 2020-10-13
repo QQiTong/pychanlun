@@ -22,7 +22,7 @@ okexUrl = "https://www.okex.me/v2/perpetual/pc/public/instruments/BTC-USDT-SWAP/
 
 
 @lru_cache(maxsize=128)
-def getDigitCoinData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M")):
+def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
     t = time.time()
     timeStamp = int(round(t * 1000))
     headers = {
@@ -45,10 +45,10 @@ def getDigitCoinData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-
 
 
 @lru_cache(maxsize=128)
-def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M")):
+def getFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
     # 聚宽数据源
     if endDate is None:
-        end = datetime.now().replace(hour=23, minute=59, second=59)
+        end = (datetime.now() + timedelta(days=1)).replace(hour=23, minute=59, second=59)
     else:
         end = datetime.strptime(endDate, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
     timeDeltaMap = {
@@ -70,7 +70,7 @@ def getFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-
 
 
 @lru_cache(maxsize=128)
-def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M")):
+def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:
@@ -212,7 +212,7 @@ def getStockData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%
 
 
 @lru_cache(maxsize=128)
-def getGlobalFutureData(symbol, period, endDate, stamp=datetime.now().strftime("%Y-%m-%d %H:%M")):
+def getGlobalFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:

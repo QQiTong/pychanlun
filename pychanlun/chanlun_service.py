@@ -16,7 +16,7 @@ from pychanlun import Duan, divergence
 from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData
 from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
-from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data
+from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data, get_period_cache_stamp
 from pychanlun.config import config
 from pychanlun.analysis.chanlun_data import ChanlunData
 import pychanlun.placeholder as placeholder
@@ -41,7 +41,7 @@ def get_data_v2(symbol, period, end_date=None):
     data_list = []
     required_period_list.reverse()
     for period_one in required_period_list:
-        kline_data = get_instrument_data(symbol, period_one, end_date, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+        kline_data = get_instrument_data(symbol, period_one, end_date, get_period_cache_stamp(period_one))
         if kline_data is None or len(kline_data) == 0:
             continue
         kline_data["time_str"] = kline_data["time"] \
