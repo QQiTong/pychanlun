@@ -154,7 +154,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             max_stop_rate = 0.3
             print(signal, symbol, period, futureCalcObj, perOrderStopRate)
 
-        if abs((date_created - fire_time).total_seconds()) < 60 * 4  and perOrderStopRate <= max_stop_rate:
+        if abs((date_created - fire_time).total_seconds()) < 60 * 4   and perOrderStopRate <= max_stop_rate:
             # 新增
             remind = await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                                   stop_lose_price, futureCalcObj, True)
@@ -696,7 +696,7 @@ async def monitorBeichi(result, symbol, period, closePrice):
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
         futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        if above_ma5 or not_lower:
+        if above_ma5 or not_lower :
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sellMACDBCData']['date']) > 0:
         fire_time = result['sellMACDBCData']['date'][-1]

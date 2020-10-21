@@ -412,7 +412,7 @@
                                         show: true,
                                         position: 'top',
                                         formatter(p) {
-                                            return that.statisticList.win_end_list[p.dataIndex] - that.statisticList.lose_end_list[p.dataIndex] +
+                                            return that.statisticList.win_end_list[p.dataIndex] + that.statisticList.lose_end_list[p.dataIndex] +
                                                 "\n\n 盈亏比" + Math.abs((that.statisticList.win_end_list[p.dataIndex] / that.statisticList.lose_end_list[p.dataIndex])).toFixed(1)
                                         }
                                     }

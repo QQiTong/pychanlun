@@ -244,7 +244,7 @@ def get_data_v2(symbol, period, end_date=None):
     fractal_region2 = {} if fractal_region2 is None else fractal_region2
     resp['fractal'] = [fractal_region, fractal_region2]
     resp['notLower'] = calcNotLower(kline_data.duan.to_list(), kline_data.low.to_list())
-    resp['notHigher'] = calcNotHigher(kline_data.duan.to_list(), kline_data.low.to_list())
+    resp['notHigher'] = calcNotHigher(kline_data.duan.to_list(), kline_data.high.to_list())
 
     return resp
 
