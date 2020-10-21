@@ -154,7 +154,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             max_stop_rate = 0.3
             print(signal, symbol, period, futureCalcObj, perOrderStopRate)
 
-        if abs((date_created - fire_time).total_seconds()) < 60 * 16 * 60 and perOrderStopRate <= max_stop_rate:
+        if abs((date_created - fire_time).total_seconds()) < 60 * 4  and perOrderStopRate <= max_stop_rate:
             # 新增
             remind = await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                                   stop_lose_price, futureCalcObj, True)
@@ -623,10 +623,10 @@ async def do_monitoring(symbol, period):
             close_price = result['close'][-1]
             # await monitorBeichi(result, symbol, period, close_price)
             await monitorHuila(result, symbol, period, close_price)
-            await monitorTupo(result, symbol, period, close_price)
+            # await monitorTupo(result, symbol, period, close_price)
             await monitorVReverse(result, symbol, period, close_price)
             await monitorFiveVReverse(result, symbol, period, close_price)
-            await monitorDuanBreak(result, symbol, period, close_price)
+            # await monitorDuanBreak(result, symbol, period, close_price)
             await monitorFractal(result, symbol, period, close_price)
     except BaseException as e:
         logger.error("Error Occurred: {0}".format(traceback.format_exc()))
