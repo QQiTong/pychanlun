@@ -628,7 +628,7 @@
                 内盘期货(￥)
 
                 <span :class="sumObj.currentProfitSum| percentTagFilter" class="sum-text"
-                      v-if="positionQueryForm.status ==='holding'">当前盈利：{{sumObj.currentProfitSum}}
+                      v-if="positionQueryForm.status ==='holding'">当前盈利：{{sumObj.currentProfitSum + sumObj.winEndSum}}
                      占比：{{sumObj.currentProfitSumRate}}
                      预计止损：{{(sumObj.predictStopSum)}}
                 </span>
@@ -1266,7 +1266,9 @@
                             this.sumObj.currentProfitSum += parseInt(item.current_profit)
                             this.sumObj.predictStopSum += parseInt(item.predict_stop_money)
                         }
-                        this.sumObj.winEndSum += parseInt(item.win_end_money)
+                        if (this.positionQueryForm.status === 'winEnd') {
+                            this.sumObj.winEndSum += parseInt(item.win_end_money)
+                        }
                         // 判断是否 动止过，如果动止 盈利 = 当前浮盈+ 已动止的盈利
                         if (item.hasOwnProperty('dynamicPositionList') && item.dynamicPositionList.length !== 0) {
                             let dynamicWinSum = 0

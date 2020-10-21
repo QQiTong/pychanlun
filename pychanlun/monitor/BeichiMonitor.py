@@ -90,13 +90,24 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
     temp_fire_time = datetime.strptime(fire_time_str, "%Y-%m-%d %H:%M")
     # 触发时间转换成UTC时间
     fire_time = temp_fire_time - timedelta(hours=8)
-    last_fire = DBPyChanlun['future_signal'].find_one({
-        'symbol': symbol,
-        'period': period,
-        'fire_time': fire_time,
-        'direction': direction,
-        'signal': signal,
-    })
+    # 当信号为分型动止的时候， 5m 和30m 动止时间相同 会导致其中级别的信号提醒不出来,因此再加一个tag字段
+    if signal == 'fractal':
+        last_fire = DBPyChanlun['future_signal'].find_one({
+            'symbol': symbol,
+            'period': period,
+            'tag': tag,
+            'fire_time': fire_time,
+            'direction': direction,
+            'signal': signal,
+        })
+    else:
+        last_fire = DBPyChanlun['future_signal'].find_one({
+            'symbol': symbol,
+            'period': period,
+            'fire_time': fire_time,
+            'direction': direction,
+            'signal': signal,
+        })
     date_created = datetime.utcnow()
     if last_fire is not None:
         DBPyChanlun['future_signal'].find_one_and_update({
@@ -138,12 +149,12 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             "fractal": fractal,  # 信号触发时是否在大级别分型确立
             "power": power  # 5个指标综合判断当前信号强度
         })
-        max_stop_rate = 0.1
+        max_stop_rate = 0.25
         if signal == 'fractal':
             max_stop_rate = 0.3
             print(signal, symbol, period, futureCalcObj, perOrderStopRate)
 
-        if abs((date_created - fire_time).total_seconds()) < 60 * 4 and perOrderStopRate <= max_stop_rate:
+        if abs((date_created - fire_time).total_seconds()) < 60 * 16 * 60 and perOrderStopRate <= max_stop_rate:
             # 新增
             remind = await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                                   stop_lose_price, futureCalcObj, True)
@@ -172,7 +183,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 "品种": symbol,
                 "周期": period,
                 "信号": signalCN,
-                "方向": '买' if direction == 'B' else '卖',
+                "方向": '买' if direction == 'B' or direction == 'HB' else '卖',
                 "数量": amount,
                 "止损价": stop_lose_price,
                 "止损率": str(int(perOrderStopRate * 100)) + '%',
@@ -343,7 +354,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                         }
                     }, upsert=True)
                 else:
-                    # 如果 动止后 剩余数量 小于1手，将持仓状态设置为止盈
+                    # 1.如果 动止后 剩余数量 小于1手，将持仓状态设置为止盈或止损
                     print(symbol, period, "动止后数量为小于1直接止盈")
                     winEndPercent = abs(round(((float(close_price) - last_fire['price']) / last_fire['price']) * marginLevel, 2))
                     # 止盈已实现盈亏
@@ -351,24 +362,53 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                     # 止盈比率
                     win_end_rate = round(winEndPercent, 2)
 
-                    DBPyChanlun['future_auto_position'].find_one_and_update({
-                        'symbol': symbol, 'direction': direction, 'status': status
-                    }, {
-                        '$set': {
-                            'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
-                            'last_update_time': date_created,  # 最后信号更新时间
-                            'last_update_signal': signal,  # 最后更新的信号
-                            'last_update_period': period,  # 最后更新的周期
-                            'status': 'winEnd',  # 将之前反方向的持仓状态改为止盈
-                            'win_end_price': close_price,
-                            'win_end_money': win_end_money,
-                            'win_end_rate': win_end_rate,
-                            'win_end_time': date_created,
-                        },
-                        '$inc': {
-                            'update_count': 1
-                        }
-                    }, upsert=True)
+                    # 累加动止的盈利
+                    dynamic_win_list_sum = 0
+                    if 'dynamicPositionList' in last_fire:
+                        for i in range(len(last_fire['dynamicPositionList'])):
+                            item = last_fire['dynamicPositionList'][i]
+                            dynamic_win_list_sum = dynamic_win_list_sum + item['stop_win_money']
+
+                    # 2. 如果动止的盈利+止盈的盈利 <= 0 ，那么该单为止损单
+                    if win_end_money + dynamic_win_list_sum > 0:
+                        status = 'winEnd'
+                        DBPyChanlun['future_auto_position'].find_one_and_update({
+                            'symbol': symbol, 'direction': direction, 'status': status
+                        }, {
+                            '$set': {
+                                'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                                'last_update_time': date_created,  # 最后信号更新时间
+                                'last_update_signal': signal,  # 最后更新的信号
+                                'last_update_period': period,  # 最后更新的周期
+                                'status': status,  # 将之前反方向的持仓状态改为止盈
+                                'win_end_price': close_price,
+                                'win_end_money': win_end_money,
+                                'win_end_rate': win_end_rate,
+                                'win_end_time': date_created,
+                            },
+                            '$inc': {
+                                'update_count': 1
+                            }
+                        }, upsert=True)
+                    else:
+                        status = 'loseEnd'
+                        DBPyChanlun['future_auto_position'].find_one_and_update({
+                            'symbol': symbol, 'direction': direction, 'status': status
+                        }, {
+                            '$set': {
+                                'close_price': close_price,  # 只需要更新最新价格，用于判断是否止损
+                                'last_update_time': date_created,  # 最后信号更新时间
+                                'last_update_signal': signal,  # 最后更新的信号
+                                'last_update_period': period,  # 最后更新的周期
+                                'status': status,  # 将之前反方向的持仓状态改为止损
+                                'lose_end_price': close_price,
+                                'lose_end_money': win_end_money,
+                                'lose_end_time': date_created,
+                            },
+                            '$inc': {
+                                'update_count': 1
+                            }
+                        }, upsert=True)
                 # 提醒
                 remind = True
             else:
@@ -583,10 +623,10 @@ async def do_monitoring(symbol, period):
             close_price = result['close'][-1]
             # await monitorBeichi(result, symbol, period, close_price)
             await monitorHuila(result, symbol, period, close_price)
-            # await monitorTupo(result, symbol, period, close_price)
+            await monitorTupo(result, symbol, period, close_price)
             await monitorVReverse(result, symbol, period, close_price)
             await monitorFiveVReverse(result, symbol, period, close_price)
-            # await monitorDuanBreak(result, symbol, period, close_price)
+            await monitorDuanBreak(result, symbol, period, close_price)
             await monitorFractal(result, symbol, period, close_price)
     except BaseException as e:
         logger.error("Error Occurred: {0}".format(traceback.format_exc()))
@@ -705,8 +745,9 @@ async def monitorHuila(result, symbol, period, closePrice):
             # 底分型的顶部
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
-        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if not_lower or above_ma5:
+            futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_zs_huila']['date']) > 0:
         fire_time = result['sell_zs_huila']['date'][-1]
@@ -722,8 +763,9 @@ async def monitorHuila(result, symbol, period, closePrice):
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
-        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if not_higher or not above_ma5:
+            futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -802,9 +844,9 @@ async def monitorVReverse(result, symbol, period, closePrice):
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
         # else 大级别已经向上成笔，说明该级别走势已经完美
-
-        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if not_lower or above_ma5:
+            futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_v_reverse']['date']) > 0:
         fire_time = result['sell_v_reverse']['date'][-1]
         price = result['sell_v_reverse']['data'][-1]
@@ -819,8 +861,9 @@ async def monitorVReverse(result, symbol, period, closePrice):
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
-        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if not_higher or not above_ma5:
+            futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -847,8 +890,9 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
             # 底分型的顶部
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
-        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if not_lower or above_ma5:
+            futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_five_v_reverse']['date']) > 0:
         fire_time = result['sell_five_v_reverse']['date'][-1]
         price = result['sell_five_v_reverse']['data'][-1]
@@ -863,8 +907,9 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
-        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if not_higher or not above_ma5:
+            futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -892,8 +937,9 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
             # 底分型的顶部
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
-        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if not_lower or above_ma5:
+            futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sell_duan_break']['date']) > 0:
         fire_time = result['sell_duan_break']['date'][-1]
         price = result['sell_duan_break']['data'][-1]
@@ -908,8 +954,9 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
-        futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+        if not_higher or not above_ma5:
+            futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
+            await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
 
 '''
@@ -1192,7 +1239,7 @@ def run(**kwargs):
     def worker():
         while is_run:
             symbol_item = q.get()
-            monitor_futures_and_digitcoin([symbol_item], [ '1m','3m', '5m', '15m', '30m'])
+            monitor_futures_and_digitcoin([symbol_item], ['1m', '3m', '5m', '15m', '30m'])
             q.task_done()
 
     def dispatcher():
