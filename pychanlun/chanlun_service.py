@@ -595,7 +595,7 @@ def get_data(symbol, period, end_date=None):
     resp['fractal'] = [fractal_region, fractal_region2]
 
     resp['notLower'] = calcNotLower(list(kline_data["duan"]), list(kline_data["low"]))
-    resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["low"]))
+    resp['notHigher'] = calcNotHigher(list(kline_data["duan"]), list(kline_data["high"]))
 
     return resp
 
