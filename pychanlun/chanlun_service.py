@@ -27,7 +27,7 @@ tz = pytz.timezone('Asia/Shanghai')
 
 @func_set_timeout(120)
 def get_data_v2(symbol, period, end_date=None):
-    required_period_list = get_required_period_list(period)
+    required_period_list = get_required_period_list(period)[0:3]
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
     if match_stock is not None:
         get_instrument_data = getStockData
