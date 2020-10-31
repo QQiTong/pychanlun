@@ -156,7 +156,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
     ma20 = list(df['ma20'])
 
     entanglement_list = entanglement.CalcEntanglements(time_str_series, duan_series, bi_series, high_series, low_series)
-    zs_huila = entanglement.la_hui(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    zs_huila = entanglement.la_hui(entanglement_list, time_str_series, high_series, low_series, bi_series, duan_series)
     zs_tupo = entanglement.tu_po(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
     v_reverse = entanglement.v_reverse(entanglement_list, time_str_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
     five_v_fan = entanglement.five_v_fan(

@@ -321,7 +321,7 @@ class Calc:
         CalcDuan(count, higherHigherDuanList, higherDuanList, highList, lowList)
 
         entanglementList = entanglement.CalcEntanglements(timeList, duanList, biList, highList, lowList)
-        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList, openPriceList, closePriceList,
+        huila = entanglement.la_hui(entanglementList, timeList, highList, lowList,
                                     biList, duanList, higherDuanList)
         tupo = entanglement.tu_po(entanglementList, timeList, highList, lowList, openPriceList, closePriceList, biList,
                                   duanList, higherDuanList)

@@ -113,7 +113,7 @@ class ChanLunStrategy(CtaTemplate):
         CalcDuan(count, self.higherHigherDuanList, self.higherDuanList, self.highList, self.lowList)
 
         entanglementList = entanglement.CalcEntanglements(self.timeList, self.duanList, self.timeList, self.highList, self.lowList)
-        huila = entanglement.la_hui(entanglementList, self.timeList, self.highList, self.lowList, self.openList, self.closeList, self.timeList,
+        huila = entanglement.la_hui(entanglementList, self.timeList, self.highList, self.lowList, self.timeList,
                                     self.duanList)
         tupo = entanglement.tu_po(entanglementList, self.timeList, self.highList, self.lowList, self.openList, self.closeList, self.timeList, self.duanList)
         v_reverse = entanglement.v_reverse(entanglementList, self.timeList, self.highList, self.lowList, self.openList, self.closeList, self.timeList,
@@ -121,7 +121,7 @@ class ChanLunStrategy(CtaTemplate):
         duan_pohuai = entanglement.po_huai(self.timeList, self.highList, self.lowList, self.openList, self.closeList, self.timeList, self.duanList)
         # 段中枢
         entanglementHigherList = entanglement.CalcEntanglements(self.timeList, self.higherDuanList, self.duanList, self.highList, self.lowList)
-        huila_higher = entanglement.la_hui(entanglementHigherList, self.timeList, self.highList, self.lowList, self.openList, self.closeList,
+        huila_higher = entanglement.la_hui(entanglementHigherList, self.timeList, self.highList, self.lowList,
                                            self.duanList, self.higherDuanList)
         tupo_higher = entanglement.tu_po(entanglementHigherList, self.timeList, self.highList, self.lowList, self.openList, self.closeList,
                                          self.duanList, self.higherDuanList)

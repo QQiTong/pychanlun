@@ -127,9 +127,11 @@ def CalcEntanglements(time_serial, duan_serial, bi_serial, high_serial, low_seri
     return e_list
 
 
-def la_hui(e_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series,
-           higher_duan_series=None, ma5=None,ma20=None):
+def la_hui(e_list, time_str_array, high_array, low_array, bi_array, duan_array,
+           higher_duan_array=None, ma5=None, ma20=None):
+    count = len(time_str_array)
     result = {
+        'signal_array': [0 for i in range(count)],
         'buy_zs_huila': {
             'idx': [],
             'date': [],
@@ -159,45 +161,46 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
             # 上涨中枢，找第一次的拉回
             # 离开中枢后的第一个笔结束
             leave = e.end
-            for x in range(e.end + 1, len(high_series)):
-                if high_series[x] > e.zg and bi_series[x] == 1:
+            for x in range(e.end + 1, len(high_array)):
+                if high_array[x] > e.zg and bi_array[x] == 1:
                     leave = x
                     break
-                if duan_series[x] == -1:
+                if duan_array[x] == -1:
                     break
             if leave - e.end >= 5:
                 r = -1
-                k = len(low_series)
+                k = len(low_array)
                 if i < len(e_list) - 1:
                     k = e_list[i + 1].start
                 for x in range(leave + 1, k):
                     if e_next is not None and x >= e_next.start:
                         break
-                    if low_series[x] < e.top and (
-                        len(pydash.chain(low_series[e.end + 1:x]).filter_(lambda a: a > e.top).value()) > 0 or
-                        len(pydash.chain(high_series[e.end + 1:x]).filter_(lambda a: a > e.gg).value()) > 0):
+                    if low_array[x] < e.top and (
+                        len(pydash.chain(low_array[e.end + 1:x]).filter_(lambda a: a > e.top).value()) > 0 or
+                            len(pydash.chain(high_array[e.end + 1:x]).filter_(lambda a: a > e.gg).value()) > 0):
                         r = x
                         break
-                    if duan_series[x] == -1:
+                    if duan_array[x] == -1:
                         break
                 if r >= 0:
                     tags = []
+                    result['signal_array'][r] = -1
                     result['sell_zs_huila']['idx'].append(r)
-                    result['sell_zs_huila']['date'].append(time_series[r])
+                    result['sell_zs_huila']['date'].append(time_str_array[r])
                     result['sell_zs_huila']['data'].append(e.top)
-                    top_index = pydash.find_last_index(duan_series[:r + 1], lambda a: a == 1)
+                    top_index = pydash.find_last_index(duan_array[:r + 1], lambda a: a == 1)
                     if top_index > -1:
-                        result['sell_zs_huila']['stop_lose_price'].append(high_series[top_index])
-                        stop_win_price = e.top - (high_series[top_index] - e.top)
+                        result['sell_zs_huila']['stop_lose_price'].append(high_array[top_index])
+                        stop_win_price = e.top - (high_array[top_index] - e.top)
                         result['sell_zs_huila']['stop_win_price'].append(stop_win_price)
                     else:
                         result['sell_zs_huila']['stop_lose_price'].append(0)
                         result['sell_zs_huila']['stop_win_price'].append(0)
 
-                    if perfect_sell_short(duan_series, high_series, low_series, r):
+                    if perfect_sell_short(duan_array, high_array, low_array, r):
                         tags.append('完备卖')
-                    if higher_duan_series is not None:
-                        category = sell_category(higher_duan_series, duan_series, high_series, low_series, r)
+                    if higher_duan_array is not None:
+                        category = sell_category(higher_duan_array, duan_array, high_array, low_array, r)
                         if len(category) > 0:
                             if category not in tags:
                                 tags.append(category)
@@ -205,7 +208,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
 
                     above_ma5 = True
                     if ma5 is not None:
-                        t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
+                        t = datetime.datetime.strptime(time_str_array[r], "%Y-%m-%d %H:%M")
                         t = t.replace(hour=0, minute=0).timestamp()
                         if t in ma5 and e.top < ma5[t]:
                             above_ma5 = False
@@ -213,7 +216,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
 
                     above_ma20 = True
                     if ma20 is not None:
-                        t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
+                        t = datetime.datetime.strptime(time_str_array[r], "%Y-%m-%d %H:%M")
                         t = t.replace(hour=0, minute=0).timestamp()
                         if t in ma20 and e.top < ma20[t]:
                             above_ma20 = False
@@ -221,41 +224,42 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
         if e.direction == -1:
             # 下跌中枢，找第一次的拉回
             leave = e.end
-            for x in range(e.end + 1, len(low_series)):
-                if low_series[x] < e.zd and bi_series[x] == -1:
+            for x in range(e.end + 1, len(low_array)):
+                if low_array[x] < e.zd and bi_array[x] == -1:
                     leave = x
                     break
-                if duan_series[x] == 1:
+                if duan_array[x] == 1:
                     break
             if leave - e.end >= 5:
                 r = -1
-                for x in range(leave + 1, len(high_series)):
+                for x in range(leave + 1, len(high_array)):
                     if e_next is not None and x >= e_next.start:
                         break
-                    if high_series[x] > e.bottom and (
-                        len(pydash.chain(high_series[e.end + 1:x]).filter_(lambda a: a < e.bottom).value()) > 0 or
-                        len(pydash.chain(low_series[e.end + 1:x]).filter_(lambda a: a < e.dd).value()) > 0):
+                    if high_array[x] > e.bottom and (
+                        len(pydash.chain(high_array[e.end + 1:x]).filter_(lambda a: a < e.bottom).value()) > 0 or
+                            len(pydash.chain(low_array[e.end + 1:x]).filter_(lambda a: a < e.dd).value()) > 0):
                         r = x
                         break
-                    if duan_series[x] == 1:
+                    if duan_array[x] == 1:
                         break
                 if r >= 0:
                     tags = []
+                    result['signal_array'][r] = 1
                     result['buy_zs_huila']['idx'].append(r)
-                    result['buy_zs_huila']['date'].append(time_series[r])
+                    result['buy_zs_huila']['date'].append(time_str_array[r])
                     result['buy_zs_huila']['data'].append(e.bottom)
-                    bottom_index = pydash.find_last_index(duan_series[:r + 1], lambda a: a == -1)
+                    bottom_index = pydash.find_last_index(duan_array[:r + 1], lambda a: a == -1)
                     if bottom_index > -1:
-                        result['buy_zs_huila']['stop_lose_price'].append(low_series[bottom_index])
-                        stop_win_price = e.bottom + (e.bottom - low_series[bottom_index])
+                        result['buy_zs_huila']['stop_lose_price'].append(low_array[bottom_index])
+                        stop_win_price = e.bottom + (e.bottom - low_array[bottom_index])
                         result['buy_zs_huila']['stop_win_price'].append(stop_win_price)
                     else:
                         result['buy_zs_huila']['stop_lose_price'].append(0)
                         result['buy_zs_huila']['stop_win_price'].append(0)
-                    if perfect_buy_long(duan_series, high_series, low_series, r):
+                    if perfect_buy_long(duan_array, high_array, low_array, r):
                         tags.append('完备买')
-                    if higher_duan_series is not None:
-                        category = buy_category(higher_duan_series, duan_series, high_series, low_series, r)
+                    if higher_duan_array is not None:
+                        category = buy_category(higher_duan_array, duan_array, high_array, low_array, r)
                         if len(category) > 0:
                             if category not in tags:
                                 tags.append(category)
@@ -263,7 +267,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
 
                     above_ma5 = False
                     if ma5 is not None:
-                        t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
+                        t = datetime.datetime.strptime(time_str_array[r], "%Y-%m-%d %H:%M")
                         t = t.replace(hour=0, minute=0).timestamp()
                         if t in ma5 and e.bottom > ma5[t]:
                             above_ma5 = True
@@ -271,7 +275,7 @@ def la_hui(e_list, time_series, high_series, low_series, open_series, close_seri
 
                     above_ma20 = False
                     if ma20 is not None:
-                        t = datetime.datetime.strptime(time_series[r], "%Y-%m-%d %H:%M")
+                        t = datetime.datetime.strptime(time_str_array[r], "%Y-%m-%d %H:%M")
                         t = t.replace(hour=0, minute=0).timestamp()
                         if t in ma20 and e.bottom > ma20[t]:
                             above_ma20 = True

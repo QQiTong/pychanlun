@@ -75,7 +75,7 @@ def doExecute(symbol, period, inspect_time = None, is_debug = False):
 
     # 笔中枢的会拉和突破
     entanglement_list = entanglement.CalcEntanglements(time_series, duan_series, bi_series, high_series, low_series)
-    zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
+    zs_huila = entanglement.la_hui(entanglement_list, time_series, high_series, low_series, bi_series, duan_series)
     zs_tupo = entanglement.tu_po(entanglement_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series)
 
     count = len(zs_huila['buy_zs_huila']['date'])
@@ -94,7 +94,7 @@ def doExecute(symbol, period, inspect_time = None, is_debug = False):
 
     # 段中枢的回拉和突破
     higher_entaglement_list = entanglement.CalcEntanglements(time_series, higher_duan_series, duan_series, high_series, low_series)
-    higher_zs_huila = entanglement.la_hui(higher_entaglement_list, time_series, high_series, low_series, open_series, close_series, duan_series, higher_duan_series)
+    higher_zs_huila = entanglement.la_hui(higher_entaglement_list, time_series, high_series, low_series, duan_series, higher_duan_series)
     higher_zs_tupo = entanglement.tu_po(higher_entaglement_list, time_series, high_series, low_series, open_series, close_series, duan_series, higher_duan_series)
 
     count = len(higher_zs_huila['buy_zs_huila']['date'])
