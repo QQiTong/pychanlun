@@ -1,2 +1,3 @@
 docker network create -d bridge --subnet 172.11.0.0/24 --gateway 172.11.0.1 qa_network
 docker volume create mongodb
+docker volume create redis
