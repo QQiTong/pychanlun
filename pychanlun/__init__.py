@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import os
+import logging
 from rqdatac import init
+
+logging.disable(logging.INFO)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
