@@ -31,7 +31,7 @@ export default {
             myChart: null,
             // 多周期图
             myChart1: null,
-            myChart3: null,
+            myChart1d: null,
             myChart5: null,
             myChart15: null,
             myChart30: null,
@@ -195,7 +195,7 @@ export default {
             selectedSymbol: '',
             // 输入的交割过的期货品种 或者 股票品种
             inputSymbol: '',
-            periodList: ['1m', '3m', '5m', '15m', '30m', '60m', '180m'],
+            periodList: ['1m', '3m', '5m', '15m', '30m', '60m', '180m', '1d'],
             // 是否指显示当前持仓的开平动止
             isPosition: false,
             // 当前品种持仓信息
@@ -205,7 +205,7 @@ export default {
             dynamicDirectionMap: {'long': '多', 'short': '空', 'close': '平'},
             currentInfo: null,
             // 数字货币 和外盘 将180m 替换成1m
-            isShow1Min: true,
+            isShow1Min: false,
             futureConfig: {},
             symbolInfo: null,
             show1MinSymbol: ['BTC'],
@@ -341,7 +341,7 @@ export default {
                     this.myChart.resize()
                 })
             } else {
-                this.myChart3 = this.$echarts.init(document.getElementById('main3'))
+                this.myChart1d = this.$echarts.init(document.getElementById('main1d'))
                 this.myChart5 = this.$echarts.init(document.getElementById('main5'))
                 this.myChart15 = this.$echarts.init(document.getElementById('main15'))
                 this.myChart30 = this.$echarts.init(document.getElementById('main30'))
@@ -355,18 +355,18 @@ export default {
                     this.chartssize(document.getElementById('main240Parent'), document.getElementById('main240'))
                     this.myChart240.resize()
                 }
-                this.chartssize(document.getElementById('main3Parent'), document.getElementById('main3'))
+                this.chartssize(document.getElementById('main1dParent'), document.getElementById('main1d'))
                 this.chartssize(document.getElementById('main15Parent'), document.getElementById('main15'))
                 this.chartssize(document.getElementById('main60Parent'), document.getElementById('main60'))
                 this.chartssize(document.getElementById('main5Parent'), document.getElementById('main5'))
                 this.chartssize(document.getElementById('main30Parent'), document.getElementById('main30'))
-                this.myChart3.resize()
+                this.myChart1d.resize()
                 this.myChart5.resize()
                 this.myChart15.resize()
                 this.myChart30.resize()
                 this.myChart60.resize()
                 window.addEventListener('resize', () => {
-                    this.myChart3.resize()
+                    this.myChart1d.resize()
                     this.myChart5.resize()
                     this.myChart15.resize()
                     this.myChart30.resize()
@@ -581,7 +581,7 @@ export default {
                         //     that.sendRequest(symbol, '1m', update)
                         //     break;
                         case 1:
-                            that.sendRequest(symbol, '3m', update)
+                            that.sendRequest(symbol, '1d', update)
                             break
                         case 2:
                             that.sendRequest(symbol, '5m', update)
@@ -620,7 +620,7 @@ export default {
                 }
             } else {
                 if (this.firstFlag[1] === true) {
-                    this.myChart3.showLoading(this.echartsConfig.loadingOption)
+                    this.myChart1d.showLoading(this.echartsConfig.loadingOption)
                 }
                 if (this.firstFlag[2] === true) {
                     this.myChart5.showLoading(this.echartsConfig.loadingOption)
@@ -658,8 +658,8 @@ export default {
                         this.myChart.hideLoading()
                         this.firstFlag[0] = false
                     } else {
-                        if (requestData.period === '3m') {
-                            this.myChart3.hideLoading()
+                        if (requestData.period === '1d') {
+                            this.myChart1d.hideLoading()
                             this.firstFlag[1] = false
                         }
                         if (requestData.period === '5m') {
@@ -713,8 +713,8 @@ export default {
             if (this.period !== '') {
                 currentChart = this.myChart
             } else {
-                if (period === '3m') {
-                    currentChart = this.myChart3
+                if (period === '1d') {
+                    currentChart = this.myChart1d
                 } else if (period === '5m') {
                     currentChart = this.myChart5
                 } else if (period === '15m') {
@@ -735,8 +735,8 @@ export default {
             //     currentChart = myChart1d
             // }
             let specialMA5 = 5
-            let specialMA20 = 20
-            let specialMA60 = 60
+            let specialMA34 = 34
+            let specialMA55 = 55
             // 5日  20日 均线
             // 内盘 每天交易时间 6小时， 外盘交易时间24小时  ,
             if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
@@ -745,72 +745,72 @@ export default {
                     switch (period) {
                         case '1m':
                             specialMA5 = 5400
-                            specialMA20 = 21600
+                            specialMA34 = 21600
                             break
-                        case '3m':
-                            specialMA5 = 1800
-                            specialMA20 = 7200
+                        case '1d':
+                            specialMA5 = 5
+                            specialMA34 = 34
                             break
                         case '5m':
                             specialMA5 = 1080
-                            specialMA20 = 4320
+                            specialMA34 = 4320
                             break
                         case '15m':
                             specialMA5 = 360
-                            specialMA20 = 1440
+                            specialMA34 = 1440
                             break
                         case '30m':
                             // 5 * 48 = 240
                             // 20 *48 = 960
                             specialMA5 = 180
-                            specialMA20 = 720
+                            specialMA34 = 720
                             break
                         case '60m':
                             // 5*18 = 90
                             // 20*18 = 360
                             specialMA5 = 90
-                            specialMA20 = 360
+                            specialMA34 = 360
                             break
                         case '180m':
                             // 180
                             specialMA5 = 30
-                            specialMA20 = 120
+                            specialMA34 = 120
                             break
                     }
                 } else {
                     switch (period) {
                         case '1m':
                             specialMA5 = 7200
-                            specialMA20 = 28800
+                            specialMA34 = 28800
                             break
-                        case '3m':
-                            specialMA5 = 2400
-                            specialMA20 = 9600
+                        case '1d':
+                            specialMA5 = 5
+                            specialMA34 = 34
                             break
                         case '5m':
                             specialMA5 = 1440
-                            specialMA20 = 5760
+                            specialMA34 = 5760
                             break
                         case '15m':
                             specialMA5 = 480
-                            specialMA20 = 1920
+                            specialMA34 = 1920
                             break
                         case '30m':
                             // 5 * 48 = 240
                             // 20 *48 = 960
                             specialMA5 = 240
-                            specialMA20 = 960
+                            specialMA34 = 960
                             break
                         case '60m':
                             // 5*24 = 120
                             // 20*24 = 480
                             specialMA5 = 120
-                            specialMA20 = 480
+                            specialMA34 = 480
                             break
                         case '180m':
                             // 180
                             specialMA5 = 40
-                            specialMA20 = 160
+                            specialMA34 = 160
                             break
                     }
                 }
@@ -827,8 +827,8 @@ export default {
                 let baseHour = 6
 
                 let _5base = 5
-                let _20base = 20
-                let _60base = 60
+                let _34base = 34
+                let _55base = 55
                 if (_4HourSymbolList.indexOf(simpleSymbol) !== -1) {
                     baseHour = 4
                 } else if (_8HourSymbolList.indexOf(simpleSymbol) !== -1) {
@@ -841,52 +841,54 @@ export default {
                 switch (period) {
                     case '1m':
                         specialMA5 = _5base * baseHour * 2 * 2 * 5 * 3
-                        specialMA20 = _20base * baseHour * 2 * 2 * 5 * 3
-                        specialMA60 = _60base * baseHour * 2 * 2 * 5 * 3
+                        specialMA34 = _34base * baseHour * 2 * 2 * 5 * 3
+                        specialMA55 = _55base * baseHour * 2 * 2 * 5 * 3
                         break
-                    case '3m':
-                        specialMA5 = _5base * baseHour * 2 * 2 * 5
-                        specialMA20 = _20base * baseHour * 2 * 2 * 5
-                        specialMA60 = _60base * baseHour * 2 * 2 * 5
+                    case '1d':
+                        specialMA5 = _5base
+                        specialMA34 = _34base
+                        specialMA55 = _55base
                         break
                     case '5m':
                         specialMA5 = _5base * baseHour * 2 * 2 * 3
-                        specialMA20 = _20base * baseHour * 2 * 2 * 3
-                        specialMA60 = _60base * baseHour * 2 * 2 * 3
+                        specialMA34 = _34base * baseHour * 2 * 2 * 3
+                        specialMA55 = _55base * baseHour * 2 * 2 * 3
                         break
                     case '15m':
                         specialMA5 = _5base * baseHour * 2 * 2
-                        specialMA20 = _20base * baseHour * 2 * 2
-                        specialMA60 = _60base * baseHour * 2 * 2
+                        specialMA34 = _34base * baseHour * 2 * 2
+                        specialMA55 = _55base * baseHour * 2 * 2
                         break
                     case '30m':
                         // 5 * 8 = 40
                         // 20 *8 = 160
                         specialMA5 = _5base * baseHour * 2
-                        specialMA20 = _20base * baseHour * 2
-                        specialMA60 = _60base * baseHour * 2
+                        specialMA34 = _34base * baseHour * 2
+                        specialMA55 = _55base * baseHour * 2
                         break
                     case '60m':
                         // 5*4 = 20
                         // 20*4 = 80
                         specialMA5 = _5base * baseHour
-                        specialMA20 = _20base * baseHour
-                        specialMA60 = _60base * baseHour
+                        specialMA34 = _34base * baseHour
+                        specialMA55 = _55base * baseHour
                         break
                     case '180m':
+
                         // 180
-                        specialMA5 = _5base / 3
-                        specialMA20 = _20base / 3
-                        specialMA60 = _60base / 3
+                        specialMA5 = _5base * baseHour / 3
+                        specialMA34 = _34base * baseHour / 3
+                        specialMA55 = _55base * baseHour / 3
+                        console.log("内盘", specialMA5, specialMA34, specialMA55)
                         break
                 }
 
             }
-            // console.log(period, specialMA5, specialMA20)
+            // console.log(period, specialMA5, specialMA34)
             let option
             if (update === 'update') {
                 // console.log('更新', period)
-                option = that.refreshOption(currentChart, resultData, specialMA5, specialMA20, specialMA60)
+                option = that.refreshOption(currentChart, resultData, specialMA5, specialMA34, specialMA55)
             } else {
                 console.log('重载', period)
                 option = {
@@ -1029,15 +1031,15 @@ export default {
                     },
                     color: ['yellow', 'green', 'blue', 'white', 'yellow', 'red' /* 'white', 'white', 'white' */],
                     legend: {
-                        data: ['笔', '段', '高级别段', 'MA5', 'MA20', 'MA60', /* '布林上轨', '布林中轨', '布林下轨' */],
+                        data: ['笔', '段', '高级别段', 'MA5', 'MA34', 'MA55', /* '布林上轨', '布林中轨', '布林下轨' */],
 
                         selected: {
                             '笔': true,
                             '段': true,
                             '高级别段': true,
                             'MA5': true,
-                            'MA20': true,
-                            'MA60': true,
+                            'MA34': true,
+                            'MA55': true,
                             // 'markline': true
                         },
                         top: 10,
@@ -1483,9 +1485,9 @@ export default {
                         },
                         // //index 11
                         {
-                            name: 'MA20',
+                            name: 'MA34',
                             type: 'line',
-                            data: that.calculateMA(resultData, specialMA20),
+                            data: that.calculateMA(resultData, specialMA34),
                             smooth: true,
                             lineStyle: {
                                 normal: {
@@ -1500,9 +1502,9 @@ export default {
                         },
                         // // index 12
                         {
-                            name: 'MA60',
+                            name: 'MA55',
                             type: 'line',
-                            data: that.calculateMA(resultData, specialMA60),
+                            data: that.calculateMA(resultData, specialMA55),
                             smooth: true,
                             lineStyle: {
                                 normal: {
@@ -1535,9 +1537,9 @@ export default {
                         //
                         // // index 14
                         // {
-                        //     name: 'MA20',
+                        //     name: 'MA34',
                         //     type: 'line',
-                        //     data: that.calculateMA(resultData, specialMA20),
+                        //     data: that.calculateMA(resultData, specialMA34),
                         //     smooth: true,
                         //     lineStyle: {
                         //         normal: {
@@ -1564,7 +1566,7 @@ export default {
             }
             currentChart.setOption(option)
         },
-        refreshOption(chart, resultData, specialMA5, specialMA20, specialMA60) {
+        refreshOption(chart, resultData, specialMA5, specialMA34, specialMA55) {
             let option = chart.getOption()
             option.series[0].data = resultData.values
             option.xAxis[0].data = resultData.date
@@ -1586,8 +1588,8 @@ export default {
             // option.series[8].markPoint.data = resultData.bigBcMACDValues
             // option.series[9].data = resultData.deaBigLevel
             option.series[4].data = this.calculateMA(resultData, specialMA5);
-            option.series[5].data = this.calculateMA(resultData, specialMA20);
-            option.series[6].data = this.calculateMA(resultData, specialMA60);
+            option.series[5].data = this.calculateMA(resultData, specialMA34);
+            option.series[6].data = this.calculateMA(resultData, specialMA55);
             // option.series[11].data = resultData.volume;
             // console.log('更新的option', option)
             return option

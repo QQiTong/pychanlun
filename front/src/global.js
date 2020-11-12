@@ -13,10 +13,10 @@ let digitCoinLevel = 20
 let globalFutureSymbol = ['CL', 'GC', 'SI', 'ZS', 'ZM', 'ZL', 'YM', 'ES', 'NQ', 'CN']
 
 // 最大资金使用率
-let maxAccountUseRate = 0.15
+let maxAccountUseRate = 0.10
 
 // 止损系数
-let stopRate = 0.004
+let stopRate = 0.01
 
 export default {
     install() {

@@ -61,8 +61,8 @@ digitCoinFee = 0.001
 digitCoinAccount = 60.80 / 10000
 # 外盘期货账户
 global_future_account = 6
-maxAccountUseRate = 0.15
-stopRate = 0.004
+maxAccountUseRate = 0.10
+stopRate = 0.01
 mail = Mail()
 dingMsg = DingMsg()
 
@@ -149,12 +149,12 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             "fractal": fractal,  # 信号触发时是否在大级别分型确立
             "power": power  # 5个指标综合判断当前信号强度
         })
-        max_stop_rate = 0.25
+        max_stop_rate = 0.55
         if signal == 'fractal':
             max_stop_rate = 0.3
             print(signal, symbol, period, futureCalcObj, perOrderStopRate)
 
-        if abs((date_created - fire_time).total_seconds()) < 60 * 4   and perOrderStopRate <= max_stop_rate:
+        if abs((date_created - fire_time).total_seconds()) < 60 * 4 and perOrderStopRate <= max_stop_rate:
             # 新增
             remind = await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                                   stop_lose_price, futureCalcObj, True)
@@ -623,10 +623,10 @@ async def do_monitoring(symbol, period):
             close_price = result['close'][-1]
             # await monitorBeichi(result, symbol, period, close_price)
             await monitorHuila(result, symbol, period, close_price)
-            # await monitorTupo(result, symbol, period, close_price)
+            await monitorTupo(result, symbol, period, close_price)
             await monitorVReverse(result, symbol, period, close_price)
             await monitorFiveVReverse(result, symbol, period, close_price)
-            # await monitorDuanBreak(result, symbol, period, close_price)
+            await monitorDuanBreak(result, symbol, period, close_price)
             await monitorFractal(result, symbol, period, close_price)
     except BaseException as e:
         logger.error("Error Occurred: {0}".format(traceback.format_exc()))
@@ -1239,7 +1239,7 @@ def run(**kwargs):
     def worker():
         while is_run:
             symbol_item = q.get()
-            monitor_futures_and_digitcoin([symbol_item], ['1m', '3m', '5m', '15m', '30m'])
+            monitor_futures_and_digitcoin([symbol_item], ['5m','15m', '30m','60m','180m'])
             q.task_done()
 
     def dispatcher():

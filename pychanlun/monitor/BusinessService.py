@@ -22,7 +22,7 @@ from pychanlun.db import DBPyChanlun
 tz = pytz.timezone('Asia/Shanghai')
 
 # periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
-periodList = ['1m', '3m', '5m', '15m', '30m']
+periodList = ['1m', '3m', '5m', '15m', '30m','180m']
 # 主力合约列表
 dominantSymbolList = []
 # 主力合约详细信息
@@ -189,8 +189,9 @@ class BusinessService:
 
             win_end_count_list.append(int(win_end_group_by_date.count()[i]))
             lose_end_count_list.append(int(lose_end_group_by_date.count()[i]))
-            win_lose_count_rate.append(round(int(win_end_group_by_date.count()[i]) /
-                                             (int(lose_end_group_by_date.count()[i]) + int(win_end_group_by_date.count()[i])), 2))
+            if int(win_end_group_by_date.count()[i]) != 0:
+                win_lose_count_rate.append(round(int(win_end_group_by_date.count()[i]) /
+                                                 (int(lose_end_group_by_date.count()[i]) + int(win_end_group_by_date.count()[i])), 2))
 
         sorted_win_money_list = win_end_group_by_symbol.max().sort_values(ascending=False).dropna(axis=0)
         sorted_lose_money_list = lose_end_group_by_symbol.max().sort_values(ascending=True).dropna(axis=0)
@@ -290,24 +291,24 @@ class BusinessService:
 
             "beichi_win_money": int(df_beichi_win['win_end_money'].sum()) if 'win_end_money' in df_beichi_win else 0,
             "beichi_lose_money": int(df_beichi_win['lose_end_money'].sum()) if 'lose_end_money' in df_beichi_win else 0,
-
+            #
             "huila_win_count": len(df_huila_win),
             "huila_lose_count": len(df_huila_lose),
-
-            "huila_win_money": df_huila_win['win_end_money'].sum(),
-            "huila_lose_money": df_huila_win['lose_end_money'].sum() if 'lose_end_money' in df_huila_win else 0,
+            #
+            "huila_win_money": int(df_huila_win['win_end_money'].sum()),
+            "huila_lose_money": int(df_huila_win['lose_end_money'].sum()) if 'lose_end_money' in df_huila_win else 0,
 
             "break_win_count": len(df_break_win),
             "break_lose_count": len(df_break_lose),
 
-            "break_win_money": df_break_win['win_end_money'].sum() if 'win_end_money' in df_break_win else 0,
-            "break_lose_money": df_break_win['lose_end_money'].sum() if 'lose_end_money' in df_break_win else 0,
+            "break_win_money": int(df_break_win['win_end_money'].sum()) if 'win_end_money' in df_break_win else 0,
+            "break_lose_money": int(df_break_win['lose_end_money'].sum()) if 'lose_end_money' in df_break_win else 0,
 
             "tupo_win_count": len(df_tupo_win),
             "tupo_lose_count": len(df_tupo_lose),
 
-            "tupo_win_money": df_tupo_win['win_end_money'].sum() if 'win_end_money' in df_tupo_win else 0,
-            "tupo_lose_money": df_tupo_win['lose_end_money'].sum() if 'lose_end_money' in df_tupo_win else 0,
+            "tupo_win_money": int(df_tupo_win['win_end_money'].sum()) if 'win_end_money' in df_tupo_win else 0,
+            "tupo_lose_money": int(df_tupo_win['lose_end_money'].sum()) if 'lose_end_money' in df_tupo_win else 0,
 
             # "v_reverse_win_count": len(df_v_reverse_win),
             # "v_reverse_lose_count": len(df_v_reverse_lose),
