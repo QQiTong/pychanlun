@@ -4,6 +4,7 @@ import datetime
 import re
 import traceback
 
+import QUANTAXIS as QA
 import numpy as np
 import pandas as pd
 import pydash
@@ -12,15 +13,16 @@ from func_timeout import func_set_timeout
 from loguru import logger
 
 import pychanlun.entanglement as entanglement
-from pychanlun import Duan, divergence
+import pychanlun.placeholder as placeholder
+from pychanlun import Duan
 from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData
+from pychanlun.analysis.chanlun_data import ChanlunData
 from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
 from pychanlun.basic.util import get_required_period_list, get_Line_data, get_zhong_shu_data, get_period_cache_stamp
-from pychanlun.config import config
-from pychanlun.analysis.chanlun_data import ChanlunData
-import pychanlun.placeholder as placeholder
 from pychanlun.basic.util import str_from_timestamp
+from pychanlun.config import config
+from pychanlun.helloquant.hq_tag.jcsc import find_jcsc_tags
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -89,9 +91,29 @@ def get_data_v2(symbol, period, end_date=None):
 
     daily_data = get_instrument_data(symbol, "1d", end_date)
     daily_data = pd.DataFrame(daily_data)
+    daily_data["time_str"] = daily_data["time"] \
+        .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
     daily_data = daily_data.set_index("time")
     ma5 = np.round(pd.Series.rolling(daily_data["close"], window=5).mean(), 2)
     ma34 = np.round(pd.Series.rolling(daily_data["close"], window=34).mean(), 2)
+
+    jcsc_tags = {
+        "buy_ma_gold_cross": {
+            "idx": [],
+            "date": [],
+            "data": [],
+            "stop_lose_price": []
+        },
+        "sell_ma_dead_cross": {
+            "idx": [],
+            "date": [],
+            "data": [],
+            "stop_lose_price": []
+        }
+    }
+    if period == "1d":
+        jcsc_tags = find_jcsc_tags(np.array(daily_data["time_str"]), np.array(daily_data["high"]),
+                                   np.array(daily_data["low"]), np.array(daily_data["close"]))
 
     # 计算买卖预警信号
     hui_la = entanglement.la_hui(
@@ -235,7 +257,9 @@ def get_data_v2(symbol, period, end_date=None):
         "sell_five_v_reverse": sell_five_v_reverse,
         "buy_duan_break": buy_duan_break,
         "sell_duan_break": sell_duan_break,
-        'fractal': placeholder.fractal
+        'fractal': placeholder.fractal,
+        "buy_ma_gold_cross": jcsc_tags["buy_ma_gold_cross"],
+        "sell_ma_dead_cross": jcsc_tags["sell_ma_dead_cross"]
     }
 
     fractal_region = {} if fractal_region is None else fractal_region
