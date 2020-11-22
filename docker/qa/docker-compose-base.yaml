@@ -1,0 +1,33 @@
+version: '3.7'
+services:
+    mgdb:
+        image: mongo:bionic
+        ports:
+            - "27017:27017"
+        env_file: env.env
+        volumes:
+            - qamg:/data/db
+        networks:
+            - qanetwork
+        restart: always
+
+    qaeventmq:
+        image: daocloud.io/quantaxis/qaeventmq:latest
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+            - "4369:4369"
+        environment:
+            - TZ=Asia/Shanghai
+        networks:
+            - qanetwork
+        restart: always
+
+volumes:
+    qamg:
+        external:
+            name: qamg
+
+networks:
+    qanetwork:
+        external: true
