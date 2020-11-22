@@ -41,6 +41,7 @@ services:
         env_file: env.env
         networks:
             - qanetwork
+        restart: always
         command:
             ['/root/QUANTAXIS_RealtimeCollector/docker/wait_for_it.sh', 'qaeventmq:5672', '--' ,'/root/QUANTAXIS_RealtimeCollector/docker/start_collector.sh']
 
@@ -53,6 +54,7 @@ services:
             ['/root/QATrader/docker/wait_for_it.sh', 'qaeventmq:5672', '--' ,'qatraderserver']
         networks:
             - qanetwork
+        restart: always
 
 volumes:
     qacode:
