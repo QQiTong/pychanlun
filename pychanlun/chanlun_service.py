@@ -31,6 +31,7 @@ tz = pytz.timezone('Asia/Shanghai')
 def get_data_v2(symbol, period, end_date=None):
     required_period_list = get_required_period_list(period)[0:3]
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
+    current_minute_holder = None
     if match_stock is not None:
         get_instrument_data = getStockData
     elif symbol in config['global_future_symbol'] or symbol in config['global_stock_symbol']:
@@ -39,6 +40,7 @@ def get_data_v2(symbol, period, end_date=None):
         get_instrument_data = getDigitCoinData
     else:
         get_instrument_data = getFutureData
+        current_minute_holder = current_minute
 
     data_list = []
     required_period_list.reverse()
@@ -117,12 +119,13 @@ def get_data_v2(symbol, period, end_date=None):
         low_arr = np.array(daily_data["low"])
         close_arr = np.array(daily_data["close"])
 
-        current = current_minute(symbol)
-        if daily_data.index[-1] < datetime.datetime.now().replace(hour=0, minute=0, second=0).timestamp():
-            time_str_arr = np.append(time_str_arr, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
-            high_arr = np.append(high_arr, current["high"])
-            low_arr = np.append(low_arr, current["low"])
-            close_arr = np.append(close_arr, current["close"])
+        if current_minute_holder is not None:
+            current = current_minute(symbol)
+            if daily_data.index[-1] < datetime.datetime.now().replace(hour=0, minute=0, second=0).timestamp():
+                time_str_arr = np.append(time_str_arr, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+                high_arr = np.append(high_arr, current["high"])
+                low_arr = np.append(low_arr, current["low"])
+                close_arr = np.append(close_arr, current["close"])
         jcsc_tags = find_jcsc_tags(time_str_arr, high_arr, low_arr, close_arr)
 
     # 计算买卖预警信号
