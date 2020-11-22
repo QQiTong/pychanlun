@@ -169,7 +169,7 @@ config = {
         # 'IC': {'margin_rate': 0.12, 'contract_multiplier': 200},
         # 'IF': {'margin_rate': 0.10, 'contract_multiplier': 300},
         # 'IH': {'margin_rate': 0.10, 'contract_multiplier': 300},
-        # 'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
+        'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         # 外盘
         'CL': {'margin_rate': 0.16, 'contract_multiplier': 500},  # 8:30 -14:00 0.1      其它时间 0.15       11756
         'GC': {'margin_rate': 0.07, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065

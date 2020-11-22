@@ -437,7 +437,7 @@ class BusinessService:
         conbinSymbolInfo = copy.deepcopy(dominantSymbolInfoList)
         #  把外盘 数字货币加进去
         conbinSymbolInfo.extend(config['global_future_symbol_info'])
-        # conbinSymbolInfo.extend(config['digit_coin_symbol_info'])
+        conbinSymbolInfo.extend(config['digit_coin_symbol_info'])
         return conbinSymbolInfo
 
     def getFutureSignalList(self):

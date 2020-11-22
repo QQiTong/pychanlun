@@ -19,27 +19,41 @@ from pychanlun.db import DBQuantAxis
 tz = pytz.timezone('Asia/Shanghai')
 
 okexUrl = "https://www.okex.me/v2/perpetual/pc/public/instruments/BTC-USDT-SWAP/candles"
-
+zbUrl = "http://api.zb.center/data/v1/kline?market=btc_usdt&type=1day"
 
 @lru_cache(maxsize=128)
 def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
-    t = time.time()
-    timeStamp = int(round(t * 1000))
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
-        "Accept": "application/json",
-        "App-Type": "web",
-        "Referer": "https://www.okex.me/derivatives/swap/full/usdt-btc"}
-
-    payload = {
-        'granularity': period,
-        'size': 1000,
-        't': timeStamp
+    # t = time.time()
+    # timeStamp = int(round(t * 1000))
+    # headers = {
+    #     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
+    #     "Accept": "application/json",
+    #     "App-Type": "web",
+    #     "Referer": "https://www.okex.me/derivatives/swap/full/usdt-btc"}
+    #
+    # payload = {
+    #     'granularity': period,
+    #     'size': 1000,
+    #     't': timeStamp
+    # }
+    # r = requests.get(okexUrl, params=payload, headers=headers, timeout=(15, 15))
+    periodMap = {
+        '1m': '1min',
+        '3m': '3min',
+        '5m': '5min',
+        '15m': '15min',
+        '60m': '1hour',
+        '30m': '30min',
+        '180m': '2hour',
+        '1d': '1day',
+        '3d': '3day',
+        '1w': '1week'
     }
-    r = requests.get(okexUrl, params=payload, headers=headers, timeout=(15, 15))
+    url = "http://api.zb.center/data/v1/kline?market=btc_usdt&type=%s" % (periodMap[period])
+    r = requests.get(url, timeout=(15, 15))
     data_list = json.loads(r.text)['data']
     df = pd.DataFrame(list(data_list), columns=['time', 'open', 'high', 'low', 'close', 'volume'])
-    df['time'] = df['time'].apply(lambda value: datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ'))
+    df['time'] = df['time'].apply(lambda value: int(value/1000))
     df.fillna(0, inplace=True)
     return df
 

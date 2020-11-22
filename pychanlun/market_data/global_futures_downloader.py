@@ -74,7 +74,7 @@ def fetch_global_futures_mink():
                 time.sleep(1)
                 if not is_run:
                     break
-        time.sleep(200)
+        time.sleep(300)
     logger.info("外盘分钟数据抓取程序已停止。")
 
 
