@@ -741,7 +741,7 @@ export default {
             // 内盘 每天交易时间 6小时， 外盘交易时间24小时  ,
             if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
                 // 其中 ZM ZS ZL 是18小时
-                if (this.symbol === 'ZS' || this.symbol === 'ZM' || this.symbol === 'ZL') {
+                if (this.symbol === 'S' || this.symbol === 'SM' || this.symbol === 'BO') {
                     switch (period) {
                         case '1m':
                             specialMA5 = 5400

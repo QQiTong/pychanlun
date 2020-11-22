@@ -106,13 +106,6 @@ class MacdStrategy(CtaTemplate):
         self.slow_ma0 = slow_ma[-1]
         self.slow_ma1 = slow_ma[-2]
         self.slow_ma2 = slow_ma[-4]
-
-        middle_ma = am.sma(self.middle_window, array=True)
-        self.middle_ma0 = middle_ma[-1]
-        self.middle_ma1 = middle_ma[-2]
-        self.middle_ma2 = middle_ma[-4]
-
-
         # kd = am.kd(9, 3, array=True)
         # k = kd[0]
         # d = kd[1]

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import logging
+from loguru import logger
+
 import traceback
 import datetime
 import time
@@ -14,7 +15,6 @@ from pymongo import UpdateOne
 import pytz
 import signal
 from pychanlun.config import config
-
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -52,14 +52,14 @@ def fetch_global_futures_mink():
                 if not is_run:
                     break
             if not is_run:
-                    break
+                break
         # 取日线数据
         if is_run:
             for symbol in symbol_list:
                 d = datetime.datetime.now().strftime('%Y_%m_%d')
                 var = "_%s_%s" % (symbol, d)
                 url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var %s=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=%s&_=%s&source=web" % (var, symbol, d)
-                response = requests.get(url, headers = headers, timeout=(15, 15))
+                response = requests.get(url, headers=headers, timeout=(15, 15))
                 response_text = response.text
                 m = re.search(r'\((.*)\)', response_text)
                 content = m.group(1)
@@ -68,19 +68,19 @@ def fetch_global_futures_mink():
                 df.set_index('date', inplace=True)
                 save_data_d(symbol, '1d', df)
                 # 合成3d数据
-                ohlc_dict = { 'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum' }
+                ohlc_dict = {'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum'}
                 df3d = df.resample('3D', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                 save_data_d(symbol, '3d', df3d)
                 time.sleep(1)
                 if not is_run:
                     break
         time.sleep(200)
-    logging.info("外盘分钟数据抓取程序已停止。")
+    logger.info("外盘分钟数据抓取程序已停止。")
 
 
 def save_data_m(code, period, df):
     if not df.empty:
-        logging.info("保存 %s %s %s" % (code, period, df.index.values[-1]))
+        logger.info("保存 %s %s %s" % (code, period, df.index.values[-1]))
     batch = []
     for idx, row in df.iterrows():
         batch.append(UpdateOne({
@@ -104,7 +104,7 @@ def save_data_m(code, period, df):
 
 def save_data_d(code, period, df):
     if not df.empty:
-        logging.info("保存 %s %s %s" % (code, period, df.index.values[-1]))
+        logger.info("保存 %s %s %s" % (code, period, df.index.values[-1]))
     batch = []
     for idx, row in df.iterrows():
         batch.append(UpdateOne({
@@ -127,7 +127,7 @@ def save_data_d(code, period, df):
 
 
 def signal_hanlder(signalnum, frame):
-    logging.info("正在停止程序。")
+    logger.info("正在停止程序。")
     global is_run
     is_run = False
 

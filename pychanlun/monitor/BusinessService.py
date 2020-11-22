@@ -436,7 +436,7 @@ class BusinessService:
     def getDoinantSynmbol(self):
         conbinSymbolInfo = copy.deepcopy(dominantSymbolInfoList)
         #  把外盘 数字货币加进去
-        # conbinSymbolInfo.extend(config['global_future_symbol_info'])
+        conbinSymbolInfo.extend(config['global_future_symbol_info'])
         # conbinSymbolInfo.extend(config['digit_coin_symbol_info'])
         return conbinSymbolInfo
 
@@ -511,9 +511,9 @@ class BusinessService:
             resultItem = {'change': change, 'price': today}
             symbolChangeMap[item] = resultItem
         # print("涨跌幅信息", symbolChangeMap)
-        # globalChangeList = self.getGlobalFutureChangeList()
-        # conbineChangeList = dict(symbolChangeMap, **globalChangeList)
-        return symbolChangeMap
+        globalChangeList = self.getGlobalFutureChangeList()
+        conbineChangeList = dict(symbolChangeMap, **globalChangeList)
+        return conbineChangeList
 
     def calc_ma(self, close_list, day):
         ma = QA.MA(pd.Series(close_list), day)

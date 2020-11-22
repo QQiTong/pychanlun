@@ -73,11 +73,11 @@ config = {
         # "IF",
         # "IH",
 
-    #   第二组 新增品种 15
-    #     "AL",
-    #     "SN",
-    #     "PB",
-    #     "SM",
+        #   第二组 新增品种 15
+        #     "AL",
+        #     "SN",
+        #     "PB",
+        #     "SM",
         # "SF",
 
         # "B",
@@ -169,23 +169,21 @@ config = {
         # 'IC': {'margin_rate': 0.12, 'contract_multiplier': 200},
         # 'IF': {'margin_rate': 0.10, 'contract_multiplier': 300},
         # 'IH': {'margin_rate': 0.10, 'contract_multiplier': 300},
-
         # 'BTC': {'margin_rate': 0.05, 'contract_multiplier': 1},
         # 外盘
-        # 'CL': {'margin_rate': 0.31, 'contract_multiplier': 500},  # 8:30 -14:00 0.1      其它时间 0.15       11756
-        # 'GC': {'margin_rate': 0.054, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
-        # 'SI': {'margin_rate': 0.13, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
-
+        'CL': {'margin_rate': 0.16, 'contract_multiplier': 500},  # 8:30 -14:00 0.1      其它时间 0.15       11756
+        'GC': {'margin_rate': 0.07, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
+        'SI': {'margin_rate': 0.14, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
+        'HG': {'margin_rate': 0.06, 'contract_multiplier': 25000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
+        'NID': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'ZSD': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'CN': {'margin_rate': 0.09, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06          1045
 
-        # 'ZS': {'margin_rate': 0.056, 'contract_multiplier': 50},  # 2314
-        # 'ZM': {'margin_rate': 0.07, 'contract_multiplier': 100},  # 2062
-        # 'ZL': {'margin_rate': 0.06, 'contract_multiplier': 600},  # 935
-
-        # 'NID': {'margin_rate': 0.1, 'contract_multiplier': 1},
-        # 'ZSD': {'margin_rate': 0.1, 'contract_multiplier': 1},
-        # 'CP': {'margin_rate': 0.1, 'contract_multiplier': 1},
-        # 'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'S': {'margin_rate': 0.03, 'contract_multiplier': 50},  # 2314
+        'SM': {'margin_rate': 0.04, 'contract_multiplier': 100},  # 2062
+        'BO': {'margin_rate': 0.04, 'contract_multiplier': 600},  # 935
+        'FCPO': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'SB': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # wshq
         # 'YM': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
@@ -214,10 +212,12 @@ config = {
         '1w'
     ],
     # 外盘期货品种
-    # CL:原油; GC:黄金;SI:白银; CT:棉花;ZS:大豆;ZM:豆粕; ZL:豆油;NID:伦镍;
-    # YM:道琼斯 CN:A50 CP:马棕榈
+    # CL:原油; GC:黄金;SI:白银; CT:棉花;S:大豆;SM:豆粕; BO:豆油;NID:伦镍; ZSD:伦锌;HG:美铜
+    # YM:道琼斯 CN:A50 ;FCPO:马棕榈
     # wshq 'SB'
-    'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL', 'NID', 'ZSD'],
+    # 'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL', 'NID', 'ZSD'],
+    # 新浪外盘品种名
+    'global_future_symbol': ['CL', 'GC', 'SI', 'HG', 'NID', 'ZSD', 'S', 'SM', 'BO', 'FCPO', 'CT'],
     # 美国股票
     'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD'],
     # wshq
@@ -266,7 +266,7 @@ config = {
         {
             'contract_multiplier': 500,
             'exchange': '美国',
-            'margin_rate': 0.31,
+            'margin_rate': 0.16,
             'order_book_id': 'CL',
             'trading_hours': '7*24',
             'type': 'future',
@@ -275,7 +275,7 @@ config = {
         {
             'contract_multiplier': 10,
             'exchange': '美国',
-            'margin_rate': 0.059,
+            'margin_rate': 0.07,
             'order_book_id': 'GC',
             'trading_hours': '7*24',
             'type': 'future',
@@ -284,55 +284,55 @@ config = {
         {
             'contract_multiplier': 5000,
             'exchange': '美国',
-            'margin_rate': 0.13,
+            'margin_rate': 0.14,
             'order_book_id': 'SI',
             'trading_hours': '7*24',
             'type': 'future',
             'feeRate': 0.012
         },
         {
-            'contract_multiplier': 1,
-            'exchange': '新加坡',
-            'margin_rate': 0.09,
-            'order_book_id': 'CN',
-            'trading_hours': '7*24',
-            'type': 'stock',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 0.5,
-            'exchange': '美国',
-            'margin_rate': 0.13,
-            'order_book_id': 'YM',
-            'trading_hours': '7*24',
-            'type': 'future',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 5,
-            'exchange': '美国',
-            'margin_rate': 0.086,
-            'order_book_id': 'ES',
-            'trading_hours': '7*24',
-            'type': 'future',
-            'feeRate': 0.012
-        },
-        {
-            'contract_multiplier': 2,
-            'exchange': '美国',
-            'margin_rate': 0.086,
-            'order_book_id': 'NQ',
+            'contract_multiplier': 25000,
+            'exchange': '美铜',
+            'margin_rate': 0.06,
+            'order_book_id': 'HG',
             'trading_hours': '7*24',
             'type': 'future',
             'feeRate': 0.012
         },
         # {
         #     'contract_multiplier': 1,
-        #     'exchange': '马来西亚',
-        #     'margin_rate': 0.1,
-        #     'order_book_id': 'CP',
+        #     'exchange': '新加坡',
+        #     'margin_rate': 0.09,
+        #     'order_book_id': 'CN',
         #     'trading_hours': '7*24',
         #     'type': 'stock',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 0.5,
+        #     'exchange': '美国',
+        #     'margin_rate': 0.13,
+        #     'order_book_id': 'YM',
+        #     'trading_hours': '7*24',
+        #     'type': 'future',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 5,
+        #     'exchange': '美国',
+        #     'margin_rate': 0.086,
+        #     'order_book_id': 'ES',
+        #     'trading_hours': '7*24',
+        #     'type': 'future',
+        #     'feeRate': 0.012
+        # },
+        # {
+        #     'contract_multiplier': 2,
+        #     'exchange': '美国',
+        #     'margin_rate': 0.086,
+        #     'order_book_id': 'NQ',
+        #     'trading_hours': '7*24',
+        #     'type': 'future',
         #     'feeRate': 0.012
         # },
         {
@@ -353,15 +353,7 @@ config = {
             'type': 'future',
             'feeRate': 0.012
         },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 0.1,
-        #     'order_book_id': 'CT',
-        #     'trading_hours': '7*24',
-        #     'type': 'future',
-        #     'feeRate': 0.012
-        # },
+
         # {
         #     'contract_multiplier': 1,
         #     'exchange': '美国',
@@ -373,112 +365,58 @@ config = {
         # },
         {
             'contract_multiplier': 50,
-            'exchange': '美国',
-            'margin_rate': 0.056,
-            'order_book_id': 'ZS',
+            'exchange': '美豆',
+            'margin_rate': 0.03,
+            'order_book_id': 'S',
             'trading_hours': '7*24',
             'type': 'future',
             'feeRate': 0.012
         },
+        # {
+        #     'contract_multiplier': 50,
+        #     'exchange': '美玉米',
+        #     'margin_rate': 0.06,
+        #     'order_book_id': 'C',
+        #     'trading_hours': '7*24',
+        #     'type': 'future',
+        #     'feeRate': 0.012
+        # },
         {
             'contract_multiplier': 100,
-            'exchange': '美国',
-            'margin_rate': 0.07,
-            'order_book_id': 'ZM',
+            'exchange': '美豆粕',
+            'margin_rate': 0.04,
+            'order_book_id': 'SM',
             'trading_hours': '7*24',
             'type': 'future',
             'feeRate': 0.012
         },
         {
             'contract_multiplier': 600,
-            'exchange': '美国',
-            'margin_rate': 0.06,
-            'order_book_id': 'ZL',
+            'exchange': '美豆油',
+            'margin_rate': 0.04,
+            'order_book_id': 'BO',
             'trading_hours': '7*24',
             'type': 'future',
             'feeRate': 0.012
         },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 1,
-        #     'order_book_id': 'AAPL',
-        #     'trading_hours': '5*7',
-        #     'type': 'stock',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 1,
-        #     'order_book_id': 'MSFT',
-        #     'trading_hours': '5*7',
-        #     'type': 'stock',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 1,
-        #     'order_book_id': 'GOOG',
-        #     'trading_hours': '5*7',
-        #     'type': 'stock',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 1,
-        #     'order_book_id': 'FB',
-        #     'trading_hours': '5*7',
-        #     'type': 'stock',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 1,
-        #     'order_book_id': 'AMZN',
-        #     'trading_hours': '5*7',
-        #     'type': 'stock',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 1,
-        #     'order_book_id': 'NFLX',
-        #     'trading_hours': '5*7',
-        #     'type': 'stock',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 1,
-        #     'order_book_id': 'NVDA',
-        #     'trading_hours': '5*7',
-        #     'type': 'stock',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 1,
-        #     'order_book_id': 'AMD',
-        #     'trading_hours': '5*7',
-        #     'type': 'stock',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 1,
-        #     'exchange': '美国',
-        #     'margin_rate': 1,
-        #     'order_book_id': 'ROKU',
-        #     'trading_hours': '5*7',
-        #     'type': 'stock',
-        #     'feeRate': 0.012
-        # }
+        {
+            'contract_multiplier': 1,
+            'exchange': '美棉',
+            'margin_rate': 0.1,
+            'order_book_id': 'CT',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '马来西亚',
+            'margin_rate': 0.1,
+            'order_book_id': 'FCPO',
+            'trading_hours': '7*24',
+            'type': 'stock',
+            'feeRate': 0.012
+        },
     ]
 }
 cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]

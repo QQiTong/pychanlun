@@ -178,7 +178,7 @@
                             header-cell-class-name="el-header-cell"
                             cell-class-name="el-cell"
                         >
-                            <el-table-column align="left" width="80">
+                            <el-table-column align="left" >
                                 <template slot="header" slot-scope="scope">
                                     <el-input v-model="symbolSearch" size="mini" placeholder="搜索">
                                         <!--                                <el-button type="primary" @click="getSignalList" size="mini" slot="append">刷新-->
@@ -194,7 +194,7 @@
                                     </el-link>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="保证金率" width="80">
+                            <el-table-column label="保证金率" >
                                 <template slot-scope="scope">
                                     <el-link
                                         @click="fillMarginRate(scope.row,changeList && changeList[scope.row.order_book_id]?
@@ -209,7 +209,7 @@
                                     </el-link>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="涨跌幅" width="90">
+                            <el-table-column label="涨跌幅" >
                                 <template slot-scope="scope">
                                     <!--                                    <el-tag-->
                                     <!--                                        effect="dark"-->
@@ -241,7 +241,7 @@
                                     </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="最新价" width="70">
+                            <el-table-column label="最新价" >
                                 <template slot-scope="scope">
                                     <span v-if="scope.row.order_book_id.indexOf('BTC')===-1">
                                         {{(changeList && changeList[scope.row.order_book_id]?
@@ -252,7 +252,7 @@
                                     </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="日20均线" width="100" align="center">
+                            <el-table-column label="日20均线"  align="center">
                                 <template slot-scope="scope">
                                     <!--                                    <el-tag-->
                                     <!--                                        size="medium"-->
@@ -278,129 +278,76 @@
 
                                 </template>
                             </el-table-column>
-                            <el-table-column label="多空力度" align="center">
-                                <template slot-scope="scope">
-                                    <el-progress
-                                        :percentage="beichiList[scope.row.order_book_id]['combine_percentage']"
-                                        :color="customColorMethod"
-                                        :text-inside="true"
-                                        :stroke-width="24"
-                                    ></el-progress>
+<!--                            <el-table-column label="多空力度" align="center">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <el-progress-->
+<!--                                        :percentage="beichiList[scope.row.order_book_id]['combine_percentage']"-->
+<!--                                        :color="customColorMethod"-->
+<!--                                        :text-inside="true"-->
+<!--                                        :stroke-width="24"-->
+<!--                                    ></el-progress>-->
 
-                                </template>
-                            </el-table-column>
-                            <el-table-column label="1m" align="center">
-                                <template slot-scope="scope">
-                                    <span
-                                        :class="beichiList[scope.row.order_book_id]['1m']&& beichiList[scope.row.order_book_id]['1m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['1m']['direction'] }}
-                                    </span>
-                                    <span>
-                                     {{ beichiList[scope.row.order_book_id]['1m']['signal'] }}
-                                    </span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column label="3m" align="center">
-                                <template slot-scope="scope">
-                                    <span
-                                        :class="beichiList[scope.row.order_book_id]['3m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['3m']['direction'] }}
-                                    </span>
-                                    <span>
-                                     {{ beichiList[scope.row.order_book_id]['3m']['signal'] }}
-                                    </span>
-                                </template>
-                            </el-table-column>
+<!--                                </template>-->
+<!--                            </el-table-column>-->
+<!--                            <el-table-column label="1m" align="center">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <span-->
+<!--                                        :class="beichiList[scope.row.order_book_id]['1m']&& beichiList[scope.row.order_book_id]['1m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"-->
+<!--                                    >{{ beichiList[scope.row.order_book_id]['1m']['direction'] }}-->
+<!--                                    </span>-->
+<!--                                    <span>-->
+<!--                                     {{ beichiList[scope.row.order_book_id]['1m']['signal'] }}-->
+<!--                                    </span>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
+<!--                            <el-table-column label="3m" align="center">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <span-->
+<!--                                        :class="beichiList[scope.row.order_book_id]['3m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"-->
+<!--                                    >{{ beichiList[scope.row.order_book_id]['3m']['direction'] }}-->
+<!--                                    </span>-->
+<!--                                    <span>-->
+<!--                                     {{ beichiList[scope.row.order_book_id]['3m']['signal'] }}-->
+<!--                                    </span>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
 
-                            <!--                            <el-table-column label="5F级别" width="65">-->
-                            <!--                                <template slot-scope="scope">-->
-                            <!--                                    <el-tag-->
-                            <!--                                        size="medium"-->
-                            <!--                                        class="mr-5"-->
-                            <!--                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?-->
-                            <!--                            levelDirectionList[scope.row.order_book_id]['5m']==='多'?'danger':'primary'-->
-                            <!--                            :'info'"-->
-                            <!--                                    >{{-->
-                            <!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['5m']:''-->
-                            <!--                                        }}-->
-                            <!--                                    </el-tag>-->
-                            <!--                                </template>-->
-                            <!--                            </el-table-column>-->
-                            <el-table-column label="5m" align="center">
-                                <template slot-scope="scope">
-                                    <span
-                                        :class="beichiList[scope.row.order_book_id]['5m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['5m']['direction'] }}
-                                    </span>
-                                    <span>
-                                     {{ beichiList[scope.row.order_book_id]['5m']['signal'] }}
-                                    </span>
-                                </template>
-                            </el-table-column>
-                            <!--                            <el-table-column label="15F级别" width="70">-->
-                            <!--                                <template slot-scope="scope">-->
-                            <!--                                    <el-tag-->
-                            <!--                                        size="medium"-->
-                            <!--                                        class="mr-5"-->
-                            <!--                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?-->
-                            <!--                            levelDirectionList[scope.row.order_book_id]['15m']==='多'?'danger':'primary'-->
-                            <!--                            :'info'"-->
-                            <!--                                    >{{-->
-                            <!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['15m']:''-->
-                            <!--                                        }}-->
-                            <!--                                    </el-tag>-->
-                            <!--                                </template>-->
-                            <!--                            </el-table-column>-->
-                            <el-table-column label="15m" align="center">
-                                <template slot-scope="scope">
-                                    <span
-                                        :class="beichiList[scope.row.order_book_id]['15m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['15m']['direction'] }}
-                                    </span>
-                                    <span>
-                                     {{ beichiList[scope.row.order_book_id]['15m']['signal'] }}
-                                    </span>
-                                </template>
-                            </el-table-column>
-                            <!--                            <el-table-column label="30F级别" width="70">-->
-                            <!--                                <template slot-scope="scope">-->
-                            <!--                                    <el-tag-->
-                            <!--                                        size="medium"-->
-                            <!--                                        class="mr-5"-->
-                            <!--                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?-->
-                            <!--                            levelDirectionList[scope.row.order_book_id]['30m']==='多'?'danger':'primary'-->
-                            <!--                            :'info'"-->
-                            <!--                                    >{{-->
-                            <!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['30m']:''-->
-                            <!--                                        }}-->
-                            <!--                                    </el-tag>-->
-                            <!--                                </template>-->
-                            <!--                            </el-table-column>-->
-                            <el-table-column label="30m" align="center">
-                                <template slot-scope="scope">
-                                    <span
-                                        :class="beichiList[scope.row.order_book_id]['30m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"
-                                    >{{ beichiList[scope.row.order_book_id]['30m']['direction'] }}
-                                    </span>
-                                    <span>
-                                     {{ beichiList[scope.row.order_book_id]['30m']['signal'] }}
-                                    </span>
-                                </template>
-                            </el-table-column>
-                            <!--                            <el-table-column label="60F级别" width="70">-->
-                            <!--                                <template slot-scope="scope">-->
-                            <!--                                    <el-tag-->
-                            <!--                                        size="medium"-->
-                            <!--                                        class="mr-5"-->
-                            <!--                                        :type="levelDirectionList&&levelDirectionList[scope.row.order_book_id]?-->
-                            <!--                            levelDirectionList[scope.row.order_book_id]['60m']==='多'?'danger':'primary'-->
-                            <!--                            :'info'"-->
-                            <!--                                    >{{-->
-                            <!--                                        levelDirectionList&&levelDirectionList[scope.row.order_book_id]?levelDirectionList[scope.row.order_book_id]['60m']:''-->
-                            <!--                                        }}-->
-                            <!--                                    </el-tag>-->
-                            <!--                                </template>-->
-                            <!--                            </el-table-column>-->
+<!--                            <el-table-column label="5m" align="center">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <span-->
+<!--                                        :class="beichiList[scope.row.order_book_id]['5m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"-->
+<!--                                    >{{ beichiList[scope.row.order_book_id]['5m']['direction'] }}-->
+<!--                                    </span>-->
+<!--                                    <span>-->
+<!--                                     {{ beichiList[scope.row.order_book_id]['5m']['signal'] }}-->
+<!--                                    </span>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
+<!--               -->
+<!--                            <el-table-column label="15m" align="center">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <span-->
+<!--                                        :class="beichiList[scope.row.order_book_id]['15m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"-->
+<!--                                    >{{ beichiList[scope.row.order_book_id]['15m']['direction'] }}-->
+<!--                                    </span>-->
+<!--                                    <span>-->
+<!--                                     {{ beichiList[scope.row.order_book_id]['15m']['signal'] }}-->
+<!--                                    </span>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
+<!--            -->
+<!--                            <el-table-column label="30m" align="center">-->
+<!--                                <template slot-scope="scope">-->
+<!--                                    <span-->
+<!--                                        :class="beichiList[scope.row.order_book_id]['30m']['direction'].indexOf('多')!==-1?'up-red':'down-green'"-->
+<!--                                    >{{ beichiList[scope.row.order_book_id]['30m']['direction'] }}-->
+<!--                                    </span>-->
+<!--                                    <span>-->
+<!--                                     {{ beichiList[scope.row.order_book_id]['30m']['signal'] }}-->
+<!--                                    </span>-->
+<!--                                </template>-->
+<!--                            </el-table-column>-->
+
 
                         </el-table>
                     </div>

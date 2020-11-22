@@ -681,25 +681,27 @@ async def combineIndicator(direction, above_ma5, above_ma20, not_lower, not_high
 
 async def monitorMaCross(result, symbol, period, closePrice):
     signal = "ma_cross"
+    not_lower = result['notLower']
+    not_higher = result['notHigher']
     if len(result['buy_ma_gold_cross']['date']) > 0:
         fire_time = result['buy_ma_gold_cross']['date'][-1]
         price = result['buy_ma_gold_cross']['data'][-1]
         direction = 'B'
         stop_lose_price = result['buy_ma_gold_cross']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = ""
-        futureCalcObj['not_higher'] = ""
+        futureCalcObj['not_lower'] = not_lower
+        futureCalcObj['not_higher'] = not_higher
         tag = ""
         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 
     if len(result['sell_ma_dead_cross']['date']) > 0:
         fire_time = result['sell_ma_dead_cross']['date'][-1]
         price = result['sell_ma_dead_cross']['data'][-1]
-        direction = 'B'
+        direction = 'S'
         stop_lose_price = result['sell_ma_dead_cross']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
-        futureCalcObj['not_lower'] = ""
-        futureCalcObj['not_higher'] = ""
+        futureCalcObj['not_lower'] = not_lower
+        futureCalcObj['not_higher'] = not_higher
         tag = ""
         await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
 

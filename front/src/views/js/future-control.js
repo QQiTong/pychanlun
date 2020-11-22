@@ -393,7 +393,7 @@ export default {
                 }
                 item['signal_percentage'] = signal_count * 10
                 item['direction_percentage'] = direction_count * 10
-                item['combine_percentage'] = (item['signal_percentage'] + item['direction_percentage'])
+                // item['combine_percentage'] = (item['signal_percentage'] + item['direction_percentage'])
                 for (let i = 0; i < 5; i++) {
                     if (this.groupList[i].indexOf(simpleSymbol) !== -1) {
                         if (item['signal_percentage'] >= 30) {
