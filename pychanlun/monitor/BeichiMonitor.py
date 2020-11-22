@@ -150,11 +150,15 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             "power": power  # 5个指标综合判断当前信号强度
         })
         max_stop_rate = 0.55
+        interval_time = 60 * 4
+        # 如果是日K 金死叉信号 提醒过滤间隔时间为 1天
+        if signal == 'ma_cross':
+            interval_time = 60 * 60 * 24 * 2
         if signal == 'fractal':
             max_stop_rate = 0.3
             print(signal, symbol, period, futureCalcObj, perOrderStopRate)
 
-        if abs((date_created - fire_time).total_seconds()) < 60 * 4 and perOrderStopRate <= max_stop_rate:
+        if abs((date_created - fire_time).total_seconds()) < interval_time and perOrderStopRate <= max_stop_rate:
             # 新增
             remind = await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price, close_price,
                                                   stop_lose_price, futureCalcObj, True)
@@ -622,12 +626,15 @@ async def do_monitoring(symbol, period):
         if result is not None and result.get('close') is not None and len(result['close']) > 0:
             close_price = result['close'][-1]
             # await monitorBeichi(result, symbol, period, close_price)
-            await monitorHuila(result, symbol, period, close_price)
-            await monitorTupo(result, symbol, period, close_price)
-            await monitorVReverse(result, symbol, period, close_price)
-            await monitorFiveVReverse(result, symbol, period, close_price)
-            await monitorDuanBreak(result, symbol, period, close_price)
-            await monitorFractal(result, symbol, period, close_price)
+            if period == '1d':
+                await monitorMaCross(result, symbol, period, close_price)
+            else:
+                await monitorHuila(result, symbol, period, close_price)
+                await monitorTupo(result, symbol, period, close_price)
+                await monitorVReverse(result, symbol, period, close_price)
+                await monitorFiveVReverse(result, symbol, period, close_price)
+                await monitorDuanBreak(result, symbol, period, close_price)
+                await monitorFractal(result, symbol, period, close_price)
     except BaseException as e:
         logger.error("Error Occurred: {0}".format(traceback.format_exc()))
     stop_watch.stop()
@@ -672,6 +679,31 @@ async def combineIndicator(direction, above_ma5, above_ma20, not_lower, not_high
     return futureCalcObj
 
 
+async def monitorMaCross(result, symbol, period, closePrice):
+    signal = "ma_cross"
+    if len(result['buy_ma_gold_cross']['date']) > 0:
+        fire_time = result['buy_ma_gold_cross']['date'][-1]
+        price = result['buy_ma_gold_cross']['data'][-1]
+        direction = 'B'
+        stop_lose_price = result['buy_ma_gold_cross']['stop_lose_price'][-1]
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj['not_lower'] = ""
+        futureCalcObj['not_higher'] = ""
+        tag = ""
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+
+    if len(result['sell_ma_dead_cross']['date']) > 0:
+        fire_time = result['sell_ma_dead_cross']['date'][-1]
+        price = result['sell_ma_dead_cross']['data'][-1]
+        direction = 'B'
+        stop_lose_price = result['sell_ma_dead_cross']['stop_lose_price'][-1]
+        futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
+        futureCalcObj['not_lower'] = ""
+        futureCalcObj['not_higher'] = ""
+        tag = ""
+        await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
+
+
 async def monitorBeichi(result, symbol, period, closePrice):
     signal = 'beichi'
     # 使用notlower notHigher 过滤确保当前只做2买，完备，3买
@@ -696,7 +728,7 @@ async def monitorBeichi(result, symbol, period, closePrice):
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
         futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal, futureCalcObj)
-        if above_ma5 or not_lower :
+        if above_ma5 or not_lower:
             await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice, stop_lose_price, futureCalcObj)
     if len(result['sellMACDBCData']['date']) > 0:
         fire_time = result['sellMACDBCData']['date'][-1]
@@ -1239,7 +1271,7 @@ def run(**kwargs):
     def worker():
         while is_run:
             symbol_item = q.get()
-            monitor_futures_and_digitcoin([symbol_item], ['5m','15m', '30m','60m','180m'])
+            monitor_futures_and_digitcoin([symbol_item], ['5m', '15m', '30m', '60m', '1d'])
             q.task_done()
 
     def dispatcher():

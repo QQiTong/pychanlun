@@ -29,13 +29,15 @@ def find_jcsc_tags(time_str_array: np.array, high_array: np.array, low_array: np
             "idx": [],
             "date": [],
             "data": [],
-            "stop_lose_price": []
+            "stop_lose_price": [],
+            "stop_win_price":[]
         },
         "sell_ma_dead_cross": {
             "idx": [],
             "date": [],
             "data": [],
-            "stop_lose_price": []
+            "stop_lose_price": [],
+            "stop_win_price":[]
         }
     }
     fast_ma = QA.MA(pd.Series(close_array), fast_window)

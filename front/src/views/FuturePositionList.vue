@@ -655,7 +655,8 @@
         {key: "break", display_name: "破坏"},
         {key: "v_reverse", display_name: "V反"},
         {key: "beichi", display_name: "背驰"},
-        {key: "five_v_reverse", display_name: "5浪V"}
+        {key: "five_v_reverse", display_name: "5浪V"},
+        {key: "ma_cross", display_name: "金死叉"}
     ];
     const directionOptions = [
         {key: "long", display_name: "多"},

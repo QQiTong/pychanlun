@@ -17,7 +17,7 @@ class Config:
 class DevelopmentConfig(Config):
     # 局域网2台电脑公用数据库
     MONGODB_SETTINGS = {
-        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://192.168.50.35:27017/pychanlun')
+        'url': os.environ.get('PYCHANLUN_MONGO_URL', 'mongodb://localhost:27017/pychanlun')
     }
     pass
 
@@ -39,9 +39,10 @@ config = {
         "HC",
         "I",
         "J",
-        "JM",
+        # "JM",
         # 金属类
         "AG",
+        "AU",
         "NI",
         "ZN",
         # 化工系
@@ -51,23 +52,23 @@ config = {
         "MA",
         "TA",
         "PP",
-        "EG",
-        "EB",
-        "L",
-        "PG",
+        # "EG",
+        # "EB",
+        # "L",
+        # "PG",
         # 农产品
         "CF",
         "SR",
         "AP",
-        "JD",
-        "A",
+        # "JD",
+        # "A",
         "M",
-        "RM",
+        # "RM",
         # 食用油
         "Y",
         "P",
-        "OI",
-        # "AU",
+        # "OI",
+
         # "IC",
         # "IF",
         # "IH",
@@ -76,20 +77,20 @@ config = {
     #     "AL",
     #     "SN",
     #     "PB",
-        "SM",
-        "SF",
+    #     "SM",
+        # "SF",
 
         # "B",
         "C",
-        "CS",
-        "CJ",
-        "SP",
+        # "CS",
+        # "CJ",
+        # "SP",
 
         "FG",
         "SA",
-        "ZC",
-        "UR",
-        # "V",
+        # "ZC",
+        # "UR",
+        "V",
     ],
     # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整 b
     'margin_rate_company': 0.01,
@@ -101,67 +102,67 @@ config = {
         'RU': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'FU': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'BU': {'margin_rate': 0.11, 'contract_multiplier': 10},
-        # 'AU': {'margin_rate': 0.08, 'contract_multiplier': 1000},
+        'AU': {'margin_rate': 0.08, 'contract_multiplier': 1000},
         'AG': {'margin_rate': 0.12, 'contract_multiplier': 15},
         'NI': {'margin_rate': 0.1, 'contract_multiplier': 1},
         'ZN': {'margin_rate': 0.1, 'contract_multiplier': 5},
-        'SP': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        # 'SP': {'margin_rate': 0.08, 'contract_multiplier': 10},
         # 'CU': {'margin_rate': 0.1, 'contract_multiplier': 5},
 
         # 沪铝
-        'AL': {'margin_rate': 0.1, 'contract_multiplier': 5},
+        # 'AL': {'margin_rate': 0.1, 'contract_multiplier': 5},
         # 沪锡
-        'SN': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        # 'SN': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 沪铅
-        'PB': {'margin_rate': 0.1, 'contract_multiplier': 5},
+        # 'PB': {'margin_rate': 0.1, 'contract_multiplier': 5},
 
         # 郑商所
         'MA': {'margin_rate': 0.07, 'contract_multiplier': 10},
         'TA': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'CF': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'SR': {'margin_rate': 0.05, 'contract_multiplier': 10},
-        'OI': {'margin_rate': 0.06, 'contract_multiplier': 10},
-        'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
+        # 'OI': {'margin_rate': 0.06, 'contract_multiplier': 10},
+        # 'RM': {'margin_rate': 0.06, 'contract_multiplier': 10},
         'AP': {'margin_rate': 0.08, 'contract_multiplier': 10},
-        'CJ': {'margin_rate': 0.08, 'contract_multiplier': 5},
+        # 'CJ': {'margin_rate': 0.08, 'contract_multiplier': 5},
         # 玻璃
         'FG': {'margin_rate': 0.06, 'contract_multiplier': 20},
         # 纯碱
         'SA': {'margin_rate': 0.06, 'contract_multiplier': 20},
         # 锰硅
-        'SM': {'margin_rate': 0.07, 'contract_multiplier': 5},
+        # 'SM': {'margin_rate': 0.07, 'contract_multiplier': 5},
         # 尿素
-        'UR': {'margin_rate': 0.05, 'contract_multiplier': 20},
+        # 'UR': {'margin_rate': 0.05, 'contract_multiplier': 20},
         # 动力煤
-        'ZC': {'margin_rate': 0.05, 'contract_multiplier': 100},
+        # 'ZC': {'margin_rate': 0.05, 'contract_multiplier': 100},
         # 硅铁
-        'SF': {'margin_rate': 0.07, 'contract_multiplier': 5},
+        # 'SF': {'margin_rate': 0.07, 'contract_multiplier': 5},
 
         # 大商所
         'J': {'margin_rate': 0.08, 'contract_multiplier': 100},
-        'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
+        # 'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
         'I': {'margin_rate': 0.08, 'contract_multiplier': 100},
         'M': {'margin_rate': 0.08, 'contract_multiplier': 10},
-        'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
+        # 'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
         # 聚丙烯
         'PP': {'margin_rate': 0.11, 'contract_multiplier': 5},
         # 苯乙烯
-        'EB': {'margin_rate': 0.12, 'contract_multiplier': 5},
+        # 'EB': {'margin_rate': 0.12, 'contract_multiplier': 5},
         # 聚乙烯
-        'L': {'margin_rate': 0.11, 'contract_multiplier': 5},
+        # 'L': {'margin_rate': 0.11, 'contract_multiplier': 5},
         'P': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'Y': {'margin_rate': 0.08, 'contract_multiplier': 10},
-        'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
-        'PG': {'margin_rate': 0.11, 'contract_multiplier': 20},
+        # 'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
+        # 'PG': {'margin_rate': 0.11, 'contract_multiplier': 20},
         # 豆一
-        'A': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        # 'A': {'margin_rate': 0.08, 'contract_multiplier': 10},
 
         # 豆二
-        'B': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        # 'B': {'margin_rate': 0.08, 'contract_multiplier': 10},
         # 玉米
         'C': {'margin_rate': 0.07, 'contract_multiplier': 10},
         # 淀粉
-        'CS': {'margin_rate': 0.07, 'contract_multiplier': 10},
+        # 'CS': {'margin_rate': 0.07, 'contract_multiplier': 10},
         # 聚氯乙烯
         'V': {'margin_rate': 0.09, 'contract_multiplier': 5},
 

@@ -22,7 +22,7 @@ from pychanlun.db import DBPyChanlun
 tz = pytz.timezone('Asia/Shanghai')
 
 # periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
-periodList = ['1m', '3m', '5m', '15m', '30m','180m']
+periodList = ['1m', '3m', '5m', '15m', '30m','180m','1d']
 # 主力合约列表
 dominantSymbolList = []
 # 主力合约详细信息

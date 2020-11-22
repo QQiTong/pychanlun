@@ -2575,6 +2575,12 @@ export default {
                     // case 12:
                     //     lastBeichi = jsonObj.sellMACDBCData
                     //     break
+                    case 11:
+                        lastBeichi = jsonObj.buy_ma_gold_cross
+                        break
+                    case 12:
+                        lastBeichi = jsonObj.sell_ma_dead_cross
+                        break
                 }
                 // 背驰时的价格
                 let beichiPrice = lastBeichi['data'][lastBeichi['data'].length - 1]
@@ -3096,6 +3102,9 @@ export default {
             // let buyMACDBCData = jsonObj.buyMACDBCData
             // let sellMACDBCData = jsonObj.sellMACDBCData
 
+            // 日K 均线金死叉
+            let buy_ma_gold_cross = jsonObj.buy_ma_gold_cross
+            let sell_ma_dead_cross = jsonObj.sell_ma_dead_cross
             // 回拉
             let buy_zs_huila_stamp = 0
             // let buy_zs_huila_higher_stamp = 0
@@ -3127,6 +3136,11 @@ export default {
             let higherBuyTimeStr
             let sellTimeStr
             let higherSellTimeStr
+
+            // 日K 金死叉
+            let buy_day_gold_cross_stamp = 0
+            let sell_day_gold_cross_stamp = 0
+
             // 回拉
             if (buy_zs_huila.date.length > 0) {
                 buyTimeStr = buy_zs_huila.date[buy_zs_huila.date.length - 1]
@@ -3146,18 +3160,18 @@ export default {
             // }
 
             // 线段破坏
-            // if (buy_duan_break.date.length > 0) {
-            //     buyTimeStr = buy_duan_break.date[buy_duan_break.date.length - 1]
-            //     buy_duan_break_stamp = this.timeStrToStamp(buyTimeStr)
-            // }
+            if (buy_duan_break.date.length > 0) {
+                buyTimeStr = buy_duan_break.date[buy_duan_break.date.length - 1]
+                buy_duan_break_stamp = this.timeStrToStamp(buyTimeStr)
+            }
             // if (buy_duan_break_higher.date.length > 0) {
             //     higherBuyTimeStr = buy_duan_break_higher.date[buy_duan_break_higher.date.length - 1]
             //     buy_duan_break_higher_stamp = this.timeStrToStamp(higherBuyTimeStr)
             // }
-            // if (sell_duan_break.date.length > 0) {
-            //     sellTimeStr = sell_duan_break.date[sell_duan_break.date.length - 1]
-            //     sell_duan_break_stamp = this.timeStrToStamp(sellTimeStr)
-            // }
+            if (sell_duan_break.date.length > 0) {
+                sellTimeStr = sell_duan_break.date[sell_duan_break.date.length - 1]
+                sell_duan_break_stamp = this.timeStrToStamp(sellTimeStr)
+            }
             // if (sell_duan_break_higher.date.length > 0) {
             //     higherSellTimeStr = sell_duan_break_higher.date[sell_duan_break_higher.date.length - 1]
             //     sell_duan_break_higher_stamp = this.timeStrToStamp(higherSellTimeStr)
@@ -3214,6 +3228,15 @@ export default {
             //     sell_beichi_stamp = this.timeStrToStamp(sellTimeStr)
             // }
 
+            // 日K 金死叉
+            if (buy_ma_gold_cross.date.length > 0) {
+                buyTimeStr = buy_ma_gold_cross.date[buy_ma_gold_cross.date.length - 1]
+                buy_day_gold_cross_stamp = this.timeStrToStamp(buyTimeStr)
+            }
+            if (sell_ma_dead_cross.date.length > 0) {
+                sellTimeStr = sell_ma_dead_cross.date[sell_ma_dead_cross.date.length - 1]
+                sell_day_gold_cross_stamp = this.timeStrToStamp(sellTimeStr)
+            }
             // 当线段破坏和中枢突破时间相等的时候，使用中枢突破信号，因为中枢突破止损更小
             if (buy_zs_tupo_stamp === buy_duan_break_stamp) {
                 buy_duan_break_stamp = 0
@@ -3234,6 +3257,7 @@ export default {
                 buy_v_reverse_stamp, sell_v_reverse_stamp,
                 buy_five_v_reverse_stamp, sell_five_v_reverse_stamp,
                 // buy_beichi_stamp, sell_beichi_stamp
+                buy_day_gold_cross_stamp, sell_day_gold_cross_stamp
             ]
             let maxPos = 0
             let maxTime = timeArray[0]
@@ -3248,8 +3272,9 @@ export default {
                 buy_duan_break_stamp === 0 && sell_duan_break_stamp === 0 &&
                 buy_zs_tupo_stamp === 0 && sell_zs_tupo_stamp === 0 &&
                 buy_v_reverse_stamp === 0 && sell_v_reverse_stamp === 0 &&
-                buy_five_v_reverse_stamp === 0 && sell_five_v_reverse_stamp === 0
-            // && buy_beichi_stamp && sell_beichi_stamp
+                buy_five_v_reverse_stamp === 0 && sell_five_v_reverse_stamp === 0 &&
+                // && buy_beichi_stamp && sell_beichi_stamp
+                buy_day_gold_cross_stamp === 0 && sell_day_gold_cross_stamp === 0
             ) {
                 return 0
             } else {
