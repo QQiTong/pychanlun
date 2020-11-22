@@ -241,3 +241,7 @@ def getGlobalFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().
     kline_data['time'] = kline_data['_id'].apply(lambda value: value.timestamp())
     kline_data.fillna(0, inplace=True)
     return kline_data
+
+
+def current_minute(symbol):
+    return rq.current_minute(symbol)

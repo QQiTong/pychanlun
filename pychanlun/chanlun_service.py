@@ -15,7 +15,7 @@ from loguru import logger
 import pychanlun.entanglement as entanglement
 import pychanlun.placeholder as placeholder
 from pychanlun import Duan
-from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData
+from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData, current_minute
 from pychanlun.analysis.chanlun_data import ChanlunData
 from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
@@ -112,8 +112,18 @@ def get_data_v2(symbol, period, end_date=None):
         }
     }
     if period == "1d":
-        jcsc_tags = find_jcsc_tags(np.array(daily_data["time_str"]), np.array(daily_data["high"]),
-                                   np.array(daily_data["low"]), np.array(daily_data["close"]))
+        time_str_arr = np.array(daily_data["time_str"])
+        high_arr = np.array(daily_data["high"])
+        low_arr = np.array(daily_data["low"])
+        close_arr = np.array(daily_data["close"])
+
+        current = current_minute(symbol)
+        if daily_data.index[-1] < datetime.datetime.now().replace(hour=0, minute=0, second=0).timestamp():
+            time_str_arr = np.append(time_str_arr, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+            high_arr = np.append(high_arr, current["high"])
+            low_arr = np.append(low_arr, current["low"])
+            close_arr = np.append(close_arr, current["close"])
+        jcsc_tags = find_jcsc_tags(time_str_arr, high_arr, low_arr, close_arr)
 
     # 计算买卖预警信号
     hui_la = entanglement.la_hui(
