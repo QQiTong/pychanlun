@@ -41,13 +41,10 @@ def monitoring(**kwargs):
     BeichiMonitor.run(**kwargs)
 
 
-"""
-下载外盘数据
-pychanlun download-global-future-data
-"""
-
-
+# 下载外盘数据
+# pychanlun download-global-future-data
 @run.command()
+@click.option('--loop/--no_loop', default=True)
 def download_global_future_data(**kwargs):
     global_futures_downloader.run(**kwargs)
 
