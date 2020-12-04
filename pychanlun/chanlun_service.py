@@ -42,6 +42,30 @@ def get_data_v2(symbol, period, end_date=None):
         get_instrument_data = getFutureData
         current_minute_holder = current_minute
 
+    # 取一分种的K线合成当日的K线
+    kline_data_1m = get_instrument_data(symbol, '1m', end_date, get_period_cache_stamp('1m'))
+    day_bar = {}
+    now = datetime.datetime.now()
+    if now.hour < 21:
+        cut_start = datetime.datetime.now() - datetime.timedelta(days=1)
+        cut_start = cut_start.replace(hour=21, minute=0, second=0)
+        cut_end = datetime.datetime.now()
+        cut_end = cut_end.replace(hour=21, minute=0, second=0)
+        kline_data_1m = kline_data_1m[cut_start <= kline_data_1m.index < cut_end]
+        dt = now
+        day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
+    else:
+        cut_start = datetime.datetime.now()
+        cut_start = cut_start.replace(hour=21, minute=0, second=0)
+        kline_data_1m = kline_data_1m[kline_data_1m.index > cut_start]
+        dt = now + datetime.timedelta(days=1)
+        day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
+    if len(kline_data_1m) > 0:
+        day_bar['high'] = kline_data_1m['high'].max()
+        day_bar['low'] = kline_data_1m['low'].min()
+        day_bar['open'] = kline_data_1m['open'][0]
+        day_bar['close'] = kline_data_1m['close'][-1]
+
     data_list = []
     required_period_list.reverse()
     for period_one in required_period_list:
