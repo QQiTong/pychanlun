@@ -44,16 +44,18 @@ def get_data_v2(symbol, period, end_date=None):
 
     # 取一分种的K线合成当日的K线
     kline_data_1m = get_instrument_data(symbol, '1m', end_date, get_period_cache_stamp('1m'))
-    day_bar = {}
     now = datetime.datetime.now()
+    day_bar = {}
     if now.hour < 21:
         cut_start = datetime.datetime.now() - datetime.timedelta(days=1)
         cut_start = cut_start.replace(hour=21, minute=0, second=0)
         cut_end = datetime.datetime.now()
         cut_end = cut_end.replace(hour=21, minute=0, second=0)
-        kline_data_1m = kline_data_1m[cut_start <= kline_data_1m.index < cut_end]
+        kline_data_1m = kline_data_1m[kline_data_1m.index >= cut_start]
+        kline_data_1m = kline_data_1m[kline_data_1m.index < cut_end]
         dt = now
         day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
+        day_bar['time'] = day_bar['datetime'].timestamp()
     else:
         cut_start = datetime.datetime.now()
         cut_start = cut_start.replace(hour=21, minute=0, second=0)
@@ -65,6 +67,7 @@ def get_data_v2(symbol, period, end_date=None):
         day_bar['low'] = kline_data_1m['low'].min()
         day_bar['open'] = kline_data_1m['open'][0]
         day_bar['close'] = kline_data_1m['close'][-1]
+        day_bar['volume'] = kline_data_1m['volume'].sum()
 
     data_list = []
     required_period_list.reverse()
@@ -72,6 +75,12 @@ def get_data_v2(symbol, period, end_date=None):
         kline_data = get_instrument_data(symbol, period_one, end_date, get_period_cache_stamp(period_one))
         if kline_data is None or len(kline_data) == 0:
             continue
+        if period_one == '1d':
+            if day_bar['datetime'] > kline_data.index[-1]:
+                kline_data = kline_data.append(pd.Series(
+                    {"high": day_bar['high'], "low": day_bar['low'], "open": day_bar['open'], "close": day_bar['close'], "time": day_bar['time']},
+                    name=day_bar['datetime']
+                ))
         kline_data["time_str"] = kline_data["time"] \
             .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
         length = len(data_list)
@@ -142,14 +151,6 @@ def get_data_v2(symbol, period, end_date=None):
         high_arr = np.array(daily_data["high"])
         low_arr = np.array(daily_data["low"])
         close_arr = np.array(daily_data["close"])
-
-        if current_minute_holder is not None:
-            current = current_minute(symbol)
-            if daily_data.index[-1] < datetime.datetime.now().replace(hour=0, minute=0, second=0).timestamp():
-                time_str_arr = np.append(time_str_arr, datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
-                high_arr = np.append(high_arr, current["high"])
-                low_arr = np.append(low_arr, current["low"])
-                close_arr = np.append(close_arr, current["close"])
         jcsc_tags = find_jcsc_tags(time_str_arr, high_arr, low_arr, close_arr)
 
     # 计算买卖预警信号
