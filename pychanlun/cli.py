@@ -88,5 +88,11 @@ def save_all(**kwargs):
     send_ding_message("【事件通知】数据下载完成")
 
 
+@run.command()
+def save_xdxr(**kwargs):
+    save_xdxr_job(**kwargs)
+    send_ding_message("【事件通知】XDXR数据下载完成")
+
+
 if __name__ == '__main__':
     run()
