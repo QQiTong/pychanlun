@@ -8,7 +8,7 @@ from loguru import logger
 
 from pychanlun.db import DBPyChanlun
 from pychanlun.db import DBQuantAxis
-from pychanlun.zerodegree.notify import send_ding_message
+from pychanlun.zero.notify import send_ding_message
 
 tz = pytz.timezone('Asia/Shanghai')
 
