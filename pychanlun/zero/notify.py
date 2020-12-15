@@ -12,7 +12,7 @@ DING_TALK_WEB_HOOK = "https://oapi.dingtalk.com/robot/send?access_token=ed114ee4
 
 
 @sleep_and_retry
-@limits(calls=1, period=30)
+@limits(calls=1, period=10)
 def send_ding_message(content):
     now = datetime.datetime.now()
     if 22 <= now.hour <= 23 or 0 <= now.hour <= 7:
