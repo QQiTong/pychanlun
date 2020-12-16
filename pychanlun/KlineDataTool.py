@@ -118,6 +118,8 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
             return None
         kline_data = pd.DataFrame(data_list)
         kline_data['time'] = kline_data['time_stamp']
+        kline_data['datetime'] = kline_data['datetime'].apply(lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        kline_data.set_index('datetime', drop=False, inplace=True)
     elif period == "3m":
         data_list = DBQuantAxis["stock_min"] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
@@ -134,7 +136,7 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
         kline_data['datetime'] = kline_data['datetime'].apply(lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
         kline_data = QA_data_stockmin_resample(kline_data, 3)
         kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
-
+        kline_data.set_index('datetime', drop=False, inplace=True)
     elif period == "5m":
         data_list = DBQuantAxis["stock_min"] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
@@ -148,7 +150,10 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
         if len(data_list) == 0:
             return None
         kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
         kline_data['time'] = kline_data['time_stamp']
+        kline_data.set_index('datetime', drop=False, inplace=True)
     elif period == "15m":
         data_list = DBQuantAxis["stock_min"] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
@@ -162,7 +167,10 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
         if len(data_list) == 0:
             return None
         kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
         kline_data['time'] = kline_data['time_stamp']
+        kline_data.set_index('datetime', drop=False, inplace=True)
     elif period == "30m":
         data_list = DBQuantAxis["stock_min"] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
@@ -176,7 +184,10 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
         if len(data_list) == 0:
             return None
         kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
         kline_data['time'] = kline_data['time_stamp']
+        kline_data.set_index('datetime', drop=False, inplace=True)
     elif period == "60m":
         data_list = DBQuantAxis["stock_min"] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
@@ -190,7 +201,10 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
         if len(data_list) == 0:
             return None
         kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
         kline_data['time'] = kline_data['time_stamp']
+        kline_data.set_index('datetime', drop=False, inplace=True)
     elif period == "180m" or period == "240m" or period == "1d":
         data_list = DBQuantAxis["stock_day"] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
@@ -203,7 +217,10 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
         if len(data_list) == 0:
             return None
         kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['date'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d"))
         kline_data['time'] = kline_data['date_stamp']
+        kline_data.set_index('datetime', drop=False, inplace=True)
     elif period == "3d":
         data_list = DBQuantAxis["stock_day"] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
@@ -219,7 +236,10 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
         kline_data['date'] = kline_data['date'].apply(
             lambda value: datetime.strptime(value, "%Y-%m-%d"))
         kline_data = QA_data_day_resample(kline_data, "w")
+        kline_data['datetime'] = kline_data['date'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d"))
         kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+        kline_data.set_index('datetime', drop=False, inplace=True)
 
     kline_data.fillna(0, inplace=True)
     return kline_data

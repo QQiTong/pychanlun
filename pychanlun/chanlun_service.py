@@ -67,7 +67,6 @@ def get_data_v2(symbol, period, end_date=None):
         day_bar['low'] = kline_data_1m['low'].min()
         day_bar['open'] = kline_data_1m['open'][0]
         day_bar['close'] = kline_data_1m['close'][-1]
-        day_bar['volume'] = kline_data_1m['volume'].sum()
 
     data_list = []
     required_period_list.reverse()
