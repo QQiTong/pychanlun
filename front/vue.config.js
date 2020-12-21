@@ -23,7 +23,7 @@ module.exports = {
     // TIP 发布到线上后 process.env.VUE_APP_VERSION 又被还原了 没有效果，
     // TIP 换成 config.plugins[1].definitions['process.env'].VUE_APP_VERSION 实测可行
     // process.env.VUE_APP_VERSION = new Date().getTime()
-    config.plugins[1].definitions['process.env'].VUE_APP_VERSION = new Date().getTime()
+    config.plugins[1].definitions['process.env'].VUE_APP_VERSION = `${new Date().getTime()}`
     console.log('当前版本', config.plugins[1].definitions['process.env'].VUE_APP_VERSION)
     if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'sit' || process.env.NODE_ENV === 'sit_green') {
       // 去除console.log
