@@ -7,7 +7,7 @@ from pychanlun.monitor import BeichiMonitor
 from pychanlun.select import a_stock_signal
 from pychanlun.market_data import tdx_local_downloader, global_futures_downloader
 from pychanlun.monitor import a_stock_tdx as stock_monitoring
-from pychanlun.job import save_all_job
+from pychanlun.job import save_all_job, save_xdxr_job
 from pychanlun.zero.notify import send_ding_message
 
 

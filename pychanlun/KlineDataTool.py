@@ -236,7 +236,7 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
         kline_data['date'] = kline_data['date'].apply(
             lambda value: datetime.strptime(value, "%Y-%m-%d"))
         kline_data = QA_data_day_resample(kline_data, "w")
-        kline_data['datetime'] = kline_data['date']
+        kline_data['datetime'] = kline_data.index
         kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
         kline_data.set_index('datetime', drop=False, inplace=True)
 
