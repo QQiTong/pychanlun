@@ -46,27 +46,30 @@ def get_data_v2(symbol, period, end_date=None):
     kline_data_1m = get_instrument_data(symbol, '1m', end_date, get_period_cache_stamp('1m'))
     now = datetime.datetime.now()
     day_bar = {}
-    if now.hour < 21:
-        cut_start = datetime.datetime.now() - datetime.timedelta(days=1)
-        cut_start = cut_start.replace(hour=21, minute=0, second=0)
-        cut_end = datetime.datetime.now()
-        cut_end = cut_end.replace(hour=21, minute=0, second=0)
-        kline_data_1m = kline_data_1m[kline_data_1m.index >= cut_start]
-        kline_data_1m = kline_data_1m[kline_data_1m.index < cut_end]
-        dt = now
-        day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
-        day_bar['time'] = day_bar['datetime'].timestamp()
-    else:
-        cut_start = datetime.datetime.now()
-        cut_start = cut_start.replace(hour=21, minute=0, second=0)
-        kline_data_1m = kline_data_1m[kline_data_1m.index > cut_start]
-        dt = now + datetime.timedelta(days=1)
-        day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
-    if len(kline_data_1m) > 0:
-        day_bar['high'] = kline_data_1m['high'].max()
-        day_bar['low'] = kline_data_1m['low'].min()
-        day_bar['open'] = kline_data_1m['open'][0]
-        day_bar['close'] = kline_data_1m['close'][-1]
+    extra_day_bar = False
+    if kline_data_1m is not None and len(kline_data_1m) > 0:
+        if now.hour < 21:
+            cut_start = datetime.datetime.now() - datetime.timedelta(days=1)
+            cut_start = cut_start.replace(hour=21, minute=0, second=0)
+            cut_end = datetime.datetime.now()
+            cut_end = cut_end.replace(hour=21, minute=0, second=0)
+            kline_data_1m = kline_data_1m[kline_data_1m.index >= cut_start]
+            kline_data_1m = kline_data_1m[kline_data_1m.index < cut_end]
+            dt = now
+            day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
+            day_bar['time'] = day_bar['datetime'].timestamp()
+        else:
+            cut_start = datetime.datetime.now()
+            cut_start = cut_start.replace(hour=21, minute=0, second=0)
+            kline_data_1m = kline_data_1m[kline_data_1m.index > cut_start]
+            dt = now + datetime.timedelta(days=1)
+            day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
+        if len(kline_data_1m) > 0:
+            day_bar['high'] = kline_data_1m['high'].max()
+            day_bar['low'] = kline_data_1m['low'].min()
+            day_bar['open'] = kline_data_1m['open'][0]
+            day_bar['close'] = kline_data_1m['close'][-1]
+            extra_day_bar = True
 
     data_list = []
     required_period_list.reverse()
@@ -75,7 +78,7 @@ def get_data_v2(symbol, period, end_date=None):
         if kline_data is None or len(kline_data) == 0:
             continue
         if period_one == '1d':
-            if day_bar['datetime'] > kline_data.index[-1] and day_bar.get("high") is not None:
+            if extra_day_bar and day_bar['datetime'] > kline_data.index[-1]:
                 kline_data = kline_data.append(pd.Series(
                     {"high": day_bar['high'], "low": day_bar['low'], "open": day_bar['open'], "close": day_bar['close'], "time": day_bar['time']},
                     name=day_bar['datetime']
