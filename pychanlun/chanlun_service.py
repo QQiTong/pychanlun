@@ -75,7 +75,7 @@ def get_data_v2(symbol, period, end_date=None):
         if kline_data is None or len(kline_data) == 0:
             continue
         if period_one == '1d':
-            if day_bar['datetime'] > kline_data.index[-1]:
+            if day_bar['datetime'] > kline_data.index[-1] and day_bar.get("high") is not None:
                 kline_data = kline_data.append(pd.Series(
                     {"high": day_bar['high'], "low": day_bar['low'], "open": day_bar['open'], "close": day_bar['close'], "time": day_bar['time']},
                     name=day_bar['datetime']
