@@ -10,7 +10,7 @@ setup(
     install_requires=[
         "numpy",
         "flask",
-        "pandas==0.24.2",
+        "pandas",
         "scipy==1.1.0",
         "requests",
         "pydash",
@@ -22,7 +22,6 @@ setup(
         "waitress",
         "click",
         "pytdx",
-        "tqsdk",
         "et_stopwatch",
         "func_timeout",
         "loguru",
