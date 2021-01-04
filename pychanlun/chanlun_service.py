@@ -442,10 +442,10 @@ def get_data(symbol, period, end_date=None):
     ma34 = np.round(pd.Series.rolling(daily_data["close"], window=34).mean(), 2)
 
     data = data_list[-1]
-    data2 = data_list[-2]
+    data2 = data_list[-2] if len(data_list) > 1 else None
 
     kline_data = data["kline_data"]
-    kline_data2 = data2["kline_data"]
+    kline_data2 = data2["kline_data"] if data2 is not None else None
 
     # 计算笔中枢
     entanglement_list = entanglement.CalcEntanglements(
@@ -614,7 +614,7 @@ def get_data(symbol, period, end_date=None):
         "period": data["period"],
         "endDate": end_date,
         "date": list(kline_data["time_str"]),
-        "dateBigLevel": list(kline_data2["time_str"])[big_level_idx:],
+        "dateBigLevel": list(kline_data2["time_str"])[big_level_idx:] if kline_data2 is not None else [],
         "open": list(kline_data["open"]),
         "high": list(kline_data["high"]),
         "low": list(kline_data["low"]),
