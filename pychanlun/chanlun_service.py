@@ -64,6 +64,7 @@ def get_data_v2(symbol, period, end_date=None):
             kline_data_1m = kline_data_1m[kline_data_1m.index > cut_start]
             dt = now + datetime.timedelta(days=1)
             day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
+            day_bar['time'] = day_bar['datetime'].timestamp()
         if len(kline_data_1m) > 0:
             day_bar['high'] = kline_data_1m['high'].max()
             day_bar['low'] = kline_data_1m['low'].min()
