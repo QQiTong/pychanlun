@@ -9,7 +9,7 @@ import pandas as pd
 import pytz
 from bson.codec_options import CodecOptions
 
-from pychanlun.chanlun_service import get_data
+from pychanlun.chanlun_service import get_data_v2
 from pychanlun.db import DBPyChanlun
 from pychanlun.db import DBQuantAxis
 from pychanlun.monitor.a_stock_common import save_a_stock_signal
@@ -118,7 +118,7 @@ def calculate_chanlun_signal(code_period_obj):
     symbol = code_period_obj["symbol"]
     code = code_period_obj["code"]
     period = code_period_obj["period"]
-    resp = get_data(symbol, period, datetime.now().strftime("%Y-%m-%d"))
+    resp = get_data_v2(symbol, period, datetime.now().strftime("%Y-%m-%d"))
 
     signal_map = {
         "buy_zs_huila": "回拉中枢上涨",
