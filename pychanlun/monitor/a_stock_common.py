@@ -43,8 +43,8 @@ def save_a_stock_signal(sse, symbol, code, period, remark, fire_time, price, sto
             }, upsert=True)
         if x is None and fire_time >= datetime.datetime.now(tz=tz).replace(hour=0, minute=0, second=0, microsecond=0):
             # 首次信号，做通知
-            content = "【事件通知】 %s-%s-%s-%s-%s-%s" \
-                      % (symbol, name, period, remark, fire_time.strftime("%m%d%H%M"), price)
+            content = "【事件通知】 %s,%s,%s,%s,时间%s,价格%s,止损%s" \
+                      % (symbol, name, period, remark, fire_time.strftime("%m%d %H:%M"), price, stop_lose_price)
             if category is not None and len(category.strip()) > 0:
                 content = content + "-" + category
             if tags is not None and len(",".join(tags).strip()) > 0:

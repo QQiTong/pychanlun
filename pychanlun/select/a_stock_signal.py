@@ -102,7 +102,7 @@ def calculate_raising_limit(code_obj):
                 sse,
                 symbol,
                 code,
-                '180m',
+                '1d',
                 '涨停',
                 datetime.fromtimestamp(bars.loc[idx, 'date_stamp'], timezone.utc),
                 bars.loc[idx, 'close'],
@@ -126,7 +126,6 @@ def calculate_chanlun_signal(code_period_obj):
         "buy_v_reverse": "V反上涨",
         "buy_five_v_reverse": "五浪V反上涨",
         "buy_duan_break": "线段破坏上涨",
-        # "buyMACDBCData": "底背驰"
     }
     for signal in signal_map:
         signals = resp[signal]
@@ -161,7 +160,7 @@ def export_to_tdx():
     t = t.replace(hour=0, minute=0, second=0, microsecond=0)
     signals = DBPyChanlun['stock_signal'] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
-        .find({'period': {'$in': ['30m', '60m', '180m']}, 'fire_time': {'$gte': t}})
+        .find({'period': {'$in': ['30m', '60m', '1d']}, 'fire_time': {'$gte': t}})
     signals = pd.DataFrame(signals).drop_duplicates(["symbol"])
     signals["group"] = signals["fire_time"].apply(lambda v: v.strftime("%d"))
 
