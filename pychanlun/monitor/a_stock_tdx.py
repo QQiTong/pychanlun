@@ -205,8 +205,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
                 price,
                 stop_lose_price,
                 'BUY_LONG',
-                tags,
-                "N/A"
+                tags
             )
 
 

@@ -108,8 +108,7 @@ def calculate_raising_limit(code_obj):
                 bars.loc[idx, 'close'],
                 bars.loc[idx, 'open'],
                 'BUY_LONG',
-                ['涨停'],
-                "涨停"
+                ['涨停']
             )
 
 
@@ -146,8 +145,7 @@ def calculate_chanlun_signal(code_period_obj):
                 price,
                 stop_lose_price,
                 'BUY_LONG',
-                tags,
-                "N/A"
+                tags
             )
 
 
