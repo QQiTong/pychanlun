@@ -98,13 +98,14 @@ def calculate_raising_limit(code_obj):
         lambda x: x.quantize(decimal.Decimal('0.00')))
     for idx in bars.index:
         if bars.loc[idx, 'limit_up']:
+            fire_time = datetime.fromtimestamp(bars.loc[idx, 'date_stamp'], tz)
             save_a_stock_signal(
                 sse,
                 symbol,
                 code,
                 '1d',
                 '涨停',
-                datetime.fromtimestamp(bars.loc[idx, 'date_stamp'], timezone.utc),
+                fire_time,
                 bars.loc[idx, 'close'],
                 bars.loc[idx, 'open'],
                 'BUY_LONG',
