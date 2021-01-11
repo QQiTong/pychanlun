@@ -78,10 +78,7 @@ def monitoring_stock():
                     sse = 'sh'
                     symbol = 'sh%s' % code
                 for period in monitoring_periods.split(","):
-                    stopwatch = Stopwatch('%s %3s' % (symbol, period))
                     calculate_and_notify(api, market, sse, symbol, code, period)
-                    stopwatch.stop()
-                    logger.info(stopwatch)
                     if not is_run:
                         break
                 if not is_run:
