@@ -166,14 +166,14 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         ma5,
         ma20,
     )
-    beichi = calc_beichi_data(df, df2)
+    # beichi = calc_beichi_data(df, df2)
 
     resp = {
         "buy_zs_huila": zs_huila['buy_zs_huila'],
         "buy_zs_tupo": zs_tupo['buy_zs_tupo'],
         "buy_v_reverse": v_reverse['buy_v_reverse'],
         "buy_five_v_reverse": five_v_fan['buy_five_v_reverse'],
-        "buyMACDBCData": beichi['buyMACDBCData']
+        # "buyMACDBCData": beichi['buyMACDBCData']
     }
 
     signal_map = {
@@ -181,7 +181,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         "buy_zs_tupo": "突破中枢上涨",
         "buy_v_reverse": "V反上涨",
         "buy_five_v_reverse": "五浪V反上涨",
-        "buyMACDBCData": "底背驰"
+        # "buyMACDBCData": "底背驰"
     }
     for signal_type in signal_map:
         signals = resp[signal_type]
