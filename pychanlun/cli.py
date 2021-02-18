@@ -35,7 +35,7 @@ pychanlun monitoring
 
 
 @run.command()
-@click.option('--loop/--no_loop', default=True)
+@click.option('--loop/--no-loop', default=True)
 def monitoring(**kwargs):
     """运行监控"""
     BeichiMonitor.run(**kwargs)
@@ -44,7 +44,7 @@ def monitoring(**kwargs):
 # 下载外盘数据
 # pychanlun download-global-future-data
 @run.command()
-@click.option('--loop/--no_loop', default=True)
+@click.option('--loop/--no-loop', default=True)
 def download_global_future_data(**kwargs):
     global_futures_downloader.run(**kwargs)
 
