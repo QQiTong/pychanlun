@@ -81,6 +81,8 @@ def calc_divergence(x_data, xx_data):
                 if info['duan_type'] == -1:
                     duan_start = info['duan_start']
                     duan_end = info['duan_end']
+                    if duan_end - duan_start < 96 or duan_end - duan_start > 240:
+                        break
                     down_bi_list = pydash. \
                         filter_(
                             bi_list,
@@ -125,7 +127,7 @@ def calc_divergence(x_data, xx_data):
                     if bi_e > 0 and bi_signal_list[bi_e] == -1:
                         if len(pydash.filter_(gold_cross[bi_e:i], lambda value: value == 1)) == 0:
                             bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == 1)
-                            if bi_s >= 0:
+                            if bi_s >= 0 and 96 < bi_e - bi_s < 240:
                                 temp_idx = bi_e
                                 while temp_idx >= bi_s:
                                     k = pydash.find_last_index(gold_cross[bi_s:temp_idx], lambda value: value == 1)
@@ -149,6 +151,8 @@ def calc_divergence(x_data, xx_data):
                 if info['duan_type'] == 1:
                     duan_start = info['duan_start']
                     duan_end = info['duan_end']
+                    if duan_end - duan_start < 96 or duan_end - duan_start > 240:
+                        break
                     up_bi_list = pydash. \
                         filter_(
                             bi_list,
@@ -192,7 +196,7 @@ def calc_divergence(x_data, xx_data):
                     if bi_e > 0 and bi_signal_list[bi_e] == 1:
                         if len(pydash.filter_(dead_cross[bi_e:i], lambda value: value == 1)) == 0:
                             bi_s = pydash.find_last_index(bi_signal_list[:bi_e], lambda value: value == -1)
-                            if bi_s >= 0:
+                            if bi_s >= 0 and 96 < bi_e - bi_s < 240:
                                 temp_idx = bi_e
                                 while temp_idx >= bi_s:
                                     k = pydash.find_last_index(dead_cross[bi_s:temp_idx], lambda value: value == 1)

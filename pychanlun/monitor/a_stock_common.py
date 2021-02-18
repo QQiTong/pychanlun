@@ -50,6 +50,5 @@ def save_a_stock_signal(sse, symbol, code, period, remark, fire_time, price, sto
                 content = content + "," + category
             if tags is not None and len(",".join(tags).strip()) > 0:
                 content = content + "," + ",".join(tags).strip()
-            if stop_loose_rate > -5:
-                logger.info(content)
-                send_ding_message(content)
+            logger.info(content)
+            send_ding_message(content)
