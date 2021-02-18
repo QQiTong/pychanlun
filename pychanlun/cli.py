@@ -74,7 +74,7 @@ def select_a_stock(**kwargs):
 @run.command()
 @click.option('--code', type=str)
 @click.option('--period', type=str)
-@click.option('--loop/--no_loop', default=True)
+@click.option('--loop/--no-loop', default=True)
 def monitoring_a_stock_tdx(**kwargs):
     logger.info("股票监控 开始")
     stock_monitoring.run(**kwargs)
@@ -82,7 +82,7 @@ def monitoring_a_stock_tdx(**kwargs):
 
 
 @run.command()
-@click.option('--auto_shutdown/--no_auto_shutdown', default=False)
+@click.option('--auto-shutdown/--no-auto-shutdown', default=False)
 def save_all(**kwargs):
     save_all_job.run(**kwargs)
     send_ding_message("【事件通知】数据下载完成")

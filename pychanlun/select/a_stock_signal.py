@@ -58,7 +58,7 @@ def run(**kwargs):
     for idx in range(len(code_period_list)):
         calculate_chanlun_signal(code_period_list[idx])
 
-    export_to_tdx()
+    # export_to_tdx()
 
 
 def pre_filter(stock_list):

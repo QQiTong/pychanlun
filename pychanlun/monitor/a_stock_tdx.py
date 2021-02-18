@@ -43,19 +43,14 @@ def monitoring_stock():
         logger.error("没有指定通达信安装目录环境遍历（TDX_HOME）")
         return
     stocks = []
-    block_path = os.path.join(TDX_HOME, "T0002\\blocknew\\ZXG.blk")
-    if os.path.exists(block_path):
-        with open(block_path, "r") as fo:
-            lines = fo.readlines()
-            stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
-    for x in range(0, 32):
-        block_path = os.path.join(TDX_HOME, "T0002\\blocknew\\CL%s.blk" % str(x).zfill(2))
-        if os.path.exists(block_path):
-            with open(block_path, "r") as fo:
+    block_path = os.path.join(TDX_HOME, "T0002\\blocknew")
+    files = os.listdir(block_path)
+    for filename in files:
+        if filename.endswith(".blk"):
+            filepath = os.path.join(block_path, filename)
+            with open(filepath, "r") as fo:
                 lines = fo.readlines()
                 stocks = stocks + pydash.chain(lines).map(lambda v: v.strip()).filter(lambda v: len(v) > 0).value()
-        if x == 0 and len(stocks) >= 100:
-            break
     stocks = pydash.uniq(stocks)
     random.shuffle(stocks)
     logger.info("监控股票数量: {}".format(len(stocks)))
@@ -166,14 +161,14 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         ma5,
         ma20,
     )
-    # beichi = calc_beichi_data(df, df2)
+    beichi = calc_beichi_data(df, df2)
 
     resp = {
         "buy_zs_huila": zs_huila['buy_zs_huila'],
         "buy_zs_tupo": zs_tupo['buy_zs_tupo'],
         "buy_v_reverse": v_reverse['buy_v_reverse'],
         "buy_five_v_reverse": five_v_fan['buy_five_v_reverse'],
-        # "buyMACDBCData": beichi['buyMACDBCData']
+        "buyMACDBCData": beichi['buyMACDBCData']
     }
 
     signal_map = {
@@ -181,7 +176,7 @@ def calculate_and_notify(api, market, sse, symbol, code, period):
         "buy_zs_tupo": "突破中枢上涨",
         "buy_v_reverse": "V反上涨",
         "buy_five_v_reverse": "五浪V反上涨",
-        # "buyMACDBCData": "底背驰"
+        "buyMACDBCData": "底背驰"
     }
     for signal_type in signal_map:
         signals = resp[signal_type]
