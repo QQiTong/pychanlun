@@ -734,85 +734,22 @@ export default {
             // else if (period === '1d') {
             //     currentChart = myChart1d
             // }
-            let specialMA5 = 5
-            let specialMA34 = 34
+           let specialMA5 = 5
+            let specialMA21 = 21
             let specialMA55 = 55
+            let _5base = 5
+            let _21base = 21
+            let _55base = 55
+            let baseHour = 6
             // 5日  20日 均线
             // 内盘 每天交易时间 6小时， 外盘交易时间24小时  ,
             if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
-                // 其中 ZM ZS ZL 是18小时
-                if (this.symbol === 'S' || this.symbol === 'SM' || this.symbol === 'BO') {
-                    switch (period) {
-                        case '1m':
-                            specialMA5 = 5400
-                            specialMA34 = 21600
-                            break
-                        case '1d':
-                            specialMA5 = 5
-                            specialMA34 = 34
-                            break
-                        case '5m':
-                            specialMA5 = 1080
-                            specialMA34 = 4320
-                            break
-                        case '15m':
-                            specialMA5 = 360
-                            specialMA34 = 1440
-                            break
-                        case '30m':
-                            // 5 * 48 = 240
-                            // 20 *48 = 960
-                            specialMA5 = 180
-                            specialMA34 = 720
-                            break
-                        case '60m':
-                            // 5*18 = 90
-                            // 20*18 = 360
-                            specialMA5 = 90
-                            specialMA34 = 360
-                            break
-                        case '180m':
-                            // 180
-                            specialMA5 = 30
-                            specialMA34 = 120
-                            break
-                    }
+                // ZM ZS ZL NID ZSD 是18小时 其它24小时
+                let _18HourSymbolList = ['S', 'SM', 'BO', 'NID', 'ZSD','CT']
+                if (_18HourSymbolList.indexOf(this.symbol) !== -1) {
+                    baseHour = 18
                 } else {
-                    switch (period) {
-                        case '1m':
-                            specialMA5 = 7200
-                            specialMA34 = 28800
-                            break
-                        case '1d':
-                            specialMA5 = 5
-                            specialMA34 = 34
-                            break
-                        case '5m':
-                            specialMA5 = 1440
-                            specialMA34 = 5760
-                            break
-                        case '15m':
-                            specialMA5 = 480
-                            specialMA34 = 1920
-                            break
-                        case '30m':
-                            // 5 * 48 = 240
-                            // 20 *48 = 960
-                            specialMA5 = 240
-                            specialMA34 = 960
-                            break
-                        case '60m':
-                            // 5*24 = 120
-                            // 20*24 = 480
-                            specialMA5 = 120
-                            specialMA34 = 480
-                            break
-                        case '180m':
-                            // 180
-                            specialMA5 = 40
-                            specialMA34 = 160
-                            break
-                    }
+                    baseHour = 24
                 }
             } else {
                 // 4小时
@@ -824,11 +761,6 @@ export default {
                 let _9_5HourSymbolList = ['AG', 'AU']
 
                 let simpleSymbol = this.symbol.replace(/[0-9]/g, '')
-                let baseHour = 6
-
-                let _5base = 5
-                let _34base = 34
-                let _55base = 55
                 if (_4HourSymbolList.indexOf(simpleSymbol) !== -1) {
                     baseHour = 4
                 } else if (_8HourSymbolList.indexOf(simpleSymbol) !== -1) {
@@ -838,57 +770,54 @@ export default {
                 } else {
                     baseHour = 6
                 }
-                switch (period) {
-                    case '1m':
-                        specialMA5 = _5base * baseHour * 2 * 2 * 5 * 3
-                        specialMA34 = _34base * baseHour * 2 * 2 * 5 * 3
-                        specialMA55 = _55base * baseHour * 2 * 2 * 5 * 3
-                        break
-                    case '1d':
-                        specialMA5 = _5base
-                        specialMA34 = _34base
-                        specialMA55 = _55base
-                        break
-                    case '5m':
-                        specialMA5 = _5base * baseHour * 2 * 2 * 3
-                        specialMA34 = _34base * baseHour * 2 * 2 * 3
-                        specialMA55 = _55base * baseHour * 2 * 2 * 3
-                        break
-                    case '15m':
-                        specialMA5 = _5base * baseHour * 2 * 2
-                        specialMA34 = _34base * baseHour * 2 * 2
-                        specialMA55 = _55base * baseHour * 2 * 2
-                        break
-                    case '30m':
-                        // 5 * 8 = 40
-                        // 20 *8 = 160
-                        specialMA5 = _5base * baseHour * 2
-                        specialMA34 = _34base * baseHour * 2
-                        specialMA55 = _55base * baseHour * 2
-                        break
-                    case '60m':
-                        // 5*4 = 20
-                        // 20*4 = 80
-                        specialMA5 = _5base * baseHour
-                        specialMA34 = _34base * baseHour
-                        specialMA55 = _55base * baseHour
-                        break
-                    case '180m':
-
-                        // 180
-                        specialMA5 = _5base * baseHour / 3
-                        specialMA34 = _34base * baseHour / 3
-                        specialMA55 = _55base * baseHour / 3
-                        console.log("内盘", specialMA5, specialMA34, specialMA55)
-                        break
-                }
-
             }
-            // console.log(period, specialMA5, specialMA34)
+            switch (period) {
+                case '1m':
+                    specialMA5 = _5base * baseHour * 2 * 2 * 5 * 3
+                    specialMA21 = _21base * baseHour * 2 * 2 * 5 * 3
+                    specialMA55 = _55base * baseHour * 2 * 2 * 5 * 3
+                    break
+                case '1d':
+                    specialMA5 = _5base
+                    specialMA21 = _21base
+                    specialMA55 = _55base
+                    break
+                case '5m':
+                    specialMA5 = _5base * baseHour * 2 * 2 * 3
+                    specialMA21 = _21base * baseHour * 2 * 2 * 3
+                    specialMA55 = _55base * baseHour * 2 * 2 * 3
+                    break
+                case '15m':
+                    specialMA5 = _5base * baseHour * 2 * 2
+                    specialMA21 = _21base * baseHour * 2 * 2
+                    specialMA55 = _55base * baseHour * 2 * 2
+                    break
+                case '30m':
+                    // 5 * 8 = 40
+                    // 20 *8 = 160
+                    specialMA5 = _5base * baseHour * 2
+                    specialMA21 = _21base * baseHour * 2
+                    specialMA55 = _55base * baseHour * 2
+                    break
+                case '60m':
+                    // 5*4 = 20
+                    // 20*4 = 80
+                    specialMA5 = _5base * baseHour
+                    specialMA21 = _21base * baseHour
+                    specialMA55 = _55base * baseHour
+                    break
+                case '180m':
+                    // 180 均线要取整，否则前端显示错乱
+                    specialMA5 = parseInt(_5base * baseHour / 3)
+                    specialMA21 = parseInt(_21base * baseHour / 3)
+                    specialMA55 = parseInt(_55base * baseHour / 3)
+                    break
+            }
+            // console.log(period, specialMA5, specialMA21)
             let option
             if (update === 'update') {
                 // console.log('更新', period)
-                option = that.refreshOption(currentChart, resultData, specialMA5, specialMA34, specialMA55)
+                option = that.refreshOption(currentChart, resultData, specialMA5, specialMA21, specialMA55)
             } else {
                 console.log('重载', period)
                 option = {
@@ -1031,14 +960,14 @@ export default {
                     },
                     color: ['yellow', 'green', 'blue', 'white', 'yellow', 'red' /* 'white', 'white', 'white' */],
                     legend: {
-                        data: ['笔', '段', '高级别段', 'MA5', 'MA34', 'MA55', /* '布林上轨', '布林中轨', '布林下轨' */],
+                        data: ['笔', '段', '高级别段', 'MA5', 'MA21', 'MA55', /* '布林上轨', '布林中轨', '布林下轨' */],
 
                         selected: {
                             '笔': true,
                             '段': true,
                             '高级别段': true,
                             'MA5': true,
-                            'MA34': true,
+                            'MA21': true,
                             'MA55': true,
                             // 'markline': true
                         },
@@ -1485,9 +1414,9 @@ export default {
                         },
                         // //index 11
                         {
-                            name: 'MA34',
+                            name: 'MA21',
                             type: 'line',
-                            data: that.calculateMA(resultData, specialMA34),
+                            data: that.calculateMA(resultData, specialMA21),
                             smooth: true,
                             lineStyle: {
                                 normal: {
@@ -1537,9 +1466,9 @@ export default {
                         //
                         // // index 14
                         // {
-                        //     name: 'MA34',
+                        //     name: 'MA5',
                         //     type: 'line',
-                        //     data: that.calculateMA(resultData, specialMA34),
+                        //     data: that.calculateMA(resultData, specialMA5),
                         //     smooth: true,
                         //     lineStyle: {
                         //         normal: {
@@ -1566,7 +1495,7 @@ export default {
             }
             currentChart.setOption(option)
         },
-        refreshOption(chart, resultData, specialMA5, specialMA34, specialMA55) {
+        refreshOption(chart, resultData, specialMA5, specialMA21, specialMA55) {
             let option = chart.getOption()
             option.series[0].data = resultData.values
             option.xAxis[0].data = resultData.date
@@ -1588,7 +1517,7 @@ export default {
             // option.series[8].markPoint.data = resultData.bigBcMACDValues
             // option.series[9].data = resultData.deaBigLevel
             option.series[4].data = this.calculateMA(resultData, specialMA5);
-            option.series[5].data = this.calculateMA(resultData, specialMA34);
+            option.series[5].data = this.calculateMA(resultData, specialMA21);
             option.series[6].data = this.calculateMA(resultData, specialMA55);
             // option.series[11].data = resultData.volume;
             // console.log('更新的option', option)

@@ -39,7 +39,7 @@ config = {
         "HC",
         "I",
         "J",
-        # "JM",
+        "JM",
         # 金属类
         "AG",
         "AU",
@@ -52,16 +52,16 @@ config = {
         "MA",
         "TA",
         "PP",
-        # "EG",
-        # "EB",
-        # "L",
+        "EG",
+        "EB",
+        "L",
         # "PG",
         # 农产品
         "CF",
         "SR",
         "AP",
-        # "JD",
-        # "A",
+        "JD",
+        "A",
         "M",
         # "RM",
         # 食用油
@@ -78,7 +78,7 @@ config = {
         #     "SN",
         #     "PB",
         #     "SM",
-        # "SF",
+        "SF",
 
         # "B",
         "C",
@@ -88,20 +88,103 @@ config = {
 
         "FG",
         "SA",
-        # "ZC",
-        # "UR",
+        "ZC",
+        "UR",
         "V",
+    ],
+    # 指数列表
+    'symbolListIndex': [
+        # 第一组  28个
+        # 黑色系
+        "RB99",
+        "HC99",
+        "I99",
+        "J99",
+        "JM99",
+        # 金属类
+        "AG99",
+        "AU99",
+        "NI99",
+        "ZN99",
+        # 化工系
+        "RU99",
+        "FU99",
+        "BU99",
+        "MA99",
+        "TA99",
+        "PP99",
+        "EG99",
+        "EB99",
+        "L99",
+        # "PG99",
+        # 农产品
+        "CF99",
+        "SR99",
+        "AP99",
+        "JD99",
+        "A99",
+        "M99",
+        # "RM99",
+        # 食用油
+        "Y99",
+        "P99",
+        # "OI99",
+
+        # "IC99",
+        # "IF99",
+        # "IH99",
+
+        #   第二组 新增品种 15
+        #     "AL99",
+        #     "SN99",
+        #     "PB99",
+        #     "SM99",
+        # "SF99",
+
+        # "B99",
+        "C99",
+        # "CS99",
+        # "CJ99",
+        # "SP99",
+
+        "FG99",
+        "SA99",
+        "ZC99",
+        "UR99",
+        "V99",
     ],
     # 华安期货是在标准保证金基础上加1个点，这个可以找期货公司调整 b
     'margin_rate_company': 0.01,
     # 商品期货保证金率一般固定，只有过节会变下。因为换合约期间需要拿到老合约保证金率，因此保存起来
     'futureConfig': {
-        # 上期所
         'RB': {'margin_rate': 0.09, 'contract_multiplier': 10},
         'HC': {'margin_rate': 0.09, 'contract_multiplier': 10},
+        'I': {'margin_rate': 0.08, 'contract_multiplier': 100},
+        'J': {'margin_rate': 0.08, 'contract_multiplier': 100},
+        'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
+        # 郑煤
+        'ZC': {'margin_rate': 0.05, 'contract_multiplier': 100},
+        # 锰硅
+        'SM': {'margin_rate': 0.07, 'contract_multiplier': 5},
+        # 硅铁
+        'SF': {'margin_rate': 0.07, 'contract_multiplier': 5},
+
         'RU': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'FU': {'margin_rate': 0.11, 'contract_multiplier': 10},
         'BU': {'margin_rate': 0.11, 'contract_multiplier': 10},
+
+        'MA': {'margin_rate': 0.07, 'contract_multiplier': 10},
+        'TA': {'margin_rate': 0.07, 'contract_multiplier': 5},
+
+        'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
+        # 苯乙烯
+        'EB': {'margin_rate': 0.12, 'contract_multiplier': 5},
+        # 聚丙烯
+        'PP': {'margin_rate': 0.11, 'contract_multiplier': 5},
+        # 聚乙烯
+        'L': {'margin_rate': 0.11, 'contract_multiplier': 5},
+        # 聚氯乙烯
+        'V': {'margin_rate': 0.09, 'contract_multiplier': 5},
         'AU': {'margin_rate': 0.08, 'contract_multiplier': 1000},
         'AG': {'margin_rate': 0.12, 'contract_multiplier': 15},
         'NI': {'margin_rate': 0.1, 'contract_multiplier': 1},
@@ -116,9 +199,6 @@ config = {
         # 沪铅
         # 'PB': {'margin_rate': 0.1, 'contract_multiplier': 5},
 
-        # 郑商所
-        'MA': {'margin_rate': 0.07, 'contract_multiplier': 10},
-        'TA': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'CF': {'margin_rate': 0.07, 'contract_multiplier': 5},
         'SR': {'margin_rate': 0.05, 'contract_multiplier': 10},
         # 'OI': {'margin_rate': 0.06, 'contract_multiplier': 10},
@@ -129,33 +209,17 @@ config = {
         'FG': {'margin_rate': 0.06, 'contract_multiplier': 20},
         # 纯碱
         'SA': {'margin_rate': 0.06, 'contract_multiplier': 20},
-        # 锰硅
-        # 'SM': {'margin_rate': 0.07, 'contract_multiplier': 5},
-        # 尿素
-        # 'UR': {'margin_rate': 0.05, 'contract_multiplier': 20},
-        # 动力煤
-        # 'ZC': {'margin_rate': 0.05, 'contract_multiplier': 100},
-        # 硅铁
-        # 'SF': {'margin_rate': 0.07, 'contract_multiplier': 5},
 
-        # 大商所
-        'J': {'margin_rate': 0.08, 'contract_multiplier': 100},
-        # 'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
-        'I': {'margin_rate': 0.08, 'contract_multiplier': 100},
+        # 尿素
+        'UR': {'margin_rate': 0.05, 'contract_multiplier': 20},
+
         'M': {'margin_rate': 0.08, 'contract_multiplier': 10},
-        # 'EG': {'margin_rate': 0.11, 'contract_multiplier': 10},
-        # 聚丙烯
-        'PP': {'margin_rate': 0.11, 'contract_multiplier': 5},
-        # 苯乙烯
-        # 'EB': {'margin_rate': 0.12, 'contract_multiplier': 5},
-        # 聚乙烯
-        # 'L': {'margin_rate': 0.11, 'contract_multiplier': 5},
         'P': {'margin_rate': 0.08, 'contract_multiplier': 10},
         'Y': {'margin_rate': 0.08, 'contract_multiplier': 10},
-        # 'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
+        'JD': {'margin_rate': 0.09, 'contract_multiplier': 10},
         # 'PG': {'margin_rate': 0.11, 'contract_multiplier': 20},
         # 豆一
-        # 'A': {'margin_rate': 0.08, 'contract_multiplier': 10},
+        'A': {'margin_rate': 0.08, 'contract_multiplier': 10},
 
         # 豆二
         # 'B': {'margin_rate': 0.08, 'contract_multiplier': 10},
@@ -163,8 +227,6 @@ config = {
         'C': {'margin_rate': 0.07, 'contract_multiplier': 10},
         # 淀粉
         # 'CS': {'margin_rate': 0.07, 'contract_multiplier': 10},
-        # 聚氯乙烯
-        'V': {'margin_rate': 0.09, 'contract_multiplier': 5},
 
         # 'IC': {'margin_rate': 0.12, 'contract_multiplier': 200},
         # 'IF': {'margin_rate': 0.10, 'contract_multiplier': 300},
@@ -180,7 +242,7 @@ config = {
         # 'CN': {'margin_rate': 0.09, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06          1045
 
         'S': {'margin_rate': 0.03, 'contract_multiplier': 50},  # 2314
-        'SM': {'margin_rate': 0.04, 'contract_multiplier': 100},  # 2062
+        # 'SM': {'margin_rate': 0.04, 'contract_multiplier': 100},  # 2062
         'BO': {'margin_rate': 0.04, 'contract_multiplier': 600},  # 935
         'FCPO': {'margin_rate': 0.1, 'contract_multiplier': 1},
         'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
@@ -216,8 +278,8 @@ config = {
     # YM:道琼斯 CN:A50 ;FCPO:马棕榈
     # wshq 'SB'
     # 'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL', 'NID', 'ZSD'],
-    # 新浪外盘品种名
-    'global_future_symbol': ['CL', 'GC', 'SI', 'HG', 'NID', 'ZSD', 'S', 'SM', 'BO', 'FCPO', 'CT'],
+    # 新浪外盘品种名'SM',
+    'global_future_symbol': ['CL', 'GC', 'SI', 'HG', 'NID', 'ZSD', 'S',  'BO', 'FCPO', 'CT'],
     # 美国股票
     'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD'],
     # wshq
@@ -381,15 +443,15 @@ config = {
         #     'type': 'future',
         #     'feeRate': 0.012
         # },
-        {
-            'contract_multiplier': 100,
-            'exchange': '美豆粕',
-            'margin_rate': 0.04,
-            'order_book_id': 'SM',
-            'trading_hours': '7*24',
-            'type': 'future',
-            'feeRate': 0.012
-        },
+        # {
+        #     'contract_multiplier': 100,
+        #     'exchange': '美豆粕',
+        #     'margin_rate': 0.04,
+        #     'order_book_id': 'SM',
+        #     'trading_hours': '7*24',
+        #     'type': 'future',
+        #     'feeRate': 0.012
+        # },
         {
             'contract_multiplier': 600,
             'exchange': '美豆油',
@@ -417,6 +479,277 @@ config = {
             'type': 'stock',
             'feeRate': 0.012
         },
+    ],
+    # 内盘期货信息列表
+    'future_symbol_info': [
+        # 黑色板块
+        {
+            'order_book_id': 'RB99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.09,
+        },
+        {
+            'order_book_id': 'HC99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.09,
+        },
+        {
+            'order_book_id': 'I99',
+            'contract_multiplier': 100,
+            'margin_rate': 0.08,
+        },
+        {
+            'order_book_id': 'J99',
+            'contract_multiplier': 100,
+            'margin_rate': 0.08,
+        },
+        {
+            'order_book_id': 'JM99',
+            'contract_multiplier': 60,
+            'margin_rate': 0.08,
+        },
+
+        # 动力煤
+        {
+            'order_book_id': 'ZC99',
+            'contract_multiplier': 100,
+            'margin_rate': 0.05,
+        },
+        # 锰硅
+        {
+            'order_book_id': 'SM99',
+            'contract_multiplier': 5,
+            'margin_rate': 0.07,
+        },
+        # 硅铁
+        {
+            'order_book_id': 'SF99',
+            'contract_multiplier': 5,
+            'margin_rate': 0.07,
+        },
+
+        # 化工板块
+        {
+            'order_book_id': 'RU99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.11,
+        },
+        {
+            'order_book_id': 'FU99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.11,
+        },
+        {
+            'order_book_id': 'BU99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.11,
+        },
+
+        {
+            'order_book_id': 'MA99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.07,
+        },
+        {
+            'order_book_id': 'TA99',
+            'contract_multiplier': 5,
+            'margin_rate': 0.07,
+        },
+        {
+            'order_book_id': 'EG99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.11,
+        },
+        # 苯乙烯
+        {
+            'order_book_id': 'EB99',
+            'contract_multiplier': 5,
+            'margin_rate': 0.12,
+        },
+        # 聚丙烯
+        {
+            'order_book_id': 'PP99',
+            'contract_multiplier': 5,
+            'margin_rate': 0.12,
+        },
+        # 聚乙烯
+        {
+            'order_book_id': 'L99',
+            'contract_multiplier': 5,
+            'margin_rate': 0.11,
+        },
+        # 聚氯乙烯
+        {
+            'order_book_id': 'V99',
+            'contract_multiplier': 5,
+            'margin_rate': 0.09,
+        },
+        {
+            'order_book_id': 'AU99',
+            'contract_multiplier': 1000,
+            'margin_rate': 0.08,
+        },
+        {
+            'order_book_id': 'AG99',
+            'contract_multiplier': 15,
+            'margin_rate': 0.12,
+        },
+        {
+            'order_book_id': 'NI99',
+            'contract_multiplier': 1,
+            'margin_rate': 0.1,
+        },
+        {
+            'order_book_id': 'ZN99',
+            'contract_multiplier': 5,
+            'margin_rate': 0.1,
+        },
+        # {
+        #     'order_book_id': 'SP99',
+        #     'contract_multiplier': 10,
+        #     'margin_rate': 0.08,
+        # },
+        # {
+        #     'order_book_id': 'CU99',
+        #     'contract_multiplier': 5,
+        #     'margin_rate': 0.1,
+        # },
+        # {
+        #     'order_book_id': 'AL99',
+        #     'contract_multiplier': 5,
+        #     'margin_rate': 0.1,
+        # },
+        # {
+        #     'order_book_id': 'SN99',#沪锡
+        #     'contract_multiplier': 1,
+        #     'margin_rate': 0.1,
+        # },
+        # {
+        #     'order_book_id': 'PB99',#沪铅
+        #     'contract_multiplier': 5,
+        #     'margin_rate': 0.1,
+        # },
+
+        # 郑商所
+
+        {
+            'order_book_id': 'CF99',
+            'contract_multiplier': 5,
+            'margin_rate': 0.07,
+        },
+        {
+            'order_book_id': 'SR99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.05,
+        },
+        # {
+        #     'order_book_id': 'OI99',
+        #     'contract_multiplier': 10,
+        #     'margin_rate': 0.06,
+        # },
+        # {
+        #     'order_book_id': 'RM99',
+        #     'contract_multiplier': 10,
+        #     'margin_rate': 0.06,
+        # },
+        {
+            'order_book_id': 'AP99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.08,
+        },
+        # {
+        #     'order_book_id': 'CJ99',
+        #     'contract_multiplier': 5,
+        #     'margin_rate': 0.08,
+        # },
+        # 玻璃
+        {
+            'order_book_id': 'FG99',
+            'contract_multiplier': 20,
+            'margin_rate': 0.06,
+        },
+        # 纯碱
+        {
+            'order_book_id': 'SA99',
+            'contract_multiplier': 20,
+            'margin_rate': 0.06,
+        },
+        # 尿素
+        {
+            'order_book_id': 'UR99',
+            'contract_multiplier': 20,
+            'margin_rate': 0.05,
+        },
+        # 大商所
+        {
+            'order_book_id': 'M99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.08,
+        },
+
+        {
+            'order_book_id': 'P99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.08,
+        },
+        {
+            'order_book_id': 'Y99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.08,
+        },
+        # {
+        #     'order_book_id': 'JD99',
+        #     'contract_multiplier': 10,
+        #     'margin_rate': 0.09,
+        # },
+        #  {
+        #     'order_book_id': 'PG99',
+        #     'contract_multiplier': 20,
+        #     'margin_rate': 0.11,
+        # },
+
+        {
+            'order_book_id': 'A99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.08,
+        },
+        # {
+        #             'order_book_id': 'B99',
+        #             'contract_multiplier': 10,
+        #             'margin_rate': 0.08,
+        #         },
+        {
+            'order_book_id': 'C99',
+            'contract_multiplier': 10,
+            'margin_rate': 0.07,
+        },
+        # 淀粉
+        # {
+        #             'order_book_id': 'CS99',
+        #             'contract_multiplier': 10,
+        #             'margin_rate': 0.07,
+        #         },
+
+        # {
+        #             'order_book_id': 'IC99',
+        #             'contract_multiplier': 200,
+        #             'margin_rate': 0.12,
+        #         },
+        # {
+        #             'order_book_id': 'IF99',
+        #             'contract_multiplier': 300,
+        #             'margin_rate': 0.10,
+        #         },
+        # {
+        #             'order_book_id': 'IH99',
+        #             'contract_multiplier': 300,
+        #             'margin_rate': 0.10,
+        #         },
+        # {
+        #             'order_book_id': 'BTC',
+        #             'contract_multiplier': 1,
+        #             'margin_rate': 0.05,
+        #         },
     ]
 }
 cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]

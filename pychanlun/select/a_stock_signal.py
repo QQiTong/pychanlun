@@ -70,8 +70,8 @@ def pre_filter(stock_list):
             .find({"code": stock["code"], "date_stamp": {"$gte": cutoff_time.timestamp()}})
         bars = pd.DataFrame(bars)
         if len(bars) > 0:
-            ma34 = QA.MA(bars.close, 34)
-            if 2 < ma34.iloc[-1] < bars.close.iloc[-1] < 20:
+            ma21 = QA.MA(bars.close, 21)
+            if 2 < ma21.iloc[-1] < bars.close.iloc[-1] < 20:
                 result.append(stock)
             continue
         DBPyChanlun["stock_signal"].delete_many({"sse": stock["sse"], "code": stock["code"]})

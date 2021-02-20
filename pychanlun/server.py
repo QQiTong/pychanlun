@@ -267,7 +267,7 @@ def update_stock_position_status():
 def run(**kwargs):
     port = kwargs.get("port", 5000)
     # 程序启动初始化主力合约信息,不需要每次都请求
-    businessService.initDoinantSynmbol()
+    # businessService.initDoinantSynmbol()
     # 生产模式运行，用waitress服务器
     serve(app, host='0.0.0.0', port=port)
     # waitress经常阻塞超时，换WSGIServer

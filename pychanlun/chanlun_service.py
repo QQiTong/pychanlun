@@ -133,7 +133,7 @@ def get_data_v2(symbol, period, end_date=None):
         .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
     daily_data = daily_data.set_index("time")
     ma5 = np.round(pd.Series.rolling(daily_data["close"], window=5).mean(), 2)
-    ma34 = np.round(pd.Series.rolling(daily_data["close"], window=34).mean(), 2)
+    ma21 = np.round(pd.Series.rolling(daily_data["close"], window=21).mean(), 2)
 
     jcsc_tags = {
         "buy_ma_gold_cross": {
@@ -166,7 +166,7 @@ def get_data_v2(symbol, period, end_date=None):
         kline_data.duan.to_list(),
         kline_data.duan2.to_list(),
         ma5,
-        ma34
+        ma21
     )
     buy_zs_huila = hui_la['buy_zs_huila']
     sell_zs_huila = hui_la['sell_zs_huila']
@@ -182,7 +182,7 @@ def get_data_v2(symbol, period, end_date=None):
         kline_data.duan.to_list(),
         kline_data.duan2.to_list(),
         ma5,
-        ma34
+        ma21
     )
 
     buy_zs_tupo = tu_po['buy_zs_tupo']
@@ -199,7 +199,7 @@ def get_data_v2(symbol, period, end_date=None):
         kline_data.duan.to_list(),
         kline_data.duan2.to_list(),
         ma5,
-        ma34
+        ma21
     )
 
     buy_v_reverse = v_reverse['buy_v_reverse']
@@ -213,7 +213,7 @@ def get_data_v2(symbol, period, end_date=None):
         kline_data.low.to_list(),
         kline_data.duan2.to_list(),
         ma5,
-        ma34,
+        ma21,
     )
 
     buy_five_v_reverse = five_v_fan['buy_five_v_reverse']
@@ -229,7 +229,7 @@ def get_data_v2(symbol, period, end_date=None):
         kline_data.duan.to_list(),
         kline_data.duan2.to_list(),
         ma5,
-        ma34
+        ma21
     )
 
     buy_duan_break = duan_pohuai['buy_duan_break']
@@ -439,7 +439,7 @@ def get_data(symbol, period, end_date=None):
     daily_data = pd.DataFrame(daily_data)
     daily_data = daily_data.set_index("time")
     ma5 = np.round(pd.Series.rolling(daily_data["close"], window=5).mean(), 2)
-    ma34 = np.round(pd.Series.rolling(daily_data["close"], window=34).mean(), 2)
+    ma21 = np.round(pd.Series.rolling(daily_data["close"], window=21).mean(), 2)
 
     data = data_list[-1]
     data2 = data_list[-2] if len(data_list) > 1 else None
@@ -497,7 +497,7 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["duan"]),
         list(kline_data["duan2"]),
         ma5,
-        ma34
+        ma21
     )
 
     buy_zs_huila = hui_la['buy_zs_huila']
@@ -514,7 +514,7 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["duan"]),
         list(kline_data["duan2"]),
         ma5,
-        ma34
+        ma21
     )
 
     buy_zs_tupo = tu_po['buy_zs_tupo']
@@ -531,7 +531,7 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["duan"]),
         list(kline_data["duan2"]),
         ma5,
-        ma34
+        ma21
     )
 
     buy_v_reverse = v_reverse['buy_v_reverse']
@@ -545,7 +545,7 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["low"]),
         list(kline_data["duan2"]),
         ma5,
-        ma34,
+        ma21,
     )
 
     buy_five_v_reverse = five_v_fan['buy_five_v_reverse']
@@ -561,13 +561,13 @@ def get_data(symbol, period, end_date=None):
         list(kline_data["duan"]),
         list(kline_data["duan2"]),
         ma5,
-        ma34
+        ma21
     )
 
     buy_duan_break = duan_pohuai['buy_duan_break']
     sell_duan_break = duan_pohuai['sell_duan_break']
 
-    # beichiData = divergence.calc_beichi_data(kline_data, kline_data2, ma5, ma34)
+    # beichiData = divergence.calc_beichi_data(kline_data, kline_data2, ma5, ma21)
     # buyMACDBCData = beichiData['buyMACDBCData']
     # sellMACDBCData = beichiData['sellMACDBCData']
     #
