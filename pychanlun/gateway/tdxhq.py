@@ -28,7 +28,9 @@ class TdxExHqExecutor(metaclass=SingletonType):
             func = api.__getattribute__(item)
             def wrapper(*args, **kwargs):
                 f = self.executor.submit(func, *args, **kwargs)
-                return f.result()
+                result = f.result()
+                self._queue.put(api)
+                return result
             return wrapper
         except Exception as e:
             raise e
