@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
+from dynaconf import Dynaconf
 
-BASEDIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # freshquant所在目录
+EXE_DIR = os.path.split(os.path.realpath(sys.argv[0]))[0]  # 程序或脚本所在目录
+CWD_DIR = os.getcwd()  # 执行程序或脚本的目录
 
 
 class Config:
@@ -753,3 +757,36 @@ config = {
     ]
 }
 cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
+config_path = os.path.expanduser('~')
+config_path = '{}{}{}'.format(config_path, os.sep, '.pychanlun')
+settings = Dynaconf(
+    settings_files=[
+        os.path.join(BASE_DIR, "freshquant.yaml"),
+        os.path.join(BASE_DIR, "freshquant.yml"),
+        os.path.join(BASE_DIR, "freshquant.json"),
+        os.path.join(EXE_DIR, "freshquant.yaml"),
+        os.path.join(EXE_DIR, "freshquant.yml"),
+        os.path.join(EXE_DIR, "freshquant.json"),
+        os.path.join(config_path, "freshquant.yaml"),
+        os.path.join(config_path, "freshquant.yml"),
+        os.path.join(config_path, "freshquant.json"),
+        os.path.join(CWD_DIR, "freshquant.yaml"),
+        os.path.join(CWD_DIR, "freshquant.yml"),
+        os.path.join(CWD_DIR, "freshquant.json"),
+    ],
+    includes=[
+        os.path.join(BASE_DIR, "freshquant_*.yaml"),
+        os.path.join(BASE_DIR, "freshquant_*.yml"),
+        os.path.join(BASE_DIR, "freshquant_*.json"),
+        os.path.join(EXE_DIR, "freshquant_*.yaml"),
+        os.path.join(EXE_DIR, "freshquant_*.yml"),
+        os.path.join(EXE_DIR, "freshquant_*.json"),
+        os.path.join(config_path, "freshquant_*.yaml"),
+        os.path.join(config_path, "freshquant_*.yml"),
+        os.path.join(config_path, "freshquant_*.json"),
+        os.path.join(CWD_DIR, "freshquant_*.yaml"),
+        os.path.join(CWD_DIR, "freshquant_*.yml"),
+        os.path.join(CWD_DIR, "freshquant_*.json")
+    ],
+    envvar_prefix="freshquant",
+)
