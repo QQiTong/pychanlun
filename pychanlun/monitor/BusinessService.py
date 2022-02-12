@@ -12,7 +12,6 @@ import pandas as pd
 import pymongo
 import pytz
 import requests
-import rqdatac as rq
 from bson import ObjectId
 from bson.codec_options import CodecOptions
 

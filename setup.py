@@ -11,7 +11,7 @@ setup(
         "numpy",
         "flask",
         "pandas",
-        "scipy==1.1.0",
+        "scipy",
         "requests",
         "pydash",
         "apscheduler",

@@ -9,7 +9,6 @@ import pandas as pd
 import pymongo
 import pytz
 import requests
-import rqdatac as rq
 from QUANTAXIS.QAData.data_resample import QA_data_stockmin_resample, QA_data_day_resample
 from bson.codec_options import CodecOptions
 

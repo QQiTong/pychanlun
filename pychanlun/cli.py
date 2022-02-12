@@ -7,7 +7,7 @@ from pychanlun.monitor import BeichiMonitor
 from pychanlun.select import a_stock_signal
 from pychanlun.market_data import tdx_local_downloader, global_futures_downloader
 from pychanlun.monitor import a_stock_tdx as stock_monitoring
-from pychanlun.job import save_all_job, save_xdxr_job
+from pychanlun.job import save_all_job, save_xdxr_job, save_future_job
 from pychanlun.zero.notify import send_ding_message
 
 
@@ -85,8 +85,13 @@ def monitoring_a_stock_tdx(**kwargs):
 @click.option('--auto-shutdown/--no-auto-shutdown', default=False)
 def save_all(**kwargs):
     save_all_job.run(**kwargs)
-    send_ding_message("【事件通知】数据下载完成")
+    send_ding_message("【事件通知】期货数据下载完成")
 
+@run.command()
+@click.option('--auto-shutdown/--no-auto-shutdown', default=False)
+def save_future(**kwargs):
+    save_future_job.run(**kwargs)
+    send_ding_message("【事件通知】期货数据下载完成")
 
 @run.command()
 def save_xdxr(**kwargs):
