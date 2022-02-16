@@ -199,7 +199,7 @@ export default {
 
     mounted() {
         // this.subscribeWS()
-        this.getDayMaList()
+        // this.getDayMaList()
         this.getChangeiList()
         this.getSignalList()
         // this.getLevelDirectionList()

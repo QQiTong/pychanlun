@@ -33,7 +33,7 @@ MongoDB也要先安装成Windows服务模式，参考MongoDB文档。
 （管理员命令行模式）
 ```cmd
 nssm install pychanlun-api-service C:\Users\Administrator\scoop\apps\python37\current\scripts\pychanlun.exe
-nssm install pychanlun-api-service C:\Python\Python37\Scripts\pychanlun.exe
+nssm install pychanlun-api-service C:\Python\Python38\Scripts\pychanlun.exe
 nssm set pychanlun-api-service AppDirectory D:\development\pychanlun
 nssm set pychanlun-api-service AppParameters "run-api-server --port 18888"
 nssm set pychanlun-api-service AppEnvironmentExtra PATH=C:\Windows\System32;C:\Windows PYCHANLUN_MONGO_URL=mongodb://localhost:27017/pychanlun
@@ -54,7 +54,7 @@ npm run build
 
 ```cmd
 nssm install nginx "D:\scoop\shims\nginx.exe"
-nssm install nginx "C:\Users\admin\scoop\shims\nginx.exe"
+nssm install nginx "C:\Users\parker\scoop\shims\nginx.exe"
 nssm set nginx AppParameters "-p D:\development\pychanlun\nginx"
 nssm set nginx AppEnvironmentExtra PATH=C:\Windows\System32;C:\Windows
 net start nginx

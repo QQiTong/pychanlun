@@ -36,6 +36,7 @@ from futu import *
 # from WindPy import w
 import talib as ta
 import copy
+from pychanlun.db import DBQuantAxis
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -121,7 +122,7 @@ def testChange():
     for i in range(len(dominantSymbolList)):
         item = dominantSymbolList[i]
         # print(item)
-        if item is not 'BTC' and item is not 'ETH_CQ':
+        if item != 'BTC' and item != 'ETH_CQ':
             df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
                                 start_date=start, end_date=end)
             df1m = rq.current_minute(item)
@@ -417,7 +418,8 @@ def testWechat():
     remark = '双盘'
     url = "http://www.yutiansut.com/signal?user_id=oL-C4w2KYo5DB486YBwAK2M69uo4&template=xiadan_report&strategy_id=%s" \
           "&realaccount=%s&code=%s&order_direction=%s&order_offset=%s&price=%s&volume=%s&order_time=%s" \
-          % (signal, remark, symbol + '_' + period, signal, direction, '开:' + str(close_price) + ' 止:' + str(stop_lose_price) + ' 触:' + str(price), amount,
+          % (signal, remark, symbol + '_' + period, signal, direction,
+             '开:' + str(close_price) + ' 止:' + str(stop_lose_price) + ' 触:' + str(price), amount,
              '开:' + fire_time_str + ' 触:' + date_created_str)
     requests.post(url)
 
@@ -430,10 +432,11 @@ def testOkex1():
         "http": "socks5://127.0.0.1:10808",
         "https": "socks5://127.0.0.1:10808"
     }
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
-               "Accept": "application/json",
-               "App-Type": "web",
-               "Referer": "https://www.okex.me/derivatives/swap/full/usdt-btc"}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
+        "Accept": "application/json",
+        "App-Type": "web",
+        "Referer": "https://www.okex.me/derivatives/swap/full/usdt-btc"}
 
     t = time.time()
     timeStamp = int(round(t * 1000))
@@ -616,7 +619,8 @@ def testGroupBy():
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     start = datetime.strptime(startDate, "%Y-%m-%d")
     start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-    data_list = DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+    data_list = DBPyChanlun['future_auto_position'].with_options(
+        codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
         "date_created": {"$gte": start, "$lte": end}
     }).sort("_id", pymongo.ASCENDING)
     df = pd.DataFrame(list(data_list))
@@ -684,7 +688,7 @@ def formatTime(localTime):
 
 
 '''
- 外盘期货 代码         入库别名简称           11个品种  这个 24小时采集  20秒采集1次   24*60*3 = 4320 次  
+ 外盘期货 代码         入库别名简称           11个品种  这个 24小时采集  20秒采集1次   24*60*3 = 4320 次
  原油：@CL0W           --CL
  黄金：@GC0W           --GC
  白银：@SI0W           --SI
@@ -696,8 +700,8 @@ def formatTime(localTime):
  豆油：@ZL0W           --L
  棕榈油：CPO0W         --P
  棉花：CT0W            --T
- 
- 美国股票    代码      8只股票  这个每天 晚上 21:00 到 凌晨 4:00 采集就可以了 . 20秒采集1次 一天采集 7*60 * 3 = 1260次           
+
+ 美国股票    代码      8只股票  这个每天 晚上 21:00 到 凌晨 4:00 采集就可以了 . 20秒采集1次 一天采集 7*60 * 3 = 1260次
  苹果        AAPL
  微软        MSFT
  谷歌        GOOG
@@ -732,9 +736,11 @@ def testMeigu():
 
 def testFutu():
     quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)
-    ret, data, page_req_key = quote_ctx.request_history_kline('HK.00700', start='2017-06-20', end='2018-06-22', max_count=50)  # 请求开头50个数据
+    ret, data, page_req_key = quote_ctx.request_history_kline('HK.00700', start='2017-06-20', end='2018-06-22',
+                                                              max_count=50)  # 请求开头50个数据
     print(ret, data)
-    ret, data, page_req_key = quote_ctx.request_history_kline('HK.00700', start='2017-06-20', end='2018-06-22', max_count=50, page_req_key=page_req_key)  # 请求下50个数据
+    ret, data, page_req_key = quote_ctx.request_history_kline('HK.00700', start='2017-06-20', end='2018-06-22',
+                                                              max_count=50, page_req_key=page_req_key)  # 请求下50个数据
     print(ret, data)
     quote_ctx.close()
 
@@ -905,34 +911,42 @@ def testStatistic():
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     start = datetime.strptime(startDate, "%Y-%m-%d")
     start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-    df_beichi_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "beichi"
-    }).sort("_id", pymongo.ASCENDING)))
+    df_beichi_win = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "beichi"
+        }).sort("_id", pymongo.ASCENDING)))
 
-    df_beichi_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "beichi"
-    }).sort("_id", pymongo.ASCENDING)))
+    df_beichi_lose = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "beichi"
+        }).sort("_id", pymongo.ASCENDING)))
 
-    df_break_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "break"
-    }).sort("_id", pymongo.ASCENDING)))
-    df_break_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "break"
-    }).sort("_id", pymongo.ASCENDING)))
+    df_break_win = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "break"
+        }).sort("_id", pymongo.ASCENDING)))
+    df_break_lose = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "break"
+        }).sort("_id", pymongo.ASCENDING)))
 
-    df_huila_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "huila"
-    }).sort("_id", pymongo.ASCENDING)))
-    df_huila_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "huila"
-    }).sort("_id", pymongo.ASCENDING)))
+    df_huila_win = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "huila"
+        }).sort("_id", pymongo.ASCENDING)))
+    df_huila_lose = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "huila"
+        }).sort("_id", pymongo.ASCENDING)))
 
-    df_tupo_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "tupo"
-    }).sort("_id", pymongo.ASCENDING)))
-    df_tupo_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "tupo"
-    }).sort("_id", pymongo.ASCENDING)))
+    df_tupo_win = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "tupo"
+        }).sort("_id", pymongo.ASCENDING)))
+    df_tupo_lose = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "tupo"
+        }).sort("_id", pymongo.ASCENDING)))
 
     # df_v_reverse_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
     #     "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "v_reverse"
@@ -941,12 +955,14 @@ def testStatistic():
     #     "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "v_reverse"
     # }).sort("_id", pymongo.ASCENDING)))
 
-    df_five_v_reverse_win = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "five_v_reverse"
-    }).sort("_id", pymongo.ASCENDING)))
-    df_five_v_reverse_lose = pd.DataFrame(list(DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
-        "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "five_v_reverse"
-    }).sort("_id", pymongo.ASCENDING)))
+    df_five_v_reverse_win = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "winEnd", "signal": "five_v_reverse"
+        }).sort("_id", pymongo.ASCENDING)))
+    df_five_v_reverse_lose = pd.DataFrame(list(
+        DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+            "date_created": {"$gte": start, "$lte": end}, "status": "loseEnd", "signal": "five_v_reverse"
+        }).sort("_id", pymongo.ASCENDING)))
 
     signal_result = {
         "beichi_win_count": len(df_beichi_win),
@@ -962,24 +978,33 @@ def testStatistic():
         "five_v_reverse_win_count": len(df_five_v_reverse_win),
         "five_v_reverse_lose_count": len(df_five_v_reverse_lose),
 
-        "beichi_win_lose_count_rate": round(len(df_beichi_win) / len(df_beichi_lose), 2) if len(df_beichi_lose) != 0 else 1,
-        "beichi_win_lose_money_rate": round(df_beichi_win['win_end_money'].sum() / df_beichi_lose['lose_end_money'].sum(), 2) if df_beichi_lose['lose_end_money'].sum() != 0 else 1,
+        "beichi_win_lose_count_rate": round(len(df_beichi_win) / len(df_beichi_lose), 2) if len(
+            df_beichi_lose) != 0 else 1,
+        "beichi_win_lose_money_rate": round(
+            df_beichi_win['win_end_money'].sum() / df_beichi_lose['lose_end_money'].sum(), 2) if df_beichi_lose[
+                                                                                                     'lose_end_money'].sum() != 0 else 1,
 
         "huila_win_lose_count_rate": round(len(df_huila_win) / len(df_huila_lose), 2) if len(df_huila_lose) != 0 else 1,
-        "huila_win_lose_money_rate": round(df_huila_win['win_end_money'].sum() / df_huila_lose['lose_end_money'].sum(), 2) if df_huila_lose['lose_end_money'].sum() != 0 else 1,
+        "huila_win_lose_money_rate": round(df_huila_win['win_end_money'].sum() / df_huila_lose['lose_end_money'].sum(),
+                                           2) if df_huila_lose['lose_end_money'].sum() != 0 else 1,
 
         "break_win_lose_count_rate": round(len(df_break_win) / len(df_break_lose), 2) if len(df_break_lose) != 0 else 1,
-        "break_win_lose_money_rate": round(df_break_win['win_end_money'].sum() / df_break_lose['lose_end_money'].sum(), 2) if df_break_lose['lose_end_money'].sum() != 0 else 1,
+        "break_win_lose_money_rate": round(df_break_win['win_end_money'].sum() / df_break_lose['lose_end_money'].sum(),
+                                           2) if df_break_lose['lose_end_money'].sum() != 0 else 1,
 
         "tupo_win_lose_count_rate": round(len(df_tupo_win) / len(df_tupo_lose), 2) if len(df_tupo_lose) != 0 else 1,
-        "tupo_win_lose_money_rate": round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(), 2) if df_tupo_lose['lose_end_money'].sum() != 0 else 1,
+        "tupo_win_lose_money_rate": round(df_tupo_win['win_end_money'].sum() / df_tupo_lose['lose_end_money'].sum(),
+                                          2) if df_tupo_lose['lose_end_money'].sum() != 0 else 1,
 
         # "v_reverse_win_lose_count_rate": round(len(df_v_reverse_win) / len(df_v_reverse_lose),2) if len(df_v_reverse_lose) != 0 else 1,
         # "v_reverse_win_lose_money_rate": round(df_v_reverse_win['win_end_money'].sum() / df_v_reverse_lose['lose_end_money'].sum(), 2) if df_v_reverse_lose['lose_end_money'].sum() != 0 else 1,
         #
-        "five_v_reverse_win_lose_count_rate": round(len(df_five_v_reverse_win) / len(df_five_v_reverse_lose), 2) if len(df_five_v_reverse_lose) != 0 else 1,
-        "five_v_reverse_win_lose_money_rate": round(df_five_v_reverse_win['win_end_money'].sum() / df_five_v_reverse_lose['lose_end_money'].sum(), 2) if df_five_v_reverse_lose[
-                                                                                                                                                             'lose_end_money'].sum() != 0 else 1
+        "five_v_reverse_win_lose_count_rate": round(len(df_five_v_reverse_win) / len(df_five_v_reverse_lose), 2) if len(
+            df_five_v_reverse_lose) != 0 else 1,
+        "five_v_reverse_win_lose_money_rate": round(
+            df_five_v_reverse_win['win_end_money'].sum() / df_five_v_reverse_lose['lose_end_money'].sum(), 2) if
+        df_five_v_reverse_lose[
+            'lose_end_money'].sum() != 0 else 1
     }
     print(signal_result)
 
@@ -1046,7 +1071,8 @@ def testDynamicProfit():
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     start = datetime.strptime(startDate, "%Y-%m-%d")
     start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-    data_list = DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+    data_list = DBPyChanlun['future_auto_position'].with_options(
+        codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
         "date_created": {"$gte": start, "$lte": end}, "status": {'$ne': 'exception'}
     }).sort("_id", pymongo.ASCENDING)
     # print(data_list.count())
@@ -1085,7 +1111,8 @@ def testDynamicProfit():
     lose_end_group_by_symbol = df['lose_end_money'].groupby(df['simple_symbol'])
     # 查询 动止列表不为空的记录
     # win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception') & (df.dynamicPositionList.notnull())].groupby(df['new_date_created'])
-    win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception')].groupby(df['new_date_created']) if 'dynamicPositionList' in df else []
+    win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception')].groupby(
+        df['new_date_created']) if 'dynamicPositionList' in df else []
     # 转化为list
     win_end_group_by_date_dynamic_list = list(win_end_group_by_date_dynamic)
     # 按日期记录每天的动止盈利
@@ -1154,7 +1181,8 @@ def testDynamicProfit():
 
         win_end_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_money)
         lose_end_list.append(int(lose_end_group_by_date.sum()[i]))
-        net_profit_list.append(int(win_end_group_by_date.sum()[i]) + dynamic_win_money + int(lose_end_group_by_date.sum()[i]))
+        net_profit_list.append(
+            int(win_end_group_by_date.sum()[i]) + dynamic_win_money + int(lose_end_group_by_date.sum()[i]))
 
         win_lose_money_rate.append(abs(round((int(win_end_group_by_date.sum()[i]) + dynamic_win_money) /
                                              (int(lose_end_group_by_date.sum()[i])), 2)))
@@ -1162,7 +1190,8 @@ def testDynamicProfit():
         win_end_count_list.append(int(win_end_group_by_date.count()[i]))
         lose_end_count_list.append(int(lose_end_group_by_date.count()[i]))
         win_lose_count_rate.append(round(int(win_end_group_by_date.count()[i]) /
-                                         (int(lose_end_group_by_date.count()[i]) + int(win_end_group_by_date.count()[i])), 2))
+                                         (int(lose_end_group_by_date.count()[i]) + int(
+                                             win_end_group_by_date.count()[i])), 2))
 
     sorted_win_money_list = win_end_group_by_symbol.max().sort_values(ascending=False).dropna(axis=0)
     sorted_lose_money_list = lose_end_group_by_symbol.max().sort_values(ascending=True).dropna(axis=0)
@@ -1247,7 +1276,8 @@ def testPower():
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     start = datetime.strptime(startDate, "%Y-%m-%d")
     start = start.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-    data_list = DBPyChanlun['future_auto_position'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
+    data_list = DBPyChanlun['future_auto_position'].with_options(
+        codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find({
         "date_created": {"$gte": start, "$lte": end}, "status": {'$ne': 'exception'}
     }).sort("_id", pymongo.ASCENDING)
     # print(data_list.count())
@@ -1286,7 +1316,8 @@ def testPower():
     lose_end_group_by_symbol = df['lose_end_money'].groupby(df['simple_symbol'])
     # 查询 动止列表不为空的记录
     # win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception') & (df.dynamicPositionList.notnull())].groupby(df['new_date_created'])
-    win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception')].groupby(df['new_date_created']) if 'dynamicPositionList' in df else []
+    win_end_group_by_date_dynamic = df['dynamicPositionList'][(df.status != 'exception')].groupby(
+        df['new_date_created']) if 'dynamicPositionList' in df else []
     # 转化为list
     win_end_group_by_date_dynamic_list = list(win_end_group_by_date_dynamic)
     # 按日期记录每天的动止盈利
@@ -1301,7 +1332,6 @@ def testPower():
         dynamic_win_list.append(int(dynamic_win_sum))
 
     print(dynamic_win_list)
-
 
     per_order_margin_group_by_date_list = list(per_order_margin_group_by_date)
     per_order_amount_group_by_date_list = list(per_order_amount_group_by_date)
@@ -1342,11 +1372,6 @@ def testPower():
     for name, group in win_end_group_by_date:
         dateList.append(name)
 
-
-
-
-
-
     power_list = []
     win_end_group_by_power = df['win_end_money'].groupby(df['power'])
     lose_end_group_by_power = df['lose_end_money'].groupby(df['power'])
@@ -1374,9 +1399,11 @@ def testPower():
     win_end_count_power_list = list(win_end_group_by_power.count())
     lose_end_count_power_list = list(lose_end_group_by_power.count())
 
-    win_lose_count_power_rate = list(win_end_group_by_power.count() / (win_end_group_by_power.count() + lose_end_group_by_power.count()))
+    win_lose_count_power_rate = list(
+        win_end_group_by_power.count() / (win_end_group_by_power.count() + lose_end_group_by_power.count()))
 
-    win_lose_money_power_rate = list(win_end_group_by_power.sum() / (win_end_group_by_power.sum() + lose_end_group_by_power.sum()))
+    win_lose_money_power_rate = list(
+        win_end_group_by_power.sum() / (win_end_group_by_power.sum() + lose_end_group_by_power.sum()))
     # print(list(win_end_group_by_power.sum()))
 
     # for i in range(len(win_end_group_by_power.sum())):
@@ -1405,10 +1432,52 @@ def testPower():
 
 def testBus():
     from pychanlun.monitor.BusinessService import businessService
-    test  = businessService.getStatisticList('2020-10-20,2020-10-27')
+    test = businessService.getStatisticList('2020-10-20,2020-10-27')
     print(json.dumps(test))
 
+
+def test_future_change_list():
+    end = datetime.now()- timedelta(1)
+    end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+    start_date = end + timedelta(-1)
+    # print("->",start_date,end)
+    symbol_list = config['symbolList']
+    change_list = {}
+    for i in range(len(symbol_list)):
+        item = symbol_list[i] + "L9"
+        # 查日线开盘价
+        data_list = list(
+            DBQuantAxis["future_day"].find({"code": item}).sort("_id", pymongo.DESCENDING).limit(1))
+        if len(data_list) == 0:
+            continue
+        day_open_price = data_list[0]['open']
+        # 查1分钟收盘价
+        data_list2 = list(DBQuantAxis["future_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "code": item,
+            "type": "1min",
+            "time_stamp": {"$gte": start_date.timestamp()}
+        }) \
+            .sort("_id", pymongo.DESCENDING).limit(1))
+
+        if len(data_list2) == 0:
+            continue
+        min_close_price = data_list2[0]['close']
+
+        change = round((min_close_price - day_open_price) / day_open_price, 4)
+        change_item = {
+            'change': change,
+            'price': min_close_price
+        }
+        # print(item, '-> ', day_open_price, ' -> ', min_close_price)
+        change_list[item] = change_item
+    # print(change_list)
+    return change_list
+
+
 def app():
+    test_future_change_list()
     # testBus()
     # testPower()
     # testDynamicProfit()
@@ -1420,7 +1489,7 @@ def app():
     # testHuila()
     # testChange()
     # testTQ()
-    testRQ()
+    # testRQ()
     # testMonitor()
     # testThread()
     # testHuobi()

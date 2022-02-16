@@ -22,7 +22,7 @@ def stock_data():
     end_date = request.args.get("endDate")
     stopwatch = Stopwatch('/api/stock_data {} {}'.format(symbol, period, end_date))
     # result = get_data(symbol, period, end_date)
-    result = get_data_v2(symbol, period, end_date)
+    result = get_data_v2(symbol, period, end_date,0)
     stopwatch.stop()
     logging.info(stopwatch)
     return Response(json.dumps(result), mimetype='application/json')
@@ -95,7 +95,7 @@ def get_future_signal_list():
 # 获取涨跌幅信息
 @app.route('/api/get_change_list')
 def get_change_list():
-    changeListResult = func_timeout(30, businessService.getChangeList)
+    changeListResult = func_timeout(30, businessService.get_future_change_list)
     return Response(json.dumps(changeListResult), mimetype='application/json')
 
 

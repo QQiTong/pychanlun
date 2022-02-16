@@ -966,9 +966,9 @@ export default {
                             '笔': true,
                             '段': true,
                             '高级别段': true,
-                            'MA5': true,
-                            'MA21': true,
-                            'MA55': true,
+                            'MA5': false,
+                            'MA21': false,
+                            'MA55': false,
                             // 'markline': true
                         },
                         top: 10,
@@ -1197,7 +1197,7 @@ export default {
                             lineStyle: {
                                 normal: {
                                     opacity: 1,
-                                    type: 'dashed',
+                                    type: 'solid',
                                     width: 1,
                                     color: 'yellow'
                                 },
@@ -1759,7 +1759,7 @@ export default {
             for (let i = 0; i < jsonObj.buy_zs_huila.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_zs_huila.date[i], jsonObj.buy_zs_huila.data[i]],
-                    value: jsonObj.buy_zs_huila.data[i] + jsonObj.buy_zs_huila.tag[i],
+                    value: jsonObj.buy_zs_huila.data[i], // + jsonObj.buy_zs_huila.tag[i],
                     symbolRotate: -90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
@@ -1782,7 +1782,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_zs_huila.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_zs_huila.date[i], jsonObj.sell_zs_huila.data[i]],
-                    value: jsonObj.sell_zs_huila.data[i] + jsonObj.sell_zs_huila.tag[i],
+                    value: jsonObj.sell_zs_huila.data[i], // + + jsonObj.sell_zs_huila.tag[i],
                     symbolRotate: 90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
@@ -1853,7 +1853,7 @@ export default {
             for (let i = 0; i < jsonObj.buy_zs_tupo.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_zs_tupo.date[i], jsonObj.buy_zs_tupo.data[i]],
-                    value: jsonObj.buy_zs_tupo.data[i] + jsonObj.buy_zs_tupo.tag[i],
+                    value: jsonObj.buy_zs_tupo.data[i], // + + jsonObj.buy_zs_tupo.tag[i],
                     symbolRotate: 0,
                     symbol: 'arrow',
                     symbolSize: 30,
@@ -1878,7 +1878,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_zs_tupo.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_zs_tupo.date[i], jsonObj.sell_zs_tupo.data[i]],
-                    value: jsonObj.sell_zs_tupo.data[i] + jsonObj.sell_zs_tupo.tag[i],
+                    value: jsonObj.sell_zs_tupo.data[i] , // +jsonObj.sell_zs_tupo.tag[i],
                     symbolRotate: 180,
                     symbolSize: 30,
                     symbol: 'arrow',
@@ -1952,7 +1952,7 @@ export default {
             for (let i = 0; i < jsonObj.buy_v_reverse.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_v_reverse.date[i], jsonObj.buy_v_reverse.data[i]],
-                    value: jsonObj.buy_v_reverse.data[i] + jsonObj.buy_v_reverse.tag[i],
+                    value: jsonObj.buy_v_reverse.data[i], // +jsonObj.buy_v_reverse.tag[i],
                     symbolRotate: 0,
                     symbol: 'diamond',
                     symbolSize: 30,
@@ -1977,7 +1977,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_v_reverse.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_v_reverse.date[i], jsonObj.sell_v_reverse.data[i]],
-                    value: jsonObj.sell_v_reverse.data[i] + jsonObj.sell_v_reverse.tag[i],
+                    value: jsonObj.sell_v_reverse.data[i], // +jsonObj.sell_v_reverse.tag[i],
                     symbolRotate: 180,
                     symbolSize: 30,
                     symbol: 'diamond',
@@ -2053,7 +2053,7 @@ export default {
             for (let i = 0; i < jsonObj.buy_five_v_reverse.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_five_v_reverse.date[i], jsonObj.buy_five_v_reverse.data[i]],
-                    value: jsonObj.buy_five_v_reverse.data[i] + jsonObj.buy_five_v_reverse.tag[i],
+                    value: jsonObj.buy_five_v_reverse.data[i], // +jsonObj.buy_five_v_reverse.tag[i],
                     symbolRotate: 0,
                     symbol: 'diamond',
                     symbolSize: 30,
@@ -2078,7 +2078,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_five_v_reverse.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_five_v_reverse.date[i], jsonObj.sell_five_v_reverse.data[i]],
-                    value: jsonObj.sell_five_v_reverse.data[i] + jsonObj.sell_five_v_reverse.tag[i],
+                    value: jsonObj.sell_five_v_reverse.data[i], // +jsonObj.sell_five_v_reverse.tag[i],
                     symbolRotate: 180,
                     symbolSize: 30,
                     symbol: 'diamond',
@@ -2104,7 +2104,7 @@ export default {
             for (let i = 0; i < jsonObj.buy_duan_break.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_duan_break.date[i], jsonObj.buy_duan_break.data[i]],
-                    value: jsonObj.buy_duan_break.data[i] + jsonObj.buy_duan_break.tag[i],
+                    value: jsonObj.buy_duan_break.data[i], // +jsonObj.buy_duan_break.tag[i],
                     symbolRotate: 0,
                     symbol: 'circle',
                     symbolSize: 10,
@@ -2129,7 +2129,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_duan_break.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_duan_break.date[i], jsonObj.sell_duan_break.data[i]],
-                    value: jsonObj.sell_duan_break.data[i] + jsonObj.sell_duan_break.tag[i],
+                    value: jsonObj.sell_duan_break.data[i], // +jsonObj.sell_duan_break.tag[i],
                     symbolRotate: 180,
                     symbolSize: 10,
                     symbol: 'circle',

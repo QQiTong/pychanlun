@@ -15,7 +15,7 @@ from loguru import logger
 import pychanlun.entanglement as entanglement
 import pychanlun.placeholder as placeholder
 from pychanlun import Duan
-from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData, current_minute
+from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData, current_minute,get_future_data_v2
 from pychanlun.analysis.chanlun_data import ChanlunData
 from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
@@ -26,9 +26,12 @@ from pychanlun.helloquant.hq_tag.jcsc import find_jcsc_tags
 
 tz = pytz.timezone('Asia/Shanghai')
 
-
+'''
+monitor 1 监控， 0 复盘
+监控返回少量数据，复盘返回大量数据
+'''
 @func_set_timeout(120)
-def get_data_v2(symbol, period, end_date=None):
+def get_data_v2(symbol, period, end_date=None,monitor=1):
     required_period_list = get_required_period_list(period)[0:3]
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
     current_minute_holder = None
@@ -39,11 +42,12 @@ def get_data_v2(symbol, period, end_date=None):
     elif 'BTC' in symbol:
         get_instrument_data = getDigitCoinData
     else:
-        get_instrument_data = getFutureData
+        # get_instrument_data = getFutureData
+        get_instrument_data = get_future_data_v2
         current_minute_holder = current_minute
 
     # 取一分种的K线合成当日的K线
-    kline_data_1m = get_instrument_data(symbol, '1m', end_date, get_period_cache_stamp('1m'))
+    kline_data_1m = get_instrument_data(symbol, '1m', end_date, get_period_cache_stamp('1m'),monitor)
     now = datetime.datetime.now()
     day_bar = {}
     extra_day_bar = False
@@ -75,7 +79,7 @@ def get_data_v2(symbol, period, end_date=None):
     data_list = []
     required_period_list.reverse()
     for period_one in required_period_list:
-        kline_data = get_instrument_data(symbol, period_one, end_date, get_period_cache_stamp(period_one))
+        kline_data = get_instrument_data(symbol, period_one, end_date, get_period_cache_stamp(period_one),monitor)
         if kline_data is None or len(kline_data) == 0:
             continue
         if period_one == '1d':
@@ -127,7 +131,7 @@ def get_data_v2(symbol, period, end_date=None):
         )
     zs_data2, zs_flag2 = get_zhong_shu_data(entanglement_list2)
 
-    daily_data = get_instrument_data(symbol, "1d", end_date)
+    daily_data = get_instrument_data(symbol, "1d", end_date,monitor)
     daily_data = pd.DataFrame(daily_data)
     daily_data["time_str"] = daily_data["time"] \
         .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))

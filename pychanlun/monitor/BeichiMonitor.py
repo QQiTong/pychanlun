@@ -1302,10 +1302,10 @@ def run(**kwargs):
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     # symbol_list, dominant_symbol_info_list = getDominantSymbol()
-    symbol_list = config['symbolListIndex']
-    dominant_symbol_info_list = config['futureConfig']
-    symbol_list = symbol_list + global_future_symbol
-
+    # symbol_list = config['symbolListIndex']
+    # dominant_symbol_info_list = config['futureConfig']
+    # symbol_list = symbol_list + global_future_symbol
+    symbol_list = global_future_symbol
     logger.info("监控标的数量: {}".format(len(symbol_list)))
 
     stop_watch = Stopwatch("总监控耗时")

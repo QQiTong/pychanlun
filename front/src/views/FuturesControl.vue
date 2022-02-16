@@ -235,7 +235,7 @@
                                          {{
                                             ((changeList && changeList[scope.row.order_book_id] ?
                                                 changeList[scope.row.order_book_id]['change'] : 0) * (1 / (scope.row.margin_rate
-                                                + marginLevelCompany)) * 100).toFixed(1)
+                                                + marginLevelCompany)) * 100).toFixed(2)
                                         }}%
                                     </span>
                                     <span v-else :class="btcTicker.change>0?'up-red':'down-green'">
@@ -278,13 +278,13 @@
                                     <!--                                        class="mt-5"-->
                                     <!--                                    >-->
                                     <!--                                    </el-progress>-->
-                                    <span
-                                        :class="dayMa20List && dayMa20List[scope.row.order_book_id] ? (dayMa20List[scope.row.order_book_id]['above_ma_20']===1 ?'up-red':'down-green'):'zero-gray'"
-                                    >
-                                                                     {{
-                                            dayMa20List && dayMa20List[scope.row.order_book_id] ? dayMa20List[scope.row.order_book_id]['above_ma_20'] === 1 ? '上' : '下' : '--'
-                                        }}
-                                                                </span>
+<!--                                    <span-->
+<!--                                        :class="dayMa20List && dayMa20List[scope.row.order_book_id] ? (dayMa20List[scope.row.order_book_id]['above_ma_20']===1 ?'up-red':'down-green'):'zero-gray'"-->
+<!--                                    >-->
+<!--                                                                     {{-->
+<!--                                            dayMa20List && dayMa20List[scope.row.order_book_id] ? dayMa20List[scope.row.order_book_id]['above_ma_20'] === 1 ? '上' : '下' : '&#45;&#45;'-->
+<!--                                        }}-->
+<!--                                                                </span>-->
 
                                 </template>
                             </el-table-column>

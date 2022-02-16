@@ -16,7 +16,7 @@ from bson import ObjectId
 from bson.codec_options import CodecOptions
 
 from pychanlun.config import config
-from pychanlun.db import DBPyChanlun
+from pychanlun.db import DBPyChanlun, DBQuantAxis
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -61,7 +61,7 @@ class BusinessService:
         split = dateRange.split(",")
         startDate = split[0]
         endDate = split[1]
-        print("dateRange", split)
+        # print("dateRange", split)
         # test
         # startDate = '2020-03-29'
         # endDate = '2020-03-31'
@@ -129,7 +129,7 @@ class BusinessService:
                     for k in range(len(item[j])):
                         dynamic_win_sum = dynamic_win_sum + item[j][k]['stop_win_money']
             dynamic_win_list.append(int(dynamic_win_sum))
-        print(dynamic_win_list)
+        # print(dynamic_win_list)
 
         # 总保证金
         total_margin_list = []
@@ -141,7 +141,7 @@ class BusinessService:
             total_margin_sum = item_margin * item_amount
             # print("保证金\n",item_margin,"数量\n" ,item_amount,"总保证金\n",total_margin_sum.sum())
             total_margin_list.append(int(total_margin_sum.sum()))
-        print(total_margin_list)
+        # print(total_margin_list)
 
         # print(win_end_group_by_symbol.sum())
         # print(lose_end_group_by_symbol.sum())
@@ -230,7 +230,7 @@ class BusinessService:
                 else:
                     lose_end_holding_day_list[i] = lose_end_holding_day_list[i] + delta_days
                 count = count + 1
-        print(win_end_holding_day_list, lose_end_holding_day_list)
+        # print(win_end_holding_day_list, lose_end_holding_day_list)
 
         # 取整数
         win_money_list = list(sorted_win_money_list.dropna(axis=0))
@@ -319,7 +319,7 @@ class BusinessService:
             "huila_win_count": len(df_huila_win),
             "huila_lose_count": len(df_huila_lose),
             #
-            "huila_win_money": int(df_huila_win['win_end_money'].sum()),
+            "huila_win_money": int(df_huila_win['win_end_money'].sum()) if 'win_end_money' in df_huila_win else 0,
             "huila_lose_money": int(df_huila_win['lose_end_money'].sum()) if 'lose_end_money' in df_huila_win else 0,
 
             "break_win_count": len(df_break_win),
@@ -354,8 +354,9 @@ class BusinessService:
             "huila_win_lose_count_rate": round(len(df_huila_win) / (len(df_huila_lose) + len(df_huila_win)), 2) if len(
                 df_huila_lose) != 0 else 1,
             "huila_win_lose_money_rate": abs(
-                round(df_huila_win['win_end_money'].sum() / df_huila_lose['lose_end_money'].sum(), 2)) if df_huila_lose[
-                                                                                                              'lose_end_money'].sum() != 0 else 1,
+                round(df_huila_win['win_end_money'].sum() / df_huila_lose['lose_end_money'].sum(), 2))
+            if df_huila_lose['lose_end_money'].sum() != 0 and 'win_end_money' in df_huila_win
+            else 1,
 
             "break_win_lose_count_rate": round(len(df_break_win) / (len(df_break_lose) + len(df_break_win)), 2) if len(
                 df_break_lose) != 0 else 1,
@@ -523,38 +524,77 @@ class BusinessService:
         return symbolListMap
 
     # 获取涨跌幅数据
-    def getChangeList(self):
-        symbolChangeMap = {}
-        end = datetime.now() + timedelta(1)
-        # 周日weekday 6 取前2天 周一 weekday 0 取前3天
-        weekday = datetime.now().weekday()
-        if weekday == 0:
-            start = datetime.now() + timedelta(-3)
-        elif weekday == 6:
-            start = datetime.now() + timedelta(-2)
-        else:
-            start = datetime.now() + timedelta(-1)
-        symbolList = copy.deepcopy(config['symbolListIndex'])
-        for i in range(len(symbolList)):
-            item = symbolList[i]
-            df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-                                start_date=start, end_date=end)
-            if df1d is None:
+    # def get_future_change_list(self):
+    #     symbolChangeMap = {}
+    #     end = datetime.now() + timedelta(1)
+    #     # 周日weekday 6 取前2天 周一 weekday 0 取前3天
+    #     weekday = datetime.now().weekday()
+    #     if weekday == 0:
+    #         start = datetime.now() + timedelta(-3)
+    #     elif weekday == 6:
+    #         start = datetime.now() + timedelta(-2)
+    #     else:
+    #         start = datetime.now() + timedelta(-1)
+    #     symbolList = copy.deepcopy(config['symbolListIndex'])
+    #     for i in range(len(symbolList)):
+    #         item = symbolList[i]
+    #         df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+    #                             start_date=start, end_date=end)
+    #         if df1d is None:
+    #             continue
+    #         df1m = rq.current_minute(item)
+    #         today = df1m.iloc[0]['close']
+    #         if df1d is None:
+    #             change = "--"
+    #         else:
+    #             preday = df1d.iloc[0, 3]
+    #             change = round(((today - preday) / preday), 4)
+    #             # print("debug-", item, preday, today, change)
+    #         resultItem = {'change': change, 'price': today}
+    #         symbolChangeMap[item] = resultItem
+    #     globalChangeList = self.getGlobalFutureChangeList()
+    #     conbineChangeList = dict(symbolChangeMap, **globalChangeList)
+    #     # print("涨跌幅信息", symbolChangeMap)
+    #     return conbineChangeList
+
+    def get_future_change_list(self):
+        end = datetime.now() - timedelta(1)
+        end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+        start_date = end + timedelta(-1)
+        # print("->",start_date,end)
+        symbol_list = config['symbolList']
+        change_list = {}
+        for i in range(len(symbol_list)):
+            item = symbol_list[i] + "L9"
+            # 查日线开盘价
+            data_list = list(
+                DBQuantAxis["future_day"].find({"code": item}).sort("_id", pymongo.DESCENDING).limit(1))
+            if len(data_list) == 0:
                 continue
-            df1m = rq.current_minute(item)
-            today = df1m.iloc[0]['close']
-            if df1d is None:
-                change = "--"
-            else:
-                preday = df1d.iloc[0, 3]
-                change = round(((today - preday) / preday), 4)
-                # print("debug-", item, preday, today, change)
-            resultItem = {'change': change, 'price': today}
-            symbolChangeMap[item] = resultItem
-        globalChangeList = self.getGlobalFutureChangeList()
-        conbineChangeList = dict(symbolChangeMap, **globalChangeList)
-        # print("涨跌幅信息", symbolChangeMap)
-        return conbineChangeList
+            day_open_price = data_list[0]['open']
+            # 查1分钟收盘价
+            data_list2 = list(DBQuantAxis["future_min"] \
+                              .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+                              .find({
+                "code": item,
+                "type": "1min",
+                "time_stamp": {"$gte": start_date.timestamp()}
+            }) \
+                              .sort("_id", pymongo.DESCENDING).limit(1))
+
+            if len(data_list2) == 0:
+                continue
+            min_close_price = data_list2[0]['close']
+
+            change = round((min_close_price - day_open_price) / day_open_price, 4)
+            change_item = {
+                'change': change,
+                'price': min_close_price
+            }
+            # print(item, '-> ', day_open_price, ' -> ', min_close_price)
+            change_list[item] = change_item
+        # print(change_list)
+        return change_list
 
     def calc_ma(self, close_list, day):
         ma = QA.MA(pd.Series(close_list), day)
@@ -563,24 +603,25 @@ class BusinessService:
 
     # 获取内盘 20日 均线
     def get_day_ma_list(self):
-        symbol_ma_20_map = {}
-        symbolList = copy.deepcopy(config['symbolListIndex'])
-        for i in range(len(symbolList)):
-            item = symbolList[i]
-            end = datetime.now() + timedelta(1)
-            start = datetime.now() + timedelta(-40)
-            df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-                                start_date=start, end_date=end)
-            day_close = list(df1d['close'])
-            df1m = rq.current_minute(item)
-            current_price = df1m.iloc[0]['close']
-            day_ma_20 = self.calc_ma(day_close, 21)[-1]
-            # todo  这里用 True 和 False  无法序列化
-            result_item = {'above_ma_20': 1 if current_price >= day_ma_20 else -1}
-            symbol_ma_20_map[item] = result_item
-        global_day_ma_list = self.get_global_day_ma_list()
-        conbine_day_ma_list = dict(symbol_ma_20_map, **global_day_ma_list)
-        return conbine_day_ma_list
+        return
+        # symbol_ma_20_map = {}
+        # symbolList = copy.deepcopy(config['symbolListIndex'])
+        # for i in range(len(symbolList)):
+        #     item = symbolList[i]
+        #     end = datetime.now() + timedelta(1)
+        #     start = datetime.now() + timedelta(-40)
+        #     df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
+        #                         start_date=start, end_date=end)
+        #     day_close = list(df1d['close'])
+        #     df1m = rq.current_minute(item)
+        #     current_price = df1m.iloc[0]['close']
+        #     day_ma_20 = self.calc_ma(day_close, 21)[-1]
+        #     # todo  这里用 True 和 False  无法序列化
+        #     result_item = {'above_ma_20': 1 if current_price >= day_ma_20 else -1}
+        #     symbol_ma_20_map[item] = result_item
+        # global_day_ma_list = self.get_global_day_ma_list()
+        # conbine_day_ma_list = dict(symbol_ma_20_map, **global_day_ma_list)
+        # return conbine_day_ma_list
 
     # 获取外盘20日均线
     def get_global_day_ma_list(self):
