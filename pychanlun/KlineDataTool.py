@@ -462,7 +462,7 @@ def getGlobalFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().
     else:
         end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-    timeDeltaMap = {
+    time_delta_map = {
         '1m': -3,
         '3m': -3 * 3,
         '5m': -3 * 5,
