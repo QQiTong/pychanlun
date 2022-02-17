@@ -219,6 +219,64 @@ export default {
                 count: 0,
                 stopRate: 0,
                 perOrderStopMoney: 0
+            },
+            echartZoomEnd: 55
+        }
+    },
+    created() {
+        console.log("created")
+        let that = this;
+        document.onkeydown = function (e) {
+            let page_up = 33
+            let page_down = 34
+            let arrow_up = 38
+            let arrow_down = 40
+            let arrow_left = 37
+            let arrow_right = 39
+
+            let key = window.event.keyCode;
+            if (key === page_down) {
+                that.onPgUpDnChangeSymbol(1)
+            } else if (key === page_up) {
+                that.onPgUpDnChangeSymbol(-1)
+            } else if (key === arrow_up) {
+                // 缩小显示范围，放大K线
+                console.log("arrow_up")
+                if (that.echartZoomEnd > 25) {
+                    that.echartZoomEnd -= 10
+                }
+                // 大图
+                if (that.period !== '') {
+                    that.myChart.dispatchAction({
+                        type: 'dataZoom',
+                        end: that.echartZoomEnd,
+                    });
+                } else {
+                     that.dispatchMultiEchartsEvent()
+                }
+
+            } else if (key === arrow_down) {
+                // 放大显示范围，缩小K线
+                if (that.echartZoomEnd < 100) {
+                    that.echartZoomEnd += 10
+                }
+                console.log("arrow_down", that.myChart)
+                if (that.period !== '') {
+                    that.myChart.dispatchAction({
+                        type: 'dataZoom',
+                        start: 0,
+                        end: that.echartZoomEnd,
+                    });
+                } else {
+                    that.dispatchMultiEchartsEvent()
+                }
+
+            } else if (key === arrow_left) {
+                console.log("arrow_left")
+                that.quickSwitchDay('pre')
+            } else if (key === arrow_right) {
+                console.log("arrow_right")
+                that.quickSwitchDay('next')
             }
         }
     },
@@ -276,7 +334,55 @@ export default {
     beforeDestroy() {
         clearTimeout(this.timer)
     },
+
     methods: {
+        dispatchMultiEchartsEvent() {
+            this.myChart1d.dispatchAction({
+                type: 'dataZoom',
+                end: this.echartZoomEnd,
+            });
+            this.myChart5.dispatchAction({
+                type: 'dataZoom',
+                end: this.echartZoomEnd,
+            });
+            this.myChart15.dispatchAction({
+                type: 'dataZoom',
+                end: this.echartZoomEnd,
+            });
+            this.myChart30.dispatchAction({
+                type: 'dataZoom',
+                end: this.echartZoomEnd,
+            });
+            this.myChart60.dispatchAction({
+                type: 'dataZoom',
+                end: this.echartZoomEnd,
+            });
+            this.myChart240.dispatchAction({
+                type: 'dataZoom',
+                end: this.echartZoomEnd,
+            });
+        },
+        onPgUpDnChangeSymbol(direction) {
+            let nextIndex = 0
+            for (let currentIndex = 0; currentIndex < this.futureSymbolList.length; currentIndex++) {
+                if (this.symbol === this.futureSymbolList[currentIndex].order_book_id) {
+                    if (direction === 1) {
+                        nextIndex = currentIndex + 1
+                    } else {
+                        nextIndex = currentIndex - 1
+                    }
+
+                    if (nextIndex === this.futureSymbolList.length) {
+                        nextIndex = 0
+                    } else if (nextIndex === -1) {
+                        nextIndex = this.futureSymbolList.length - 1
+                    }
+                }
+            }
+            // console.log("下一个索引", nextIndex)
+            this.symbol = this.futureSymbolList[nextIndex].order_book_id
+            this.quickSwitchSymbol(this.symbol)
+        },
         getDominantSymbol() {
             futureApi.getDominant().then(res => {
                 console.log('获取主力合约:', res)
@@ -332,6 +438,8 @@ export default {
         initEcharts() {
             //  大图只显示选中的k线图
             if (this.period !== '') {
+                console.log("初始化大图")
+
                 // this.endDate = this.getParams('endDate')
                 this.myChart = this.$echarts.init(document.getElementById('main'))
                 this.chartssize(document.getElementById('mainParent'),
@@ -341,6 +449,7 @@ export default {
                     this.myChart.resize()
                 })
             } else {
+                console.log("初始化小图")
                 this.myChart1d = this.$echarts.init(document.getElementById('main1d'))
                 this.myChart5 = this.$echarts.init(document.getElementById('main5'))
                 this.myChart15 = this.$echarts.init(document.getElementById('main15'))
@@ -534,7 +643,9 @@ export default {
                 this.contractMultiplier = this.symbolInfo.contract_multiplier
             } else {
                 // 内盘 期货简单代码   RB
-                let simpleSymbol = this.symbol.replace(/[0-9]/g, '')
+                // let simpleSymbol = this.symbol.replace(/[0-9]/g, '')
+                let simpleSymbol = this.symbol.slice(0, -2)
+                // console.log("切换",simpleSymbol)
                 this.symbolInfo = this.futureConfig[simpleSymbol]
                 const margin_rate = this.symbolInfo.margin_rate
                 this.currentMarginRate = margin_rate + this.marginLevelCompany
@@ -700,7 +811,6 @@ export default {
 
         draw(stockJsonData, update, period) {
             let that = this
-            let zoomStart = 55
             const resultData = this.splitData(stockJsonData, period)
             let dataTitle = that.symbol + '  ' + period
             let subText = '杠杆: ' + this.marginLevel + ' 保证金: ' + this.marginPrice + ' 乘数: ' + this.contractMultiplier +
@@ -734,7 +844,7 @@ export default {
             // else if (period === '1d') {
             //     currentChart = myChart1d
             // }
-           let specialMA5 = 5
+            let specialMA5 = 5
             let specialMA21 = 21
             let specialMA55 = 55
             let _5base = 5
@@ -745,7 +855,7 @@ export default {
             // 内盘 每天交易时间 6小时， 外盘交易时间24小时  ,
             if (this.globalFutureSymbol.indexOf(this.symbol) !== -1) {
                 // ZM ZS ZL NID ZSD 是18小时 其它24小时
-                let _18HourSymbolList = ['S', 'SM', 'BO', 'NID', 'ZSD','CT']
+                let _18HourSymbolList = ['S', 'SM', 'BO', 'NID', 'ZSD', 'CT']
                 if (_18HourSymbolList.indexOf(this.symbol) !== -1) {
                     baseHour = 18
                 } else {
@@ -984,12 +1094,12 @@ export default {
                             height: '57%',
                             top: 50,
                         },
-                        // {
-                        //     top: '65%',
-                        //     height: '20%',
-                        //     left: '0%',
-                        //     right: '10%',
-                        // },
+                        {
+                            top: '65%',
+                            height: '20%',
+                            left: '0%',
+                            right: '10%',
+                        },
                         // {
                         //     top: '80%',
                         //     height: '15%',
@@ -1118,9 +1228,9 @@ export default {
                         {
                             type: 'inside',
                             xAxisIndex: [0, 0],
-                            start: 55,
+                            start: 0,
                             end: 100,
-                            minSpan: 10,
+                            // minSpan: 10,
                         },
                         // {
                         //     type: 'inside',
@@ -1130,31 +1240,31 @@ export default {
                         //     minSpan: 10,
                         // },
                         // {
-                        //     xAxisIndex: [0, 1, 2],
+                        //     xAxisIndex: [0, 1],
                         //     type: 'inside',
                         //     start: 55,
                         //     end: 100,
                         //     // top: '95%',
                         //     minSpan: 10,
-                        //     // textStyle: {
-                        //     //     color: '#8392A5'
-                        //     // },
-                        //     // dataBackground: {
-                        //     //     areaStyle: {
-                        //     //         color: '#8392A5'
-                        //     //     },
-                        //     //     lineStyle: {
-                        //     //         opacity: 0.8,
-                        //     //         color: '#8392A5'
-                        //     //     }
-                        //     // },
-                        //     // handleStyle: {
-                        //     //     color: '#fff',
-                        //     //     shadowBlur: 3,
-                        //     //     shadowColor: 'rgba(0, 0, 0, 0.6)',
-                        //     //     shadowOffsetX: 2,
-                        //     //     shadowOffsetY: 2
-                        //     // }
+                        //     textStyle: {
+                        //         color: '#8392A5'
+                        //     },
+                        //     dataBackground: {
+                        //         areaStyle: {
+                        //             color: '#8392A5'
+                        //         },
+                        //         lineStyle: {
+                        //             opacity: 0.8,
+                        //             color: '#8392A5'
+                        //         }
+                        //     },
+                        //     handleStyle: {
+                        //         color: '#fff',
+                        //         shadowBlur: 3,
+                        //         shadowColor: 'rgba(0, 0, 0, 0.6)',
+                        //         shadowOffsetX: 2,
+                        //         shadowOffsetY: 2
+                        //     }
                         //
                         // }
                     ],
@@ -1878,7 +1988,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_zs_tupo.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_zs_tupo.date[i], jsonObj.sell_zs_tupo.data[i]],
-                    value: jsonObj.sell_zs_tupo.data[i] , // +jsonObj.sell_zs_tupo.tag[i],
+                    value: jsonObj.sell_zs_tupo.data[i], // +jsonObj.sell_zs_tupo.tag[i],
                     symbolRotate: 180,
                     symbolSize: 30,
                     symbol: 'arrow',

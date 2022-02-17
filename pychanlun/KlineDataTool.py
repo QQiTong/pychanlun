@@ -9,7 +9,7 @@ import pandas as pd
 import pymongo
 import pytz
 import requests
-from QUANTAXIS.QAData.data_resample import QA_data_stockmin_resample, QA_data_day_resample, QA_data_futuremin_resample
+from QUANTAXIS.QAData.data_resample import QA_data_stockmin_resample, QA_data_day_resample, QA_data_futuremin_resample,QA_data_futuremin_resample_tb_kq
 from bson.codec_options import CodecOptions
 
 from pychanlun.db import DBPyChanlun
@@ -249,7 +249,7 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
     #         lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
     #     kline_data['volume'] = kline_data['trade'] * 100
     #     # todo 转180m 报错 AttributeError: 'RangeIndex' object has no attribute 'indexer_between_time'
-    #     kline_data = QA_data_futuremin_resample(kline_data, 180)
+    #     kline_data = QA_data_futuremin_resample(kline_data, '180min')
     #     kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
     #     kline_data.set_index('datetime', drop=False, inplace=True)
 
