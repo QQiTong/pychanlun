@@ -553,6 +553,57 @@ export default {
                         this.myChart240.resize()
                     }
                 })
+
+                // 监听点击事件
+                this.myChart1d.on('click', function (params) {
+                    if (params.componentType === 'markPoint') {
+                        if (params.seriesIndex === 0) {
+                            that.positionNotify(params)
+                        }
+                    }
+                });
+                this.myChart5.on('click', function (params) {
+                    if (params.componentType === 'markPoint') {
+                        if (params.seriesIndex === 0) {
+                            that.positionNotify(params)
+                        }
+                    }
+                });
+                this.myChart15.on('click', function (params) {
+                    if (params.componentType === 'markPoint') {
+                        if (params.seriesIndex === 0) {
+                            that.positionNotify(params)
+                        }
+                    }
+                });
+                this.myChart30.on('click', function (params) {
+                    if (params.componentType === 'markPoint') {
+                        if (params.seriesIndex === 0) {
+                            that.positionNotify(params)
+                        }
+                    }
+                });
+                this.myChart60.on('click', function (params) {
+                    if (params.componentType === 'markPoint') {
+                        if (params.seriesIndex === 0) {
+                            that.positionNotify(params)
+                        }
+                    }
+                });
+                this.myChart1d.on('click', function (params) {
+                    if (params.componentType === 'markPoint') {
+                        if (params.seriesIndex === 0) {
+                            that.positionNotify(params)
+                        }
+                    }
+                });
+                this.myChart240.on('click', function (params) {
+                    if (params.componentType === 'markPoint') {
+                        if (params.seriesIndex === 0) {
+                            that.positionNotify(params)
+                        }
+                    }
+                });
             }
         },
         // 计算echarts 高度
