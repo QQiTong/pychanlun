@@ -335,6 +335,56 @@ export default {
     },
 
     methods: {
+        positionNotify(params) {
+            console.log(params)
+            this.quickCalc.openPrice = params.data.value
+            this.quickCalc.stopPrice = params.data.stop_lose_price
+            this.quickCalcMaxCount()
+            // 合约乘数
+            let multiInfo = this.symbolInfo.contract_multiplier
+            // 1倍到5倍盈亏比
+            let firstBlood = 0
+            let doubleKill = 0
+            let tribleKill = 0
+            let quadroKill = 0
+            let pentaKill = 0
+            let longShort = -1
+            // 判断多空
+            if (this.quickCalc.openPrice < this.quickCalc.stopPrice) {
+                longShort = -1
+                // 空单
+                firstBlood = this.quickCalc.openPrice - (this.quickCalc.stopPrice - this.quickCalc.openPrice)
+                doubleKill = this.quickCalc.openPrice - (this.quickCalc.stopPrice - this.quickCalc.openPrice) * 2
+                tribleKill = this.quickCalc.openPrice - (this.quickCalc.stopPrice - this.quickCalc.openPrice) * 3
+                quadroKill = this.quickCalc.openPrice - (this.quickCalc.stopPrice - this.quickCalc.openPrice) * 4
+                pentaKill = this.quickCalc.openPrice - (this.quickCalc.stopPrice - this.quickCalc.openPrice) * 5
+            } else {
+                // 多单
+                longShort = 1
+                firstBlood = this.quickCalc.openPrice + (this.quickCalc.openPrice - this.quickCalc.stopPrice)
+                doubleKill = this.quickCalc.openPrice + (this.quickCalc.openPrice - this.quickCalc.stopPrice) * 2
+                tribleKill = this.quickCalc.openPrice + (this.quickCalc.openPrice - this.quickCalc.stopPrice) * 3
+                quadroKill = this.quickCalc.openPrice + (this.quickCalc.openPrice - this.quickCalc.stopPrice) * 4
+                pentaKill = this.quickCalc.openPrice + (this.quickCalc.openPrice - this.quickCalc.stopPrice) * 5
+            }
+            const h = this.$createElement
+            this.$notify({
+                title: '信号详情',
+                type: longShort === -1 ? "success" : "error",
+                duration: 10 * 1000,
+                dangerouslyUseHTMLString: true,
+                message: "开仓手数 " + this.quickCalc.count + " 手<br/>" +
+                    "占用保证金 " + (this.quickCalc.count * this.symbolInfo.margin_rate * this.quickCalc.openPrice * multiInfo).toFixed(0) + " 元" + "<br/>" +
+                    "止损率 " + (this.quickCalc.stopRate * 100).toFixed(0) + "%" + "<br/>" +
+                    "每手止损 " + this.quickCalc.perOrderStopMoney + " 元" + "<br/>" +
+                    "总止损 " + (this.quickCalc.perOrderStopMoney * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
+                    "1倍盈亏比目标位 " + firstBlood.toFixed(0) + " 盈利 " + (Math.abs(firstBlood - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
+                    "2倍盈亏比目标位 " + doubleKill.toFixed(0) + " 盈利 " + (Math.abs(doubleKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
+                    "3倍盈亏比目标位 " + tribleKill.toFixed(0) + " 盈利 " + (Math.abs(tribleKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
+                    "4倍盈亏比目标位 " + quadroKill.toFixed(0) + " 盈利 " + (Math.abs(quadroKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
+                    "5倍盈亏比目标位 " + pentaKill.toFixed(0) + " 盈利 " + (Math.abs(pentaKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>"
+            })
+        },
         dispatchMultiEchartsEvent() {
             this.myChart1d.dispatchAction({
                 type: 'dataZoom',
@@ -435,6 +485,7 @@ export default {
             })
         },
         initEcharts() {
+            let that = this
             //  大图只显示选中的k线图
             if (this.period !== '') {
                 // this.endDate = this.getParams('endDate')
@@ -450,8 +501,8 @@ export default {
                     if (params.componentType === 'markPoint') {
                         // 点击到了 markPoint 上
                         if (params.seriesIndex === 0) {
-
-                            console.log("点击到了 index 为 0 的 series 的 markPoint 上。", params)
+                            console.log("点击到了 index 为 0 的 series 的 markPoint 上。")
+                            that.positionNotify(params)
                         }
                     } else if (params.componentType === 'series') {
                         if (params.seriesType === 'graph') {
@@ -1885,7 +1936,9 @@ export default {
             for (let i = 0; i < jsonObj.buy_zs_huila.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_zs_huila.date[i], jsonObj.buy_zs_huila.data[i]],
-                    value: jsonObj.buy_zs_huila.data[i] + "|" + jsonObj.buy_zs_huila.stop_lose_price[i] + "|" + jsonObj.buy_zs_huila.stop_win_price[i],
+                    value: jsonObj.buy_zs_huila.data[i],
+                    stop_lose_price: jsonObj.buy_zs_huila.stop_lose_price[i],
+                    stop_win_price: jsonObj.buy_zs_huila.stop_win_price[i],
                     symbolRotate: -90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
@@ -1908,7 +1961,9 @@ export default {
             for (let i = 0; i < jsonObj.sell_zs_huila.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_zs_huila.date[i], jsonObj.sell_zs_huila.data[i]],
-                    value: jsonObj.sell_zs_huila.data[i] + "|" + jsonObj.sell_zs_huila.stop_lose_price[i] + "|" + jsonObj.sell_zs_huila.stop_win_price[i],
+                    value: jsonObj.sell_zs_huila.data[i],
+                    stop_lose_price: jsonObj.sell_zs_huila.stop_lose_price[i],
+                    stop_win_price: jsonObj.sell_zs_huila.stop_win_price[i],
                     symbolRotate: 90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
@@ -1980,6 +2035,8 @@ export default {
                 let value = {
                     coord: [jsonObj.buy_zs_tupo.date[i], jsonObj.buy_zs_tupo.data[i]],
                     value: jsonObj.buy_zs_tupo.data[i], // + + jsonObj.buy_zs_tupo.tag[i],
+                    stop_lose_price: jsonObj.buy_zs_tupo.stop_lose_price[i],
+                    stop_win_price: jsonObj.buy_zs_tupo.stop_win_price[i],
                     symbolRotate: 0,
                     symbol: 'arrow',
                     symbolSize: 30,
@@ -2005,6 +2062,8 @@ export default {
                 let value = {
                     coord: [jsonObj.sell_zs_tupo.date[i], jsonObj.sell_zs_tupo.data[i]],
                     value: jsonObj.sell_zs_tupo.data[i], // +jsonObj.sell_zs_tupo.tag[i],
+                    stop_lose_price: jsonObj.sell_zs_tupo.stop_lose_price[i],
+                    stop_win_price: jsonObj.sell_zs_tupo.stop_win_price[i],
                     symbolRotate: 180,
                     symbolSize: 30,
                     symbol: 'arrow',
@@ -2079,6 +2138,8 @@ export default {
                 let value = {
                     coord: [jsonObj.buy_v_reverse.date[i], jsonObj.buy_v_reverse.data[i]],
                     value: jsonObj.buy_v_reverse.data[i], // +jsonObj.buy_v_reverse.tag[i],
+                    stop_lose_price: jsonObj.buy_v_reverse.stop_lose_price[i],
+                    stop_win_price: jsonObj.buy_v_reverse.stop_win_price[i],
                     symbolRotate: 0,
                     symbol: 'diamond',
                     symbolSize: 30,
@@ -2104,6 +2165,8 @@ export default {
                 let value = {
                     coord: [jsonObj.sell_v_reverse.date[i], jsonObj.sell_v_reverse.data[i]],
                     value: jsonObj.sell_v_reverse.data[i], // +jsonObj.sell_v_reverse.tag[i],
+                    stop_lose_price: jsonObj.sell_v_reverse.stop_lose_price[i],
+                    stop_win_price: jsonObj.sell_v_reverse.stop_win_price[i],
                     symbolRotate: 180,
                     symbolSize: 30,
                     symbol: 'diamond',
@@ -2180,6 +2243,8 @@ export default {
                 let value = {
                     coord: [jsonObj.buy_five_v_reverse.date[i], jsonObj.buy_five_v_reverse.data[i]],
                     value: jsonObj.buy_five_v_reverse.data[i], // +jsonObj.buy_five_v_reverse.tag[i],
+                    stop_lose_price: jsonObj.buy_five_v_reverse.stop_lose_price[i],
+                    stop_win_price: jsonObj.buy_five_v_reverse.stop_win_price[i],
                     symbolRotate: 0,
                     symbol: 'diamond',
                     symbolSize: 30,
@@ -2205,6 +2270,8 @@ export default {
                 let value = {
                     coord: [jsonObj.sell_five_v_reverse.date[i], jsonObj.sell_five_v_reverse.data[i]],
                     value: jsonObj.sell_five_v_reverse.data[i], // +jsonObj.sell_five_v_reverse.tag[i],
+                    stop_lose_price: jsonObj.sell_five_v_reverse.stop_lose_price[i],
+                    stop_win_price: jsonObj.sell_five_v_reverse.stop_win_price[i],
                     symbolRotate: 180,
                     symbolSize: 30,
                     symbol: 'diamond',
@@ -2231,6 +2298,8 @@ export default {
                 let value = {
                     coord: [jsonObj.buy_duan_break.date[i], jsonObj.buy_duan_break.data[i]],
                     value: jsonObj.buy_duan_break.data[i], // +jsonObj.buy_duan_break.tag[i],
+                    stop_lose_price: jsonObj.buy_duan_break.stop_lose_price[i],
+                    stop_win_price: jsonObj.buy_duan_break.stop_win_price[i],
                     symbolRotate: 0,
                     symbol: 'circle',
                     symbolSize: 10,
@@ -2256,6 +2325,8 @@ export default {
                 let value = {
                     coord: [jsonObj.sell_duan_break.date[i], jsonObj.sell_duan_break.data[i]],
                     value: jsonObj.sell_duan_break.data[i], // +jsonObj.sell_duan_break.tag[i],
+                    stop_lose_price: jsonObj.sell_duan_break.stop_lose_price[i],
+                    stop_win_price: jsonObj.sell_duan_break.stop_win_price[i],
                     symbolRotate: 180,
                     symbolSize: 10,
                     symbol: 'circle',
