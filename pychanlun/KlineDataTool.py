@@ -22,41 +22,219 @@ zbUrl = "http://api.zb.center/data/v1/kline?market=btc_usdt&type=1day"
 
 
 @lru_cache(maxsize=128)
-def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
-    # t = time.time()
-    # timeStamp = int(round(t * 1000))
-    # headers = {
-    #     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36",
-    #     "Accept": "application/json",
-    #     "App-Type": "web",
-    #     "Referer": "https://www.okex.me/derivatives/swap/full/usdt-btc"}
-    #
-    # payload = {
-    #     'granularity': period,
-    #     'size': 1000,
-    #     't': timeStamp
-    # }
-    # r = requests.get(okexUrl, params=payload, headers=headers, timeout=(15, 15))
-    periodMap = {
-        '1m': '1min',
-        '3m': '3min',
-        '5m': '5min',
-        '15m': '15min',
-        '60m': '1hour',
-        '30m': '30min',
-        '180m': '2hour',
-        '1d': '1day',
-        '3d': '3day',
-        '1w': '1week'
+def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()),monitor=1):
+    if endDate is None or endDate == "":
+        end = datetime.now() + timedelta(1)
+    else:
+        end = datetime.strptime(endDate, "%Y-%m-%d")
+    end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+    time_delta_map = {
+        '1m': -5,
+        '3m': -5 * 3,
+        '5m': -5 * 5,
+        '15m': -5 * 15,
+        '30m': -5 * 30,
+        '60m': -5 * 60,
+        '180m': -5 * 180,
+        '240m': -5 * 180,
+        '1d': -1000,
+        '3d': -3000
     }
-    url = "http://api.zb.center/data/v1/kline?market=btc_usdt&type=%s" % (periodMap[period])
-    r = requests.get(url, timeout=(15, 15))
-    data_list = json.loads(r.text)['data']
-    df = pd.DataFrame(list(data_list), columns=['time', 'open', 'high', 'low', 'close', 'volume'])
-    df['time'] = df['time'].apply(lambda value: int(value / 1000))
-    df.fillna(0, inplace=True)
-    return df
+    if monitor == 0:
+        time_delta_map = {
+            '1m': -25,
+            '3m': -25 * 3,
+            '5m': -25 * 30,
+            '15m': -25 * 15,
+            '30m': -25 * 30,
+            '60m': -25 * 60,
+            '180m': -5 * 180,
+            '1d': -1000,
+            '3d': -1000
+        }
+    start_date = end + timedelta(time_delta_map[period])
+    code = "OKEX.BTC-USDT"
+    if period == "1m":
+        data_list = DBQuantAxis["cryptocurrency_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "symbol": code,
+            "type": "1min",
+            "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+        }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
+        kline_data = pd.DataFrame(data_list)
+        kline_data['time'] = kline_data['time_stamp']
+        process_ohlc_str(kline_data)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        kline_data.set_index('datetime', drop=False, inplace=True)
+    elif period == "3m":
+        data_list = DBQuantAxis["cryptocurrency_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "symbol": code,
+            "type": "1min",
+            "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+        }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
+        kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        kline_data = QA_data_stockmin_resample(kline_data, 3)
+        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+        process_ohlc_str(kline_data)
+        kline_data.set_index('datetime', drop=False, inplace=True)
+    elif period == "5m":
+        data_list = DBQuantAxis["cryptocurrency_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "symbol": code,
+            "type": "5min",
+            "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+        }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
+        kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        kline_data['time'] = kline_data['time_stamp']
+        process_ohlc_str(kline_data)
+        kline_data.set_index('datetime', drop=False, inplace=True)
+    elif period == "15m":
+        data_list = DBQuantAxis["cryptocurrency_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "symbol": code,
+            "type": "15min",
+            "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+        }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
+        kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        kline_data['time'] = kline_data['time_stamp']
+        process_ohlc_str(kline_data)
+        kline_data.set_index('datetime', drop=False, inplace=True)
+    elif period == "30m":
+        data_list = DBQuantAxis["cryptocurrency_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "symbol": code,
+            "type": "30min",
+            "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+        }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
+        kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        kline_data['time'] = kline_data['time_stamp']
+        process_ohlc_str(kline_data)
+        kline_data.set_index('datetime', drop=False, inplace=True)
+    elif period == "60m":
+        data_list = DBQuantAxis["cryptocurrency_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "symbol": code,
+            "type": "60min",
+            "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+        }) \
+            .sort("_id", pymongo.ASCENDING)
 
+        data_list = list(data_list)
+
+        if len(data_list) == 0:
+            return None
+        kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        kline_data['time'] = kline_data['time_stamp']
+        process_ohlc_str(kline_data)
+        kline_data.set_index('datetime', drop=False, inplace=True)
+    # elif period == "180m":
+    #     data_list = DBQuantAxis["cryptocurrency_min"] \
+    #         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+    #         .find({
+    #         "type":"60min",
+    #         "symbol": code,
+    #         "date_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+    #     }) \
+    #         .sort("_id", pymongo.ASCENDING)
+    #     data_list = list(data_list)
+    #     if len(data_list) == 0:
+    #         return None
+    #     kline_data = pd.DataFrame(data_list)
+    #     kline_data['datetime'] = kline_data['datetime'].apply(
+    #         lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+    #     kline_data['volume'] = kline_data['trade'] * 100
+    #     # todo 转180m 报错 AttributeError: 'RangeIndex' object has no attribute 'indexer_between_time'
+    #     kline_data = QA_data_futuremin_resample(kline_data, '180min')
+    #     kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+    #     kline_data.set_index('datetime', drop=False, inplace=True)
+
+    elif period == "180m" or period == "240m" or period == "1d":
+        data_list = DBQuantAxis["cryptocurrency_day"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "symbol": code,
+            "date_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+        }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
+        kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['date'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d"))
+        kline_data['time'] = kline_data['date_stamp']
+        process_ohlc_str(kline_data)
+        kline_data.set_index('datetime', drop=False, inplace=True)
+    elif period == "3d":
+        data_list = DBQuantAxis["cryptocurrency_day"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "symbol": code,
+            "date_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+        }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
+        kline_data = pd.DataFrame(data_list)
+        kline_data['date'] = kline_data['date'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d"))
+        # kline_data['volume'] = kline_data['trade'] * 100
+
+
+        kline_data['code'] = kline_data['symbol']
+        kline_data = QA_data_day_resample(kline_data, "w")
+        kline_data['datetime'] = kline_data.index
+        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+        kline_data.set_index('datetime', drop=False, inplace=True)
+    kline_data.fillna(0, inplace=True)
+    return kline_data
+'''
+由于BTC从数据库中取出的ohlc都是字符串类型，将其转为float
+'''
+def process_ohlc_str(kline_data):
+    kline_data['open'] = kline_data['open'].apply(lambda value: float(value))
+    kline_data['high'] = kline_data['high'].apply(lambda value: float(value))
+    kline_data['low'] = kline_data['low'].apply(lambda value: float(value))
+    kline_data['close'] = kline_data['close'].apply(lambda value: float(value))
 
 @lru_cache(maxsize=128)
 def getFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
@@ -293,7 +471,7 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
 
 
 @lru_cache(maxsize=128)
-def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
+def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()),monitor=1):
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:

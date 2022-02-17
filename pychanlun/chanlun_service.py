@@ -131,7 +131,7 @@ def get_data_v2(symbol, period, end_date=None,monitor=1):
         )
     zs_data2, zs_flag2 = get_zhong_shu_data(entanglement_list2)
 
-    daily_data = get_instrument_data(symbol, "1d", end_date,monitor)
+    daily_data = get_instrument_data(symbol, "1d", end_date,int(datetime.datetime.now().timestamp()),monitor)
     daily_data = pd.DataFrame(daily_data)
     daily_data["time_str"] = daily_data["time"] \
         .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))

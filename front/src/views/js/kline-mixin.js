@@ -224,7 +224,6 @@ export default {
         }
     },
     created() {
-        console.log("created")
         let that = this;
         document.onkeydown = function (e) {
             let page_up = 33
@@ -252,7 +251,7 @@ export default {
                         end: that.echartZoomEnd,
                     });
                 } else {
-                     that.dispatchMultiEchartsEvent()
+                    that.dispatchMultiEchartsEvent()
                 }
 
             } else if (key === arrow_down) {
@@ -438,8 +437,6 @@ export default {
         initEcharts() {
             //  大图只显示选中的k线图
             if (this.period !== '') {
-                console.log("初始化大图")
-
                 // this.endDate = this.getParams('endDate')
                 this.myChart = this.$echarts.init(document.getElementById('main'))
                 this.chartssize(document.getElementById('mainParent'),
@@ -448,6 +445,25 @@ export default {
                 window.addEventListener('resize', () => {
                     this.myChart.resize()
                 })
+
+                this.myChart.on('click', function (params) {
+                    if (params.componentType === 'markPoint') {
+                        // 点击到了 markPoint 上
+                        if (params.seriesIndex === 0) {
+
+                            console.log("点击到了 index 为 0 的 series 的 markPoint 上。", params)
+                        }
+                    } else if (params.componentType === 'series') {
+                        if (params.seriesType === 'graph') {
+                            if (params.dataType === 'edge') {
+                                console.log("点击到了 graph 的 edge（边）上。")
+                            } else {
+                                console.log("点击到了 graph 的 node（节点）上。")
+                            }
+                        }
+                    }
+                });
+
             } else {
                 console.log("初始化小图")
                 this.myChart1d = this.$echarts.init(document.getElementById('main1d'))
@@ -522,7 +538,7 @@ export default {
 
                     if (key === name) {
                         res = value
-                        console.log('coinName', res)
+                        // console.log('paramValue', res)
                         break
                     }
                 }
@@ -619,9 +635,9 @@ export default {
             }
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
-            that.timer = setInterval(() => {
-                that.switchSymbol(that.symbol, 'update')
-            }, 10000)
+            // that.timer = setInterval(() => {
+            //     that.switchSymbol(that.symbol, 'update')
+            // }, 10000)
         },
         processMargin() {
             // 获取当前品种的合约 保证金率
@@ -1869,7 +1885,7 @@ export default {
             for (let i = 0; i < jsonObj.buy_zs_huila.date.length; i++) {
                 let value = {
                     coord: [jsonObj.buy_zs_huila.date[i], jsonObj.buy_zs_huila.data[i]],
-                    value: jsonObj.buy_zs_huila.data[i], // + jsonObj.buy_zs_huila.tag[i],
+                    value: jsonObj.buy_zs_huila.data[i] + "|" + jsonObj.buy_zs_huila.stop_lose_price[i] + "|" + jsonObj.buy_zs_huila.stop_win_price[i],
                     symbolRotate: -90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
@@ -1892,7 +1908,7 @@ export default {
             for (let i = 0; i < jsonObj.sell_zs_huila.date.length; i++) {
                 let value = {
                     coord: [jsonObj.sell_zs_huila.date[i], jsonObj.sell_zs_huila.data[i]],
-                    value: jsonObj.sell_zs_huila.data[i], // + + jsonObj.sell_zs_huila.tag[i],
+                    value: jsonObj.sell_zs_huila.data[i] + "|" + jsonObj.sell_zs_huila.stop_lose_price[i] + "|" + jsonObj.sell_zs_huila.stop_win_price[i],
                     symbolRotate: 90,
                     symbol: 'pin',
                     symbolOffset: [0, '0%'],
@@ -2546,7 +2562,6 @@ export default {
                 }
                 markLineData.push(markLineFractal)
             }
-            // console.log("最后的背驰:", period, lastBeichiType)
             if (lastBeichiType !== 0) {
                 switch (lastBeichiType) {
                     // 回拉
