@@ -21,7 +21,7 @@ scoop bucket add versions
 ```
 
 ```cmd
-scoop install python37
+scoop install python38
 scoop install nginx
 scoop install nssm
 ```
@@ -36,7 +36,7 @@ nssm install pychanlun-api-service C:\Users\Administrator\scoop\apps\python37\cu
 nssm install pychanlun-api-service C:\Python\Python38\Scripts\pychanlun.exe
 nssm set pychanlun-api-service AppDirectory D:\development\pychanlun
 nssm set pychanlun-api-service AppParameters "run-api-server --port 18888"
-nssm set pychanlun-api-service AppEnvironmentExtra PATH=C:\Windows\System32;C:\Windows PYCHANLUN_MONGO_URL=mongodb://localhost:27017/pychanlun
+nssm set pychanlun-api-service AppEnvironmentExtra PATH=C:\Windows\System32 PYCHANLUN_MONGO_URL=mongodb://localhost:27017/pychanlun
 nssm set pychanlun-api-service AppStdout D:\logs\pychanlun.log
 nssm set pychanlun-api-service AppStderr D:\logs\pychanlun.log
 nssm set pychanlun-api-service DependOnService MongoDB
@@ -69,4 +69,27 @@ net start nginx
 ```cmd
 cd D:\development\pychanlun
 python pychanlun\server.py
+```
+外盘期货下载服务
+（管理员命令行模式）
+```cmd
+nssm install download-global-future-service C:\Python\Python38\Scripts\pychanlun.exe
+nssm set download-global-future-service AppEnvironmentExtra PATH=C:\Windows\System32 PYCHANLUN_MONGO_URL=mongodb://localhost:27017/pychanlun
+nssm set download-global-future-service AppParameters "download-global-future-data"
+nssm set download-global-future-service AppStdout D:\logs\pychanlun.log
+nssm set download-global-future-service AppStderr D:\logs\pychanlun.log
+nssm set download-global-future-service DependOnService MongoDB
+net start download-global-future-service
+```
+
+期货监控服务服务
+（管理员命令行模式）
+```cmd
+nssm install future-monitoring-service C:\Python\Python38\Scripts\pychanlun.exe
+nssm set future-monitoring-service AppEnvironmentExtra PATH=C:\Windows\System32 PYCHANLUN_MONGO_URL=mongodb://localhost:27017/pychanlun
+nssm set future-monitoring-service AppParameters "monitoring"
+nssm set future-monitoring-service AppStdout D:\logs\pychanlun.log
+nssm set future-monitoring-service AppStderr D:\logs\pychanlun.log
+nssm set future-monitoring-service DependOnService MongoDB
+net start future-monitoring-service
 ```
