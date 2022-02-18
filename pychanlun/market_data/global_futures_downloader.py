@@ -18,8 +18,7 @@ from pychanlun.config import config
 
 tz = pytz.timezone('Asia/Shanghai')
 
-
-symbol_list = config['global_future_symbol']
+symbol_list = config['global_future_symbol_sina']
 min_list = ['5', '15', '30', '60']
 
 is_run = True
@@ -34,18 +33,21 @@ def fetch_global_futures_mink():
             for symbol in symbol_list:
                 try:
                     var = "_%s_%s_%s" % (symbol, minute, datetime.datetime.now().timestamp())
-                    url = "https://gu.sina.cn/ft/api/jsonp.php/var %s=/GlobalService.getMink?symbol=%s&type=%s" % (var, symbol, minute)
-                    response = requests.get(url, headers = headers, timeout=(15, 15))
+                    url = "https://gu.sina.cn/ft/api/jsonp.php/var %s=/GlobalService.getMink?symbol=%s&type=%s" % (
+                        var, symbol, minute)
+                    response = requests.get(url, headers=headers, timeout=(15, 15))
                     response_text = response.text
                     m = re.search(r'\((.*)\)', response.text)
                     content = m.group(1)
                     df = pd.DataFrame(json.loads(content))
                     df['d'] = df['d'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
                     df.set_index("d", inplace=True)
+
+                    symbol = change_name(symbol)
                     save_data_m(symbol, '%sm' % minute, df)
                     # 合成180F数据
                     if minute == '30':
-                        ohlc_dict = { 'o': 'first', 'h': 'max', 'l': 'min', 'c': 'last', 'v': 'sum' }
+                        ohlc_dict = {'o': 'first', 'h': 'max', 'l': 'min', 'c': 'last', 'v': 'sum'}
                         df180m = df.resample('180T', closed='right', label='right').agg(ohlc_dict).dropna(how='any')
                         save_data_m(symbol, '180m', df180m)
                     time.sleep(1)
@@ -62,7 +64,8 @@ def fetch_global_futures_mink():
                 try:
                     d = datetime.datetime.now().strftime('%Y_%m_%d')
                     var = "_%s_%s" % (symbol, d)
-                    url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var %s=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=%s&_=%s&source=web" % (var, symbol, d)
+                    url = "https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var %s=/GlobalFuturesService.getGlobalFuturesDailyKLine?symbol=%s&_=%s&source=web" % (
+                        var, symbol, d)
                     response = requests.get(url, headers=headers, timeout=(15, 15))
                     response_text = response.text
                     m = re.search(r'\((.*)\)', response_text)
@@ -70,6 +73,7 @@ def fetch_global_futures_mink():
                     df = pd.DataFrame(json.loads(content))
                     df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d'))
                     df.set_index('date', inplace=True)
+                    symbol = change_name(symbol)
                     save_data_d(symbol, '1d', df)
                     # 合成3d数据
                     ohlc_dict = {'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum'}
@@ -84,6 +88,19 @@ def fetch_global_futures_mink():
         if not is_loop:
             break
     logger.info("外盘分钟数据抓取程序已停止。")
+
+
+# 新浪外盘部分期货命名和内盘冲突,部分命名和国际标准不一致，改名入库
+def change_name(symbol):
+    if symbol == 'SM':  # 美豆粕
+        symbol = 'ZM'
+    if symbol == 'C':  # 美玉米
+        symbol = 'MZC'
+    if symbol == 'S':
+        symbol = 'ZS'  # 美豆
+    if symbol == 'BO':  # 美豆油
+        symbol = 'ZL'
+    return symbol
 
 
 def save_data_m(code, period, df):

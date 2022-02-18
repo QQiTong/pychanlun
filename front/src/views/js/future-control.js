@@ -199,7 +199,7 @@ export default {
 
     mounted() {
         // this.subscribeWS()
-        // this.getDayMaList()
+        this.getDayMaList()
         this.getChangeiList()
         this.getSignalList()
         // this.getLevelDirectionList()
@@ -272,7 +272,9 @@ export default {
                         }
                         // console.log('获取涨跌幅列表', simpleSymbol, changeLong[i], changeShort[i])
                     }
-                    that.changePercentage[i] = parseInt(changeLong[i] / (changeLong[i] + changeShort[i]) * 100)
+                    if (changeLong[i] + changeShort[i] !== 0) {
+                        that.changePercentage[i] = parseInt(changeLong[i] / (changeLong[i] + changeShort[i]) * 100)
+                    }
                 }
             }
             this.$nextTick(() => {

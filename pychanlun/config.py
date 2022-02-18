@@ -78,8 +78,8 @@ config = {
         # "IH",
 
         #   第二组 新增品种 15
-            "AL",
-            "SN",
+        "AL",
+        "SN",
         #     "PB",
         #     "SM",
         "SF",
@@ -167,7 +167,7 @@ config = {
         'J': {'margin_rate': 0.08, 'contract_multiplier': 100},
         'JM': {'margin_rate': 0.08, 'contract_multiplier': 60},
         # 郑煤
-        'ZC': {'margin_rate': 0.05, 'contract_multiplier': 100},
+        'ZC': {'margin_rate': 0.5, 'contract_multiplier': 100},
         # 锰硅
         'SM': {'margin_rate': 0.07, 'contract_multiplier': 5},
         # 硅铁
@@ -241,15 +241,18 @@ config = {
         'GC': {'margin_rate': 0.07, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
         'SI': {'margin_rate': 0.14, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
         'HG': {'margin_rate': 0.06, 'contract_multiplier': 25000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
+        'AHD': {'margin_rate': 0.1, 'contract_multiplier': 1},
         'NID': {'margin_rate': 0.1, 'contract_multiplier': 1},
         'ZSD': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'SND': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # 'CN': {'margin_rate': 0.09, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06          1045
 
-        'S': {'margin_rate': 0.03, 'contract_multiplier': 50},  # 2314
-        # 'SM': {'margin_rate': 0.04, 'contract_multiplier': 100},  # 2062
-        'BO': {'margin_rate': 0.04, 'contract_multiplier': 600},  # 935
-        'FCPO': {'margin_rate': 0.1, 'contract_multiplier': 1},
-        'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},
+        'ZS': {'margin_rate': 0.03, 'contract_multiplier': 50},  # 美豆
+        'ZM': {'margin_rate': 0.04, 'contract_multiplier': 100},  # 美豆粕
+        'ZL': {'margin_rate': 0.04, 'contract_multiplier': 600},  # 美豆油
+        'MZC': {'margin_rate': 0.04, 'contract_multiplier': 50},  # 美玉米
+        'FCPO': {'margin_rate': 0.1, 'contract_multiplier': 1},  # 马棕榈
+        'CT': {'margin_rate': 0.1, 'contract_multiplier': 1},  # 美棉花
         # 'SB': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # wshq
         # 'YM': {'margin_rate': 0.13, 'contract_multiplier': 0.5},  # 18:30 -14:00 0.04   其它时间 0.06          13200
@@ -282,8 +285,10 @@ config = {
     # YM:道琼斯 CN:A50 ;FCPO:马棕榈
     # wshq 'SB'
     # 'global_future_symbol': ['CL', 'GC', 'SI', 'YM', 'NQ', 'ES', 'CN', 'ZS', 'ZM', 'ZL', 'NID', 'ZSD'],
-    # 新浪外盘品种名'SM',
-    'global_future_symbol': ['CL', 'GC', 'SI', 'HG', 'NID', 'ZSD', 'S',  'BO', 'FCPO', 'CT'],
+    # 修正新浪外盘品种名 美豆 S->ZS,美豆粕 SM->ZM,美玉米ZC->MZC 马棕榈FCPO 美豆油BO->ZL
+    'global_future_symbol_sina': ['CL', 'GC', 'SI', 'HG', 'AHD', 'NID', 'ZSD', 'SND', 'S', 'C', 'BO', 'FCPO', 'CT', "SM"],
+    'global_future_symbol': ['CL', 'GC', 'SI', 'HG', 'AHD', 'NID', 'ZSD', 'SND', 'ZS', 'MZC', 'ZL', 'FCPO', 'CT', "ZM"],
+
     # 美国股票
     'global_stock_symbol': ['AAPL', 'MSFT', 'GOOG', 'FB', 'AMZN', 'NFLX', 'NVDA', 'AMD'],
     # wshq
@@ -405,6 +410,15 @@ config = {
             'contract_multiplier': 1,
             'exchange': '伦敦',
             'margin_rate': 0.1,
+            'order_book_id': 'AHD',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '伦敦',
+            'margin_rate': 0.1,
             'order_book_id': 'NID',
             'trading_hours': '7*24',
             'type': 'future',
@@ -415,6 +429,15 @@ config = {
             'exchange': '伦敦',
             'margin_rate': 0.1,
             'order_book_id': 'ZSD',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 1,
+            'exchange': '伦敦',
+            'margin_rate': 0.1,
+            'order_book_id': 'SND',
             'trading_hours': '7*24',
             'type': 'future',
             'feeRate': 0.012
@@ -433,34 +456,34 @@ config = {
             'contract_multiplier': 50,
             'exchange': '美豆',
             'margin_rate': 0.03,
-            'order_book_id': 'S',
+            'order_book_id': 'ZS',
             'trading_hours': '7*24',
             'type': 'future',
             'feeRate': 0.012
         },
-        # {
-        #     'contract_multiplier': 50,
-        #     'exchange': '美玉米',
-        #     'margin_rate': 0.06,
-        #     'order_book_id': 'C',
-        #     'trading_hours': '7*24',
-        #     'type': 'future',
-        #     'feeRate': 0.012
-        # },
-        # {
-        #     'contract_multiplier': 100,
-        #     'exchange': '美豆粕',
-        #     'margin_rate': 0.04,
-        #     'order_book_id': 'SM',
-        #     'trading_hours': '7*24',
-        #     'type': 'future',
-        #     'feeRate': 0.012
-        # },
+        {
+            'contract_multiplier': 50,
+            'exchange': '美玉米',
+            'margin_rate': 0.06,
+            'order_book_id': 'MZC',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
+        {
+            'contract_multiplier': 100,
+            'exchange': '美豆粕',
+            'margin_rate': 0.04,
+            'order_book_id': 'ZM',
+            'trading_hours': '7*24',
+            'type': 'future',
+            'feeRate': 0.012
+        },
         {
             'contract_multiplier': 600,
             'exchange': '美豆油',
             'margin_rate': 0.04,
-            'order_book_id': 'BO',
+            'order_book_id': 'ZL',
             'trading_hours': '7*24',
             'type': 'future',
             'feeRate': 0.012
@@ -781,14 +804,14 @@ config = {
         {
             'order_book_id': 'JML9',
             'contract_multiplier': 60,
-            'margin_rate': 0.08,
+            'margin_rate': 0.1,
         },
 
         # 动力煤
         {
             'order_book_id': 'ZCL9',
             'contract_multiplier': 100,
-            'margin_rate': 0.05,
+            'margin_rate': 0.5,
         },
         # 锰硅
         {
@@ -895,7 +918,7 @@ config = {
             'margin_rate': 0.1,
         },
         {
-            'order_book_id': 'SNL9',#沪锡
+            'order_book_id': 'SNL9',  # 沪锡
             'contract_multiplier': 1,
             'margin_rate': 0.1,
         },
@@ -977,7 +1000,7 @@ config = {
         #     'contract_multiplier': 10,
         #     'margin_rate': 0.09,
         # },
-         {
+        {
             'order_book_id': 'PGL9',
             'contract_multiplier': 20,
             'margin_rate': 0.11,

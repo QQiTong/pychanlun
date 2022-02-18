@@ -9,14 +9,14 @@ let digitCoinAccount = 60.3 / 10000
 let globalFutureAccount = 6
 // 数字货币 杠杆倍数
 let digitCoinLevel = 20
-// 'NID', 'CP', 'CT',
-let globalFutureSymbol = ['CL', 'GC', 'SI', 'ZS', 'ZM', 'ZL', 'YM', 'ES', 'NQ', 'CN']
+// 'NID', 'CP', 'CT', MZC 美玉米
+let globalFutureSymbol = ['CL', 'GC', 'SI', 'HG', 'AHD','NID', 'ZSD','SND', 'ZS', 'MZC', 'ZL', 'FCPO', 'CT',"ZM"]
 
 // 最大资金使用率
 let maxAccountUseRate = 0.10
 
 // 止损系数
-let stopRate = 0.01
+let stopRate = 0.02
 
 export default {
     install() {

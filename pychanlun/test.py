@@ -1437,7 +1437,7 @@ def testBus():
 
 
 def test_future_change_list():
-    end = datetime.now()- timedelta(1)
+    end = datetime.now() - timedelta(1)
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
     start_date = end + timedelta(-1)
     # print("->",start_date,end)
@@ -1453,13 +1453,13 @@ def test_future_change_list():
         day_open_price = data_list[0]['open']
         # 查1分钟收盘价
         data_list2 = list(DBQuantAxis["future_min"] \
-            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
-            .find({
+                          .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+                          .find({
             "code": item,
             "type": "1min",
             "time_stamp": {"$gte": start_date.timestamp()}
         }) \
-            .sort("_id", pymongo.DESCENDING).limit(1))
+                          .sort("_id", pymongo.DESCENDING).limit(1))
 
         if len(data_list2) == 0:
             continue

@@ -9,7 +9,8 @@ import pandas as pd
 import pymongo
 import pytz
 import requests
-from QUANTAXIS.QAData.data_resample import QA_data_stockmin_resample, QA_data_day_resample, QA_data_futuremin_resample,QA_data_futuremin_resample_tb_kq
+from QUANTAXIS.QAData.data_resample import QA_data_stockmin_resample, QA_data_day_resample, QA_data_futuremin_resample, \
+    QA_data_futuremin_resample_tb_kq
 from bson.codec_options import CodecOptions
 
 from pychanlun.db import DBPyChanlun
@@ -22,7 +23,7 @@ zbUrl = "http://api.zb.center/data/v1/kline?market=btc_usdt&type=1day"
 
 
 @lru_cache(maxsize=128)
-def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()),monitor=1):
+def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()), monitor=1):
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:
@@ -219,7 +220,6 @@ def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().tim
             lambda value: datetime.strptime(value, "%Y-%m-%d"))
         # kline_data['volume'] = kline_data['trade'] * 100
 
-
         kline_data['code'] = kline_data['symbol']
         kline_data = QA_data_day_resample(kline_data, "w")
         kline_data['datetime'] = kline_data.index
@@ -227,14 +227,32 @@ def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().tim
         kline_data.set_index('datetime', drop=False, inplace=True)
     kline_data.fillna(0, inplace=True)
     return kline_data
+
+
 '''
 由于BTC从数据库中取出的ohlc都是字符串类型，将其转为float
 '''
+
+
 def process_ohlc_str(kline_data):
     kline_data['open'] = kline_data['open'].apply(lambda value: float(value))
     kline_data['high'] = kline_data['high'].apply(lambda value: float(value))
     kline_data['low'] = kline_data['low'].apply(lambda value: float(value))
     kline_data['close'] = kline_data['close'].apply(lambda value: float(value))
+
+
+'''
+由于部分期货品种数从数据库中取出的ohlc长达10位小数，除黄金外去掉小数
+'''
+
+
+def process_ohlc_decimal(kline_data):
+    kline_data['open'] = kline_data['open'].apply(lambda value: int(value))
+    kline_data['high'] = kline_data['high'].apply(lambda value: int(value))
+    kline_data['low'] = kline_data['low'].apply(lambda value: int(value))
+    kline_data['close'] = kline_data['close'].apply(lambda value: int(value))
+    # print(kline_data)
+    return kline_data
 
 @lru_cache(maxsize=128)
 def getFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
@@ -297,7 +315,7 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
         time_delta_map = {
             '1m': -25,
             '3m': -25 * 3,
-            '5m': -25 * 30,
+            '5m': -25 * 5,
             '15m': -25 * 15,
             '30m': -25 * 30,
             '60m': -25 * 60,
@@ -467,11 +485,13 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
         kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
         kline_data.set_index('datetime', drop=False, inplace=True)
     kline_data.fillna(0, inplace=True)
+    # if code != "AUL9":
+    #     kline_data = process_ohlc_decimal(kline_data)
     return kline_data
 
 
 @lru_cache(maxsize=128)
-def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()),monitor=1):
+def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()), monitor=1):
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:

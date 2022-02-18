@@ -1,7 +1,7 @@
 <template>
     <div class="header-main">
         <el-button type="primary" @click="jumpToControl('futures')" size="mini" class="primary-button">期货</el-button>
-        <h1>顺势而为 抓大放小 以小博大 提高胜率比（双盘|二买|完备|三买）</h1>
+        <h1>顺势而为 抓大放小 以小博大 提高胜率盈亏比（双盘|二买|完备|三买）</h1>
         <el-button type="danger" @click="jumpToControl('stock')" size="mini" class="primary-button">股票</el-button>
     </div>
 </template>

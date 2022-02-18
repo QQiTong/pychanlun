@@ -15,6 +15,7 @@ import requests
 from bson import ObjectId
 from bson.codec_options import CodecOptions
 
+
 from pychanlun.config import config
 from pychanlun.db import DBPyChanlun, DBQuantAxis
 
@@ -594,7 +595,9 @@ class BusinessService:
             # print(item, '-> ', day_open_price, ' -> ', min_close_price)
             change_list[item] = change_item
         # print(change_list)
-        return change_list
+        globalChangeList = self.getGlobalFutureChangeList()
+        conbineChangeList = dict(change_list, **globalChangeList)
+        return conbineChangeList
 
     def calc_ma(self, close_list, day):
         ma = QA.MA(pd.Series(close_list), day)
@@ -603,25 +606,42 @@ class BusinessService:
 
     # 获取内盘 20日 均线
     def get_day_ma_list(self):
-        return
-        # symbol_ma_20_map = {}
-        # symbolList = copy.deepcopy(config['symbolListIndex'])
-        # for i in range(len(symbolList)):
-        #     item = symbolList[i]
-        #     end = datetime.now() + timedelta(1)
-        #     start = datetime.now() + timedelta(-40)
-        #     df1d = rq.get_price(item, frequency='1d', fields=['open', 'high', 'low', 'close', 'volume'],
-        #                         start_date=start, end_date=end)
-        #     day_close = list(df1d['close'])
-        #     df1m = rq.current_minute(item)
-        #     current_price = df1m.iloc[0]['close']
-        #     day_ma_20 = self.calc_ma(day_close, 21)[-1]
-        #     # todo  这里用 True 和 False  无法序列化
-        #     result_item = {'above_ma_20': 1 if current_price >= day_ma_20 else -1}
-        #     symbol_ma_20_map[item] = result_item
-        # global_day_ma_list = self.get_global_day_ma_list()
-        # conbine_day_ma_list = dict(symbol_ma_20_map, **global_day_ma_list)
-        # return conbine_day_ma_list
+        end = datetime.now() + timedelta(1)
+        end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
+        start_date = end + timedelta(-2)
+        symbol_ma_20_map = {}
+        for item in config['futureConfig']:
+            item = item + "L9"
+            # 查日线开盘价
+            data_list = list(
+                DBQuantAxis["future_day"].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+                    {"code": item}).limit(40).sort("_id", pymongo.DESCENDING))
+            if len(data_list) == 0:
+                continue
+            data_list.reverse()
+            day_close_price_list = list(pd.DataFrame(data_list)['close'])
+            day_ma_20 = self.calc_ma(day_close_price_list, 21)
+
+            # 查1分钟收盘价
+            data_list = DBQuantAxis["future_min"] \
+                .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+                .find({
+                "code": item,
+                "type": "1min",
+                "time_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+            }) \
+                .sort("_id", pymongo.ASCENDING)
+            data_list = list(data_list)
+            if len(data_list) == 0:
+                continue
+            min_close_price = list(pd.DataFrame(data_list)['close'])[0]
+            # print(day_ma_20[-1], min_close_price)
+            result_item = {'above_ma_20': 1 if min_close_price >= day_ma_20[-1] else -1}
+            symbol_ma_20_map[item] = result_item
+        # print(symbol_ma_20_map)
+        global_day_ma_list = self.get_global_day_ma_list()
+        conbine_day_ma_list = dict(symbol_ma_20_map, **global_day_ma_list)
+        return conbine_day_ma_list
 
     # 获取外盘20日均线
     def get_global_day_ma_list(self):
@@ -639,20 +659,19 @@ class BusinessService:
             data_list.reverse()
             day_close_price_list = list(pd.DataFrame(data_list)['close'])
             day_ma_20 = self.calc_ma(day_close_price_list, 21)
-            code = "%s_%s" % (item, '1m')
-
+            code = "%s_%s" % (item, '5m')
             # 查1分钟收盘价
             data_list = list(DBPyChanlun[code].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
             ).sort("_id", pymongo.DESCENDING))
             if len(data_list) == 0:
                 continue
             min_close_price = list(pd.DataFrame(data_list)['close'])[0]
-            # todo  这里用 True 和 False  无法序列化
             above_item = {
                 'above_ma_20': 1 if min_close_price >= day_ma_20[-1] else -1
             }
             # print(item, '-> ', above_item)
             aboveList[item] = above_item
+        # print(aboveList)
         return aboveList
 
     def getLevelDirectionList(self):
