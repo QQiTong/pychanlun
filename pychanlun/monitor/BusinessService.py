@@ -15,7 +15,6 @@ import requests
 from bson import ObjectId
 from bson.codec_options import CodecOptions
 
-
 from pychanlun.config import config
 from pychanlun.db import DBPyChanlun, DBQuantAxis
 
@@ -31,7 +30,7 @@ dominantSymbolInfoList = []
 # 马棕 日胶
 global_future_symbol = config['global_future_symbol']
 global_stock_symbol = config['global_stock_symbol']
-digit_coin_symbol = config['digit_coin_symbol']
+# digit_coin_symbol = config['digit_coin_symbol']
 hbSwapUrl = "http://api.btcgateway.pro/swap-ex/market/history/kline?contract_code=BTC-USD"
 hbSwapTickUrl = "http://api.btcgateway.pro/swap-ex/market/trade?contract_code=BTC-USD"
 
@@ -475,24 +474,17 @@ class BusinessService:
     #         dominantSymbolInfoList.append(dominantSymbolInfo.__dict__)
     # print("当前主力合约列表:", dominantSymbolList)
     # print("当前主力合约详细信息:", dominantSymbolInfoList)
-
-    def getDoinantSynmbol(self):
-        conbinSymbolInfo = copy.deepcopy(config['future_symbol_info'])
-        #  把外盘 数字货币加进去
-        conbinSymbolInfo.extend(config['global_future_symbol_info'])
-        conbinSymbolInfo.extend(config['digit_coin_symbol_info'])
-        return conbinSymbolInfo
+    # 获取内盘，外盘，数字货币期货信息
+    def get_dominant_symbol_list(self):
+        symbol_list = []
+        for item in config['future_config']:
+            symbol_list.append(config['future_config'][item])
+        return symbol_list
 
     def getFutureSignalList(self):
-        # symbolList = copy.deepcopy(dominantSymbolList)
-        symbolList = copy.deepcopy(config['symbolListIndex'])
-        #  把外盘加进去
-        symbolList.extend(global_future_symbol)
-        # symbolList.extend(global_stock_symbol)
-        # symbolList.extend(digit_coin_symbol)
+        symbol_map = copy.deepcopy(config['future_config'])
         symbolListMap = {}
-        for i in range(len(symbolList)):
-            symbol = symbolList[i]
+        for symbol in symbol_map:
             symbolListMap[symbol] = {}
             for j in range(len(periodList)):
                 period = periodList[j]
@@ -563,10 +555,9 @@ class BusinessService:
         end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
         start_date = end + timedelta(-1)
         # print("->",start_date,end)
-        symbol_list = config['symbolList']
         change_list = {}
-        for i in range(len(symbol_list)):
-            item = symbol_list[i] + "L9"
+        for symbol in config['future_config']:
+            item = symbol + "L9"
             # 查日线开盘价
             data_list = list(
                 DBQuantAxis["future_day"].find({"code": item}).sort("_id", pymongo.DESCENDING).limit(1))
@@ -610,7 +601,7 @@ class BusinessService:
         end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
         start_date = end + timedelta(-2)
         symbol_ma_20_map = {}
-        for item in config['futureConfig']:
+        for item in config['future_config']:
             item = item + "L9"
             # 查日线开盘价
             data_list = list(
@@ -679,7 +670,7 @@ class BusinessService:
         #  把外盘加进去
         symbolList.extend(global_future_symbol)
         # symbolList.extend(global_stock_symbol)
-        symbolList.extend(digit_coin_symbol)
+        # symbolList.extend(digit_coin_symbol)
         symbolListMap = {}
         for i in range(len(symbolList)):
             symbol = symbolList[i]
@@ -701,7 +692,7 @@ class BusinessService:
     # --------------------期货部份----------------------------------------------
     # 为了兼容老合约 保证金率不再从主力合约中取了， 直接拿配置信息
     def getFutureConfig(self):
-        return config['futureConfig']
+        return config['future_config']
 
     def getPosition(self, symbol, period, status, direction):
         if period == 'all':

@@ -1221,8 +1221,8 @@ async def calMaxOrderCount(symbol, openPrice, stopPrice, period, signal):
         maxStopMoney = account * 10000 * 0.1
     elif symbol in config['global_future_symbol'] or symbol in config['global_stock_symbol']:
         account = global_future_account
-        margin_rate = config['futureConfig'][symbol]['margin_rate']
-        contract_multiplier = config['futureConfig'][symbol]['contract_multiplier']
+        margin_rate = config['future_config'][symbol]['margin_rate']
+        contract_multiplier = config['future_config'][symbol]['contract_multiplier']
         # 计算1手需要的保证金
         perOrderMargin = int(openPrice * contract_multiplier * margin_rate)
         # 1手止损的金额
@@ -1301,11 +1301,10 @@ def run(**kwargs):
     is_loop = kwargs.get("loop")
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    # symbol_list, dominant_symbol_info_list = getDominantSymbol()
-    # symbol_list = config['symbolListIndex']
-    # dominant_symbol_info_list = config['futureConfig']
-    # symbol_list = symbol_list + global_future_symbol
-    symbol_list = global_future_symbol
+    symbol_list = []
+    for symbol in config['future_config']:
+        symbol_list.append(symbol)
+
     logger.info("监控标的数量: {}".format(len(symbol_list)))
 
     stop_watch = Stopwatch("总监控耗时")

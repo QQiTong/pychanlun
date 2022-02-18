@@ -1475,9 +1475,14 @@ def test_future_change_list():
     # print(change_list)
     return change_list
 
+def test_symbol_list():
+    symbol_list = []
+    for item in config['future_config']:
+        print(config['future_config'][item])
 
 def app():
-    test_future_change_list()
+    test_symbol_list()
+    # test_future_change_list()
     # testBus()
     # testPower()
     # testDynamicProfit()

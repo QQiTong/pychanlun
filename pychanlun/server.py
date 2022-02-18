@@ -81,8 +81,8 @@ def get_future_margin_rate():
 # curl -X GET http://127.0.0.1:5000/api/dominant
 @app.route('/api/dominant')
 def dominant():
-    dominantSymbolInfoList = func_timeout(30, businessService.getDoinantSynmbol)
-    return Response(json.dumps(dominantSymbolInfoList), mimetype='application/json')
+    dominant_symbol_info_list = func_timeout(30, businessService.get_dominant_symbol_list)
+    return Response(json.dumps(dominant_symbol_info_list), mimetype='application/json')
 
 
 # 获取所有背驰列表
