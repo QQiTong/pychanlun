@@ -303,7 +303,7 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
         '1m': -5,
         '3m': -5 * 3,
         '5m': -5 * 5,
-        '15m': -5 * 15,
+        '15m': -10 * 15,
         '30m': -5 * 30,
         '60m': -5 * 60,
         '180m': -5 * 180,

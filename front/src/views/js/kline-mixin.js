@@ -232,7 +232,15 @@ export default {
             let arrow_down = 40
             let arrow_left = 37
             let arrow_right = 39
-
+            let space_bar = 32
+            let num1 = 49
+            let num2 = 50
+            let num3 = 51
+            let num4 = 52
+            let num5 = 53
+            let num6 = 54
+            let num7 = 55
+            let num8 = 56
             let key = window.event.keyCode;
             if (key === page_down) {
                 that.onPgUpDnChangeSymbol(1)
@@ -276,6 +284,49 @@ export default {
             } else if (key === arrow_right) {
                 console.log("arrow_right")
                 that.quickSwitchDay('next')
+            } else if (key === space_bar) {
+                if (that.period !== '') {
+                    that.setOneKeyNakedKline(that.myChart)
+                } else {
+                    that.setOneKeyNakedKline(that.myChart5)
+                    that.setOneKeyNakedKline(that.myChart15)
+                    that.setOneKeyNakedKline(that.myChart30)
+                    that.setOneKeyNakedKline(that.myChart60)
+                    that.setOneKeyNakedKline(that.myChart240)
+                    that.setOneKeyNakedKline(that.myChart1d)
+                }
+            } else if (key === num1) {
+                if (that.period !== '') {
+                    that.switchPeriod("1m")
+                }
+            } else if (key === num2) {
+                if (that.period !== '') {
+                    that.switchPeriod("3m")
+                }
+            } else if (key === num3) {
+                if (that.period !== '') {
+                    that.switchPeriod("5m")
+                }
+            } else if (key === num4) {
+                if (that.period !== '') {
+                    that.switchPeriod("15m")
+                }
+            } else if (key === num5) {
+                if (that.period !== '') {
+                    that.switchPeriod("30m")
+                }
+            } else if (key === num6) {
+                if (that.period !== '') {
+                    that.switchPeriod("60m")
+                }
+            } else if (key === num7) {
+                if (that.period !== '') {
+                    that.switchPeriod("180m")
+                }
+            } else if (key === num8) {
+                if (that.period !== '') {
+                    that.switchPeriod("1d")
+                }
             }
         }
     },
@@ -384,6 +435,17 @@ export default {
                     "4倍盈亏比目标位 " + quadroKill.toFixed(0) + " 盈利 " + (Math.abs(quadroKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
                     "5倍盈亏比目标位 " + pentaKill.toFixed(0) + " 盈利 " + (Math.abs(pentaKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>"
             })
+        },
+        setOneKeyNakedKline(chart) {
+            let option = chart.getOption()
+            if (option.legend[0].selected['笔'] === false) {
+                option.legend[0].selected['笔'] = true
+                option.legend[0].selected['段'] = true
+            } else {
+                option.legend[0].selected['笔'] = false
+                option.legend[0].selected['段'] = false
+            }
+            chart.setOption(option)
         },
         dispatchMultiEchartsEvent() {
             this.myChart1d.dispatchAction({
@@ -737,9 +799,9 @@ export default {
             }
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
-            that.timer = setInterval(() => {
-                that.switchSymbol(that.symbol, 'update')
-            }, 10000)
+            // that.timer = setInterval(() => {
+            //     that.switchSymbol(that.symbol, 'update')
+            // }, 10000)
         },
         processMargin() {
             // 获取当前品种的合约 保证金率
@@ -1401,20 +1463,7 @@ export default {
                                     borderColor0: this.echartsConfig.downBorderColor
                                 }
                             },
-                            markPoint: {
-                                data: resultData.huilaValues,
-                                animation: false
-                            },
-                            markArea: {
-                                silent: true,
-                                data: resultData.zsvalues,
-                            },
-                            markLine: {
-                                silent: true,
-                                data: resultData.markLineData,
-                                symbol: 'circle',
-                                symbolSize: 1,
-                            }
+
                         },
                         // index 1
                         {
@@ -1431,7 +1480,21 @@ export default {
                                 },
                             },
                             symbol: 'none',
-                            animation: false
+                            animation: false,
+                            markPoint: {
+                                data: resultData.huilaValues,
+                                animation: false
+                            },
+                            markArea: {
+                                silent: true,
+                                data: resultData.zsvalues,
+                            },
+                            markLine: {
+                                silent: true,
+                                data: resultData.markLineData,
+                                symbol: 'circle',
+                                symbolSize: 1,
+                            }
                         },
                         // index 2
                         {
