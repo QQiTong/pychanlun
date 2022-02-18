@@ -74,7 +74,7 @@
                 inputSymbol_: this.inputSymbol,
                 endDate_: this.endDate,
                 shortCutData: [{
-                    name: 'space',
+                    name: 'Space',
                     desc: '裸K',
                 }, {
                     name: 'PageUp',
@@ -83,16 +83,16 @@
                     name: 'PageDw',
                     desc: '下一合约',
                 }, {
-                    name: 'left',
+                    name: 'Left',
                     desc: '上一日',
                 }, {
-                    name: 'right',
+                    name: 'Right',
                     desc: '下一日',
                 }, {
-                    name: 'up',
+                    name: 'Up',
                     desc: '放大',
                 }, {
-                    name: 'down',
+                    name: 'Down',
                     desc: '缩小',
                 }, {
                     name: 'Num1',
