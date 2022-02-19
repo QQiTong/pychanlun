@@ -241,6 +241,9 @@ export default {
             let num6 = 54
             let num7 = 55
             let num8 = 56
+            let klineHeader = that.$refs['klineHeader']
+
+            //字母 A~Z  65~90
             let key = window.event.keyCode;
             if (key === page_down) {
                 that.onPgUpDnChangeSymbol(1)
@@ -296,37 +299,43 @@ export default {
                     that.setOneKeyNakedKline(that.myChart1d)
                 }
             } else if (key === num1) {
-                if (that.period !== '') {
+
+                if (that.period !== '' && klineHeader.blurOrFocus === 0) {
                     that.switchPeriod("1m")
                 }
             } else if (key === num2) {
-                if (that.period !== '') {
+                if (that.period !== '' && klineHeader.blurOrFocus === 0) {
                     that.switchPeriod("3m")
                 }
-            } else if (key === num3) {
+            } else if (key === num3 && klineHeader.blurOrFocus === 0) {
                 if (that.period !== '') {
                     that.switchPeriod("5m")
                 }
-            } else if (key === num4) {
+            } else if (key === num4 && klineHeader.blurOrFocus === 0) {
                 if (that.period !== '') {
                     that.switchPeriod("15m")
                 }
-            } else if (key === num5) {
+            } else if (key === num5 && klineHeader.blurOrFocus === 0) {
+                // 如果当前处于多图模式或者 正在代码输入框输入代码则不响应
                 if (that.period !== '') {
                     that.switchPeriod("30m")
                 }
-            } else if (key === num6) {
+            } else if (key === num6 && klineHeader.blurOrFocus === 0) {
                 if (that.period !== '') {
                     that.switchPeriod("60m")
                 }
-            } else if (key === num7) {
+            } else if (key === num7 && klineHeader.blurOrFocus === 0) {
                 if (that.period !== '') {
                     that.switchPeriod("180m")
                 }
-            } else if (key === num8) {
+            } else if (key === num8 && klineHeader.blurOrFocus === 0) {
                 if (that.period !== '') {
                     that.switchPeriod("1d")
                 }
+            } else if (key >= 65 && key <= 90) {
+                // 如果输入代码自动定位 代码输入框
+                // console.log("input focus")
+                klineHeader.$refs["inputSymbolRef"].focus()
             }
         }
     },
@@ -777,11 +786,12 @@ export default {
             this.submitSymbol(this.symbol)
         },
         submitSymbol(val) {
+            let inputSymbolRef = this.$refs['klineHeader'].$refs["inputSymbolRef"]
             this.inputSymbol = val
             if (val !== '') {
                 this.symbol = this.inputSymbol.indexOf('sz') === -1 && this.inputSymbol.indexOf('sh') ? this.inputSymbol.toUpperCase() : this.inputSymbol
             } else {
-                alert('请输入品种')
+                // alert('请输入品种')
                 return
             }
             this.processMargin()
@@ -789,7 +799,9 @@ export default {
             // 一个大图+ 6个小图
             this.firstFlag = [true, true, true, true, true, true, true]
             this.requestSymbolData()
-            // this.replaceParamVal("symbol",this.symbol)
+            // 提交品种代码后,丢失焦点并清除输入框
+            inputSymbolRef.blur()
+            inputSymbolRef.clear()
         },
         // 请求数据
         requestSymbolData() {

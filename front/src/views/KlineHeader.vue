@@ -19,7 +19,8 @@
             </el-date-picker>
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('pre')" size="mini">前一天</el-button>
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('next')" size="mini">后一天</el-button>
-            <el-input v-model="inputSymbol_" placeholder="请输入代码" size="mini" class="search-symbol-input ml-5 mr-5"
+            <el-input v-model="inputSymbol_" ref="inputSymbolRef" @blur="blurInputSymbol" @focus="focusInputSymbol" placeholder="请输入代码"
+                      size="mini" class="search-symbol-input ml-5 mr-5"
                       @change="submitSymbol"/>
             <el-button type="primary" class="primary-button" v-for="period in periodList" :key="period" size="mini"
                        @click="switchPeriod(period)"
@@ -44,7 +45,7 @@
             <!--            <el-button size="mini" type="primary" class="primary-button" @click="quickSwitchSymbol('Y2009')">Y2009</el-button>-->
             <!--            <el-button size="mini" type="primary" class="primary-button" @click="quickSwitchSymbol('RM2009')">RM2009</el-button>-->
             <!--            <el-button size="mini" type="primary" class="primary-button" @click="quickSwitchSymbol('NI2007')">NI2007</el-button>-->
-            <el-select size="mini" v-model="inputSymbol_" class="form-input" placeholder="请选择"
+            <el-select size="mini" v-model="inputSymbol_" class="form-input" filterable placeholder="请选择"
                        @change="quickSwitchSymbol(inputSymbol_)">
                 <el-option
                     v-for="item in futureSymbolList"
@@ -73,6 +74,7 @@
             return {
                 inputSymbol_: this.inputSymbol,
                 endDate_: this.endDate,
+                blurOrFocus:0,
                 shortCutData: [{
                     name: 'Space',
                     desc: '裸K',
@@ -176,6 +178,14 @@
         methods: {
             setELDatePicker(endDate) {
                 this.endDate_ = endDate
+            },
+            focusInputSymbol(params) {
+                // console.log("获得焦点")
+                this.blurOrFocus = 1
+            },
+            blurInputSymbol(params) {
+                // console.log("失去焦点")
+                this.blurOrFocus = 0
             }
         }
     }
