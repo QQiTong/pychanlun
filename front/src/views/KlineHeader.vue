@@ -56,7 +56,7 @@
             </el-select>
             <el-popover
                 placement="bottom"
-                width="250"
+                width="230"
                 trigger="hover">
                 <el-table :data="shortCutData">
                     <el-table-column width="100" property="name" label="快捷键"></el-table-column>
@@ -74,7 +74,7 @@
             return {
                 inputSymbol_: this.inputSymbol,
                 endDate_: this.endDate,
-                blurOrFocus:0,
+                blurOrFocus: 0,
                 shortCutData: [{
                     name: 'Space',
                     desc: '裸K',
@@ -120,6 +120,12 @@
                 }, {
                     name: 'Num8',
                     desc: '日线',
+                }, {
+                    name: '点击信号',
+                    desc: '信号详情',
+                }, {
+                    name: '点击中枢',
+                    desc: '中枢详情',
                 }]
             }
         },

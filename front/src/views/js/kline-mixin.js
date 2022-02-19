@@ -67,8 +67,10 @@ export default {
                 macdDownDarkColor: '#26A69A',
                 macdDownLightColor: '#B2DFDB',
                 loadingOption: {
-                    text: '让子弹飞一会...',
-                    maskColor: '#0B0E11',
+                    text: '知彼知己，百戰不殆',
+                    // maskColor: '#0B0E11',
+                    // 使用透明色不闪烁不伤眼
+                    maskColor: '#ffffff00',
                     textColor: 'white',
                     color: '#FFCC08'
                 },
@@ -220,7 +222,8 @@ export default {
                 stopRate: 0,
                 perOrderStopMoney: 0
             },
-            echartZoomEnd: 55
+            echartZoomStart: 0,
+            echartZoomEnd: 100
         }
     },
     created() {
@@ -530,6 +533,7 @@ export default {
             this.processMargin()
         },
         quickSwitchDay(type) {
+            console.log(2)
             let tempDate = this.endDate.replace(/-/g, '/')
             let date = new Date(tempDate)
             let preDay = date.getTime() - 3600 * 1000 * 24
@@ -810,6 +814,13 @@ export default {
             this.submitSymbol(this.symbol)
         },
         submitSymbol(val) {
+            // 大图切换品种周期日期将缩放位置保存起来
+            if (this.period !== '') {
+                this.echartZoomEnd = this.myChart.getOption().dataZoom[0].end
+                this.echartZoomStart = this.myChart.getOption().dataZoom[0].start
+                // 切换日期 这段代码只执行一次，但是日志却打了2次
+                // console.log("当前zoom start end ", this.echartZoomStart, this.echartZoomEnd)
+            }
             let inputSymbolRef = this.$refs['klineHeader'].$refs["inputSymbolRef"]
             this.inputSymbol = val
             if (val !== '') {
@@ -823,7 +834,7 @@ export default {
             // 一个大图+ 6个小图
             this.firstFlag = [true, true, true, true, true, true, true]
             this.requestSymbolData()
-            // 提交品种代码后,丢失焦点并清除输入框
+            // 提交品种代码后,丢失焦点并清除输入框,方便下次输入
             inputSymbolRef.blur()
             inputSymbolRef.clear()
         },
@@ -973,12 +984,13 @@ export default {
             }
 
             const requesting = this.$cache.get(`REQUESTING#${requestData.symbol}#${requestData.period}`)
+            // console.log("请求缓存", requesting)
             if (!requesting) {
                 this.$cache.set(`REQUESTING#${requestData.symbol}#${requestData.period}`, true, 60)
                 futureApi.stockData(requestData).then(res => {
                     // 如果之前请求的symbol 和当前的symbol不一致，直接过滤
                     if (res && (res.symbol !== this.symbol || res.endDate !== this.endDate || res.period !== requestData.period)) {
-                        console.log('symbol或period结束日期不一致，过滤掉之前的请求')
+                        console.log('symbol或period结束日期不一致，过滤掉之前老请求的结果，使用新的返回结果绘制图形，当逐日复盘键盘左右按键快速连按会触发，之后60秒内的请求都会被过滤')
                         return
                     }
                     if (this.period !== '') {
@@ -1142,7 +1154,7 @@ export default {
             // console.log(period, specialMA5, specialMA21)
             let option
             if (update === 'update') {
-                // console.log('更新', period)
+                console.log('更新', period)
                 option = that.refreshOption(currentChart, resultData, specialMA5, specialMA21, specialMA55)
             } else {
                 console.log('重载', period)
@@ -1444,9 +1456,8 @@ export default {
                         {
                             type: 'inside',
                             xAxisIndex: [0, 0],
-                            start: 0,
-                            end: 100,
-                            // minSpan: 10,
+                            start: this.echartZoomStart,
+                            end: this.echartZoomEnd
                         },
                         // {
                         //     type: 'inside',
