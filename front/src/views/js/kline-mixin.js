@@ -395,6 +395,17 @@ export default {
     },
 
     methods: {
+        entanglementNotify(params) {
+            console.log(params)
+            const h = this.$createElement
+            this.$notify({
+                title: '中枢详情',
+                type: "success",
+                duration: 10 * 1000,
+                dangerouslyUseHTMLString: true,
+                message: "持续时间: " + params.data.remainTime + "天 波动幅度: " + params.data.volatility + "%"
+            })
+        },
         positionNotify(params) {
             console.log(params)
             this.quickCalc.openPrice = params.data.value
@@ -567,22 +578,21 @@ export default {
                 window.addEventListener('resize', () => {
                     this.myChart.resize()
                 })
-
                 this.myChart.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
-                        // 点击到了 markPoint 上
                         if (params.seriesIndex === 1) {
-                            // console.log("点击到了 index 为 0 的 series 的 markPoint 上。")
                             that.positionNotify(params)
                         }
                     } else if (params.componentType === 'series') {
                         if (params.seriesType === 'graph') {
                             if (params.dataType === 'edge') {
-                                // console.log("点击到了 graph 的 edge（边）上。")
+                                console.log("点击到了 graph 的 edge（边）上。")
                             } else {
-                                // console.log("点击到了 graph 的 node（节点）上。")
+                                console.log("点击到了 graph 的 node（节点）上。")
                             }
                         }
+                    } else if (params.componentType === 'markArea') {
+                        that.entanglementNotify(params)
                     }
                 });
 
@@ -631,6 +641,8 @@ export default {
                         if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
+                    } else if (params.componentType === 'markArea') {
+                        that.entanglementNotify(params)
                     }
                 });
                 this.myChart5.on('click', function (params) {
@@ -638,6 +650,8 @@ export default {
                         if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
+                    } else if (params.componentType === 'markArea') {
+                        that.entanglementNotify(params)
                     }
                 });
                 this.myChart15.on('click', function (params) {
@@ -645,6 +659,8 @@ export default {
                         if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
+                    } else if (params.componentType === 'markArea') {
+                        that.entanglementNotify(params)
                     }
                 });
                 this.myChart30.on('click', function (params) {
@@ -652,6 +668,8 @@ export default {
                         if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
+                    } else if (params.componentType === 'markArea') {
+                        that.entanglementNotify(params)
                     }
                 });
                 this.myChart60.on('click', function (params) {
@@ -659,6 +677,8 @@ export default {
                         if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
+                    } else if (params.componentType === 'markArea') {
+                        that.entanglementNotify(params)
                     }
                 });
                 this.myChart1d.on('click', function (params) {
@@ -666,6 +686,8 @@ export default {
                         if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
+                    } else if (params.componentType === 'markArea') {
+                        that.entanglementNotify(params)
                     }
                 });
                 this.myChart240.on('click', function (params) {
@@ -673,6 +695,8 @@ export default {
                         if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
+                    } else if (params.componentType === 'markArea') {
+                        that.entanglementNotify(params)
                     }
                 });
             }
@@ -1498,7 +1522,7 @@ export default {
                                 animation: false
                             },
                             markArea: {
-                                silent: true,
+                                silent: false,
                                 data: resultData.zsvalues,
                             },
                             markLine: {
@@ -1803,9 +1827,9 @@ export default {
             option.series[0].data = resultData.values
             option.xAxis[0].data = resultData.date
             // option.xAxis[1].data = resultData.date
-            option.series[0].markArea.data = resultData.zsvalues
-            option.series[0].markLine.data = resultData.markLineData
-            option.series[0].markPoint.data = resultData.huilaValues
+            option.series[1].markArea.data = resultData.zsvalues
+            option.series[1].markLine.data = resultData.markLineData
+            option.series[1].markPoint.data = resultData.huilaValues
             option.series[1].data = resultData.biValues
             option.series[2].data = resultData.duanValues
             option.series[2].markPoint.data = resultData.duanPriceValues
@@ -1915,7 +1939,19 @@ export default {
             let zsvalues = []
             for (let i = 0; i < zsdata.length; i++) {
                 let value
+                let start_date = zsdata[i][0][0].slice(0, -6).replace(/-/g, '/')
+                let end_date = zsdata[i][1][0].slice(0, -6).replace(/-/g, '/')
+                // console.log(start_date, end_date)
+                let start_date_timestamp = new Date(start_date)
+                let end_date_timestamp = new Date(end_date)
+                let delta_timestamp = end_date_timestamp - start_date_timestamp
+                // 中枢持续时间
+                let remainTime = delta_timestamp / 3600 / 1000 / 24
+                // console.log("中枢持续时间", remainTime)
                 if (zsflag[i] > 0) {
+                    // 波动率
+                    let volatility = ((zsdata[i][1][1] - zsdata[i][0][1]) / zsdata[i][0][1] * 100).toFixed(1)
+                    // console.log("波动率", volatility)
                     value = [
                         {
                             coord: zsdata[i][0],
@@ -1924,7 +1960,9 @@ export default {
                                 borderWidth: '2',
                                 borderColor: 'red',
                                 opacity: 0.2,
-                            }
+                            },
+                            remainTime: remainTime,
+                            volatility: volatility
                         },
                         {
                             coord: zsdata[i][1],
@@ -1933,10 +1971,13 @@ export default {
                                 borderWidth: '1',
                                 borderColor: this.echartsConfig.upColor,
                                 opacity: 0.2,
-                            }
+                            },
+
                         }
                     ]
                 } else {
+                    // 波动率
+                    let volatility = ((zsdata[i][1][1] - zsdata[i][0][1]) / zsdata[i][0][1] * 100).toFixed(1)
                     value = [
                         {
                             coord: zsdata[i][0],
@@ -1945,7 +1986,9 @@ export default {
                                 borderWidth: '1',
                                 borderColor: this.echartsConfig.downColor,
                                 opacity: 0.2,
-                            }
+                            },
+                            remainTime: remainTime,
+                            volatility: volatility
                         },
                         {
                             coord: zsdata[i][1],
@@ -1954,7 +1997,7 @@ export default {
                                 borderWidth: '1',
                                 borderColor: this.echartsConfig.downColor,
                                 opacity: 0.2,
-                            }
+                            },
                         }
                     ]
                 }
