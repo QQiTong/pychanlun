@@ -243,7 +243,7 @@ export default {
             let num8 = 56
             let klineHeader = that.$refs['klineHeader']
 
-            //字母 A~Z  65~90
+            // 字母 A~Z  65~90
             let key = window.event.keyCode;
             if (key === page_down) {
                 that.onPgUpDnChangeSymbol(1)
@@ -571,16 +571,16 @@ export default {
                 this.myChart.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
                         // 点击到了 markPoint 上
-                        if (params.seriesIndex === 0) {
-                            console.log("点击到了 index 为 0 的 series 的 markPoint 上。")
+                        if (params.seriesIndex === 1) {
+                            // console.log("点击到了 index 为 0 的 series 的 markPoint 上。")
                             that.positionNotify(params)
                         }
                     } else if (params.componentType === 'series') {
                         if (params.seriesType === 'graph') {
                             if (params.dataType === 'edge') {
-                                console.log("点击到了 graph 的 edge（边）上。")
+                                // console.log("点击到了 graph 的 edge（边）上。")
                             } else {
-                                console.log("点击到了 graph 的 node（节点）上。")
+                                // console.log("点击到了 graph 的 node（节点）上。")
                             }
                         }
                     }
@@ -628,49 +628,49 @@ export default {
                 // 监听点击事件
                 this.myChart1d.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
-                        if (params.seriesIndex === 0) {
+                        if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
                     }
                 });
                 this.myChart5.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
-                        if (params.seriesIndex === 0) {
+                        if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
                     }
                 });
                 this.myChart15.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
-                        if (params.seriesIndex === 0) {
+                        if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
                     }
                 });
                 this.myChart30.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
-                        if (params.seriesIndex === 0) {
+                        if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
                     }
                 });
                 this.myChart60.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
-                        if (params.seriesIndex === 0) {
+                        if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
                     }
                 });
                 this.myChart1d.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
-                        if (params.seriesIndex === 0) {
+                        if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
                     }
                 });
                 this.myChart240.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
-                        if (params.seriesIndex === 0) {
+                        if (params.seriesIndex === 1) {
                             that.positionNotify(params)
                         }
                     }
