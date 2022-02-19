@@ -9,7 +9,6 @@ from threading import Thread, Timer
 from QUANTAXIS.QAUtil.QASetting import future_ip_list
 from fastapi import FastAPI
 from pychanlun.basic.singleton_type import SingletonType
-from pychanlun.database.cache import RedisCache
 
 class TdxExHqExecutor(metaclass=SingletonType):
     def __init__(self, thread_num=5, timeout=1, sleep_time=1, *args, **kwargs):
@@ -82,7 +81,6 @@ class TdxExHqExecutor(metaclass=SingletonType):
 
 app = FastAPI()
 
-@RedisCache.memoize(expiration=3)
 def ex_get_markets():
     return TdxExHqExecutor().get_markets()
 
@@ -90,7 +88,6 @@ def ex_get_markets():
 async def _ex_get_markets():
     return ex_get_markets()
 
-@RedisCache.memoize(expiration=3)
 def ex_get_instrument_count():
     return TdxExHqExecutor().get_instrument_count()
 
@@ -98,7 +95,6 @@ def ex_get_instrument_count():
 async def _ex_get_instrument_count():
     return ex_get_instrument_count()
 
-@RedisCache.memoize(expiration=3)
 def ex_get_instrument_quote(market: int, code: str):
     return TdxExHqExecutor().get_instrument_quote(market, code)
 
@@ -106,7 +102,6 @@ def ex_get_instrument_quote(market: int, code: str):
 async def _ex_get_instrument_quote(market: int, code: str):
     return ex_get_instrument_quote(market, code)
 
-@RedisCache.memoize(expiration=3)
 def ex_get_instrument_bars(category: int, market: int, code: str, start: int=0, count: int=700):
     return TdxExHqExecutor().get_instrument_bars(category, market, code, start, count)
 
@@ -114,7 +109,6 @@ def ex_get_instrument_bars(category: int, market: int, code: str, start: int=0, 
 async def _ex_get_instrument_bars(category: int, market: int, code: str, start: int=0, count: int=700):
     return ex_get_instrument_bars(category, market, code, start, count)
 
-@RedisCache.memoize(expiration=3)
 def ex_get_minute_time_data(market: int, code: str):
     return TdxExHqExecutor().get_minute_time_data(market, code)
 
@@ -122,7 +116,6 @@ def ex_get_minute_time_data(market: int, code: str):
 async def _ex_get_minute_time_data(market: int, code: str):
     return ex_get_minute_time_data(market, code)
 
-@RedisCache.memoize(expiration=3)
 def ex_get_history_minute_time_data(market: int, code: str, date: int):
     return TdxExHqExecutor().get_history_minute_time_data(market, code, date)
 
@@ -130,7 +123,6 @@ def ex_get_history_minute_time_data(market: int, code: str, date: int):
 async def _ex_get_history_minute_time_data(market: int, code: str, date: int):
     return ex_get_history_minute_time_data(market, code, date)
 
-@RedisCache.memoize(expiration=3)
 def ex_get_transaction_data(market: int, code: str, start: int=0, count: int=1800):
     return TdxExHqExecutor().get_transaction_data(market, code, start, count)
 
@@ -138,7 +130,6 @@ def ex_get_transaction_data(market: int, code: str, start: int=0, count: int=180
 async def _ex_get_transaction_data(market: int, code: str, start: int=0, count: int=1800):
     return ex_get_transaction_data(market, code, start, count)
 
-@RedisCache.memoize(expiration=3)
 def ex_get_history_transaction_data(market: int, code: str, date: int, start: int=0, count: int=1800):
     return TdxExHqExecutor().get_history_transaction_data(market, code, date, start, count)
 
@@ -146,7 +137,6 @@ def ex_get_history_transaction_data(market: int, code: str, date: int, start: in
 async def _ex_get_history_transaction_data(market: int, code: str, date: int, start: int=0, count: int=1800):
     return ex_get_history_transaction_data(market, code, date, start, count)
 
-@RedisCache.memoize(expiration=3)
 def ex_get_history_instrument_bars_range(market: int, code: str, start: int, end: int):
     return TdxExHqExecutor().get_history_instrument_bars_range(market, code, start, end)
 
@@ -154,7 +144,6 @@ def ex_get_history_instrument_bars_range(market: int, code: str, start: int, end
 async def _ex_get_history_instrument_bars_range(market: int, code: str, start: int, end: int):
     return ex_get_history_instrument_bars_range(market, code, start, end)
 
-@RedisCache.memoize(expiration=3)
 def ex_get_instrument_info(start: int, count: int=100):
     return TdxExHqExecutor().get_instrument_info(start, count)
 
@@ -162,7 +151,6 @@ def ex_get_instrument_info(start: int, count: int=100):
 async def _ex_get_instrument_info(start: int, count: int=100):
     return ex_get_instrument_info(start, count)
 
-@RedisCache.memoize(expiration=3)
 def ex_get_instrument_quote_list(market: int, category: int, start: int=0, count: int=80):
     return TdxExHqExecutor().get_instrument_quote_list(market, category, start, count)
 

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import pytz
 from dynaconf import Dynaconf
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # freshquant所在目录
@@ -10,8 +11,16 @@ CWD_DIR = os.getcwd()  # 执行程序或脚本的目录
 
 
 class Config:
-    SCHEDULER_API_ENABLED = True
-    SCHEDULER_TIMEZONE = 'Asia/Shanghai'
+    BASE_DIR = BASE_DIR
+    EXE_DIR = EXE_DIR
+    CWD_DIR = CWD_DIR
+    TIMEZONE = 'Asia/Shanghai'
+    TZ = pytz.timezone(TIMEZONE)
+    DT_FORMAT_FULL = "%Y-%m-%d %H:%M:%S"
+    DT_FORMAT_DAY = "%Y-%m-%d"
+    DT_FORMAT_M = "%Y-%m-%d %H:%M"
+    FUTURE_OHLC = {'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'position': 'sum', 'amount': 'sum'}
+
     PROXIES = {
         "http": "socks5://127.0.0.1:10808",
         "https": "socks5://127.0.0.1:10808"
@@ -188,32 +197,32 @@ config_path = os.path.expanduser('~')
 config_path = '{}{}{}'.format(config_path, os.sep, '.pychanlun')
 settings = Dynaconf(
     settings_files=[
-        os.path.join(BASE_DIR, "freshquant.yaml"),
-        os.path.join(BASE_DIR, "freshquant.yml"),
-        os.path.join(BASE_DIR, "freshquant.json"),
-        os.path.join(EXE_DIR, "freshquant.yaml"),
-        os.path.join(EXE_DIR, "freshquant.yml"),
-        os.path.join(EXE_DIR, "freshquant.json"),
-        os.path.join(config_path, "freshquant.yaml"),
-        os.path.join(config_path, "freshquant.yml"),
-        os.path.join(config_path, "freshquant.json"),
-        os.path.join(CWD_DIR, "freshquant.yaml"),
-        os.path.join(CWD_DIR, "freshquant.yml"),
-        os.path.join(CWD_DIR, "freshquant.json"),
+        os.path.join(BASE_DIR, "pychanlun.yaml"),
+        os.path.join(BASE_DIR, "pychanlun.yml"),
+        os.path.join(BASE_DIR, "pychanlun.json"),
+        os.path.join(EXE_DIR, "pychanlun.yaml"),
+        os.path.join(EXE_DIR, "pychanlun.yml"),
+        os.path.join(EXE_DIR, "pychanlun.json"),
+        os.path.join(config_path, "pychanlun.yaml"),
+        os.path.join(config_path, "pychanlun.yml"),
+        os.path.join(config_path, "pychanlun.json"),
+        os.path.join(CWD_DIR, "pychanlun.yaml"),
+        os.path.join(CWD_DIR, "pychanlun.yml"),
+        os.path.join(CWD_DIR, "pychanlun.json"),
     ],
     includes=[
-        os.path.join(BASE_DIR, "freshquant_*.yaml"),
-        os.path.join(BASE_DIR, "freshquant_*.yml"),
-        os.path.join(BASE_DIR, "freshquant_*.json"),
-        os.path.join(EXE_DIR, "freshquant_*.yaml"),
-        os.path.join(EXE_DIR, "freshquant_*.yml"),
-        os.path.join(EXE_DIR, "freshquant_*.json"),
-        os.path.join(config_path, "freshquant_*.yaml"),
-        os.path.join(config_path, "freshquant_*.yml"),
-        os.path.join(config_path, "freshquant_*.json"),
-        os.path.join(CWD_DIR, "freshquant_*.yaml"),
-        os.path.join(CWD_DIR, "freshquant_*.yml"),
-        os.path.join(CWD_DIR, "freshquant_*.json")
+        os.path.join(BASE_DIR, "pychanlun_*.yaml"),
+        os.path.join(BASE_DIR, "pychanlun_*.yml"),
+        os.path.join(BASE_DIR, "pychanlun_*.json"),
+        os.path.join(EXE_DIR, "pychanlun_*.yaml"),
+        os.path.join(EXE_DIR, "pychanlun_*.yml"),
+        os.path.join(EXE_DIR, "pychanlun_*.json"),
+        os.path.join(config_path, "pychanlun_*.yaml"),
+        os.path.join(config_path, "pychanlun_*.yml"),
+        os.path.join(config_path, "pychanlun_*.json"),
+        os.path.join(CWD_DIR, "pychanlun_*.yaml"),
+        os.path.join(CWD_DIR, "pychanlun_*.yml"),
+        os.path.join(CWD_DIR, "pychanlun_*.json")
     ],
-    envvar_prefix="freshquant",
+    envvar_prefix="pychanlun",
 )
