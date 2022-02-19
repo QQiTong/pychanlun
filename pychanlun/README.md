@@ -82,7 +82,7 @@ nssm set download-global-future-service DependOnService MongoDB
 net start download-global-future-service
 ```
 
-期货监控服务服务
+期货监控服务
 （管理员命令行模式）
 ```cmd
 nssm install future-monitoring-service C:\Python\Python38\Scripts\pychanlun.exe
@@ -92,4 +92,10 @@ nssm set future-monitoring-service AppStdout D:\logs\pychanlun.log
 nssm set future-monitoring-service AppStderr D:\logs\pychanlun.log
 nssm set future-monitoring-service DependOnService MongoDB
 net start future-monitoring-service
+```
+安装redis 服务
+```cmd
+nssm install redis-service "C:\Users\parker\scoop\shims\redis-server.exe"
+nssm set redis-service AppEnvironmentExtra PATH=C:\Windows\System32;
+net start redis-service
 ```
