@@ -14,7 +14,7 @@ import pymongo
 from loguru import logger
 from pymongo import UpdateOne
 
-from pychanlun.config import cfg, settings
+from pychanlun.config import cfg, settings, config
 from pychanlun.gateway.tdxhq import TdxExHqExecutor
 from QUANTAXIS.QAUtil import QA_util_if_tradetime, QA_util_if_trade
 from pychanlun.database.redis import RedisDB
@@ -25,6 +25,7 @@ from pychanlun.data.future.fetch import fq_future_fetch_instrument_bars
 SYMBOL_QUEUE_NAME = "future_zh_min_symbol_queue"
 _is_test = pydash.get(settings, "test", False)
 _running = True
+future_list = []
 
 
 def signal_handler(signalnum, frame):
@@ -147,15 +148,20 @@ def future_zh_min_symbol_queue():
                 #     if tool_trade_date_seconds_to_start() > 0:
                 #         continue
             if queue_length == 0:
-                symbols = ["RBL9"]
-                if len(symbols) > 0:
-                    RedisDB.lpush(SYMBOL_QUEUE_NAME, *symbols)
+                if len(future_list) > 0:
+                    RedisDB.lpush(SYMBOL_QUEUE_NAME, *future_list)
         except Exception:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
         sleep(1)
 
 
 def job():
+    for symbol in config['future_config']:
+        # 到美原油为止
+        if symbol == 'CL':
+            break
+        future_list.append(symbol + "L9")
+    print("采集的品种列表", future_list)
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     indexes = DBPyChanlun["future_realtime"].index_information()
