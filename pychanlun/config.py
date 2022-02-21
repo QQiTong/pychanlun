@@ -127,7 +127,7 @@ config = {
         'CL': {'order_book_id': 'CL','margin_rate': 0.16, 'contract_multiplier': 500},  # 8:30 -14:00 0.1      其它时间 0.15       11756
         'GC': {'order_book_id': 'GC','margin_rate': 0.07, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
         'SI': {'order_book_id': 'SI','margin_rate': 0.14, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
-        'HG': {'order_book_id': 'HG','margin_rate': 0.06, 'contract_multiplier': 25000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
+        'HG': {'order_book_id': 'HG','margin_rate': 0.06, 'contract_multiplier': 250},  # 由于新浪数据报价单位是美分 所以将乘数25000改成250
         'AHD': {'order_book_id': 'AHD','margin_rate': 0.1, 'contract_multiplier': 1},
         'NID': {'order_book_id': 'NID','margin_rate': 0.1, 'contract_multiplier': 1},
         'ZSD': {'order_book_id': 'ZSD','margin_rate': 0.1, 'contract_multiplier': 1},

@@ -399,7 +399,7 @@ export default {
 
     methods: {
         entanglementNotify(params) {
-            console.log(params)
+            // console.log(params)
             const h = this.$createElement
             this.$notify({
                 title: '中枢详情',
@@ -410,7 +410,15 @@ export default {
             })
         },
         positionNotify(params) {
-            console.log(params)
+            // console.log("参数", params)
+            let openSignalTime = params.data.coord[0]
+            let openSignalDate = openSignalTime.slice(0, -6)
+
+            let startDate = openSignalTime.replace(/-/g, '/')
+            // 信号如果持有到今天持续时间
+            let signalRemainTodayTime = parseInt(this.getDiffDate(startDate, this.endDate));
+            // 信号如果持有到今天涨跌幅度
+            let signalRemainTodayVolatility = (Math.abs(this.currentPrice - params.data.value) / params.data.value * 100).toFixed(1)
             this.quickCalc.openPrice = params.data.value
             this.quickCalc.stopPrice = params.data.stop_lose_price
             this.quickCalcMaxCount()
@@ -444,19 +452,22 @@ export default {
             const h = this.$createElement
             this.$notify({
                 title: '信号详情',
-                type: longShort === -1 ? "success" : "error",
+                type: longShort === -1 ? "success" : "warning",
                 duration: 10 * 1000,
                 dangerouslyUseHTMLString: true,
-                message: "开仓手数 " + this.quickCalc.count + " 手<br/>" +
+                message:
+                    "开仓时间 " + openSignalTime + " <br/>" +
+                    "开仓手数 " + this.quickCalc.count + " 手<br/>" +
                     "占用保证金 " + (this.quickCalc.count * this.symbolInfo.margin_rate * this.quickCalc.openPrice * multiInfo).toFixed(0) + " 元" + "<br/>" +
                     "止损率 " + (this.quickCalc.stopRate * 100).toFixed(0) + "%" + "<br/>" +
                     "每手止损 " + this.quickCalc.perOrderStopMoney + " 元" + "<br/>" +
                     "总止损 " + (this.quickCalc.perOrderStopMoney * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
+                    "持续时间 " + signalRemainTodayTime + " 天,幅度 " + signalRemainTodayVolatility + "%<br/>" +
                     "1倍盈亏比目标位 " + firstBlood.toFixed(0) + " 盈利 " + (Math.abs(firstBlood - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
                     "2倍盈亏比目标位 " + doubleKill.toFixed(0) + " 盈利 " + (Math.abs(doubleKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
                     "3倍盈亏比目标位 " + tribleKill.toFixed(0) + " 盈利 " + (Math.abs(tribleKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
                     "4倍盈亏比目标位 " + quadroKill.toFixed(0) + " 盈利 " + (Math.abs(quadroKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>" +
-                    "5倍盈亏比目标位 " + pentaKill.toFixed(0) + " 盈利 " + (Math.abs(pentaKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元" + "<br/>"
+                    "5倍盈亏比目标位 " + pentaKill.toFixed(0) + " 盈利 " + (Math.abs(pentaKill - this.quickCalc.openPrice) * multiInfo * this.quickCalc.count).toFixed(0) + " 元"
             })
         },
         setOneKeyNakedKline(chart) {
@@ -1861,6 +1872,15 @@ export default {
             // console.log('更新的option', option)
             return option
         },
+        getDiffDate(start_date, end_date) {
+            // console.log(start_date, end_date)
+            let start_date_timestamp = new Date(start_date)
+            let end_date_timestamp = new Date(end_date)
+            let delta_timestamp = end_date_timestamp - start_date_timestamp
+            // 中枢持续时间
+            let remainTime = delta_timestamp / 3600 / 1000 / 24
+            return remainTime;
+        },
         splitData(jsonObj, period) {
             const stockDate = jsonObj.date
             const stockHigh = jsonObj.high
@@ -1952,12 +1972,7 @@ export default {
                 let value
                 let start_date = zsdata[i][0][0].slice(0, -6).replace(/-/g, '/')
                 let end_date = zsdata[i][1][0].slice(0, -6).replace(/-/g, '/')
-                // console.log(start_date, end_date)
-                let start_date_timestamp = new Date(start_date)
-                let end_date_timestamp = new Date(end_date)
-                let delta_timestamp = end_date_timestamp - start_date_timestamp
-                // 中枢持续时间
-                let remainTime = delta_timestamp / 3600 / 1000 / 24
+                let remainTime = this.getDiffDate(start_date, end_date);
                 // console.log("中枢持续时间", remainTime)
                 if (zsflag[i] > 0) {
                     // 波动率
