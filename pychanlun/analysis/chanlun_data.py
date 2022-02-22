@@ -419,12 +419,12 @@ class ChanlunData:
 
         # 计算是否有独立隔离K线的函数
         def isolation_func(s: Stick):
-            return s.high_price <= fractal_start.low_price and s.low_price >= fractal_end.high_price if \
+            return s.high_price <= fractal_start.low_price or s.low_price >= fractal_end.high_price if \
                 fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
                 s.low_price >= fractal_start.high_price and s.high_price <= fractal_end.low_price
 
         def isolation_func2(s: MergedStick):
-            return s.high_price <= fractal_start.low_price and s.low_price >= fractal_end.high_price if \
+            return s.high_price <= fractal_start.low_price or s.low_price >= fractal_end.high_price if \
                 fractal_end.fractal_type == CONSTANT.FRACTAL_BOTTOM else \
                 s.low_price >= fractal_start.high_price and s.high_price <= fractal_end.low_price
 
