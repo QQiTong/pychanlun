@@ -155,10 +155,10 @@ export default {
             // 账户总额
             account: 0,
             // 期货账户总额
-            futureAccount: this.$futureAccount,
-            globalFutureAccount: this.$globalFutureAccount,
+            futureAccount: 0,
+            globalFutureAccount: 0,
             // 数字货币账户总额
-            digitCoinAccount: this.$digitCoinAccount,
+            digitCoinAccount: 0,
             // 开仓价格
             openPrice: null,
             // 止损价格
@@ -168,11 +168,11 @@ export default {
             // 资金使用率
             accountUseRate: null,
             // 最大资金使用率
-            maxAccountUseRate: this.$maxAccountUseRate,
+            maxAccountUseRate: 0,
             // 止损系数
-            stopRate: this.$stopRate,
+            stopRate: 0,
             // 数字货币手续费 20倍杠杆 双向 0.05%*2
-            digitCoinFee: 0.001,
+            digitCoinFee: 0,
 
             // 1手需要的保证金
             perOrderMargin: 0,
@@ -210,7 +210,7 @@ export default {
             futureConfig: {},
             symbolInfo: null,
             show1MinSymbol: ['BTC'],
-            globalFutureSymbol: this.$globalFutureSymbol,
+            globalFutureSymbol: [],
             //    快速计算开仓手数
             quickCalc: {
                 openPrice: "",
@@ -350,6 +350,9 @@ export default {
         // }
     },
     mounted() {
+        this.getAccountInfo()
+
+        this.getGlobalFutureSymbol()
         // 不共用symbol对象, symbol是双向绑定的
         this.inputSymbol = JSON.parse(JSON.stringify(this.symbol))
         this.period = this.getParams('period')
@@ -397,6 +400,29 @@ export default {
     },
 
     methods: {
+        getAccountInfo() {
+            futureApi.getAccountInfo().then(res => {
+                console.log('获取账户信息:', res)
+                this.futureAccount = res.inner_future
+                this.globalFutureAccount = res.global_future
+                this.digitCoinAccount = res.digit_coin
+                this.maxAccountUseRate = res.risk_control.max_account_use_rate
+                this.stopRate = res.risk_control.stop_rate
+                this.digitCoinFee = res.digit_coin.fee
+            }).catch((error) => {
+                console.log('获取账户信息失败:', error)
+            })
+        },
+        getGlobalFutureSymbol() {
+            futureApi.getGlobalFutureSymbol().then(res => {
+                this.globalFutureSymbol = res
+                console.log('获取外盘品种:', res)
+
+            }).catch((error) => {
+                console.log('获取外盘品种失败:', error)
+
+            })
+        },
         entanglementNotify(params) {
             // console.log(params)
             const h = this.$createElement
@@ -3330,8 +3356,8 @@ export default {
                 this.perOrderStopMoney = Math.abs(openPrice - stopPrice) * this.contractMultiplier
                 // 1手止损的百分比
                 this.perOrderStopRate = (this.perOrderStopMoney / this.perOrderMargin).toFixed(2)
-                this.maxAccountUseRate = this.$maxAccountUseRate
-                this.stopRate = this.$stopRate
+                this.maxAccountUseRate = this.maxAccountUseRate
+                this.stopRate = this.stopRate
             }
 
             // 计算最大能使用的资金

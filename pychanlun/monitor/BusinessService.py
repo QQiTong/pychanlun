@@ -40,26 +40,10 @@ class BusinessService:
         print('初始化业务对象...')
 
     def get_account_info(self):
-        account_info = {
-            'inner_future': {
-                'account': 10,
-            },
-            'inner_stock': {
-                'account': 10
-            },
-            'digit_coin': {
-                'account': 10,
-                'level':20
-            },
-            'global_future': {
-                'account': 10
-            },
-            'risk_control': {
-                'stop_rate': 0.02,
-                'max_account_use_rate':0.1
-            }
-        }
-        return account_info
+        return config['account_info']
+
+    def get_global_future_symbol(self):
+        return config['global_future_symbol']
 
     # okex数字货币部分涨跌幅
     def getBTCTicker(self):

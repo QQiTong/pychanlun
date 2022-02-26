@@ -1611,9 +1611,9 @@
                     // 由于程序性能问题 实际扫描到止损的时候价格已经越过止损价了 因此这里使用预计止损额更准确
                     this.sumObj.loseEndSum += Math.round(item.predict_stop_money, 0)
                     this.sumObj.marginSum += Math.round(item.total_margin, 0)
-                    this.sumObj.marginSumRate = (this.sumObj.marginSum / (this.$futureAccount * 10000) * 100).toFixed(1) + "%"
-                    this.sumObj.winEndSumRate = (this.sumObj.winEndSum / (this.$futureAccount * 10000) * 100).toFixed(1) + "%"
-                    this.sumObj.currentProfitSumRate = (this.sumObj.currentProfitSum / (this.$futureAccount * 10000) * 100).toFixed(1) + "%"
+                    this.sumObj.marginSumRate = (this.sumObj.marginSum / (this.futureAccount * 10000) * 100).toFixed(1) + "%"
+                    this.sumObj.winEndSumRate = (this.sumObj.winEndSum / (this.futureAccount * 10000) * 100).toFixed(1) + "%"
+                    this.sumObj.currentProfitSumRate = (this.sumObj.currentProfitSum / (this.futureAccount * 10000) * 100).toFixed(1) + "%"
                 }
 
                 for (let i = 0; i < this.globalFuturePositionList.length; i++) {
@@ -1671,7 +1671,7 @@
                         })
                         sums[index] = parseInt(winEndSum)
                     } else if (label === '已盈利比率') {
-                        sums[index] = (this.sumObj.winEndSum / (this.$futureAccount * 10000) * 100).toFixed(1) + '%'
+                        sums[index] = (this.sumObj.winEndSum / (this.futureAccount * 10000) * 100).toFixed(1) + '%'
                     } else if (label === '浮盈额') {
                         // 累加当前盈利
                         data.forEach((item) => {
@@ -1694,9 +1694,9 @@
                         })
                         sums[index] = totalMargin
                     } else if (label === '浮盈率') {
-                        sums[index] = (this.sumObj.currentProfitSum / (this.$futureAccount * 10000) * 100).toFixed(1) + '%'
+                        sums[index] = (this.sumObj.currentProfitSum / (this.futureAccount * 10000) * 100).toFixed(1) + '%'
                     } else if (label === '止损率') {
-                        sums[index] = (this.sumObj.loseEndSum / (this.$futureAccount * 10000) * 100).toFixed(1) + '%'
+                        sums[index] = (this.sumObj.loseEndSum / (this.futureAccount * 10000) * 100).toFixed(1) + '%'
                     } else {
                         sums[index] = ''
                     }

@@ -53,17 +53,18 @@ futureLevelMap = {
 dominant_symbol_info_list = {}
 
 # 期货公司在原有保证金基础上1%
-marginLevelCompany = 0.01
-# 期货账户
-futuresAccount = 58
+margin_rate_company = config['account_info']['inner_future']['margin_rate_company']
+# 内盘期货账户
+inner_future_account = config['account_info']['inner_future']['account']
 # 数字货币手续费0.05% 开平仓0.1%
-digitCoinFee = 0.001
+digit_coin_fee = config['account_info']['digit_coin']['fee']
 # 数字货币账户
-digitCoinAccount = 60.80 / 10000
+digit_coin_account = config['account_info']['digit_coin']['account']
 # 外盘期货账户
-global_future_account = 6
-maxAccountUseRate = 0.10
-stopRate = 0.01
+global_future_account = config['account_info']['global_future']['account']
+max_account_use_rate = config['account_info']['risk_control']['max_account_use_rate']
+stop_rate = config['account_info']['risk_control']['stop_rate']
+
 mail = Mail()
 dingMsg = DingMsg()
 
@@ -77,8 +78,8 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
     if futureCalcObj == -1:
         print("symbol ->", symbol, " period->", period)
         return
-    # perOrderStopRate 的止损率大于0.3 的信号只保存不再提醒出来，也就是不做止损较大的单子
-    perOrderStopRate = futureCalcObj['perOrderStopRate']
+    # perOrderstop_rate 的止损率大于0.3 的信号只保存不再提醒出来，也就是不做止损较大的单子
+    perOrderstop_rate = futureCalcObj['perOrderstop_rate']
     above_ma5, above_ma20, not_lower, not_higher, fractal, power = await getFormatNotifyMsg(direction, signal,
                                                                                             futureCalcObj)
     # 更新,实时更新持仓品种的价格
@@ -123,7 +124,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 'amount': amount,
                 'date_created': datetime.utcnow(),
                 'stop_lose_price': stop_lose_price,
-                'per_order_stop_rate': round(perOrderStopRate, 3)
+                'per_order_stop_rate': round(perOrderstop_rate, 3)
             },
             '$inc': {
                 'update_count': 1
@@ -142,7 +143,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             'close_price': close_price,  # 提醒时最新价格
             'direction': direction,
             'stop_lose_price': stop_lose_price,  # 当前信号的止损价
-            'per_order_stop_rate': round(perOrderStopRate, 3),
+            'per_order_stop_rate': round(perOrderstop_rate, 3),
             'update_count': 1,  # 这条背驰记录的更新次数
             'above_ma5': above_ma5,
             'above_ma20': above_ma20,
@@ -158,9 +159,9 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             interval_time = 60 * 60 * 24 * 1
         if signal == 'fractal':
             max_stop_rate = 0.3
-            print(signal, symbol, period, futureCalcObj, perOrderStopRate)
+            print(signal, symbol, period, futureCalcObj, perOrderstop_rate)
 
-        if abs((date_created - fire_time).total_seconds()) < interval_time and perOrderStopRate <= max_stop_rate:
+        if abs((date_created - fire_time).total_seconds()) < interval_time and perOrderstop_rate <= max_stop_rate:
             # 新增
             remind = await saveFutureAutoPosition(symbol, period, fire_time_str, direction, signal, tag, price,
                                                   close_price,
@@ -195,7 +196,7 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
                 "方向": '买' if direction == 'B' or direction == 'HB' else '卖',
                 "数量": amount,
                 "止损价": stop_lose_price,
-                "止损率": str(int(perOrderStopRate * 100)) + '%',
+                "止损率": str(int(perOrderstop_rate * 100)) + '%',
                 "分类": tag,
                 "触发价格": price,
                 "触发时间": fire_time_str,
@@ -323,7 +324,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                     marginLevel = 1 / last_fire['margin_rate']
                 else:
                     # 内盘
-                    marginLevel = 1 / (last_fire['margin_rate'] + config['margin_rate_company'])
+                    marginLevel = 1 / (last_fire['margin_rate'] + margin_rate_company)
 
                 if last_fire['direction'] == "long":
                     stop_win_profit_rate = round(
@@ -457,7 +458,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
                     'update_count': 1,  # 这条背驰记录的更新次数
                     'status': status,
                     'per_order_stop_money': futureCalcObj['perOrderStopMoney'],
-                    'per_order_stop_rate': round(futureCalcObj['perOrderStopRate'], 2),
+                    'per_order_stop_rate': round(futureCalcObj['perOrderstop_rate'], 2),
                     'per_order_margin': round(futureCalcObj['perOrderMargin'], 2),
                     'predict_stop_money': -round(futureCalcObj['perOrderStopMoney'] * futureCalcObj['maxOrderCount'],
                                                  2),
@@ -515,7 +516,7 @@ async def saveFutureAutoPosition(symbol, period, fire_time_str, direction, signa
             elif last_fire['symbol'] in global_future_symbol:
                 marginLevel = 1 / last_fire['margin_rate']
             else:
-                marginLevel = 1 / (last_fire['margin_rate'] + config['margin_rate_company'])
+                marginLevel = 1 / (last_fire['margin_rate'] + margin_rate_company)
             # 之后价格再涨上来，status又会变成holding ,因此已经被止损的持仓不要再更新状态了
             if last_fire['status'] == 'holding':
 
@@ -1209,14 +1210,14 @@ async def calMaxOrderCount(symbol, openPrice, stopPrice, period, signal):
         return -1
     # 兼容数字货币 外盘期货
     if 'BTC' in symbol:
-        account = digitCoinAccount
+        account = digit_coin_account
         margin_rate = 0.05
         # 因为使用20倍杠杆所以 需要除以20
         perOrderMargin = 0.01 * openPrice * margin_rate
         # 1手止损的比率
-        perOrderStopRate = (abs(openPrice - stopPrice) / openPrice + digitCoinFee) * 20
+        perOrderstop_rate = (abs(openPrice - stopPrice) / openPrice + digit_coin_fee) * 20
         # 1手止损的金额
-        perOrderStopMoney = round((perOrderMargin * perOrderStopRate), 4)
+        perOrderStopMoney = round((perOrderMargin * perOrderstop_rate), 4)
         maxAccountUse = account * 10000 * 0.4
         maxStopMoney = account * 10000 * 0.1
     elif symbol in config['global_future_symbol'] or symbol in config['global_stock_symbol']:
@@ -1228,39 +1229,39 @@ async def calMaxOrderCount(symbol, openPrice, stopPrice, period, signal):
         # 1手止损的金额
         perOrderStopMoney = abs(openPrice - stopPrice) * contract_multiplier
         # 1手止损的百分比
-        perOrderStopRate = round((perOrderStopMoney / perOrderMargin), 2)
+        perOrderstop_rate = round((perOrderStopMoney / perOrderMargin), 2)
 
         maxAccountUse = account * 10000 * 0.3
         maxStopMoney = account * 10000 * 0.1
     # 内盘期货
     else:
         simple_symbol = symbol.rstrip(string.digits)
-        account = futuresAccount
+        account = inner_future_account
         margin_rate = dominant_symbol_info_list[simple_symbol]['margin_rate']
         contract_multiplier = dominant_symbol_info_list[simple_symbol]['contract_multiplier']
         # 计算1手需要的保证金
-        perOrderMargin = int(openPrice * contract_multiplier * (margin_rate + marginLevelCompany))
+        perOrderMargin = int(openPrice * contract_multiplier * (margin_rate + margin_rate_company))
         # 1手止损的金额
         perOrderStopMoney = abs(openPrice - stopPrice) * contract_multiplier
         # 1手止损的百分比
-        perOrderStopRate = round((perOrderStopMoney / perOrderMargin), 2)
+        perOrderstop_rate = round((perOrderStopMoney / perOrderMargin), 2)
         # 计算最大能使用的资金
-        maxAccountUse = account * 10000 * maxAccountUseRate
+        maxAccountUse = account * 10000 * max_account_use_rate
         # 计算最大止损金额
-        maxStopMoney = account * 10000 * stopRate
+        maxStopMoney = account * 10000 * stop_rate
     # 根据止损算出的开仓手数(四舍五入)
 
-    # print("debug ",symbol,account,maxStopMoney,maxAccountUse,perOrderStopMoney,"1手保证金：",perOrderMargin,openPrice, stopPrice,"1手止损：",perOrderStopRate,perOrderStopMoney,period,contract_multiplier)
+    # print("debug ",symbol,account,maxStopMoney,maxAccountUse,perOrderStopMoney,"1手保证金：",perOrderMargin,openPrice, stopPrice,"1手止损：",perOrderstop_rate,perOrderStopMoney,period,contract_multiplier)
     maxOrderCount1 = round(maxStopMoney / perOrderStopMoney)
     # 根据最大资金使用率算出的开仓手数(四舍五入)
     maxOrderCount2 = round(maxAccountUse / perOrderMargin)
     maxOrderCount = maxOrderCount2 if maxOrderCount1 > maxOrderCount2 else maxOrderCount1
-    # print(symbol,"--> ",period,"--> ",perOrderStopRate,"-->",maxStopMoney,"-->",maxStopMoney / perOrderStopMoney,"-->",maxAccountUse,"-->",maxAccountUse / perOrderMargin ,"->",perOrderMargin)
+    # print(symbol,"--> ",period,"--> ",perOrderstop_rate,"-->",maxStopMoney,"-->",maxStopMoney / perOrderStopMoney,"-->",maxAccountUse,"-->",maxAccountUse / perOrderMargin ,"->",perOrderMargin)
     # 返回最大开仓手数，1手止损的金额，1手止损的百分比,1手保证金,保证金率
     futureCalcObj = {
         'maxOrderCount': maxOrderCount,
         'perOrderStopMoney': perOrderStopMoney,
-        'perOrderStopRate': perOrderStopRate,
+        'perOrderstop_rate': perOrderstop_rate,
         'perOrderMargin': perOrderMargin,
         'marginRate': margin_rate
     }

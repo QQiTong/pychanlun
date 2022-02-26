@@ -32,10 +32,10 @@ export default {
                 account: 0,
 
                 // 期货账户总额
-                futureAccount: this.$futureAccount,
+                futureAccount: 0,
                 // 数字货币账户总额
-                digitCoinAccount: this.$digitCoinAccount,
-                globalFutureAccount: this.$globalFutureAccount,
+                digitCoinAccount: 0,
+                globalFutureAccount: 0,
                 // 开仓价格
                 openPrice: null,
                 // 止损价格
@@ -87,9 +87,9 @@ export default {
             account: 0,
 
             // 期货账户总额
-            futureAccount: this.$futureAccount,
+            futureAccount: 0,
             // 数字货币账户总额
-            digitCoinAccount: this.$digitCoinAccount,
+            digitCoinAccount: 0,
             // 开仓价格
             openPrice: null,
             // 止损价格
@@ -99,9 +99,9 @@ export default {
             // 资金使用率
             accountUseRate: null,
             // 最大资金使用率
-            maxAccountUseRate: 0.1,
+            maxAccountUseRate: 0,
             // 止损系数
-            stopRate: 0.01,
+            stopRate: 0,
 
             // 1手需要的保证金
             perOrderMargin: 0,
@@ -159,7 +159,7 @@ export default {
             // history 历史状态 获取的不一定是主力合约 ，提交表格触发更新
             prejudgeTableStatus: 'current',
             prejudgeTableId: '',
-            globalFutureSymbol: this.$globalFutureSymbol,
+            globalFutureSymbol: [],
             // 5大板块列表
             groupList: [
                 // 有色板块
@@ -200,6 +200,7 @@ export default {
     mounted() {
         // this.subscribeWS()
         this.getAccountInfo()
+        this.getGlobalFutureSymbol()
         this.getDayMaList()
         this.getChangeiList()
         this.getSignalList()
@@ -219,9 +220,22 @@ export default {
         getAccountInfo() {
             futureApi.getAccountInfo().then(res => {
                 console.log('获取账户信息:', res)
-
+                this.futureAccount = res.inner_future
+                this.globalFutureAccount = res.global_future
+                this.digitCoinAccount = res.digit_coin
+                this.maxAccountUseRate = res.risk_control.max_account_use_rate
+                this.stopRate = res.risk_control.stop_rate
             }).catch((error) => {
                 console.log('获取账户信息失败:', error)
+            })
+        },
+        getGlobalFutureSymbol() {
+            futureApi.getGlobalFutureSymbol().then(res => {
+                this.globalFutureSymbol = res
+                console.log('获取外盘品种:', res)
+
+            }).catch((error) => {
+                console.log('获取外盘品种失败:', error)
 
             })
         },
@@ -495,8 +509,8 @@ export default {
             } else {
                 this.calcPosForm.currentMarginRate = Number((symbolInfo.margin_rate + this.marginLevelCompany).toFixed(3))
                 this.calcPosForm.account = this.calcPosForm.futureAccount
-                this.calcPosForm.maxAccountUseRate = this.$maxAccountUseRate
-                this.calcPosForm.stopRate = this.$stopRate
+                this.calcPosForm.maxAccountUseRate = this.maxAccountUseRate
+                this.calcPosForm.stopRate = this.stopRate
             }
             this.calcPosForm.marginLevel = (1 / this.calcPosForm.currentMarginRate).toFixed(2)
             this.calcPosForm.contractMultiplier = symbolInfo.contract_multiplier

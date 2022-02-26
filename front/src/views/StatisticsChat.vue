@@ -724,7 +724,7 @@
                             normal: {
                                 color:
                                     function (params) {
-                                        return parseInt((params.data / (that.$futureAccount * 10000)) * 100) > 50 ? 'rgba(255,144,128,1)' : 'rgba(0,191,183,1)'
+                                        return parseInt((params.data / (that.futureAccount * 10000)) * 100) > 50 ? 'rgba(255,144,128,1)' : 'rgba(0,191,183,1)'
                                     },
                                 label: {
                                     show: true,
@@ -733,7 +733,7 @@
                                     },
                                     position: 'top',
                                     formatter(p) {
-                                        return p.value + "\n\n占比" + parseInt((p.value / (that.$futureAccount * 10000)) * 100) + "%"
+                                        return p.value + "\n\n占比" + parseInt((p.value / (that.futureAccount * 10000)) * 100) + "%"
                                     }
                                 }
                             }

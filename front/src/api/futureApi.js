@@ -12,6 +12,16 @@ export const futureApi = {
         })
     },
     /**
+     * 获取外盘列表前端标识
+     */
+    getGlobalFutureSymbol () {
+        let url = `/api/get_global_future_symbol`
+        return axios({
+            url: url,
+            method: 'get',
+        })
+    },
+    /**
      * 获取K线数据
      */
     stockData (data) {

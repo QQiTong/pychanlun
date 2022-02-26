@@ -42,7 +42,13 @@ def stock_data_v2():
 @app.route('/api/get_account_info')
 def get_account_info():
     account_info = func_timeout(30, businessService.get_account_info)
-    return Response(json.dumps(account_info), mimetype='application/json')
+    return Response(json.dumps(account_info), mimetype='application/json')\
+
+
+@app.route('/api/get_global_future_symbol')
+def get_global_future_symbol():
+    global_future_symbol = func_timeout(30, businessService.get_global_future_symbol)
+    return Response(json.dumps(global_future_symbol), mimetype='application/json')
 # --------------------------------数字货币部分------------------------------------
 
 
