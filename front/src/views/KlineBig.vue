@@ -3,7 +3,7 @@
         <KlineHeader ref="klineHeader" :periodList="periodList" :endDate="endDate" :inputSymbol="inputSymbol" :quickCalc="quickCalc"
                      :submitSymbol="submitSymbol" :quickCalcMaxCount="quickCalcMaxCount" :quickSwitchDay="quickSwitchDay"
                      :switchPeriod="switchPeriod" :jumpToControl="jumpToControl" :showPeriodList="true" :changeDate="changeDate" :jumpToMultiPeriod="jumpToMultiPeriod"
-                     :quickSwitchSymbol="quickSwitchSymbol" :futureSymbolList="futureSymbolList"
+                     :quickSwitchSymbol="quickSwitchSymbol" :futureSymbolList="futureSymbolList" :themeOptions="themeOptions"
         ></KlineHeader>
         <div class="echarts-item-big" id="mainParent">
             <div id="main">

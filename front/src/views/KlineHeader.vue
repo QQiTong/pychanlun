@@ -19,7 +19,8 @@
             </el-date-picker>
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('pre')" size="mini">前一天</el-button>
             <el-button type="primary" class="primary-button" @click="quickSwitchDay('next')" size="mini">后一天</el-button>
-            <el-input v-model="inputSymbol_" ref="inputSymbolRef" @blur="blurInputSymbol" @focus="focusInputSymbol" placeholder="请输入代码"
+            <el-input v-model="inputSymbol_" ref="inputSymbolRef" @blur="blurInputSymbol" @focus="focusInputSymbol"
+                      placeholder="请输入代码"
                       size="mini" class="search-symbol-input ml-5 mr-5"
                       @change="submitSymbol"/>
             <el-button type="primary" class="primary-button" v-for="period in periodList" :key="period" size="mini"
@@ -55,6 +56,7 @@
                 />
             </el-select>
             <el-popover
+                class="ml-5"
                 placement="bottom"
                 width="230"
                 trigger="hover">
@@ -64,6 +66,10 @@
                 </el-table>
                 <el-button slot="reference" type="primary" class="primary-button" size="mini">快捷键</el-button>
             </el-popover>
+            <el-radio-group class="ml-5" v-model="themeOptions.theme" @change="applySetting" size="mini">
+                <el-radio-button label="light-theme">白天</el-radio-button>
+                <el-radio-button label="dark-theme">夜晚</el-radio-button>
+            </el-radio-group>
         </div>
     </div>
 </template>
@@ -179,7 +185,8 @@
             futureSymbolList: {
                 type: Array,
                 default: null
-            }
+            },
+            themeOptions: null
         },
         methods: {
             setELDatePicker(endDate) {
@@ -192,7 +199,10 @@
             blurInputSymbol(params) {
                 // console.log("失去焦点")
                 this.blurOrFocus = 0
-            }
+            },
+            applySetting() {
+                this.$parent.changeTheme()
+            },
         }
     }
 </script>

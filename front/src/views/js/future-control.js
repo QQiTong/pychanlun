@@ -172,7 +172,10 @@ export default {
                 ['MA', 'TA', 'PP', 'EG', 'EB'],
                 // 油脂板块
                 ['Y', 'P', 'OI', 'M', 'RM']
-            ]
+            ],
+            themeOptions: {
+                theme: ''
+            }
         }
     },
     computed: {
@@ -215,8 +218,17 @@ export default {
             // this.getBTCTicker()
             // this.getGlobalFutureChangeList()
         }, 20000)
+        CommonTool.initTheme()
+        this.themeOptions.theme = CommonTool.getTheme()
     },
     methods: {
+        applySetting() {
+            CommonTool.setTheme(this.themeOptions.theme)
+            this.defaultThemes = this.themeOptions.theme
+            window.localStorage.setItem('theme', this.themeOptions.theme)
+            this.defaultConfig = JSON.stringify(this.themeOptions)
+        },
+
         getAccountInfo() {
             futureApi.getAccountInfo().then(res => {
                 console.log('获取账户信息:', res)

@@ -37,15 +37,43 @@ export default {
             myChart30: null,
             myChart60: null,
             myChart240: null,
+            periodIcons: [
+                require('../../assets/img/icon_1min.png'),
+                require('../../assets/img/icon_3min.png'),
+                require('../../assets/img/icon_5min.png'),
+                require('../../assets/img/icon_15min.png'),
+                require('../../assets/img/icon_30min.png'),
+                require('../../assets/img/icon_1h.png'),
+                require('../../assets/img/icon_4h.png'),
+                require('../../assets/img/icon_1d.png'),
+                require('../../assets/img/icon_1w.png'),
+                require('../../assets/img/icon_refresh.svg'),
+                require('../../assets/img/big-kline.png'),
+                require('../../assets/img/big-kline-light.png')
+            ],
 
-            echartsConfig: {
-
+            // 夜间主题
+            echartsDarkConfig: {
+                textColor: 'white',
+                subTextColor: 'white',
+                legendTextColor: 'white',
+                // data 属性不能互相引用 只能写常量
+                bigKlineIcon: require('../../assets/img/big-kline.png'),
+                axisLineColor: '#8392A5',
                 bgColor: '#202529',
+                biColor: 'yellow',
+                duanColor: 'green',
+                higherDuanColor: 'blue',
+                ma1Color: 'white',
+                ma2Color: 'yellow',
+                ma3Color: 'red',
+
                 upColor: 'red',
                 upBorderColor: 'red',
                 downColor: '#14d0cd',
                 downBorderColor: '#14d0cd',
 
+                openPriceColor: '#FF8800',
                 higherUpColor: 'purple',
                 higherDownColor: 'green',
 
@@ -55,7 +83,8 @@ export default {
                 higherColor: '#14d0cd',
                 higherHigherColor: 'green',
                 dynamicOpertionColor: 'yellow',
-                currentPriceColor: '#FFCDD2',
+                // currentPriceColor: '#FFCDD2',
+                currentPriceColor: '#666666',
                 macdUpLastValue: Number.MIN_SAFE_INTEGER,
                 macdDownLastValue: Number.MAX_SAFE_INTEGER,
 
@@ -120,6 +149,104 @@ export default {
 
                 ],
             },
+            // 日间主题
+            echartsLightConfig: {
+                bgColor: '#F5f5fA',
+                textColor: 'black',
+                subTextColor: 'black',
+                legendTextColor: 'black',
+                bigKlineIcon: require('../../assets/img/big-kline-light.png'),
+                axisLineColor: 'black',
+                biColor: 'black',
+                duanColor: 'green',
+                higherDuanColor: 'blue',
+                ma1Color: 'black',
+                ma2Color: 'yellow',
+                ma3Color: 'red',
+
+                upColor: '#EF5350',
+                upBorderColor: '#EF5350',
+                downColor: '#26A69A',
+                downBorderColor: '#26A69A',
+                // 开仓线 markline数量不确定，只能通用颜色
+                openPriceColor: '#FF8800',
+
+                higherUpColor: 'purple',
+                higherDownColor: 'green',
+
+                higherHigherUpColor: 'pink',
+                higherHigherDownColor: 'blue',
+
+                higherColor: '#14d0cd',
+                higherHigherColor: 'green',
+                dynamicOpertionColor: 'yellow',
+                // currentPriceColor: '#FFCDD2',
+                currentPriceColor: '#666666',
+                macdUpLastValue: Number.MIN_SAFE_INTEGER,
+                macdDownLastValue: Number.MAX_SAFE_INTEGER,
+
+                bigMacdUpLastValue: Number.MIN_SAFE_INTEGER,
+                bigMacdDownLastValue: Number.MAX_SAFE_INTEGER,
+
+                macdUpDarkColor: '#EF5350',
+                macdUpLightColor: '#FFCDD2',
+                macdDownDarkColor: '#26A69A',
+                macdDownLightColor: '#B2DFDB',
+                loadingOption: {
+                    text: '知彼知己，百戰不殆',
+                    // maskColor: '#0B0E11',
+                    // 使用透明色不闪烁不伤眼
+                    maskColor: '#ffffff00',
+                    textColor: 'black',
+                    color: '#FFCC08'
+                },
+                // 多周期显示不下,需要配置
+                multiPeriodGrid: [
+                    {
+                        left: '0%',
+                        right: '15%',
+                        top: 50,
+                        height: '85%',
+                    },
+                    // {
+                    //     left: '0%',
+                    //     right: '15%',
+                    //     top: '65%',
+                    //     height: '10%',
+                    // },
+                    // {
+                    //     left: '0%',
+                    //     right: '15%',
+                    //     top: '82%',
+                    //     height: '20%',
+                    // }
+                ],
+                klineBigGrid: [
+                    {// 直角坐标系
+                        left: '0%',
+                        right: '10%',
+                        top: 50,
+                        height: '85%',
+
+                    },
+                    // {
+                    //     left: '0%',
+                    //     right: '10%',
+                    //     top: '65%',
+                    //     height: '10%',
+                    //
+                    // },
+                    // {
+                    //     left: '0%',
+                    //     right: '10%',
+                    //     top: '80%',
+                    //     height: '10%',
+                    //
+                    // },
+
+                ],
+            },
+            echartsConfig: {},
             // 品种
             symbol: 'RB2005',
             period: '',
@@ -127,19 +254,6 @@ export default {
             reloadOrUpdate: 'reload',
             dataTitle: '主标题',
             dataSubTitle: '副标题',
-            periodIcons: [
-                require('../../assets/img/icon_1min.png'),
-                require('../../assets/img/icon_3min.png'),
-                require('../../assets/img/icon_5min.png'),
-                require('../../assets/img/icon_15min.png'),
-                require('../../assets/img/icon_30min.png'),
-                require('../../assets/img/icon_1h.png'),
-                require('../../assets/img/icon_4h.png'),
-                require('../../assets/img/icon_1d.png'),
-                require('../../assets/img/icon_1w.png'),
-                require('../../assets/img/icon_refresh.svg'),
-                require('../../assets/img/big-kline.png')
-            ],
 
             futureSymbolList: [],
             futureSymbolMap: {},
@@ -222,7 +336,10 @@ export default {
                 perOrderStopMoney: 0
             },
             echartZoomStart: 0,
-            echartZoomEnd: 100
+            echartZoomEnd: 100,
+            themeOptions: {
+                theme: ''
+            }
         }
     },
     created() {
@@ -350,6 +467,15 @@ export default {
         // }
     },
     mounted() {
+        CommonTool.initTheme()
+        let theme = CommonTool.getTheme()
+        // console.log("主题", theme)
+        this.themeOptions.theme = theme
+        if (theme === 'dark-theme') {
+            this.echartsConfig = this.echartsDarkConfig
+        } else {
+            this.echartsConfig = this.echartsLightConfig
+        }
         this.getAccountInfo()
 
         this.getGlobalFutureSymbol()
@@ -400,6 +526,61 @@ export default {
     },
 
     methods: {
+        changeTheme() {
+            // console.log("切换主题")
+            CommonTool.setTheme(this.themeOptions.theme)
+            this.currentThemes = this.themeOptions.theme
+            window.localStorage.setItem('theme', this.themeOptions.theme)
+            this.defaultConfig = JSON.stringify(this.options)
+            if (this.currentThemes === 'dark-theme') {
+                this.echartsConfig = this.echartsDarkConfig
+            } else {
+                this.echartsConfig = this.echartsLightConfig
+            }
+            // 大图
+            if (this.period !== '') {
+                this.setEchartsTheme(this.myChart)
+            } else {
+                this.setEchartsTheme(this.myChart5)
+                this.setEchartsTheme(this.myChart15)
+                this.setEchartsTheme(this.myChart30)
+                this.setEchartsTheme(this.myChart60)
+                this.setEchartsTheme(this.myChart240)
+                this.setEchartsTheme(this.myChart1d)
+            }
+        },
+        setEchartsTheme(chart) {
+            let option = chart.getOption()
+            option.backgroundColor = this.echartsConfig.bgColor
+            option.title[0].textStyle.color = this.echartsConfig.textColor
+            option.title[0].subtextStyle.color = this.echartsConfig.subTextColor
+            option.legend[0].textStyle.color = this.echartsConfig.legendTextColor
+            // 放大图标
+            // console.log("放大图标1", option.toolbox[0].feature.myLevel1.icon, this.echartsConfig.bigKlineIcon)
+            option.toolbox[0].feature.myLevel1.icon = 'image://' + this.echartsConfig.bigKlineIcon
+
+            // 横坐标轴颜色
+            option.xAxis[0].axisLine.lineStyle.color = this.echartsConfig.axisLineColor
+            // 阴线
+            option.series[0].itemStyle.color0 = this.echartsConfig.downColor
+            option.series[0].itemStyle.borderColor0 = this.echartsConfig.downColor
+            // 阳线
+            option.series[0].itemStyle.color = this.echartsConfig.upColor
+            option.series[0].itemStyle.borderColor = this.echartsConfig.upColor
+            option.series[1].lineStyle.color = this.echartsConfig.biColor
+            // 开仓标注线 难以动态设置，markLine.data数组长度可能为2,3,4,5几种情况
+            // console.log("marklinedata:",option.series[1].markLine.data)
+            // option.series[1].markLine.data[2].lineStyle.color = this.echartsConfig.openPriceColor
+            // option.series[1].markLine.data[2].label.color = this.echartsConfig.openPriceColor
+
+            option.series[2].lineStyle.color = this.echartsConfig.duanColor
+            option.series[3].lineStyle.color = this.echartsConfig.higherDuanColor
+            option.series[4].lineStyle.color = this.echartsConfig.ma1Color
+            option.series[5].lineStyle.color = this.echartsConfig.ma2Color
+            option.series[6].lineStyle.color = this.echartsConfig.ma3Color
+
+            chart.setOption(option)
+        },
         getAccountInfo() {
             futureApi.getAccountInfo().then(res => {
                 console.log('获取账户信息:', res)
@@ -1200,9 +1381,12 @@ export default {
                     title: {
                         text: dataTitle,
                         subtext: subText,
+                        subtextStyle: {
+                            color: this.echartsConfig.subTextColor,
+                        },
                         left: '2%',
                         textStyle: {
-                            color: 'white'
+                            color: this.echartsConfig.textColor,
                         }
                     },
                     tooltip: { // 提示框
@@ -1225,7 +1409,7 @@ export default {
                             myLevel1: {
                                 show: true,
                                 title: '放大',
-                                icon: 'image://' + this.periodIcons[10],
+                                icon: 'image://' + this.echartsConfig.bigKlineIcon,
                                 onclick: function () {
                                     that.jumpToKlineBig(period)
                                 }
@@ -1347,7 +1531,7 @@ export default {
                         },
                         top: 10,
                         textStyle: {
-                            color: 'white'
+                            color: this.echartsConfig.legendTextColor,
                         }
                     },
                     grid: [
@@ -1381,7 +1565,7 @@ export default {
                             splitNumber: 20,
                             min: 'dataMin',
                             max: 'dataMax',
-                            axisLine: {onZero: true, lineStyle: {color: '#8392A5'}},
+                            axisLine: {onZero: true, lineStyle: {color: this.echartsConfig.axisLineColor}},
                             // axisPointer: {
                             //     label: {
                             //         formatter: function (params) {
@@ -1427,11 +1611,12 @@ export default {
                                 show: false
                             },
                             splitLine: {
-                                lineStyle: {
-                                    opacity: 0.3,
-                                    type: 'dashed',
-                                    color: this.echartsConfig.bgColor
-                                }
+                                show: false,
+                                // lineStyle: {
+                                //     opacity: 0.3,
+                                //     type: 'dashed',
+                                //     color: this.echartsConfig.bgColor
+                                // }
                             },
                             axisLine: {lineStyle: {color: this.echartsConfig.bgColor}},
                         },
@@ -1559,7 +1744,7 @@ export default {
                                     opacity: 1,
                                     type: 'solid',
                                     width: 1,
-                                    color: 'yellow'
+                                    color: this.echartsConfig.biColor,
                                 },
                             },
                             symbol: 'none',
@@ -1590,7 +1775,7 @@ export default {
                                     opacity: 1,
                                     type: 'solid',
                                     width: 2,
-                                    color: 'green'
+                                    color: this.echartsConfig.duanColor,
                                 },
                             },
                             markPoint: {
@@ -1610,7 +1795,7 @@ export default {
                                     opacity: 1,
                                     type: 'solid',
                                     width: 2,
-                                    color: 'blue'
+                                    color: this.echartsConfig.higherDuanColor,
                                 },
                             },
                             symbol: 'none',
@@ -1780,7 +1965,7 @@ export default {
                                     opacity: 0.9,
                                     type: 'solid',
                                     width: 2,
-                                    color: "white"
+                                    color: this.echartsConfig.ma1Color,
                                 },
                             },
                             symbol: 'none',
@@ -1797,7 +1982,7 @@ export default {
                                     opacity: 0.9,
                                     type: 'solid',
                                     width: 2,
-                                    color: "yellow"
+                                    color: this.echartsConfig.ma2Color,
                                 },
                             },
                             symbol: 'none',
@@ -1814,7 +1999,7 @@ export default {
                                     opacity: 0.9,
                                     type: 'solid',
                                     width: 2,
-                                    color: "red"
+                                    color: this.echartsConfig.ma3Color,
                                 },
                             },
                             symbol: 'none',
@@ -1960,8 +2145,8 @@ export default {
                             position: 'inside',
                             offset: [0, -10],
                             textBorderColor: this.echartsConfig.downColor,
-                            textBorderWidth: 2,
-                            color: 'white',
+                            textBorderWidth: 1,
+                            color: this.echartsConfig.textColor
                         },
                     }
                 } else {
@@ -1978,8 +2163,8 @@ export default {
                             position: 'inside',
                             offset: [0, 10],
                             textBorderColor: this.echartsConfig.upColor,
-                            textBorderWidth: 2,
-                            color: 'white',
+                            textBorderWidth: 1,
+                            color: this.echartsConfig.textColor,
                         },
                     }
                 }
@@ -2986,7 +3171,7 @@ export default {
                             opacity: 1,
                             type: 'dash',
                             width: 1,
-                            color: 'yellow'
+                            color: this.echartsConfig.currentPriceColor,
                         },
                     },
                     symbol: 'circle',
@@ -3008,14 +3193,14 @@ export default {
                                 opacity: 1,
                                 type: 'dashed',
                                 width: 1,
-                                color: 'white'
+                                color: this.echartsConfig.openPriceColor
                             },
                         },
                         symbol: 'circle',
                         symbolSize: 1,
                         label: {
                             normal: {
-                                color: 'white',
+                                color: this.echartsConfig.openPriceColor,
                                 formatter: '开: ' + beichiPrice.toFixed(2) + ' ' + this.maxOrderCount + ' 手',
                             },
                         },
@@ -3350,7 +3535,7 @@ export default {
                 this.stopRate = 0.02
             } else {
                 // 内盘
-                this.account = this.futureAccount
+                this.account = this.futureAccount.account
                 // 计算1手需要的保证金
                 this.perOrderMargin = Math.floor(openPrice * this.contractMultiplier * this.currentMarginRate)
                 this.perOrderStopMoney = Math.abs(openPrice - stopPrice) * this.contractMultiplier
