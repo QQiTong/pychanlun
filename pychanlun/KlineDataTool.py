@@ -428,28 +428,27 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
             lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
         kline_data['time'] = kline_data['time_stamp']
         kline_data.set_index('datetime', drop=False, inplace=True)
-    # elif period == "180m":
-    #     data_list = DBQuantAxis["future_min"] \
-    #         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
-    #         .find({
-    #         "type":"60min",
-    #         "code": code,
-    #         "date_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
-    #     }) \
-    #         .sort("_id", pymongo.ASCENDING)
-    #     data_list = list(data_list)
-    #     if len(data_list) == 0:
-    #         return None
-    #     kline_data = pd.DataFrame(data_list)
-    #     kline_data['datetime'] = kline_data['datetime'].apply(
-    #         lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
-    #     kline_data['volume'] = kline_data['trade'] * 100
-    #     # todo 转180m 报错 AttributeError: 'RangeIndex' object has no attribute 'indexer_between_time'
-    #     kline_data = QA_data_futuremin_resample(kline_data, '180min')
-    #     kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
-    #     kline_data.set_index('datetime', drop=False, inplace=True)
+    elif period == "180m":
+        data_list = DBQuantAxis["future_min"] \
+            .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
+            .find({
+            "type":"60min",
+            "code": code,
+            "date_stamp": {"$gte": start_date.timestamp(), "$lte": end.timestamp()}
+        }) \
+            .sort("_id", pymongo.ASCENDING)
+        data_list = list(data_list)
+        if len(data_list) == 0:
+            return None
+        kline_data = pd.DataFrame(data_list)
+        kline_data['datetime'] = kline_data['datetime'].apply(
+            lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
+        kline_data['volume'] = kline_data['trade'] * 100
+        kline_data.set_index('datetime', drop=False, inplace=True)
+        kline_data = QA_data_futuremin_resample(kline_data, '180min')
+        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
 
-    elif period == "180m" or period == "240m" or period == "1d":
+    elif period == "240m" or period == "1d":
         data_list = DBQuantAxis["future_day"] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
             .find({
