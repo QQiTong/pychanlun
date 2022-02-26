@@ -45,7 +45,6 @@ class ProductionConfig(Config):
 config = {
     'default': DevelopmentConfig,
     'production': ProductionConfig,
-    # 商品期货保证金率一般固定，只有过节会变下。因为换合约期间需要拿到老合约保证金率，因此保存起来
     'account_info': {
         'inner_future': {
             'account': 58,
@@ -71,6 +70,7 @@ config = {
             'max_account_use_rate': 0.1
         }
     },
+    # 商品期货保证金率一般固定，只有过节会变下。因为换合约期间需要拿到老合约保证金率，因此保存起来
     'future_config': {
         'RB': {'order_book_id': 'RBL9', 'margin_rate': 0.09, 'contract_multiplier': 10},
         'HC': {'order_book_id': 'HCL9', 'margin_rate': 0.09, 'contract_multiplier': 10},
