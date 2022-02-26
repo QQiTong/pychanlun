@@ -128,18 +128,18 @@ config = {
         'GC': {'order_book_id': 'GC','margin_rate': 0.07, 'contract_multiplier': 10},  # 8:30 -14:00 0.02   其它时间 0.03         10065
         'SI': {'order_book_id': 'SI','margin_rate': 0.14, 'contract_multiplier': 5000},  # 18:30 -14:00 0.04   其它时间 0.06       10271
         'HG': {'order_book_id': 'HG','margin_rate': 0.06, 'contract_multiplier': 250},  # 由于新浪数据报价单位是美分 所以将乘数25000改成250
-        'AHD': {'order_book_id': 'AHD','margin_rate': 0.1, 'contract_multiplier': 1},
-        'NID': {'order_book_id': 'NID','margin_rate': 0.1, 'contract_multiplier': 1},
-        'ZSD': {'order_book_id': 'ZSD','margin_rate': 0.1, 'contract_multiplier': 1},
-        'SND': {'order_book_id': 'SND','margin_rate': 0.1, 'contract_multiplier': 1},
-        # 'CN': {'order_book_id': 'CN','margin_rate': 0.09, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06          1045
+        'AHD': {'order_book_id': 'AHD','margin_rate': 0.1, 'contract_multiplier': 25},
+        'NID': {'order_book_id': 'NID','margin_rate': 0.1, 'contract_multiplier': 6},
+        'ZSD': {'order_book_id': 'ZSD','margin_rate': 0.1, 'contract_multiplier': 25},
+        'SND': {'order_book_id': 'SND','margin_rate': 0.1, 'contract_multiplier': 5},
+        'CN': {'order_book_id': 'CN','margin_rate': 0.09, 'contract_multiplier': 1},  # 18:30 -14:00 0.04   其它时间 0.06          1045
 
         'ZS': {'order_book_id': 'ZS','margin_rate': 0.03, 'contract_multiplier': 50},  # 美豆
         'ZM': {'order_book_id': 'ZM','margin_rate': 0.04, 'contract_multiplier': 100},  # 美豆粕
         'ZL': {'order_book_id': 'ZL','margin_rate': 0.04, 'contract_multiplier': 600},  # 美豆油
         'MZC': {'order_book_id': 'MZC','margin_rate': 0.06, 'contract_multiplier': 50},  # 美玉米
-        'FCPO': {'order_book_id': 'FCPO','margin_rate': 0.1, 'contract_multiplier': 1},  # 马棕榈
-        'CT': {'order_book_id': 'CT','margin_rate': 0.1, 'contract_multiplier': 1},  # 美棉花
+        'FCPO': {'order_book_id': 'FCPO','margin_rate': 0.1, 'contract_multiplier': 25},  # 马棕榈
+        'CT': {'order_book_id': 'CT','margin_rate': 0.1, 'contract_multiplier': 100},  # 美棉花
         'BTC': {'order_book_id': 'BTC', 'margin_rate': 0.1, 'contract_multiplier': 1},
 
         # 'SB': {'margin_rate': 0.1, 'contract_multiplier': 1},

@@ -39,6 +39,28 @@ class BusinessService:
     def __init__(self):
         print('初始化业务对象...')
 
+    def get_account_info(self):
+        account_info = {
+            'inner_future': {
+                'account': 10,
+            },
+            'inner_stock': {
+                'account': 10
+            },
+            'digit_coin': {
+                'account': 10,
+                'level':20
+            },
+            'global_future': {
+                'account': 10
+            },
+            'risk_control': {
+                'stop_rate': 0.02,
+                'max_account_use_rate':0.1
+            }
+        }
+        return account_info
+
     # okex数字货币部分涨跌幅
     def getBTCTicker(self):
         okexUrl = "https://www.okex.me/api/swap/v3/instruments/BTC-USDT-SWAP/ticker"
@@ -743,7 +765,8 @@ class BusinessService:
         end = datetime.strptime(endDate, "%Y-%m-%d")
         end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
         start_date = end + timedelta(-1)
-        positionList = []
+        inner_future_position_list = []
+        global_future_position_list = []
         collection = DBPyChanlun["future_auto_position"]
         # 查询总记录数
         if status == 'all':
@@ -790,10 +813,16 @@ class BusinessService:
                 for y in x['dynamicPositionList']:
                     y['date_created'] = self.formatTime(y['date_created'])
 
-            # 占用保证金
-            positionList.append(x)
+            # 将内盘和外盘拆分开来
+            if 'L9' in x['symbol']:
+                inner_future_position_list.append(x)
+            else:
+                global_future_position_list.append(x)
         positionListResult = {
-            'records': positionList,
+            'records': {
+                'inner_future':inner_future_position_list,
+                'global_future':global_future_position_list,
+            },
             'total': total
         }
         return positionListResult

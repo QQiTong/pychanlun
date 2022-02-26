@@ -199,6 +199,7 @@ export default {
 
     mounted() {
         // this.subscribeWS()
+        this.getAccountInfo()
         this.getDayMaList()
         this.getChangeiList()
         this.getSignalList()
@@ -215,6 +216,15 @@ export default {
         }, 20000)
     },
     methods: {
+        getAccountInfo() {
+            futureApi.getAccountInfo().then(res => {
+                console.log('获取账户信息:', res)
+
+            }).catch((error) => {
+                console.log('获取账户信息失败:', error)
+
+            })
+        },
         onInputChange() {
             this.createOrUpdatePrejudgeList('update')
         },

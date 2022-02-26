@@ -37,7 +37,12 @@ def stock_data_v2():
     result = get_data_v2(symbol, period, end_date)
     stopwatch.stop()
     logging.info(stopwatch)
-    return Response(json.dumps(result), mimetype='application/json')
+    return Response(json.dumps(result), mimetype='application/json')\
+
+@app.route('/api/get_account_info')
+def get_account_info():
+    account_info = func_timeout(30, businessService.get_account_info)
+    return Response(json.dumps(account_info), mimetype='application/json')
 # --------------------------------数字货币部分------------------------------------
 
 

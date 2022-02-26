@@ -70,7 +70,7 @@
             </el-form>
         </el-row>
         <!--持仓区域-->
-        <el-divider content-position="center">持仓列表</el-divider>
+        <el-divider content-position="center">内盘持仓列表</el-divider>
         <FuturePositionList
             :futureSymbolList="futureSymbolList"
             :futureSymbolMap="futureSymbolMap"

@@ -173,8 +173,7 @@ export default {
             stopRate: this.$stopRate,
             // 数字货币手续费 20倍杠杆 双向 0.05%*2
             digitCoinFee: 0.001,
-            // okex 开仓起始杠杆
-            digitCoinLevel: this.$digitCoinLevel,
+
             // 1手需要的保证金
             perOrderMargin: 0,
             // 1手止损金额

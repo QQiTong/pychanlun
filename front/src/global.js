@@ -24,7 +24,6 @@ export default {
         Vue.prototype.$globalFutureAccount = globalFutureAccount
         Vue.prototype.$stockAccount = stockAccount
         Vue.prototype.$digitCoinAccount = digitCoinAccount
-        Vue.prototype.$digitCoinLevel = digitCoinLevel
         Vue.prototype.$globalFutureSymbol = globalFutureSymbol
         Vue.prototype.$maxAccountUseRate = maxAccountUseRate
         Vue.prototype.$stopRate = stopRate

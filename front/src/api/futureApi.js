@@ -2,6 +2,16 @@ import axios from 'axios'
 
 export const futureApi = {
     /**
+     * 获取账户信息
+     */
+    getAccountInfo () {
+        let url = `/api/get_account_info`
+        return axios({
+            url: url,
+            method: 'get',
+        })
+    },
+    /**
      * 获取K线数据
      */
     stockData (data) {
