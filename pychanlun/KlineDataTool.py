@@ -240,20 +240,6 @@ def process_ohlc_str(kline_data):
     kline_data['low'] = kline_data['low'].apply(lambda value: float(value))
     kline_data['close'] = kline_data['close'].apply(lambda value: float(value))
 
-
-'''
-由于部分期货品种数从数据库中取出的ohlc长达10位小数，除黄金外去掉小数
-'''
-
-
-def process_ohlc_decimal(kline_data):
-    kline_data['open'] = kline_data['open'].apply(lambda value: int(value))
-    kline_data['high'] = kline_data['high'].apply(lambda value: int(value))
-    kline_data['low'] = kline_data['low'].apply(lambda value: int(value))
-    kline_data['close'] = kline_data['close'].apply(lambda value: int(value))
-    # print(kline_data)
-    return kline_data
-
 @lru_cache(maxsize=128)
 def getFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp())):
     return
@@ -484,8 +470,7 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
         kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
         kline_data.set_index('datetime', drop=False, inplace=True)
     kline_data.fillna(0, inplace=True)
-    # if code != "AUL9":
-    #     kline_data = process_ohlc_decimal(kline_data)
+    kline_data = kline_data.round({"open": 2, "high": 2, "low": 2, "close": 2, "volume": 2, "amount": 2})
     return kline_data
 
 
