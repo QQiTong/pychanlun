@@ -15,7 +15,6 @@ from loguru import logger
 from pymongo import UpdateOne
 
 from pychanlun.config import cfg, settings, config
-from pychanlun.gateway.tdxhq import TdxExHqExecutor
 from QUANTAXIS.QAUtil import QA_util_if_tradetime, QA_util_if_trade
 from pychanlun.database.redis import RedisDB
 from pychanlun.db import DBPyChanlun
