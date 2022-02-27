@@ -66,7 +66,7 @@
                 </el-table>
                 <el-button slot="reference" type="primary" class="primary-button" size="mini">快捷键</el-button>
             </el-popover>
-            <el-radio-group class="ml-5" v-model="themeOptions.theme" @change="applySetting" size="mini">
+            <el-radio-group class="ml-5 mr-10 change-theme" v-model="themeOptions.theme" @change="applySetting" size="mini">
                 <el-radio-button label="light-theme">白天</el-radio-button>
                 <el-radio-button label="dark-theme">夜晚</el-radio-button>
             </el-radio-group>
