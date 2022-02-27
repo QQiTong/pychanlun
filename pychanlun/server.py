@@ -60,10 +60,17 @@ def get_btc_ticker():
 
 # --------------------------------期货部分------------------------------------
 
-# 获取期货统计信息
+# 获取当前价格在MA20上还是下
+@app.route('/api/get_day_ma_up_down_list')
+def get_day_ma_up_down_list():
+    day_ma_up_down_list = func_timeout(30, businessService.get_day_ma_up_down_list)
+    return Response(json.dumps(day_ma_up_down_list), mimetype='application/json')
+
+# 获取当前品种3条均线
 @app.route('/api/get_day_ma_list')
 def get_day_ma_list():
-    day_ma_list = func_timeout(30, businessService.get_day_ma_list)
+    symbol = request.args.get("symbol")
+    day_ma_list = func_timeout(30, businessService.get_day_ma_list,args=(symbol,))
     return Response(json.dumps(day_ma_list), mimetype='application/json')
 
 # 获取期货统计信息

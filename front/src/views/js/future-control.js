@@ -204,7 +204,7 @@ export default {
         // this.subscribeWS()
         this.getAccountInfo()
         this.getGlobalFutureSymbol()
-        this.getDayMaList()
+        this.getDayMaUpDownList()
         this.getChangeiList()
         this.getSignalList()
         // this.getLevelDirectionList()
@@ -450,11 +450,11 @@ export default {
                 }
             }
         },
-        getDayMaList() {
+        getDayMaUpDownList() {
             const requesting = this.$cache.get(`DAY_MA_LIST`)
             if (!requesting) {
                 this.$cache.set(`DAY_MA_LIST`, true, 60)
-                futureApi.getDayMaList().then(res => {
+                futureApi.getDayMaUpDownList().then(res => {
                     this.dayMa20List = res
                     console.log(this.dayMa20List)
                     this.$cache.del(`DAY_MA_LIST`)

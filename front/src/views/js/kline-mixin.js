@@ -65,7 +65,7 @@ export default {
                 duanColor: 'green',
                 higherDuanColor: 'blue',
                 ma1Color: 'white',
-                ma2Color: 'yellow',
+                ma2Color: 'blue',
                 ma3Color: 'red',
 
                 upColor: 'red',
@@ -161,7 +161,7 @@ export default {
                 duanColor: 'green',
                 higherDuanColor: 'blue',
                 ma1Color: 'black',
-                ma2Color: 'yellow',
+                ma2Color: 'blue',
                 ma3Color: 'red',
 
                 upColor: '#EF5350',
@@ -339,7 +339,9 @@ export default {
             echartZoomEnd: 100,
             themeOptions: {
                 theme: ''
-            }
+            },
+            // 3条日均线列表
+            dayMaList: {}
         }
     },
     created() {
@@ -520,12 +522,22 @@ export default {
             this.getDominantSymbol()
         }
         this.requestSymbolData()
+        // 后端获取的日均线date和日内分钟对不上无法显示
+        // this.getDayMaList()
     },
     beforeDestroy() {
         clearTimeout(this.timer)
     },
 
     methods: {
+        getDayMaList() {
+            futureApi.getDayMaList(this.symbol).then(res => {
+                console.log('获取日均线列表:', res)
+                this.dayMaList = res
+            }).catch((error) => {
+                console.log('获取日均线列表失败:', error)
+            })
+        },
         changeTheme() {
             // console.log("切换主题")
             CommonTool.setTheme(this.themeOptions.theme)
@@ -557,7 +569,7 @@ export default {
             option.legend[0].textStyle.color = this.echartsConfig.legendTextColor
             // 放大图标
             // console.log("放大图标1", option.toolbox[0].feature.myLevel1.icon, this.echartsConfig.bigKlineIcon)
-            option.toolbox[0].feature.myLevel1.icon = 'image://' + this.echartsConfig.bigKlineIcon
+            // option.toolbox[0].feature.myLevel1.icon = 'image://' + this.echartsConfig.bigKlineIcon
 
             // 横坐标轴颜色
             option.xAxis[0].axisLine.lineStyle.color = this.echartsConfig.axisLineColor
@@ -1368,7 +1380,7 @@ export default {
                     specialMA55 = parseInt(_55base * baseHour / 3)
                     break
             }
-            // console.log(period, specialMA5, specialMA21)
+            console.log(period, specialMA5, specialMA21)
             let option
             if (update === 'update') {
                 console.log('更新', period)
@@ -1397,6 +1409,9 @@ export default {
                     },
                     axisPointer: {
                         link: {xAxisIndex: 'all'},
+                        label: {
+                            backgroundColor: '#666666'
+                        }
                     },
 
                     toolbox: {

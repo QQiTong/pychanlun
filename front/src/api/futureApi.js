@@ -87,9 +87,15 @@ export const futureApi = {
             method: 'get',
         })
     },
-    getDayMaList () {
+    getDayMaUpDownList () {
         return axios({
-            url: `/api/get_day_ma_list`,
+            url: `/api/get_day_ma_up_down_list`,
+            method: 'get',
+        })
+    },
+    getDayMaList (symbol) {
+        return axios({
+            url: `/api/get_day_ma_list?symbol=${symbol}`,
             method: 'get',
         })
     },

@@ -601,8 +601,29 @@ class BusinessService:
         result = np.nan_to_num(ma).round(decimals=2)
         return result
 
-    # 获取内盘 20日 均线
-    def get_day_ma_list(self):
+    # 获取MA5,MA10,MA20三条均线列表
+    def get_day_ma_list(self,symbol):
+        # 查日线开盘价
+        data_list = list(
+            DBQuantAxis["future_day"].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)).find(
+                {"code": symbol}).limit(40).sort("_id", pymongo.DESCENDING))
+        if len(data_list) == 0:
+            return
+        data_list.reverse()
+        day_close_price_list = list(pd.DataFrame(data_list)['close'])
+
+        day_ma_5_list = self.calc_ma(day_close_price_list, 5)
+        day_ma_10_list = self.calc_ma(day_close_price_list, 10)
+        day_ma_20_list = self.calc_ma(day_close_price_list, 20)
+        day_ma_list = {
+            'day_ma_5_list':list(day_ma_5_list)[4:], # 去掉前4个为0 的数据
+            'day_ma_10_list':list(day_ma_10_list)[4:],
+            'day_ma_20_list':list(day_ma_20_list)[4:],
+        }
+        return day_ma_list
+
+    # 获取内盘当前价格在 20日 均线上还是下
+    def get_day_ma_up_down_list(self):
         end = datetime.now() + timedelta(1)
         end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
         start_date = end + timedelta(-2)
@@ -636,12 +657,12 @@ class BusinessService:
             result_item = {'above_ma_20': 1 if min_close_price >= day_ma_20[-1] else -1}
             symbol_ma_20_map[item] = result_item
         # print(symbol_ma_20_map)
-        global_day_ma_list = self.get_global_day_ma_list()
+        global_day_ma_list = self.get_global_day_ma_up_down_list()
         conbine_day_ma_list = dict(symbol_ma_20_map, **global_day_ma_list)
         return conbine_day_ma_list
 
-    # 获取外盘20日均线
-    def get_global_day_ma_list(self):
+    # 获取外盘当前价格在 20日 均线上还是下
+    def get_global_day_ma_up_down_list(self):
         global_future_symbol = config['global_future_symbol']
         combinSymbol = copy.deepcopy(global_future_symbol)
         aboveList = {}
