@@ -343,9 +343,10 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
         kline_data = pd.DataFrame(data_list)
         kline_data['datetime'] = kline_data['datetime'].apply(
             lambda value: datetime.strptime(value, "%Y-%m-%d %H:%M:%S"))
-        kline_data = QA_data_stockmin_resample(kline_data, 3)
-        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+        kline_data['volume'] = kline_data['trade'] * 100
         kline_data.set_index('datetime', drop=False, inplace=True)
+        kline_data = QA_data_futuremin_resample(kline_data, '3min')
+        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
     elif period == "5m":
         data_list = DBQuantAxis["future_min"] \
             .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
