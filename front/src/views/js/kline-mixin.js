@@ -1125,9 +1125,9 @@ export default {
             }
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
-            // that.timer = setInterval(() => {
-            //     that.switchSymbol(that.symbol, 'update')
-            // }, 10000)
+            that.timer = setInterval(() => {
+                that.switchSymbol(that.symbol, 'update')
+            }, 10000)
         },
         processMargin() {
             // 获取当前品种的合约 保证金率

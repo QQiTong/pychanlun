@@ -9,6 +9,7 @@ from pychanlun.database.cache import RedisCache
 from pychanlun.config import settings
 from pydash import get
 from pychanlun.db import DBQuantAxis
+from pychanlun.gateway.tdxhq import ex_get_instrument_bars
 
 global extension_market_list
 extension_market_list = None
@@ -68,7 +69,7 @@ def fq_future_fetch_extension_instrument_list():
 
 
 def fq_future_fetch_instrument_bars(code, count=700, frequence='1min'):
-    endpoint = get_tdxhq_endpoint()
+    # endpoint = get_tdxhq_endpoint()
     instrument = fq_future_fetch_instrument(code)
     if str(frequence) in ['5', '5m', '5min', 'five']:
         frequence = 0
@@ -90,10 +91,13 @@ def fq_future_fetch_instrument_bars(code, count=700, frequence='1min'):
             'start': (pages-i)*700,
             'count': 700
         })
-        req = urllib.request.Request(urllib.parse.urljoin(endpoint, f'/ex/get_instrument_bars?{query}'), method='GET')
-        resp = urllib.request.urlopen(req, timeout=30)
-        text = resp.read().decode('utf-8')
-        df = to_df(json.loads(text))
+        # req = urllib.request.Request(urllib.parse.urljoin(endpoint, f'/ex/get_instrument_bars?{query}'), method='GET')
+        # resp = urllib.request.urlopen(req, timeout=30)
+        # text = resp.read().decode('utf-8')
+        # df = to_df(json.loads(text))
+        data = ex_get_instrument_bars(frequence, instrument['market'], code, (pages-i)*700, 700)
+        print(data)
+        df = to_df(data)
         if df is not None:
             bars.append(df)
     if len(bars) > 0:

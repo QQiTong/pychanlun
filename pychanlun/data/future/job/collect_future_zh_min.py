@@ -18,7 +18,7 @@ from pychanlun.config import cfg, settings, config
 from QUANTAXIS.QAUtil import QA_util_if_tradetime, QA_util_if_trade
 from pychanlun.database.redis import RedisDB
 from pychanlun.db import DBPyChanlun
-from pychanlun.data.future.fetch import fq_future_fetch_instrument_bars
+from pychanlun.data.future.tdx import fq_future_fetch_instrument_bars
 
 
 SYMBOL_QUEUE_NAME = "future_zh_min_symbol_queue"
@@ -45,6 +45,7 @@ def _save(df):
     code = df["code"][0]
     df['time_stamp'] = df.index.to_series().apply(lambda v: v.timestamp())
     df["date_stamp"] = df.index.to_series().apply(lambda dt: cfg.TZ.localize(datetime(year=dt.year, month=dt.month, day=dt.day)).timestamp())
+    df['tradetime'] = df.index.to_series().apply(lambda record: record if record.hour < 20 else record + timedelta(days=1))
     save_records(df.reset_index().to_dict(orient="records"))
 
     df = df.resample('5T', closed='right', label='right').agg(cfg.FUTURE_OHLC).dropna(how='any')
@@ -53,6 +54,7 @@ def _save(df):
     df["source"] = source
     df['time_stamp'] = df.index.to_series().apply(lambda v: v.timestamp())
     df["date_stamp"] = df.index.to_series().apply(lambda dt: cfg.TZ.localize(datetime(year=dt.year, month=dt.month, day=dt.day)).timestamp())
+    df['tradetime'] = df.index.to_series().apply(lambda record: record if record.hour < 20 else record + timedelta(days=1))
     if len(df) > 1:
         save_records(df[1:].reset_index().to_dict(orient="records"))
 
@@ -62,6 +64,7 @@ def _save(df):
     df["source"] = source
     df['time_stamp'] = df.index.to_series().apply(lambda v: v.timestamp())
     df["date_stamp"] = df.index.to_series().apply(lambda dt: cfg.TZ.localize(datetime(year=dt.year, month=dt.month, day=dt.day)).timestamp())
+    df['tradetime'] = df.index.to_series().apply(lambda record: record if record.hour < 20 else record + timedelta(days=1))
     if len(df) > 1:
         save_records(df[1:].reset_index().to_dict(orient="records"))
 
@@ -70,8 +73,8 @@ def _save(df):
     df["type"] = "30min"
     df["source"] = source
     df['time_stamp'] = df.index.to_series().apply(lambda v: v.timestamp())
-    df["date_stamp"] = df.index.to_series().apply(lambda dt: cfg.TZ.localize(
-        datetime(year=dt.year, month=dt.month, day=dt.day)).timestamp())
+    df["date_stamp"] = df.index.to_series().apply(lambda dt: cfg.TZ.localize(datetime(year=dt.year, month=dt.month, day=dt.day)).timestamp())
+    df['tradetime'] = df.index.to_series().apply(lambda record: record if record.hour < 20 else record + timedelta(days=1))
     if len(df) > 1:
         save_records(df[1:].reset_index().to_dict(orient="records"))
 
@@ -80,8 +83,8 @@ def _save(df):
     df["type"] = "60min"
     df["source"] = source
     df['time_stamp'] = df.index.to_series().apply(lambda v: v.timestamp())
-    df["date_stamp"] = df.index.to_series().apply(lambda dt: cfg.TZ.localize(
-        datetime(year=dt.year, month=dt.month, day=dt.day)).timestamp())
+    df["date_stamp"] = df.index.to_series().apply(lambda dt: cfg.TZ.localize(datetime(year=dt.year, month=dt.month, day=dt.day)).timestamp())
+    df['tradetime'] = df.index.to_series().apply(lambda record: record if record.hour < 20 else record + timedelta(days=1))
     if len(df) > 1:
         save_records(df[1:].reset_index().to_dict(orient="records"))
 
@@ -91,6 +94,7 @@ def _save(df):
     df["source"] = source
     df['time_stamp'] = df.index.to_series().apply(lambda v: v.timestamp())
     df["date_stamp"] = df.index.to_series().apply(lambda dt: cfg.TZ.localize(datetime(year=dt.year, month=dt.month, day=dt.day)).timestamp())
+    df['tradetime'] = df.index.to_series().apply(lambda record: record if record.hour < 20 else record + timedelta(days=1))
     if len(df) > 1:
         save_records(df[1:].reset_index().to_dict(orient="records"))
 
@@ -118,6 +122,7 @@ def future_zh_min_tdx():
                 continue
             df = df[['open', 'high', 'low', 'close', 'position', 'trade', 'price', 'datetime', 'amount']]
             df['datetime'] = df['datetime'].apply(lambda record: cfg.TZ.localize(datetime.strptime(record, cfg.DT_FORMAT_M)))
+            df['datetime'] = df['datetime'].apply(lambda record: record if record.hour < 20 else record - timedelta(days=1))
             df.set_index('datetime', inplace=True, drop=True)
             df['open'] = df['open'].astype('float64')
             df['close'] = df['close'].astype('float64')

@@ -85,7 +85,7 @@ module.exports = {
   devServer: {
     // 自动打开浏览器
     open: false,
-    port: 8089,
+    port: 8377,
     https: false,
     // TIP 修复热更新失效问题
     hot: true,

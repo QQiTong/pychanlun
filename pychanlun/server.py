@@ -9,8 +9,9 @@ from func_timeout import func_timeout
 from waitress import serve
 
 import pychanlun.stock_service as stock_service
-from pychanlun.chanlun_service import get_data, get_data_v2
+from pychanlun.chanlun_service import get_data_v2
 from pychanlun.monitor.BusinessService import businessService
+from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 
@@ -284,13 +285,8 @@ def update_stock_position_status():
 
 def run(**kwargs):
     port = kwargs.get("port", 5000)
-    # 程序启动初始化主力合约信息,不需要每次都请求
-    # businessService.initDoinantSynmbol()
-    # 生产模式运行，用waitress服务器
-    serve(app, host='0.0.0.0', port=port)
-    # waitress经常阻塞超时，换WSGIServer
-    # http_serv = WSGIServer(("0.0.0.0", port), app, handler_class=WebSocketHandler)
-    # http_serv.serve_forever()
+    http_serv = WSGIServer(("0.0.0.0", port), app)
+    http_serv.serve_forever()
 
 
 if __name__ == '__main__':

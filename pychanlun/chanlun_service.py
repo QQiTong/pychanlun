@@ -42,10 +42,9 @@ def get_data_v2(symbol, period, end_date=None,monitor=1):
     elif 'BTC' in symbol:
         get_instrument_data = getDigitCoinData
     else:
-        get_instrument_data = getGlobalFutureData
-        # get_instrument_data = get_future_data_v2
+        # get_instrument_data = getGlobalFutureData
+        get_instrument_data = get_future_data_v2
         current_minute_holder = current_minute
-
     # 取一分种的K线合成当日的K线
     kline_data_1m = get_instrument_data(symbol, '1m', end_date, get_period_cache_stamp('1m'),monitor)
     now = datetime.datetime.now()
@@ -88,8 +87,7 @@ def get_data_v2(symbol, period, end_date=None,monitor=1):
                     {"high": day_bar['high'], "low": day_bar['low'], "open": day_bar['open'], "close": day_bar['close'], "time": day_bar['time']},
                     name=day_bar['datetime']
                 ))
-        kline_data["time_str"] = kline_data["time"] \
-            .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
+        kline_data["time_str"] = kline_data["time"].apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
         length = len(data_list)
         higher_chanlun_data = data_list[-1] if length > 0 else None
         pre_duan_data = higher_chanlun_data['chanlun_data'].bi_data if higher_chanlun_data is not None else None
