@@ -64,6 +64,7 @@ export default {
                 biColor: 'yellow',
                 duanColor: 'green',
                 higherDuanColor: 'blue',
+                duanPeakColor:'white',
                 ma1Color: 'white',
                 ma2Color: 'blue',
                 ma3Color: 'red',
@@ -160,6 +161,7 @@ export default {
                 biColor: 'black',
                 duanColor: 'green',
                 higherDuanColor: 'blue',
+                duanPeakColor:'white',
                 ma1Color: 'black',
                 ma2Color: 'blue',
                 ma3Color: 'red',
@@ -340,8 +342,13 @@ export default {
             themeOptions: {
                 theme: ''
             },
+            brushOptions: {
+                brush: 'close-brush'
+            },
             // 3条日均线列表
-            dayMaList: {}
+            dayMaList: {},
+            // 横坐标时间数组
+            klineDateList: []
         }
     },
     created() {
@@ -469,15 +476,7 @@ export default {
         // }
     },
     mounted() {
-        CommonTool.initTheme()
-        let theme = CommonTool.getTheme()
-        // console.log("主题", theme)
-        this.themeOptions.theme = theme
-        if (theme === 'dark-theme') {
-            this.echartsConfig = this.echartsDarkConfig
-        } else {
-            this.echartsConfig = this.echartsLightConfig
-        }
+        this.initTheme()
         this.getAccountInfo()
 
         this.getGlobalFutureSymbol()
@@ -524,12 +523,63 @@ export default {
         this.requestSymbolData()
         // 后端获取的日均线date和日内分钟对不上无法显示
         // this.getDayMaList()
+        this.initBrushSetting()
     },
     beforeDestroy() {
         clearTimeout(this.timer)
     },
 
     methods: {
+        // 初始化主题
+        initTheme() {
+            CommonTool.initTheme()
+            let theme = CommonTool.getTheme()
+            // console.log("主题", theme)
+            this.themeOptions.theme = theme
+            if (theme === 'dark-theme') {
+                this.echartsConfig = this.echartsDarkConfig
+            } else {
+                this.echartsConfig = this.echartsLightConfig
+            }
+        },
+        initBrushSetting() {
+            // 只有大图开启监听用户区域选择事件
+            let brush = CommonTool.getBrush()
+            if (this.period !== '') {
+                if (brush === 'open-brush') {
+                    this.myChart.on('brushselected', this.renderBrushed);
+                    this.brushOptions.brush = 'open-brush'
+                }
+            }
+        },
+        changeBrush() {
+            // console.log("开关绘图")
+            CommonTool.setBrush(this.brushOptions.brush)
+            // 重新initBrushSetting 是否开启绘图监听 提高性能
+            window.location.reload()
+        },
+        renderBrushed(params) {
+            // console.log("绘图事件", params)
+            if (params.batch && params.batch[0]) {
+                if (params.batch[0].areas && params.batch[0].areas[0]) {
+                    if (params.batch[0].areas[0].coordRange) {
+                        let dateIndexArr = params.batch[0].areas[0].coordRange[0]
+                        let priceArr = params.batch[0].areas[0].coordRange[1]
+                        let startDate = this.klineDateList[dateIndexArr[0]].slice(0, -6)
+                        let enbDate = this.klineDateList[dateIndexArr[1]].slice(0, -6)
+                        let lowPrice = priceArr[0]
+                        let highPrice = priceArr[1]
+                        let diffPrice = Math.abs(highPrice - lowPrice) / lowPrice * (1 / this.currentMarginRate)
+                        let diffDate = parseInt(this.getDiffDate(startDate, enbDate))
+                        let brushInfo = " 区域选择： 收益率：" + (diffPrice * 100).toFixed(0) + "%, 持仓时间： " + diffDate + " 天"
+                        // console.log(brushInfo)
+                        let option = this.myChart.getOption()
+                        option.title[0].text = this.symbol + ' ' + this.period + brushInfo
+                        this.myChart.setOption(option)
+                    }
+                }
+            }
+        },
         getDayMaList() {
             futureApi.getDayMaList(this.symbol).then(res => {
                 console.log('获取日均线列表:', res)
@@ -595,7 +645,7 @@ export default {
         },
         getAccountInfo() {
             futureApi.getAccountInfo().then(res => {
-                console.log('获取账户信息:', res)
+                // console.log('获取账户信息:', res)
                 this.futureAccount = res.inner_future
                 this.globalFutureAccount = res.global_future
                 this.digitCoinAccount = res.digit_coin
@@ -609,7 +659,7 @@ export default {
         getGlobalFutureSymbol() {
             futureApi.getGlobalFutureSymbol().then(res => {
                 this.globalFutureSymbol = res
-                console.log('获取外盘品种:', res)
+                // console.log('获取外盘品种:', res)
 
             }).catch((error) => {
                 console.log('获取外盘品种失败:', error)
@@ -1111,7 +1161,7 @@ export default {
         },
         getFutureConfig() {
             futureApi.getFutureConfig().then(res => {
-                console.log('合约配置信息:', res)
+                // console.log('合约配置信息:', res)
                 this.futureConfig = res
                 window.localStorage.setItem('symbolConfig', JSON.stringify(this.futureConfig))
                 this.processMargin()
@@ -1344,6 +1394,11 @@ export default {
                     specialMA21 = _21base * baseHour * 2 * 2 * 5 * 3
                     specialMA55 = _55base * baseHour * 2 * 2 * 5 * 3
                     break
+                case '3m':
+                    specialMA5 = _5base * baseHour * 2 * 2 * 5
+                    specialMA21 = _21base * baseHour * 2 * 2 * 5
+                    specialMA55 = _55base * baseHour * 2 * 2 * 5
+                    break
                 case '1d':
                     specialMA5 = _5base
                     specialMA21 = _21base
@@ -1380,7 +1435,7 @@ export default {
                     specialMA55 = parseInt(_55base * baseHour / 3)
                     break
             }
-            console.log(period, specialMA5, specialMA21)
+            // console.log(period, specialMA5, specialMA21)
             let option
             if (update === 'update') {
                 console.log('更新', period)
@@ -1530,8 +1585,14 @@ export default {
                             //         //     show: false
                             //         // },
                         },
+
                     },
-                    color: ['yellow', 'green', 'blue', 'white', 'yellow', 'red' /* 'white', 'white', 'white' */],
+                    brush: {
+                        xAxisIndex: 'all',
+                        toolbox: ['rect'],
+                        throttleDelay: 'debounce'
+                    },
+                    color: ['yellow', 'green', 'blue', 'black', 'blue', 'red' /* 'white', 'white', 'white' */],
                     legend: {
                         data: ['笔', '段', '高级别段', 'MA5', 'MA21', 'MA55', /* '布林上轨', '布林中轨', '布林下轨' */],
 
@@ -2060,11 +2121,18 @@ export default {
                 }
             }
             // console.log("option", currentChart, option)
-            //  大图隐藏放大按钮
+            //  大图隐藏放大按钮 ，小图隐藏区域选择按钮
             if (this.period !== '') {
                 option.toolbox.feature = {}
                 option.grid = this.echartsConfig.klineBigGrid
+                let brush = CommonTool.getBrush()
+                // 当前为大图，切关闭了绘图模式
+                if (brush === 'close-brush') {
+                    option.brush = null
+                }
+
             } else {
+                option.brush = null
                 option.grid = this.echartsConfig.multiPeriodGrid
             }
             currentChart.setOption(option)
@@ -2108,6 +2176,8 @@ export default {
         },
         splitData(jsonObj, period) {
             const stockDate = jsonObj.date
+            // 这个数组保存到全局给 区域选择使用
+            this.klineDateList = stockDate
             const stockHigh = jsonObj.high
             const stockLow = jsonObj.low
             const stockOpen = jsonObj.open
@@ -2161,7 +2231,7 @@ export default {
                             offset: [0, -10],
                             textBorderColor: this.echartsConfig.downColor,
                             textBorderWidth: 1,
-                            color: this.echartsConfig.textColor
+                            color: this.echartsConfig.duanPeakColor
                         },
                     }
                 } else {
@@ -2179,7 +2249,7 @@ export default {
                             offset: [0, 10],
                             textBorderColor: this.echartsConfig.upColor,
                             textBorderWidth: 1,
-                            color: this.echartsConfig.textColor,
+                            color: this.echartsConfig.duanPeakColor,
                         },
                     }
                 }
@@ -3304,7 +3374,7 @@ export default {
                         opacity: 1,
                         type: 'dash',
                         width: 1,
-                        color: 'yellow'
+                        color: this.echartsConfig.currentPriceColor,
                     },
                 },
                 symbol: 'circle',
@@ -3325,14 +3395,14 @@ export default {
                         opacity: 1,
                         type: 'dashed',
                         width: 1,
-                        color: 'white'
+                        color: this.echartsConfig.openPriceColor
                     },
                 },
                 symbol: 'circle',
                 symbolSize: 1,
                 label: {
                     normal: {
-                        color: 'white',
+                        color: this.echartsConfig.openPriceColor,
                         formatter: '开: ' + openPrice.toFixed(2) + ' ' + this.dynamicDirectionMap[direction] + ': ' + openAmount + ' 手',
                     },
                 },

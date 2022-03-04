@@ -131,10 +131,10 @@ config = {
         'M': {'order_book_id': 'ML9', 'margin_rate': 0.08, 'contract_multiplier': 10},
         'P': {'order_book_id': 'PL9', 'margin_rate': 0.08, 'contract_multiplier': 10},
         'Y': {'order_book_id': 'YL9', 'margin_rate': 0.08, 'contract_multiplier': 10},
-        'JD': {'order_book_id': 'JDL9', 'margin_rate': 0.09, 'contract_multiplier': 10},
+        # 'JD': {'order_book_id': 'JDL9', 'margin_rate': 0.09, 'contract_multiplier': 10},
         'PG': {'order_book_id': 'PGL9', 'margin_rate': 0.11, 'contract_multiplier': 20},
         # 豆一
-        'A': {'order_book_id': 'AL9', 'margin_rate': 0.08, 'contract_multiplier': 10},
+        # 'A': {'order_book_id': 'AL9', 'margin_rate': 0.08, 'contract_multiplier': 10},
 
         # 豆二
         # 'B': {'order_book_id': 'CL','margin_rate': 0.08, 'contract_multiplier': 10},

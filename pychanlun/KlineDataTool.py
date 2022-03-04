@@ -640,6 +640,10 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
 
 @lru_cache(maxsize=128)
 def getGlobalFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()), monitor=1):
+    # 通达信还未完成，暂时先用新浪内盘数据源
+    if "L9" in symbol:
+        symbol = symbol[:-2]+"0"
+    # print("symbol", symbol)
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:

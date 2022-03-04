@@ -42,8 +42,8 @@ def get_data_v2(symbol, period, end_date=None,monitor=1):
     elif 'BTC' in symbol:
         get_instrument_data = getDigitCoinData
     else:
-        # get_instrument_data = getFutureData
-        get_instrument_data = get_future_data_v2
+        get_instrument_data = getGlobalFutureData
+        # get_instrument_data = get_future_data_v2
         current_minute_holder = current_minute
 
     # 取一分种的K线合成当日的K线

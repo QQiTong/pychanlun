@@ -153,7 +153,8 @@ async def saveFutureSignal(symbol, period, fire_time_str, direction, signal, tag
             "power": power  # 5个指标综合判断当前信号强度
         })
         max_stop_rate = 0.55
-        interval_time = 60 * 4
+        # 由于新浪内盘下载需要12分钟才能更新，所以这边提醒间隔调大
+        interval_time = 60 * 15
         # 如果是日K 金死叉信号 提醒过滤间隔时间为 1天
         if signal == 'ma_cross':
             interval_time = 60 * 60 * 24 * 1
@@ -1235,10 +1236,11 @@ async def calMaxOrderCount(symbol, openPrice, stopPrice, period, signal):
         maxStopMoney = account * 10000 * 0.1
     # 内盘期货
     else:
-        simple_symbol = symbol.rstrip(string.digits)
+        # simple_symbol = symbol.rstrip(string.digits)
+        simple_symbol = symbol[:-2]
         account = inner_future_account
-        margin_rate = dominant_symbol_info_list[simple_symbol]['margin_rate']
-        contract_multiplier = dominant_symbol_info_list[simple_symbol]['contract_multiplier']
+        margin_rate = config['future_config'][simple_symbol]['margin_rate']
+        contract_multiplier = config['future_config'][simple_symbol]['contract_multiplier']
         # 计算1手需要的保证金
         perOrderMargin = int(openPrice * contract_multiplier * (margin_rate + margin_rate_company))
         # 1手止损的金额
@@ -1298,13 +1300,21 @@ async def calStopWinCount(symbol, period, positionInfo, closePrice):
 
 
 def run(**kwargs):
-    global dominant_symbol_info_list
     is_loop = kwargs.get("loop")
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     symbol_list = []
+    symbol_list_process = []
     for symbol in config['future_config']:
         symbol_list.append(symbol)
+    for i in range(len(symbol_list)):
+        symbol = symbol_list[i]
+        if i <= 36:
+            symbol = symbol + "L9"
+        if symbol == 'BTC':
+            continue
+        symbol_list_process.append(symbol)
+    symbol_list = symbol_list_process
 
     logger.info("监控标的数量: {}".format(len(symbol_list)))
 

@@ -376,7 +376,7 @@
             </el-table-column>
             <el-table-column label="信号" align="center" :key="4">
                 <template slot-scope="{row}">
-                    <span :class="row.signal==='short'?'down-green':'up-red'">{{ row.signal| signalTypeFilter }}</span>
+                    <span :class="row.direction==='short'?'down-green':'up-red'">{{ row.signal| signalTypeFilter }}</span>
                 </template>
             </el-table-column>
             <el-table-column label="数量" prop="amount" align="center" :key="7"/>
@@ -1246,7 +1246,7 @@
             },
             getFutureConfig() {
                 futureApi.getFutureConfig().then(res => {
-                    console.log('合约配置信息:', res)
+                    // console.log('合约配置信息:', res)
                     this.futureConfig = res
                     window.localStorage.setItem('symbolConfig', JSON.stringify(this.futureConfig))
                     setInterval(() => {

@@ -99,3 +99,15 @@ nssm install redis-service "C:\Users\parker\scoop\shims\redis-server.exe"
 nssm set redis-service AppEnvironmentExtra PATH=C:\Windows\System32;
 net start redis-service
 ```
+
+内盘期货下载服务
+（管理员命令行模式）
+```cmd
+nssm install download-inner-future-service C:\Python\Python38\Scripts\pychanlun.exe
+nssm set download-inner-future-service AppEnvironmentExtra PATH=C:\Windows\System32 PYCHANLUN_MONGO_URL=mongodb://localhost:27017/pychanlun
+nssm set download-inner-future-service AppParameters "download-inner-future-data"
+nssm set download-inner-future-service AppStdout D:\logs\pychanlun.log
+nssm set download-inner-future-service AppStderr D:\logs\pychanlun.log
+nssm set download-inner-future-service DependOnService MongoDB
+net start download-inner-future-service
+```

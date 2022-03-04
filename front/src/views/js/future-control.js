@@ -222,7 +222,7 @@ export default {
         this.themeOptions.theme = CommonTool.getTheme()
     },
     methods: {
-        applySetting() {
+        onThemeChange() {
             CommonTool.setTheme(this.themeOptions.theme)
             this.defaultThemes = this.themeOptions.theme
             window.localStorage.setItem('theme', this.themeOptions.theme)
@@ -231,7 +231,7 @@ export default {
 
         getAccountInfo() {
             futureApi.getAccountInfo().then(res => {
-                console.log('获取账户信息:', res)
+                // console.log('获取账户信息:', res)
                 this.futureAccount = res.inner_future
                 this.globalFutureAccount = res.global_future
                 this.digitCoinAccount = res.digit_coin
@@ -244,7 +244,7 @@ export default {
         getGlobalFutureSymbol() {
             futureApi.getGlobalFutureSymbol().then(res => {
                 this.globalFutureSymbol = res
-                console.log('获取外盘品种:', res)
+                // console.log('获取外盘品种:', res)
 
             }).catch((error) => {
                 console.log('获取外盘品种失败:', error)

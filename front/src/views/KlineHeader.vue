@@ -66,7 +66,15 @@
                 </el-table>
                 <el-button slot="reference" type="primary" class="primary-button" size="mini">快捷键</el-button>
             </el-popover>
-            <el-radio-group class="ml-5 mr-10 change-theme" v-model="themeOptions.theme" @change="applySetting" size="mini">
+            <!-- 绘图模式           -->
+            <el-radio-group v-if="showBrushSwitch" class="ml-5 mr-10 change-theme" v-model="brushOptions.brush"
+                            @change="onBrushChange" size="mini">
+                <el-radio-button label="open-brush">开启绘图</el-radio-button>
+                <el-radio-button label="close-brush">关闭绘图</el-radio-button>
+            </el-radio-group>
+            <!--           主题切换 -->
+            <el-radio-group class="ml-5 mr-10 change-theme" v-model="themeOptions.theme" @change="onThemeChange"
+                            size="mini">
                 <el-radio-button label="light-theme">白天</el-radio-button>
                 <el-radio-button label="dark-theme">夜晚</el-radio-button>
             </el-radio-group>
@@ -186,7 +194,11 @@
                 type: Array,
                 default: null
             },
-            themeOptions: null
+            themeOptions: null,
+            // 消耗性能默认关闭
+            brushOptions: null,
+            //  小图不显示切换绘图按钮
+            showBrushSwitch: null
         },
         methods: {
             setELDatePicker(endDate) {
@@ -200,9 +212,12 @@
                 // console.log("失去焦点")
                 this.blurOrFocus = 0
             },
-            applySetting() {
+            onThemeChange() {
                 this.$parent.changeTheme()
             },
+            onBrushChange() {
+                this.$parent.changeBrush()
+            }
         }
     }
 </script>

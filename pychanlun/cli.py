@@ -5,7 +5,7 @@ import click
 from pychanlun import server as api_server
 from pychanlun.monitor import BeichiMonitor
 from pychanlun.select import a_stock_signal
-from pychanlun.market_data import tdx_local_downloader, global_futures_downloader
+from pychanlun.market_data import tdx_local_downloader, global_futures_downloader,inner_futures_downloader
 from pychanlun.monitor import a_stock_tdx as stock_monitoring
 from pychanlun.job import save_all_job, save_xdxr_job, save_future_job
 from pychanlun.zero.notify import send_ding_message
@@ -47,6 +47,13 @@ def monitoring(**kwargs):
 @click.option('--loop/--no-loop', default=True)
 def download_global_future_data(**kwargs):
     global_futures_downloader.run(**kwargs)
+
+# 下载内盘数据
+# pychanlun download-inner-future-data
+@run.command()
+@click.option('--loop/--no-loop', default=True)
+def download_inner_future_data(**kwargs):
+    inner_futures_downloader.run(**kwargs)
 
 
 @run.command()

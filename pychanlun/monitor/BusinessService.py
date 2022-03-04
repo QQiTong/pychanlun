@@ -887,7 +887,7 @@ class BusinessService:
             marginLevel = 1 / (item['margin_rate'])
         else:
             print(item['symbol'], item)
-            marginLevel = 1 / (item['margin_rate'] + config['margin_rate_company'])
+            marginLevel = 1 / (item['margin_rate'] + config['account_info']['inner_future']['margin_rate_company'])
         if status == 'winEnd':
             winEndPercent = round(((float(close_price) - item['price']) / item['price']) * marginLevel, 2)
             # 止盈已实现盈亏

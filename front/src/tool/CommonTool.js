@@ -177,9 +177,16 @@ const CommonTool = {
         const theme = this.getTheme()
         this.setTheme(theme)
     },
-    getTheme(){
+    getTheme() {
         const theme = localStorage.getItem('theme') || 'dark-theme'
         return theme
+    },
+    setBrush(brush) {
+        localStorage.setItem('brush', brush)
+    },
+    getBrush() {
+        const brush = localStorage.getItem('brush') || 'close-brush'
+        return brush
     }
 }
 export default CommonTool
