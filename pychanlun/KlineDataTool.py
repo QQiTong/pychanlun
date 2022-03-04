@@ -16,6 +16,7 @@ from bson.codec_options import CodecOptions
 from pychanlun.db import DBPyChanlun
 from pychanlun.db import DBQuantAxis
 from pychanlun.data.future.db import fq_data_future_fetch_min
+from pychanlun.data.stock import fq_data_stock_fetch_min, fq_data_stock_fetch_day, fq_data_stock_resample_90min, fq_data_stock_resample_120min
 
 tz = pytz.timezone('Asia/Shanghai')
 
@@ -317,6 +318,10 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
     elif period == "3m":
         kline_data = fq_data_future_fetch_min(code, "1min", start_date, end)
         kline_data = QA_data_futuremin_resample(kline_data, '3min')
+        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+        kline_data["time_stamp"] = kline_data['time']
+        kline_data.reset_index(inplace=True)
+        print(kline_data)
     elif period == "5m":
         kline_data = fq_data_future_fetch_min(code, "5min", start_date, end)
     elif period == "15m":
@@ -427,8 +432,56 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
         kline_data.set_index('datetime', drop=False, inplace=True)
     kline_data.fillna(0, inplace=True)
     kline_data = kline_data.round({"open": 2, "high": 2, "low": 2, "close": 2, "volume": 2, "amount": 2})
+    kline_data['datetime'] = kline_data.index
     return kline_data
 
+
+@lru_cache(maxsize=128)
+def get_stock_data(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()), useCustomData=False):
+    if endDate is None or endDate == "":
+        end = datetime.now() + timedelta(1)
+    else:
+        end = datetime.strptime(endDate, "%Y-%m-%d")
+    end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=cfg.TZ)
+    start = end + timedelta(cfg.TIME_DELTA[period])
+    code = symbol[2:]
+
+    kline_data = None
+    if period == "1m":
+        kline_data = fq_data_stock_fetch_min(code, "1min", start, end, useCustomData=useCustomData)
+    elif period == "3m":
+        kline_data = fq_data_stock_fetch_min(code, "1min", start, end, useCustomData=useCustomData)
+        kline_data = QA_data_stockmin_resample(kline_data, 3)
+    elif period == "5m":
+        kline_data = fq_data_stock_fetch_min(code, "5min", start, end, useCustomData=useCustomData)
+    elif period == "15m":
+        kline_data = fq_data_stock_fetch_min(code, "15min", start, end, useCustomData=useCustomData)
+    elif period == "30m":
+        kline_data = fq_data_stock_fetch_min(code, "30min", start, end, useCustomData=useCustomData)
+    elif period == "60m":
+        kline_data = fq_data_stock_fetch_min(code, "60min", start, end, useCustomData=useCustomData)
+    elif period == "90m":
+        if useCustomData:
+            kline_data = fq_data_stock_fetch_min(code, "90min", start, end, useCustomData=useCustomData)
+        else:
+            kline_data = fq_data_stock_fetch_min(code, "30min", start, end, useCustomData=useCustomData)
+            kline_data = fq_data_stock_resample_90min(kline_data)
+    elif period == "120m":
+        if useCustomData:
+            kline_data = fq_data_stock_fetch_min(code, "120min", start, end, useCustomData=useCustomData)
+        else:
+            kline_data = fq_data_stock_fetch_min(code, "60min", start, end, useCustomData=useCustomData)
+            kline_data = fq_data_stock_resample_120min(kline_data)
+    elif period == "1d":
+        kline_data = fq_data_stock_fetch_day(code, start, end, useCustomData=useCustomData)
+    elif period == "1w":
+        kline_data = fq_data_stock_fetch_day(code, start, end, useCustomData=useCustomData)
+        kline_data = QA_data_day_resample(kline_data, "w")
+        kline_data['time_stamp'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+    if kline_data is not None:
+        kline_data.fillna(0, inplace=True)
+    kline_data['datetime'] = kline_data.index
+    return kline_data
 
 @lru_cache(maxsize=128)
 def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()), monitor=1):

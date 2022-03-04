@@ -5,7 +5,7 @@ import sys
 import pytz
 from dynaconf import Dynaconf
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # freshquant所在目录
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # pychanlun所在目录
 EXE_DIR = os.path.split(os.path.realpath(sys.argv[0]))[0]  # 程序或脚本所在目录
 CWD_DIR = os.getcwd()  # 执行程序或脚本的目录
 

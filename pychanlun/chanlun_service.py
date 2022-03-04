@@ -15,7 +15,7 @@ from loguru import logger
 import pychanlun.entanglement as entanglement
 import pychanlun.placeholder as placeholder
 from pychanlun import Duan
-from pychanlun.KlineDataTool import getStockData, getGlobalFutureData, getDigitCoinData, getFutureData, current_minute,get_future_data_v2
+from pychanlun.KlineDataTool import get_stock_data, getStockData, getGlobalFutureData, getDigitCoinData, getFutureData, current_minute, get_future_data_v2
 from pychanlun.analysis.chanlun_data import ChanlunData
 from pychanlun.basic.bi import calculate_bi, FindLastFractalRegion
 from pychanlun.basic.duan import calculate_duan, split_bi_in_duan
@@ -24,254 +24,160 @@ from pychanlun.basic.util import str_from_timestamp
 from pychanlun.config import config
 from pychanlun.helloquant.hq_tag.jcsc import find_jcsc_tags
 
+from pychanlun.data.astock.holding import get_stock_fills
+from pychanlun.data.astock.basic import fq_fetch_a_stock_basic
+from pychanlun.analysis.chanlun_analysis import Chanlun
+from pychanlun.pattern import pattern_chanlun
+from pychanlun.config import cfg
+
 tz = pytz.timezone('Asia/Shanghai')
 
-'''
-monitor 1 监控， 0 复盘
-监控返回少量数据，复盘返回大量数据
-'''
-@func_set_timeout(120)
-def get_data_v2(symbol, period, end_date=None,monitor=1):
-    required_period_list = get_required_period_list(period)[0:3]
+
+def get_data_v2(symbol, period, end_date=None, monitor=1):
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
-    current_minute_holder = None
+    stock_fills = None
+    digitalcoin_fills = None
+    name = None
     if match_stock is not None:
-        get_instrument_data = getStockData
-    elif symbol in config['global_future_symbol'] or symbol in config['global_stock_symbol']:
-        get_instrument_data = getGlobalFutureData
+        stock_obj = fq_fetch_a_stock_basic(symbol[2:])
+        name = stock_obj['name']
+        get_instrument_data = get_stock_data
+        stock_fills = get_stock_fills(symbol[2:])
+        if len(stock_fills) > 0:
+            stock_fills = stock_fills[["date", "time", "quantity", "settle_quantity", "price"]].to_dict(orient="records")
+        else:
+            stock_fills = None
     elif 'BTC' in symbol:
         get_instrument_data = getDigitCoinData
+    elif symbol in config['global_future_symbol'] or symbol in config[
+            'global_stock_symbol']:
+        get_instrument_data = getGlobalFutureData
     else:
-        # get_instrument_data = getGlobalFutureData
         get_instrument_data = get_future_data_v2
-        current_minute_holder = current_minute
-    # 取一分种的K线合成当日的K线
-    kline_data_1m = get_instrument_data(symbol, '1m', end_date, get_period_cache_stamp('1m'),monitor)
-    now = datetime.datetime.now()
-    day_bar = {}
-    extra_day_bar = False
-    if kline_data_1m is not None and len(kline_data_1m) > 0:
-        if now.hour < 21:
-            cut_start = datetime.datetime.now() - datetime.timedelta(days=1)
-            cut_start = cut_start.replace(hour=21, minute=0, second=0)
-            cut_end = datetime.datetime.now()
-            cut_end = cut_end.replace(hour=21, minute=0, second=0)
-            kline_data_1m = kline_data_1m[kline_data_1m.index >= cut_start]
-            kline_data_1m = kline_data_1m[kline_data_1m.index < cut_end]
-            dt = now
-            day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
-            day_bar['time'] = day_bar['datetime'].timestamp()
-        else:
-            cut_start = datetime.datetime.now()
-            cut_start = cut_start.replace(hour=21, minute=0, second=0)
-            kline_data_1m = kline_data_1m[kline_data_1m.index > cut_start]
-            dt = now + datetime.timedelta(days=1)
-            day_bar['datetime'] = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
-            day_bar['time'] = day_bar['datetime'].timestamp()
-        if len(kline_data_1m) > 0:
-            day_bar['high'] = kline_data_1m['high'].max()
-            day_bar['low'] = kline_data_1m['low'].min()
-            day_bar['open'] = kline_data_1m['open'][0]
-            day_bar['close'] = kline_data_1m['close'][-1]
-            extra_day_bar = True
 
-    data_list = []
-    required_period_list.reverse()
-    for period_one in required_period_list:
-        kline_data = get_instrument_data(symbol, period_one, end_date, get_period_cache_stamp(period_one),monitor)
-        if kline_data is None or len(kline_data) == 0:
-            continue
-        if period_one == '1d':
-            if extra_day_bar and day_bar['datetime'] > kline_data.index[-1]:
-                kline_data = kline_data.append(pd.Series(
-                    {"high": day_bar['high'], "low": day_bar['low'], "open": day_bar['open'], "close": day_bar['close'], "time": day_bar['time']},
-                    name=day_bar['datetime']
-                ))
-        kline_data["time_str"] = kline_data["time"].apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
-        length = len(data_list)
-        higher_chanlun_data = data_list[-1] if length > 0 else None
-        pre_duan_data = higher_chanlun_data['chanlun_data'].bi_data if higher_chanlun_data is not None else None
-        pre_higher_duan_data = higher_chanlun_data['chanlun_data'].duan_data if higher_chanlun_data is not None else None
-        chanlunData = ChanlunData(kline_data.time.to_list(), kline_data.open.to_list(), kline_data.close.to_list(),
-                                  kline_data.low.to_list(), kline_data.high.to_list(), pre_duan_data, pre_higher_duan_data)
-        kline_data['bi'] = chanlunData.bi_signal_list
-        kline_data['duan'] = chanlunData.duan_signal_list
-        kline_data['duan2'] = chanlunData.higher_duan_signal_list
-        data_list.append({"symbol": symbol, "period": period_one, "kline_data": kline_data, "chanlun_data": chanlunData})
-    if len(data_list) == 0:
-        return None
+    kline_data = get_instrument_data(
+        symbol,
+        period,
+        end_date,
+        cache_stamp=get_period_cache_stamp(period)
+    )
+    print(kline_data)
+    kline_data["time_str"] = kline_data["time_stamp"].apply(lambda value: datetime.datetime.fromtimestamp(value,tz=cfg.TZ).strftime("%Y-%m-%d %H:%M"))
 
-    data = data_list[-1]
+    chanlun = Chanlun().analysis(kline_data.time_stamp.to_list(), kline_data.open.to_list(), kline_data.close.to_list(), kline_data.low.to_list(), kline_data.high.to_list())
+    kline_data['bi'] = chanlun.bi_signal_list
+    kline_data['duan'] = chanlun.duan_signal_list
+    kline_data['duan2'] = chanlun.higher_duan_signal_list
+
+    data = {"symbol": symbol, "name": name, "period": period, "kline_data": kline_data, "chanlun_data": chanlun}
     kline_data = data['kline_data']
 
-    bi_data = {'date': list(map(str_from_timestamp, chanlunData.bi_data['dt'])), 'data': chanlunData.bi_data['data']}
-    duan_data = {'date': list(map(str_from_timestamp, chanlunData.duan_data['dt'])), 'data': chanlunData.duan_data['data']}
-    higher_chanlun_data = {'date': list(map(str_from_timestamp, chanlunData.higher_duan_data['dt'])), 'data': chanlunData.higher_duan_data['data']}
+    bi_data = {
+        'date': list(map(str_from_timestamp, chanlun.bi_data['dt'])),
+        'data': chanlun.bi_data['data']
+    }
+    duan_data = {
+        'date': list(map(str_from_timestamp, chanlun.duan_data['dt'])),
+        'data': chanlun.duan_data['data']
+    }
+    higher_chanlun_data = {
+        'date': list(map(str_from_timestamp, chanlun.higher_duan_data['dt'])),
+        'data': chanlun.higher_duan_data['data']
+    }
 
     # 计算笔中枢
-    entanglement_list = entanglement.CalcEntanglements(
+    entanglement_list = chanlun.entanglement_list
+    zs_data, zs_flag = get_zhong_shu_data(entanglement_list)
+    # 计算段中枢
+    if "duan2" in kline_data.columns:
+        entanglement_list2 = chanlun.high_entanglement_list
+    zs_data2, zs_flag2 = get_zhong_shu_data(entanglement_list2)
+
+    daily_data = get_instrument_data(symbol, "1d", end_date)
+
+    ma5 = None
+    ma34 = None
+    if daily_data is not None and len(daily_data) > 0:
+        daily_data = pd.DataFrame(daily_data)
+        daily_data["time_str"] = daily_data["time_stamp"].apply(
+            lambda value: datetime.datetime.fromtimestamp(value, tz=cfg.TZ).strftime("%Y-%m-%d %H:%M")
+        )
+        daily_data = daily_data.set_index("time_stamp")
+        ma5 = np.round(pd.Series.rolling(daily_data["close"], window=5).mean(), 2)
+        ma34 = np.round(pd.Series.rolling(daily_data["close"], window=34).mean(), 2)
+
+    # 计算买卖预警信号
+    hui_la = pattern_chanlun.la_hui(
+        entanglement_list,
+        kline_data['datetime'].to_list(),
+        kline_data.time_str.to_list(),
+        kline_data.high.to_list(),
+        kline_data.low.to_list(),
+        kline_data.bi.to_list(),
+        kline_data.duan.to_list(),
+    )
+    buy_zs_huila = hui_la['buy_zs_huila']
+    sell_zs_huila = hui_la['sell_zs_huila']
+
+    tu_po = pattern_chanlun.tu_po(
+        entanglement_list,
+        kline_data['datetime'].to_list(),
+        kline_data.time_str.to_list(),
+        kline_data.high.to_list(),
+        kline_data.low.to_list(),
+        kline_data.open.to_list(),
+        kline_data.close.to_list(),
+        kline_data.bi.to_list(),
+        kline_data.duan.to_list()
+    )
+
+    buy_zs_tupo = tu_po['buy_zs_tupo']
+    sell_zs_tupo = tu_po['sell_zs_tupo']
+
+    v_reverse = pattern_chanlun.v_reverse(
+        entanglement_list,
+        kline_data['datetime'].to_list(),
+        kline_data.time_str.to_list(),
+        kline_data.high.to_list(),
+        kline_data.low.to_list(),
+        kline_data.open.to_list(),
+        kline_data.close.to_list(),
+        kline_data.bi.to_list(),
+        kline_data.duan.to_list()
+    )
+
+    buy_v_reverse = v_reverse['buy_v_reverse']
+    sell_v_reverse = v_reverse['sell_v_reverse']
+
+    five_v_fan = pattern_chanlun.five_v_fan(
+        kline_data['datetime'].to_list(),
         kline_data.time_str.to_list(),
         kline_data.duan.to_list(),
         kline_data.bi.to_list(),
         kline_data.high.to_list(),
         kline_data.low.to_list()
     )
-    zs_data, zs_flag = get_zhong_shu_data(entanglement_list)
-
-    # 计算段中枢
-    if "duan2" in kline_data.columns:
-        entanglement_list2 = entanglement.CalcEntanglements(
-            kline_data.time_str.to_list(),
-            kline_data.duan2.to_list(),
-            kline_data.duan.to_list(),
-            kline_data.high.to_list(),
-            kline_data.low.to_list()
-        )
-    zs_data2, zs_flag2 = get_zhong_shu_data(entanglement_list2)
-
-    daily_data = get_instrument_data(symbol, "1d", end_date,int(datetime.datetime.now().timestamp()),monitor)
-    daily_data = pd.DataFrame(daily_data)
-    daily_data["time_str"] = daily_data["time"] \
-        .apply(lambda value: datetime.datetime.fromtimestamp(value, tz=tz).strftime("%Y-%m-%d %H:%M"))
-    daily_data = daily_data.set_index("time")
-    ma5 = np.round(pd.Series.rolling(daily_data["close"], window=5).mean(), 2)
-    ma21 = np.round(pd.Series.rolling(daily_data["close"], window=21).mean(), 2)
-
-    jcsc_tags = {
-        "buy_ma_gold_cross": {
-            "idx": [],
-            "date": [],
-            "data": [],
-            "stop_lose_price": []
-        },
-        "sell_ma_dead_cross": {
-            "idx": [],
-            "date": [],
-            "data": [],
-            "stop_lose_price": []
-        }
-    }
-    if period == "1d":
-        time_str_arr = np.array(daily_data["time_str"])
-        high_arr = np.array(daily_data["high"])
-        low_arr = np.array(daily_data["low"])
-        close_arr = np.array(daily_data["close"])
-        jcsc_tags = find_jcsc_tags(time_str_arr, high_arr, low_arr, close_arr)
-
-    # 计算买卖预警信号
-    hui_la = entanglement.la_hui(
-        entanglement_list,
-        kline_data.time_str.to_list(),
-        kline_data.high.to_list(),
-        kline_data.low.to_list(),
-        kline_data.bi.to_list(),
-        kline_data.duan.to_list(),
-        kline_data.duan2.to_list(),
-        ma5,
-        ma21
-    )
-    buy_zs_huila = hui_la['buy_zs_huila']
-    sell_zs_huila = hui_la['sell_zs_huila']
-
-    tu_po = entanglement.tu_po(
-        entanglement_list,
-        kline_data.time_str.to_list(),
-        kline_data.high.to_list(),
-        kline_data.low.to_list(),
-        kline_data.open.to_list(),
-        kline_data.close.to_list(),
-        kline_data.bi.to_list(),
-        kline_data.duan.to_list(),
-        kline_data.duan2.to_list(),
-        ma5,
-        ma21
-    )
-
-    buy_zs_tupo = tu_po['buy_zs_tupo']
-    sell_zs_tupo = tu_po['sell_zs_tupo']
-
-    v_reverse = entanglement.v_reverse(
-        entanglement_list,
-        kline_data.time_str.to_list(),
-        kline_data.high.to_list(),
-        kline_data.low.to_list(),
-        kline_data.open.to_list(),
-        kline_data.close.to_list(),
-        kline_data.bi.to_list(),
-        kline_data.duan.to_list(),
-        kline_data.duan2.to_list(),
-        ma5,
-        ma21
-    )
-
-    buy_v_reverse = v_reverse['buy_v_reverse']
-    sell_v_reverse = v_reverse['sell_v_reverse']
-
-    five_v_fan = entanglement.five_v_fan(
-        kline_data.time_str.to_list(),
-        kline_data.duan.to_list(),
-        kline_data.bi.to_list(),
-        kline_data.high.to_list(),
-        kline_data.low.to_list(),
-        kline_data.duan2.to_list(),
-        ma5,
-        ma21,
-    )
 
     buy_five_v_reverse = five_v_fan['buy_five_v_reverse']
     sell_five_v_reverse = five_v_fan['sell_five_v_reverse']
 
-    duan_pohuai = entanglement.po_huai(
+    duan_pohuai = pattern_chanlun.po_huai(
+        kline_data['datetime'].to_list(),
         kline_data.time_str.to_list(),
         kline_data.high.to_list(),
         kline_data.low.to_list(),
         kline_data.open.to_list(),
         kline_data.close.to_list(),
         kline_data.bi.to_list(),
-        kline_data.duan.to_list(),
-        kline_data.duan2.to_list(),
-        ma5,
-        ma21
+        kline_data.duan.to_list()
     )
 
     buy_duan_break = duan_pohuai['buy_duan_break']
     sell_duan_break = duan_pohuai['sell_duan_break']
 
-    # 顶底分型
-    fractal_region = None
-    if len(data_list) > 1:
-        data2 = data_list[-2]
-        kline_data2 = data2["kline_data"]
-        fractal_region = FindLastFractalRegion(
-            len(kline_data2),
-            kline_data2.bi.to_list(),
-            kline_data2.time_str.to_list(),
-            kline_data2.high.to_list(),
-            kline_data2.low.to_list(),
-            kline_data2.open.to_list(),
-            kline_data2.close.to_list()
-        )
-        if fractal_region is not None:
-            fractal_region["period"] = data2["period"]
-
-    fractal_region2 = None
-    if len(data_list) > 2:
-        data3 = data_list[-3]
-        kline_data3 = data3["kline_data"]
-        fractal_region2 = FindLastFractalRegion(
-            len(kline_data3),
-            kline_data3.bi.to_list(),
-            kline_data3.time_str.to_list(),
-            kline_data3.high.to_list(),
-            kline_data3.low.to_list(),
-            kline_data3.open.to_list(),
-            kline_data3.close.to_list()
-        )
-        if fractal_region2 is not None:
-            fractal_region2["period"] = data3["period"]
-
     resp = {
         "symbol": symbol,
+        "name": name,
         "period": period,
         "endDate": end_date,
         "dateBigLevel": [],
@@ -301,17 +207,21 @@ def get_data_v2(symbol, period, end_date=None,monitor=1):
         "buy_duan_break": buy_duan_break,
         "sell_duan_break": sell_duan_break,
         'fractal': placeholder.fractal,
-        "buy_ma_gold_cross": jcsc_tags["buy_ma_gold_cross"],
-        "sell_ma_dead_cross": jcsc_tags["sell_ma_dead_cross"]
+        "stock_fills": stock_fills,
+        "digitalcoin_fills": digitalcoin_fills
     }
 
-    fractal_region = {} if fractal_region is None else fractal_region
-    fractal_region2 = {} if fractal_region2 is None else fractal_region2
-    resp['fractal'] = [fractal_region, fractal_region2]
-    resp['notLower'] = calcNotLower(kline_data.duan.to_list(), kline_data.low.to_list())
-    resp['notHigher'] = calcNotHigher(kline_data.duan.to_list(), kline_data.high.to_list())
+    resp['notLower'] = calcNotLower(
+        kline_data.duan.to_list(),
+        kline_data.low.to_list()
+    )
+    resp['notHigher'] = calcNotHigher(
+        kline_data.duan.to_list(),
+        kline_data.high.to_list()
+    )
 
     return resp
+
 
 
 @func_set_timeout(60)
