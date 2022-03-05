@@ -30,10 +30,10 @@ def get_zhong_shu_data(entanglement_list):
         e = entanglement_list[i]
         if e.direction == -1:
             zs_flag.append(-1)
-            zs_data.append([[e.startTime, e.top], [e.endTime, e.bottom]])
+            zs_data.append([[str_from_timestamp(e.startTime), e.top], [str_from_timestamp(e.endTime), e.bottom]])
         else:
             zs_flag.append(1)
-            zs_data.append([[e.startTime, e.bottom], [e.endTime, e.top]])
+            zs_data.append([[str_from_timestamp(e.startTime), e.bottom], [str_from_timestamp(e.endTime), e.top]])
     return zs_data, zs_flag
 
 

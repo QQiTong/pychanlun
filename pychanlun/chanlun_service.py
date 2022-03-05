@@ -61,7 +61,7 @@ def get_data_v2(symbol, period, end_date=None, monitor=1):
         end_date,
         cache_stamp=get_period_cache_stamp(period)
     )
-    print(kline_data)
+
     kline_data["time_str"] = kline_data["time_stamp"].apply(lambda value: datetime.datetime.fromtimestamp(value,tz=cfg.TZ).strftime("%Y-%m-%d %H:%M"))
 
     chanlun = Chanlun().analysis(kline_data.time_stamp.to_list(), kline_data.open.to_list(), kline_data.close.to_list(), kline_data.low.to_list(), kline_data.high.to_list())
@@ -208,7 +208,9 @@ def get_data_v2(symbol, period, end_date=None, monitor=1):
         "sell_duan_break": sell_duan_break,
         'fractal': placeholder.fractal,
         "stock_fills": stock_fills,
-        "digitalcoin_fills": digitalcoin_fills
+        "digitalcoin_fills": digitalcoin_fills,
+        "buy_ma_gold_cross": { "date": [] },
+        "sell_ma_dead_cross": { "date": [] }
     }
 
     resp['notLower'] = calcNotLower(
