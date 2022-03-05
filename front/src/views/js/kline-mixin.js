@@ -646,9 +646,9 @@ export default {
         getAccountInfo() {
             futureApi.getAccountInfo().then(res => {
                 // console.log('获取账户信息:', res)
-                this.futureAccount = res.inner_future
-                this.globalFutureAccount = res.global_future
-                this.digitCoinAccount = res.digit_coin
+                this.futureAccount = res.inner_future.account
+                this.globalFutureAccount = res.global_future.account
+                this.digitCoinAccount = res.digit_coin.account
                 this.maxAccountUseRate = res.risk_control.max_account_use_rate
                 this.stopRate = res.risk_control.stop_rate
                 this.digitCoinFee = res.digit_coin.fee
@@ -1125,9 +1125,9 @@ export default {
             }
             this.switchSymbol(this.symbol, 'reload')
             // 开启轮询
-            // that.timer = setInterval(() => {
-            //     that.switchSymbol(that.symbol, 'update')
-            // }, 10000)
+            that.timer = setInterval(() => {
+                that.switchSymbol(that.symbol, 'update')
+            }, 10000)
         },
         processMargin() {
             // 获取当前品种的合约 保证金率
@@ -3620,7 +3620,7 @@ export default {
                 this.stopRate = 0.02
             } else {
                 // 内盘
-                this.account = this.futureAccount.account
+                this.account = this.futureAccount
                 // 计算1手需要的保证金
                 this.perOrderMargin = Math.floor(openPrice * this.contractMultiplier * this.currentMarginRate)
                 this.perOrderStopMoney = Math.abs(openPrice - stopPrice) * this.contractMultiplier
