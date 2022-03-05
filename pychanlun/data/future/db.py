@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
 
 from QUANTAXIS.QAUtil.QADate import QA_util_datetime_to_strdatetime
-from QUANTAXIS import QA_fetch_future_min_adv, QA_fetch_stock_day_adv
+from QUANTAXIS import QA_fetch_future_min_adv, QA_fetch_stock_day_adv, QA_fetch_future_day_adv
 from pychanlun.config import settings, cfg
 from bson.codec_options import CodecOptions
 from pychanlun.db import DBPyChanlun
 import pymongo
 import pandas as pd
+from datetime import datetime, time
 
 def fq_data_future_fetch_min(code, frequence, start=None, end=None):
     data = QA_fetch_future_min_adv(code, QA_util_datetime_to_strdatetime(start), QA_util_datetime_to_strdatetime(end), frequence=frequence).data
@@ -35,4 +36,15 @@ def fq_data_future_fetch_min(code, frequence, start=None, end=None):
         data.drop_duplicates(subset="datetime", keep="first", inplace=True)
     data['time'] = data['time_stamp']
     data = data.round({"open": 2, "high": 2, "low": 2, "close": 2, "position": 2, "volume": 2})
+    return data
+
+
+def fq_data_future_fetch_day(code, start=None, end=None):
+    data = QA_fetch_future_day_adv(code, QA_util_datetime_to_strdatetime(start), QA_util_datetime_to_strdatetime(end)).data
+    data.reset_index(inplace=True)
+    data['datetime'] = data['date'].apply(lambda x: datetime.combine(x, time()))
+    data['date_stamp'] = data['datetime'].apply(lambda x: x.timestamp())
+    data['time_stamp'] = data['date_stamp']
+    data = data.round({"open": 2, "high": 2, "low": 2, "close": 2, "volume": 2, "amount": 2})
+    data.set_index('datetime', drop=False, inplace=True)
     return data

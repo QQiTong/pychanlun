@@ -12,6 +12,7 @@ import pychanlun.stock_service as stock_service
 from pychanlun.chanlun_service import get_data_v2
 from pychanlun.monitor.BusinessService import businessService
 from gevent.pywsgi import WSGIServer
+from pychanlun.util.encoder import MyJsonEncoder
 
 app = Flask(__name__)
 
@@ -26,7 +27,7 @@ def stock_data():
     result = get_data_v2(symbol, period, end_date, 0)
     stopwatch.stop()
     logging.info(stopwatch)
-    return Response(json.dumps(result), mimetype='application/json')
+    return Response(json.dumps(result, cls=MyJsonEncoder), mimetype='application/json')
 
 
 @app.route('/api/stock_data_v2')
