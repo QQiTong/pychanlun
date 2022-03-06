@@ -7,9 +7,9 @@ import pandas as pd
 from pydash import get
 from datetime import datetime, time
 from bson.codec_options import CodecOptions
-from freshquant.db import DBfreshquant
-from freshquant.util.code import fq_util_code_append_market_code
-from freshquant.config import settings, cfg
+from pychanlun.db import DBPyChanlun
+from pychanlun.util.code import fq_util_code_append_market_code
+from pychanlun.config import settings, cfg
 from QUANTAXIS.QAUtil.QADate import QA_util_datetime_to_strdatetime
 from QUANTAXIS import QA_fetch_stock_min_adv, QA_fetch_stock_day_adv
 
