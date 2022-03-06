@@ -8,19 +8,25 @@ from pychanlun.db import DBPyChanlun
 import pymongo
 import pandas as pd
 from datetime import datetime, time
-from pychanlun.database.cache import InMemoryCache
+from pychanlun.database.cache import RedisCache
 
 
+@RedisCache.memoize(expiration=900)
 def fq_data_QA_fetch_future_min_adv(code, start, end=None, frequence='1min'):
-    return QA_fetch_future_min_adv(code, start, end, frequence)
+    data = QA_fetch_future_min_adv(code, start, end, frequence)
+    return data.data if data else None
 
 
+@RedisCache.memoize(expiration=900)
 def fq_data_QA_fetch_future_day_adv(code, start, end=None):
-    return QA_fetch_future_day_adv(code, start, end)
+    data = QA_fetch_future_day_adv(code, start, end)
+    return data.data if data else None
 
 
 def fq_data_future_fetch_min(code, frequence, start=None, end=None):
-    data = fq_data_QA_fetch_future_min_adv(code, QA_util_datetime_to_strdatetime(start), QA_util_datetime_to_strdatetime(end), frequence=frequence).data
+    data = fq_data_QA_fetch_future_min_adv(code, QA_util_datetime_to_strdatetime(start), QA_util_datetime_to_strdatetime(end), frequence=frequence)
+    if data is None:
+        return None
     data.reset_index(inplace=True)
     data["time_stamp"] = data["datetime"].apply(lambda dt: cfg.TZ.localize(dt).timestamp())
     data.set_index("datetime", inplace=True, drop=False)
@@ -50,7 +56,9 @@ def fq_data_future_fetch_min(code, frequence, start=None, end=None):
 
 
 def fq_data_future_fetch_day(code, start=None, end=None):
-    data = fq_data_QA_fetch_future_day_adv(code, QA_util_datetime_to_strdatetime(start), QA_util_datetime_to_strdatetime(end)).data
+    data = fq_data_QA_fetch_future_day_adv(code, QA_util_datetime_to_strdatetime(start), QA_util_datetime_to_strdatetime(end))
+    if data is None:
+        return None
     data.reset_index(inplace=True)
     data['datetime'] = data['date'].apply(lambda x: datetime.combine(x, time()))
     data['date_stamp'] = data['datetime'].apply(lambda x: x.timestamp())
