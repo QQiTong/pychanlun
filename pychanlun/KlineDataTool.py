@@ -21,6 +21,32 @@ tz = pytz.timezone('Asia/Shanghai')
 
 okexUrl = "https://www.okex.me/v2/perpetual/pc/public/instruments/BTC-USDT-SWAP/candles"
 zbUrl = "http://api.zb.center/data/v1/kline?market=btc_usdt&type=1day"
+# time_delta_maps[0] 用于复盘， time_delta_maps[1]用于监控
+time_delta_maps = [
+    {
+        '1m': -25,
+        '3m': -25 * 3,
+        '5m': -25 * 5,
+        '15m': -25 * 15,
+        '30m': -25 * 30,
+        '60m': -25 * 60,
+        '180m': -5 * 180,
+        '1d': -1000,
+        '3d': -1000
+    },
+    {
+        '1m': -5,
+        '3m': -5 * 3,
+        '5m': -5 * 5,
+        '15m': -10 * 15,
+        '30m': -5 * 30,
+        '60m': -5 * 60,
+        '180m': -5 * 180,
+        '240m': -5 * 180,
+        '1d': -1000,
+        '3d': -3000
+    }
+]
 
 
 @lru_cache(maxsize=128)
@@ -30,31 +56,11 @@ def getDigitCoinData(symbol, period, endDate, cache_stamp=int(datetime.now().tim
     else:
         end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-    time_delta_map = {
-        '1m': -5,
-        '3m': -5 * 3,
-        '5m': -5 * 5,
-        '15m': -5 * 15,
-        '30m': -5 * 30,
-        '60m': -5 * 60,
-        '180m': -5 * 180,
-        '240m': -5 * 180,
-        '1d': -1000,
-        '3d': -3000
-    }
     if monitor == 0:
-        time_delta_map = {
-            '1m': -25,
-            '3m': -25 * 3,
-            '5m': -25 * 30,
-            '15m': -25 * 15,
-            '30m': -25 * 30,
-            '60m': -25 * 60,
-            '180m': -5 * 180,
-            '1d': -1000,
-            '3d': -1000
-        }
-    start_date = end + timedelta(time_delta_map[period])
+        current_time_delta = time_delta_maps[0]
+    else:
+        current_time_delta = time_delta_maps[1]
+    start_date = end + timedelta(current_time_delta[period])
     code = "OKEX.BTC-USDT"
     if period == "1m":
         data_list = DBQuantAxis["cryptocurrency_min"] \
@@ -286,31 +292,11 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
     else:
         end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-    time_delta_map = {
-        '1m': -5,
-        '3m': -5 * 3,
-        '5m': -5 * 5,
-        '15m': -10 * 15,
-        '30m': -5 * 30,
-        '60m': -5 * 60,
-        '180m': -5 * 180,
-        '240m': -5 * 180,
-        '1d': -1000,
-        '3d': -3000
-    }
     if monitor == 0:
-        time_delta_map = {
-            '1m': -25,
-            '3m': -25 * 3,
-            '5m': -25 * 5,
-            '15m': -25 * 15,
-            '30m': -25 * 30,
-            '60m': -25 * 60,
-            '180m': -5 * 180,
-            '1d': -1000,
-            '3d': -1000
-        }
-    start_date = end + timedelta(time_delta_map[period])
+        current_time_delta = time_delta_maps[0]
+    else:
+        current_time_delta = time_delta_maps[1]
+    start_date = end + timedelta(current_time_delta[period])
     code = symbol
     if period == "1m":
         kline_data = fq_data_future_fetch_min(code, "1min", start_date, end)
@@ -408,19 +394,11 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
     else:
         end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-    timeDeltaMap = {
-        '1m': -5,
-        '3m': -5 * 3,
-        '5m': -5 * 5,
-        '15m': -5 * 15,
-        '30m': -5 * 30,
-        '60m': -5 * 60,
-        '180m': -5 * 180,
-        '240m': -5 * 180,
-        '1d': -1000,
-        '3d': -3000
-    }
-    start_date = end + timedelta(timeDeltaMap[period])
+    if monitor == 0:
+        current_time_delta = time_delta_maps[0]
+    else:
+        current_time_delta = time_delta_maps[1]
+    start_date = end + timedelta(current_time_delta[period])
     code = symbol[2:]
     if period == "1m":
         data_list = DBQuantAxis["stock_min"] \
@@ -568,38 +546,18 @@ def getStockData(symbol, period, endDate, cache_stamp=int(datetime.now().timesta
 def getGlobalFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().timestamp()), monitor=1):
     # 通达信还未完成，暂时先用新浪内盘数据源
     if "L9" in symbol:
-        symbol = symbol[:-2]+"0"
+        symbol = symbol[:-2] + "0"
     # print("symbol", symbol)
     if endDate is None or endDate == "":
         end = datetime.now() + timedelta(1)
     else:
         end = datetime.strptime(endDate, "%Y-%m-%d")
     end = end.replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz)
-    time_delta_map = {
-        '1m': -3,
-        '3m': -3 * 3,
-        '5m': -3 * 5,
-        '15m': -3 * 15,
-        '30m': -3 * 30,
-        '60m': -3 * 60,
-        '180m': -3 * 180,
-        '1d': -1000,
-        '3d': -3000
-    }
     if monitor == 0:
-        time_delta_map = {
-            '1m': -25,
-            '3m': -25 * 3,
-            '5m': -25 * 30,
-            '15m': -25 * 15,
-            '30m': -25 * 30,
-            '60m': -25 * 60,
-            '180m': -5 * 180,
-            '1d': -1000,
-            '3d': -1000
-        }
-
-    start_date = end + timedelta(time_delta_map[period])
+        current_time_delta = time_delta_maps[0]
+    else:
+        current_time_delta = time_delta_maps[1]
+    start_date = end + timedelta(current_time_delta[period])
     code = "%s_%s" % (symbol, period)
     data_list = DBPyChanlun[code] \
         .with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=tz)) \
