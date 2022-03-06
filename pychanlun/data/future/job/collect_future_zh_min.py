@@ -117,6 +117,8 @@ def future_zh_min_tdx():
                 continue
             symbol = symbol[1]
             df = fq_future_fetch_instrument_bars(symbol)
+            if symbol == "RBL9":
+                print(df)
             if df is None or len(df) <= 0:
                 RedisDB.lpush(SYMBOL_QUEUE_NAME, symbol)
                 continue
@@ -185,7 +187,6 @@ def job():
             "%lt": datetime.now() - timedelta(days=5)
         }
     })
-    threading.Thread(target=future_zh_min_tdx, daemon=False).start()
     threading.Thread(target=future_zh_min_tdx, daemon=False).start()
     threading.Thread(target=future_zh_min_symbol_queue, daemon=False).start()
 
