@@ -64,7 +64,7 @@ export default {
                 biColor: 'yellow',
                 duanColor: 'green',
                 higherDuanColor: 'blue',
-                duanPeakColor:'white',
+                duanPeakColor: 'white',
                 ma1Color: 'white',
                 ma2Color: 'blue',
                 ma3Color: 'red',
@@ -161,7 +161,7 @@ export default {
                 biColor: 'black',
                 duanColor: 'green',
                 higherDuanColor: 'blue',
-                duanPeakColor:'white',
+                duanPeakColor: 'white',
                 ma1Color: 'black',
                 ma2Color: 'blue',
                 ma3Color: 'red',
@@ -258,6 +258,7 @@ export default {
             dataSubTitle: '副标题',
 
             futureSymbolList: [],
+            biType: '',
             futureSymbolMap: {},
             timer: null,
             // 不同期货公司提高的点数不一样 ,华安是在基础上加1%
@@ -469,6 +470,7 @@ export default {
     },
     beforeMount() {
         this.symbol = this.getParams('symbol')
+        this.biType = CommonTool.getBiType()
         // if (this.show1MinSymbol.indexOf(this.symbol) !== -1) {
         //     this.isShow1Min = true
         // } else {
@@ -556,6 +558,12 @@ export default {
             // console.log("开关绘图")
             CommonTool.setBrush(this.brushOptions.brush)
             // 重新initBrushSetting 是否开启绘图监听 提高性能
+            window.location.reload()
+        },
+        changeBiType(biType) {
+            // console.log("当前笔类型", biType)
+            this.biType = biType
+            CommonTool.setBiType(this.biType)
             window.location.reload()
         },
         renderBrushed(params) {
@@ -1227,7 +1235,7 @@ export default {
             }
         },
         sendRequest(symbol, period, update) {
-            let requestData = {'symbol': symbol, 'period': period, 'endDate': this.endDate}
+            let requestData = {'symbol': symbol, 'period': period, 'endDate': this.endDate, 'biType': this.biType}
             this.getStockData(requestData, update)
         },
         getStockData(requestData, update) {
@@ -1262,10 +1270,10 @@ export default {
                 }
             }
 
-            const requesting = this.$cache.get(`REQUESTING#${requestData.symbol}#${requestData.period}`)
+            const requesting = this.$cache.get(`REQUESTING#${requestData.symbol}#${requestData.period}#${requestData.biType}`)
             // console.log("请求缓存", requesting)
             if (!requesting) {
-                this.$cache.set(`REQUESTING#${requestData.symbol}#${requestData.period}`, true, 60)
+                this.$cache.set(`REQUESTING#${requestData.symbol}#${requestData.period}#${requestData.biType}`, true, 60)
                 futureApi.stockData(requestData).then(res => {
                     // 如果之前请求的symbol 和当前的symbol不一致，直接过滤
                     if (res && (res.symbol !== this.symbol || res.endDate !== this.endDate || res.period !== requestData.period)) {
@@ -1309,7 +1317,7 @@ export default {
                         }
                     }
                     this.draw(res, update, requestData.period)
-                    this.$cache.del(`REQUESTING#${requestData.symbol}#${requestData.period}`)
+                    this.$cache.del(`REQUESTING#${requestData.symbol}#${requestData.period}#${requestData.biType}`)
                 }).catch(e => {
                     console.log(e)
                 })

@@ -27,9 +27,9 @@ export const futureApi = {
     stockData (data) {
         let url
         if (!data.endDate) {
-            url = `/api/stock_data?period=${data.period}&symbol=${data.symbol}`
+            url = `/api/stock_data?period=${data.period}&symbol=${data.symbol}&biType=${data.biType}`
         } else {
-            url = `/api/stock_data?period=${data.period}&symbol=${data.symbol}&endDate=${data.endDate}`
+            url = `/api/stock_data?period=${data.period}&symbol=${data.symbol}&endDate=${data.endDate}&biType=${data.biType}`
         }
         return axios({
             url: url,

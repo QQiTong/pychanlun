@@ -33,7 +33,7 @@ from pychanlun.config import cfg
 tz = pytz.timezone('Asia/Shanghai')
 
 
-def get_data_v2(symbol, period, end_date=None, monitor=1):
+def get_data_v2(symbol, period, end_date=None,bi_type=1, monitor=1):
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
     stock_fills = None
     digitalcoin_fills = None
@@ -59,12 +59,13 @@ def get_data_v2(symbol, period, end_date=None, monitor=1):
         symbol,
         period,
         end_date,
-        cache_stamp=get_period_cache_stamp(period)
+        cache_stamp=get_period_cache_stamp(period),
+        monitor=monitor
     )
 
     kline_data["time_str"] = kline_data["time_stamp"].apply(lambda value: datetime.datetime.fromtimestamp(value,tz=cfg.TZ).strftime("%Y-%m-%d %H:%M"))
-
-    chanlun = Chanlun().analysis(kline_data.time_stamp.to_list(), kline_data.open.to_list(), kline_data.close.to_list(), kline_data.low.to_list(), kline_data.high.to_list())
+    bi_type = 'cl'+str(bi_type)
+    chanlun = Chanlun(bi_type).analysis(kline_data.time_stamp.to_list(), kline_data.open.to_list(), kline_data.close.to_list(), kline_data.low.to_list(), kline_data.high.to_list())
     kline_data['bi'] = chanlun.bi_signal_list
     kline_data['duan'] = chanlun.duan_signal_list
     kline_data['duan2'] = chanlun.higher_duan_signal_list

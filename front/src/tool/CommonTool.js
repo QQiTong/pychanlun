@@ -187,6 +187,13 @@ const CommonTool = {
     getBrush() {
         const brush = localStorage.getItem('brush') || 'close-brush'
         return brush
+    },
+    setBiType(biType) {
+        localStorage.setItem('biType', biType)
+    },
+    getBiType() {
+        const biType = localStorage.getItem('biType')
+        return biType
     }
 }
 export default CommonTool

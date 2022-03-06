@@ -66,6 +66,16 @@
                 </el-table>
                 <el-button slot="reference" type="primary" class="primary-button" size="mini">快捷键</el-button>
             </el-popover>
+<!--            切换笔类型-->
+            <el-select size="mini" v-model="biType_" class="form-input" filterable placeholder="笔类型"
+                       @change="changeBiType(biType_)">
+                <el-option
+                    v-for="item in biTypeOptions"
+                    :key="item.key"
+                    :label="item.display_name"
+                    :value="item.key"
+                />
+            </el-select>
             <!-- 绘图模式           -->
             <el-radio-group v-if="showBrushSwitch" class="ml-5 mr-10 change-theme" v-model="brushOptions.brush"
                             @change="onBrushChange" size="mini">
@@ -82,13 +92,21 @@
     </div>
 </template>
 <script>
+    const biTypeOptions = [
+        {key: "1", display_name: "chanlunlianghua"},
+        {key: "2", display_name: "chanlunx"},
+        {key: "3", display_name: "freshczsc"},
+        {key: "4", display_name: "fqczsc"},
+    ];
     export default {
         name: "KlineHeader",
         data() {
             return {
                 inputSymbol_: this.inputSymbol,
                 endDate_: this.endDate,
+                biType_: this.biType,
                 blurOrFocus: 0,
+                biTypeOptions,
                 shortCutData: [{
                     name: 'Space',
                     desc: '裸K',
@@ -184,6 +202,10 @@
                 type: Function,
                 default: null
             },
+            changeBiType: {
+                type: Function,
+                default: null
+            },
             periodList: {
                 type: Array,
                 default: null
@@ -198,7 +220,9 @@
             // 消耗性能默认关闭
             brushOptions: null,
             //  小图不显示切换绘图按钮
-            showBrushSwitch: null
+            showBrushSwitch: null,
+            // 笔类型
+            biType: null,
         },
         methods: {
             setELDatePicker(endDate) {

@@ -742,7 +742,7 @@ async def monitorBeichi(result, symbol, period, closePrice):
 
         fractal = ""
         # 借助大级别分型信号进行过滤
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
             # 底分型的顶部
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
@@ -762,7 +762,7 @@ async def monitorBeichi(result, symbol, period, closePrice):
         stop_lose_price = result['sellMACDBCData']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         fractal = ""
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
@@ -789,14 +789,17 @@ async def monitorHuila(result, symbol, period, closePrice):
         fire_time = result['buy_zs_huila']['date'][-1]
         price = result['buy_zs_huila']['data'][-1]
         tag = result['buy_zs_huila']['tag'][-1]
-        above_ma5 = result['buy_zs_huila']['above_ma5'][-1]
-        above_ma20 = result['buy_zs_huila']['above_ma20'][-1]
+        # todo
+        # above_ma5 = result['buy_zs_huila']['above_ma5'][-1]
+        # above_ma20 = result['buy_zs_huila']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         stop_lose_price = result['buy_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'B'
         fractal = ""
         # 借助大级别分型信号进行过滤
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
             # 底分型的顶部
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
@@ -810,13 +813,15 @@ async def monitorHuila(result, symbol, period, closePrice):
         fire_time = result['sell_zs_huila']['date'][-1]
         price = result['sell_zs_huila']['data'][-1]
         tag = result['sell_zs_huila']['tag'][-1]
-        above_ma5 = result['sell_zs_huila']['above_ma5'][-1]
-        above_ma20 = result['sell_zs_huila']['above_ma20'][-1]
+        # above_ma5 = result['sell_zs_huila']['above_ma5'][-1]
+        # above_ma20 = result['sell_zs_huila']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         stop_lose_price = result['sell_zs_huila']['stop_lose_price'][-1]
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         direction = 'S'
         fractal = ""
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
@@ -844,15 +849,17 @@ async def monitorTupo(result, symbol, period, closePrice):
         price = result['buy_zs_tupo']['data'][-1]
         stop_lose_price = result['buy_zs_tupo']['stop_lose_price'][-1]
         tag = ''
-        above_ma5 = result['buy_zs_tupo']['above_ma5'][-1]
-        above_ma20 = result['buy_zs_tupo']['above_ma20'][-1]
+        # above_ma5 = result['buy_zs_tupo']['above_ma5'][-1]
+        # above_ma20 = result['buy_zs_tupo']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         fractal = ""
         # 借助大级别分型信号进行过滤
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
             # 底分型的顶部
-            top_price = result['fractal'][0]['bottom_fractal']['top']
+            top_price = result['fractal'][0]['bottomfractal']['top']
             fractal = True if closePrice >= top_price else False
         futureCalcObj = await combineIndicator(direction, above_ma5, above_ma20, not_lower, not_higher, fractal,
                                                futureCalcObj)
@@ -865,12 +872,14 @@ async def monitorTupo(result, symbol, period, closePrice):
         price = result['sell_zs_tupo']['data'][-1]
         stop_lose_price = result['sell_zs_tupo']['stop_lose_price'][-1]
         tag = ''
-        above_ma5 = result['sell_zs_tupo']['above_ma5'][-1]
-        above_ma20 = result['sell_zs_tupo']['above_ma20'][-1]
+        # above_ma5 = result['sell_zs_tupo']['above_ma5'][-1]
+        # above_ma20 = result['sell_zs_tupo']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         fractal = ""
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
@@ -896,13 +905,15 @@ async def monitorVReverse(result, symbol, period, closePrice):
         price = result['buy_v_reverse']['data'][-1]
         stop_lose_price = result['buy_v_reverse']['stop_lose_price'][-1]
         tag = ''
-        above_ma5 = result['buy_v_reverse']['above_ma5'][-1]
-        above_ma20 = result['buy_v_reverse']['above_ma20'][-1]
+        # above_ma5 = result['buy_v_reverse']['above_ma5'][-1]
+        # above_ma20 = result['buy_v_reverse']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         fractal = ""
         # 借助大级别分型信号进行过滤
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
             # 底分型的顶部
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
@@ -917,12 +928,14 @@ async def monitorVReverse(result, symbol, period, closePrice):
         price = result['sell_v_reverse']['data'][-1]
         stop_lose_price = result['sell_v_reverse']['stop_lose_price'][-1]
         tag = ''
-        above_ma5 = result['sell_v_reverse']['above_ma5'][-1]
-        above_ma20 = result['sell_v_reverse']['above_ma20'][-1]
+        # above_ma5 = result['sell_v_reverse']['above_ma5'][-1]
+        # above_ma20 = result['sell_v_reverse']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         fractal = ""
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
@@ -947,13 +960,15 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         price = result['buy_five_v_reverse']['data'][-1]
         stop_lose_price = result['buy_five_v_reverse']['stop_lose_price'][-1]
         tag = ''
-        above_ma5 = result['buy_five_v_reverse']['above_ma5'][-1]
-        above_ma20 = result['buy_five_v_reverse']['above_ma20'][-1]
+        # above_ma5 = result['buy_five_v_reverse']['above_ma5'][-1]
+        # above_ma20 = result['buy_five_v_reverse']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         fractal = ""
         # 借助大级别分型信号进行过滤
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
             # 底分型的顶部
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
@@ -967,12 +982,14 @@ async def monitorFiveVReverse(result, symbol, period, closePrice):
         price = result['sell_five_v_reverse']['data'][-1]
         stop_lose_price = result['sell_five_v_reverse']['stop_lose_price'][-1]
         tag = ''
-        above_ma5 = result['sell_five_v_reverse']['above_ma5'][-1]
-        above_ma20 = result['sell_five_v_reverse']['above_ma20'][-1]
+        # above_ma5 = result['sell_five_v_reverse']['above_ma5'][-1]
+        # above_ma20 = result['sell_five_v_reverse']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         fractal = ""
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
@@ -998,13 +1015,15 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
         price = result['buy_duan_break']['data'][-1]
         stop_lose_price = result['buy_duan_break']['stop_lose_price'][-1]
         tag = ''
-        above_ma5 = result['buy_duan_break']['above_ma5'][-1]
-        above_ma20 = result['buy_duan_break']['above_ma20'][-1]
+        # above_ma5 = result['buy_duan_break']['above_ma5'][-1]
+        # above_ma20 = result['buy_duan_break']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         direction = 'B'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         fractal = ""
         # 借助大级别分型信号进行过滤
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
             # 底分型的顶部
             top_price = result['fractal'][0]['bottom_fractal']['top']
             fractal = True if closePrice >= top_price else False
@@ -1018,12 +1037,14 @@ async def monitorDuanBreak(result, symbol, period, closePrice):
         price = result['sell_duan_break']['data'][-1]
         stop_lose_price = result['sell_duan_break']['stop_lose_price'][-1]
         tag = ''
-        above_ma5 = result['sell_duan_break']['above_ma5'][-1]
-        above_ma20 = result['sell_duan_break']['above_ma20'][-1]
+        # above_ma5 = result['sell_duan_break']['above_ma5'][-1]
+        # above_ma20 = result['sell_duan_break']['above_ma20'][-1]
+        above_ma5 = True
+        above_ma20 = True
         direction = 'S'
         futureCalcObj = await calMaxOrderCount(symbol, price, stop_lose_price, period, signal)
         fractal = ""
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
             # 顶分型的底部
             bottom_price = result['fractal'][0]['top_fractal']['bottom']
             fractal = True if closePrice <= bottom_price else False
@@ -1076,7 +1097,7 @@ close_price 和触发价格 price 已经相差很多，此时计算的止损率�
 async def monitorFractal(result, symbol, period, closePrice):
     # 将当前级别的的方向插入到数据库，用于前端展示当前级别的状态
     # 15m向上成笔，代表3F级别多， 15m向下成笔，代表3F级别空
-    if result['fractal'][0] != {}:
+    if result['fractal'] and result['fractal'][0] != {}:
         levelDirection = result['fractal'][0]['direction']
         if levelDirection == 1:
             await saveFutureDirection(symbol, period, '多')
@@ -1093,7 +1114,7 @@ async def monitorFractal(result, symbol, period, closePrice):
 
         # 多单查找向上笔的顶分型
         # 高级别
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == 1:
             fire_time = result['fractal'][0]['top_fractal']['date']
             # 顶分型的底
             price = result['fractal'][0]['top_fractal']['bottom']
@@ -1122,7 +1143,7 @@ async def monitorFractal(result, symbol, period, closePrice):
                 await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
                                        stop_lose_price, futureCalcObj)
         # 高高级别
-        if result['fractal'][1] != {} and result['fractal'][1]['direction'] == 1:
+        if result['fractal'] and result['fractal'][1] != {} and result['fractal'][1]['direction'] == 1:
             fire_time = result['fractal'][1]['top_fractal']['date']
             price = result['fractal'][1]['top_fractal']['bottom']
             stop_lose_price = result['fractal'][1]['top_fractal']['top']
@@ -1150,7 +1171,7 @@ async def monitorFractal(result, symbol, period, closePrice):
     if positionInfoShort != -1:
         # 空单查找向下笔的底分型
         # 高级别
-        if result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
+        if result['fractal'] and result['fractal'][0] != {} and result['fractal'][0]['direction'] == -1:
             fire_time = result['fractal'][0]['bottom_fractal']['date']
             price = result['fractal'][0]['bottom_fractal']['top']
             stop_lose_price = result['fractal'][0]['bottom_fractal']['bottom']
@@ -1176,7 +1197,7 @@ async def monitorFractal(result, symbol, period, closePrice):
                 await saveFutureSignal(symbol, period, fire_time, direction, signal, tag, price, closePrice,
                                        stop_lose_price, futureCalcObj)
         # 高高级别
-        if result['fractal'][1] != {} and result['fractal'][1]['direction'] == -1:
+        if result['fractal'] and result['fractal'][1] != {} and result['fractal'][1]['direction'] == -1:
             fire_time = result['fractal'][1]['bottom_fractal']['date']
             price = result['fractal'][1]['bottom_fractal']['top']
             stop_lose_price = result['fractal'][1]['bottom_fractal']['bottom']

@@ -4,7 +4,7 @@
                      :submitSymbol="submitSymbol" :quickCalcMaxCount="quickCalcMaxCount" :quickSwitchDay="quickSwitchDay"
                      :switchPeriod="switchPeriod" :jumpToControl="jumpToControl" :showPeriodList="false" :changeDate="changeDate" :jumpToMultiPeriod="jumpToMultiPeriod"
                      :quickSwitchSymbol="quickSwitchSymbol" :futureSymbolList="futureSymbolList" :themeOptions="themeOptions"
-                     :brush-options="brushOptions" :showBrushSwitch="false"></KlineHeader>
+                     :brush-options="brushOptions" :showBrushSwitch="false" :changeBiType="changeBiType" :biType="biType"></KlineHeader>
         <div class="echarts-list">
 <!--            <div class="echarts-item" id="main3Parent">-->
 <!--                <div id="main3" class="echarts">-->

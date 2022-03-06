@@ -165,7 +165,7 @@ config = {
         'NID': {'order_book_id': 'NID', 'margin_rate': 0.1, 'contract_multiplier': 6},
         'ZSD': {'order_book_id': 'ZSD', 'margin_rate': 0.1, 'contract_multiplier': 25},
         'SND': {'order_book_id': 'SND', 'margin_rate': 0.1, 'contract_multiplier': 5},
-        'CN': {'order_book_id': 'CN', 'margin_rate': 0.09, 'contract_multiplier': 1},
+        # 'CN': {'order_book_id': 'CN', 'margin_rate': 0.09, 'contract_multiplier': 1},
         # 18:30 -14:00 0.04   其它时间 0.06          1045
 
         'ZS': {'order_book_id': 'ZS', 'margin_rate': 0.03, 'contract_multiplier': 50},  # 美豆
@@ -174,7 +174,7 @@ config = {
         'MZC': {'order_book_id': 'MZC', 'margin_rate': 0.06, 'contract_multiplier': 50},  # 美玉米
         'FCPO': {'order_book_id': 'FCPO', 'margin_rate': 0.1, 'contract_multiplier': 25},  # 马棕榈
         'CT': {'order_book_id': 'CT', 'margin_rate': 0.1, 'contract_multiplier': 100},  # 美棉花
-        'BTC': {'order_book_id': 'BTC', 'margin_rate': 0.1, 'contract_multiplier': 1},
+        # 'BTC': {'order_book_id': 'BTC', 'margin_rate': 0.1, 'contract_multiplier': 1},
 
         # 'SB': {'margin_rate': 0.1, 'contract_multiplier': 1},
         # wshq

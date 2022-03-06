@@ -609,6 +609,8 @@ def getGlobalFutureData(symbol, period, endDate, cache_stamp=int(datetime.now().
         return None
     kline_data = pd.DataFrame(data_list)
     kline_data['time'] = kline_data['_id'].apply(lambda value: value.timestamp())
+    kline_data['time_stamp'] = kline_data['time']
+    kline_data['datetime'] = kline_data['_id']
     kline_data.fillna(0, inplace=True)
     return kline_data
 
