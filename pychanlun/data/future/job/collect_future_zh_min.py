@@ -118,7 +118,7 @@ def future_zh_min_tdx():
             symbol = symbol[1]
             df = fq_future_fetch_instrument_bars(symbol)
             if symbol == "RBL9":
-                print(df)
+                print(df, "1")
             if df is None or len(df) <= 0:
                 RedisDB.lpush(SYMBOL_QUEUE_NAME, symbol)
                 continue
@@ -134,6 +134,8 @@ def future_zh_min_tdx():
             df["type"] = "1min"
             df["source"] = "通达信"
             logger.info("%s 通达信" % symbol)
+            if symbol == "RBL9":
+                print(df, "2")
             _save(df)
         except Exception:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
