@@ -72,80 +72,87 @@ config = {
     },
     # 商品期货保证金率一般固定，只有过节会变下。因为换合约期间需要拿到老合约保证金率，因此保存起来
     'future_config': {
-        'RB': {'order_book_id': 'RBL9', 'margin_rate': 0.09, 'contract_multiplier': 10},
-        'HC': {'order_book_id': 'HCL9', 'margin_rate': 0.09, 'contract_multiplier': 10},
-        'I': {'order_book_id': 'IL9', 'margin_rate': 0.08, 'contract_multiplier': 100},
-        'J': {'order_book_id': 'JL9', 'margin_rate': 0.08, 'contract_multiplier': 100},
-        'JM': {'order_book_id': 'JML9', 'margin_rate': 0.08, 'contract_multiplier': 60},
+        'RB': {'order_book_id': 'RBL9', 'margin_rate': 0.09, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'HC': {'order_book_id': 'HCL9', 'margin_rate': 0.09, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'I': {'order_book_id': 'IL9', 'margin_rate': 0.08, 'contract_multiplier': 100,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'J': {'order_book_id': 'JL9', 'margin_rate': 0.08, 'contract_multiplier': 100,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'JM': {'order_book_id': 'JML9', 'margin_rate': 0.08, 'contract_multiplier': 60,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 郑煤
-        'ZC': {'order_book_id': 'ZCL9', 'margin_rate': 0.5, 'contract_multiplier': 100},
-        # 锰硅
-        'SM': {'order_book_id': 'SML9', 'margin_rate': 0.07, 'contract_multiplier': 5},
-        # 硅铁
-        'SF': {'order_book_id': 'SFL9', 'margin_rate': 0.07, 'contract_multiplier': 5},
+        'ZC': {'order_book_id': 'ZCL9', 'margin_rate': 0.5, 'contract_multiplier': 100,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 锰硅 没夜盘
+        'SM': {'order_book_id': 'SML9', 'margin_rate': 0.07, 'contract_multiplier': 5,'trading_hours':'09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 硅铁 没夜盘
+        'SF': {'order_book_id': 'SFL9', 'margin_rate': 0.07, 'contract_multiplier': 5,'trading_hours':'09:01-10:15,10:31-11:30,13:31-15:00'},
 
-        'RU': {'order_book_id': 'RUL9', 'margin_rate': 0.11, 'contract_multiplier': 10},
-        'FU': {'order_book_id': 'FUL9', 'margin_rate': 0.11, 'contract_multiplier': 10},
-        'BU': {'order_book_id': 'BUL9', 'margin_rate': 0.11, 'contract_multiplier': 10},
+        'RU': {'order_book_id': 'RUL9', 'margin_rate': 0.11, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'FU': {'order_book_id': 'FUL9', 'margin_rate': 0.11, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'BU': {'order_book_id': 'BUL9', 'margin_rate': 0.11, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
 
-        'MA': {'order_book_id': 'MAL9', 'margin_rate': 0.07, 'contract_multiplier': 10},
-        'TA': {'order_book_id': 'TAL9', 'margin_rate': 0.07, 'contract_multiplier': 5},
+        'MA': {'order_book_id': 'MAL9', 'margin_rate': 0.07, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'TA': {'order_book_id': 'TAL9', 'margin_rate': 0.07, 'contract_multiplier': 5,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
 
-        'EG': {'order_book_id': 'EGL9', 'margin_rate': 0.11, 'contract_multiplier': 10},
+        'EG': {'order_book_id': 'EGL9', 'margin_rate': 0.11, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 苯乙烯
-        'EB': {'order_book_id': 'EBL9', 'margin_rate': 0.12, 'contract_multiplier': 5},
+        'EB': {'order_book_id': 'EBL9', 'margin_rate': 0.12, 'contract_multiplier': 5,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 聚丙烯
-        'PP': {'order_book_id': 'PPL9', 'margin_rate': 0.11, 'contract_multiplier': 5},
+        'PP': {'order_book_id': 'PPL9', 'margin_rate': 0.11, 'contract_multiplier': 5,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 聚乙烯
-        'L': {'order_book_id': 'LL9', 'margin_rate': 0.11, 'contract_multiplier': 5},
+        'L': {'order_book_id': 'LL9', 'margin_rate': 0.11, 'contract_multiplier': 5,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 聚氯乙烯
-        'V': {'order_book_id': 'VL9', 'margin_rate': 0.09, 'contract_multiplier': 5},
-        'AU': {'order_book_id': 'AUL9', 'margin_rate': 0.08, 'contract_multiplier': 1000},
-        'AG': {'order_book_id': 'AGL9', 'margin_rate': 0.12, 'contract_multiplier': 15},
-        'NI': {'order_book_id': 'NIL9', 'margin_rate': 0.1, 'contract_multiplier': 1},
-        'ZN': {'order_book_id': 'ZNL9', 'margin_rate': 0.1, 'contract_multiplier': 5},
-        'SP': {'order_book_id': 'SPL9', 'margin_rate': 0.08, 'contract_multiplier': 10},
-        'CU': {'order_book_id': 'CUL9', 'margin_rate': 0.1, 'contract_multiplier': 5},
+        'V': {'order_book_id': 'VL9', 'margin_rate': 0.09, 'contract_multiplier': 5,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 沪金 加长夜盘
+        'AU': {'order_book_id': 'AUL9', 'margin_rate': 0.08, 'contract_multiplier': 1000,'trading_hours':'21:01-02:30,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 沪银 加长夜盘
+        'AG': {'order_book_id': 'AGL9', 'margin_rate': 0.12, 'contract_multiplier': 15,'trading_hours':'21:01-02:30,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 沪镍 加长夜盘
+        'NI': {'order_book_id': 'NIL9', 'margin_rate': 0.1, 'contract_multiplier': 1, 'trading_hours': '21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 沪锌 加长夜盘
+        'ZN': {'order_book_id': 'ZNL9', 'margin_rate': 0.1, 'contract_multiplier': 5,'trading_hours':'21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 沪铜 加长夜盘
+        'CU': {'order_book_id': 'CUL9', 'margin_rate': 0.1, 'contract_multiplier': 5,'trading_hours':'21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 沪铝 加长夜盘
+        'AL': {'order_book_id': 'ALL9', 'margin_rate': 0.1, 'contract_multiplier': 5,'trading_hours':'21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 沪锡 加长夜盘
+        'SN': {'order_book_id': 'SNL9', 'margin_rate': 0.1, 'contract_multiplier': 1,'trading_hours':'21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 沪铅 加长夜盘
+        # 'PB': {'order_book_id': 'CL','margin_rate': 0.1, 'contract_multiplier': 5,'trading_hours':'21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
 
-        # 沪铝
-        'AL': {'order_book_id': 'ALL9', 'margin_rate': 0.1, 'contract_multiplier': 5},
-        # 沪锡
-        'SN': {'order_book_id': 'SNL9', 'margin_rate': 0.1, 'contract_multiplier': 1},
-        # 沪铅
-        # 'PB': {'order_book_id': 'CL','margin_rate': 0.1, 'contract_multiplier': 5},
+        'SP': {'order_book_id': 'SPL9', 'margin_rate': 0.08, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
 
-        'CF': {'order_book_id': 'CFL9', 'margin_rate': 0.07, 'contract_multiplier': 5},
-        'SR': {'order_book_id': 'SRL9', 'margin_rate': 0.05, 'contract_multiplier': 10},
-        # 'OI': {'order_book_id': 'CL','margin_rate': 0.06, 'contract_multiplier': 10},
-        # 'RM': {'order_book_id': 'CL','margin_rate': 0.06, 'contract_multiplier': 10},
-        'AP': {'order_book_id': 'APL9', 'margin_rate': 0.08, 'contract_multiplier': 10},
-        # 'CJ': {'order_book_id': 'CL','margin_rate': 0.08, 'contract_multiplier': 5},
+        'CF': {'order_book_id': 'CFL9', 'margin_rate': 0.07, 'contract_multiplier': 5,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'SR': {'order_book_id': 'SRL9', 'margin_rate': 0.05, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 'OI': {'order_book_id': 'CL','margin_rate': 0.06, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 'RM': {'order_book_id': 'CL','margin_rate': 0.06, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 苹果 无夜盘
+        'AP': {'order_book_id': 'APL9', 'margin_rate': 0.08, 'contract_multiplier': 10,'trading_hours':'09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 红枣 无夜盘
+        # 'CJ': {'order_book_id': 'CL','margin_rate': 0.08, 'contract_multiplier': 5,'trading_hours':'09:01-10:15,10:31-11:30,13:31-15:00'},
         # 玻璃
-        'FG': {'order_book_id': 'FGL9', 'margin_rate': 0.06, 'contract_multiplier': 20},
+        'FG': {'order_book_id': 'FGL9', 'margin_rate': 0.06, 'contract_multiplier': 20,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 纯碱
-        'SA': {'order_book_id': 'SAL9', 'margin_rate': 0.06, 'contract_multiplier': 20},
+        'SA': {'order_book_id': 'SAL9', 'margin_rate': 0.06, 'contract_multiplier': 20,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
 
-        # 尿素
-        'UR': {'order_book_id': 'URL9', 'margin_rate': 0.05, 'contract_multiplier': 20},
+        # 尿素 无夜盘
+        'UR': {'order_book_id': 'URL9', 'margin_rate': 0.05, 'contract_multiplier': 20,'trading_hours':'09:01-10:15,10:31-11:30,13:31-15:00'},
 
-        'M': {'order_book_id': 'ML9', 'margin_rate': 0.08, 'contract_multiplier': 10},
-        'P': {'order_book_id': 'PL9', 'margin_rate': 0.08, 'contract_multiplier': 10},
-        'Y': {'order_book_id': 'YL9', 'margin_rate': 0.08, 'contract_multiplier': 10},
+        'M': {'order_book_id': 'ML9', 'margin_rate': 0.08, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'P': {'order_book_id': 'PL9', 'margin_rate': 0.08, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'Y': {'order_book_id': 'YL9', 'margin_rate': 0.08, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 'JD': {'order_book_id': 'JDL9', 'margin_rate': 0.09, 'contract_multiplier': 10},
-        'PG': {'order_book_id': 'PGL9', 'margin_rate': 0.11, 'contract_multiplier': 20},
+        'PG': {'order_book_id': 'PGL9', 'margin_rate': 0.11, 'contract_multiplier': 20,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 豆一
-        # 'A': {'order_book_id': 'AL9', 'margin_rate': 0.08, 'contract_multiplier': 10},
+        # 'A': {'order_book_id': 'AL9', 'margin_rate': 0.08, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
 
         # 豆二
-        # 'B': {'order_book_id': 'CL','margin_rate': 0.08, 'contract_multiplier': 10},
+        # 'B': {'order_book_id': 'CL','margin_rate': 0.08, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 玉米
-        'C': {'order_book_id': 'CL9', 'margin_rate': 0.07, 'contract_multiplier': 10},
+        'C': {'order_book_id': 'CL9', 'margin_rate': 0.07, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 淀粉
-        # 'CS': {'order_book_id': 'CL','margin_rate': 0.07, 'contract_multiplier': 10},
-
-        # 'IC': {'order_book_id': 'CL','margin_rate': 0.12, 'contract_multiplier': 200},
-        # 'IF': {'order_book_id': 'CL','margin_rate': 0.10, 'contract_multiplier': 300},
-        # 'IH': {'order_book_id': 'CL','margin_rate': 0.10, 'contract_multiplier': 300},
+        # 'CS': {'order_book_id': 'CL','margin_rate': 0.07, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 股指 无夜盘
+        # 'IC': {'order_book_id': 'CL','margin_rate': 0.12, 'contract_multiplier': 200, 'trading_hours': '09:31-11:30,13:01-15:00'
+        # 'IF': {'order_book_id': 'CL','margin_rate': 0.10, 'contract_multiplier': 300, 'trading_hours': '09:31-11:30,13:01-15:00'
+        # 'IH': {'order_book_id': 'CL','margin_rate': 0.10, 'contract_multiplier': 300, 'trading_hours': '09:31-11:30,13:01-15:00'
         # 外盘
         'CL': {'order_book_id': 'CL', 'margin_rate': 0.16, 'contract_multiplier': 500},
         # 8:30 -14:00 0.1      其它时间 0.15       11756
@@ -219,6 +226,8 @@ config = {
         'LEZSD3M': 'ZSD',  # 伦锌
     }
 }
+
+
 cfg = config[os.environ.get('PYCHANLUN_CONFIG_ENV', 'default')]
 config_path = os.path.expanduser('~')
 config_path = '{}{}{}'.format(config_path, os.sep, '.pychanlun')
