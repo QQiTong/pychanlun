@@ -25,7 +25,7 @@ def stock_data():
     bi_type = request.args.get("biType")
     stopwatch = Stopwatch('/api/stock_data {} {}'.format(symbol, period, end_date))
     # result = get_data(symbol, period, end_date)
-    result = get_data_v2(symbol, period, end_date,bi_type,0)
+    result = get_data_v2(symbol, period, end_date,bi_type,1)
     stopwatch.stop()
     logging.info(stopwatch)
     return Response(json.dumps(result, cls=MyJsonEncoder), mimetype='application/json')
@@ -38,7 +38,7 @@ def stock_data_v2():
     end_date = request.args.get("endDate")
     bi_type = request.args.get("biType")
     stopwatch = Stopwatch('/api/stock_data_v2 {} {}'.format(symbol, period, end_date,bi_type))
-    result = get_data_v2(symbol, period, end_date,bi_type,0)
+    result = get_data_v2(symbol, period, end_date,bi_type,1)
     stopwatch.stop()
     logging.info(stopwatch)
     return Response(json.dumps(result), mimetype='application/json')\

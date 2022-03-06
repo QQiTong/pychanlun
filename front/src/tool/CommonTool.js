@@ -192,7 +192,7 @@ const CommonTool = {
         localStorage.setItem('biType', biType)
     },
     getBiType() {
-        const biType = localStorage.getItem('biType')
+        const biType = localStorage.getItem('biType') || '1'
         return biType
     }
 }

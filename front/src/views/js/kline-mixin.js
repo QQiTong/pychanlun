@@ -31,7 +31,8 @@ export default {
             myChart: null,
             // 多周期图
             myChart1: null,
-            myChart1d: null,
+            // myChart1d: null,
+            myChart3: null,
             myChart5: null,
             myChart15: null,
             myChart30: null,
@@ -425,7 +426,8 @@ export default {
                     that.setOneKeyNakedKline(that.myChart30)
                     that.setOneKeyNakedKline(that.myChart60)
                     that.setOneKeyNakedKline(that.myChart240)
-                    that.setOneKeyNakedKline(that.myChart1d)
+                    // that.setOneKeyNakedKline(that.myChart1d)
+                    that.setOneKeyNakedKline(that.myChart3)
                 }
             } else if (key === num1) {
 
@@ -616,7 +618,8 @@ export default {
                 this.setEchartsTheme(this.myChart30)
                 this.setEchartsTheme(this.myChart60)
                 this.setEchartsTheme(this.myChart240)
-                this.setEchartsTheme(this.myChart1d)
+                // this.setEchartsTheme(this.myChart1d)
+                this.setEchartsTheme(this.myChart3)
             }
         },
         setEchartsTheme(chart) {
@@ -654,9 +657,9 @@ export default {
         getAccountInfo() {
             futureApi.getAccountInfo().then(res => {
                 // console.log('获取账户信息:', res)
-                this.futureAccount = res.inner_future
-                this.globalFutureAccount = res.global_future
-                this.digitCoinAccount = res.digit_coin
+                this.futureAccount = res.inner_future.account
+                this.globalFutureAccount = res.global_future.account
+                this.digitCoinAccount = res.digit_coin.account
                 this.maxAccountUseRate = res.risk_control.max_account_use_rate
                 this.stopRate = res.risk_control.stop_rate
                 this.digitCoinFee = res.digit_coin.fee
@@ -758,7 +761,11 @@ export default {
             chart.setOption(option)
         },
         dispatchMultiEchartsEvent() {
-            this.myChart1d.dispatchAction({
+            // this.myChart1d.dispatchAction({
+            //     type: 'dataZoom',
+            //     end: this.echartZoomEnd,
+            // });
+            this.myChart3.dispatchAction({
                 type: 'dataZoom',
                 end: this.echartZoomEnd,
             });
@@ -889,7 +896,8 @@ export default {
 
             } else {
                 console.log("初始化小图")
-                this.myChart1d = this.$echarts.init(document.getElementById('main1d'))
+                // this.myChart1d = this.$echarts.init(document.getElementById('main1d'))
+                this.myChart3 = this.$echarts.init(document.getElementById('main3'))
                 this.myChart5 = this.$echarts.init(document.getElementById('main5'))
                 this.myChart15 = this.$echarts.init(document.getElementById('main15'))
                 this.myChart30 = this.$echarts.init(document.getElementById('main30'))
@@ -903,18 +911,21 @@ export default {
                     this.chartssize(document.getElementById('main240Parent'), document.getElementById('main240'))
                     this.myChart240.resize()
                 }
-                this.chartssize(document.getElementById('main1dParent'), document.getElementById('main1d'))
+                // this.chartssize(document.getElementById('main1dParent'), document.getElementById('main1d'))
+                this.chartssize(document.getElementById('main3Parent'), document.getElementById('main3'))
                 this.chartssize(document.getElementById('main15Parent'), document.getElementById('main15'))
                 this.chartssize(document.getElementById('main60Parent'), document.getElementById('main60'))
                 this.chartssize(document.getElementById('main5Parent'), document.getElementById('main5'))
                 this.chartssize(document.getElementById('main30Parent'), document.getElementById('main30'))
-                this.myChart1d.resize()
+                // this.myChart1d.resize()
+                this.myChart3.resize()
                 this.myChart5.resize()
                 this.myChart15.resize()
                 this.myChart30.resize()
                 this.myChart60.resize()
                 window.addEventListener('resize', () => {
-                    this.myChart1d.resize()
+                    // this.myChart1d.resize()
+                    this.myChart3.resize()
                     this.myChart5.resize()
                     this.myChart15.resize()
                     this.myChart30.resize()
@@ -927,7 +938,16 @@ export default {
                 })
 
                 // 监听点击事件
-                this.myChart1d.on('click', function (params) {
+                // this.myChart1d.on('click', function (params) {
+                //     if (params.componentType === 'markPoint') {
+                //         if (params.seriesIndex === 1) {
+                //             that.positionNotify(params)
+                //         }
+                //     } else if (params.componentType === 'markArea') {
+                //         that.entanglementNotify(params)
+                //     }
+                // });
+                this.myChart3.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
                         if (params.seriesIndex === 1) {
                             that.positionNotify(params)
@@ -972,7 +992,16 @@ export default {
                         that.entanglementNotify(params)
                     }
                 });
-                this.myChart1d.on('click', function (params) {
+                // this.myChart1d.on('click', function (params) {
+                //     if (params.componentType === 'markPoint') {
+                //         if (params.seriesIndex === 1) {
+                //             that.positionNotify(params)
+                //         }
+                //     } else if (params.componentType === 'markArea') {
+                //         that.entanglementNotify(params)
+                //     }
+                // });
+                this.myChart3.on('click', function (params) {
                     if (params.componentType === 'markPoint') {
                         if (params.seriesIndex === 1) {
                             that.positionNotify(params)
@@ -1205,8 +1234,11 @@ export default {
                         // case 0:
                         //     that.sendRequest(symbol, '1m', update)
                         //     break;
+                        // case 1:
+                        //     that.sendRequest(symbol, '1d', update)
+                        //     break
                         case 1:
-                            that.sendRequest(symbol, '1d', update)
+                            that.sendRequest(symbol, '3m', update)
                             break
                         case 2:
                             that.sendRequest(symbol, '5m', update)
@@ -1244,8 +1276,11 @@ export default {
                     this.myChart.showLoading(this.echartsConfig.loadingOption)
                 }
             } else {
+                // if (this.firstFlag[1] === true) {
+                //     this.myChart1d.showLoading(this.echartsConfig.loadingOption)
+                // }
                 if (this.firstFlag[1] === true) {
-                    this.myChart1d.showLoading(this.echartsConfig.loadingOption)
+                    this.myChart3.showLoading(this.echartsConfig.loadingOption)
                 }
                 if (this.firstFlag[2] === true) {
                     this.myChart5.showLoading(this.echartsConfig.loadingOption)
@@ -1284,8 +1319,12 @@ export default {
                         this.myChart.hideLoading()
                         this.firstFlag[0] = false
                     } else {
-                        if (requestData.period === '1d') {
-                            this.myChart1d.hideLoading()
+                        // if (requestData.period === '1d') {
+                        //     this.myChart1d.hideLoading()
+                        //     this.firstFlag[1] = false
+                        // }
+                        if (requestData.period === '3m') {
+                            this.myChart3.hideLoading()
                             this.firstFlag[1] = false
                         }
                         if (requestData.period === '5m') {
@@ -1338,8 +1377,11 @@ export default {
             if (this.period !== '') {
                 currentChart = this.myChart
             } else {
-                if (period === '1d') {
-                    currentChart = this.myChart1d
+                // if (period === '1d') {
+                //     currentChart = this.myChart1d
+                // }
+                if (period === '3m') {
+                    currentChart = this.myChart3
                 } else if (period === '5m') {
                     currentChart = this.myChart5
                 } else if (period === '15m') {
@@ -3476,112 +3518,112 @@ export default {
             let higherHigherTopPrice = 0
             //  多单查找顶型
             if (direction === 'long') {
-                if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === 1) {
-                    higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
-                    // 高级别分型线
-                    let markLineFractal = {
-                        yAxis: higherBottomPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dashed',
-                                width: 1,
-                                color: this.echartsConfig.higherColor
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: this.echartsConfig.higherColor,
-                                formatter: '顶: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
-                                position: 'insideMiddleTop'
-
-                            },
-                        },
-                    }
-                    markLineData.push(markLineFractal)
-                }
-                if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === 1) {
-                    higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
-                    // 高高级别分型线
-                    let markLineFractal = {
-                        yAxis: higherHigherBottomPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dashed',
-                                width: 1,
-                                color: this.echartsConfig.higherHigherColor
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: this.echartsConfig.higherHigherColor,
-                                formatter: '顶: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
-                                position: 'insideMiddleBottom'
-
-                            },
-                        },
-                    }
-                    markLineData.push(markLineFractal)
-                }
+                // if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === 1) {
+                //     higherBottomPrice = jsonObj['fractal'][0]['top_fractal']['bottom']
+                //     // 高级别分型线
+                //     let markLineFractal = {
+                //         yAxis: higherBottomPrice,
+                //         lineStyle: {
+                //             normal: {
+                //                 opacity: 1,
+                //                 type: 'dashed',
+                //                 width: 1,
+                //                 color: this.echartsConfig.higherColor
+                //             },
+                //         },
+                //         symbol: 'circle',
+                //         symbolSize: 1,
+                //         label: {
+                //             normal: {
+                //                 color: this.echartsConfig.higherColor,
+                //                 formatter: '顶: ' + jsonObj['fractal'][0]['period'] + ' ' + higherBottomPrice,
+                //                 position: 'insideMiddleTop'
+                //
+                //             },
+                //         },
+                //     }
+                //     markLineData.push(markLineFractal)
+                // }
+                // if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === 1) {
+                //     higherHigherBottomPrice = jsonObj['fractal'][1]['top_fractal']['bottom']
+                //     // 高高级别分型线
+                //     let markLineFractal = {
+                //         yAxis: higherHigherBottomPrice,
+                //         lineStyle: {
+                //             normal: {
+                //                 opacity: 1,
+                //                 type: 'dashed',
+                //                 width: 1,
+                //                 color: this.echartsConfig.higherHigherColor
+                //             },
+                //         },
+                //         symbol: 'circle',
+                //         symbolSize: 1,
+                //         label: {
+                //             normal: {
+                //                 color: this.echartsConfig.higherHigherColor,
+                //                 formatter: '顶: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherBottomPrice,
+                //                 position: 'insideMiddleBottom'
+                //
+                //             },
+                //         },
+                //     }
+                //     markLineData.push(markLineFractal)
+                // }
             } else {
                 // 空单查找底分型
-                if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === -1) {
-                    higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
-                    // 高级别分型线
-                    let markLineFractal = {
-                        yAxis: higherTopPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dashed',
-                                width: 1,
-                                color: this.echartsConfig.higherColor
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: this.echartsConfig.higherColor,
-                                formatter: '底: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
-                                position: 'insideMiddleBottom'
-
-                            },
-                        },
-                    }
-                    markLineData.push(markLineFractal)
-                }
-                if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === -1) {
-                    higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
-                    // 高高级别分型线
-                    let markLineFractal = {
-                        yAxis: higherHigherTopPrice,
-                        lineStyle: {
-                            normal: {
-                                opacity: 1,
-                                type: 'dashed',
-                                width: 1,
-                                color: this.echartsConfig.higherHigherColor
-                            },
-                        },
-                        symbol: 'circle',
-                        symbolSize: 1,
-                        label: {
-                            normal: {
-                                color: this.echartsConfig.higherHigherColor,
-                                formatter: '底: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
-                                position: 'insideMiddleTop'
-
-                            },
-                        },
-                    }
-                    markLineData.push(markLineFractal)
-                }
+                // if (JSON.stringify(jsonObj['fractal'][0]) !== '{}' && jsonObj['fractal'][0]['direction'] === -1) {
+                //     higherTopPrice = jsonObj['fractal'][0]['bottom_fractal']['top']
+                //     // 高级别分型线
+                //     let markLineFractal = {
+                //         yAxis: higherTopPrice,
+                //         lineStyle: {
+                //             normal: {
+                //                 opacity: 1,
+                //                 type: 'dashed',
+                //                 width: 1,
+                //                 color: this.echartsConfig.higherColor
+                //             },
+                //         },
+                //         symbol: 'circle',
+                //         symbolSize: 1,
+                //         label: {
+                //             normal: {
+                //                 color: this.echartsConfig.higherColor,
+                //                 formatter: '底: ' + jsonObj['fractal'][0]['period'] + ' ' + higherTopPrice,
+                //                 position: 'insideMiddleBottom'
+                //
+                //             },
+                //         },
+                //     }
+                //     markLineData.push(markLineFractal)
+                // }
+                // if (JSON.stringify(jsonObj['fractal'][1]) !== '{}' && jsonObj['fractal'][1]['direction'] === -1) {
+                //     higherHigherTopPrice = jsonObj['fractal'][1]['bottom_fractal']['top']
+                //     // 高高级别分型线
+                //     let markLineFractal = {
+                //         yAxis: higherHigherTopPrice,
+                //         lineStyle: {
+                //             normal: {
+                //                 opacity: 1,
+                //                 type: 'dashed',
+                //                 width: 1,
+                //                 color: this.echartsConfig.higherHigherColor
+                //             },
+                //         },
+                //         symbol: 'circle',
+                //         symbolSize: 1,
+                //         label: {
+                //             normal: {
+                //                 color: this.echartsConfig.higherHigherColor,
+                //                 formatter: '底: ' + jsonObj['fractal'][1]['period'] + ' ' + higherHigherTopPrice,
+                //                 position: 'insideMiddleTop'
+                //
+                //             },
+                //         },
+                //     }
+                //     markLineData.push(markLineFractal)
+                // }
             }
             return markLineData
         },
@@ -3628,7 +3670,7 @@ export default {
                 this.stopRate = 0.02
             } else {
                 // 内盘
-                this.account = this.futureAccount.account
+                this.account = this.futureAccount
                 // 计算1手需要的保证金
                 this.perOrderMargin = Math.floor(openPrice * this.contractMultiplier * this.currentMarginRate)
                 this.perOrderStopMoney = Math.abs(openPrice - stopPrice) * this.contractMultiplier

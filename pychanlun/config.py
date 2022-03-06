@@ -74,7 +74,7 @@ config = {
     'future_config': {
         'RB': {'order_book_id': 'RBL9', 'margin_rate': 0.09, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         'HC': {'order_book_id': 'HCL9', 'margin_rate': 0.09, 'contract_multiplier': 10,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
-        'I': {'order_book_id': 'IL9', 'margin_rate': 0.08, 'contract_multiplier': 100,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        'I': {'order_book_id': 'IL9', 'margin_rate': 0.12, 'contract_multiplier': 100,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         'J': {'order_book_id': 'JL9', 'margin_rate': 0.08, 'contract_multiplier': 100,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         'JM': {'order_book_id': 'JML9', 'margin_rate': 0.08, 'contract_multiplier': 60,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 郑煤
@@ -169,7 +169,7 @@ config = {
         # 18:30 -14:00 0.04   其它时间 0.06          1045
 
         'ZS': {'order_book_id': 'ZS', 'margin_rate': 0.03, 'contract_multiplier': 50},  # 美豆
-        'ZM': {'order_book_id': 'ZM', 'margin_rate': 0.04, 'contract_multiplier': 100},  # 美豆粕
+        'ZM': {'order_book_id': 'ZM', 'margin_rate': 0.07, 'contract_multiplier': 100},  # 美豆粕
         'ZL': {'order_book_id': 'ZL', 'margin_rate': 0.04, 'contract_multiplier': 600},  # 美豆油
         'MZC': {'order_book_id': 'MZC', 'margin_rate': 0.06, 'contract_multiplier': 50},  # 美玉米
         'FCPO': {'order_book_id': 'FCPO', 'margin_rate': 0.1, 'contract_multiplier': 25},  # 马棕榈

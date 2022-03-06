@@ -120,9 +120,6 @@ def future_zh_min_tdx():
             if df is None or len(df) <= 0:
                 RedisDB.lpush(SYMBOL_QUEUE_NAME, symbol)
                 continue
-            if symbol == "RBL9":
-                print(df, "1")
-                print(df["close"])
             df = df[['open', 'high', 'low', 'close', 'position', 'trade', 'price', 'datetime', 'amount']]
             df['datetime'] = df['datetime'].apply(lambda record: cfg.TZ.localize(datetime.strptime(record, cfg.DT_FORMAT_M)))
             df['datetime'] = df['datetime'].apply(lambda record: record if record.hour < 20 else record - timedelta(days=1))
@@ -135,9 +132,6 @@ def future_zh_min_tdx():
             df["type"] = "1min"
             df["source"] = "通达信"
             logger.info("%s 通达信" % symbol)
-            if symbol == "RBL9":
-                print(df, "2")
-                print(df["close"])
             _save(df)
         except Exception:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
