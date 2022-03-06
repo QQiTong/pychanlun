@@ -43,7 +43,7 @@ def fq_data_stock_fetch_min(code, frequence, start=None, end=None, useCustomData
         return None
     last_datetime = data['datetime'][-1]
     # TODO: 取实时数据部分优化
-    realtime_data_list = DBfreshquant["stock_realtime"].with_options(
+    realtime_data_list = DBPyChanlun["stock_realtime"].with_options(
         codec_options=CodecOptions(tz_aware=True, tzinfo=cfg.TZ)).find({"code": fq_util_code_append_market_code(code, upper_case=False),
             "frequence": frequence, "datetime": {"$gt": last_datetime, "$lte": end},
             "open": {"$gt": 0}, "high": {"$gt": 0}, "low": {"$gt": 0}, "close": {"$gt": 0}
