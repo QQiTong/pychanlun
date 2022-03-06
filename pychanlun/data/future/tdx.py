@@ -96,14 +96,9 @@ def fq_future_fetch_instrument_bars(code, count=700, frequence='1min'):
         # text = resp.read().decode('utf-8')
         # df = to_df(json.loads(text))
         data = ex_get_instrument_bars(frequence, instrument['market'], code, (pages-i)*700, 700)
-        print(data)
-        df = to_df(data)
-        if df is not None:
-            bars.append(df)
-    if len(bars) > 0:
-        return pd.concat(bars)
-    else:
-        return None
+        if data is not None and len(data) > 0:
+            bars.extend(data)
+    return to_df(bars)
 
 
 if __name__ == "__main__":

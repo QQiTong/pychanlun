@@ -140,6 +140,7 @@ def future_zh_min_tdx():
 
 def future_zh_min_symbol_queue():
     global _running
+    global future_list
     while _running:
         try:
             queue_length = RedisDB.llen(SYMBOL_QUEUE_NAME)
@@ -160,6 +161,7 @@ def future_zh_min_symbol_queue():
 
 
 def job():
+    global future_list
     for symbol in config['future_config']:
         # 到美原油为止
         if symbol == 'CL':
