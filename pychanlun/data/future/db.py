@@ -8,15 +8,13 @@ from pychanlun.db import DBPyChanlun
 import pymongo
 import pandas as pd
 from datetime import datetime, time
-from pychanlun.database.cache import RedisCache
+from pychanlun.database.cache import InMemoryCache
 
 
-@RedisCache.memoize(expiration=900)
 def fq_data_QA_fetch_future_min_adv(code, start, end=None, frequence='1min'):
     return QA_fetch_future_min_adv(code, start, end, frequence)
 
 
-@RedisCache.memoize(expiration=900)
 def fq_data_QA_fetch_future_day_adv(code, start, end=None):
     return QA_fetch_future_day_adv(code, start, end)
 
