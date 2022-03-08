@@ -162,7 +162,7 @@ export default {
                 biColor: 'black',
                 duanColor: 'green',
                 higherDuanColor: 'blue',
-                duanPeakColor: 'white',
+                duanPeakColor: 'black',
                 ma1Color: 'black',
                 ma2Color: 'blue',
                 ma3Color: 'red',
@@ -611,26 +611,26 @@ export default {
         changeTheme() {
             // console.log("切换主题")
             CommonTool.setTheme(this.themeOptions.theme)
-            this.currentThemes = this.themeOptions.theme
+            // this.currentThemes = this.themeOptions.theme
             window.localStorage.setItem('theme', this.themeOptions.theme)
-            this.defaultConfig = JSON.stringify(this.options)
-            if (this.currentThemes === 'dark-theme') {
-                this.echartsConfig = this.echartsDarkConfig
-            } else {
-                this.echartsConfig = this.echartsLightConfig
-            }
-            // 大图
-            if (this.period !== '') {
-                this.setEchartsTheme(this.myChart)
-            } else {
-                this.setEchartsTheme(this.myChart5)
-                this.setEchartsTheme(this.myChart15)
-                this.setEchartsTheme(this.myChart30)
-                this.setEchartsTheme(this.myChart60)
-                this.setEchartsTheme(this.myChart240)
-                // this.setEchartsTheme(this.myChart1d)
-                this.setEchartsTheme(this.myChart3)
-            }
+            window.location.reload()
+            // if (this.currentThemes === 'dark-theme') {
+            //     this.echartsConfig = this.echartsDarkConfig
+            // } else {
+            //     this.echartsConfig = this.echartsLightConfig
+            // }
+            // // 大图
+            // if (this.period !== '') {
+            //     this.setEchartsTheme(this.myChart)
+            // } else {
+            //     this.setEchartsTheme(this.myChart5)
+            //     this.setEchartsTheme(this.myChart15)
+            //     this.setEchartsTheme(this.myChart30)
+            //     this.setEchartsTheme(this.myChart60)
+            //     this.setEchartsTheme(this.myChart240)
+            //     // this.setEchartsTheme(this.myChart1d)
+            //     this.setEchartsTheme(this.myChart3)
+            // }
         },
         setEchartsTheme(chart) {
             let option = chart.getOption()
