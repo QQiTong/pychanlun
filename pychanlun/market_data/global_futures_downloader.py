@@ -84,7 +84,7 @@ def fetch_global_futures_mink():
                         break
                 except BaseException as e:
                     logger.error("Error Occurred: {0}".format(traceback.format_exc()))
-        time.sleep(300)
+        # time.sleep(200)
         if not is_loop:
             break
     logger.info("外盘分钟数据抓取程序已停止。")

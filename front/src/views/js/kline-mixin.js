@@ -259,7 +259,10 @@ export default {
             dataSubTitle: '副标题',
 
             futureSymbolList: [],
+            // 笔类型 默认 1
             biType: '',
+            // 二次进场 默认0
+            secondChance: '',
             futureSymbolMap: {},
             timer: null,
             // 不同期货公司提高的点数不一样 ,华安是在基础上加1%
@@ -473,6 +476,7 @@ export default {
     beforeMount() {
         this.symbol = this.getParams('symbol')
         this.biType = CommonTool.getBiType()
+        this.secondChance = CommonTool.getSecondChance()
         // if (this.show1MinSymbol.indexOf(this.symbol) !== -1) {
         //     this.isShow1Min = true
         // } else {
@@ -566,6 +570,12 @@ export default {
             // console.log("当前笔类型", biType)
             this.biType = biType
             CommonTool.setBiType(this.biType)
+            window.location.reload()
+        },
+        changeSecondChance(secondChance) {
+            // console.log("当前二次进场机会", secondChance)
+            this.secondChance = secondChance
+            CommonTool.setSecondChance(this.secondChance)
             window.location.reload()
         },
         renderBrushed(params) {
@@ -1267,7 +1277,7 @@ export default {
             }
         },
         sendRequest(symbol, period, update) {
-            let requestData = {'symbol': symbol, 'period': period, 'endDate': this.endDate, 'biType': this.biType}
+            let requestData = {'symbol': symbol, 'period': period, 'endDate': this.endDate, 'biType': this.biType, 'secondChance': this.secondChance}
             this.getStockData(requestData, update)
         },
         getStockData(requestData, update) {
@@ -1305,10 +1315,10 @@ export default {
                 }
             }
 
-            const requesting = this.$cache.get(`REQUESTING#${requestData.symbol}#${requestData.period}#${requestData.biType}`)
+            const requesting = this.$cache.get(`REQUESTING#${requestData.symbol}#${requestData.period}#${requestData.biType}#${requestData.secondChance}`)
             // console.log("请求缓存", requesting)
             if (!requesting) {
-                this.$cache.set(`REQUESTING#${requestData.symbol}#${requestData.period}#${requestData.biType}`, true, 60)
+                this.$cache.set(`REQUESTING#${requestData.symbol}#${requestData.period}#${requestData.biType}#${requestData.secondChance}`, true, 60)
                 futureApi.stockData(requestData).then(res => {
                     // 如果之前请求的symbol 和当前的symbol不一致，直接过滤
                     if (res && (res.symbol !== this.symbol || res.endDate !== this.endDate || res.period !== requestData.period)) {
@@ -1356,7 +1366,7 @@ export default {
                         }
                     }
                     this.draw(res, update, requestData.period)
-                    this.$cache.del(`REQUESTING#${requestData.symbol}#${requestData.period}#${requestData.biType}`)
+                    this.$cache.del(`REQUESTING#${requestData.symbol}#${requestData.period}#${requestData.biType}#${requestData.secondChance}`)
                 }).catch(e => {
                     console.log(e)
                 })

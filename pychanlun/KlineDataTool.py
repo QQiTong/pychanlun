@@ -303,7 +303,7 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
     elif period == "3m":
         kline_data = fq_data_future_fetch_min(code, "1min", start_date, end)
         kline_data = QA_data_futuremin_resample(kline_data, '3min')
-        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp()- 8 * 3600)
         kline_data["time_stamp"] = kline_data['time']
         kline_data.reset_index(inplace=True)
         kline_data.set_index("datetime", inplace=True, drop=False)
@@ -318,7 +318,7 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
     elif period == "180m":
         kline_data = fq_data_future_fetch_min(code, "60min", start_date, end)
         kline_data = QA_data_futuremin_resample(kline_data, '180min')
-        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp())
+        kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp()- 8 * 3600)
         kline_data["time_stamp"] = kline_data['time']
         kline_data.reset_index(inplace=True)
         kline_data.set_index("datetime", inplace=True, drop=False)

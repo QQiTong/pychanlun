@@ -3,7 +3,7 @@
 import pydash
 
 
-def la_hui(e_list, datetime_list, time_str_array, high_array, low_array, bi_array, duan_array):
+def la_hui(e_list, datetime_list, time_str_array, high_array, low_array, bi_array, duan_array,second_chance):
     count = len(time_str_array)
     result = {
         'signal_array': [0 for i in range(count)],
@@ -79,8 +79,7 @@ def la_hui(e_list, datetime_list, time_str_array, high_array, low_array, bi_arra
                         result['sell_zs_huila']['stop_lose_price'].append(0)
                         result['sell_zs_huila']['stop_win_price'].append(0)
                     result['sell_zs_huila']['tag'].append(','.join(tags))
-
-                    if top_index >= 0:
+                    if top_index >= 0 and second_chance == 1:
                         for k in range(r + 6, len(datetime_list) - 2):
                             if high_array[k] > high_array[top_index] or duan_array[k] == -1:
                                 break
@@ -140,7 +139,7 @@ def la_hui(e_list, datetime_list, time_str_array, high_array, low_array, bi_arra
                         result['buy_zs_huila']['stop_win_price'].append(0)
                     result['buy_zs_huila']['tag'].append(','.join(tags))
 
-                    if bottom_index >= 0:
+                    if bottom_index >= 0 and second_chance == 1:
                         for k in range(r + 6, len(datetime_list) - 2):
                             if low_array[k] < low_array[bottom_index] or duan_array[k] == 1:
                                 break
@@ -164,7 +163,7 @@ def la_hui(e_list, datetime_list, time_str_array, high_array, low_array, bi_arra
     return result
 
 
-def tu_po(e_list, datetime_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def tu_po(e_list, datetime_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series,second_chance):
     result = {
         'buy_zs_tupo': {
             'idx': [],
@@ -224,19 +223,20 @@ def tu_po(e_list, datetime_list, time_series, high_series, low_series, open_seri
                 result['buy_zs_tupo']['stop_lose_price'].append(e.zg)
                 result['buy_zs_tupo']['tag'].append(','.join(tags))
 
-                for kk in range(r + 6, len(time_series)):
-                    if low_series[kk] < e.zg or duan_series[kk] == -1:
-                        break
-                    if low_series[kk] > low_series[kk-2] and low_series[kk-1] > low_series[kk-2] and high_series[kk] < (e.zg+e.gg)/2:
-                        result['buy_zs_tupo']['idx'].append(kk)
-                        result['buy_zs_tupo']['date'].append(time_series[kk])
-                        result['buy_zs_tupo']['datetime'].append(datetime_list[kk])
-                        result['buy_zs_tupo']['time_str'].append(time_series[kk])
-                        result['buy_zs_tupo']['data'].append(high_series[kk])
-                        result['buy_zs_tupo']['price'].append(high_series[kk])
-                        result['buy_zs_tupo']['stop_lose_price'].append(e.zg)
-                        result['buy_zs_tupo']['tag'].append(','.join(tags))
-                        break
+                if second_chance == 1:
+                    for kk in range(r + 6, len(time_series)):
+                        if low_series[kk] < e.zg or duan_series[kk] == -1:
+                            break
+                        if low_series[kk] > low_series[kk-2] and low_series[kk-1] > low_series[kk-2] and high_series[kk] < (e.zg+e.gg)/2:
+                            result['buy_zs_tupo']['idx'].append(kk)
+                            result['buy_zs_tupo']['date'].append(time_series[kk])
+                            result['buy_zs_tupo']['datetime'].append(datetime_list[kk])
+                            result['buy_zs_tupo']['time_str'].append(time_series[kk])
+                            result['buy_zs_tupo']['data'].append(high_series[kk])
+                            result['buy_zs_tupo']['price'].append(high_series[kk])
+                            result['buy_zs_tupo']['stop_lose_price'].append(e.zg)
+                            result['buy_zs_tupo']['tag'].append(','.join(tags))
+                            break
 
         if e.direction == -1:
             duan_start = pydash.find_last_index(duan_series[:e.start], lambda t: t == 1)
@@ -266,23 +266,24 @@ def tu_po(e_list, datetime_list, time_series, high_series, low_series, open_seri
                 result['sell_zs_tupo']['stop_lose_price'].append(e.zd)
                 result['sell_zs_tupo']['tag'].append(','.join(tags))
 
-                for kk in range(r + 6, len(time_series)):
-                    if high_series[kk] > e.zd or duan_series[kk] == 1:
-                        break
-                    if high_series[kk] < high_series[kk-2] and high_series[kk-1] < high_series[kk-2] and low_series[kk] > (e.zd+e.dd)/2:
-                        result['sell_zs_tupo']['idx'].append(kk)
-                        result['sell_zs_tupo']['date'].append(time_series[kk])
-                        result['sell_zs_tupo']['datetime'].append(datetime_list[kk])
-                        result['sell_zs_tupo']['time_str'].append(time_series[kk])
-                        result['sell_zs_tupo']['data'].append(low_series[kk])
-                        result['sell_zs_tupo']['price'].append(low_series[kk])
-                        result['sell_zs_tupo']['stop_lose_price'].append(e.zd)
-                        result['sell_zs_tupo']['tag'].append(','.join(tags))
-                        break
+                if second_chance == 1:
+                    for kk in range(r + 6, len(time_series)):
+                        if high_series[kk] > e.zd or duan_series[kk] == 1:
+                            break
+                        if high_series[kk] < high_series[kk-2] and high_series[kk-1] < high_series[kk-2] and low_series[kk] > (e.zd+e.dd)/2:
+                            result['sell_zs_tupo']['idx'].append(kk)
+                            result['sell_zs_tupo']['date'].append(time_series[kk])
+                            result['sell_zs_tupo']['datetime'].append(datetime_list[kk])
+                            result['sell_zs_tupo']['time_str'].append(time_series[kk])
+                            result['sell_zs_tupo']['data'].append(low_series[kk])
+                            result['sell_zs_tupo']['price'].append(low_series[kk])
+                            result['sell_zs_tupo']['stop_lose_price'].append(e.zd)
+                            result['sell_zs_tupo']['tag'].append(','.join(tags))
+                            break
     return result
 
 
-def five_v_fan(datetime_list, time_series, duan_series, bi_series, high_series, low_series):
+def five_v_fan(datetime_list, time_series, duan_series, bi_series, high_series, low_series,second_chance):
     result = {
         'sell_five_v_reverse': {
             'idx': [],
@@ -335,19 +336,20 @@ def five_v_fan(datetime_list, time_series, duan_series, bi_series, high_series, 
                             result['sell_five_v_reverse']['stop_lose_price'].append(high_series[g1])
                             result['sell_five_v_reverse']['tag'].append(','.join(tags))
 
-                            for kk in range(k + 6, len(time_series)):
-                                if high_series[kk] > high_series[g1] or duan_series[kk] == -1:
-                                    break
-                                if high_series[kk] < high_series[kk-2] and high_series[kk-1] < high_series[kk-2] and low_series[kk] > (high_series[g1]+low_series[d1])/2:
-                                    result['sell_five_v_reverse']['idx'].append(kk)
-                                    result['sell_five_v_reverse']['date'].append(time_series[kk])
-                                    result['sell_five_v_reverse']['datetime'].append(datetime_list[kk])
-                                    result['sell_five_v_reverse']['time_str'].append(time_series[kk])
-                                    result['sell_five_v_reverse']['data'].append(low_series[kk])
-                                    result['sell_five_v_reverse']['price'].append(low_series[kk])
-                                    result['sell_five_v_reverse']['stop_lose_price'].append(high_series[g1])
-                                    result['sell_five_v_reverse']['tag'].append(','.join(tags))
-                                    break
+                            if second_chance == 1:
+                                for kk in range(k + 6, len(time_series)):
+                                    if high_series[kk] > high_series[g1] or duan_series[kk] == -1:
+                                        break
+                                    if high_series[kk] < high_series[kk-2] and high_series[kk-1] < high_series[kk-2] and low_series[kk] > (high_series[g1]+low_series[d1])/2:
+                                        result['sell_five_v_reverse']['idx'].append(kk)
+                                        result['sell_five_v_reverse']['date'].append(time_series[kk])
+                                        result['sell_five_v_reverse']['datetime'].append(datetime_list[kk])
+                                        result['sell_five_v_reverse']['time_str'].append(time_series[kk])
+                                        result['sell_five_v_reverse']['data'].append(low_series[kk])
+                                        result['sell_five_v_reverse']['price'].append(low_series[kk])
+                                        result['sell_five_v_reverse']['stop_lose_price'].append(high_series[g1])
+                                        result['sell_five_v_reverse']['tag'].append(','.join(tags))
+                                        break
                         break
                     if bi_series[k] == -1:
                         break
@@ -374,27 +376,28 @@ def five_v_fan(datetime_list, time_series, duan_series, bi_series, high_series, 
                             result['buy_five_v_reverse']['price'].append(high_series[g1])
                             result['buy_five_v_reverse']['stop_lose_price'].append(low_series[d1])
                             result['buy_five_v_reverse']['tag'].append(','.join(tags))
-                            
-                            for kk in range(k + 6, len(time_series)):
-                                if low_series[kk] < low_series[d1] or duan_series[kk] == 1:
-                                    break
-                                if low_series[kk] > low_series[kk-2] and low_series[kk-1] > low_series[kk-2] and high_series[kk] < (low_series[d1]+high_series[g1])/2:
-                                    result['buy_five_v_reverse']['idx'].append(kk)
-                                    result['buy_five_v_reverse']['date'].append(time_series[kk])
-                                    result['buy_five_v_reverse']['datetime'].append(datetime_list[kk])
-                                    result['buy_five_v_reverse']['time_str'].append(time_series[kk])
-                                    result['buy_five_v_reverse']['data'].append(high_series[kk])
-                                    result['buy_five_v_reverse']['price'].append(high_series[kk])
-                                    result['buy_five_v_reverse']['stop_lose_price'].append(low_series[d1])
-                                    result['buy_five_v_reverse']['tag'].append(','.join(tags))
-                                    break
+
+                            if second_chance == 1:
+                                for kk in range(k + 6, len(time_series)):
+                                    if low_series[kk] < low_series[d1] or duan_series[kk] == 1:
+                                        break
+                                    if low_series[kk] > low_series[kk-2] and low_series[kk-1] > low_series[kk-2] and high_series[kk] < (low_series[d1]+high_series[g1])/2:
+                                        result['buy_five_v_reverse']['idx'].append(kk)
+                                        result['buy_five_v_reverse']['date'].append(time_series[kk])
+                                        result['buy_five_v_reverse']['datetime'].append(datetime_list[kk])
+                                        result['buy_five_v_reverse']['time_str'].append(time_series[kk])
+                                        result['buy_five_v_reverse']['data'].append(high_series[kk])
+                                        result['buy_five_v_reverse']['price'].append(high_series[kk])
+                                        result['buy_five_v_reverse']['stop_lose_price'].append(low_series[d1])
+                                        result['buy_five_v_reverse']['tag'].append(','.join(tags))
+                                        break
                         break
                     if bi_series[k] == -1:
                         break
     return result
 
 
-def v_reverse(e_list, datetime_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def v_reverse(e_list, datetime_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series,second_chance):
     result = {
         'buy_v_reverse': {
             'idx': [],
@@ -462,19 +465,21 @@ def v_reverse(e_list, datetime_list, time_series, high_series, low_series, open_
                                 result['sell_v_reverse']['price'].append(resist_price)
                                 result['sell_v_reverse']['stop_lose_price'].append(high_series[leave_end_index])
                                 result['sell_v_reverse']['tag'].append(','.join(tags))
-                                for kk in range(k + 6, len(time_series)):
-                                    if high_series[kk] > high_series[leave_end_index] or duan_series[kk] == -1:
-                                        break
-                                    if high_series[kk] < high_series[kk-2] and high_series[kk-1] < high_series[kk-2] and low_series[kk] > (high_series[leave_end_index]+resist_price)/2:
-                                        result['sell_v_reverse']['idx'].append(kk)
-                                        result['sell_v_reverse']['date'].append(time_series[kk])
-                                        result['sell_v_reverse']['datetime'].append(datetime_list[kk])
-                                        result['sell_v_reverse']['time_str'].append(time_series[kk])
-                                        result['sell_v_reverse']['data'].append(low_series[kk])
-                                        result['sell_v_reverse']['price'].append(low_series[kk])
-                                        result['sell_v_reverse']['stop_lose_price'].append(high_series[leave_end_index])
-                                        result['sell_v_reverse']['tag'].append(','.join(tags))
-                                        break
+
+                                if second_chance == 1:
+                                    for kk in range(k + 6, len(time_series)):
+                                        if high_series[kk] > high_series[leave_end_index] or duan_series[kk] == -1:
+                                            break
+                                        if high_series[kk] < high_series[kk-2] and high_series[kk-1] < high_series[kk-2] and low_series[kk] > (high_series[leave_end_index]+resist_price)/2:
+                                            result['sell_v_reverse']['idx'].append(kk)
+                                            result['sell_v_reverse']['date'].append(time_series[kk])
+                                            result['sell_v_reverse']['datetime'].append(datetime_list[kk])
+                                            result['sell_v_reverse']['time_str'].append(time_series[kk])
+                                            result['sell_v_reverse']['data'].append(low_series[kk])
+                                            result['sell_v_reverse']['price'].append(low_series[kk])
+                                            result['sell_v_reverse']['stop_lose_price'].append(high_series[leave_end_index])
+                                            result['sell_v_reverse']['tag'].append(','.join(tags))
+                                            break
                             break
         if e.direction == -1:
             # 离开中枢后的第一段结束
@@ -512,24 +517,25 @@ def v_reverse(e_list, datetime_list, time_series, high_series, low_series, open_
                                 result['buy_v_reverse']['stop_lose_price'].append(low_series[leave_end_index])
                                 result['buy_v_reverse']['tag'].append(','.join(tags))
 
-                                for kk in range(k + 6, count):
-                                    if low_series[kk] < low_series[leave_end_index] or duan_series[kk] == 1:
-                                        break
-                                    if low_series[kk] > low_series[kk-2] and low_series[kk-1] > low_series[kk-2] and high_series[kk] < (low_series[leave_end_index]+resist_price)/2:
-                                        result['buy_v_reverse']['idx'].append(kk)
-                                        result['buy_v_reverse']['date'].append(time_series[kk])
-                                        result['buy_v_reverse']['datetime'].append(datetime_list[kk])
-                                        result['buy_v_reverse']['time_str'].append(time_series[kk])
-                                        result['buy_v_reverse']['data'].append(high_series[kk])
-                                        result['buy_v_reverse']['price'].append(high_series[kk])
-                                        result['buy_v_reverse']['stop_lose_price'].append(low_series[leave_end_index])
-                                        result['buy_v_reverse']['tag'].append(','.join(tags))
-                                        break
+                                if second_chance == 1:
+                                    for kk in range(k + 6, count):
+                                        if low_series[kk] < low_series[leave_end_index] or duan_series[kk] == 1:
+                                            break
+                                        if low_series[kk] > low_series[kk-2] and low_series[kk-1] > low_series[kk-2] and high_series[kk] < (low_series[leave_end_index]+resist_price)/2:
+                                            result['buy_v_reverse']['idx'].append(kk)
+                                            result['buy_v_reverse']['date'].append(time_series[kk])
+                                            result['buy_v_reverse']['datetime'].append(datetime_list[kk])
+                                            result['buy_v_reverse']['time_str'].append(time_series[kk])
+                                            result['buy_v_reverse']['data'].append(high_series[kk])
+                                            result['buy_v_reverse']['price'].append(high_series[kk])
+                                            result['buy_v_reverse']['stop_lose_price'].append(low_series[leave_end_index])
+                                            result['buy_v_reverse']['tag'].append(','.join(tags))
+                                            break
                             break
     return result
 
 
-def po_huai(datetime_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series):
+def po_huai(datetime_list, time_series, high_series, low_series, open_series, close_series, bi_series, duan_series,second_chance):
     result = {
         'buy_duan_break': {
             'idx': [],
@@ -590,19 +596,20 @@ def po_huai(datetime_list, time_series, high_series, low_series, open_series, cl
                         result['sell_duan_break']['stop_lose_price'].append(high_series[i])
                         result['sell_duan_break']['tag'].append(','.join(tags))
 
-                        for kk in range(k + 6, len(time_series)):
-                            if high_series[kk] > high_series[i] or duan_series[kk] == -1:
-                                break
-                            if high_series[kk] < high_series[kk-2] and high_series[kk-1] < high_series[kk-2] and low_series[kk] > (high_series[i]+low_series[anchor])/2:
-                                result['sell_duan_break']['idx'].append(kk)
-                                result['sell_duan_break']['date'].append(time_series[kk])
-                                result['sell_duan_break']['datetime'].append(datetime_list[kk])
-                                result['sell_duan_break']['time_str'].append(time_series[kk])
-                                result['sell_duan_break']['data'].append(low_series[kk])
-                                result['sell_duan_break']['price'].append(low_series[kk])
-                                result['sell_duan_break']['stop_lose_price'].append(high_series[i])
-                                result['sell_duan_break']['tag'].append(','.join(tags))
-                                break
+                        if second_chance == 1:
+                            for kk in range(k + 6, len(time_series)):
+                                if high_series[kk] > high_series[i] or duan_series[kk] == -1:
+                                    break
+                                if high_series[kk] < high_series[kk-2] and high_series[kk-1] < high_series[kk-2] and low_series[kk] > (high_series[i]+low_series[anchor])/2:
+                                    result['sell_duan_break']['idx'].append(kk)
+                                    result['sell_duan_break']['date'].append(time_series[kk])
+                                    result['sell_duan_break']['datetime'].append(datetime_list[kk])
+                                    result['sell_duan_break']['time_str'].append(time_series[kk])
+                                    result['sell_duan_break']['data'].append(low_series[kk])
+                                    result['sell_duan_break']['price'].append(low_series[kk])
+                                    result['sell_duan_break']['stop_lose_price'].append(high_series[i])
+                                    result['sell_duan_break']['tag'].append(','.join(tags))
+                                    break
                         break
         elif duan_series[i] == -1:
             count = 0
@@ -635,18 +642,19 @@ def po_huai(datetime_list, time_series, high_series, low_series, open_series, cl
                         result['buy_duan_break']['stop_lose_price'].append(low_series[i])
                         result['buy_duan_break']['tag'].append(','.join(tags))
 
-                        for kk in range(k + 6, len(time_series)):
-                            if low_series[kk] < low_series[i] or duan_series[kk] == 1:
-                                break
-                            if low_series[kk] > low_series[kk-2] and low_series[kk-1] > low_series[kk-2] and high_series[kk] < (low_series[i]+high_series[anchor])/2:
-                                result['buy_duan_break']['idx'].append(kk)
-                                result['buy_duan_break']['date'].append(time_series[kk])
-                                result['buy_duan_break']['datetime'].append(datetime_list[kk])
-                                result['buy_duan_break']['time_str'].append(time_series[kk])
-                                result['buy_duan_break']['data'].append(high_series[kk])
-                                result['buy_duan_break']['price'].append(high_series[kk])
-                                result['buy_duan_break']['stop_lose_price'].append(low_series[i])
-                                result['buy_duan_break']['tag'].append(','.join(tags))
-                                break
+                        if second_chance == 1:
+                            for kk in range(k + 6, len(time_series)):
+                                if low_series[kk] < low_series[i] or duan_series[kk] == 1:
+                                    break
+                                if low_series[kk] > low_series[kk-2] and low_series[kk-1] > low_series[kk-2] and high_series[kk] < (low_series[i]+high_series[anchor])/2:
+                                    result['buy_duan_break']['idx'].append(kk)
+                                    result['buy_duan_break']['date'].append(time_series[kk])
+                                    result['buy_duan_break']['datetime'].append(datetime_list[kk])
+                                    result['buy_duan_break']['time_str'].append(time_series[kk])
+                                    result['buy_duan_break']['data'].append(high_series[kk])
+                                    result['buy_duan_break']['price'].append(high_series[kk])
+                                    result['buy_duan_break']['stop_lose_price'].append(low_series[i])
+                                    result['buy_duan_break']['tag'].append(','.join(tags))
+                                    break
                         break
     return result

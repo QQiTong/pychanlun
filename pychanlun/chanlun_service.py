@@ -33,7 +33,7 @@ from pychanlun.config import cfg
 tz = pytz.timezone('Asia/Shanghai')
 
 
-def get_data_v2(symbol, period, end_date=None,bi_type=1, monitor=1):
+def get_data_v2(symbol, period, end_date=None,bi_type=1,second_chance=0, monitor=1):
     match_stock = re.match("(sh|sz)(\\d{6})", symbol, re.I)
     stock_fills = None
     digitalcoin_fills = None
@@ -116,6 +116,7 @@ def get_data_v2(symbol, period, end_date=None,bi_type=1, monitor=1):
         kline_data.low.to_list(),
         kline_data.bi.to_list(),
         kline_data.duan.to_list(),
+        second_chance
     )
     buy_zs_huila = hui_la['buy_zs_huila']
     sell_zs_huila = hui_la['sell_zs_huila']
@@ -129,7 +130,8 @@ def get_data_v2(symbol, period, end_date=None,bi_type=1, monitor=1):
         kline_data.open.to_list(),
         kline_data.close.to_list(),
         kline_data.bi.to_list(),
-        kline_data.duan.to_list()
+        kline_data.duan.to_list(),
+        second_chance
     )
 
     buy_zs_tupo = tu_po['buy_zs_tupo']
@@ -144,7 +146,8 @@ def get_data_v2(symbol, period, end_date=None,bi_type=1, monitor=1):
         kline_data.open.to_list(),
         kline_data.close.to_list(),
         kline_data.bi.to_list(),
-        kline_data.duan.to_list()
+        kline_data.duan.to_list(),
+        second_chance
     )
 
     buy_v_reverse = v_reverse['buy_v_reverse']
@@ -156,7 +159,8 @@ def get_data_v2(symbol, period, end_date=None,bi_type=1, monitor=1):
         kline_data.duan.to_list(),
         kline_data.bi.to_list(),
         kline_data.high.to_list(),
-        kline_data.low.to_list()
+        kline_data.low.to_list(),
+        second_chance
     )
 
     buy_five_v_reverse = five_v_fan['buy_five_v_reverse']
@@ -170,7 +174,8 @@ def get_data_v2(symbol, period, end_date=None,bi_type=1, monitor=1):
         kline_data.open.to_list(),
         kline_data.close.to_list(),
         kline_data.bi.to_list(),
-        kline_data.duan.to_list()
+        kline_data.duan.to_list(),
+        second_chance
     )
 
     buy_duan_break = duan_pohuai['buy_duan_break']

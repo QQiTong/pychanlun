@@ -76,6 +76,18 @@
                     :value="item.key"
                 />
             </el-select>
+
+            <!--            切换是否显示二次进场机会-->
+            <el-select size="mini" v-model="secondChance_" class="form-input" filterable placeholder="开关二次进场"
+                       @change="changeSecondChance(secondChance_)">
+                <el-option
+                    v-for="item in secondChanceOptions"
+                    :key="item.key"
+                    :label="item.display_name"
+                    :value="item.key"
+                />
+            </el-select>
+
             <!-- 绘图模式           -->
             <el-radio-group v-if="showBrushSwitch" class="ml-5 mr-10 change-theme" v-model="brushOptions.brush"
                             @change="onBrushChange" size="mini">
@@ -98,6 +110,10 @@
         {key: "3", display_name: "freshczsc"},
         {key: "4", display_name: "fqczsc"},
     ];
+    const secondChanceOptions = [
+        {key: "1", display_name: "显示二次进场"},
+        {key: "0", display_name: "不显示二次进场"},
+    ];
     export default {
         name: "KlineHeader",
         data() {
@@ -105,8 +121,10 @@
                 inputSymbol_: this.inputSymbol,
                 endDate_: this.endDate,
                 biType_: this.biType,
+                secondChance_: this.secondChance,
                 blurOrFocus: 0,
                 biTypeOptions,
+                secondChanceOptions,
                 shortCutData: [{
                     name: 'Space',
                     desc: '裸K',
@@ -206,6 +224,10 @@
                 type: Function,
                 default: null
             },
+            changeSecondChance: {
+                type: Function,
+                default: null
+            },
             periodList: {
                 type: Array,
                 default: null
@@ -223,6 +245,8 @@
             showBrushSwitch: null,
             // 笔类型
             biType: null,
+            // 是否显示二次进场
+            secondChance: null,
         },
         methods: {
             setELDatePicker(endDate) {

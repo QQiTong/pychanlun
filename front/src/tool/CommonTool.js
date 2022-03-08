@@ -194,6 +194,13 @@ const CommonTool = {
     getBiType() {
         const biType = localStorage.getItem('biType') || '1'
         return biType
+    },
+    setSecondChance(secondChance) {
+        localStorage.setItem('secondChance', secondChance)
+    },
+    getSecondChance() {
+        const secondChance = localStorage.getItem('secondChance') || '0'
+        return secondChance
     }
 }
 export default CommonTool
