@@ -1330,7 +1330,7 @@ def run(**kwargs):
         symbol_list.append(symbol)
     for i in range(len(symbol_list)):
         symbol = symbol_list[i]
-        if i <= 36:
+        if i <= 30:
             symbol = symbol + "L9"
         if symbol == 'BTC':
             continue
@@ -1351,7 +1351,10 @@ def run(**kwargs):
     def worker():
         while is_run:
             symbol_item = q.get()
-            monitor_futures_and_digitcoin([symbol_item], ['5m', '15m', '30m', '60m', '180m'])
+            if "L9" in symbol_item:
+                monitor_futures_and_digitcoin([symbol_item], ['3m', '5m', '15m', '30m', '60m'])
+            else:
+                monitor_futures_and_digitcoin([symbol_item], ['5m', '15m', '30m', '60m'])
             q.task_done()
 
     def dispatcher():

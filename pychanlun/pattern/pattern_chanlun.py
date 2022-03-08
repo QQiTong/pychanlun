@@ -575,11 +575,15 @@ def po_huai(datetime_list, time_series, high_series, low_series, open_series, cl
             if count < 2:
                 continue
             anchor = 0
+            anchor2 = 0
             for j in range(i + 1, len(time_series)):
                 if duan_series[j] == -1:
                     break
                 if bi_series[j] == -1:
                     anchor = j
+                if bi_series[j] == 1:
+                    anchor2 = j
+                if anchor > 0 and anchor2 > 0:
                     break
             if anchor > 0:
                 for k in range(anchor + 1, len(time_series)):
@@ -593,7 +597,7 @@ def po_huai(datetime_list, time_series, high_series, low_series, open_series, cl
                         result['sell_duan_break']['time_str'].append(time_series[k])
                         result['sell_duan_break']['data'].append(low_series[anchor])
                         result['sell_duan_break']['price'].append(low_series[anchor])
-                        result['sell_duan_break']['stop_lose_price'].append(high_series[i])
+                        result['sell_duan_break']['stop_lose_price'].append(high_series[anchor2])
                         result['sell_duan_break']['tag'].append(','.join(tags))
 
                         if second_chance == 1:
@@ -621,12 +625,16 @@ def po_huai(datetime_list, time_series, high_series, low_series, open_series, cl
             if count < 2:
                 continue
             anchor = 0
+            anchor2 = 0
             for j in range(i + 1, len(time_series)):
                 if duan_series[j] == 1:
                     break
                 if bi_series[j] == 1:
                     anchor = j
-                    break
+                if bi_series[j] == -1:
+                    anchor2 = j
+                if anchor > 0 and anchor2 > 0:
+                    break;
             if anchor > 0:
                 for k in range(anchor + 1, len(time_series)):
                     if duan_series[k] == 1:
@@ -639,7 +647,7 @@ def po_huai(datetime_list, time_series, high_series, low_series, open_series, cl
                         result['buy_duan_break']['time_str'].append(time_series[k])
                         result['buy_duan_break']['data'].append(high_series[anchor])
                         result['buy_duan_break']['price'].append(high_series[anchor])
-                        result['buy_duan_break']['stop_lose_price'].append(low_series[i])
+                        result['buy_duan_break']['stop_lose_price'].append(low_series[anchor2])
                         result['buy_duan_break']['tag'].append(','.join(tags))
 
                         if second_chance == 1:
