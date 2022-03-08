@@ -80,7 +80,7 @@ config = {
         # 郑煤
         'ZC': {'order_book_id': 'ZCL9', 'margin_rate': 0.6, 'contract_multiplier': 100,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 锰硅 没夜盘
-        'SM': {'order_book_id': 'SML9', 'margin_rate': 0.12, 'contract_multiplier': 5,'trading_hours':'09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 'SM': {'order_book_id': 'SML9', 'margin_rate': 0.12, 'contract_multiplier': 5,'trading_hours':'09:01-10:15,10:31-11:30,13:31-15:00'},
         # 硅铁 没夜盘
         'SF': {'order_book_id': 'SFL9', 'margin_rate': 0.12, 'contract_multiplier': 5,'trading_hours':'09:01-10:15,10:31-11:30,13:31-15:00'},
         # 不锈钢
@@ -103,17 +103,17 @@ config = {
         # 聚氯乙烯
         'V': {'order_book_id': 'VL9', 'margin_rate': 0.1, 'contract_multiplier': 5,'trading_hours':'21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 短纤
-        'PF': {'order_book_id': 'PFL9', 'margin_rate': 0.08, 'contract_multiplier': 5,'trading_hours': '21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 'PF': {'order_book_id': 'PFL9', 'margin_rate': 0.08, 'contract_multiplier': 5,'trading_hours': '21:01-23:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 沪金 加长夜盘
-        'AU': {'order_book_id': 'AUL9', 'margin_rate': 0.08, 'contract_multiplier': 1000,'trading_hours':'21:01-02:30,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 'AU': {'order_book_id': 'AUL9', 'margin_rate': 0.08, 'contract_multiplier': 1000,'trading_hours':'21:01-02:30,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 沪银 加长夜盘
-        'AG': {'order_book_id': 'AGL9', 'margin_rate': 0.12, 'contract_multiplier': 15,'trading_hours':'21:01-02:30,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 'AG': {'order_book_id': 'AGL9', 'margin_rate': 0.12, 'contract_multiplier': 15,'trading_hours':'21:01-02:30,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 沪镍 加长夜盘
         'NI': {'order_book_id': 'NIL9', 'margin_rate': 0.14, 'contract_multiplier': 1, 'trading_hours': '21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 沪锌 加长夜盘
         'ZN': {'order_book_id': 'ZNL9', 'margin_rate': 0.1, 'contract_multiplier': 5,'trading_hours':'21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 沪铜 加长夜盘
-        'CU': {'order_book_id': 'CUL9', 'margin_rate': 0.1, 'contract_multiplier': 5,'trading_hours':'21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
+        # 'CU': {'order_book_id': 'CUL9', 'margin_rate': 0.1, 'contract_multiplier': 5,'trading_hours':'21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 沪铝 加长夜盘
         'AL': {'order_book_id': 'ALL9', 'margin_rate': 0.1, 'contract_multiplier': 5,'trading_hours':'21:01-01:00,09:01-10:15,10:31-11:30,13:31-15:00'},
         # 沪锡 加长夜盘

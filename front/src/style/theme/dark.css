@@ -126,3 +126,9 @@ html {
 .mt-10 {
     margin-top: 10px;
 }
+.el-table .cell {
+    font-size: 18px!important;
+}
+.el-link{
+    font-size: 18px!important;
+}

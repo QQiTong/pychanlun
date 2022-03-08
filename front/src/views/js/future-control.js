@@ -88,6 +88,8 @@ export default {
 
             // 期货账户总额
             futureAccount: 0,
+            // 外盘账户总额
+            globalFutureAccount:0,
             // 数字货币账户总额
             digitCoinAccount: 0,
             // 开仓价格
@@ -232,9 +234,9 @@ export default {
         getAccountInfo() {
             futureApi.getAccountInfo().then(res => {
                 // console.log('获取账户信息:', res)
-                this.futureAccount = res.inner_future
-                this.globalFutureAccount = res.global_future
-                this.digitCoinAccount = res.digit_coin
+                this.futureAccount = res.inner_future.account
+                this.globalFutureAccount = res.global_future.account
+                this.digitCoinAccount = res.digit_coin.account
                 this.maxAccountUseRate = res.risk_control.max_account_use_rate
                 this.stopRate = res.risk_control.stop_rate
             }).catch((error) => {

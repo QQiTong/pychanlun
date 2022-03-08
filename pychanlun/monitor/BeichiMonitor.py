@@ -1330,7 +1330,7 @@ def run(**kwargs):
         symbol_list.append(symbol)
     for i in range(len(symbol_list)):
         symbol = symbol_list[i]
-        if i <= 30:
+        if i <= 31:
             symbol = symbol + "L9"
         if symbol == 'BTC':
             continue

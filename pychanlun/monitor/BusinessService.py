@@ -21,7 +21,7 @@ from pychanlun.db import DBPyChanlun, DBQuantAxis
 tz = pytz.timezone('Asia/Shanghai')
 
 # periodList = ['3min', '5min', '15min', '30min', '60min', '4hour', '1day']
-periodList = ['5m', '15m', '30m', '60m', '180m', '1d']
+periodList = ['3m','5m', '15m', '30m', '60m', '180m', '1d']
 # 主力合约列表
 dominantSymbolList = []
 # 主力合约详细信息
@@ -368,7 +368,7 @@ class BusinessService:
                 df_break_lose) != 0 else 1,
             "break_win_lose_money_rate": abs(
                 round(df_break_win['win_end_money'].sum() / df_break_lose['lose_end_money'].sum(), 2)) if (
-                                                                                                              'lose_end_money' in df_break_lose) and
+                                                                                                              'lose_end_money' in df_break_lose and 'win_end_money' in df_break_win ) and
                                                                                                           df_break_lose[
                                                                                                               'lose_end_money'].sum() != 0 else 1,
 

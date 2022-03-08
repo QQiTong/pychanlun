@@ -280,7 +280,7 @@
             :data="innerFuturePositionList"
             fit
             style="width: 100%;"
-            size="mini"
+            size="medium"
             :row-class-name="tableRowClassName"
             :row-key="getRowKeys"
             :row-style="tableRowStyle"
@@ -376,7 +376,8 @@
             </el-table-column>
             <el-table-column label="信号" align="center" :key="4">
                 <template slot-scope="{row}">
-                    <span :class="row.direction==='short'?'down-green':'up-red'">{{ row.signal| signalTypeFilter }}</span>
+                    <span
+                        :class="row.direction==='short'?'down-green':'up-red'">{{ row.signal| signalTypeFilter }}</span>
                 </template>
             </el-table-column>
             <el-table-column label="数量" prop="amount" align="center" :key="7"/>
@@ -389,7 +390,7 @@
             <!--            </el-table-column>-->
             <el-table-column label="周期" prop="period" align="center"
                              :key="2"/>
-            <el-table-column label="入场时间" align="center" :key="3" width="135">
+            <el-table-column label="入场时间" align="center" :key="3" width="125">
                 <template slot-scope="{row}">
                     <span>{{ row.date_created}}</span>
                 </template>
@@ -618,7 +619,7 @@
             :data="globalFuturePositionList"
             fit
             style="width: 100%;"
-            size="mini"
+            size="medium"
             :row-class-name="tableRowClassName"
             :row-key="getRowKeys"
             :row-style="tableRowStyle"
@@ -715,7 +716,7 @@
             <!--            </el-table-column>-->
             <el-table-column label="周期" prop="period" align="center"
                              :key="2"/>
-            <el-table-column label="入场时间" align="center" :key="3" width="135">
+            <el-table-column label="入场时间" align="center" :key="3" width="125">
                 <template slot-scope="{row}">
                     <span>{{ row.date_created}}</span>
                 </template>
@@ -950,25 +951,29 @@
         <!--当前收益统计        -->
 
         <el-row class="mt-10 sum-text">
-            <!--            <el-col :span="12">-->
-            <!--                外盘期货（$）-->
-            <!--                当前盈利：-->
-            <!--                <span :class="globalSumObj.currentProfitSum| percentTagFilter" class="sum-text">{{globalSumObj.currentProfitSum}}</span>-->
-            <!--                预计止损：{{(globalSumObj.predictStopSum)}}-->
-            <!--                已止盈：{{(globalSumObj.winEndSum)}}-->
-            <!--                已止损：{{(globalSumObj.loseEndSum)}}-->
-            <!--                保证金：{{(globalSumObj.marginSum)}}-->
-            <!--            </el-col>-->
+            <el-col :span="12">
+                外盘期货（$）
+                <span :class="globalSumObj.currentProfitSum| percentTagFilter" class="sum-text"
+                      v-if="positionQueryForm.status ==='holding'">当前盈利：{{globalSumObj.currentProfitSum + globalSumObj.winEndSum}}
+                     占比：{{globalSumObj.currentProfitSumRate}}
+                     预计止损：{{(globalSumObj.predictStopSum)}}
+                </span>
+                <span v-if="positionQueryForm.status ==='winEnd'">
+                    已止盈：{{(globalSumObj.winEndSum)}}
+                    占比：{{globalSumObj.winEndSumRate}}</span>
+                <span v-if="positionQueryForm.status ==='loseEnd'">已止损：{{(globalSumObj.loseEndSum)}}
+                </span>
+                保证金：{{(globalSumObj.marginSum)}}
+                占比：{{globalSumObj.marginSumRate}}
+            </el-col>
 
             <el-col :span="24">
                 内盘期货(￥)
-
                 <span :class="sumObj.currentProfitSum| percentTagFilter" class="sum-text"
                       v-if="positionQueryForm.status ==='holding'">当前盈利：{{sumObj.currentProfitSum + sumObj.winEndSum}}
                      占比：{{sumObj.currentProfitSumRate}}
                      预计止损：{{(sumObj.predictStopSum)}}
                 </span>
-
                 <span v-if="positionQueryForm.status ==='winEnd'">
                     已止盈：{{(sumObj.winEndSum)}}
                 占比：{{sumObj.winEndSumRate}}</span>
@@ -1088,13 +1093,17 @@
                 default: null
             },
             marginLevelCompany: 0,
-            globalFutureSymbol: null
+            globalFutureSymbol: null,
+            globalFutureAccount: 0,
+            futureAccount: 0
         },
         data() {
             return {
                 globalSumObj: {
                     // 当前盈利
                     'currentProfitSum': 0,
+                    // 当前盈利占总账户比例
+                    'currentProfitSumRate': 0,
                     // 保证金
                     'marginSum': 0,
                     // 已盈利
@@ -1103,6 +1112,7 @@
                     'loseEndSum': 0,
                     // 预计止损
                     'predictStopSum': 0,
+                    'marginSumRate': 0,
                 },
                 sumObj: {
                     // 当前盈利
@@ -1561,6 +1571,8 @@
                 this.globalSumObj = {
                     // 当前盈利
                     'currentProfitSum': 0,
+                    // 当前盈利占总账户比例
+                    'currentProfitSumRate': 0,
                     // 保证金
                     'marginSum': 0,
                     // 已盈利
@@ -1569,6 +1581,8 @@
                     'loseEndSum': 0,
                     // 预计止损
                     'predictStopSum': 0,
+                    // 保证金占用总账户比例
+                    'marginSumRate': 0,
                 }
                 this.sumObj = {
                     // 当前盈利
@@ -1623,9 +1637,13 @@
                         this.globalSumObj.currentProfitSum += parseInt(item.current_profit)
                         this.globalSumObj.predictStopSum += parseInt(item.predict_stop_money)
                     }
-                    this.globalSumObj.winEndSum += Math.round(item.win_end_money, 0)
-                    this.globalSumObj.loseEndSum += Math.round(item.lose_end_money, 0)
+                    if (this.positionQueryForm.status === 'winEnd') {
+                        this.globalSumObj.winEndSum += Math.round(item.win_end_money, 0)
+                    }
+                    this.globalSumObj.loseEndSum += Math.round(item.predict_stop_money, 0)
                     this.globalSumObj.marginSum += Math.round(item.total_margin, 0)
+                    this.globalSumObj.marginSumRate = (this.globalSumObj.marginSum / (this.globalFutureAccount * 10000) * 100).toFixed(1) + "%"
+                    this.globalSumObj.currentProfitSumRate = (this.globalSumObj.currentProfitSum / (this.globalFutureAccount * 10000) * 100).toFixed(1) + "%"
                 }
             },
             getSummaries(param) {

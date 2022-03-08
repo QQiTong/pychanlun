@@ -76,6 +76,8 @@
             :futureSymbolMap="futureSymbolMap"
             :marginLevelCompany="marginLevelCompany"
             :globalFutureSymbol="globalFutureSymbol"
+            :futureAccount="futureAccount"
+            :globalFutureAccount="globalFutureAccount"
         ></FuturePositionList>
         <el-divider content-position="center"> 多空分布</el-divider>
         <el-row type="flex" justify="space-around">
