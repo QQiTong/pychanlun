@@ -55,7 +55,9 @@ def la_hui(e_list, datetime_list, time_str_array, high_array, low_array, bi_arra
                 for x in range(leave + 1, k):
                     if e_next is not None and x >= e_next.start:
                         break
-                    if low_array[x] < e.top and (len(pydash.chain(low_array[e.end + 1:x]).filter_(lambda a: a > e.top).value()) > 0 or \
+                    # if low_array[x] < e.top and (len(pydash.chain(low_array[e.end + 1:x]).filter_(lambda a: a > e.top).value()) > 0 or \
+                    #     len(pydash.chain(high_array[e.end + 1:x]).filter_(lambda a: a > e.gg).value()) > 0):
+                    if low_array[x] < e.gg and (len(pydash.chain(low_array[e.end + 1:x]).filter_(lambda a: a > e.gg).value()) > 0 or \
                         len(pydash.chain(high_array[e.end + 1:x]).filter_(lambda a: a > e.gg).value()) > 0):
                         r = x
                         break
@@ -68,8 +70,8 @@ def la_hui(e_list, datetime_list, time_str_array, high_array, low_array, bi_arra
                     result['sell_zs_huila']['date'].append(time_str_array[r])
                     result['sell_zs_huila']['datetime'].append(datetime_list[r])
                     result['sell_zs_huila']['time_str'].append(time_str_array[r])
-                    result['sell_zs_huila']['data'].append(e.top)
-                    result['sell_zs_huila']['price'].append(e.top)
+                    result['sell_zs_huila']['data'].append(e.gg)
+                    result['sell_zs_huila']['price'].append(e.gg)
                     top_index = pydash.find_last_index(duan_array[:r + 1], lambda a: a == 1)
                     if top_index > -1:
                         result['sell_zs_huila']['stop_lose_price'].append(high_array[top_index])
@@ -114,7 +116,10 @@ def la_hui(e_list, datetime_list, time_str_array, high_array, low_array, bi_arra
                 for x in range(leave + 1, len(high_array)):
                     if e_next is not None and x >= e_next.start:
                         break
-                    if high_array[x] > e.bottom and (len(pydash.chain(high_array[e.end + 1:x]).filter_(lambda a: a < e.bottom).value()) > 0 or \
+                    # if high_array[x] > e.bottom and (len(pydash.chain(high_array[e.end + 1:x]).filter_(lambda a: a < e.bottom).value()) > 0 or \
+                    #     len(pydash.chain(low_array[e.end + 1:x]).filter_(lambda a: a < e.dd).value()) > 0):
+                    if high_array[x] > e.dd and (
+                        len(pydash.chain(high_array[e.end + 1:x]).filter_(lambda a: a < e.dd).value()) > 0 or \
                         len(pydash.chain(low_array[e.end + 1:x]).filter_(lambda a: a < e.dd).value()) > 0):
                         r = x
                         break
@@ -127,8 +132,8 @@ def la_hui(e_list, datetime_list, time_str_array, high_array, low_array, bi_arra
                     result['buy_zs_huila']['date'].append(time_str_array[r])
                     result['buy_zs_huila']['datetime'].append(datetime_list[r])
                     result['buy_zs_huila']['time_str'].append(time_str_array[r])
-                    result['buy_zs_huila']['data'].append(e.bottom)
-                    result['buy_zs_huila']['price'].append(e.bottom)
+                    result['buy_zs_huila']['data'].append(e.dd)
+                    result['buy_zs_huila']['price'].append(e.dd)
                     bottom_index = pydash.find_last_index(duan_array[:r + 1], lambda a: a == -1)
                     if bottom_index > -1:
                         result['buy_zs_huila']['stop_lose_price'].append(low_array[bottom_index])

@@ -298,25 +298,32 @@ def get_future_data_v2(symbol, period, endDate, cache_stamp=int(datetime.now().t
         current_time_delta = time_delta_maps[1]
     start_date = end + timedelta(current_time_delta[period])
     code = symbol
+    realtime = 1
+    if end < datetime.now().replace(hour=23, minute=59, second=59, microsecond=999, tzinfo=tz):
+        # print("历史数据",end)
+        realtime = 0
+    else:
+        # print("实时数据",end)
+        realtime = 1
     if period == "1m":
-        kline_data = fq_data_future_fetch_min(code, "1min", start_date, end)
+        kline_data = fq_data_future_fetch_min(code, "1min", start_date, end,realtime)
     elif period == "3m":
-        kline_data = fq_data_future_fetch_min(code, "1min", start_date, end)
+        kline_data = fq_data_future_fetch_min(code, "1min", start_date, end,realtime)
         kline_data = QA_data_futuremin_resample(kline_data, '3min')
         kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp()- 8 * 3600)
         kline_data["time_stamp"] = kline_data['time']
         kline_data.reset_index(inplace=True)
         kline_data.set_index("datetime", inplace=True, drop=False)
     elif period == "5m":
-        kline_data = fq_data_future_fetch_min(code, "5min", start_date, end)
+        kline_data = fq_data_future_fetch_min(code, "5min", start_date, end,realtime)
     elif period == "15m":
-        kline_data = fq_data_future_fetch_min(code, "15min", start_date, end)
+        kline_data = fq_data_future_fetch_min(code, "15min", start_date, end,realtime)
     elif period == "30m":
-        kline_data = fq_data_future_fetch_min(code, "30min", start_date, end)
+        kline_data = fq_data_future_fetch_min(code, "30min", start_date, end,realtime)
     elif period == "60m":
-        kline_data = fq_data_future_fetch_min(code, "60min", start_date, end)
+        kline_data = fq_data_future_fetch_min(code, "60min", start_date, end,realtime)
     elif period == "180m":
-        kline_data = fq_data_future_fetch_min(code, "60min", start_date, end)
+        kline_data = fq_data_future_fetch_min(code, "60min", start_date, end,realtime)
         kline_data = QA_data_futuremin_resample(kline_data, '180min')
         kline_data['time'] = kline_data.index.to_series().apply(lambda value: value[0].timestamp()- 8 * 3600)
         kline_data["time_stamp"] = kline_data['time']

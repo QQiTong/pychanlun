@@ -23,7 +23,7 @@ def fq_data_QA_fetch_future_day_adv(code, start, end=None):
     return data.data if data else None
 
 
-def fq_data_future_fetch_min(code, frequence, start=None, end=None):
+def fq_data_future_fetch_min(code, frequence, start=None, end=None,realtime=1):
     data = fq_data_QA_fetch_future_min_adv(code, QA_util_datetime_to_strdatetime(start), QA_util_datetime_to_strdatetime(end), frequence=frequence)
     if data is None:
         return None
@@ -32,11 +32,18 @@ def fq_data_future_fetch_min(code, frequence, start=None, end=None):
     data.set_index("datetime", inplace=True, drop=False)
     if data is None or len(data) == 0:
         return None
+    # 直接返回历史数据
+    if realtime == 0:
+        data['time'] = data['time_stamp']
+        data = data.round({"open": 2, "high": 2, "low": 2, "close": 2, "position": 2, "volume": 2})
+        return data
     last_datetime = data['datetime'][-1]
+    last_datetime = cfg.TZ.localize(last_datetime)
     realtime_data_list = DBPyChanlun["future_realtime"].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=cfg.TZ)).find({
         "code": code, "type": frequence, "datetime": {"$gt": last_datetime}, "open": {"$gt": 0}, "high": {"$gt": 0}, "low": {"$gt": 0}, "close": {"$gt": 0}
     }).sort("datetime", pymongo.ASCENDING)
     realtime_data_list = pd.DataFrame(realtime_data_list)
+    # print("实时数据",realtime_data_list,last_datetime)
     if 'volume' not in data.columns:
         data['volume'] = 0
     data = data[["code", "datetime", "open", "close", "high", "low", "position", 'volume', "time_stamp", "tradetime"]]
