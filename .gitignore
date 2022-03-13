@@ -19,3 +19,4 @@ pychanlun.egg-info/
 dist/
 package-lock.json
 front/public/version.js
+build/
