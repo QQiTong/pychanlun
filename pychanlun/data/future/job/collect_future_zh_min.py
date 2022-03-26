@@ -6,16 +6,14 @@ import traceback
 from datetime import datetime, timedelta
 from time import sleep
 
-import durationpy
-import jqdatasdk as jq
-import pandas as pd
 import pydash
 import pymongo
 from loguru import logger
 from pymongo import UpdateOne
 
 from pychanlun.config import cfg, settings, config
-from QUANTAXIS.QAUtil import QA_util_if_tradetime, QA_util_if_trade
+from QUANTAXIS.QAUtil import QA_util_if_tradetime
+from QUANTAXIS.QAUtil.QAParameter import MARKET_TYPE
 from pychanlun.database.redis import RedisDB
 from pychanlun.db import DBPyChanlun
 from pychanlun.data.future.tdx import fq_future_fetch_instrument_bars
@@ -104,15 +102,7 @@ def future_zh_min_tdx():
     while _running:
         symbol = None
         try:
-            # if not _is_test and RedisDB.llen(SYMBOL_QUEUE_NAME) == 0:
-            #     seconds = tool_trade_date_seconds_to_start()
-            #     if seconds > 0:
-            #         seconds = min(seconds, 900)
-            #         logger.info("%s from now on, %s sleep %s to resume" % (datetime.now().strftime(cfg.DT_FORMAT_FULL), "收集通达信分钟数据", durationpy.to_str(timedelta(seconds=seconds))))
-            #         sleep(seconds)
-            #         if tool_trade_date_seconds_to_start() > 0:
-            #             continue
-            symbol = RedisDB.brpop(SYMBOL_QUEUE_NAME)
+            symbol = RedisDB.brpop(SYMBOL_QUEUE_NAME, 0)
             if symbol is None:
                 continue
             symbol = symbol[1]
@@ -144,20 +134,13 @@ def future_zh_min_symbol_queue():
     while _running:
         try:
             queue_length = RedisDB.llen(SYMBOL_QUEUE_NAME)
-            # if not _is_test and queue_length == 0:
-                # seconds = tool_trade_date_seconds_to_start()
-                # if seconds > 0:
-                #     seconds = min(seconds, 900)
-                #     logger.info("%s from now on, %s sleep %s to resume" % (datetime.now().strftime(cfg.DT_FORMAT_FULL), "股票队列派发", durationpy.to_str(timedelta(seconds=seconds))))
-                #     sleep(seconds)
-                #     if tool_trade_date_seconds_to_start() > 0:
-                #         continue
-            if queue_length == 0:
-                if len(future_list) > 0:
-                    RedisDB.lpush(SYMBOL_QUEUE_NAME, *future_list)
+            if not _is_test and queue_length == 0:
+                for code in future_list:
+                    if QA_util_if_tradetime(datetime.now(), MARKET_TYPE.FUTURE_CN, code):
+                        RedisDB.lpush(SYMBOL_QUEUE_NAME, code)
         except Exception:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
-        sleep(1)
+        sleep(5)
 
 
 def job():
