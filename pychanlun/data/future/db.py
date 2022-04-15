@@ -23,7 +23,7 @@ def fq_data_QA_fetch_future_day_adv(code, start, end=None):
     return data.data if data else None
 
 
-def fq_data_future_fetch_min(code, frequence, start=None, end=None,realtime=1):
+def fq_data_future_fetch_min(code, frequence, start=None, end=None, realtime=1):
     data = fq_data_QA_fetch_future_min_adv(code, QA_util_datetime_to_strdatetime(start), QA_util_datetime_to_strdatetime(end), frequence=frequence)
     if data is None:
         return None
