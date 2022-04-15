@@ -136,7 +136,8 @@ def future_zh_min_symbol_queue():
             queue_length = RedisDB.llen(SYMBOL_QUEUE_NAME)
             if not _is_test and queue_length == 0:
                 for code in future_list:
-                    if QA_util_if_tradetime(datetime.now(), MARKET_TYPE.FUTURE_CN, code):
+                    shortCode = code[:-2] if code.endswith("L9") else code
+                    if QA_util_if_tradetime(datetime.now(), MARKET_TYPE.FUTURE_CN, shortCode):
                         RedisDB.lpush(SYMBOL_QUEUE_NAME, code)
         except Exception:
             logger.info("Error Occurred: {0}".format(traceback.format_exc()))
